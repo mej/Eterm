@@ -3409,3 +3409,8 @@ Fri Mar 31 15:12:37 PST 2000	Michael Jennings <mej@eterm.org>
 	Added the escape sequence for the "no input" option.  "\e]6;27\a".
 	
 -------------------------------------------------------------------------------
+Mon Apr  3 16:42:06 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Added a --buttonbar option to force on/off all your buttonbars.
+	
+-------------------------------------------------------------------------------

@@ -93,6 +93,7 @@ static conf_var_t *conf_vars = NULL;
 static char *rs_pipe_name = NULL;
 static int rs_shade = 0;
 static char *rs_tint = NULL;
+static unsigned long rs_buttonbars = 1;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -320,6 +321,7 @@ static const struct {
       OPT_BLONG("select-line", "triple-click selects whole line", &Options, Opt_select_whole_line),
       OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &Options, Opt_select_trailing_spaces),
       OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &Options, Opt_report_as_keysyms),
+      OPT_BLONG("buttonbar", "toggle the display of all buttonbars", &rs_buttonbars, BBAR_FORCE_TOGGLE),
 
 /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
@@ -3795,6 +3797,16 @@ post_parse(void)
     PixColors[bgColor] = images[image_bg].norm->bg;
   }
 
+  /* rs_buttonbars is set to 1.  If it stays 1, the option was never
+     specified.  If specified, it will either become 3 (on) or 0 (off). */
+  if (rs_buttonbars != 1) {
+    if (rs_buttonbars) {
+      FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+    } else {
+      FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+    }
+    rs_buttonbars = 1;  /* Reset for future use. */
+  }
   /* Update buttonbar sizes based on new imageclass info. */
   bbar_resize_all(-1);
 

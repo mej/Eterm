@@ -82,6 +82,8 @@
 # define IMOPT_ITRANS                   (1U << 1)
 # define IMOPT_VIEWPORT                 (1U << 2)
 
+# define BBAR_FORCE_TOGGLE              (0x03)
+
 #define BOOL_OPT_ISTRUE(s)  (!strcasecmp((s), true_vals[0]) || !strcasecmp((s), true_vals[1]) \
                              || !strcasecmp((s), true_vals[2]) || !strcasecmp((s), true_vals[3]))
 #define BOOL_OPT_ISFALSE(s) (!strcasecmp((s), false_vals[0]) || !strcasecmp((s), false_vals[1]) \

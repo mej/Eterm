@@ -32,13 +32,10 @@ AC_ARG_WITH(cc, [  --with-cc=compiler      force Eterm to build with a particula
 )
 
 if test "$CC" = "check"; then
-  dnl# Check for Pentium compilers
-  AC_CHECK_PROG(EGCS, egcs, egcs)
+  dnl# Check for Pentium compiler
   AC_CHECK_PROG(PGCC, pgcc, pgcc)
 
-  if test ! -z "$EGCS"; then
-    CC=$EGCS
-  elif test ! -z "$PGCC"; then
+  if test ! -z "$PGCC"; then
     CC=$PGCC
   else
     unset CC

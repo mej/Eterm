@@ -54,6 +54,8 @@
 # define bbar_reset_total_height()     (bbar_total_h = -1)
 #endif
 
+#define FOREACH_BUTTONBAR(x)           do {buttonbar_t *bbar; for (bbar = buttonbar; bbar; bbar = bbar->next) { x } } while (0)
+
 /************ Structures ************/
 typedef struct button_struct {
   simage_t *icon;
