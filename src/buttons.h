@@ -85,6 +85,7 @@ typedef struct buttonbar_struct {
 #endif
   unsigned short fwidth, fheight, fascent, fdescent;
   event_dispatcher_data_t event_data;
+  unsigned char image_state;
   button_t *buttons, *rbuttons, *current;
   struct buttonbar_struct *next;
 } buttonbar_t;
@@ -106,10 +107,11 @@ extern unsigned char bbar_handle_button_press(event_t *);
 extern unsigned char bbar_handle_button_release(event_t *);
 extern unsigned char bbar_handle_motion_notify(event_t *);
 extern unsigned char bbar_dispatch_event(event_t *);
+extern buttonbar_t *find_bbar_by_window(Window);
 extern void bbar_add(buttonbar_t *bbar);
 extern unsigned short bbar_calc_height(buttonbar_t *bbar);
-extern void bbar_calc_sizes(buttonbar_t *bbar);
-extern void bbar_calc_positions(buttonbar_t *bbar);
+extern void bbar_calc_button_sizes(buttonbar_t *bbar);
+extern void bbar_calc_button_positions(buttonbar_t *bbar);
 extern void button_calc_size(buttonbar_t *bbar, button_t *button);
 extern void button_calc_rel_coords(buttonbar_t *bbar, button_t *button);
 extern void bbar_add_button(buttonbar_t *bbar, button_t *button);
@@ -132,6 +134,7 @@ extern void bbar_resize_all(int width);
 extern void bbar_dock(buttonbar_t *bbar, unsigned char dock);
 extern void bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_modes);
 extern void bbar_draw_all(unsigned char image_state, unsigned char force_modes);
+extern void bbar_calc_positions(void);
 extern unsigned long bbar_calc_total_height(void);
 extern unsigned long bbar_calc_docked_height(unsigned char);
 

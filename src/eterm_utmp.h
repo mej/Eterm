@@ -28,6 +28,51 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 #ifdef UTMP_SUPPORT
+
+# include <stdio.h>
+# include <string.h>
+/* For some systems (HP-UX in particular), sys/types.h must be included
+   before utmp*.h -- mej */
+# include <sys/types.h>
+# include <sys/stat.h>
+/* Unsupported/broken utmpx.h on HP-UX, AIX, and glibc 2.1 */
+# if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
+#   undef HAVE_UTMPX_H
+# endif
+# ifdef HAVE_UTMPX_H
+#  include <utmpx.h>
+#  define USE_SYSV_UTMP
+# else
+#  include <utmp.h>
+#  ifdef HAVE_SETUTENT
+#   define USE_SYSV_UTMP
+#  endif
+# endif
+# ifdef TIME_WITH_SYS_TIME
+#  include <sys/time.h>
+#  include <time.h>
+# else
+#  ifdef HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#  else
+#   include <time.h>
+#  endif
+# endif
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+# include <pwd.h>
+# include <errno.h>
+# ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
+# endif
+# ifdef HAVE_LASTLOG_H
+#  include <lastlog.h>
+# endif
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  include <ttyent.h>
+# endif
+
 # ifdef HAVE_LIBUTEMPTER
 #  include <utempter.h>
 #  define add_utmp_entry(p, h, f)  addToUtmp(p, h, f)

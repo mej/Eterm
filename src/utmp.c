@@ -26,55 +26,11 @@ static const char cvs_ident[] = "$Id$";
 #include "config.h"
 #include "feature.h"
 
-#ifdef UTMP_SUPPORT
-
-# include <stdio.h>
-# include <string.h>
-/* For some systems (HP-UX in particular), sys/types.h must be included
-   before utmp*.h -- mej */
-# include <sys/types.h>
-# include <sys/stat.h>
-/* Unsupported/broken utmpx.h on HP-UX, AIX, and glibc 2.1 */
-# if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
-#   undef HAVE_UTMPX_H
-# endif
-# ifdef HAVE_UTMPX_H
-#  include <utmpx.h>
-#  define USE_SYSV_UTMP
-# else
-#  include <utmp.h>
-#  ifdef HAVE_SETUTENT
-#   define USE_SYSV_UTMP
-#  endif
-# endif
-# ifdef TIME_WITH_SYS_TIME
-#  include <sys/time.h>
-#  include <time.h>
-# else
-#  ifdef HAVE_SYS_TIME_H
-#   include <sys/time.h>
-#  else
-#   include <time.h>
-#  endif
-# endif
-# ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-# endif
-# include <pwd.h>
-# include <errno.h>
-# ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-# endif
-# ifdef HAVE_LASTLOG_H
-#  include <lastlog.h>
-# endif
-# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
-#  include <ttyent.h>
-# endif
-
 # include "eterm_utmp.h"
 # include "command.h"
 # include "screen.h"
+
+#if defined(UTMP_SUPPORT) && !defined(HAVE_LIBUTEMPTER)
 
 /* screen.h includes config.h again, so re-fix these.  Pointed out by Sung-Hyun Nam <namsh@lgic.co.kr> */
 # if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
@@ -82,13 +38,11 @@ static const char cvs_ident[] = "$Id$";
 # endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
-# ifndef HAVE_LIBUTEMPTER
 #  if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
 static char ut_id[5];		/* remember if entry to utmp made */
 #  else
 static int utmp_pos;		/* BSD position of utmp-stamp */
 #  endif
-# endif
 
 # ifdef USE_SYSV_UTMP
 
@@ -98,7 +52,6 @@ static int utmp_pos;		/* BSD position of utmp-stamp */
 #   define update_wtmp updwtmpx
 #  else				/* HAVE_UTMPX_H */
 
-#   ifndef HAVE_LIBUTEMPTER
 static void
 update_wtmp(char *fname, struct utmp *putmp)
 {
@@ -134,10 +87,8 @@ update_wtmp(char *fname, struct utmp *putmp)
 
   close(fd);
 }
-#   endif /* ifndef HAVE_LIBUTEMPTER */
 #  endif /* HAVE_UTMPX_H */
 
-#  ifndef HAVE_LIBUTEMPTER
 void
 add_utmp_entry(const char *pty, const char *hostname, int fd)
 {
@@ -266,7 +217,6 @@ remove_utmp_entry(void)
   endutent();
 #   endif /* HAVE_UTMPX_H */
 }
-#  endif /* ifndef HAVE_LIBUTEMPTER */
 
 # else /* USE_SYSV_UTMP */
 /* BSD utmp support */

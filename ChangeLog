@@ -4597,3 +4597,13 @@ Wed Apr 24 22:34:59 2002                        Michael Jennings (mej)
 
 Fix warning.
 ----------------------------------------------------------------------
+Fri Apr 26 14:28:08 2002                        Michael Jennings (mej)
+
+Reverted Charles Clancy's shading patch (from the 21st) since it
+breaks 24bpp on Linux.  Hopefully there is a better fix.
+
+Fixed an ASSERT failure in the buttonbar redraw pointed out by
+Laurence J. Lane <ljlane@debian.org>.
+
+Also made multiple buttonbars work properly.
+----------------------------------------------------------------------

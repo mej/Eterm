@@ -824,7 +824,7 @@ redraw_image(unsigned char which) {
   case image_button:
   case image_bbar:
   case image_gbar:
-    bbar_draw(buttonbar, IMAGE_STATE_CURRENT, MODE_MASK);
+    bbar_draw_all(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   default:
     D_PIXMAP(("Bad value %u\n", which));
@@ -843,7 +843,7 @@ redraw_images_by_mode(unsigned char mode) {
       scr_touch();
     }
     scrollbar_draw(IMAGE_STATE_CURRENT, mode);
-    bbar_draw(buttonbar, IMAGE_STATE_CURRENT, mode);
+    bbar_draw_all(IMAGE_STATE_CURRENT, mode);
   }
 }
 #endif  /* PIXMAP_SUPPORT */
@@ -1778,10 +1778,8 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
       case 24:
         if (ximg->bits_per_pixel != 32) {
             shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
-        } else {
-            shade_ximage_24(ximg->data, ximg->bytes_per_line, w * 4 / 3, h, rm, gm, bm);
         }
-        break;
+        /* drop */
       case 32:
 #ifdef HAVE_MMX
 	shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
