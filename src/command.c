@@ -2437,9 +2437,14 @@ cmd_getc(void)
     if (paused == 1 && cmd_fd == -1) {
       const char *done = " -- Task Finished, ESC to exit";
 
-      append_to_title(done);
-      append_to_icon_name(done);
+      append_to_title(rs_finished_title ? rs_finished_title : done);
+      append_to_icon_name(rs_finished_title ? rs_finished_title : done);
+
       paused++;
+
+      if (rs_finished_text) {
+        cmd_write((unsigned char *) rs_finished_text, strlen(rs_finished_text));
+      }
     }
 
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING

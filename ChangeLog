@@ -3793,3 +3793,20 @@ Fri Jul  7 11:45:49 PDT 2000	Michael Jennings <mej@eterm.org>
 	Some more bits from last night's work.
 	
 -------------------------------------------------------------------------------
+Mon Jul 10 14:28:28 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Two more patches from Marius Gedminas <mgedmin@takas.lt>.  The first
+	one allows for customization of the message displayed when Eterm goes
+	into pause mode.  There are actually two; one goes in the titlebar,
+	and the other is displayed in the text window.
+
+	His second patch makes Eterm's behavior a little smarter when it
+	resizes itself.  It tries to figure out which quadrant of the screen
+	it's on and resizes in the most appropriate direction.  (For example,
+	Ctrl-GreaterThan on an Eterm in the lower right corner will cause the
+	upper left corner of the Eterm to move; the lower right corner will
+	stay put.)
+
+	Thanks again to Marius for saving me time by sending patches. :-)
+	
+-------------------------------------------------------------------------------

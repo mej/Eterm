@@ -478,6 +478,37 @@ Create_Windows(int argc, char *argv[])
   }
 }
 
+/* resize window keeping one point (determined by window geometry) in place */
+void
+resize_parent(unsigned int width, unsigned int height)
+{
+  XWindowAttributes attr;
+
+  if ((!XGetWindowAttributes(Xdisplay, TermWin.parent, &attr))) {
+    XResizeWindow(Xdisplay, TermWin.parent, width, height);
+  } else {
+    Window junkwin;
+    int x, y, scr_w, scr_h, dx, dy;
+
+    scr_w = WidthOfScreen(attr.screen);
+    scr_h = HeightOfScreen(attr.screen);
+    dx = attr.width - width;
+    dy = attr.height - height;
+    XTranslateCoordinates(Xdisplay, TermWin.parent, attr.root, 0, 0, &x, &y, &junkwin);
+    /* Check position of the center of the window */
+    if (x < (scr_w - attr.width) / 2)          /* left half */
+        dx = 0;
+    else if (x == (scr_w - attr.width) / 2 )   /* exact center */
+        dx /= 2;
+    if (y < (scr_h - attr.height) / 2)         /* top half */
+        dy = 0;
+    else if (y == (scr_h - attr.height) / 2)   /* exact center */
+        dy /= 2;
+    D_X11(("Calling XMoveResizeWindow(Xdisplay, 0x%08x, %d + %d, %d + %d, %d, %d)\n", TermWin.parent, x, dx, y, dy, width, height));
+    XMoveResizeWindow(Xdisplay, TermWin.parent, x + dx, y + dy, width, height);
+  }
+}
+
 /* good for toggling 80/132 columns */
 void
 set_width(unsigned short width)
@@ -488,7 +519,7 @@ set_width(unsigned short width)
     width = szHint.base_width + width * TermWin.fwidth;
     height = szHint.base_height + height * TermWin.fheight;
 
-    XResizeWindow(Xdisplay, TermWin.parent, width, height);
+    resize_parent(width, height);
     handle_resize(width, height);
   }
 }
@@ -548,7 +579,7 @@ parent_resize(void)
 {
   D_X11(("Called.\n"));
   update_size_hints();
-  XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
+  resize_parent(szHint.width, szHint.height);
   D_X11((" -> New parent width/height == %lux%lu\n", szHint.width, szHint.height));
   term_resize(szHint.width, szHint.height);
   scrollbar_resize(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));

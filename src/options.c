@@ -137,6 +137,8 @@ char *rs_cutchars = NULL;
 unsigned short rs_min_anchor_size = 0;
 char *rs_scrollbar_type = NULL;
 unsigned long rs_scrollbar_width = 0;
+char *rs_finished_title = NULL;
+char *rs_finished_text = NULL;
 char *rs_term_name = NULL;
 #ifdef PIXMAP_SUPPORT
 char *rs_pixmapScale = NULL;
@@ -351,6 +353,8 @@ static const struct {
 #ifdef CUTCHAR_OPTION
       OPT_LONG("cut-chars", "seperators for double-click selection", &rs_cutchars),
 #endif /* CUTCHAR_OPTION */
+      OPT_LONG("finished-title", "text to add to window title after program termination", &rs_finished_title),
+      OPT_LONG("finished-text", "text to output after program termination", &rs_finished_text),
       OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
       OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
       OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
@@ -2431,6 +2435,12 @@ parse_misc(char *buff, void *state)
 
   } else if (!BEG_STRCASECMP(buff, "line_space ")) {
     rs_line_space = strtol(PWord(2, buff), (char **) NULL, 0);
+
+  } else if (!BEG_STRCASECMP(buff, "finished_title ")) {
+    RESET_AND_ASSIGN(rs_finished_title, Word(2, buff));
+
+  } else if (!BEG_STRCASECMP(buff, "finished_text ")) {
+    RESET_AND_ASSIGN(rs_finished_text, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "term_name ")) {
     RESET_AND_ASSIGN(rs_term_name, Word(2, buff));

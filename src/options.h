@@ -207,6 +207,8 @@ extern       char  *rs_geometry;	/* Geometry string */
 extern        int   rs_desktop;         /* Startup desktop */
 extern        int   rs_saveLines;	/* Lines in the scrollback buffer */
 extern unsigned short rs_min_anchor_size; /* Minimum size, in pixels, of the scrollbar anchor */
+extern       char  *rs_finished_title;	/* Text added to window title (--pause) */
+extern       char  *rs_finished_text;	/* Text added to scrollback (--pause) */
 extern       char  *rs_term_name;
 extern       char  *rs_icon;
 extern       char  *rs_scrollbar_type;
