@@ -1596,21 +1596,15 @@ scr_refresh(int type)
   Pixmap pmap = images[image_bg].current->pmap->pixmap;
   int (*draw_string) (), (*draw_image_string) ();
   register int low_x = 99999, low_y = 99999, high_x = 0, high_y = 0;
+#ifdef PIXMAP_SUPPORT
+  Drawable draw_buffer;
+#endif
 #ifndef NO_BOLDFONT
   int bfont = 0;		/* we've changed font to bold font           */
 #endif
 #ifdef OPTIMIZE_HACKS
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
-#endif
-#ifdef PIXMAP_SUPPORT
-  Drawable draw_buffer;
-
-  if (buffer_pixmap) {
-    draw_buffer = buffer_pixmap;
-  } else {
-    draw_buffer = TermWin.vt;
-  }
 #endif
 
   PROF_INIT(scr_refresh);
@@ -1628,6 +1622,14 @@ scr_refresh(int type)
   }
   if (type == NO_REFRESH)
     return;
+
+#ifdef PIXMAP_SUPPORT
+  if (buffer_pixmap) {
+    draw_buffer = buffer_pixmap;
+  } else {
+    draw_buffer = TermWin.vt;
+  }
+#endif
 
   row_offset = TermWin.saveLines - TermWin.view_start;
   fprop = TermWin.fprop;
