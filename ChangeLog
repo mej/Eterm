@@ -4288,3 +4288,8 @@ for 0.9.1.  Now we just need some testing to make sure there's
 nothing horridly wrong....  So you all can test while we finish up
 the web site and the backgrounds. :-)
 ----------------------------------------------------------------------
+Fri Jul 13 17:07:45 2001                        Michael Jennings (mej)
+
+This is mostly cosmetic, but fairly important nonetheless.  Saved
+config files should not contain the "main" context.
+----------------------------------------------------------------------
