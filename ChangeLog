@@ -4362,3 +4362,9 @@ the gen-menus script in doc/.
 I also removed the comments from the theme.cfg files of all themes
 except "Eterm" itself.
 ----------------------------------------------------------------------
+Thu Aug 23 14:19:48 2001                        Michael Jennings (mej)
+
+I forgot to mention that I made a small change to the input routine to
+try and support Cyrillic characters without XIM.  This was requested
+by Konstantin Zemlyak <zart@mail.ru>.
+----------------------------------------------------------------------
