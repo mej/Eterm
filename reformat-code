@@ -14,4 +14,7 @@ for i in *.c src/*.c utils/*.c ; do
     fi
 done
 
-perl -p -i.bak -e 's/(\w+)_t (\*+)\s+/$1_t $2/g;' */*.[ch]
+perl -p -i.bak -e '
+  s/(\w+)_t (\*+)\s+/$1_t $2/g;
+  s/^(\w+_t\s+\**)\s*(\w+)\s*(\([^\)]+\))\s*$/$1\n$2$3\n/g;
+' */*.[ch]

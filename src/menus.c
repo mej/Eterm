@@ -410,7 +410,8 @@ menu_dispatch_event(event_t *ev)
     return (0);
 }
 
-menulist_t *menulist_add_menu(menulist_t *list, menu_t *menu)
+menulist_t *
+menulist_add_menu(menulist_t *list, menu_t *menu)
 {
     ASSERT_RVAL(menu != NULL, list);
 
@@ -442,7 +443,8 @@ menulist_clear(menulist_t *list)
     FREE(list);
 }
 
-menu_t *menu_create(char *title)
+menu_t *
+menu_create(char *title)
 {
     menu_t *menu;
     static Cursor cursor;
@@ -594,7 +596,8 @@ menu_is_child(menu_t *menu, menu_t *submenu)
     return 0;
 }
 
-menu_t *find_menu_by_title(menulist_t *list, char *title)
+menu_t *
+find_menu_by_title(menulist_t *list, char *title)
 {
     register unsigned char i;
 
@@ -608,7 +611,8 @@ menu_t *find_menu_by_title(menulist_t *list, char *title)
     return NULL;
 }
 
-menu_t *find_menu_by_window(menulist_t *list, Window win)
+menu_t *
+find_menu_by_window(menulist_t *list, Window win)
 {
     register unsigned char i;
 
@@ -622,7 +626,8 @@ menu_t *find_menu_by_window(menulist_t *list, Window win)
     return NULL;
 }
 
-menuitem_t *find_item_by_coords(menu_t *menu, int x, int y)
+menuitem_t *
+find_item_by_coords(menu_t *menu, int x, int y)
 {
     register unsigned char i;
     register menuitem_t *item;
@@ -692,7 +697,8 @@ menuitem_change_current(menuitem_t *item)
     }
 }
 
-menuitem_t *menuitem_create(char *text)
+menuitem_t *
+menuitem_create(char *text)
 {
     menuitem_t *menuitem;
 
@@ -968,10 +974,6 @@ menu_draw(menu_t *menu)
 {
     register unsigned short i, len;
     unsigned long width, height;
-
-#if 0
-    char *safeaction;
-#endif
     unsigned short str_x, str_y;
     XGCValues gcvalue;
     int ascent, descent, direction, dx, dy;
@@ -1134,23 +1136,6 @@ menu_draw(menu_t *menu)
                                              item->x + item->w - 3 * MENU_HGAP, item->y + (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
                   }
                   break;
-#if 0
-              case MENUITEM_STRING:
-                  safeaction = STRDUP(item->action.string);
-                  safe_str(safeaction, strlen(safeaction));
-                  D_MENU(("  Item %hu:  %s (string %s)\n", i, item->text, safeaction));
-                  FREE(safeaction);
-                  break;
-              case MENUITEM_ECHO:
-                  safeaction = STRDUP(item->action.string);
-                  safe_str(safeaction, strlen(safeaction));
-                  D_MENU(("  Item %hu:  %s (echo %s)\n", i, item->text, safeaction));
-                  FREE(safeaction);
-                  break;
-              default:
-                  fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
-                  break;
-#endif
               default:
                   break;
             }
@@ -1201,30 +1186,18 @@ menu_action(menuitem_t *item)
           cmd_write((unsigned char *) item->action.string, strlen(item->action.string));
           break;
       case MENUITEM_ECHO:
+      case MENUITEM_LITERAL:
 #ifdef ESCREEN
           if (TermWin.screen && TermWin.screen->backend) {
               /* translate escapes */
               switch (TermWin.screen->backend) {
 #  ifdef NS_HAVE_SCREEN
                 case NS_MODE_SCREEN:
-                    ns_parse_screen_interactive(TermWin.screen, item->action.string);
-                    break;
-#  endif
-                default:
-                    tt_write((unsigned char *) item->action.string, strlen(item->action.string));
-              }
-          } else
-#endif
-              tt_write((unsigned char *) item->action.string, strlen(item->action.string));
-          break;
-      case MENUITEM_LITERAL:
-#ifdef ESCREEN
-          if (TermWin.screen) {
-              /* translate escapes */
-              switch (TermWin.screen->backend) {
-#  ifdef NS_HAVE_SCREEN
-                case NS_MODE_SCREEN:
-                    (void) ns_screen_command(TermWin.screen, item->action.string);
+                    if (item->type == MENUITEM_ECHO) {
+                        ns_parse_screen_interactive(TermWin.screen, item->action.string);
+                    } else {
+                        ns_screen_command(TermWin.screen, item->action.string);
+                    }
                     break;
 #  endif
                 default:
@@ -1261,7 +1234,6 @@ menu_invoke(int x, int y, Window win, menu_t *menu, Time timestamp)
         XTranslateCoordinates(Xdisplay, win, Xroot, x, y, &root_x, &root_y, &unused);
     }
     menu_display(root_x, root_y, menu);
-
 }
 
 void
@@ -1359,9 +1331,13 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
             b[0] = '\0';
     }
 
+    /* Hide any menu that might've brought up this dialog. */
+    menu_reset_all(menu_list);
+
     if ((m = menu_create(prompt))) {
-        for (l = 0; l < menu_list->nummenus; l++) {     /* copycat font entry to */
-            if (menu_list->menus[l]->font) {    /* blend in with l&f */
+        for (l = 0; l < menu_list->nummenus; l++) {
+            if (menu_list->menus[l]->font) {
+                /* copycat font entry to blend in with l&f */
                 m->font = menu_list->menus[l]->font;
                 m->fwidth = menu_list->menus[l]->fwidth;
                 m->fheight = menu_list->menus[l]->fheight;
@@ -1377,7 +1353,8 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
             i->text = b;
             i->len = strlen(b);
 
-            if (m->font) {      /* pre-calc width so we can center the dialog */
+            if (m->font) {
+                /* pre-calc width so we can center the dialog */
                 l = strlen(prompt);
                 if (i->len > l) {
                     l = XTextWidth(m->font, i->text, i->len);

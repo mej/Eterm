@@ -44,11 +44,9 @@ static const char cvs_ident[] = "$Id$";
 const char *
 my_basename(const char *str)
 {
-
     const char *base = strrchr(str, '/');
 
     return (base ? base + 1 : str);
-
 }
 
 /*
@@ -58,7 +56,6 @@ my_basename(const char *str)
 unsigned long
 str_leading_match(register const char *s1, register const char *s2)
 {
-
     register unsigned long n;
 
     if (!s1 || !s2) {

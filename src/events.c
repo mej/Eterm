@@ -734,64 +734,7 @@ handle_button_press(event_t *ev)
 unsigned char
 handle_button_release(event_t *ev)
 {
-
     D_EVENTS(("handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
-
-#ifdef ESCREEN
-    if (!XEVENT_IS_MYWIN(ev, &primary_data) && drag && TermWin.screen && TermWin.screen->backend && TermWin.screen->userdef) {
-        buttonbar_t *bbar = *((buttonbar_t **) (TermWin.screen->userdef));
-        button_t *b;
-        int fm = 0, to = 0;
-
-        if (!bbar || !(b = bbar->buttons)) {
-            return 0;
-        }
-
-        while (b && (b != drag)) {
-            b = b->next;
-            fm++;
-        }
-        if (!b) {
-            /* dragged button is not on the bar with our displays on */
-            return 0;
-        }
-
-        if (bbar->current) {
-            b = bbar->buttons;
-            while (b && (b != bbar->current)) {
-                b = b->next;
-                to++;
-            }
-            if (!b) {
-                /* dragged-to button is not on the bar with our displays */
-                return 0;
-            }
-        }
-
-        if (!bbar->current) {
-            /* tab torn off */
-            char *u = ns_get_url(TermWin.screen, fm);
-
-            if (u) {
-                char *c;
-                size_t l = strlen(orig_argv0) + strlen(u) + 7;
-
-                if ((c = MALLOC(l))) {
-                    snprintf(c, l, "%s%s -U %s", ((orig_argv0[0] == '/') || ((orig_argv0[0] == '.') && (orig_argv0[1] == '/'))) ? "" : "./", orig_argv0, u);
-                    D_ESCREEN(("(experimental) creating other frame using \"%s\"\n", c));
-                    (void) ns_run(TermWin.screen->efuns, c);
-                    FREE(c);
-                }
-                FREE(u);
-            }
-            return 1;
-        } else if (buttonbar->current != drag) {
-            /* tab "moved" */
-            ns_mov_disp(TermWin.screen, fm, to);
-            return 1;
-        }
-    }
-#endif
 
     if (button_state.ignore_release == 1) {
         button_state.ignore_release = 0;

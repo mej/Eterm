@@ -975,10 +975,13 @@ scr_erase_line(int mode)
     ZERO_SCROLLBACK;
     RESET_CHSTAT;
 
-    if (screen.flags & Screen_WrapNext)
+    if (screen.flags & Screen_WrapNext) {
         screen.flags &= ~Screen_WrapNext;
+    }
 
     row = TermWin.saveLines + screen.row;
+    ASSERT(row < TermWin.nrow + TermWin.saveLines);
+
     if (screen.text[row]) {
         switch (mode) {
           case 0:              /* erase to end of line */

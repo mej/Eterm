@@ -194,27 +194,22 @@ eterm_bootstrap(int argc, char *argv[])
     D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(), getegid()));
 
 #ifdef ESCREEN
+#  define ESCREEN_PREFIX "Escreen"
+
     TermWin.screen = NULL;
     TermWin.screen_mode = NS_MODE_NONE;
-    {
-        char *p = strrchr(orig_argv0, '/');
-
-#  define ESCREEN_PREFIX "Escreen"
-#  define ETERM_PREFIX   "Eterm"
-        p = p ? (p + 1) : orig_argv0;
-        if (rs_url) {
-            if (!strncmp(rs_url, NS_TWIN_PROTO, strlen(NS_TWIN_PROTO))) {
-                TermWin.screen_mode = NS_MODE_TWIN;
-            } else if (!strncmp(rs_url, NS_SCREEN_PROTO, strlen(NS_SCREEN_PROTO))) {
-                TermWin.screen_mode = NS_MODE_SCREEN;
-            } else if (!strncmp(rs_url, NS_SCREAM_PROTO, strlen(NS_SCREAM_PROTO))) {
-                TermWin.screen_mode = NS_MODE_SCREAM;
-            } else {
-                TermWin.screen_mode = NS_MODE_NEGOTIATE;
-            }
-        } else if (!strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX))) {
+    if (rs_url) {
+        if (!BEG_STRCASECMP(rs_url, NS_TWIN_PROTO)) {
+            TermWin.screen_mode = NS_MODE_TWIN;
+        } else if (!BEG_STRCASECMP(rs_url, NS_SCREEN_PROTO)) {
             TermWin.screen_mode = NS_MODE_SCREEN;
+        } else if (!BEG_STRCASECMP(rs_url, NS_SCREAM_PROTO)) {
+            TermWin.screen_mode = NS_MODE_SCREAM;
+        } else {
+            TermWin.screen_mode = NS_MODE_NEGOTIATE;
         }
+    } else if (!strcmp(ESCREEN_PREFIX, my_basename(orig_argv0))) {
+        TermWin.screen_mode = NS_MODE_SCREEN;
     }
 #endif
 

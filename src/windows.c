@@ -568,7 +568,11 @@ term_resize(int width, int height)
 
     D_X11(("term_resize(%d, %d)\n", width, height));
     TermWin.width = TermWin.ncol * TermWin.fwidth;
+#ifdef ESCREEN
+    TermWin.height = (TermWin.screen_mode ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
+#else
     TermWin.height = TermWin.nrow * TermWin.fheight;
+#endif
     D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
     width = TermWin_TotalWidth();
     height = TermWin_TotalHeight();
@@ -611,14 +615,16 @@ handle_resize(unsigned int width, unsigned int height)
     int new_nrow = (height - szHint.base_height) / TermWin.fheight;
 
     D_EVENTS(("handle_resize(%u, %u)\n", width, height));
-    if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
-        TermWin.ncol = new_ncol;
+
 #ifdef ESCREEN
-        TermWin.nrow = new_nrow + (NS_MAGIC_LINE(TermWin.screen_mode) ? 1 : 0);
-#else
-        TermWin.nrow = new_nrow;
+    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
+        new_nrow++;
+    }
 #endif
 
+    if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
+        TermWin.ncol = new_ncol;
+        TermWin.nrow = new_nrow;
         term_resize(width, height);
         szHint.width = szHint.base_width + TermWin.width;
         szHint.height = szHint.base_height + TermWin.height;

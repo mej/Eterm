@@ -2179,6 +2179,8 @@ run_command(char **argv)
         unsetenv("COLUMNS");
         unsetenv("TERMCAP");
 #endif
+        DEBUG_LEVEL = 0;
+
         get_tty();
         SET_TTYMODE(0, &tio);
 
@@ -2343,6 +2345,7 @@ static button_t *screen_button_create(char *text, char code)
     p[1] = code;
     p[2] = '\0';
     button_set_action(b, ACTION_ECHO, p);
+    b->flags |= NS_SCREAM_BUTTON;
 
     return b;
 }
@@ -2356,26 +2359,20 @@ static button_t *screen_button_create(char *text, char code)
 static int
 ins_disp(void *xd, int after, int as, char *name)
 {
-    buttonbar_t *bbar;
+    buttonbar_t *bbar = (buttonbar_t *) xd;
     button_t *button;
 
+    USE_VAR(after);
     REQUIRE_RVAL(xd, NS_FAIL);
     REQUIRE_RVAL(name, NS_FAIL);
     REQUIRE_RVAL(*name, NS_FAIL);
-
-    bbar = *((buttonbar_t **) xd);
 
     if (!(button = screen_button_create(name, '0' + as))) {
         return NS_FAIL;
     }
 
-    if ((bbar = bbar_insert_button(bbar, button, after, FALSE))) {
-        *((buttonbar_t **) xd) = bbar;
-        return NS_SUCC;
-    }
-
-    button_free(button);
-    return NS_FAIL;
+    bbar_add_button(bbar, button);
+    return NS_SUCC;
 }
 
 #if 0
@@ -2384,27 +2381,19 @@ ins_disp(void *xd, int after, int as, char *name)
    if our user's configured a bbar, we'll add to that,
    otherwise, we'll create one. */
 static int
-add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
+add_screen_ctl_button(buttonbar_t *bbar, char *name, char key)
 {
-    buttonbar_t *bbar;
     button_t *button;
 
-    REQUIRE_RVAL(xd, NS_FAIL);
+    REQUIRE_RVAL(bbar, NS_FAIL);
     REQUIRE_RVAL(name, NS_FAIL);
     REQUIRE_RVAL(*name, NS_FAIL);
-
-    bbar = *xd;
 
     if (!(button = screen_button_create(name, key)))
         return NS_FAIL;
 
-    if ((bbar = bbar_insert_button(bbar, button, -1, TRUE))) {
-        *xd = bbar;
-        return NS_SUCC;
-    }
-
-    button_free(button);
-    return NS_FAIL;
+    bbar_add_button(bbar, button);
+    return NS_SUCC;
 }
 #endif
 
@@ -2414,7 +2403,7 @@ add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
 static int
 del_disp(void *xd, int n)
 {
-    buttonbar_t *bbar = *((buttonbar_t **) xd);
+    buttonbar_t *bbar = (buttonbar_t *) xd;
     button_t *button, *b2;
     int bi = n;
 
@@ -2458,7 +2447,7 @@ del_disp(void *xd, int n)
 static int
 upd_disp(void *xd, int n, int flags, char *name)
 {
-    buttonbar_t *bbar = *((buttonbar_t **) xd);
+    buttonbar_t *bbar = (buttonbar_t *) xd;
     button_t *button;
 
     REQUIRE_RVAL(bbar, NS_FAIL);
@@ -2472,7 +2461,7 @@ upd_disp(void *xd, int n, int flags, char *name)
     }
 
     if (flags >= 0) {
-        button->flags = flags;
+        button->flags = (flags | NS_SCREAM_BUTTON);
     }
 
     bbar_redraw(bbar);
@@ -2487,7 +2476,7 @@ upd_disp(void *xd, int n, int flags, char *name)
 static int
 expire_buttons(void *xd, int n)
 {
-    buttonbar_t *bbar = *((buttonbar_t **) xd);
+    buttonbar_t *bbar = (buttonbar_t *) xd;
     button_t *b, *p;
 
     REQUIRE_RVAL(bbar, NS_FAIL);
@@ -2762,105 +2751,12 @@ waitstate(void *xd, int ms)
     return 0;
 }
 
-int
-make_escreen_menu(void)
+static _ns_efuns *
+escreen_reg_funcs(void)
 {
-    button_t *button;
-    menu_t *m;
-    menuitem_t *i;
-
-    if ((m = menu_create(NS_MENU_TITLE))) {
-        char *sc[] = {
-            /* display functions */
-            "New", "display(new)",      /* \x01:screen\r */
-            "New ...", "display(new,ask)",
-            "Rename ...", "display(name,ask)",
-            "Backlog ...", "display(backlog)",
-            "Monitor", "display(monitor)",
-            "Close", "display(close)",
-            "-", "",
-            /* region functions */
-            "Split", "region(new)",
-            "Unsplit", "region(full)",
-            "Prvs region", "region(prvs)",      /* NS_SCREEN_PRVS_REG */
-            "Next region", "region(next)",
-            "Kill region", "region(kill)",
-            "-", "",
-            /* screen functions */
-            "Reset", "reset",
-            "Statement", "statement",
-            "-", ""
-        };
-        int n, nsc = sizeof(sc) / sizeof(char *);
-
-        if (menu_list) {
-            for (n = 0; n < menu_list->nummenus; n++) { /* blend in w/ l&f */
-                if (menu_list->menus[n]->font) {
-                    m->font = menu_list->menus[n]->font;
-                    m->fwidth = menu_list->menus[n]->fwidth;
-                    m->fheight = menu_list->menus[n]->fheight;
-#ifdef MULTI_CHARSET
-                    m->fontset = menu_list->menus[n]->fontset;
-#endif
-                    break;
-                }
-            }
-        }
-
-        for (n = 0; n < (nsc - 1); n += 2) {
-            if (!strcmp(sc[n], "-")) {  /* separator */
-                if ((i = menuitem_create(NULL))) {
-                    menu_add_item(m, i);
-                    menuitem_set_action(i, MENUITEM_SEP, NULL);
-                }
-            } /* menu entry */
-            else if ((i = menuitem_create(sc[n]))) {
-                menuitem_set_action(i, MENUITEM_SCRIPT, sc[n + 1]);
-                menu_add_item(m, i);
-            }
-        }
-
-        if ((i = menuitem_create("About..."))) {
-            menuitem_set_action(i, MENUITEM_ALERT, "Screen/Twin compatibility layer by Azundris <scream@azundris.com>");
-            menu_add_item(m, i);
-        }
-
-        if ((button = button_create(NS_MENU_TITLE))) {
-            if (!(buttonbar = bbar_insert_button(buttonbar, button, -1, TRUE))) {
-                m->font = NULL;
-#ifdef MULTI_CHARSET
-                m->fontset = NULL;
-#endif
-                menu_delete(m);
-                button_set_action(button, ACTION_STRING, NS_MENU_TITLE);
-                button_free(button);
-            } else {
-                int j, k = menu_list ? menu_list->nummenus : 0;
-
-                menu_list = menulist_add_menu(menu_list, m);
-                for (j = k; j < menu_list->nummenus; j++) {
-                    event_data_add_mywin(&menu_event_data, menu_list->menus[j]->win);
-                }
-                if (!k) {
-                    menu_init();
-                }
-                button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
-                return 1;       /* success! */
-            }
-        }
-    }
-    return 0;
-}
-
-
-
-/* Set everything up for escreen mode */
-int
-escreen_init(char **argv)
-{
-    int ns_err;
     _ns_efuns *efuns;
 
+    /* Register functions */
     efuns = ns_new_efuns();
 
     ns_register_ssx(efuns, set_scroll_x);
@@ -2885,17 +2781,132 @@ escreen_init(char **argv)
 
     ns_register_fun(efuns, waitstate);
 
+    return efuns;
+}
+
+static int
+make_escreen_menu(buttonbar_t *bbar)
+{
+    button_t *button;
+    menu_t *m;
+    menuitem_t *i;
+
+    if ((m = menu_create(NS_MENU_TITLE))) {
+        char *sc[] = {
+            /* display functions */
+            "New", "es_display(new)",      /* \x01:screen\r */
+            "New (w/ name)...", "es_display(new,ask)",
+            "Rename...", "es_display(name,ask)",
+            "Backlog...", "es_display(backlog)",
+            "Monitor", "es_display(monitor)",
+            "Close", "es_display(close)",
+            "-", "",
+            /* region functions */
+            "Split", "es_region(new)",
+            "Unsplit", "es_region(full)",
+            "Prev region", "es_region(prev)",      /* NS_SCREEN_PRVS_REG */
+            "Next region", "es_region(next)",
+            "Kill region", "es_region(kill)",
+            "-", "",
+            /* screen functions */
+            "Reset", "es_reset",
+            "Statement", "es_statement",
+            "-", ""
+        };
+        int n, nsc = sizeof(sc) / sizeof(char *);
+        int j, k = menu_list ? menu_list->nummenus : 0;
+
+        if (menu_list) {
+            for (n = 0; n < menu_list->nummenus; n++) {
+                /* blend in w/ l&f */
+                if (menu_list->menus[n]->font) {
+                    m->font = menu_list->menus[n]->font;
+                    m->fwidth = menu_list->menus[n]->fwidth;
+                    m->fheight = menu_list->menus[n]->fheight;
+#ifdef MULTI_CHARSET
+                    m->fontset = menu_list->menus[n]->fontset;
+#endif
+                    break;
+                }
+            }
+        }
+
+        for (n = 0; n < (nsc - 1); n += 2) {
+            if (!strcmp(sc[n], "-")) {
+                /* separator */
+                if ((i = menuitem_create(NULL))) {
+                    menu_add_item(m, i);
+                    menuitem_set_action(i, MENUITEM_SEP, NULL);
+                }
+            } else if ((i = menuitem_create(sc[n]))) {
+                menuitem_set_action(i, MENUITEM_SCRIPT, sc[n + 1]);
+                menu_add_item(m, i);
+            }
+        }
+        if ((i = menuitem_create("About..."))) {
+            menuitem_set_action(i, MENUITEM_ALERT, "Screen/Twin compatibility layer by Azundris <scream@azundris.com>");
+            menu_add_item(m, i);
+        }
+        menu_list = menulist_add_menu(menu_list, m);
+        for (j = k; j < menu_list->nummenus; j++) {
+            event_data_add_mywin(&menu_event_data, menu_list->menus[j]->win);
+        }
+        if (!k) {
+            menu_init();
+        }
+
+        if ((button = button_create(NS_MENU_TITLE))) {
+            bbar_add_rbutton(bbar, button);
+            button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+/* Set everything up for escreen mode */
+int
+escreen_init(char **argv)
+{
+    int ns_err;
+    _ns_efuns *efuns;
+    buttonbar_t *bbar;
+
     if (!TermWin.screen_mode) {
         return run_command(argv);
-    } else if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, (void *) &buttonbar))) {
-        if (rs_delay >= 0) {
-            TermWin.screen->delay = rs_delay;   /* more flexible ways later */
-        }
-        make_escreen_menu();
-        /* add_screen_ctl_button(&buttonbar,"New",'c'); */
-        return TermWin.screen->fd;
     }
-    return -1;
+
+    efuns = escreen_reg_funcs();
+
+    /* Create buttonbar for Escreen's use. */
+    if ((bbar = bbar_create()) == NULL) {
+        if (buttonbar != NULL) {
+            bbar = buttonbar;
+        } else {
+            return -1;
+        }
+    } else {
+        bbar_set_font(bbar, "-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1");
+        bbar_init(bbar, TermWin.width);
+        bbar_add(bbar);
+    }
+
+    if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar)) == 0) {
+        return -1;
+    }
+    if (rs_delay >= 0) {
+        TermWin.screen->delay = rs_delay;       /* more flexible ways later */
+    }
+
+    make_escreen_menu(bbar);
+
+    bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
+    bbar_set_visible(bbar, 0);
+    bbar_show(bbar, 1);
+    parent_resize();
+
+    /* add_screen_ctl_button(bbar,"New",'c'); */
+    return TermWin.screen->fd;
 }
 #endif
 
