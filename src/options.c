@@ -3092,7 +3092,7 @@ init_defaults(void)
   }
 #endif
 
-  Options = (Opt_scrollBar);
+  Options = (Opt_scrollBar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
   display_name = NULL;
   rs_term_name = NULL;

@@ -2762,3 +2762,9 @@ Thu Nov 11 18:25:07 PST 1999	Michael Jennings <mej@eterm.org>
 	to make sure. :-)  I also fixed a few minor nits here.
 	
 -------------------------------------------------------------------------------
+Fri Nov 12 17:55:05 PST 1999	Michael Jennings <mej@eterm.org>
+
+	This should bring the technical reference up-to-date.  Eterm IPC is
+	now documented for the first time.
+	
+-------------------------------------------------------------------------------
