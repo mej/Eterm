@@ -1389,7 +1389,7 @@ process_window_mode(unsigned int nargs, int args[])
               tt_write((unsigned char *) buff, strlen(buff));
               break;
           case 18:
-              snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TermWin.nrow, TermWin.ncol);
+              snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TERM_WINDOW_GET_REPORTED_ROWS(), TERM_WINDOW_GET_REPORTED_COLS());
               tt_write((unsigned char *) buff, strlen(buff));
               break;
           case 20:

@@ -366,8 +366,8 @@ Create_Windows(int argc, char *argv[])
         szHint.height = height;
         szHint.flags |= USSize;
     }
-    TermWin.ncol = szHint.width;
-    TermWin.nrow = szHint.height;
+    TERM_WINDOW_SET_COLS(szHint.width);
+    TERM_WINDOW_SET_ROWS(szHint.height);
 
     change_font(1, NULL);
 
@@ -527,9 +527,9 @@ resize_parent(unsigned int width, unsigned int height)
 void
 set_width(unsigned short width)
 {
-    unsigned short height = TermWin.nrow;
+    unsigned short height = TERM_WINDOW_GET_REPORTED_ROWS();
 
-    if (width != TermWin.ncol) {
+    if (width != TERM_WINDOW_GET_REPORTED_COLS()) {
         width = szHint.base_width + width * TermWin.fwidth;
         height = szHint.base_height + height * TermWin.fheight;
 
@@ -542,7 +542,7 @@ void
 update_size_hints(void)
 {
     D_X11(("Called.\n"));
-    szHint.base_width = (2 * TermWin.internalBorder) + ((scrollbar_is_visible())? (scrollbar_trough_width()) : (0));
+    szHint.base_width = (2 * TermWin.internalBorder) + ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
     szHint.base_height = (2 * TermWin.internalBorder) + bbar_calc_docked_height(BBAR_DOCKED);
 
     szHint.width_inc = TermWin.fwidth;
@@ -552,8 +552,8 @@ update_size_hints(void)
 
     szHint.min_width = szHint.base_width + szHint.width_inc;
     szHint.min_height = szHint.base_height + szHint.height_inc;
-    szHint.width = szHint.base_width + TermWin.width;
-    szHint.height = szHint.base_height + TermWin.height;
+    szHint.width = szHint.base_width + TERM_WINDOW_GET_WIDTH();
+    szHint.height = szHint.base_height + TERM_WINDOW_GET_HEIGHT();
     D_X11(("             Minimum width/height == %lux%lu, width/height == %lux%lu\n", szHint.min_width, szHint.min_height, szHint.width, szHint.height));
 
     szHint.flags = PMinSize | PResizeInc | PBaseSize;
@@ -567,20 +567,16 @@ term_resize(int width, int height)
     static int last_width = 0, last_height = 0;
 
     D_X11(("term_resize(%d, %d)\n", width, height));
-    TermWin.width = TermWin.ncol * TermWin.fwidth;
-#ifdef ESCREEN
-    TermWin.height = (NS_MAGIC_LINE(TermWin.screen_mode) ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
-#else
-    TermWin.height = TermWin.nrow * TermWin.fheight;
-#endif
-    D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
-    width = TermWin_TotalWidth();
-    height = TermWin_TotalHeight();
+    TERM_WINDOW_SET_WIDTH();
+    TERM_WINDOW_SET_HEIGHT();
+    D_X11((" -> New TermWin width/height == %lux%lu\n", TERM_WINDOW_GET_WIDTH(), TERM_WINDOW_GET_HEIGHT()));
+    width = TERM_WINDOW_FULL_WIDTH();
+    height = TERM_WINDOW_FULL_HEIGHT();
     XMoveResizeWindow(Xdisplay, TermWin.vt,
                       ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible())? (scrollbar_trough_width()) : (0))),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), width, height);
     if (width != last_width || height != last_height) {
-        render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+        render_simage(images[image_bg].current, TermWin.vt, width, height, image_bg, 0);
         scr_reset();
         scr_touch();
         if (image_mode_is(image_bg, MODE_AUTO)) {
@@ -616,18 +612,12 @@ handle_resize(unsigned int width, unsigned int height)
 
     D_EVENTS(("handle_resize(%u, %u)\n", width, height));
 
-#ifdef ESCREEN
-    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        new_nrow++;
-    }
-#endif
-
-    if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
-        TermWin.ncol = new_ncol;
-        TermWin.nrow = new_nrow;
+    if (first_time || (new_ncol != TERM_WINDOW_GET_REPORTED_ROWS()) || (new_nrow != TERM_WINDOW_GET_REPORTED_COLS())) {
+        TERM_WINDOW_SET_COLS(new_ncol);
+        TERM_WINDOW_SET_ROWS(new_nrow);
         term_resize(width, height);
-        szHint.width = szHint.base_width + TermWin.width;
-        szHint.height = szHint.base_height + TermWin.height;
+        szHint.width = szHint.base_width + TERM_WINDOW_GET_WIDTH();
+        szHint.height = szHint.base_height + TERM_WINDOW_GET_HEIGHT();
         D_X11((" -> New szHint.width/height == %lux%lu\n", szHint.width, szHint.height));
         scrollbar_resize(width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
         bbar_resize_all(szHint.width);

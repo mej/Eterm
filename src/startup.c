@@ -231,11 +231,6 @@ eterm_bootstrap(int argc, char *argv[])
     process_colors();
 
     Create_Windows(argc, argv);
-#ifdef ESCREEN
-    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        TermWin.nrow++;
-    }
-#endif
     scr_reset();                /* initialize screen */
 
     /* Initialize the scrollbar */

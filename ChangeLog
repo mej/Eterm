@@ -4811,3 +4811,11 @@ Fri Oct  4 22:06:40 2002                        Michael Jennings (mej)
 Fixed button label positioning to be based on the font descent, not
 just existing button text.
 ----------------------------------------------------------------------
+Mon Oct  7 22:16:38 2002                        Michael Jennings (mej)
+
+This should clean up and consolidate the size-setting and reporting to
+eliminate the discrepencies sometimes seen in Escreen mode when
+coupled, for example, with --buttonbar 0.  Azundris spotted this ages
+ago, and I've been putting off fixing it.  But it should be all
+straightened out now.
+----------------------------------------------------------------------

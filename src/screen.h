@@ -47,8 +47,8 @@
  * CLEAR_CHARS: clear <num> chars starting from pixel position <x,y>
  * ERASE_ROWS : set <num> rows starting from row <row> to the foreground color
  */
-#define CLEAR_ROWS(row, num)  do {if (buffer_pixmap) {XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), \
-                                  Col2Pixel(0), Row2Pixel(row));} XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), 0);} while (0)
+#define CLEAR_ROWS(row, num)  do {if (buffer_pixmap) {XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num), \
+                                  Col2Pixel(0), Row2Pixel(row));} XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num), 0);} while (0)
 #define CLEAR_CHARS(x, y, num) ((buffer_pixmap) \
                                ? (XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(num), Height2Pixel(1), x, y)) \
                                : (XClearArea(Xdisplay, TermWin.vt, x, y, Width2Pixel(num), Height2Pixel(1), 0)))
@@ -57,8 +57,8 @@
                                : (XClearArea(Xdisplay, TermWin.vt, x, y, w, h, 0)))
 #define UPDATE_BOX(x1, y1, x2, y2)  do {if (buffer_pixmap) {if (x1 < low_x) low_x = x1; if (x2 > high_x) high_x = x2; \
                                                             if (y1 < low_y) low_y = y1; if (y2 > high_y) high_y = y2;}} while (0)
-#define ERASE_ROWS(row, num)  do {XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num)); \
-                                  if (buffer_pixmap) {XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), 0);}} while (0)
+#define ERASE_ROWS(row, num)  do {XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num)); \
+                                  if (buffer_pixmap) {XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num), 0);}} while (0)
 #define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
 #ifndef NO_BRIGHTCOLOR
 # define MONO_BOLD(x)	(((x) & RS_Bold) && fore == fgColor)

@@ -647,13 +647,15 @@ change_font(int init, const char *fontname)
 
     set_colorfgbg();
 
-    TermWin.width = TermWin.ncol * TermWin.fwidth;
 #ifdef ESCREEN
-    TermWin.height = (NS_MAGIC_LINE(TermWin.screen_mode) ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
-#else
-    TermWin.height = TermWin.nrow * TermWin.fheight;
+    D_FONT((" -> Escreen mode is %s\n", ((NS_MAGIC_LINE(TermWin.screen_mode)) ? ("on") : ("off"))));
 #endif
-    D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n", TermWin.fwidth, TermWin.fheight, TermWin.width, TermWin.height));
+
+    TERM_WINDOW_SET_WIDTH();
+    TERM_WINDOW_SET_HEIGHT();
+
+    D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n",
+            TermWin.fwidth, TermWin.fheight, TERM_WINDOW_GET_WIDTH(), TERM_WINDOW_GET_HEIGHT()));
 
     /* If we're initializing, *we* do the size hints.  If not, resize the parent window. */
     if (init) {
@@ -663,8 +665,8 @@ change_font(int init, const char *fontname)
         szHint.min_width = szHint.base_width + szHint.width_inc;
         szHint.min_height = szHint.base_height + szHint.height_inc;
 
-        szHint.width = szHint.base_width + TermWin.width;
-        szHint.height = szHint.base_height + TermWin.height;
+        szHint.width = szHint.base_width + TERM_WINDOW_GET_WIDTH();
+        szHint.height = szHint.base_height + TERM_WINDOW_GET_HEIGHT();
 
         szHint.flags = PMinSize | PResizeInc | PBaseSize;
     } else {

@@ -122,12 +122,12 @@ inline void blank_screen_mem(text_t **, rend_t **, int, rend_t);
 inline void
 blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
 {
-    register unsigned int i = TermWin.ncol;
+    register unsigned int i = TERM_WINDOW_GET_REPORTED_COLS();
     rend_t *r, fs = efs;
 
     if (tp[row] == NULL) {
-        tp[row] = MALLOC(sizeof(text_t) * (TermWin.ncol + 1));
-        rp[row] = MALLOC(sizeof(rend_t) * TermWin.ncol);
+        tp[row] = MALLOC(sizeof(text_t) * (TERM_WINDOW_GET_REPORTED_COLS() + 1));
+        rp[row] = MALLOC(sizeof(rend_t) * TERM_WINDOW_GET_REPORTED_COLS());
     }
     MEMSET(tp[row], ' ', i);
     tp[row][i] = 0;
@@ -147,7 +147,7 @@ scr_reset(void)
     TermWin.view_start = 0;
     RESET_CHSTAT;
 
-    if (TermWin.ncol == prev_ncol && TermWin.nrow == prev_nrow)
+    if (TERM_WINDOW_GET_REPORTED_COLS() == prev_ncol && TERM_WINDOW_GET_REPORTED_ROWS() == prev_nrow)
         return;
 
     if (current_screen != PRIMARY) {
@@ -168,7 +168,7 @@ scr_reset(void)
     prev_total_rows = prev_nrow + TermWin.saveLines;
 
     screen.tscroll = 0;
-    screen.bscroll = (TermWin.nrow - 1);
+    screen.bscroll = (TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     if (prev_nrow == -1) {
         /*
          * A: first time called so just malloc everything : don't rely on realloc
@@ -176,16 +176,16 @@ scr_reset(void)
          */
         screen.text = CALLOC(text_t *, total_rows);
         buf_text = CALLOC(text_t *, total_rows);
-        drawn_text = CALLOC(text_t *, TermWin.nrow);
-        swap.text = CALLOC(text_t *, TermWin.nrow);
+        drawn_text = CALLOC(text_t *, TERM_WINDOW_GET_REPORTED_ROWS());
+        swap.text = CALLOC(text_t *, TERM_WINDOW_GET_REPORTED_ROWS());
 
         screen.rend = CALLOC(rend_t *, total_rows);
         buf_rend = CALLOC(rend_t *, total_rows);
-        drawn_rend = CALLOC(rend_t *, TermWin.nrow);
-        swap.rend = CALLOC(rend_t *, TermWin.nrow);
+        drawn_rend = CALLOC(rend_t *, TERM_WINDOW_GET_REPORTED_ROWS());
+        swap.rend = CALLOC(rend_t *, TERM_WINDOW_GET_REPORTED_ROWS());
         D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
-        for (i = 0; i < TermWin.nrow; i++) {
+        for (i = 0; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
             j = i + TermWin.saveLines;
             blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE);
             blank_screen_mem(swap.text, swap.rend, i, DEFAULT_RSTYLE);
@@ -197,12 +197,12 @@ scr_reset(void)
         /*
          * B1: add or delete rows as appropriate
          */
-        if (TermWin.nrow < prev_nrow) {
+        if (TERM_WINDOW_GET_REPORTED_ROWS() < prev_nrow) {
             /* delete rows */
-            k = MIN(TermWin.nscrolled, prev_nrow - TermWin.nrow);
+            k = MIN(TermWin.nscrolled, prev_nrow - TERM_WINDOW_GET_REPORTED_ROWS());
             scroll_text(0, prev_nrow - 1, k, 1);
 
-            for (i = TermWin.nrow; i < prev_nrow; i++) {
+            for (i = TERM_WINDOW_GET_REPORTED_ROWS(); i < prev_nrow; i++) {
                 j = i + TermWin.saveLines;
                 if (screen.text[j]) {
                     FREE(screen.text[j]);
@@ -219,32 +219,32 @@ scr_reset(void)
             }
             screen.text = REALLOC(screen.text, total_rows * sizeof(text_t *));
             buf_text = REALLOC(buf_text, total_rows * sizeof(text_t *));
-            drawn_text = REALLOC(drawn_text, TermWin.nrow * sizeof(text_t *));
-            swap.text = REALLOC(swap.text, TermWin.nrow * sizeof(text_t *));
+            drawn_text = REALLOC(drawn_text, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(text_t *));
+            swap.text = REALLOC(swap.text, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(text_t *));
 
             screen.rend = REALLOC(screen.rend, total_rows * sizeof(rend_t *));
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
-            drawn_rend = REALLOC(drawn_rend, TermWin.nrow * sizeof(rend_t *));
-            swap.rend = REALLOC(swap.rend, TermWin.nrow * sizeof(rend_t *));
+            drawn_rend = REALLOC(drawn_rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
+            swap.rend = REALLOC(swap.rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
             D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
             /* we have fewer rows so fix up number of scrolled lines */
-            UPPER_BOUND(screen.row, TermWin.nrow - 1);
+            UPPER_BOUND(screen.row, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 
-        } else if (TermWin.nrow > prev_nrow) {
+        } else if (TERM_WINDOW_GET_REPORTED_ROWS() > prev_nrow) {
             /* add rows */
             screen.text = REALLOC(screen.text, total_rows * sizeof(text_t *));
             buf_text = REALLOC(buf_text, total_rows * sizeof(text_t *));
-            drawn_text = REALLOC(drawn_text, TermWin.nrow * sizeof(text_t *));
-            swap.text = REALLOC(swap.text, TermWin.nrow * sizeof(text_t *));
+            drawn_text = REALLOC(drawn_text, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(text_t *));
+            swap.text = REALLOC(swap.text, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(text_t *));
 
             screen.rend = REALLOC(screen.rend, total_rows * sizeof(rend_t *));
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
-            drawn_rend = REALLOC(drawn_rend, TermWin.nrow * sizeof(rend_t *));
-            swap.rend = REALLOC(swap.rend, TermWin.nrow * sizeof(rend_t *));
+            drawn_rend = REALLOC(drawn_rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
+            swap.rend = REALLOC(swap.rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
             D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
-            k = MIN(TermWin.nscrolled, TermWin.nrow - prev_nrow);
+            k = MIN(TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - prev_nrow);
             for (i = prev_total_rows; i < total_rows - k; i++) {
                 screen.text[i] = NULL;
                 blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
@@ -253,14 +253,14 @@ scr_reset(void)
                 screen.text[i] = NULL;
                 screen.rend[i] = NULL;
             }
-            for (i = prev_nrow; i < TermWin.nrow; i++) {
+            for (i = prev_nrow; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
                 swap.text[i] = NULL;
                 drawn_text[i] = NULL;
                 blank_screen_mem(swap.text, swap.rend, i, DEFAULT_RSTYLE);
                 blank_screen_mem(drawn_text, drawn_rend, i, DEFAULT_RSTYLE);
             }
             if (k > 0) {
-                scroll_text(0, TermWin.nrow - 1, -k, 1);
+                scroll_text(0, TERM_WINDOW_GET_REPORTED_ROWS() - 1, -k, 1);
                 screen.row += k;
                 TermWin.nscrolled -= k;
                 for (i = TermWin.saveLines - TermWin.nscrolled; k--; i--) {
@@ -271,42 +271,42 @@ scr_reset(void)
             }
         }
         /* B2: resize columns */
-        if (TermWin.ncol != prev_ncol) {
+        if (TERM_WINDOW_GET_REPORTED_COLS() != prev_ncol) {
             for (i = 0; i < total_rows; i++) {
                 if (screen.text[i]) {
                     tc = screen.text[i][prev_ncol];
-                    screen.text[i] = REALLOC(screen.text[i], (TermWin.ncol + 1) * sizeof(text_t));
-                    screen.rend[i] = REALLOC(screen.rend[i], TermWin.ncol * sizeof(rend_t));
-                    screen.text[i][TermWin.ncol] = MIN(tc, TermWin.ncol);
-                    if (TermWin.ncol > prev_ncol)
-                        blank_line(&(screen.text[i][prev_ncol]), &(screen.rend[i][prev_ncol]), TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+                    screen.text[i] = REALLOC(screen.text[i], (TERM_WINDOW_GET_REPORTED_COLS() + 1) * sizeof(text_t));
+                    screen.rend[i] = REALLOC(screen.rend[i], TERM_WINDOW_GET_REPORTED_COLS() * sizeof(rend_t));
+                    screen.text[i][TERM_WINDOW_GET_REPORTED_COLS()] = MIN(tc, TERM_WINDOW_GET_REPORTED_COLS());
+                    if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
+                        blank_line(&(screen.text[i][prev_ncol]), &(screen.rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
                 }
             }
-            for (i = 0; i < TermWin.nrow; i++) {
-                drawn_text[i] = REALLOC(drawn_text[i], (TermWin.ncol + 1) * sizeof(text_t));
-                drawn_rend[i] = REALLOC(drawn_rend[i], TermWin.ncol * sizeof(rend_t));
+            for (i = 0; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
+                drawn_text[i] = REALLOC(drawn_text[i], (TERM_WINDOW_GET_REPORTED_COLS() + 1) * sizeof(text_t));
+                drawn_rend[i] = REALLOC(drawn_rend[i], TERM_WINDOW_GET_REPORTED_COLS() * sizeof(rend_t));
                 if (swap.text[i]) {
                     tc = swap.text[i][prev_ncol];
-                    swap.text[i] = REALLOC(swap.text[i], (TermWin.ncol + 1) * sizeof(text_t));
-                    swap.rend[i] = REALLOC(swap.rend[i], TermWin.ncol * sizeof(rend_t));
-                    swap.text[i][TermWin.ncol] = MIN(tc, TermWin.ncol);
-                    if (TermWin.ncol > prev_ncol)
-                        blank_line(&(swap.text[i][prev_ncol]), &(swap.rend[i][prev_ncol]), TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+                    swap.text[i] = REALLOC(swap.text[i], (TERM_WINDOW_GET_REPORTED_COLS() + 1) * sizeof(text_t));
+                    swap.rend[i] = REALLOC(swap.rend[i], TERM_WINDOW_GET_REPORTED_COLS() * sizeof(rend_t));
+                    swap.text[i][TERM_WINDOW_GET_REPORTED_COLS()] = MIN(tc, TERM_WINDOW_GET_REPORTED_COLS());
+                    if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
+                        blank_line(&(swap.text[i][prev_ncol]), &(swap.rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
                 }
-                if (TermWin.ncol > prev_ncol)
-                    blank_line(&(drawn_text[i][prev_ncol]), &(drawn_rend[i][prev_ncol]), TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+                if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
+                    blank_line(&(drawn_text[i][prev_ncol]), &(drawn_rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
             }
         }
         if (tabs)
             FREE(tabs);
     }
-    tabs = MALLOC(TermWin.ncol);
+    tabs = MALLOC(TERM_WINDOW_GET_REPORTED_COLS());
 
-    for (i = 0; i < TermWin.ncol; i++)
+    for (i = 0; i < TERM_WINDOW_GET_REPORTED_COLS(); i++)
         tabs[i] = (i % TABSIZE == 0) ? 1 : 0;
 
-    prev_nrow = TermWin.nrow;
-    prev_ncol = TermWin.ncol;
+    prev_nrow = TERM_WINDOW_GET_REPORTED_ROWS();
+    prev_ncol = TERM_WINDOW_GET_REPORTED_COLS();
 
     tt_resize();
     if (chscr) {
@@ -321,14 +321,14 @@ scr_release(void)
     int total_rows;
     register int i;
 
-    total_rows = TermWin.nrow + TermWin.saveLines;
+    total_rows = TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines;
     for (i = 0; i < total_rows; i++) {
         if (screen.text[i]) {
             FREE(screen.text[i]);
             FREE(screen.rend[i]);
         }
     }
-    for (i = 0; i < TermWin.nrow; i++) {
+    for (i = 0; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
         FREE(drawn_text[i]);
         FREE(drawn_rend[i]);
         FREE(swap.text[i]);
@@ -362,7 +362,7 @@ scr_poweron(void)
         scr_change_screen(SECONDARY);
         scr_erase_screen(2);
         swap.tscroll = 0;
-        swap.bscroll = TermWin.nrow - 1;
+        swap.bscroll = TERM_WINDOW_GET_REPORTED_ROWS() - 1;
         swap.row = swap.col = 0;
         swap.charset = 0;
         swap.flags = Screen_DefaultFlags;
@@ -436,7 +436,7 @@ scr_change_screen(int scrn)
         offset = TermWin.saveLines;
         if (!screen.text || !screen.rend)
             return (current_screen);
-        for (i = TermWin.nrow; i--;) {
+        for (i = TERM_WINDOW_GET_REPORTED_ROWS(); i--;) {
             SWAP_IT(screen.text[i + offset], swap.text[i], t0);
             SWAP_IT(screen.rend[i + offset], swap.rend[i], r0);
         }
@@ -450,8 +450,8 @@ scr_change_screen(int scrn)
 #else
 # ifndef DONT_SCROLL_ME
     if (current_screen == PRIMARY) {
-        scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0);
-        for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++)
+        scroll_text(0, (TERM_WINDOW_GET_REPORTED_ROWS() - 1), TERM_WINDOW_GET_REPORTED_ROWS(), 0);
+        for (i = TermWin.saveLines; i < TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines; i++)
             if (screen.text[i] == NULL) {
                 blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
             }
@@ -689,14 +689,14 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
     if (len <= 0)               /* sanity */
         return;
 
-    last_col = TermWin.ncol;
+    last_col = TERM_WINDOW_GET_REPORTED_COLS();
 
     D_SCREEN(("scr_add_lines(*,%d,%d)\n", nlines, len));
     ZERO_SCROLLBACK;
     if (nlines > 0) {
         nlines += (screen.row - screen.bscroll);
         D_SCREEN((" -> screen.row == %d, screen.bscroll == %d, new nlines == %d\n", screen.row, screen.bscroll, nlines));
-        if ((nlines > 0) && (screen.tscroll == 0) && (screen.bscroll == (TermWin.nrow - 1))) {
+        if ((nlines > 0) && (screen.tscroll == 0) && (screen.bscroll == (TERM_WINDOW_GET_REPORTED_ROWS() - 1))) {
             /* _at least_ this many lines need to be scrolled */
             scroll_text(screen.tscroll, screen.bscroll, nlines, 0);
             for (i = nlines, row = screen.bscroll + TermWin.saveLines + 1; row > 0 && i--;) {
@@ -708,7 +708,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
         }
     }
     UPPER_BOUND(screen.col, last_col - 1);
-    BOUND(screen.row, -TermWin.nscrolled, TermWin.nrow - 1);
+    BOUND(screen.row, -TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 
     row = screen.row + TermWin.saveLines;
     if (screen.text[row] == NULL) {
@@ -757,7 +757,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                           scroll_text(screen.tscroll, screen.bscroll, 1, 0);
                           j = screen.bscroll + TermWin.saveLines;
                           blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
-                      } else if (screen.row < (TermWin.nrow - 1)) {
+                      } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
                           screen.row++;
                           row = screen.row + TermWin.saveLines;
                       }
@@ -786,7 +786,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 /* blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
                    rstyle);    Bug fix from John Ellison - need to reset rstyle */
                 blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
-            } else if (screen.row < (TermWin.nrow - 1)) {
+            } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
                 screen.row++;
                 row = screen.row + TermWin.saveLines;
             }
@@ -825,7 +825,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 
 #ifdef ESCREEN
     if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        if (screen.row >= TermWin.nrow - 1) {   /* last row -> upd-flag */
+        if (screen.row >= TERM_WINDOW_GET_ROWS()) {   /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         }
     }
@@ -842,7 +842,7 @@ scr_backspace(void)
 
     RESET_CHSTAT;
     if (screen.col == 0 && screen.row > 0) {
-        screen.col = TermWin.ncol - 1;
+        screen.col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
         screen.row--;
     } else if (screen.flags & Screen_WrapNext) {
         screen.flags &= ~Screen_WrapNext;
@@ -865,7 +865,7 @@ scr_tab(int count)
     if (count == 0)
         return;
     else if (count > 0) {
-        for (i = x + 1; i < TermWin.ncol; i++) {
+        for (i = x + 1; i < TERM_WINDOW_GET_REPORTED_COLS(); i++) {
             if (tabs[i]) {
                 x = i;
                 if (!--count)
@@ -895,7 +895,7 @@ scr_gotorc(int row, int col, int relative)
     RESET_CHSTAT;
 
     screen.col = ((relative & C_RELATIVE) ? (screen.col + col) : col);
-    BOUND(screen.col, 0, TermWin.ncol - 1);
+    BOUND(screen.col, 0, TERM_WINDOW_GET_REPORTED_COLS() - 1);
 
     if (screen.flags & Screen_WrapNext) {
         screen.flags &= ~Screen_WrapNext;
@@ -921,14 +921,14 @@ scr_gotorc(int row, int col, int relative)
     }
 #ifdef ESCREEN
     if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        if (screen.row >= TermWin.nrow - 1) {   /* last row -> upd-flag */
+        if (screen.row >= TERM_WINDOW_GET_ROWS()) {   /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         } else if (TermWin.screen_pending) {    /* left last -> upd-finis */
             TermWin.screen_pending |= 2;
         }
     }
 #endif
-    BOUND(screen.row, 0, TermWin.nrow - 1);
+    BOUND(screen.row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 }
 
 /*
@@ -958,7 +958,7 @@ scr_index(int direction)
         blank_screen_mem(screen.text, screen.rend, dirn, rstyle);
     } else
         screen.row += dirn;
-    BOUND(screen.row, 0, TermWin.nrow - 1);
+    BOUND(screen.row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     CHECK_SELECTION;
 }
 
@@ -982,14 +982,14 @@ scr_erase_line(int mode)
     }
 
     row = TermWin.saveLines + screen.row;
-    ASSERT(row < TermWin.nrow + TermWin.saveLines);
+    ASSERT(row < TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines);
 
     if (screen.text[row]) {
         switch (mode) {
           case 0:              /* erase to end of line */
               col = screen.col;
-              num = TermWin.ncol - col;
-              UPPER_BOUND(screen.text[row][TermWin.ncol], col);
+              num = TERM_WINDOW_GET_REPORTED_COLS() - col;
+              UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], col);
               break;
           case 1:              /* erase to beginning of line */
               col = 0;
@@ -997,8 +997,8 @@ scr_erase_line(int mode)
               break;
           case 2:              /* erase whole line */
               col = 0;
-              num = TermWin.ncol;
-              screen.text[row][TermWin.ncol] = 0;
+              num = TERM_WINDOW_GET_REPORTED_COLS();
+              screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
               break;
           default:
               return;
@@ -1042,7 +1042,7 @@ scr_erase_screen(int mode)
       case 0:                  /* erase to end of screen */
           scr_erase_line(0);
           row = screen.row + 1; /* possible OOB */
-          num = TermWin.nrow - row;
+          num = TERM_WINDOW_GET_REPORTED_ROWS() - row;
           break;
       case 1:                  /* erase to beginning of screen */
           scr_erase_line(1);
@@ -1051,13 +1051,13 @@ scr_erase_screen(int mode)
           break;
       case 2:                  /* erase whole screen */
           row = 0;
-          num = TermWin.nrow;
+          num = TERM_WINDOW_GET_REPORTED_ROWS();
           break;
       default:
           return;
     }
-    if (row >= 0 && row <= TermWin.nrow) {      /* check OOB */
-        UPPER_BOUND(num, (TermWin.nrow - row));
+    if (row >= 0 && row <= TERM_WINDOW_GET_REPORTED_ROWS()) {      /* check OOB */
+        UPPER_BOUND(num, (TERM_WINDOW_GET_REPORTED_ROWS() - row));
         if (rstyle & RS_RVid || rstyle & RS_Uline)
             ren = -1;
         else {
@@ -1096,10 +1096,10 @@ scr_E(void)
     RESET_CHSTAT;
 
     fs = rstyle;
-    for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++) {
+    for (i = TermWin.saveLines; i < TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines; i++) {
         t = screen.text[i];
         r = screen.rend[i];
-        for (j = 0; j < TermWin.ncol; j++) {
+        for (j = 0; j < TERM_WINDOW_GET_REPORTED_COLS(); j++) {
             *t++ = 'E';
             *r++ = fs;
         }
@@ -1159,32 +1159,32 @@ scr_insdel_chars(int count, int insdel)
         return;
 
     CHECK_SELECTION;
-    UPPER_BOUND(count, (TermWin.ncol - screen.col));
+    UPPER_BOUND(count, (TERM_WINDOW_GET_REPORTED_COLS() - screen.col));
 
     row = screen.row + TermWin.saveLines;
     screen.flags &= ~Screen_WrapNext;
 
     switch (insdel) {
       case INSERT:
-          for (col = TermWin.ncol - 1; (col - count) >= screen.col; col--) {
+          for (col = TERM_WINDOW_GET_REPORTED_COLS() - 1; (col - count) >= screen.col; col--) {
               screen.text[row][col] = screen.text[row][col - count];
               screen.rend[row][col] = screen.rend[row][col - count];
           }
-          screen.text[row][TermWin.ncol] += count;
-          UPPER_BOUND(screen.text[row][TermWin.ncol], TermWin.ncol);
+          screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] += count;
+          UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], TERM_WINDOW_GET_REPORTED_COLS());
           /* FALLTHROUGH */
       case ERASE:
           blank_line(&(screen.text[row][screen.col]), &(screen.rend[row][screen.col]), count, rstyle);
           break;
       case DELETE:
-          for (col = screen.col; (col + count) < TermWin.ncol; col++) {
+          for (col = screen.col; (col + count) < TERM_WINDOW_GET_REPORTED_COLS(); col++) {
               screen.text[row][col] = screen.text[row][col + count];
               screen.rend[row][col] = screen.rend[row][col + count];
           }
-          blank_line(&(screen.text[row][TermWin.ncol - count]), &(screen.rend[row][TermWin.ncol - count]), count, rstyle);
-          screen.text[row][TermWin.ncol] -= count;
-          if (((int) (char) screen.text[row][TermWin.ncol]) < 0)
-              screen.text[row][TermWin.ncol] = 0;
+          blank_line(&(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS() - count]), &(screen.rend[row][TERM_WINDOW_GET_REPORTED_COLS() - count]), count, rstyle);
+          screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] -= count;
+          if (((int) (char) screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()]) < 0)
+              screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
           break;
     }
 #ifdef MULTI_CHARSET
@@ -1192,9 +1192,9 @@ scr_insdel_chars(int count, int insdel)
         screen.rend[row][0] &= ~RS_multiMask;
         screen.text[row][0] = ' ';
     }
-    if ((screen.rend[row][TermWin.ncol - 1] & RS_multiMask) == RS_multi1) {
-        screen.rend[row][TermWin.ncol - 1] &= ~RS_multiMask;
-        screen.text[row][TermWin.ncol - 1] = ' ';
+    if ((screen.rend[row][TERM_WINDOW_GET_REPORTED_COLS() - 1] & RS_multiMask) == RS_multi1) {
+        screen.rend[row][TERM_WINDOW_GET_REPORTED_COLS() - 1] &= ~RS_multiMask;
+        screen.text[row][TERM_WINDOW_GET_REPORTED_COLS() - 1] = ' ';
     }
 #endif
 }
@@ -1207,7 +1207,7 @@ void
 scr_scroll_region(int top, int bot)
 {
     LOWER_BOUND(top, 0);
-    UPPER_BOUND(bot, TermWin.nrow - 1);
+    UPPER_BOUND(bot, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     if (top > bot)
         return;
     screen.tscroll = top;
@@ -1286,9 +1286,9 @@ void
 scr_set_tab(int mode)
 {
     if (mode < 0)
-        MEMSET(tabs, 0, (unsigned int) TermWin.ncol);
+        MEMSET(tabs, 0, (unsigned int) TERM_WINDOW_GET_REPORTED_COLS());
 
-    else if (screen.col < TermWin.ncol)
+    else if (screen.col < TERM_WINDOW_GET_REPORTED_COLS())
         tabs[screen.col] = (mode ? 1 : 0);
 }
 
@@ -1306,9 +1306,9 @@ scr_rvideo_mode(int mode)
         rvideo = mode;
         rstyle ^= RS_RVid;
 
-        maxlines = TermWin.saveLines + TermWin.nrow;
+        maxlines = TermWin.saveLines + TERM_WINDOW_GET_REPORTED_ROWS();
         for (i = TermWin.saveLines; i < maxlines; i++)
-            for (j = 0; j < TermWin.ncol + 1; j++)
+            for (j = 0; j < TERM_WINDOW_GET_REPORTED_COLS() + 1; j++)
                 screen.rend[i][j] ^= RS_RVid;
         scr_refresh(SLOW_REFRESH);
     }
@@ -1473,8 +1473,8 @@ scr_expose(int x, int y, int width, int height)
 
     REQUIRE(drawn_text != NULL);
 
-    nc = TermWin.ncol - 1;
-    nr = TermWin.nrow - 1;
+    nc = TERM_WINDOW_GET_REPORTED_COLS() - 1;
+    nr = TERM_WINDOW_GET_ROWS() - 1;
 
     rect_beg.col = Pixel2Col(x);
     BOUND(rect_beg.col, 0, nc);
@@ -1500,8 +1500,8 @@ scr_move_to(int y, int len)
     int start;
 
     start = TermWin.view_start;
-    TermWin.view_start = ((len - y) * (TermWin.nrow - 1 + TermWin.nscrolled)
-                          / (len)) - (TermWin.nrow - 1);
+    TermWin.view_start = ((len - y) * (TERM_WINDOW_GET_REPORTED_ROWS() - 1 + TermWin.nscrolled)
+                          / (len)) - (TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     D_SCREEN(("scr_move_to(%d, %d) view_start:%d\n", y, len, TermWin.view_start));
 
     BOUND(TermWin.view_start, 0, TermWin.nscrolled);
@@ -1518,7 +1518,7 @@ scr_page(int direction, int nlines)
     D_SCREEN(("scr_page(%s, %d) view_start:%d\n", ((direction == UP) ? "UP" : "DN"), nlines, TermWin.view_start));
 
     start = TermWin.view_start;
-    BOUND(nlines, 1, TermWin.nrow);
+    BOUND(nlines, 1, TERM_WINDOW_GET_REPORTED_ROWS());
     TermWin.view_start += ((direction == UP) ? nlines : (-nlines));
     BOUND(TermWin.view_start, 0, TermWin.nscrolled);
     return (TermWin.view_start - start);
@@ -1550,7 +1550,7 @@ scr_printscreen(int fullhist)
 
     if ((fd = popen_printer()) == NULL)
         return;
-    nrows = TermWin.nrow;
+    nrows = TERM_WINDOW_GET_REPORTED_ROWS();
     if (fullhist) {
         /* Print the entire scrollback buffer.  Always start from the top and go all the way to the bottom. */
         nrows += TermWin.nscrolled;
@@ -1562,7 +1562,7 @@ scr_printscreen(int fullhist)
 
     for (r = 0; r < nrows; r++) {
         t = screen.text[r + row_offset];
-        for (i = TermWin.ncol - 1; i >= 0; i--)
+        for (i = TERM_WINDOW_GET_REPORTED_COLS() - 1; i >= 0; i--)
             if (!isspace(t[i]))
                 break;
         fprintf(fd, "%.*s\n", (i + 1), t);
@@ -1636,18 +1636,12 @@ scr_refresh(int type)
     int bfont = 0;              /* we've changed font to bold font           */
 #endif
 #ifdef OPTIMIZE_HACKS
-    register int nrows = TermWin.nrow;
-    register int ncols = TermWin.ncol;
+    register int nrows = TERM_WINDOW_GET_ROWS();
+    register int ncols = TERM_WINDOW_GET_COLS();
 #endif
     int ascent, descent;
 
     PROF_INIT(scr_refresh);
-
-#ifdef ESCREEN
-    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        nrows--;
-    }
-#endif
 
     switch (type) {
       case NO_REFRESH:
@@ -1681,8 +1675,8 @@ scr_refresh(int type)
     draw_string = XDrawString;
     draw_image_string = XDrawImageString;
 
-    BOUND(screen.row, 0, TermWin.nrow - 1);
-    BOUND(screen.col, 0, TermWin.ncol - 1);
+    BOUND(screen.row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
+    BOUND(screen.col, 0, TERM_WINDOW_GET_REPORTED_COLS() - 1);
 
     row = screen.row + TermWin.saveLines;
     col = screen.col;
@@ -2090,8 +2084,8 @@ scr_refresh(int type)
                     boldlast = 1;
                 }
             }
-        }                       /* for (col = 0; col < TermWin.ncol; col++) */
-    }                           /* for (row = 0; row < TermWin.nrow; row++) */
+        }                       /* for (col = 0; col < TERM_WINDOW_GET_REPORTED_COLS(); col++) */
+    }                           /* for (row = 0; row < TERM_WINDOW_GET_REPORTED_ROWS(); row++) */
 
     row = screen.row + TermWin.saveLines;
     col = screen.col;
@@ -2180,8 +2174,8 @@ scr_search_scrollback(char *str)
     } else {
         last_str = STRDUP(str);
     }
-    lrow = rows = TermWin.nrow + TermWin.saveLines;
-    cols = TermWin.ncol;
+    lrow = rows = TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines;
+    cols = TERM_WINDOW_GET_REPORTED_COLS();
     len = strlen(str);
 
     D_SCREEN(("%d, %d\n", rows, cols));
@@ -2227,7 +2221,7 @@ scr_search_scrollback(char *str)
         FREE(last_str);
     } else {
         if (lrow != rows) {
-            TermWin.view_start = rows - lrow - TermWin.nrow;
+            TermWin.view_start = rows - lrow - TERM_WINDOW_GET_REPORTED_ROWS();
             BOUND(TermWin.view_start, 0, TermWin.nscrolled);
             D_SCREEN(("New view start is %d\n", TermWin.view_start));
         }
@@ -2243,8 +2237,8 @@ scr_dump(void)
     unsigned int *i;
     unsigned long row, col, rows, cols;
 
-    rows = TermWin.nrow + TermWin.saveLines;
-    cols = TermWin.ncol;
+    rows = TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines;
+    cols = TERM_WINDOW_GET_REPORTED_COLS();
 
     D_SCREEN(("%d, %d\n", rows, cols));
     for (row = 0; row < rows; row++) {
@@ -2280,8 +2274,8 @@ scr_dump_to_file(const char *fname)
 
     REQUIRE(fname != NULL);
 
-    rows = TermWin.nrow + TermWin.saveLines;
-    cols = TermWin.ncol;
+    rows = TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines;
+    cols = TERM_WINDOW_GET_REPORTED_COLS();
     D_SCREEN(("Dumping to file \"%s\".  %d rows, %d cols\n", fname, rows, cols));
 
     /* Remove it if it's there.  If this fails, we don't
@@ -2329,11 +2323,11 @@ selection_check(void)
         return;
 
     if ((selection.mark.row < -TermWin.nscrolled)
-        || (selection.mark.row >= TermWin.nrow)
+        || (selection.mark.row >= TERM_WINDOW_GET_ROWS())
         || (selection.beg.row < -TermWin.nscrolled)
-        || (selection.beg.row >= TermWin.nrow)
+        || (selection.beg.row >= TERM_WINDOW_GET_ROWS())
         || (selection.end.row < -TermWin.nscrolled)
-        || (selection.end.row >= TermWin.nrow)) {
+        || (selection.end.row >= TERM_WINDOW_GET_ROWS())) {
         selection_reset();
         return;
     }
@@ -2533,8 +2527,8 @@ selection_reset(void)
 
     D_SELECT(("selection_reset()\n"));
 
-    lrow = TermWin.nrow + TermWin.saveLines;
-    lcol = TermWin.ncol;
+    lrow = TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines;
+    lcol = TERM_WINDOW_GET_REPORTED_COLS();
     selection.op = SELECTION_CLEAR;
 
     i = (current_screen == PRIMARY) ? 0 : TermWin.saveLines;
@@ -2569,16 +2563,16 @@ selection_setclr(int set, int startr, int startc, int endr, int endc)
 
     D_SELECT(("selection_setclr(%d) %s (%d,%d)-(%d,%d)\n", set, (set ? "set  " : "clear"), startc, startr, endc, endr));
 
-    if ((startr < -TermWin.nscrolled) || (endr >= TermWin.nrow)) {
+    if ((startr < -TermWin.nscrolled) || (endr >= TERM_WINDOW_GET_REPORTED_ROWS())) {
         selection_reset();
         return;
     }
-    last_col = TermWin.ncol - 1;
+    last_col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
 
     LOWER_BOUND(startc, 0);
     UPPER_BOUND(endc, last_col);
-    BOUND(startr, -TermWin.nscrolled, TermWin.nrow - 1);
-    BOUND(endr, -TermWin.nscrolled, TermWin.nrow - 1);
+    BOUND(startr, -TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
+    BOUND(endr, -TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 
     startr += TermWin.saveLines;
     endr += TermWin.saveLines;
@@ -2636,12 +2630,12 @@ selection_start_colrow(int col, int row)
             selection_setclr(0, selection.beg.row, selection.beg.col, selection.end.row, selection.end.col);
     }
     selection.op = SELECTION_INIT;
-    BOUND(row, 0, TermWin.nrow - 1);
+    BOUND(row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 
     row -= TermWin.view_start;
-    end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
+    end_col = screen.text[row + TermWin.saveLines][TERM_WINDOW_GET_REPORTED_COLS()];
     if (end_col != WRAP_CHAR && col > end_col)
-        col = TermWin.ncol;
+        col = TERM_WINDOW_GET_REPORTED_COLS();
     selection.mark.col = col;
     selection.mark.row = row;
 }
@@ -2678,11 +2672,11 @@ selection_make(Time tm)
     if (selection.clicks == 4)
         return;                 /* nothing selected, go away */
 
-    if (selection.beg.row < -TermWin.nscrolled || selection.end.row >= TermWin.nrow) {
+    if (selection.beg.row < -TermWin.nscrolled || selection.end.row >= TERM_WINDOW_GET_REPORTED_ROWS()) {
         selection_reset();
         return;
     }
-    i = (selection.end.row - selection.beg.row + 1) * (TermWin.ncol + 1) + 1;
+    i = (selection.end.row - selection.beg.row + 1) * (TERM_WINDOW_GET_REPORTED_COLS() + 1) + 1;
     str = MALLOC(i * sizeof(char));
     new_selection_text = (unsigned char *) str;
 
@@ -2694,12 +2688,12 @@ selection_make(Time tm)
  */
     for (; row < end_row; row++) {
         t = &(screen.text[row][col]);
-        if ((end_col = screen.text[row][TermWin.ncol]) == WRAP_CHAR)
-            end_col = TermWin.ncol;
+        if ((end_col = screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()]) == WRAP_CHAR)
+            end_col = TERM_WINDOW_GET_REPORTED_COLS();
         for (; col < end_col; col++)
             *str++ = *t++;
         col = 0;
-        if (screen.text[row][TermWin.ncol] != WRAP_CHAR) {
+        if (screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] != WRAP_CHAR) {
             if (!(Options & Opt_select_trailing_spaces)) {
                 for (str--; *str == ' ' || *str == '\t'; str--);
                 str++;
@@ -2711,13 +2705,13 @@ selection_make(Time tm)
  * B: end row
  */
     t = &(screen.text[row][col]);
-    end_col = screen.text[row][TermWin.ncol];
+    end_col = screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()];
     if (end_col == WRAP_CHAR || selection.end.col <= end_col) {
         i = 0;
         end_col = selection.end.col + 1;
     } else
         i = 1;
-    UPPER_BOUND(end_col, TermWin.ncol);
+    UPPER_BOUND(end_col, TERM_WINDOW_GET_REPORTED_COLS());
     for (; col < end_col; col++)
         *str++ = *t++;
     if (!(Options & Opt_select_trailing_spaces)) {
@@ -2801,10 +2795,10 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
     if (!screen.text || !screen.rend)
         return;
 
-    last_col = TermWin.ncol - 1;
+    last_col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
 
-    if (row >= TermWin.nrow) {
-        row = TermWin.nrow - 1;
+    if (row >= TERM_WINDOW_GET_REPORTED_ROWS()) {
+        row = TERM_WINDOW_GET_REPORTED_ROWS() - 1;
         col = last_col;
     } else if (row < -TermWin.saveLines) {
         row = -TermWin.saveLines;
@@ -2930,7 +2924,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
                 }
             }
         }
-        if (end_col == last_col && (end_row < (TermWin.nrow - 1))) {
+        if (end_col == last_col && (end_row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1))) {
             if (*++stp == WRAP_CHAR) {
                 stp = screen.text[end_row + row_offset + 1];
 #ifdef MULTI_CHARSET
@@ -2976,7 +2970,7 @@ selection_extend(int x, int y, int flag)
  */
     col = Pixel2Col(x);
     row = Pixel2Row(y);
-    BOUND(row, 0, TermWin.nrow - 1);
+    BOUND(row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     if (((selection.clicks % 3) == 1) && !flag && (col == selection.mark.col && (row == selection.mark.row + TermWin.view_start))) {
         /* select nothing */
         selection_setclr(0, selection.beg.row, selection.beg.col, selection.end.row, selection.end.col);
@@ -3036,7 +3030,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
         return;
     }
     old_col = col;
-    BOUND(col, -1, TermWin.ncol);
+    BOUND(col, -1, TERM_WINDOW_GET_REPORTED_COLS());
     old_beg.col = selection.beg.col;
     old_beg.row = selection.beg.row;
     old_end.col = selection.end.col;
@@ -3053,9 +3047,9 @@ selection_extend_colrow(int col, int row, int flag, int cont)
         else if (row > selection.end.row || (row == selection.end.row && col >= selection.end.col)) {
             /* */ ;
         } else if (((col - selection.beg.col)
-                    + ((row - selection.beg.row) * TermWin.ncol))
+                    + ((row - selection.beg.row) * TERM_WINDOW_GET_REPORTED_COLS()))
                    < ((selection.end.col - col)
-                      + ((selection.end.row - row) * TermWin.ncol)))
+                      + ((selection.end.row - row) * TERM_WINDOW_GET_REPORTED_COLS())))
             closeto = LEFT;
     }
     if (selection.clicks == 1) {
@@ -3066,7 +3060,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             if (closeto == LEFT) {
                 selection.beg.row = row;
                 selection.beg.col = col;
-                end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
+                end_col = screen.text[row + TermWin.saveLines][TERM_WINDOW_GET_REPORTED_COLS()];
                 if (end_col != WRAP_CHAR && selection.beg.col > end_col) {
                     if (selection.beg.row < selection.end.row) {
                         selection.beg.col = -1;
@@ -3079,9 +3073,9 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             } else {
                 selection.end.row = row;
                 selection.end.col = col - 1;
-                end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
+                end_col = screen.text[row + TermWin.saveLines][TERM_WINDOW_GET_REPORTED_COLS()];
                 if (end_col != WRAP_CHAR && selection.end.col >= end_col)
-                    selection.end.col = TermWin.ncol - 1;
+                    selection.end.col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
             }
         } else if ((row < selection.mark.row)
                    || (row == selection.mark.row && col < selection.mark.col)) {
@@ -3091,7 +3085,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             selection.end.row = selection.mark.row;
             selection.end.col = selection.mark.col - 1;
             if (selection.end.col >= 0) {
-                end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
+                end_col = screen.text[row + TermWin.saveLines][TERM_WINDOW_GET_REPORTED_COLS()];
                 if (end_col != WRAP_CHAR && selection.beg.col > end_col) {
                     if (selection.beg.row < selection.end.row) {
                         selection.beg.col = -1;
@@ -3109,19 +3103,19 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             selection.end.row = row;
             selection.end.col = col - 1;
             if (old_col >= 0) {
-                end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
+                end_col = screen.text[row + TermWin.saveLines][TERM_WINDOW_GET_REPORTED_COLS()];
                 if (end_col != WRAP_CHAR && selection.end.col >= end_col)
-                    selection.end.col = TermWin.ncol - 1;
+                    selection.end.col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
             }
         }
 #ifdef MULTI_CHARSET
-        if ((selection.beg.col > 0) && (selection.beg.col < TermWin.ncol)) {
+        if ((selection.beg.col > 0) && (selection.beg.col < TERM_WINDOW_GET_REPORTED_COLS())) {
             r = selection.beg.row + TermWin.saveLines;
             if (((screen.rend[r][selection.beg.col] & RS_multiMask) == RS_multi2)
                 && ((screen.rend[r][selection.beg.col - 1] & RS_multiMask) == RS_multi1))
                 selection.beg.col--;
         }
-        if ((selection.end.col > 0) && (selection.end.col < (TermWin.ncol - 1))) {
+        if ((selection.end.col > 0) && (selection.end.col < (TERM_WINDOW_GET_REPORTED_COLS() - 1))) {
             r = selection.end.row + TermWin.saveLines;
             if (((screen.rend[r][selection.end.col] & RS_multiMask) == RS_multi1)
                 && ((screen.rend[r][selection.end.col + 1] & RS_multiMask) == RS_multi2))
@@ -3175,7 +3169,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             selection.beg.col = new_beg2.col;
             selection.clicks = 3;
         }
-        selection.end.col = TermWin.ncol - 1;
+        selection.end.col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
     }
     D_SELECT(("(c:%d,r:%d)-(c:%d,r:%d) old (c:%d,r:%d)-(c:%d,r:%d)\n", selection.beg.col, selection.beg.row,
               selection.end.col, selection.end.row, old_beg.col, old_beg.row, old_end.col, old_end.row));
@@ -3184,7 +3178,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
  * B1: clear anything before the current selection
  */
     if ((old_beg.row < selection.beg.row) || (old_beg.row == selection.beg.row && old_beg.col < selection.beg.col)) {
-        if (selection.beg.col < TermWin.ncol - 1) {
+        if (selection.beg.col < TERM_WINDOW_GET_REPORTED_COLS() - 1) {
             row = selection.beg.row;
             col = selection.beg.col + 1;
         } else {
@@ -3202,7 +3196,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             col = selection.end.col - 1;
         } else {
             row = selection.end.row - 1;
-            col = TermWin.ncol - 1;
+            col = TERM_WINDOW_GET_REPORTED_COLS() - 1;
         }
         selection_setclr(0, row, col, old_end.row, old_end.col);
     }
@@ -3391,7 +3385,8 @@ xim_get_position(XPoint * pos)
 void
 parse_screen_status_if_necessary(void)
 {
-    ns_parse_screen(TermWin.screen, (TermWin.screen_pending > 1), TermWin.ncol, screen.text[TermWin.nrow + TermWin.saveLines - 1]);
+    ns_parse_screen(TermWin.screen, (TermWin.screen_pending > 1),
+                    TERM_WINDOW_GET_REPORTED_COLS(), screen.text[TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines - 1]);
     if (TermWin.screen_pending > 1)
         TermWin.screen_pending = 0;
 }

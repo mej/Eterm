@@ -62,14 +62,32 @@
 #define TermWin_TotalWidth()    (TermWin.width  + 2 * TermWin.internalBorder)
 #define TermWin_TotalHeight()   (TermWin.height + 2 * TermWin.internalBorder)
 
-#define Xscreen		DefaultScreen(Xdisplay)
-#define Xcmap			DefaultColormap(Xdisplay,Xscreen)
-#define Xdepth			DefaultDepth(Xdisplay,Xscreen)
-#define Xroot			DefaultRootWindow(Xdisplay)
-#define Xvisual		DefaultVisual(Xdisplay, Xscreen)
+#define TERM_WINDOW_FULL_WIDTH()           (TermWin.width  + 2 * TermWin.internalBorder)
+#define TERM_WINDOW_FULL_HEIGHT()          (TermWin.height + 2 * TermWin.internalBorder)
+#define TERM_WINDOW_GET_WIDTH()            (TermWin.width)
+#define TERM_WINDOW_GET_HEIGHT()           (TermWin.height)
+#define TERM_WINDOW_SET_WIDTH()            (TermWin.width = TERM_WINDOW_GET_COLS() * TermWin.fwidth)
+#define TERM_WINDOW_SET_HEIGHT()           (TermWin.height = TERM_WINDOW_GET_ROWS() * TermWin.fheight)
+#define TERM_WINDOW_GET_REPORTED_ROWS()    (TermWin.nrow)
+#define TERM_WINDOW_GET_REPORTED_COLS()    (TermWin.ncol)
+#define TERM_WINDOW_GET_COLS()             (TermWin.ncol)
+#define TERM_WINDOW_SET_COLS(c)            (TermWin.ncol = (c))
+#ifdef ESCREEN
+#  define TERM_WINDOW_GET_ROWS()           (NS_MAGIC_LINE(TermWin.screen_mode) ? TermWin.nrow - 1 : TermWin.nrow)
+#  define TERM_WINDOW_SET_ROWS(r)          (TermWin.nrow = (NS_MAGIC_LINE(TermWin.screen_mode) ? (r + 1) : (r)))
+#else
+#  define TERM_WINDOW_GET_ROWS()           (TermWin.nrow)
+#  define TERM_WINDOW_SET_ROWS(r)          (TermWin.nrow = (r))
+#endif
+
+#define Xscreen                 DefaultScreen(Xdisplay)
+#define Xcmap                   DefaultColormap(Xdisplay, Xscreen)
+#define Xroot                   DefaultRootWindow(Xdisplay)
+#define Xvisual                 DefaultVisual(Xdisplay, Xscreen)
 #ifdef DEBUG_DEPTH
-# undef Xdepth
-# define Xdepth		DEBUG_DEPTH
+#  define Xdepth                DEBUG_DEPTH
+#else
+#  define Xdepth                DefaultDepth(Xdisplay, Xscreen)
 #endif
 
 enum {

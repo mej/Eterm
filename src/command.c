@@ -1811,8 +1811,8 @@ xim_set_size(XRectangle * size)
 {
     size->x = TermWin.internalBorder;
     size->y = TermWin.internalBorder + bbar_calc_docked_height(BBAR_DOCKED_TOP);
-    size->width = Width2Pixel(TermWin.ncol);
-    size->height = Height2Pixel(TermWin.nrow);
+    size->width = Width2Pixel(TERM_WINDOW_GET_COLS());
+    size->height = Height2Pixel(TERM_WINDOW_GET_ROWS());
 }
 
 static void
@@ -1849,15 +1849,15 @@ static void
 xim_get_area(XRectangle * preedit_rect, XRectangle * status_rect, XRectangle * needed_rect)
 {
     preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
-    preedit_rect->y = Height2Pixel(TermWin.nrow - 1);
+    preedit_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
-    preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
+    preedit_rect->width = Width2Pixel(TERM_WINDOW_GET_COLS() + 1) - needed_rect->width + (!(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
     preedit_rect->height = Height2Pixel(1);
 
     status_rect->x = (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) ? (scrollbar_trough_width()) : 0;
-    status_rect->y = Height2Pixel(TermWin.nrow - 1);
+    status_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
-    status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TermWin.ncol + 1);
+    status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TERM_WINDOW_GET_COLS() + 1);
     status_rect->height = Height2Pixel(1);
 }
 
@@ -2180,10 +2180,12 @@ run_command(char **argv)
         unsetenv("COLUMNS");
         unsetenv("TERMCAP");
 #endif
+
         DEBUG_LEVEL = 0;
 
         get_tty();
         SET_TTYMODE(0, &tio);
+        tt_winsize(0);
 
         /* become virtual console, fail silently */
         if (Options & Opt_console) {
@@ -2201,7 +2203,6 @@ run_command(char **argv)
 #endif /* SRIOCSREDIR */
             privileges(REVERT);
         }
-        tt_winsize(0);          /* set window size */
 
         /* Permanently revoke all privileges for the child process.  
            Root shells for everyone are tres uncool.... ;^) -- mej */
@@ -2591,7 +2592,7 @@ direct_write_screen(int x, int y, char *fg, rend_t bg)
 
     REQUIRE(fg);
 
-    while (*fg && (x >= 0) && (x < TermWin.ncol)) {
+    while (*fg && (x >= 0) && (x < TERM_WINDOW_GET_REPORTED_COLS())) {
         t[x] = *(fg++);
         r[x++] = bg & DIRECT_MASK;
     }
@@ -2604,11 +2605,11 @@ bosconian(int n)
     int ys = TermWin.saveLines - TermWin.view_start;
 
     for (; n != 0; n--) {
-        for (y = 0; y < TermWin.nrow; y++) {
+        for (y = 0; y < TERM_WINDOW_GET_ROWS(); y++) {
             text_t *t = screen.text[ys + y];
             rend_t *r = screen.rend[ys + y];
 
-            for (x = 0; x < TermWin.ncol; x++) {
+            for (x = 0; x < TERM_WINDOW_GET_COLS(); x++) {
                 t[x] = random() & 0xff;
                 r[x] = random() & COLOUR_MASK;
             }
@@ -2626,21 +2627,21 @@ unbosconian(void)
 
     do {
         bg = CLEAR;
-        for (y = 0; (bg == CLEAR) && y < TermWin.nrow; y++) {
+        for (y = 0; (bg == CLEAR) && y < TERM_WINDOW_GET_ROWS(); y++) {
             rend_t *r = screen.rend[ys + y];
 
-            for (x = 0; (bg == CLEAR) && x < TermWin.ncol; x++) {
+            for (x = 0; (bg == CLEAR) && x < TERM_WINDOW_GET_COLS(); x++) {
                 if (r[x] != CLEAR) {
                     bg = r[x];
                 }
             }
         }
         if (bg != CLEAR) {
-            for (y = 0; y < TermWin.nrow; y++) {
+            for (y = 0; y < TERM_WINDOW_GET_ROWS(); y++) {
                 text_t *t = screen.text[ys + y];
                 rend_t *r = screen.rend[ys + y];
 
-                for (x = 0; x < TermWin.ncol; x++) {
+                for (x = 0; x < TERM_WINDOW_GET_COLS(); x++) {
                     if (r[x] == bg) {
                         r[x] = CLEAR;
                         t[x] = ' ';
@@ -2661,7 +2662,7 @@ matrix(int n)
 {
     int x, y, w, f;
     int ys = TermWin.saveLines - TermWin.view_start;
-    text_t *s = MALLOC(TermWin.ncol);
+    text_t *s = MALLOC(TERM_WINDOW_GET_COLS());
     text_t *t, *t2;
     rend_t *r, *r2;
 
@@ -2670,12 +2671,12 @@ matrix(int n)
         return;
     }
 
-    MEMSET(s, 0, TermWin.ncol);
+    MEMSET(s, 0, TERM_WINDOW_GET_COLS());
 #define MATRIX_HI CLEAR
 #define MATRIX_LO ((4<<8)|CLEAR)
 
     while (n--) {
-        for (x = 0; x < TermWin.ncol; x++) {
+        for (x = 0; x < TERM_WINDOW_GET_COLS(); x++) {
             if (!(random() & 3)) {
                 if ((y = s[x])) {
                     w = random() & 15;
@@ -2702,7 +2703,7 @@ matrix(int n)
                   case 2:
                   case 3:
                       for (f = random() & 7; f != 0; f--) {
-                          if (y < TermWin.nrow - 1) {
+                          if (y < TERM_WINDOW_GET_ROWS() - 1) {
                               t2 = screen.text[ys + y + 1];
                               r2 = screen.rend[ys + y + 1];
                               t2[x] = t[x];
@@ -2918,7 +2919,7 @@ escreen_init(char **argv)
             buttonbar = bbar;
         }
         bbar_set_font(bbar, "-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1");
-        bbar_init(bbar, TermWin.width);
+        bbar_init(bbar, TERM_WINDOW_GET_WIDTH());
         bbar_add(bbar);
     }
 
@@ -3004,13 +3005,14 @@ tt_winsize(int fd)
 
     MEMSET(&ws, 0, sizeof(struct winsize));
 
-    ws.ws_row = (unsigned short) TermWin.nrow;
-    ws.ws_col = (unsigned short) TermWin.ncol;
+    ws.ws_row = (unsigned short) TERM_WINDOW_GET_REPORTED_ROWS();
+    ws.ws_col = (unsigned short) TERM_WINDOW_GET_REPORTED_COLS();
 #ifndef __CYGWIN32__
-    ws.ws_xpixel = (unsigned short) TermWin.width;
-    ws.ws_ypixel = (unsigned short) TermWin.height;
+    ws.ws_xpixel = (unsigned short) TERM_WINDOW_GET_WIDTH();
+    ws.ws_ypixel = (unsigned short) TERM_WINDOW_GET_HEIGHT();
 #endif
-    D_CMD(("%hdx%hd (%hdx%hd)\n", ws.ws_row, ws.ws_col, ws.ws_xpixel, ws.ws_ypixel));
+    D_CMD(("Sending TIOCSWINSZ to fd %d:  %hdx%hd (%hdx%hd)\n",
+           fd, ws.ws_row, ws.ws_col, ws.ws_xpixel, ws.ws_ypixel));
     ioctl(fd, TIOCSWINSZ, &ws);
 }
 
@@ -3131,7 +3133,7 @@ cmd_getc(void)
      * refreshing should be correct for small scrolls, because of the
      * time-out
      */
-    if (refresh_count >= (refresh_limit * (TermWin.nrow - 1))) {
+    if (refresh_count >= (refresh_limit * (TERM_WINDOW_GET_ROWS() - 1))) {
         D_CMD(("Refresh count %d >= limit %d * rows.  (Refresh period %d.)\n", refresh_count, refresh_limit, REFRESH_PERIOD));
         if (refresh_limit < REFRESH_PERIOD)
             refresh_limit++;
@@ -3434,7 +3436,7 @@ main_loop(void)
                     /* nothing */
                 } else if (ch == '\n') {
                     nlines++;
-                    if (++refresh_count >= (refresh_limit * (TermWin.nrow - 1)))
+                    if (++refresh_count >= (refresh_limit * (TERM_WINDOW_GET_ROWS() - 1)))
                         break;
                 } else {        /* unprintable */
                     cmdbuf_ptr--;
