@@ -52,7 +52,7 @@ typedef struct memrec_struct {
 #else
 #  define MALLOC(sz)		malloc(sz)
 #  define CALLOC(type,n)	calloc((n),(sizeof(type)))
-#  define REALLOC(mem,sz)	((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem)) : (NULL)))
+#  define REALLOC(mem,sz)	((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem), NULL) : (NULL)))
 #  define FREE(ptr)		do { free(ptr); (ptr) = NULL; } while (0)
 #endif
 

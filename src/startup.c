@@ -141,7 +141,7 @@ eterm_bootstrap(int argc, char *argv[])
   /* Initialize the parser */
   conf_init_subsystem();
 
-  if ((theme_dir = conf_parse_theme(rs_theme, THEME_CFG, 1)) != NULL) {
+  if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
     char *tmp;
 
     D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
@@ -149,7 +149,8 @@ eterm_bootstrap(int argc, char *argv[])
     sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
     putenv(tmp);
   }
-  if ((user_dir = conf_parse_theme(rs_theme, (rs_config_file ? rs_config_file : USER_CFG), 0)) != NULL) {
+  if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), 
+				   (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
     char *tmp;
 
     D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));

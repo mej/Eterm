@@ -42,7 +42,7 @@ static const char cvs_ident[] = "$Id$";
 #include "misc.h"
 #include "system.h"
 
-static sighandler_t old_handler = (sighandler_t) NULL;
+/*static sighandler_t old_handler = (sighandler_t) NULL;*/
 
 int
 wait_for_chld(int system_pid)

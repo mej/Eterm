@@ -38,6 +38,11 @@
 #define CONF_BEGIN_CHAR                 ((char) 1)
 #define CONF_END_CHAR                   ((char) 2)
 
+#define PARSE_TRY_USER_THEME            ((unsigned char) 0x01)
+#define PARSE_TRY_DEFAULT_THEME         ((unsigned char) 0x02)
+#define PARSE_TRY_NO_THEME              ((unsigned char) 0x04)
+#define PARSE_TRY_ALL                   ((unsigned char) 0x07)
+
 #define OPT_BOOLEAN                     0x0001
 #define OPT_INTEGER                     0x0002
 #define OPT_STRING                      0x0004
@@ -257,7 +262,7 @@ extern char *shell_expand(char *);
 extern char *conf_find_file(const char *file, const char *dir, const char *pathlist);
 extern FILE *open_config_file(char *name);
 extern char *conf_parse(char *conf_name, const char *dir, const char *path);
-extern char *conf_parse_theme(char *theme, char *conf_name, unsigned char fallback);
+extern char *conf_parse_theme(char **theme, char *conf_name, unsigned char fallback);
 extern void init_defaults(void);
 extern void post_parse(void);
 unsigned char save_config(char *, unsigned char);

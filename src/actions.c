@@ -70,10 +70,34 @@ action_handle_echo(event_t *ev, action_t *action) {
 }
 
 unsigned char
+action_handle_function(event_t *ev, action_t *action) {
+  REQUIRE_RVAL(action->param.string != NULL, 0);
+  /* To be continued....  :-) */
+  return 1;
+  ev = NULL;
+}
+
+unsigned char
 action_handle_menu(event_t *ev, action_t *action) {
   REQUIRE_RVAL(action->param.menu != NULL, 0);
   menu_invoke(ev->xbutton.x, ev->xbutton.y, TermWin.parent, action->param.menu, ev->xbutton.time);
   return 1;
+}
+
+action_t *
+action_find_match(unsigned short mod, unsigned char button, KeySym keysym) {
+
+  action_t *action;
+
+  D_ACTIONS(("mod == 0x%08x, button == %d, keysym == 0x%08x\n", mod, button, keysym));
+  for (action = action_list; action; action = action->next) {
+    D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
+    if ((action->mod == mod) && (action->button == button) && (action->keysym == keysym)) {
+      D_ACTIONS(("Match found at %8p\n", action));
+      return action;
+    }
+  }
+  return NULL;
 }
 
 unsigned char
@@ -141,14 +165,18 @@ action_dispatch(event_t *ev, KeySym keysym) {
 void
 action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_t type, void *param) {
 
-  static action_t *action;
+  action_t *action;
 
-  if (!action_list) {
-    action_list = (action_t *) MALLOC(sizeof(action_t));
-    action = action_list;
+  if (!action_list || (action = action_find_match(mod, button, keysym)) == NULL) {
+    action = (action_t *) MALLOC(sizeof(action_t));
+    action->next = action_list;
+    action_list = action;
   } else {
-    action->next = (action_t *) MALLOC(sizeof(action_t));
-    action = action->next;
+    if (action->type == ACTION_STRING || action->type == ACTION_ECHO || action->type == ACTION_FUNCTION) {
+      if (action->param.string) {
+	FREE(action->param.string);
+      }
+    }
   }
   action->mod = mod;
   action->button = button;
@@ -167,6 +195,12 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
       strcpy(action->param.string, (char *) param);
       parse_escaped_string(action->param.string);
       break;
+    case ACTION_FUNCTION:
+      action->handler = (action_handler_t) action_handle_function;
+      action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
+      strcpy(action->param.string, (char *) param);
+      parse_escaped_string(action->param.string);
+      break;
     case ACTION_MENU:
       action->handler = (action_handler_t) action_handle_menu;
       action->param.menu = (menu_t *) param;
@@ -174,7 +208,6 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
     default:
       break;
   }
-  action->next = NULL;
   D_ACTIONS(("Added action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
 }
 

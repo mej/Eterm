@@ -3724,3 +3724,22 @@ Wed Jun 28 14:14:53 PDT 2000	Michael Jennings <mej@eterm.org>
 	screwed.  Fixed now.
 	
 -------------------------------------------------------------------------------
+Mon Jul  3 12:17:53 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Marius Gedminas <mgedmin@takas.lt> reported a couple of issues back
+	when he was on his bug-spotting binge that I didn't have time to fix
+	just then.  Well, now I've fixed them.  ~/.Eterm/user.cfg will now
+	be found if there isn't a theme-specific one; this allows you to have
+	a single user.cfg which specifies some options you want all your
+	Eterms to have.
+
+	Along those same lines, the action code now searches for duplicate
+	bindings and changes the existing one rather than adding a new one
+	to the end of the list.  This allows bindings in user.cfg to override
+	those in theme.cfg (as they should).  Also, bindings are added in
+	reverse order, so newer ones (like in user.cfg) take precedence over
+	older ones (like in theme.cfg) if there is a conflict (e.g., if your
+	theme.cfg binds "anymod button2" and user.cfg binds "ctrl button2,"
+	user.cfg wins).
+	
+-------------------------------------------------------------------------------

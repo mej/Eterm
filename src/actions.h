@@ -35,6 +35,7 @@ typedef enum {
   ACTION_NONE = 0,
   ACTION_STRING,
   ACTION_ECHO,
+  ACTION_FUNCTION,
   ACTION_MENU
 } action_type_t;
 
@@ -82,7 +83,9 @@ _XFUNCPROTOBEGIN
 
 extern unsigned char action_handle_string(event_t *ev, action_t *action);
 extern unsigned char action_handle_echo(event_t *ev, action_t *action);
+extern unsigned char action_handle_function(event_t *ev, action_t *action);
 extern unsigned char action_handle_menu(event_t *ev, action_t *action);
+extern action_t *action_find_match(unsigned short mod, unsigned char button, KeySym keysym);
 extern unsigned char action_dispatch(event_t *ev, KeySym keysym);
 extern void action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_t type, void *param);
 

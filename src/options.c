@@ -3365,6 +3365,7 @@ open_config_file(char *name)
   if (fp != NULL) {
     fgets(buff, 256, fp);
     if (BEG_STRCASECMP(buff, "<" PACKAGE "-")) {
+      print_warning("%s exists but does not contain the proper magic string (<" PACKAGE "-" VERSION ">)\n", name);
       fclose(fp);
       fp = NULL;
     } else {
@@ -3524,7 +3525,7 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
 }
 
 char *
-conf_parse_theme(char *theme, char *conf_name, unsigned char fallback)
+conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
 {
   static char path[CONFIG_BUFF];
   char *ret = NULL;
@@ -3541,16 +3542,22 @@ conf_parse_theme(char *theme, char *conf_name, unsigned char fallback)
     }
     shell_expand(path);
   }
-  if (!theme || (ret = conf_parse(conf_name, rs_theme, path)) == NULL) {
-    if (fallback) {
-      RESET_AND_ASSIGN(rs_theme, StrDup(PACKAGE));
-      if ((ret = conf_parse(conf_name, rs_theme, path)) == NULL) {
-        RESET_AND_ASSIGN(rs_theme, NULL);
-        ret = conf_parse(conf_name, rs_theme, path);
-      }
+  if (fallback & PARSE_TRY_USER_THEME) {
+    if (theme && *theme && (ret = conf_parse(conf_name, *theme, path)) != NULL) {
+      return ret;
     }
   }
-  return ret;
+  if (fallback & PARSE_TRY_DEFAULT_THEME) {
+    RESET_AND_ASSIGN(*theme, StrDup(PACKAGE));
+    if ((ret = conf_parse(conf_name, *theme, path)) != NULL) {
+      return ret;
+    }
+  }
+  if (fallback & PARSE_TRY_NO_THEME) {
+    RESET_AND_ASSIGN(*theme, NULL);
+    return (conf_parse(conf_name, *theme, path));
+  }
+  return NULL;
 }
 
 static void *

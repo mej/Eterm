@@ -172,15 +172,16 @@ extern unsigned int debug_level;
 #  define DEBUG_COLORS			3
 #  define D_COLORS(x)			DPRINTF3(x)
  
-#  define DEBUG_MALLOC			4
-#  define D_MALLOC(x)			DPRINTF4(x)
 #  define DEBUG_ACTIONS			4
 #  define D_ACTIONS(x)			DPRINTF4(x)
-#  define DEBUG_PROFILE			4
-#  define D_PROFILE(x)			DPRINTF4(x)
 
-#  define DEBUG_VT                      5
-#  define D_VT(x)                       DPRINTF5(x)
+#  define DEBUG_MALLOC			5
+#  define D_MALLOC(x)			DPRINTF5(x)
+#  define DEBUG_PROFILE			5
+#  define D_PROFILE(x)			DPRINTF5(x)
+
+#  define DEBUG_VT                      6
+#  define D_VT(x)                       DPRINTF6(x)
 
 #  define DEBUG_X			9
 
