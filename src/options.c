@@ -91,6 +91,7 @@ static eterm_func_t *builtins;
 static unsigned char ctx_cnt, ctx_idx, ctx_state_idx, ctx_state_cnt, fstate_cnt, builtin_cnt, builtin_idx;
 static conf_var_t *conf_vars = NULL;
 static char *rs_pipe_name = NULL;
+static int rs_shade = 0, rs_tint = -1;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -263,6 +264,8 @@ static const struct {
       OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &image_toggles, IMOPT_TRANS),
       OPT_BOOL('0', "itrans", "use immotile-optimized transparency", &image_toggles, IMOPT_ITRANS),
       OPT_BLONG("viewport-mode", "use viewport mode for the background image", &image_toggles, IMOPT_VIEWPORT),
+      OPT_ILONG("shade", "old-style shade percentage (deprecated)", &rs_shade),
+      OPT_ILONG("tint", "old-style tint mask (deprecated)", &rs_tint),
       OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
       OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
       OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
@@ -3790,6 +3793,33 @@ post_parse(void)
   /* Update buttonbar sizes based on new imageclass info. */
   bbar_resize_all(-1);
 
+  /* Support the deprecated forms by converting the syntax to the new system */
+  if (rs_shade != 0) {
+    char buff[10];
+
+    sprintf(buff, "0x%03x", ((100 - rs_shade) << 8) / 100);
+    rs_cmod_image = StrDup(buff);
+  }
+  if (rs_tint >= 0) {
+    char buff[10];
+    int r, g, b;
+
+    r = (rs_tint & 0xff0000) >> 16;
+    if (r != 0xff) {
+      sprintf(buff, "0x%03x", r);
+      rs_cmod_red = StrDup(buff);
+    }
+    g = (rs_tint & 0xff00) >> 8;
+    if (g != 0xff) {
+      sprintf(buff, "0x%03x", g);
+      rs_cmod_green = StrDup(buff);
+    }
+    b = rs_tint & 0xff;
+    if (b != 0xff) {
+      sprintf(buff, "0x%03x", b);
+      rs_cmod_blue = StrDup(buff);
+    }
+  }
   if (rs_cmod_image) {
     unsigned char n = NumWords(rs_cmod_image);
     imlib_t *iml = images[image_bg].norm->iml;
