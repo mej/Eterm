@@ -1374,10 +1374,12 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
         if (!(sess->sysrc = STRDUP(getenv("SCREENRC"))))
             goto fail;
     } else {
-        char *loc[] = { "/usr/local/etc/screenrc",      /* official */
-            "/etc/screenrc",    /* actual (on SuSE) */
-            "/usr/etc/screenrc",
-            "/opt/etc/screenrc"
+        char *loc[] = {
+          "/usr/local/etc/screenrc",      /* official */
+          "/etc/screenrc",    /* actual (on SuSE) */
+          "/usr/etc/screenrc",
+          "/opt/etc/screenrc",
+          "/etc/screen/screenrc"
         };
         int n, nloc = sizeof(loc) / sizeof(char *);
 

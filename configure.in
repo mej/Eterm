@@ -387,11 +387,7 @@ AC_ARG_ENABLE(etwin,
             fi], AC_MSG_RESULT(no)
 )
 
-if test ! -z "FOUND_$SCREEN" || ! -z "$FOUND_LIBTWIN"; then
-  AC_DEFINE(ESCREEN)
-fi
-
-if test ! -z "FOUND_$SCREEN" || ! -z "$FOUND_LIBTWIN"; then
+if test ! -z "$FOUND_SCREEN" || ! -z "$FOUND_LIBTWIN"; then
   AC_DEFINE(ESCREEN)
 fi
 

@@ -4912,3 +4912,9 @@ Mon Nov  4 17:33:00 2002                        Michael Jennings (mej)
 
 Let's try that again, shall we?
 ----------------------------------------------------------------------
+Thu Nov  7 12:37:08 2002                        Michael Jennings (mej)
+
+Fixed typo in configure.in that caused ESCREEN to always be defined.
+
+Added support for /etc/screen/screenrc, as it is on gentoo.
+----------------------------------------------------------------------
