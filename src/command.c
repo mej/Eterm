@@ -1045,15 +1045,16 @@ handle_child_signal(int sig)
     /* If the child that exited is the command we spawned, or if the
        child exited before fork() returned in the parent, it must be
        our immediate child that exited.  We exit gracefully. */
-    if ((pid == cmd_pid && cmd_pid != -1)
-        || (pid == -1 && errno == ECHILD && cmd_pid != -1)
-        || (pid == 0)) {
+    if (((pid == cmd_pid) && (cmd_pid != -1))
+        || ((pid == -1) && (errno == ECHILD) && (cmd_pid != -1))
+        || ((pid == 0) && (cmd_pid != -1) && ((kill(cmd_pid, 0)) < 0))) {
         if (Options & Opt_pause) {
             paused = 1;
             return;
         }
         exit(EXIT_SUCCESS);
     }
+
     errno = save_errno;
 
     D_CMD(("handle_child_signal: installing signal handler\n"));

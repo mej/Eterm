@@ -1062,7 +1062,7 @@ ns_attach_ssh(_ns_sess ** sp)
 {
     _ns_sess *sess;
     char cmd[NS_MAXCMD + 1];
-    char esc[] = " -e^___";
+    char esc[] = " -e^\0\0\0";
     char *call, *p;
     int ret;
 

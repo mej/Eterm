@@ -4751,3 +4751,15 @@ Fri Jun 28 17:02:57 2002                        Michael Jennings (mej)
 
 One too many....
 ----------------------------------------------------------------------
+Wed Jul  3 13:49:27 2002                        Michael Jennings (mej)
+
+Fixed a bug in libscream that caused remote screen sessions to be
+resumed with, e.g., "-e ^Uu_" instead of "-e ^Uu".
+
+Applied a bug fix from Bill Allombert <allomber@math.u-bordeaux.fr>
+where I was using the wrong variable for loading the icon file from
+disk.
+
+Also fixed a problem where PrintScreen would cause Eterm to exit.
+Pointed out by Laurence J. Lane <ljlane@debian.org>.
+----------------------------------------------------------------------

@@ -2151,9 +2151,9 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
             XIconSize *icon_sizes;
             int count, i;
 
-            temp_im = imlib_load_image_with_error_return(filename, &im_err);
+            temp_im = imlib_load_image_with_error_return(icon_path, &im_err);
             if (temp_im == NULL) {
-                print_error("Unable to load icon file \"%s\" -- %s\n", filename, imlib_strerror(im_err));
+                print_error("Unable to load icon file \"%s\" -- %s\n", icon_path, imlib_strerror(im_err));
             } else {
                 /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
                 if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {
