@@ -76,7 +76,8 @@ eterm_bootstrap(int argc, char *argv[])
 
     int i;
     char *val;
-    static char windowid_string[20], *display_string, *term_string;     /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+    /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+    static char windowid_string[20], *display_string, *term_string;
 
     orig_argv0 = argv[0];
 
@@ -310,6 +311,19 @@ eterm_bootstrap(int argc, char *argv[])
         putenv("COLORTERM_BCE=" COLORTERMENV);
     }
     putenv("ETERM_VERSION=" VERSION);
+
+#ifdef NO_UTF8_LOCALE
+    /* Check locale for UTF-8 and deactivate if needed. */
+    val = getenv("LANG");
+    if (val && *val) {
+        char *tmp;
+
+        tmp = strcasestr(val, ".utf");
+        if (tmp) {
+            *tmp = 0;
+        }
+    }
+#endif
 
     D_CMD(("init_command()\n"));
     init_command(rs_exec_args);

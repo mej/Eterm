@@ -201,6 +201,9 @@
 /* Allow option/attribute for Meta to set the 8th bit */
 #define META8_OPTION
 
+/* Attempt to deactivate UTF-8 and similar locales. */
+#define NO_UTF8_LOCALE
+
 /********************* Miscellaneous options *********************/
 
 /* To have $DISPLAY and the "\E[7n" response be IP addresses rather than FQDN's */

@@ -5236,3 +5236,8 @@ _NET_WM_ICON property.
 
 Fixed a couple warnings.
 ----------------------------------------------------------------------
+Fri Jul 16 17:59:48 2004                        Michael Jennings (mej)
+
+If $LANG refers to a UTF-8 or similar locale, remove that part.  In
+other words, en_US.utf8 becomes en_US instead.
+----------------------------------------------------------------------
