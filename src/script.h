@@ -37,6 +37,7 @@
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+extern void script_parse(char *);
 
 _XFUNCPROTOEND
 

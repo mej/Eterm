@@ -261,7 +261,6 @@ extern unsigned char conf_register_fstate(FILE *fp, char *path, char *outfile, u
 extern unsigned char conf_register_builtin(char *name, eterm_func_ptr_t ptr);
 extern unsigned char conf_register_context_state(unsigned char ctx_id);
 extern void conf_free_subsystem(void);
-extern char *chomp(char *);
 extern char *shell_expand(char *);
 extern char *conf_find_file(const char *file, const char *dir, const char *pathlist);
 extern FILE *open_config_file(char *name);

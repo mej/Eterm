@@ -1043,7 +1043,8 @@ handle_child_signal(int sig)
   /* If the child that exited is the command we spawned, or if the
      child exited before fork() returned in the parent, it must be
      our immediate child that exited.  We exit gracefully. */
-  if (pid == cmd_pid && cmd_pid != -1) {
+  if ((pid == cmd_pid && cmd_pid != -1)
+      || (pid == -1 && errno == ECHILD && cmd_pid != -1)) {
     if (Options & Opt_pause) {
       paused = 1;
       return;

@@ -38,11 +38,12 @@ static const char cvs_ident[] = "$Id$";
 #include "options.h"
 #include "pixmap.h"
 #include "system.h"
+#include "script.h"
 
+#if 0
 void
 eterm_handle_winop(char *action)
 {
-#if 0
   char *winid;
   Window win = 0;
 
@@ -100,10 +101,54 @@ eterm_handle_winop(char *action)
   } else {
     print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
   }
-#endif
 }
+#endif
 
 void
 script_parse(char *s)
 {
+  char **token_list, **param_list;
+  register char *pstr;
+  register unsigned long i;
+  char *func_name, *params;
+  size_t len;
+
+  REQUIRE(s != NULL);
+
+  D_SCRIPT(("Parsing:  \"%s\"\n", s));
+
+  token_list = split(";", s);
+  if (token_list == NULL) {
+    D_SCRIPT(("No tokens found; ignoring script.\n"));
+    return;
+  }
+
+  for (i = 0; token_list[i]; i++) {
+    pstr = token_list[i];
+    chomp(pstr);
+    if (!(*pstr)) {
+      continue;
+    }
+    if ((params = strchr(pstr, '(')) != NULL) {
+      if (params != pstr) {
+        len = params - pstr;
+        func_name = (char *) MALLOC(len + 1);
+        strncpy(func_name, pstr, len);
+        func_name[len] = 0;
+      } else {
+        print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
+        return;
+      }
+    } else {
+      func_name = STRDUP(pstr);
+    }
+    if (func_name) {
+      chomp(func_name);
+    }
+    if (params) {
+      chomp(params);
+    }
+    D_SCRIPT(("Calling function %s with parameters:  %s\n", NONULL(func_name), NONULL(params)));
+  }
+
 }

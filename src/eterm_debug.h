@@ -57,6 +57,8 @@
 #  define D_BBAR(x)			DPRINTF2(x)
 #  define DEBUG_TIMER			2
 #  define D_TIMER(x)			DPRINTF2(x)
+#  define DEBUG_SCRIPT			2
+#  define D_SCRIPT(x)			DPRINTF2(x)
  
 #  define DEBUG_MENU			3
 #  define D_MENU(x)			DPRINTF3(x)

@@ -267,13 +267,8 @@ inline void *memmove(void *, const void *, size_t);
 #define APL_NAME	"Eterm"
 
 /* COLORTERM, TERM environment variables */
-#ifdef MULTI_CHARSET
-# define TERMENV	"kterm"
-# define COLORTERMENV	"Eterm"
-#else
-# define TERMENV	"xterm"
-# define COLORTERMENV	"Eterm"
-#endif
+#define TERMENV       "Eterm"
+#define COLORTERMENV  "Eterm"
 
 #ifdef NO_MOUSE_REPORT
 # ifndef NO_MOUSE_REPORT_SCROLLBAR

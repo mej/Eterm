@@ -40,6 +40,7 @@ static const char cvs_ident[] = "$Id$";
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
+#include "script.h"
 #include "term.h"
 #include "windows.h"
 
@@ -654,6 +655,10 @@ button_set_action(button_t *button, action_type_t type, char *action)
       strcpy(button->action.string, action);
       parse_escaped_string(button->action.string);
       break;
+    case ACTION_SCRIPT:
+      button->action.script = (char *) MALLOC(strlen(action) + 2);
+      strcpy(button->action.script, action);
+      break;
     default:
       break;
   }
@@ -736,8 +741,9 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
         tt_write((unsigned char *) button->action.string, strlen(button->action.string));
       }
       break;
-    case ACTION_FUNCTION:
+    case ACTION_SCRIPT:
       if (!press) {
+        script_parse((char *) button->action.script);
       }
       break;
     default:

@@ -62,6 +62,7 @@ typedef struct button_struct {
   action_type_t type;
   union {
     menu_t *menu;
+    char *script;
     char *string;
   } action;
   char *text;

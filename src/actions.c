@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
+#include "script.h"
 #include "scrollbar.h"
 #include "term.h"
 #include "windows.h"
@@ -63,9 +64,9 @@ action_handle_echo(event_t *ev, action_t *action) {
 }
 
 unsigned char
-action_handle_function(event_t *ev, action_t *action) {
-  REQUIRE_RVAL(action->param.string != NULL, 0);
-  /* To be continued....  :-) */
+action_handle_script(event_t *ev, action_t *action) {
+  REQUIRE_RVAL(action->param.script != NULL, 0);
+  script_parse(action->param.script);
   return 1;
   ev = NULL;
 }
@@ -165,7 +166,7 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
     action->next = action_list;
     action_list = action;
   } else {
-    if (action->type == ACTION_STRING || action->type == ACTION_ECHO || action->type == ACTION_FUNCTION) {
+    if (action->type == ACTION_STRING || action->type == ACTION_ECHO || action->type == ACTION_SCRIPT) {
       if (action->param.string) {
 	FREE(action->param.string);
       }
@@ -188,11 +189,10 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
       strcpy(action->param.string, (char *) param);
       parse_escaped_string(action->param.string);
       break;
-    case ACTION_FUNCTION:
-      action->handler = (action_handler_t) action_handle_function;
-      action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
-      strcpy(action->param.string, (char *) param);
-      parse_escaped_string(action->param.string);
+    case ACTION_SCRIPT:
+      action->handler = (action_handler_t) action_handle_script;
+      action->param.script = (char *) MALLOC(strlen((char *) param) + 2);
+      strcpy(action->param.script, (char *) param);
       break;
     case ACTION_MENU:
       action->handler = (action_handler_t) action_handle_menu;

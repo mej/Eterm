@@ -1593,28 +1593,6 @@ builtin_appname(char *param)
   return (STRDUP(APL_NAME "-" VERSION));
 }
 
-/* chomp() removes leading and trailing whitespace/quotes from a string */
-char *
-chomp(char *s)
-{
-
-  register char *front, *back;
-
-  for (front = s; *front && isspace(*front); front++);
-  /*
-     if (*front == '\"') front++;
-   */
-  for (back = s + strlen(s) - 1; *back && isspace(*back) && back > front; back--);
-  /*
-     if (*back == '\"') back--;
-   */
-
-  *(++back) = 0;
-  if (front != s)
-    memmove(s, front, back - front + 1);
-  return (s);
-}
-
 /* shell_expand() takes care of shell variable expansion, quote conventions,
    calling of built-in functions, etc.                                -- mej */
 char *
@@ -3027,6 +3005,10 @@ parse_actions(char *buff, void *state)
       menu = find_menu_by_title(menu_list, str);
       action_add(mod, button, keysym, ACTION_MENU, (void *) menu);
       FREE(str);
+    } else if (!BEG_STRCASECMP(str, "script")) {
+      str = get_word(i+1, buff);
+      action_add(mod, button, keysym, ACTION_SCRIPT, (void *) str);
+      FREE(str);
     } else {
       print_error("Parse error in file %s, line %lu:  Syntax error (\"to\" not found)\n", file_peek_path(), file_peek_line());
       return NULL;
@@ -3250,6 +3232,8 @@ parse_bbar(char *buff, void *state)
         button_set_action(button, ACTION_STRING, action);
       } else if (!BEG_STRCASECMP(type, "echo ")) {
         button_set_action(button, ACTION_ECHO, action);
+      } else if (!BEG_STRCASECMP(type, "script ")) {
+        button_set_action(button, ACTION_SCRIPT, action);
       } else {
         print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(), type);
         FREE(action);
