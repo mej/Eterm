@@ -1,0 +1,20 @@
+#!/bin/sh 
+
+set -e
+
+if [ "$1" = configure ]; then
+   xte='x-terminal-emulator'
+   binary='/usr/bin/Eterm'
+   xtebinary="/usr/bin/$xte"
+   xteman="/usr/share/man/man1/$xte.1.gz"
+   man='/usr/share/man/man1/Eterm.1.gz'
+   
+   chown root.utmp $binary
+   chmod 2755 $binary
+
+   update-alternatives \
+     --install $xtebinary $xte $binary 10 \
+     --slave $xteman $xte.1.gz $man
+fi
+
+#DEBHELPER#

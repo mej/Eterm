@@ -1,11 +1,5 @@
-eterm (0.9.2-0.2003080201) unstable; urgency=low
+eterm (0.9.3-0cvs20030911) unstable; urgency=low
 
-  * a cvs release
+  * a CVS release
 
- -- Laurence J. Lane <ljlane@debian.org>  Mon, 13 Nov 2000 10:58:37 -0500
-
-Local variables:
-mode: debian-changelog
-add-log-mailing-address: "ljlane@debian.org"
-End:
-eoch
+ -- Sytse Wielinga <s.b.wielinga@student.utwente.nl>  Thu, 11 Sep 2003 15:21:22 +0200

@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+if [ "$1" = remove -o "$1" = upgrade ]; then
+   xte='x-terminal-emulator'
+   xtebinary="/usr/bin/$xte"
+   update-alternatives --remove $xte $xtebinary
+fi
+
+#DEBHELPER#

@@ -1,0 +1,17 @@
+usr/bin/*
+usr/lib/*.so
+usr/lib/*.la
+usr/share/man/man1/*.1
+usr/share/Eterm/pix/tile/*.jpg
+usr/share/Eterm/pix/scale/*.jpg
+usr/share/Eterm/pix/*.png
+usr/share/Eterm/pix/pixmaps.list
+usr/share/Eterm/gdb.scr
+usr/share/Eterm/themes/auto/*.cfg
+usr/share/Eterm/themes/auto/pixmaps.list
+usr/share/Eterm/themes/Eterm/*.cfg
+usr/share/Eterm/themes/Eterm/pixmaps.list
+usr/share/Eterm/themes/trans/*.cfg
+usr/share/Eterm/themes/trans/pixmaps.list
+usr/share/Eterm/themes/Escreen/*.cfg
+usr/share/Eterm/themes/Escreen/pixmaps.list

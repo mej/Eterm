@@ -1,19 +1,21 @@
 Source: eterm
 Section: x11
 Priority: optional
-Maintainer: Laurence J. Lane <ljlane@debian.org>
-Standards-Version: 3.1.1
-Build-Depends: imlib-dev, libc6-dev, libjpeg62-dev, libpng2-dev, libtiff3g-dev, libungif3g-dev | giflib3g-dev, zlib1g-dev, debhelper, xlib6g-dev
+Maintainer: Sytse Wielinga <s.b.wielinga@student.utwente.nl>
+Standards-Version: 3.6.1.0
+Build-Depends: libimlib2-dev, libast2-dev (>=0.6), libpcre3-dev, libttf-dev, debhelper (>> 4.0)
 
 Package: eterm
 Architecture: any
-Depends: ${shlibs:Depends}
-Provides: x-terminal-emulator
-Conflicts: eterm-backgrounds (<< 1.1-5)
-Description: Enlightened Terminal Emulator (ala xterm) with Imlib support
- A terminal emulator in the spirit of xterm or rxvt.  However this one differs
- in that it uses an Enlightenment style config file, as well as themes.  The
- Imlib graphics engine is used to render images.  This version supports
- background images, pixmapped scrollbars, and the pseudo-transparency.
- Eterm also now uses libpthreads.
-
+Depends: ncurses-term, ${shlibs:Depends}
+Provides: x-terminal-emulator, eterm-backgrounds
+Conflicts: eterm-backgrounds, eterm-ml
+Replaces: eterm-ml, eterm-backgrounds
+Description: Enlightened Terminal Emulator
+ A terminal emulator in the spirit of xterm or rxvt, eterm uses an
+ Enlightenment style config file, as well as themes.  The Imlib graphics
+ engine is used to render images.  This version supports background images,
+ pixmapped scrollbars, pseudo-transparency, POSIX threads, and unicode
+ support.
+ .
+ This is a CVS version.
