@@ -39,7 +39,7 @@
 #include <errno.h>              /* errno */
 
 #include "config.h"
-#include "src/feature.h"
+#include "feature.h"
 
 /* use libast if we have it */
 #ifdef DEBUG_ESCREEN

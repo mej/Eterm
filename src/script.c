@@ -58,15 +58,15 @@ static eterm_script_handler_t script_handlers[] = {
     {"string", script_handler_string},
     {"dialog", script_handler_dialog},
 #ifdef ESCREEN
-    {"es_display", script_handler_display},
-    {"es_disp", script_handler_display},
-    {"es_region", script_handler_region},
-    {"es_reg", script_handler_region},
-    {"es_win", script_handler_region},
-    {"es_window", script_handler_region},
-    {"es_statement", script_handler_statement},
-    {"es_reset", script_handler_reset},
-    {"es_rst", script_handler_reset},
+    {"es_display", script_handler_es_display},
+    {"es_disp", script_handler_es_display},
+    {"es_region", script_handler_es_region},
+    {"es_reg", script_handler_es_region},
+    {"es_win", script_handler_es_region},
+    {"es_window", script_handler_es_region},
+    {"es_statement", script_handler_es_statement},
+    {"es_reset", script_handler_es_reset},
+    {"es_rst", script_handler_es_reset},
 #endif
 
     {"nop", script_handler_nop}
@@ -452,7 +452,7 @@ script_handler_dialog(char **params)
 
 #ifdef ESCREEN
 void
-script_handler_display(char **params)
+script_handler_es_display(char **params)
 {
     _ns_sess *sess = TermWin.screen;
     char *p, *a;
@@ -519,7 +519,7 @@ script_handler_display(char **params)
 }
 
 void
-script_handler_region(char **params)
+script_handler_es_region(char **params)
 {
     _ns_sess *sess = TermWin.screen;
     _ns_disp *disp;
@@ -596,7 +596,7 @@ script_handler_region(char **params)
 }
 
 void
-script_handler_statement(char **params)
+script_handler_es_statement(char **params)
 {
     char *tmp;
 
@@ -610,7 +610,7 @@ script_handler_statement(char **params)
 }
 
 void
-script_handler_reset(char **params)
+script_handler_es_reset(char **params)
 {
     USE_VAR(params);
     ns_reset(TermWin.screen, 0);

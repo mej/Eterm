@@ -4,7 +4,7 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.2
-Release: 1
+Release: 0.1
 Copyright: BSD
 Group: User Interface/X
 %if %{bzip}
@@ -34,7 +34,7 @@ have the Imlib2 library installed.
 # macros I use for compatibility with older versions of the macro
 %configure --bindir=%{_bindir} --libdir=%{_libdir} --mandir=%{_mandir} \
            --datadir=%{_datadir} --sysconfdir=%{_sysconfdir} \
-           --with-backspace=bs --with-delete=execute --enable-multi-charset
+           --enable-multi-charset --enable-escreen
 make
 
 %install

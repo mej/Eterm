@@ -2457,14 +2457,23 @@ upd_disp(void *xd, int n, int flags, char *name)
     button = bbar->buttons;
     for (; (n > 0) && (button->next); n--, button = button->next);
 
+    /* See if we actually need to update anything.  If not, don't. */
+    if ((name && button->text && !strcmp(name, button->text))
+        && ((flags | NS_SCREAM_BUTTON) == button->flags)) {
+        return NS_SUCC;
+    }
+
+    /* Update display name */
     if (name && (!button->text || strcmp(name, button->text))) {
         button_set_text(button, name);
     }
 
+    /* Update flags */
     if (flags >= 0) {
         button->flags = (flags | NS_SCREAM_BUTTON);
     }
 
+    /* Redraw buttonbar to reflect new information */
     bbar_redraw(bbar);
 
     return NS_SUCC;

@@ -4711,3 +4711,9 @@ Fri Jun 14 09:05:49 2002                        Michael Jennings (mej)
 This should fix the bug Creepy spotted where the buttonbar event
 initialization was crashing.
 ----------------------------------------------------------------------
+Tue Jun 18 16:24:03 2002                        Michael Jennings (mej)
+
+Fixed the flickering of the buttonbar caused by Escreen updates.
+
+Also fixed the deselecting of the current button on redraw.
+----------------------------------------------------------------------

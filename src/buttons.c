@@ -1113,6 +1113,9 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
     XSetWindowBackgroundPixmap(Xdisplay, bbar->win, bbar->bg);
     XClearWindow(Xdisplay, bbar->win);
     XSetForeground(Xdisplay, bbar->gc, images[image_bbar].norm->fg);
+    if (bbar->current) {
+        bbar_select_button(bbar, bbar->current);
+    }
 }
 
 void
