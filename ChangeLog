@@ -2637,3 +2637,8 @@ Wed Oct 27 14:11:11 PDT 1999	Michael Jennings <mej@eterm.org>
 	64-bit cleanliness changes.
 	
 -------------------------------------------------------------------------------
+Wed Oct 27 17:36:35 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Modified libtool flags per recommendation of HJ Lu <hjl@gnu.org>.
+	
+-------------------------------------------------------------------------------

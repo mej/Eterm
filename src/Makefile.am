@@ -5,7 +5,7 @@ lib_LTLIBRARIES = libEterm.la
 libEterm_la_SOURCES = actions.c command.c e.c events.c font.c grkelot.c menus.c misc.c netdisp.c \
                       options.c pixmap.c screen.c scrollbar.c startup.c system.c term.c timer.c utmp.c windows.c
 libEterm_la_DEPENDENCIES = $(top_builddir)/libmej/libmej.la feature.h
-libEterm_la_LDFLAGS = -version-info 9:0:9
+libEterm_la_LDFLAGS = -release $(VERSION)
 
 bin_PROGRAMS = Eterm
 Eterm_SOURCES = main.c
