@@ -340,6 +340,27 @@ handle_client_message(event_t *ev)
     return 1;
   }
 #endif /* OFFIX_DND */
+  if ((XInternAtom(Xdisplay, "_FVWM_COLORTUNER", True) == ev->xclient.message_type) && ev->xclient.send_event) {
+    if (ev->xclient.data.l[0] >= 0 && ev->xclient.data.l[0] <= 31) {
+      PixColors[(int) ev->xclient.data.l[0]] = ev->xclient.data.l[1];
+
+      if ((int) ev->xclient.data.l[0] == bgColor) {
+        XFocusChangeEvent fev;
+        event_t *pfev;
+
+        fev.type = FocusIn;
+        fev.send_event = 1;
+        fev.display = Xdisplay;
+        fev.window = ev->xany.window;
+        pfev = (event_t *) &fev;
+        handle_focus_in(pfev);
+        redraw_image(image_bg);
+      }
+      scr_touch();
+      scr_refresh(refresh_type);
+    }
+    return 1;
+  }
   return 1;
 }
 
