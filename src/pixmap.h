@@ -130,9 +130,15 @@ enum {
 #define image_mode_is(which, bit)         (images[which].mode & (bit))
 #define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
 #define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
-                                              scr_touch(); scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
-#define reload_image(iml)                 do {Imlib_Image tmp_im; imlib_context_set_image((iml)->im); tmp_im = imlib_load_image_immediately(imlib_image_get_filename()); \
-                                              imlib_free_image_and_decache(); (iml)->im = tmp_im;} while (0)
+                                              scr_touch(); scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync(); \
+                                          } while (0)
+#define reload_image(iml)                 do {Imlib_Image tmp_im; \
+                                              if ((iml) && (iml->im)) { \
+                                                imlib_context_set_image((iml)->im); \
+                                                tmp_im = imlib_load_image_immediately(imlib_image_get_filename()); \
+                                                imlib_free_image_and_decache(); (iml)->im = tmp_im; \
+                                              } \
+                                          } while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)

@@ -4334,3 +4334,10 @@ Sun Aug  5 16:15:34 2001                        Michael Jennings (mej)
 
 fvwm color thingie patch from Eric West <ericwest@asicaction.com>.
 ----------------------------------------------------------------------
+Fri Aug 10 13:51:34 2001                        Michael Jennings (mej)
+
+I noticed this when I tested the smoked glass theme, but I forgot
+about it until Martin Tyler <martin@boo.org> reminded me.  This should
+fix the bogus calls to imlib_image_get_filename() etc. when using
+transparency and shading.
+----------------------------------------------------------------------
