@@ -561,8 +561,12 @@ change_font(int init, const char *fontname)
   }
 
   /* If the sizes haven't changed, we don't have to update the hints */
-  if (fw == TermWin.fwidth && fh == TermWin.fheight)
-    return;
+  if (fw == TermWin.fwidth && fh == TermWin.fheight) {
+     /* but we _do_ need to redraw to show the new font */
+     scr_reset();
+     scr_touch();
+     return;
+  }
 
   TermWin.fwidth = fw;
   TermWin.fheight = fh;
