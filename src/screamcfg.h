@@ -15,12 +15,6 @@
    undef it, you're on your own. */
 #define NS_PARANOID
 
-/* compile in support for the GNU "screen" program as a backend */
-#define NS_HAVE_SCREEN       1
-
-/* compile in support for the "twin" program as a backend */
-#undef  NS_HAVE_TWIN
-
 
 
 #define NS_MAXCMD            512
@@ -38,6 +32,8 @@
 #define NS_SCREEN_RC         ".screenrc"
 #define NS_TWIN_CALL         "export TERM=xterm; twin %s"
 #define NS_TWIN_OPTS         "-hw=tty"
+#define NS_TWIN_PARA         "twin@"
+#define NS_TWDISPLAY_OPTS    "-" NS_TWIN_PARA "%s"
 
 /* this should never change. the escape-char for an out-of-the-box "screen".
    don't change this just because you set something else in your .screenrc */
@@ -69,6 +65,7 @@
 #define NS_SCREEN_SESS_T     "This session is named '"
 #define NS_SCREEN_VERSION_T  "scre%2s %d.%d.%d %16s %32s"
 #define NS_SCREEN_NO_DEBUG   "Sorry, screen was compiled without -DDEBUG option."
+#define NS_SCREEN_ACT_T      "Activity in window "
 
 /* should be 1s */
 #define NS_INIT_DELAY        1

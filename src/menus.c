@@ -302,7 +302,9 @@ menu_handle_button_release(event_t *ev)
                     menu_display_submenu(current_menu, item);
                 } else {
                     menu_action(item);
-                    menuitem_deselect(current_menu);
+                    if (current_menu) {
+                        menuitem_deselect(current_menu);
+                    }
                 }
             }
             /* Reset the state of the menu system. */
@@ -413,8 +415,7 @@ menu_dispatch_event(event_t *ev)
     return (0);
 }
 
-menulist_t *
-menulist_add_menu(menulist_t *list, menu_t *menu)
+menulist_t *menulist_add_menu(menulist_t *list, menu_t *menu)
 {
     ASSERT_RVAL(menu != NULL, list);
 
@@ -446,8 +447,7 @@ menulist_clear(menulist_t *list)
     FREE(list);
 }
 
-menu_t *
-menu_create(char *title)
+menu_t *menu_create(char *title)
 {
     menu_t *menu;
     static Cursor cursor;
@@ -599,8 +599,7 @@ menu_is_child(menu_t *menu, menu_t *submenu)
     return 0;
 }
 
-menu_t *
-find_menu_by_title(menulist_t *list, char *title)
+menu_t *find_menu_by_title(menulist_t *list, char *title)
 {
     register unsigned char i;
 
@@ -614,8 +613,7 @@ find_menu_by_title(menulist_t *list, char *title)
     return NULL;
 }
 
-menu_t *
-find_menu_by_window(menulist_t *list, Window win)
+menu_t *find_menu_by_window(menulist_t *list, Window win)
 {
     register unsigned char i;
 
@@ -629,8 +627,7 @@ find_menu_by_window(menulist_t *list, Window win)
     return NULL;
 }
 
-menuitem_t *
-find_item_by_coords(menu_t *menu, int x, int y)
+menuitem_t *find_item_by_coords(menu_t *menu, int x, int y)
 {
     register unsigned char i;
     register menuitem_t *item;
@@ -700,8 +697,7 @@ menuitem_change_current(menuitem_t *item)
     }
 }
 
-menuitem_t *
-menuitem_create(char *text)
+menuitem_t *menuitem_create(char *text)
 {
     menuitem_t *menuitem;
 

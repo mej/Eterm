@@ -323,8 +323,7 @@ static const struct {
         OPT_LONG("finished-text", "text to output after program termination", &rs_finished_text),
         OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
         OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
-        OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL),
-        OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
+        OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL), OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
 #ifdef ESCREEN
         OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
         OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),

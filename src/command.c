@@ -2471,6 +2471,7 @@ upd_disp(void *xd, int n, int flags, char *name)
     /* Update flags */
     if (flags >= 0) {
         button->flags = (flags | NS_SCREAM_BUTTON);
+        D_ESCREEN(("upd_disp: new flags for \"%s\": %d\n", button->text, flags));
     }
 
     /* Redraw buttonbar to reflect new information */
@@ -2571,6 +2572,7 @@ exe_prg(void *xd, char **argv)
 
 /****** Azundris' playthings :-) ******/
 
+#ifdef HAVE_HUMOR
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
@@ -2761,6 +2763,7 @@ waitstate(void *xd, int ms)
 
     return 0;
 }
+#endif
 
 static _ns_efuns *
 escreen_reg_funcs(void)
@@ -2790,7 +2793,9 @@ escreen_reg_funcs(void)
     ns_register_inp(efuns, input_dialog);
     ns_register_tab(efuns, menu_tab);
 
+#ifdef HAVE_HUMOR
     ns_register_fun(efuns, waitstate);
+#endif
 
     return efuns;
 }
@@ -2798,15 +2803,22 @@ escreen_reg_funcs(void)
 static int
 make_escreen_menu(buttonbar_t *bbar)
 {
+    static int been_here = 0;
     button_t *button;
     menu_t *m;
     menuitem_t *i;
 
+    if (been_here) {            /* the start function may be called more than once */
+        return 0;               /* in later versions, but we only want one EScreen menu */
+    }
+
+    been_here = 1;
+
     if ((m = menu_create(NS_MENU_TITLE))) {
         char *sc[] = {
             /* display functions */
-            "New", "es_display(new)",      /* \x01:screen\r */
-            "New (w/ name)...", "es_display(new,ask)",
+            "New", "es_display(new)",   /* \x01:screen\r */
+            "New...", "es_display(new,ask)",
             "Rename...", "es_display(name,ask)",
             "Backlog...", "es_display(backlog)",
             "Monitor", "es_display(monitor)",
@@ -2815,7 +2827,7 @@ make_escreen_menu(buttonbar_t *bbar)
             /* region functions */
             "Split", "es_region(new)",
             "Unsplit", "es_region(full)",
-            "Prev region", "es_region(prev)",      /* NS_SCREEN_PRVS_REG */
+            "Prev region", "es_region(prev)",   /* NS_SCREEN_PRVS_REG */
             "Next region", "es_region(next)",
             "Kill region", "es_region(kill)",
             "-", "",
@@ -2883,7 +2895,7 @@ escreen_init(char **argv)
     _ns_efuns *efuns;
     buttonbar_t *bbar;
 
-    if (!TermWin.screen_mode) {
+    if (TermWin.screen_mode == NS_MODE_NONE) {
         return run_command(argv);
     }
 
@@ -2905,7 +2917,8 @@ escreen_init(char **argv)
         bbar_add(bbar);
     }
 
-    if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar)) == 0) {
+    if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar)) == NULL) {
+        D_CMD(("ns_attach_by_URL(%s,%s) failed\n", rs_url, rs_hop));
         return -1;
     }
     if (rs_delay >= 0) {
@@ -2920,6 +2933,7 @@ escreen_init(char **argv)
     parent_resize();
 
     /* add_screen_ctl_button(bbar,"New",'c'); */
+    D_CMD(("TermWin.screen->fd = %d\n", TermWin.screen->fd));
     return TermWin.screen->fd;
 }
 #endif
@@ -2963,7 +2977,7 @@ init_command(char **argv)
         AT_LEAST((int) num_fds, pipe_fd + 1);
     }
     if ((cmd_fd = command_func(argv)) < 0) {
-        print_error("aborting\n");
+        print_error("Unable to run sub-command.\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -3140,15 +3154,19 @@ cmd_getc(void)
 #  ifdef NS_HAVE_TWIN
           case NS_MODE_TWIN:
               if (!TermWin.screen->twin) {
-                  if (!Tw_CheckMagic(libscream_magic)) {
-                      D_ESCREEN(("ns_attach_by_sess: Tw_CheckMagic failed\n"));
-                      TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
-                  } else {
-                      if (!(TermWin.screen->twin = Tw_Open(TermWin.screen->twin_str))) {
-                          D_ESCREEN(("ns_attach_by_sess: Tw_Open(%s) failed\n", TermWin.screen->twin_str));
+                  if (!TermWin.screen->timestamp) {
+                      TermWin.screen->timestamp = time(NULL);
+                  } else if (TermWin.screen->timestamp < time(NULL)) {
+                      if (!Tw_CheckMagic(libscream_magic)) {
+                          D_ESCREEN(("ns_attach_by_sess: Tw_CheckMagic failed\n"));
                           TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
                       } else {
-                          D_ESCREEN(("ns_attach_by_sess: Tw_Open(%s) succeeded\n", TermWin.screen->twin_str));
+                          if (!(TermWin.screen->twin = Tw_Open(TermWin.screen->twin_str))) {
+                              ns_desc_twin(TermWin.screen, "cmd_getc->Tw_Open");
+                              TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
+                          } else {
+                              D_ESCREEN(("ns_attach_by_sess: Tw_Open(%s) succeeded: handle @ %p\n", TermWin.screen->twin_str, TermWin.screen->twin));
+                          }
                       }
                   }
               }

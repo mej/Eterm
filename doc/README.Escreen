@@ -6,7 +6,7 @@
 |  _/ ___ \ |_| |  _ _  | |___\__ \ (__| | |  __/  __/ | | |
 |_|/_/   \_\__\_\ (_|_) |_____|___/\___|_|  \___|\___|_| |_|
                                                             
-Frequently Asked Questions about the Eterm "Escreen" extension
+Frequently Asked Questions about the "Escreen/Etwin" extension
 
 
 
@@ -86,22 +86,21 @@ A  An Eterm should open with a screen (without a status-line) running
 
 Q  What's new?
 
-*  Dialog boxes now longer block the entire GUI (only Eterm's).
+*  libscream's functions are available through Eterm's scripting
+   facility.  See escreen.cfg for an example.
 
-*  Display-closing has a dialog-box now.
+*  Preliminary Twin support. For now, Twin-URLs (Eterm -U twin://)
+   and Twin's mouse-protocol are supported, allowing you start twin
+   within Eterm (making it the only terminal emulator to support Twin,
+   AFAIK).  Next release should feature Twin support through libscream
+   (thus exposing Twin to button- and key-bindings through Eterm's
+   scripting interface).
 
-*  Code clean-up.  It's actually understandable now.
-   (You can also compile libscream w/o support for screen now. : )
-
-*  Logs debug info through libast now if it available
-
-*  Fix for scrollbar (reported by mej).
-
-*  Fix for remote sessions with no corresponding local user
-   (reported by tfing).
+   For more information on Twin see
+   http://freshmeat.net/projects/twin/?topic_id=158
 
 *  Tear-off tabs.  You can select the button-representation of a
-   display and drag-and-drop it
+   display and drag-and-drop it [currently under reconstruction]
 
    - to another button:
 
@@ -123,9 +122,6 @@ Q  What should I expect in the future?  (TODO)
 *  Limited support for scrolling.  screen doesn't give us all the info
    we'd need to make this really sexy.
 
-*  Possibly support for enhanced screen-clones (like the perchance
-   forthcoming "scream").
-
 
 
 ------------------------------------------------------------------------------
@@ -142,7 +138,7 @@ A  If you call it an Eterm, it will behave like one.  Same for an Escreen.
    (you'd have to symlink from Escreen to Eterm first, of course).
    Additionally, when called with a command-line (-e "/some/program"), the
    suite will *always* behave like an Eterm, even if invoked as Escreen.
-   Likewise, when called with an URL (-U "screen://user@some.host.gov/"),
+   Likewise, when called with an URL (-U screen://user@some.host.gov/),
    it will behave like an Escreen, even if invoked under another name.
 
 
@@ -154,7 +150,7 @@ A  Before you complain:
 *  Take a deep breath, remember you didn't pay for this.
 
 *  Check whether you are using the latest version.  Support for each
-   version stops with the release of a new one!
+   version ceases with the release of a new one!
 
 *  Read all of the FAQ, your question may be answered in there.
    Remember that the FAQ grows with almost each release, so re-reading
@@ -201,9 +197,10 @@ A  Well, yes.  ^A talks to the screen program.  Put a line
    to press to send the escape (^A in the example) to the application
    instead); you'll want to put something else to move it around.
    See "man screen" for details.
-   2002/05/13  note that ^A: opens a buffer where you can directly enter
-               statements like "escape ^Uu"; trying things out will be
-               easier that way.  yes, it will be ^U: afterwards. ; )
+
+   Note that ^A: opens a buffer where you can directly enter
+   statements like "escape ^Uu"; trying things out will be
+   easier that way.  Yes, it the magic key will be ^U: afterwards. ; )
 
 
 
@@ -230,7 +227,7 @@ Q  Escreen changes the escape on the remote box to the same thing as on
 
 A  You can always override the escapes like so:
 
-     Eterm -U user@host.com/-e^Xy
+     Eterm -U screen://user@host.com/-e^Xy
 
    Where ^X is the escape and y the literal (man screen).
 

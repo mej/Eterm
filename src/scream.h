@@ -58,7 +58,7 @@
 #define NS_SCREAM_FILE    32
 #define NS_SCREAM_SHARED  64
 #define NS_SCREAM_ZOMBIE 128
-#define NS_SCREAM_BUTTON 0xf0
+#define NS_SCREAM_BUTTON 0xf00
 
 #define NS_SCREAM_MASK   (~(NS_SCREAM_UTMP|NS_SCREAM_PRVS))
 
@@ -69,6 +69,11 @@
 #define NS_ESC_SYSSCREENRC 2
 #define NS_ESC_SCREENRC    3
 #define NS_ESC_INTERACTIVE 4
+
+#define NS_SESS_NO_MON_MSG 1
+
+#define NS_MON_TOGGLE_QUIET 0
+#define NS_MON_TOGGLE_NOISY 1
 
 
 
@@ -90,35 +95,43 @@ typedef struct __ns_hop {
 
 
 typedef struct __ns_sess {   /* a whole screen-session with many clients */
+  char   *name;              /* session name */
   int     where;             /* local/remote */
-  int     backend;           /* screen/scream */
+  int     backend;           /* screen/scream/twin */
   int     nesting;           /* 0=topLevel, 1=screen within a screen etc */
-  time_t  timestamp;         /* last updated when? see NS_SCREEN_UPD_FREQ */
+  time_t  timestamp;         /* last updated when? */
+  int     delay;             /* initialization delay */
+
+  int     flags;             /* miracle flags, see NS_SESS_* */
+  int     fd;                /* fd for communication */
+  int     dsbb;              /* default length of scroll-back buffer */
+
   char   *proto;             /* protocol.  usually "screen" */
   char   *host;              /* host. numeric or symbolic. ("localhost") */
   int     port;              /* port. usually TCP22: SSH */
+  int     disp;              /* display (used by twin etc., not screen) */
   char   *user;              /* user. often current local user */
   char   *pass;              /* password. used for su. for remote sessions, a
                                 ssh-key should be on the remote machine. */
   char   *rsrc;              /* add'l parameter to screen/scream. URL-enc */
-  char   *home;              /* user's home dir. so we can find .screenrc */
-  char   *sysrc;             /* global screen config */
+
   void   *userdef;           /* the term-app can store a pointer here */
-  char   *name;              /* session name */
-  int     fd;                /* fd for communication */
-  char    escape,literal;    /* talking to screen: defaults to ^A, a */
-  int     escdef;            /* where was the escape sequence defined? */
-  int     delay;             /* initialization delay */
-  int     dsbb;              /* default length of scroll-back buffer */
+
   struct __ns_efuns *efuns;  /* callbacks into the terminal program. */
   struct __ns_hop   *hop;    /* tunnel, if any */
   struct __ns_disp  *dsps;   /* first display (that with the lowest index) */
   struct __ns_disp  *curr;   /* current display (NULL for none) */
   struct __ns_sess  *prvs;   /* previous session in session list */
   struct __ns_sess  *next;   /* next     session in session list */
+
+  char   *home;              /* user's home dir. so we can find .screenrc */
+  char   *sysrc;             /* global screen config */
+  char    escape,literal;    /* talking to screen: defaults to ^A, a */
+  int     escdef;            /* where was the escape sequence defined? */
+
 #ifdef NS_HAVE_TWIN
-  tdisplay twin;
-  char *twin_str;
+  tdisplay twin;             /* twin-display */
+  char *twin_str;            /* twin-display (string specifier) */
 #endif
 } _ns_sess;
 
@@ -190,9 +203,14 @@ _ns_sess *ns_attach_by_sess(_ns_sess **,int *);
 _ns_sess *ns_attach_by_URL(char *,char *,_ns_efuns **,int *,void *);
 int ns_detach(_ns_sess **);
 
+/* debug */
+void ns_desc_twin(_ns_sess *,char *);
+
 /* convenience */
 int ns_run(_ns_efuns *, char *);
 int ns_get_ssh_port(void);
+int ns_get_twin_port(void);
+
 
 int disp_get_real_by_screen(_ns_sess *,int);
 int disp_get_screen_by_real(_ns_sess *,int);
@@ -236,7 +254,7 @@ int ns_rsz_disp(_ns_sess *,int,int,int);
 int ns_rem_disp(_ns_sess *,int,int);
 int ns_ren_disp(_ns_sess *,int,char *);
 int ns_log_disp(_ns_sess *,int,char *);
-int ns_mon_disp(_ns_sess *,int);
+int ns_mon_disp(_ns_sess *,int,int);
 int ns_sbb_disp(_ns_sess *,int);
 
 int ns_tog_region(_ns_sess *,_ns_disp *);

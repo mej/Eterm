@@ -484,12 +484,15 @@ script_handler_es_display(char **params)
         D_ESCREEN(("Toggle display\n"));
         ns_tog_disp(sess);
     } else if (!strcmp(p, "new")) {
-        if (!a || !*a || !strcasecmp(a, "ask")) {
+        if (!a || !*a) {
+            D_ESCREEN(("disp new\n"));
+            ns_add_disp(sess, no, "");
+        } else if (!a || !*a || !strcasecmp(a, "ask")) {
             D_ESCREEN(("disp new ask\n"));
             ns_add_disp(sess, no, NULL);
         } else {
             D_ESCREEN(("disp new \"%s\"\n", a));
-            ns_ren_disp(sess, no, a);
+            ns_add_disp(sess, no, a);
         }
     } else if (!strcmp(p, "title") || !strcmp(p, "name") || !strcmp(p, "rename")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
@@ -509,7 +512,7 @@ script_handler_es_display(char **params)
         }
     } else if (!strcmp(p, "watch") || !strcmp(p, "monitor")) {
         D_ESCREEN(("Monitor display %d\n", no));
-        ns_mon_disp(sess, no);
+        ns_mon_disp(sess, no, NS_MON_TOGGLE_NOISY);
     } else if (!strcmp(p, "back") || !strcmp(p, "backlog") || !strcmp(p, "scrollback")) {
         D_ESCREEN(("View scrollback on display %d\n", no));
         ns_sbb_disp(sess, no);

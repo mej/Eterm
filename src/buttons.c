@@ -1090,10 +1090,19 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
             GC gc;              /* evil temporary hack */
             int f = button->flags & ~NS_SCREAM_BUTTON;
 
+            if (f & NS_SCREAM_CURR) {
+                f = 1;
+            } else if (f & NS_SCREAM_ACT) {
+                f = 2;
+            } else {
+                f = 0;
+            }
+
             gc = LIBAST_X_CREATE_GC(0, NULL);
             XCopyGC(Xdisplay, bbar->gc, GCFont, gc);
             XSetForeground(Xdisplay, gc, PixColors[minBright + f + 2]);
 
+            D_BBAR(("bbar_draw: text \"%s\", colour %d.\n", button->text, f));
             if (f) {
                 draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
                 LIBAST_X_FREE_GC(gc);
