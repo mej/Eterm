@@ -955,6 +955,20 @@ request_code_to_name(int code)
   return "Unknown";
 }
 
+const char *
+get_ctrl_char_name(char c)
+{
+  const char *lookup[] =
+  {
+    "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",  /*  0-7  */
+    "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",          /*  8-15 */
+    "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",  /* 16-23 */
+    "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"        /* 24-31 */
+  };
+
+  return ((c < ' ') ? (lookup[(int) c]) : (""));
+}
+
 static void
 hard_exit(void) {
 
@@ -2600,6 +2614,15 @@ main_loop(void)
       while (cmdbuf_ptr < cmdbuf_endp) {
 
 	ch = *cmdbuf_ptr++;
+#if DEBUG >= DEBUG_VT
+        if (debug_level >= DEBUG_VT) {
+          if (ch < 32) {
+            D_VT(("\'%s\' (%d 0x%02x %03o)\n", get_ctrl_char_name(ch), ch, ch, ch));
+          } else {
+            D_VT(("\'%c\' (%d 0x%02x %03o)\n", ch, ch, ch, ch));
+          }
+        }
+#endif
 	if (ch >= ' ' || ch == '\t' || ch == '\r') {
 	  /* nothing */
 	} else if (ch == '\n') {

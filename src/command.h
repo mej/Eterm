@@ -268,7 +268,13 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 
 #define CHARS_READ()      (cmdbuf_ptr < cmdbuf_endp)
 #define CHARS_BUFFERED()  (count != CMD_BUF_SIZE)
-#define RETURN_CHAR()     do { refreshed = 0; return (*cmdbuf_ptr++); } while (0)
+#define RETURN_CHAR()     do { \
+                            char c = *cmdbuf_ptr++; \
+                            refreshed = 0; \
+                            if (c < 32) D_VT(("RETURN_CHAR():  \'%s\' (%d 0x%02x %03o)\n", get_ctrl_char_name(c), c, c, c)); \
+                            else D_VT(("RETURN_CHAR():  \'%c\' (%d 0x%02x %03o)\n", c, c, c, c)); \
+                            return (c); \
+                          } while (0)
 
 #ifdef REFRESH_DELAY
 # define REFRESH_DELAY_USEC (1000000/25)
@@ -341,6 +347,7 @@ extern void privileges(int);
 extern char *sig_to_str(int);
 extern const char *event_type_to_name(int);
 extern const char *request_code_to_name(int);
+extern const char *get_ctrl_char_name(char);
 extern void dump_stack_trace(void);
 extern void install_handlers(void);
 extern void clean_exit(void);

@@ -162,7 +162,7 @@ dnl# Utility stuff
 dnl#
 dnl# Did they want debugging?
 AC_MSG_CHECKING(for debugging level)
-AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num is an optional level],
+AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num is an integer 0-9],
               if test "$withval" = "yes"; then
                   withval=4
               else

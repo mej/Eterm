@@ -768,7 +768,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
             if (screen.row == screen.bscroll) {
               scroll_text(screen.tscroll, screen.bscroll, 1, 0);
               j = screen.bscroll + TermWin.saveLines;
-              blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
+              blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
             } else if (screen.row < (TermWin.nrow - 1)) {
               screen.row++;
               row = screen.row + TermWin.saveLines;
@@ -797,7 +797,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	j = screen.bscroll + TermWin.saveLines;
 	/* blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
 	   rstyle);    Bug fix from John Ellison - need to reset rstyle */
-        blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
+        blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
       } else if (screen.row < (TermWin.nrow - 1)) {
 	screen.row++;
 	row = screen.row + TermWin.saveLines;
@@ -985,26 +985,29 @@ scr_erase_line(int mode)
     screen.flags &= ~Screen_WrapNext;
 
   row = TermWin.saveLines + screen.row;
-  switch (mode) {
-    case 0:			/* erase to end of line */
-      col = screen.col;
-      num = TermWin.ncol - col;
-      MIN_IT(screen.text[row][TermWin.ncol], col);
-      break;
-    case 1:			/* erase to beginning of line */
-      col = 0;
-      num = screen.col + 1;
-      break;
-    case 2:			/* erase whole line */
-      col = 0;
-      num = TermWin.ncol;
-      screen.text[row][TermWin.ncol] = 0;
-      break;
-    default:
-      return;
+  if (screen.text[row]) {
+    switch (mode) {
+      case 0:			/* erase to end of line */
+        col = screen.col;
+        num = TermWin.ncol - col;
+        MIN_IT(screen.text[row][TermWin.ncol], col);
+        break;
+      case 1:			/* erase to beginning of line */
+        col = 0;
+        num = screen.col + 1;
+        break;
+      case 2:			/* erase whole line */
+        col = 0;
+        num = TermWin.ncol;
+        screen.text[row][TermWin.ncol] = 0;
+        break;
+      default:
+        return;
+    }
+    blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num, rstyle & ~RS_Uline);
+  } else {
+    blank_screen_mem(screen.text, screen.rend, row, rstyle & ~RS_Uline);
   }
-  blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num,
-	     rstyle & ~(RS_RVid | RS_Uline));
 }
 
 /*

@@ -107,6 +107,10 @@ extern unsigned int debug_level;
 #  define DPRINTF3(x)           do { if (debug_level >= 3) {__DEBUG(); real_dprintf x;} } while (0)
 #  define DPRINTF4(x)           do { if (debug_level >= 4) {__DEBUG(); real_dprintf x;} } while (0)
 #  define DPRINTF5(x)           do { if (debug_level >= 5) {__DEBUG(); real_dprintf x;} } while (0)
+#  define DPRINTF6(x)           do { if (debug_level >= 6) {__DEBUG(); real_dprintf x;} } while (0)
+#  define DPRINTF7(x)           do { if (debug_level >= 7) {__DEBUG(); real_dprintf x;} } while (0)
+#  define DPRINTF8(x)           do { if (debug_level >= 8) {__DEBUG(); real_dprintf x;} } while (0)
+#  define DPRINTF9(x)           do { if (debug_level >= 9) {__DEBUG(); real_dprintf x;} } while (0)
 # else
 #  ifndef DPRINTF
 #    define DPRINTF(x)          NOP
@@ -116,6 +120,10 @@ extern unsigned int debug_level;
 #  define DPRINTF3(x)           NOP
 #  define DPRINTF4(x)           NOP
 #  define DPRINTF5(x)           NOP
+#  define DPRINTF6(x)           NOP
+#  define DPRINTF7(x)           NOP
+#  define DPRINTF8(x)           NOP
+#  define DPRINTF9(x)           NOP
 # endif
 
 /* Use this for stuff that you only want turned on in dire situations */
@@ -171,7 +179,10 @@ extern unsigned int debug_level;
 #  define DEBUG_PROFILE			4
 #  define D_PROFILE(x)			DPRINTF4(x)
 
-#  define DEBUG_X			5
+#  define DEBUG_VT                      5
+#  define D_VT(x)                       DPRINTF5(x)
+
+#  define DEBUG_X			9
 
 #  define DEBUG_PARSE			9999
 #  define D_PARSE(x)			D_NEVER(x)
