@@ -348,15 +348,15 @@ reset_simage(simage_t * simg, unsigned long mask)
 
   D_PIXMAP(("reset_simage(%8p, 0x%08x)\n", simg, mask));
 
+  if ((mask & RESET_PMAP_PIXMAP) && simg->pmap->pixmap != None) {
+    imlib_free_pixmap_and_mask(simg->pmap->pixmap);
+    simg->pmap->pixmap = None;
+    simg->pmap->mask = None;
+  }
   if ((mask & RESET_IMLIB_IM) && simg->iml->im) {
     imlib_context_set_image(simg->iml->im);
     imlib_free_image_and_decache();
     simg->iml->im = NULL;
-  }
-  if (((mask & RESET_PMAP_PIXMAP) && simg->pmap->pixmap != None) || ((mask & RESET_PMAP_MASK) && simg->pmap->mask != None)) {
-    imlib_free_pixmap_and_mask(simg->pmap->pixmap);
-    simg->pmap->pixmap = None;
-    simg->pmap->mask = None;
   }
   if ((mask & RESET_IMLIB_BORDER) && simg->iml->border) {
     FREE(simg->iml->border);
@@ -1135,16 +1135,22 @@ search_path(const char *pathlist, const char *file, const char *ext)
     ext = "";
   }
   getcwd(name, PATH_MAX);
+  len = strlen(name);
   D_OPTIONS(("search_path(\"%s\", \"%s\", \"%s\") called from \"%s\".\n", pathlist, file, ext, name));
-  D_OPTIONS(("Checking for file \"%s\"\n", file));
-  if (!access(file, R_OK)) {
-    if (stat(file, &fst)) {
-      D_OPTIONS(("Unable to stat %s -- %s\n", file, strerror(errno)));
+  if (len < PATH_MAX - 1) {
+    strcat(name, "/");
+    strncat(name, file, PATH_MAX - len - 1);
+  }
+  D_OPTIONS(("Checking for file \"%s\"\n", name));
+  if (!access(name, R_OK)) {
+    if (stat(name, &fst)) {
+      D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
     } else {
       D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
     }
-    if (!S_ISDIR(fst.st_mode))
-      return file;
+    if (!S_ISDIR(fst.st_mode)) {
+      return name;
+    }
   }
   if ((p = strchr(file, '@')) == NULL)
     p = strchr(file, '\0');
