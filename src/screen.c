@@ -2185,7 +2185,7 @@ scr_search_scrollback(char *str)
             for (s = strstr(c, str); s; s = strstr(s + 1, str)) {
                 unsigned long j;
 
-                col = (int) s - (int) c;
+                col = (long) s - (long) c;
                 for (i = screen.rend[row] + col, j = 0; j < len; i++, j++) {
                     if (*i & RS_RVid) {
                         *i &= ~RS_RVid;
@@ -2202,7 +2202,7 @@ scr_search_scrollback(char *str)
 
                 if ((row < rows - 1) && !strncasecmp(s, str, k) && screen.text[row + 1]
                     && !strncasecmp(screen.text[row + 1], str + k, len - k)) {
-                    col = (int) s - (int) c;
+                    col = (long) s - (long) c;
                     for (i = &(screen.rend[row][cols - k]), j = 0; j < k; i++, j++) {
                         (*i & RS_RVid) ? (*i &= ~RS_RVid) : (*i |= RS_RVid);
                     }

@@ -18,6 +18,7 @@ static const char cvs_ident[] = "$Id$";
 # include <unistd.h>
 #endif
 #include <errno.h>
+#include <libast.h>
 
 #ifdef PIXMAP_SUPPORT
 #include <X11/Xlib.h>
@@ -267,6 +268,8 @@ main(int argc, char *argv[])
         XFlush(Xdisplay);
     }
 #else
+    USE_VAR(argc);
+    USE_VAR(argv);
     fprintf(stderr, "Eterm was built without pixmap support, so Esetroot is fairly useless.  Sorry.\n");
 #endif
     return 0;

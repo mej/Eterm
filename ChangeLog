@@ -5025,3 +5025,12 @@ Mon Mar 31 19:00:00 2003                          Simon Horman (horms)
 Fixed compilation problem with XIM support which resulted
 in Eterm segfaulting if the XIM server (kinput2) exited.
 ----------------------------------------------------------------------
+Tue Apr 22 11:12:26 2003                        Michael Jennings (mej)
+
+Fixed a couple minor type issues on 64-bit systems.
+
+Cleaned up all the warnings in libscream.c and Esetroot.c.
+
+Updated the spec file to depend on imlib2 and the JPEG/PNG loaders.
+I hate to do that, but it seems necessary.
+----------------------------------------------------------------------

@@ -4,9 +4,10 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.2
-Release: 2
+Release: 3
 Copyright: BSD
 Group: User Interface/X
+Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
 %if %{bzip}
 Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.bz2
 Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.bz2

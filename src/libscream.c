@@ -475,7 +475,7 @@ ns_magic_disp(_ns_sess ** s, _ns_disp ** d)
         return NS_SUCC;
     } else if (s && *s) {
         if (!(*s)->curr) {
-            if ((*s)->curr = (*s)->dsps)
+            if (((*s)->curr = (*s)->dsps))
                 return NS_SUCC;
         } else
             return NS_SUCC;
@@ -801,6 +801,9 @@ ns_desc_twin(_ns_sess * sess, char *doc)
     D_ESCREEN(("%s: twin status (%s) is %d-%s, %d-%s\n", doc, sess->twin_str,
                Tw_Errno(sess->twin),
                Tw_StrError(sess->twin, Tw_Errno(sess->twin)), Tw_ErrnoDetail(sess->twin), Tw_StrErrorDetail(sess->twin, Tw_Errno(sess->twin), Tw_ErrnoDetail(sess->twin))));
+#else
+    USE_VAR(sess);
+    USE_VAR(doc);
 #endif
 }
 
@@ -994,6 +997,8 @@ ns_make_call(_ns_sess * sess)
         ns_free(&tmp);
         return twin;
     }
+#else
+    USE_VAR(twin);
 #endif
     /* unless decidedly in other mode... */
     if (sess->backend != NS_MODE_SCREEN)
@@ -1311,7 +1316,9 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                 }
                             } else
 #  endif
-                                ;
+                                {
+                                    NOP;
+                                }
                             while (*r && (f || *r != ' ')) {
                                 if (*r == '\"')
                                     f = 1 - f;
@@ -1645,7 +1652,6 @@ ns_sbb_disp(_ns_sess * s, int no)
 int
 ns_rel_disp(_ns_sess * s, int d)
 {
-    int n;
     _ns_disp *x;
 
     if (!s)
@@ -1761,6 +1767,10 @@ ns_mov_disp(_ns_sess * s, int fm, int to)
 int
 ns_rsz_disp(_ns_sess * s, int d, int w, int h)
 {
+    USE_VAR(d);
+    USE_VAR(w);
+    USE_VAR(h);
+
     if (!s) {
         return NS_FAIL;
     }
@@ -1775,8 +1785,7 @@ ns_rsz_disp(_ns_sess * s, int d, int w, int h)
 int
 ns_rem_disp(_ns_sess * s, int d, int ask)
 {
-    char *i = NULL, *n;
-    size_t l;
+    char *i = NULL;
     int ret = NS_FAIL;
 
     if (!s) {
@@ -1878,6 +1887,9 @@ ns_ren_disp(_ns_sess * s, int d, char *name)
 int
 ns_log_disp(_ns_sess * s, int d, char *logfile)
 {
+    USE_VAR(d);
+    USE_VAR(logfile);
+
     if (!s) {
         return NS_FAIL;
     }
@@ -1904,6 +1916,7 @@ ns_tog_region(_ns_sess * s, _ns_disp * d)
 int
 ns_go2_region(_ns_sess * s, _ns_disp * d, int n)
 {
+    USE_VAR(n);
     return ns_magic_disp(&s, &d);
 }
 
@@ -1941,6 +1954,9 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 {
     int ret = NS_FAIL;
 
+    USE_VAR(after);
+    USE_VAR(name);
+
     if (ns_magic_disp(&s, &d) == NS_FAIL)
         return NS_FAIL;
 
@@ -1959,6 +1975,10 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 int
 ns_rsz_region(_ns_sess * s, _ns_disp * d, int r, int w, int h)
 {
+    USE_VAR(r);
+    USE_VAR(w);
+    USE_VAR(h);
+
     return ns_magic_disp(&s, &d);
 }
 
@@ -1966,6 +1986,9 @@ int
 ns_rem_region(_ns_sess * s, _ns_disp * d, int r, int ask)
 {
     int ret = NS_FAIL;
+
+    USE_VAR(r);
+    USE_VAR(ask);
 
     if (ns_magic_disp(&s, &d) == NS_FAIL)
         return NS_FAIL;
@@ -1987,6 +2010,8 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 {
     int ret = NS_FAIL;
 
+    USE_VAR(r);
+
     if (ns_magic_disp(&s, &d) == NS_FAIL)
         return NS_FAIL;
 
@@ -2005,30 +2030,38 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 int
 ns_mov_region(_ns_sess * s, _ns_disp * d, int fm, int to)
 {
+    USE_VAR(fm);
+    USE_VAR(to);
     return ns_magic_disp(&s, &d);
 }
 
 int
 ns_ren_region(_ns_sess * s, _ns_disp * d, int r, char *name)
 {
+    USE_VAR(r);
+    USE_VAR(name);
     return ns_magic_disp(&s, &d);
 }
 
 int
 ns_log_region(_ns_sess * s, _ns_disp * d, int r, char *logfile)
 {
+    USE_VAR(r);
+    USE_VAR(logfile);
     return ns_magic_disp(&s, &d);
 }
 
 int
 ns_mon_region(_ns_sess * s, _ns_disp * d, int r)
 {
+    USE_VAR(r);
     return ns_magic_disp(&s, &d);
 }
 
 int
 ns_sbb_region(_ns_sess * s, _ns_disp * d, int r)
 {
+    USE_VAR(r);
     return ns_magic_disp(&s, &d);
 }
 
@@ -2044,6 +2077,8 @@ ns_sbb_region(_ns_sess * s, _ns_disp * d, int r)
 int
 ns_scroll2x(_ns_sess * s, int x)
 {
+    USE_VAR(x);
+
     if (!s) {
         return NS_FAIL;
     }
@@ -2055,6 +2090,8 @@ ns_scroll2x(_ns_sess * s, int x)
 int
 ns_scroll2y(_ns_sess * s, int y)
 {
+    USE_VAR(y);
+
     if (!s) {
         return NS_FAIL;
     }
@@ -2132,6 +2169,8 @@ ns_statement(_ns_sess * s, char *c)
 int
 ns_reset(_ns_sess * s, int type)
 {
+    USE_VAR(type);
+
     if (!s) {
         return NS_FAIL;
     }
@@ -2153,6 +2192,8 @@ ns_get_url(_ns_sess * s, int d)
     char *u;
     char esc[] = "^_\0";
     char lit[] = "^_\0";
+
+    USE_VAR(d);
 
     if (!s) {
         return NULL;
