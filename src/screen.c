@@ -2265,6 +2265,7 @@ scr_dump_to_file(const char *fname)
   int outfd;
   char *buff, *src, *dest;
   unsigned long row, col, rows, cols;
+  struct stat st;
 
   REQUIRE(fname != NULL);
 
@@ -2274,12 +2275,20 @@ scr_dump_to_file(const char *fname)
 
   /* Remove it if it's there.  If this fails, we don't
      care, because open() will do the right thing. */
-  unlink(fname);
+  if ((stat(fname, &st) == 0) || (errno != ENOENT)) {
+    D_SCREEN(("Refusing to use log file \"%s\" -- %s\n", fname, (errno ? strerror(errno) : "File exists")));
+    return;
+  }
 
   /* Only open if it's a new file, and open with permissions 0600 */
   outfd = open(fname, O_CREAT | O_EXCL | O_NDELAY | O_WRONLY, S_IRUSR | S_IWUSR);
   if (outfd < 0) {
     D_SCREEN(("Unable to open \"%s\" for writing -- %s\n", fname, strerror(errno)));
+    return;
+  }
+  if (stat(fname, &st) || !S_ISREG(st.st_mode)) {
+    D_SCREEN(("Race condition exploit attempt detected on \"%s\"!\n", fname));
+    close(outfd);
     return;
   }
   buff = MALLOC(cols + 1);

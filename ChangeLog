@@ -4537,3 +4537,7 @@ Tue Feb 26 10:01:41 2002                        Michael Jennings (mej)
 
 Fixed the default fg color and color 7.
 ----------------------------------------------------------------------
+Sun Apr  7 21:15:09 2002                        Michael Jennings (mej)
+
+Be even more anal when dumping a buffer to a file....
+----------------------------------------------------------------------

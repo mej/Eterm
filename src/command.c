@@ -1039,7 +1039,8 @@ handle_child_signal(int sig)
      child exited before fork() returned in the parent, it must be
      our immediate child that exited.  We exit gracefully. */
   if ((pid == cmd_pid && cmd_pid != -1)
-      || (pid == -1 && errno == ECHILD && cmd_pid != -1)) {
+      || (pid == -1 && errno == ECHILD && cmd_pid != -1)
+      || (pid == 0)) {
     if (Options & Opt_pause) {
       paused = 1;
       return;
@@ -2530,60 +2531,75 @@ cmd_getc(void)
     }
     retval = select(num_fds, &readfds, NULL, NULL, delay);
 
-    /* See if we can read from the application */
-    if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
-      register unsigned int count = CMD_BUF_SIZE;
-
-      cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-      while (count) {
-
-	register int n = read(cmd_fd, cmdbuf_endp, count);
-
-	if (n <= 0) {
-          if (paused) {
-            cmd_fd = -1;
-          }
-	  break;
-        }
-	cmdbuf_endp += n;
-	count -= n;
+    if (retval < 0) {
+      if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
+        print_error("Error reading from tty -- %s\n", strerror(errno));
+        cmd_fd = -1;
       }
-      /* some characters read in */
-      if (CHARS_BUFFERED()) {
-	RETURN_CHAR();
+      if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
+        print_error("Error reading from pipe -- %s\n", strerror(errno));
+        pipe_fd = -1;
       }
-    } else if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
-      register unsigned int count = CMD_BUF_SIZE / 2;
-
-      cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-      while (count) {
-
-	register int n = read(pipe_fd, cmdbuf_endp, count);
-
-	if (n <= 0)
-	  break;
-        n = add_carriage_returns(cmdbuf_endp, n);
-	cmdbuf_endp += n;
-	count -= n;
+      if (pipe_fd < 0 && cmd_fd < 0 && !paused) {
+        exit(errno);
       }
-      /* some characters read in */
-      if (CHARS_BUFFERED()) {
-	RETURN_CHAR();
-      }
-    }
-    if (retval == 0) {
+    } else if (retval == 0) {
       refresh_count = 0;
       refresh_limit = 1;
       if (!refreshed) {
-	refreshed = 1;
-	D_CMD(("select() timed out, time to update the screen.\n"));
-	scr_refresh(refresh_type);
-	if (scrollbar_is_visible()) {
-	  scrollbar_anchor_update_position(1);
+        refreshed = 1;
+        D_CMD(("select() timed out, time to update the screen.\n"));
+        scr_refresh(refresh_type);
+        if (scrollbar_is_visible()) {
+          scrollbar_anchor_update_position(1);
         }
 #ifdef USE_XIM
-	xim_send_spot();
+        xim_send_spot();
 #endif
+      }
+    } else {
+      /* We have something to read from. */
+      if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
+        /* See if we can read from the application */
+        register unsigned int count = CMD_BUF_SIZE;
+
+        cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
+        while (count) {
+
+          register int n = read(cmd_fd, cmdbuf_endp, count);
+
+          if (n <= 0) {
+            if (paused) {
+              cmd_fd = -1;
+            }
+            break;
+          }
+          cmdbuf_endp += n;
+          count -= n;
+        }
+        /* some characters read in */
+        if (CHARS_BUFFERED()) {
+          RETURN_CHAR();
+        }
+      }
+      if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
+        register unsigned int count = CMD_BUF_SIZE / 2;
+
+        cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
+        while (count) {
+
+          register int n = read(pipe_fd, cmdbuf_endp, count);
+
+          if (n <= 0)
+            break;
+          n = add_carriage_returns(cmdbuf_endp, n);
+          cmdbuf_endp += n;
+          count -= n;
+        }
+        /* some characters read in */
+        if (CHARS_BUFFERED()) {
+          RETURN_CHAR();
+        }
       }
     }
   }
