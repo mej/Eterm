@@ -43,6 +43,9 @@ static const char cvs_ident[] = "$Id$";
 #include "script.h"
 #include "term.h"
 #include "windows.h"
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
 
 menulist_t *menu_list = NULL;
 #ifndef ESCREEN
@@ -721,7 +724,7 @@ menuitem_delete(menuitem_t *item)
     if (item->icon) {
         free_simage(item->icon);
     }
-    if (item->type == MENUITEM_STRING || item->type == MENUITEM_ECHO) {
+    if (item->type == MENUITEM_STRING || item->type == MENUITEM_LITERAL || item->type == MENUITEM_ECHO) {
         FREE(item->action.string);
     } else if (item->type == MENUITEM_SCRIPT) {
         FREE(item->action.script);
@@ -779,9 +782,11 @@ menuitem_set_action(menuitem_t *item, unsigned char type, char *action)
           break;
       case MENUITEM_STRING:
       case MENUITEM_ECHO:
+      case MENUITEM_LITERAL:
           item->action.string = (char *) MALLOC(strlen(action) + 2);
           strcpy(item->action.string, action);
-          parse_escaped_string(item->action.string);
+          if (type != MENUITEM_LITERAL)
+              parse_escaped_string(item->action.string);
           break;
       default:
           break;
@@ -1219,20 +1224,14 @@ menu_action(menuitem_t *item)
       case MENUITEM_ECHO:
 #ifdef ESCREEN
           if (TermWin.screen_mode && TermWin.screen) {	/* translate escapes */
-#  ifdef NS_DEBUG
-              {
-                  char *p = item->action.string;
-                  fprintf(stderr, NS_PREFIX "::menu_action: ");
-                  while (*p) {
-                      if (*p < ' ')
-                          fprintf(stderr, "^%c", *p - 1 + 'A');
-                      else
-                          fprintf(stderr, "%c", *p);
-                      p++;
-                  }
-                  fputs("\n", stderr);
-              }
-#  endif
+              ns_parse_screen_interactive(TermWin.screen, item->action.string);
+          } else
+#endif
+              tt_write((unsigned char *) item->action.string, strlen(item->action.string));
+          break;
+      case MENUITEM_LITERAL:
+#ifdef ESCREEN
+          if (TermWin.screen_mode && TermWin.screen) {	/* translate escapes */
               (void) ns_screen_command(TermWin.screen, item->action.string);
           } else
 #endif

@@ -231,6 +231,9 @@ extern unsigned char refresh_all;
 #ifdef MULTI_CHARSET
 extern encoding_t encoding_method;
 #endif
+#ifdef ESCREEN
+extern screen_t screen;
+#endif
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

@@ -137,6 +137,7 @@ extern char *rs_config_file;
 #ifdef ESCREEN
 extern char *rs_url;
 extern char *rs_hop;
+extern int   rs_delay;
 #endif
 extern unsigned int rs_line_space;
 extern unsigned int rs_meta_mod, rs_alt_mod, rs_numlock_mod;

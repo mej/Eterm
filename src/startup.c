@@ -211,7 +211,7 @@ eterm_bootstrap(int argc, char *argv[])
             fputs("You called me \"Eterm\"!\n", stderr);
         else
             fputs("Stop calling me funky names!\n", stderr);
-        fprintf(stderr, "Escreen mode is %d (%d rows, %s)\n", TermWin.screen_mode, TermWin.nrow, rs_url);
+        fprintf(stderr, "Escreen mode is %d (%d rows, URL is \"%s\")\n", TermWin.screen_mode, TermWin.nrow, rs_url);
 #  endif
     }
 #endif

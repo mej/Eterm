@@ -47,18 +47,13 @@ a menu of screen-related actions.  If you normally don't use a button-bar,
 Escreen will create one for you.  Otherwise, it will add buttons to your
 existing bar.
 
+* .screenrc, $SCREENRC, [/usr/local]/etc/screenrc and $SYSSCREENRC are
+  supported.
 
+* Eterm-buttons are supported (left click on display-name to activate
+  the display, middle to close it, right to rename it).
 
-5 - What's new?
-
-* Support for ".screenrc".  This was temporarily disabled to aid in
-  debugging and has now returned in conjunction with
-
-* Escreen accepting non-default key setups and
-
-* renaming of displays
-
-* sending statements to screen (^A: in the default setup) with
+* Sending statements to screen (^A: in the default setup) with
   tab-completion
 
 * support for screen command-line options:
@@ -68,11 +63,24 @@ existing bar.
   escape-character in the ECHO action; Escreen will remap it to
   whatever is actually used in the session)
 
-* rewrite of key parts for enhanced compatibility
-
 * alert boxes for messages from screen
 
 * support for SSH-tunneling through firewalls
+
+
+
+5 - What's new?
+
+* Entering and exiting copy mode no longer produces a dialog box.
+  Just too bloody annoying, that.
+
+* SCREENRC, SYSSCREENRC, .../etc/screenrc support (thanks mej)
+
+* Easy-to-remember key-layout (optional, see below)
+
+* Comes up much faster
+
+* You can pass arbitrary paramters to screen/scream now
 
 
 
@@ -87,15 +95,6 @@ existing bar.
 
 
 9 - FAQ
-
-Q  I don't see any buttons when I connect to a remote screen!
-
-A  Some Debian-users reported this before, and it is presumed to be a
-   problem with the terminfo-data.  Call up Eterm (or xterm, or whatnot).
-   *Then* call up "screen" from inside that terminal.  Is the last line
-   inverted?  If it isn't, something is seriously weird with your setup,
-   and it's not a problem in Escreen.  Sorry.  : (
-   2002/05/13  rewritten code should handle most of these cases
 
 Q  ^A does funny things!
 
@@ -116,11 +115,31 @@ A  You probably already  have changed the magic escape key to something
    Er, you *did* hold Control, then press A, rather then typing a ^ and
    an A, right?
 
-Q  I'd like for the button labels to be in a different colour.
+Q  But I don't like all this control-whatever stuff, can I have easier
+   to remember bindings?
 
-A  At this time, the labels follow the general (text) colours.
-   You will be able to define colours for (foreground|background|active|bell)
-   windows' labels in later releases.
+A  Sure.  Eterm is The Configurable Terminal, after all.  A pret-a-porter
+   example that you can simply add to your theme.cfg file (or %include
+   from it) lives in escreen.cfg -- enjoy.
+
+Q  Escreen changes the escape on the remote box to the same thing as on
+   the local box, does it have to?
+
+A  You can always override the escapes like so:
+
+     Eterm -U user@host.com/-e^Xy
+
+   Where ^X is the escape and y the literal (man screen).
+
+Q  I don't see any buttons when I connect to a remote screen!
+
+A  Some Debian-users reported this before, and it is presumed to be a
+   problem with the terminfo-data.  Call up Eterm (or xterm, or whatnot).
+   *Then* call up "screen" from inside that terminal.  Is the last line
+   inverted?  If it isn't, something is seriously weird with your setup,
+   and it's not a problem in Escreen.  Sorry.  : (
+   2002/05/13  rewritten code should handle most of these cases
+   2002/05/18  rewritten code should handle even more of these cases : )
 
 Q  Escreen opens, then closes again.
 
@@ -136,6 +155,12 @@ Q  Escreen works, except when I use -Z to tunnel through a firewall?
 
 A  Try to manually ssh to the firewall, see how long that takes.  Then,
    tune the -Z option accordingly (cf man Eterm).
+
+Q  I'd like for the button labels to be in a different colour.
+
+A  At this time, the labels follow the general (text) colours.
+   You will be able to define colours for (foreground|background|active|bell)
+   windows' labels in later releases.
 
 Q "screen" support rocks!  Can we have it in konsole/multi-gnome-terminal?
 

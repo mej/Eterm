@@ -1131,7 +1131,8 @@ clean_exit(void)
         font_cache_clear();
         eterm_font_list_clear();
 # ifdef PIXMAP_SUPPORT
-        FOREACH_IMAGE(free_eterm_image(&(images[idx])););
+        FOREACH_IMAGE(free_eterm_image(&(images[idx]));
+            );
 # endif
         for (i = 0; i < NRS_COLORS; i++) {
             if (rs_color[i]) {
@@ -2101,18 +2102,6 @@ run_command(char **argv)
     ttymode_t tio;
     int ptyfd;
 
-#ifdef NS_DEBUG
-    {
-        char **a = argv;
-        if (a) {
-            while (*a) {
-                fprintf(stderr, NS_PREFIX "run_command: %s\n", *a);
-                a++;
-            }
-        }
-    }
-#endif
-
     /* Save and then give up any super-user privileges */
     privileges(IGNORE);
 
@@ -2506,9 +2495,23 @@ upd_disp(void *xd, int n, int flags, char *name)
 /* display a status line the screen program sent us */
 int
 err_msg(void *xd, int err, char *msg)
-{
-    if (strlen(msg))
-        menu_dial(NULL, msg, 0, NULL, NULL);
+{                               /* there are certain things that would make sense if we were displaying
+                                   a status-line; they do not, however, warrant an alert-box, so we drop
+                                   them here. */
+
+    char *sc[] = { "Copy mode", "Bell in" };
+    int n, nsc = sizeof(sc) / sizeof(char *);
+
+    if (strlen(msg)) {
+        for (n = 0; n < nsc; n++) {
+            if (!strncmp(msg, sc[n], strlen(sc[n]))) {
+                break;
+            }
+        }
+        if (n >= nsc) {
+            menu_dial(NULL, msg, 0, NULL, NULL);
+        }
+    }
     return NS_SUCC;
 }
 
@@ -2547,6 +2550,194 @@ exe_prg(void *xd, char **argv)
     return run_command(argv);
 }
 
+
+
+#define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
+#define COLOUR_MASK (RS_fgMask|RS_bgMask)
+#define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
+#define CLEAR (1<<16)
+
+void
+direct_write_screen(int x, int y, char *fg, rend_t bg)
+{
+    int ys = TermWin.saveLines - TermWin.view_start;
+    text_t *t = screen.text[ys + y];
+    rend_t *r = screen.rend[ys + y];
+    if (!fg)
+        return;
+    while (*fg && (x >= 0) && (x < TermWin.ncol)) {
+        t[x] = *(fg++);
+        r[x++] = bg & DIRECT_MASK;
+    }
+}
+
+
+
+void
+bosconian(int n)
+{
+    int x, y;
+    int ys = TermWin.saveLines - TermWin.view_start;
+    while (n--) {
+        for (y = 0; y < TermWin.nrow; y++) {
+            text_t *t = screen.text[ys + y];
+            rend_t *r = screen.rend[ys + y];
+            for (x = 0; x < TermWin.ncol; x++) {
+                t[x] = random() & 0xff;
+                r[x] = random() & COLOUR_MASK;
+            }
+        }
+        scr_refresh(FAST_REFRESH);
+    }
+}
+
+
+
+void
+unbosconian(void)
+{
+    int x, y;
+    int ys = TermWin.saveLines - TermWin.view_start;
+    rend_t bg;
+    do {
+        bg = CLEAR;
+        for (y = 0; (bg == CLEAR) && y < TermWin.nrow; y++) {
+            text_t *t = screen.text[ys + y];
+            rend_t *r = screen.rend[ys + y];
+            for (x = 0; (bg == CLEAR) && x < TermWin.ncol; x++) {
+                if (r[x] != CLEAR) {
+                    bg = r[x];
+                }
+            }
+        }
+        if (bg != CLEAR) {
+            for (y = 0; y < TermWin.nrow; y++) {
+                text_t *t = screen.text[ys + y];
+                rend_t *r = screen.rend[ys + y];
+                for (x = 0; x < TermWin.ncol; x++) {
+                    if (r[x] == bg) {
+                        r[x] = CLEAR;
+                        t[x] = ' ';
+                    }
+                }
+            }
+            scr_refresh(FAST_REFRESH);
+        }
+    } while (bg != CLEAR);
+}
+
+
+
+void
+matrix(int n)
+{
+    int x, y, w, f;
+    int ys = TermWin.saveLines - TermWin.view_start;
+    text_t *s = malloc(TermWin.ncol);
+    text_t *t, *t2;
+    rend_t *r, *r2;
+
+    if (!s) {
+        puts("fail");
+        return;
+    }
+
+    memset(s, 0, TermWin.ncol);
+#define MATRIX_HI CLEAR
+#define MATRIX_LO ((4<<8)|CLEAR)
+
+    while (n--) {
+        for (x = 0; x < TermWin.ncol; x++) {
+            if (!(random() & 3)) {
+                if ((y = s[x])) {
+                    w = random() & 15;
+                } else {
+                    w = 0;
+                }
+                t = screen.text[ys + y];
+                r = screen.rend[ys + y];
+
+                switch (w) {
+                  case 0:      /* restart */
+                      if (s[x]) {
+                          r[x] = MATRIX_LO;
+                          s[x] = 0;
+                          t = screen.text[ys];
+                          r = screen.rend[ys];
+                      }
+                      r[x] = MATRIX_HI;
+                      t[x] = random() & 0xff;
+                      s[x]++;
+                      /* fall-through */
+
+                  case 1:      /* continue */
+                  case 2:
+                  case 3:
+                      f = random() & 7;
+                      while (f--) {
+                          if (y < TermWin.nrow - 1) {
+                              t2 = screen.text[ys + y + 1];
+                              r2 = screen.rend[ys + y + 1];
+                              t2[x] = t[x];
+                              r2[x] = r[x];
+                              s[x]++;
+                              y++;
+                          } else {
+                              s[x] = 0;
+                              f = 0;
+                          }
+                          r[x] = MATRIX_LO;
+                          t[x] = random() & 0xff;
+                          if (f) {
+                              scr_refresh(FAST_REFRESH);
+                              t = screen.text[ys + y];
+                              r = screen.rend[ys + y];
+                          }
+                      }
+                      break;
+
+                  default:     /* hold */
+                      t[x] = random() & 0xff;
+                }
+            }
+        }
+        scr_refresh(FAST_REFRESH);
+    }
+    free(s);
+}
+
+
+
+/* do whatever for ms milli-seconds */
+int
+waitstate(void *xd, int ms)
+{
+    int y = 1;
+    time_t dur = (time_t) (ms / 1000), fin = dur + time(NULL);
+
+    if (!(random() & 7)) {
+        if (!(random() & 3)) {
+            matrix(31);
+            unbosconian();
+        }
+        bosconian(4);
+        unbosconian();
+    }
+
+    direct_write_screen(0, y++, "    **** COMMODORE 64 BASIC V2 ****", (0 << 8) | CLEAR);
+    direct_write_screen(0, y++, " 64K RAM SYSTEM  38911 BASIC BYTES FREE", (0 << 8) | CLEAR);
+    y += 2;
+    direct_write_screen(0, y++, "READY.", (0 << 8) | CLEAR);
+    screen.row = y;
+    screen.col = 0;
+
+    scr_refresh(FAST_REFRESH);
+
+    sleep(dur);
+
+    return 0;
+}
+
 #endif
 
 
@@ -2579,6 +2770,8 @@ init_command(char **argv)
     ns_register_txt(efuns, inp_text);
     ns_register_inp(efuns, inp_dial);
     ns_register_tab(efuns, menu_tab);
+
+    ns_register_fun(efuns, waitstate);
 #endif
 
     /* Initialize the command connection.  This should be called after
@@ -2613,16 +2806,38 @@ init_command(char **argv)
         button_t *button;
         menu_t *m;
         menuitem_t *i;
+        if (rs_delay >= 0) {
+            TermWin.screen->delay = rs_delay;	/* more flexible ways later */
+        }
         if ((m = menu_create(NS_MENU_TITLE))) {
-            char *sc[] = { "New", "\x01\x03", "Close", "\x01k" };
+            char *sc[] = {
+                /* display functions */
+                "New", "\x01:screen\r",
+                "New ...", "\x01\x03\x01\x41",
+                "Backlog ...", "\x01\x1b",
+                "Monitor", "\x01M",
+                "Close", "\x01k",
+                "-", "",
+                /* region functions */
+                "Split", "\x01S",
+                "Unsplit", "\x01Q",
+                "Prvs region", NS_SCREEN_PRVS_REG,
+                "Next region", "\x01\t",
+                "Kill region", "\x01X",
+                "-", "",
+                /* screen functions */
+                "Reset", NS_SCREEN_INIT,
+                "Statement", "\x01:",
+                "-", ""
+            };
             int n, nsc = sizeof(sc) / sizeof(char *);
 
             if (menu_list) {
                 for (n = 0; n < menu_list->nummenus; n++) {	/* blend in w/ l&f */
-#ifdef NS_DEBUG
-                    fprintf(stderr, NS_PREFIX "font: %d: %p\n", n, menu_list->menus[n]->font);
-#endif
                     if (menu_list->menus[n]->font) {
+#ifdef NS_DEBUG
+                        fprintf(stderr, NS_PREFIX "font: %d: %p\n", n, menu_list->menus[n]->font);
+#endif
                         m->font = menu_list->menus[n]->font;
                         m->fwidth = menu_list->menus[n]->fwidth;
                         m->fheight = menu_list->menus[n]->fheight;
@@ -2635,11 +2850,22 @@ init_command(char **argv)
             }
 
             for (n = 0; n < (nsc - 1); n += 2) {
-                if ((i = menuitem_create(sc[n]))) {
+                if (!strcmp(sc[n], "-")) {	/* separator */
+                    if ((i = menuitem_create(NULL))) {
+                        menu_add_item(m, i);
+                        menuitem_set_action(i, MENUITEM_SEP, NULL);
+                    }
+                } /* menu entry */
+                else if ((i = menuitem_create(sc[n]))) {
+                    menuitem_set_action(i, n && strcmp(sc[n + 1], NS_SCREEN_INIT)
+                                        && strcmp(sc[n + 1], NS_SCREEN_PRVS_REG) ? MENUITEM_ECHO : MENUITEM_LITERAL, sc[n + 1]);
 #  ifdef NS_DEBUG
-                    fprintf(stderr, NS_PREFIX "register %s (%d)\n", &sc[n + 1][1], *sc[n + 1]);
+                    {
+                        char buf[64];
+                        sprintf(buf, NS_PREFIX "escreen_menu: registered %s as", sc[n]);
+                        ns_desc_string(i->action.string, buf);
+                    }
 #  endif
-                    menuitem_set_action(i, MENUITEM_ECHO, sc[n + 1]);
                     menu_add_item(m, i);
                 }
             }
@@ -3054,6 +3280,7 @@ main_loop(void)
         check_pixmap_change(0);
     }
 #endif
+
     do {
         while ((ch = cmd_getc()) == 0);	/* wait for something */
         if (ch >= ' ' || ch == '\t' || ch == '\n' || ch == '\r') {

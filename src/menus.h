@@ -35,6 +35,7 @@
 #define MENUITEM_ECHO		(1UL << 3)
 #define MENUITEM_SCRIPT		(1UL << 4)
 #define MENUITEM_ALERT		(1UL << 5)
+#define MENUITEM_LITERAL	(1UL << 6)
 
 #define MENU_STATE_IS_MAPPED	(1UL << 0)
 #define MENU_STATE_IS_CURRENT	(1UL << 1)

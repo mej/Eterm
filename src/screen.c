@@ -52,7 +52,10 @@ static rend_t **buf_rend = NULL;
 /* Tab stop locations */
 static char *tabs = NULL;
 
-static screen_t screen = {
+#ifndef ESCREEN
+static
+#endif
+screen_t screen = {
     NULL, NULL, 0, 0, 0, 0, 0, Screen_DefaultFlags
 };
 
@@ -3366,8 +3369,21 @@ xim_get_position(XPoint * pos)
 void
 parse_screen_status_if_necessary(void)
 {
+    static int hc = 0;
     ns_parse_screen(TermWin.screen, (TermWin.screen_pending > 1), TermWin.ncol, screen.text[TermWin.nrow + TermWin.saveLines - 1]);
     if (TermWin.screen_pending > 1)
         TermWin.screen_pending = 0;
+#if 0
+    {
+        FILE *fh;
+        int c;
+        if ((fh = fopen("Escreen.log", "a"))) {
+            for (c = 0; c < 8; c++)
+                if (strcmp(drawn_text[c], drawn_text[c + 1]))
+                    fprintf(fh, "%2d  \"%s\"\n", c, drawn_text[c]);
+            fclose(fh);
+        }
+    }
+#endif
 }
 #endif

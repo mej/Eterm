@@ -61,7 +61,7 @@ action_handle_echo(event_t *ev, action_t *action)
     REQUIRE_RVAL(action->param.string != NULL, 0);
 #ifdef ESCREEN
     if (TermWin.screen_mode && TermWin.screen)	/* translate escapes */
-        ns_screen_command(TermWin.screen, action->param.string);
+        ns_parse_screen_interactive(TermWin.screen, action->param.string);
     else
 #endif
         tt_write((unsigned char *) action->param.string, strlen(action->param.string));

@@ -16,19 +16,23 @@
 #define NS_PARANOID
 
 /* define NS_DEBUG to get debug-info. no support for those who undef this. */
-#undef  NS_DEBUG
+#undef NS_DEBUG
 
 /* debug memory stuff. never actually used this. */
 #undef  NS_DEBUG_MEM
 
+#define NS_MAXCMD            512
+
 #define NS_SSH_CALL          "ssh"
 #define NS_SSH_OPTS          "-t"
 #define NS_SSH_TUNNEL_OPTS   "-N"
-#define NS_SCREAM_CALL       "scream"
+#define NS_SCREAM_CALL       "scream %s"
 #define NS_SCREAM_OPTS       "-xRR"
-#define NS_SCREEN_CALL       "screen"
+#define NS_SCREEN_CALL       "screen %s"
 #define NS_SCREEN_OPTS       "-xRR"
-#define NS_SCREEM_CALL       "\"" NS_SCREAM_CALL " " NS_SCREAM_OPTS " 2>/dev/null || " NS_SCREEN_CALL " " NS_SCREEN_OPTS "\""
+#define NS_SCREEN_GREP       "grep escape \"$SCREENRC\" 2>/dev/null || grep escape ~/.screenrc 2>/dev/null || grep escape \"$SYSSCREENRC\" 2>/dev/null || grep escape /etc/screenrc 2>/dev/null || grep escape /usr/local/etc/screenrc 2>/dev/null || echo \"escape ^Aa\"\n"
+#define NS_SCREEM_CALL       "%s 2>/dev/null || %s"
+#define NS_WRAP_CALL         "export TERM=vt100; %s"
 #define NS_SCREEN_RC         ".screenrc"
 
 /* this should never change. the escape-char for an out-of-the-box "screen".
@@ -44,7 +48,8 @@
    else is used in the session, libscream will convert it on the fly. */
 /* DO NOT use \005Lw for your status, it breaks older screens!! */
 #define NS_SCREEN_UPDATE     "\x01w"
-#define NS_SCREEN_INIT       "\x01:hardstatus lastline\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:msgminwait 0\r\x01:msgwait 1\r\x01:nethack off\r" NS_SCREEN_UPDATE
+#define NS_SCREEN_INIT       "\x0c\x01Z\x01:hardstatus lastline\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:msgminwait 0\r\x01:msgwait 1\r\x01:nethack off\r" NS_SCREEN_UPDATE
+#define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22
 #define NS_MIN_PORT          1025
@@ -61,6 +66,9 @@
 /* if >0, force an update every NS_SCREEN_UPD_FREQ seconds.
    a bit of a last resort. */
 #define NS_SCREEN_UPD_FREQ   0
+
+/* should be 1s */
+#define NS_INIT_DELAY        1
 
 /* how many seconds to wait for an SSH-tunnel to build when using the
    -Z option (tunnel through firewall).  2 for very fast networks,

@@ -33,6 +33,7 @@
 #define NS_SCREEN_ST_CLR  12
 #define NS_EFUN_NOT_SET   13
 #define NS_USER_CXL       14
+#define NS_NOT_ALLOWED    15
 
 #define NS_ERR_WEIRDSCREEN 1
 
@@ -49,6 +50,11 @@
 
 #define NS_HOP_DOWN        0
 #define NS_HOP_UP          1
+
+#define NS_ESC_CMDLINE     1
+#define NS_ESC_SYSSCREENRC 2
+#define NS_ESC_SCREENRC    3
+#define NS_ESC_INTERACTIVE 4
 
 
 
@@ -82,9 +88,12 @@ typedef struct __ns_sess {   /* a whole screen-session with many clients */
                                 ssh-key should be on the remote machine. */
   char   *rsrc;              /* add'l parameter to screen/scream. URL-enc */
   char   *home;              /* user's home dir. so we can find .screenrc */
+  char   *sysrc;             /* global screen config */
   void   *userdef;           /* the term-app can store a pointer here */
   int     fd;                /* fd for communication */
   char    escape,literal;    /* talking to screen: defaults to ^A, a */
+  int     escdef;            /* where was the escape sequence defined? */
+  int     delay;             /* initialization delay */
   int     dsbb;              /* default length of scroll-back buffer */
   struct __ns_efuns *efuns;  /* callbacks into the terminal program. */
   struct __ns_hop   *hop;    /* tunnel, if any */
@@ -130,6 +139,7 @@ typedef struct __ns_efuns {  /* callbacks into the terminal program */
   int   (*inp_text)(void *,int,char *);
   int   (*inp_dial)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
   int   (*inp_tab)(void *,char *[],int,char *,size_t,size_t);
+  int   (*waitstate)(void *,int);
 } _ns_efuns;
 
 
@@ -153,6 +163,7 @@ _ns_efuns *ns_dst_efuns(_ns_efuns **);
 _ns_efuns *ns_get_efuns(_ns_sess *,_ns_disp *);
 
 /* debug */
+void ns_desc_string(char *,char *);
 void ns_desc_hop(_ns_hop *,char *);
 void ns_desc_sess(_ns_sess *,char *);
 
@@ -167,14 +178,17 @@ _ns_sess *ns_attach_by_URL(char *,char *,_ns_efuns **,int *,void *);
 /* send command to screen */
 int ns_screen_command(_ns_sess *, char *);
 
-/* send statement to screen */
+/* send statement to screen (prefixing it with the session's ^A: equiv) */
 int ns_screen_xcommand(_ns_sess *,char , char *);
 
-/* parse and forward a screen-statement */
-int ns_parse_screen_cmd(_ns_sess *,char *);
+/* parse and forward a screen-statement (from ^A: input or screenrc) */
+int ns_parse_screen_cmd(_ns_sess *,char *,int);
 
 /* parse and forward a screen-hotkey */
 int ns_parse_screen_key(_ns_sess *,char);
+
+/* parse and forward a string */
+int ns_parse_screen_interactive(_ns_sess *, char *);
 
 /* parse screen escape setup */
 char ns_parse_esc(char **);
@@ -222,6 +236,7 @@ void ns_register_txt(_ns_efuns *,int (*inp_text)(void *,int,char *));
 
 void ns_register_inp(_ns_efuns *,int (*)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t)));
 void ns_register_tab(_ns_efuns *,int (*)(void *,char *[],int,char *,size_t,size_t));
+void ns_register_fun(_ns_efuns *,int (*)(void *,int));
 
 
 

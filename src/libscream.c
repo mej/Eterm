@@ -12,6 +12,8 @@
  * 2002/05/04  Azundris  support for esoteric screens, thanks to Till
  * 2002/05/12  Azundris  edit display names, send statement, tab completion
  * 2002/05/13  Azundris  ssh tunnel through firewall
+ * 2002/05/17  Azundris  supports systemwide screenrc (thanks mej)
+ * 2002/05/18  Azundris  remote handling improved (thanks tillsan, tfing)
  ***************************************************************************/
 
 
@@ -42,6 +44,26 @@
 
 
 
+/* test if we have a valid callback for function-type "e".
+  !p  a variable of the "_ns_efuns *" type.  will contain a pointer to
+      an efun struct containing a function pointer to the requested function
+      if such a struct exists, or NULL, if it doesn't exist
+   s  a variable of the "_ns_sess *" type, or NULL (see ns_get_efuns())
+   d  a variable of the "_nd_disp *" type, or NULL (see ns_get_efuns())
+   e  the name of an element of "_ns_efuns"
+  !<- conditional execution of next (compound-) statement (which would
+      normally be (p)->(e)(...), the call of the function e).
+ */
+#define NS_EFUN_EXISTS(p,s,d,e)  (((p) = ns_get_efuns((s),(d))) && ((p)->e))
+
+
+
+/***************************************************************************/
+/* module-global vars */
+/**********************/
+
+
+
 static long err_inhibit = 0;    /* bits. avoid telling same error twice. */
 static _ns_sess *sa = NULL;     /* anchor for session list */
 static _ns_hop *ha = NULL;      /* anchor for hop list */
@@ -51,6 +73,20 @@ static _ns_hop *ha = NULL;      /* anchor for hop list */
 /***************************************************************************/
 /* constructors/destructors */
 /****************************/
+
+
+
+/* ns_free
+   free a string (or whatever) */
+
+void *
+ns_free(char **x)
+{
+    if (!x || !*x)
+        return;
+    free(*x);
+    *x = NULL;
+}
 
 
 
@@ -280,6 +316,7 @@ ns_new_sess(void)
         s->escape = NS_SCREEN_ESCAPE;	/* default setup for the screen program */
         s->literal = NS_SCREEN_LITERAL;
         s->dsbb = NS_SCREEN_DEFSBB;
+        s->delay = NS_INIT_DELAY;
         if (sa) {               /* add to end of list */
             _ns_sess *r = sa;
             while (r->next)
@@ -341,28 +378,33 @@ ns_dst_sess(_ns_sess ** ss)
 int
 ns_screen_command(_ns_sess * sess, char *cmd)
 {
+    _ns_efuns *efuns;
     char *c;
     int ret = NS_SUCC;
 
-    if (!cmd || !*cmd)
+    if (!cmd || !*cmd) {
         return NS_FAIL;
+    }
 
-    if (sess->efuns->inp_text) {
+    if (NS_EFUN_EXISTS(efuns, sess, NULL, inp_text)) {
         if ((c = strdup(cmd))) {
-            {
-                char *p = c;    /* replace default escape-char with that */
-                while (*p) {    /* actually used in this session */
-                    if (*p == NS_SCREEN_ESCAPE)
-                        *p = sess->escape;
-                    p++;
+            char *p;            /* replace default escape-char with that */
+
+            for (p = c; *p; p++) {	/* actually used in this session */
+                if (*p == NS_SCREEN_ESCAPE) {
+                    *p = sess->escape;
                 }
             }
-            sess->efuns->inp_text(NULL, sess->fd, c);
+#ifdef NS_DEBUG
+            ns_desc_string(c, "ns_screen_command: xlated string");
+#endif
+            efuns->inp_text(NULL, sess->fd, c);
             free(c);
-        } else
+        } else {
+            /* out of memory */
             ret = NS_OOM;
-    } /* out of memory */
-    else {
+        }
+    } else {
         ret = NS_EFUN_NOT_SET;
         fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->inp_text not set!\n");
     }
@@ -472,10 +514,12 @@ ns_upd_stat(_ns_sess * s)
 int
 ns_inp_dial(_ns_sess * s, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
+    _ns_efuns *efuns;
     char *c;
     int ret = NS_SUCC;
-    if (s->efuns->inp_dial) {
-        (void) s->efuns->inp_dial((void *) s, prompt, maxlen, retstr, inp_tab);
+
+    if (NS_EFUN_EXISTS(efuns, s, NULL, inp_dial)) {
+        (void) efuns->inp_dial((void *) s, prompt, maxlen, retstr, inp_tab);
     } else {
         ret = NS_EFUN_NOT_SET;
         fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->inp_dial not set!\n");
@@ -499,8 +543,10 @@ ns_inp_dial(_ns_sess * s, char *prompt, int maxlen, char **retstr, int (*inp_tab
 int
 ns_sess_init(_ns_sess * sess)
 {
-    if ((sess->backend == NS_MODE_NEGOTIATE) || (sess->backend == NS_MODE_SCREEN))
-        return ns_parse_screenrc(sess);
+    if ((sess->backend == NS_MODE_NEGOTIATE) || (sess->backend == NS_MODE_SCREEN)) {
+        (void) ns_parse_screenrc(sess, sess->sysrc, NS_ESC_SYSSCREENRC);
+        return ns_parse_screenrc(sess, sess->home, NS_ESC_SCREENRC);
+    }
     return NS_SUCC;
 }
 
@@ -579,11 +625,47 @@ ns_parse_hop(_ns_sess * s, char *h)
 
 
 
+/* ns_desc_string
+   c        the string
+   doc      context-info
+   !stdout  the string, in human-readable form */
+
+void
+ns_desc_string(char *c, char *doc)
+{
+    char *p = c;
+
+    if (doc)
+        fprintf(stderr, NS_PREFIX "%s: ", doc);
+
+    if (!c) {
+        fputs("NULL\n", stderr);
+        return;
+    } else if (!*c) {
+        fputs("empty\n", stderr);
+        return;
+    }
+
+    while (*p) {
+        if (*p < ' ')
+            fprintf(stderr, "^%c", *p + 'A' - 1);
+        else
+            fputc(*p, stderr);
+        p++;
+    }
+
+    fputs("\n", stderr);
+
+    return;
+}
+
+
+
 /* ns_desc_hop
    print basic info about a hop (tunnel, firewall).  mostly for debugging.
    hop:    a hop struct as generated by (eg) ns_attach_by_URL()
    doc:    info about the context
- ! stdout: info about the hop */
+ ! stderr: info about the hop */
 
 void
 ns_desc_hop(_ns_hop * h, char *doc)
@@ -607,13 +689,14 @@ ns_desc_hop(_ns_hop * h, char *doc)
    print basic info about a session.  mostly for debugging.
    sess:   a session struct as generated by (eg) ns_attach_by_URL()
    doc:    info about the context
- ! stdout: info about the session */
+ ! stderr: info about the session */
 
 void
 ns_desc_sess(_ns_sess * sess, char *doc)
 {
     if (!sess) {
         fprintf(stderr, NS_PREFIX "%s: ns_desc_sess called with broken pointer!\n", doc);
+        fflush(stderr);
         return;
     }
     if (sess->where == NS_LCL)
@@ -627,8 +710,12 @@ ns_desc_sess(_ns_sess * sess, char *doc)
     fprintf(stderr, "%c%s\n", sess->where == NS_LCL ? ' ' : '/', sess->rsrc);
     if (sess->hop)
         ns_desc_hop(sess->hop, NULL);
+    if (sess->sysrc)
+        fprintf(stderr, NS_PREFIX "info: searching for sysrc in %s\n", sess->sysrc);
     if (sess->home)
-        fprintf(stderr, NS_PREFIX "info: searching for rc in %s\n", sess->home);
+        fprintf(stderr, NS_PREFIX "info: searching for usrrc in %s\n", sess->home);
+    fprintf(stderr, NS_PREFIX "info: escapes set to ^%c-%c\n", sess->escape + 'A' - 1, sess->literal);
+    fflush(stderr);
 }
 
 
@@ -716,6 +803,64 @@ ns_run(_ns_efuns * efuns, char *cmd)
 
 
 
+/* create a call line. used in ns_attach_ssh/lcl
+   tmpl   the template. should contain one %s
+   dflt   the default value
+   opt    the user-supplied value (or NULL)
+   <-     a new malloc'd string (or NULL) */
+
+char *
+ns_make_call_el(char *tmpl, char *dflt, char *opt)
+{
+    size_t l, r;
+    char *p;
+
+    if (tmpl && dflt && *tmpl && strstr(tmpl, "%s")) {
+        l = strlen(tmpl) + (opt ? strlen(opt) : strlen(dflt)) - 1L;
+        if ((p = malloc(l))) {
+            r = snprintf(p, l, tmpl, opt ? opt : dflt);
+            if ((r >= 0) && (r < l)) {
+                return p;
+            }
+            free(p);
+        }
+    }
+    return NULL;
+}
+
+
+
+char *
+ns_make_call(_ns_sess * sess)
+{
+    char *call, *tmp = NULL, *screen = NULL, *scream = NULL, *screem = NULL;
+
+    /* unless decidedly in other mode... */
+    if (sess->backend != NS_MODE_SCREEN)
+        tmp = scream = ns_make_call_el(NS_SCREAM_CALL, NS_SCREAM_OPTS, sess->rsrc);
+    if (sess->backend != NS_MODE_SCREAM)
+        tmp = screen = ns_make_call_el(NS_SCREEN_CALL, NS_SCREEN_OPTS, sess->rsrc);
+    if (sess->backend == NS_MODE_NEGOTIATE) {
+        size_t r, l = strlen(NS_SCREEM_CALL) + strlen(scream) + strlen(screen) - 3;
+        if ((screem = malloc(l))) {
+            r = snprintf(screem, l, NS_SCREEM_CALL, scream, screen);
+#ifdef NS_PARANOID
+            if ((r < 0) || (r > l)) {
+                ns_free(&screem);
+            }
+#endif
+        }
+        tmp = screem;
+    }
+    call = ns_make_call_el(NS_WRAP_CALL, tmp, NULL);
+    ns_free(&screen);
+    ns_free(&scream);
+    ns_free(&screem);
+    return call;
+}
+
+
+
 /* attach a local session (using screen/scream)
    sp  the session
    <-  NS_FAIL, or the result of ns_run() */
@@ -724,28 +869,37 @@ int
 ns_attach_lcl(_ns_sess ** sp)
 {
     _ns_sess *sess;
-#define MAXCMD 512
-    char cmd[MAXCMD + 1];
-    int ret;
+    char *call;
+    int ret = -1;
 
     if (!sp || !*sp)
-        return NS_FAIL;
+        return ret;
+
     sess = *sp;
-    ret = snprintf(cmd, MAXCMD, "%s %s", NS_SCREEN_CALL, sess->rsrc ? sess->rsrc : NS_SCREEN_OPTS);
-    return (ret < 0 || ret > MAXCMD) ? NS_FAIL : ns_run(sess->efuns, cmd);
+
+    if (call = ns_make_call(sess)) {
+        char *c2 = ns_make_call_el("/bin/sh -c \"%s\"", call, NULL);
+        ns_free(&call);
+        if (c2) {
+            ret = ns_run(sess->efuns, c2);
+            ns_free(&c2);
+        }
+    }
+    return ret;
 }
 
 
 
 /* attach a remote session (using screen/scream via ssh)
    sp  the session
-   <-  NS_FAIL, or the result of ns_run() */
+   <-  -1, or the result of ns_run() */
 
 int
 ns_attach_ssh(_ns_sess ** sp)
 {
     _ns_sess *sess;
-    char cmd[MAXCMD + 1];
+    char cmd[NS_MAXCMD + 1];
+    char *call;
     int ret;
 
     if (!sp || !*sp)
@@ -753,23 +907,31 @@ ns_attach_ssh(_ns_sess ** sp)
 
     sess = *sp;
 
+    call = ns_make_call(sess);
+
     if (sess->hop) {
         if (sess->hop->established == NS_HOP_DOWN) {	/* the nightmare foe */
-            ret = snprintf(cmd, MAXCMD, "%s %s -p %d -L %d:%s:%d %s@%s",
+            ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d -L %d:%s:%d %s@%s",
                            NS_SSH_CALL, NS_SSH_TUNNEL_OPTS,
-                           sess->hop->fwport, sess->hop->localport, sess->host, sess->port, sess->user, sess->hop->fw, NS_SCREEM_CALL);
-            if (ret < 0 || ret > MAXCMD)
+                           sess->hop->fwport, sess->hop->localport, sess->host, sess->port, sess->user, sess->hop->fw);
+            if (ret < 0 || ret > NS_MAXCMD)
                 return NS_FAIL;
             ns_run(sess->efuns, cmd);
             sleep(sess->hop->delay);
         }
-        ret = snprintf(cmd, MAXCMD, "%s %s -p %d %s@localhost %s",
-                       NS_SSH_CALL, NS_SSH_OPTS, sess->hop->localport, sess->user, NS_SCREEM_CALL);
+        ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@localhost \"%s -e^%c%c\"",
+                       NS_SSH_CALL, NS_SSH_OPTS, sess->hop->localport, sess->user, call, sess->escape + 'A' - 1, sess->literal);
     } else {
-        ret = snprintf(cmd, MAXCMD, "%s %s -p %d %s@%s %s", NS_SSH_CALL, NS_SSH_OPTS, sess->port, sess->user, sess->host, NS_SCREEM_CALL);
+        ret =
+            snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@%s \"%s -e^%c%c\"", NS_SSH_CALL, NS_SSH_OPTS, sess->port, sess->user, sess->host, call,
+                     sess->escape + 'A' - 1, sess->literal);
     }
-
-    return (ret < 0 || ret > MAXCMD) ? NS_FAIL : ns_run(sess->efuns, cmd);
+    ns_free(&call);
+#ifdef NS_DEBUG
+    fprintf(stderr, "\n\n>>%s\n>>%s\n\n", call, cmd);
+    fflush(stderr);
+#endif
+    return (ret < 0 || ret > NS_MAXCMD) ? NS_FAIL : ns_run(sess->efuns, cmd);
 }
 
 
@@ -801,6 +963,8 @@ ns_attach_by_sess(_ns_sess ** sp, int *err)
     ns_desc_sess(sess, "ns_attach_by_sess()");
 #endif
 
+    (void) ns_sess_init(sess);
+
     switch (sess->where) {
       case NS_LCL:
           sess->fd = ns_attach_lcl(&sess);
@@ -817,10 +981,9 @@ ns_attach_by_sess(_ns_sess ** sp, int *err)
     }
 
 #ifdef NS_DEBUG
-    fprintf(stderr, NS_PREFIX "ns_attach_by_sess: screen session-fd is %d\n", sess->fd);
+    fprintf(stderr, NS_PREFIX "ns_attach_by_sess: screen session-fd is %d, ^%c-%c\n", sess->fd, sess->escape + 'A' - 1, sess->literal);
 #endif
 
-    (void) ns_sess_init(sess);
     return sess;
 
   fail:
@@ -929,6 +1092,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                 if ((x = ns_parse_esc(&r)) && (y = ns_parse_esc(&r))) {
                                     sess->escape = x;
                                     sess->literal = y;
+                                    sess->escdef = NS_ESC_CMDLINE;
                                 }
                             } else if (*r == 'c') {	/* alt screenrc */
                                 char *rc, *rx;
@@ -991,20 +1155,37 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
             goto fail;
     } else if (pwe && strcmp(pwe->pw_name, sess->user)) {	/* user!=current_user */
         sess->where = NS_SU;
-        if (!(pwe = getpwnam(sess->user))) {
+        if (!(pwe = getpwnam(sess->user)) && !sess->host && !sess->port) {
             *err = NS_UNKNOWN_USER;
             goto fail;
         }
     }
 
-    if (getenv("SCREENRC")) {
+    if (getenv("SYSSCREENRC")) {	/* $SYSSCREENRC */
+        if (!(sess->sysrc = strdup(getenv("SCREENRC"))))
+            goto fail;
+    } else {
+        char *loc[] = { "/usr/local/etc/screenrc",	/* official */
+            "/etc/screenrc",    /* actual (on SuSE) */
+            "/usr/etc/screenrc",
+            "/opt/etc/screenrc"
+        };
+        int n, nloc = sizeof(loc) / sizeof(char *);
+        for (n = 0; n < nloc; n++)
+            if (!access(loc[n], R_OK)) {
+                if (!(sess->sysrc = strdup(loc[n])))
+                    goto fail;
+                n = nloc;
+            }
+    }
+
+    if (getenv("SCREENRC")) {   /* $SCREENRC */
         sess->home = strdup(getenv("SCREENRC"));
-    } else if (pwe && !sess->home) {
+    } else if (pwe && !sess->home) {	/* ~/.screenrc */
         if ((sess->home = malloc(strlen(pwe->pw_dir) + strlen(NS_SCREEN_RC) + 2)))
             sprintf(sess->home, "%s/%s", pwe->pw_dir, NS_SCREEN_RC);
-        else
-            goto fail;
-    }
+    } else
+        goto fail;
 
     if (!sess->host) {          /* no host */
         if (!(sess->host = strdup("localhost")))
@@ -1020,7 +1201,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 
     sess->backend = NS_MODE_NEGOTIATE;
     if (!sess->proto) {
-        if (!(sess->proto = strdup("scream")))
+        if (!(sess->proto = strdup("screXX")))
             goto fail;
     } else if (!strcmp(sess->proto, "screen"))
         sess->backend = NS_MODE_SCREEN;
@@ -1061,7 +1242,9 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 int
 ns_detach(_ns_sess ** sess)
 {
+#ifdef NS_DEBUG
     ns_desc_sess(*sess, "ns_detach");
+#endif
     (void) ns_dst_sess(sess);
     return NS_SUCC;
 }
@@ -1181,6 +1364,15 @@ ns_register_tab(_ns_efuns * efuns, int (*inp_tab) (void *, char *[], int, char *
 
 
 
+/* function that will do whatever while waiting */
+void
+ns_register_fun(_ns_efuns * efuns, int (*inp_fun) (void *, int))
+{
+    efuns->waitstate = inp_fun;
+}
+
+
+
 /* get callbacks.  at least one of session and display must be non-NULL.
    s  session, or NULL. if NULL, will be initialized from d->sess
    d  display, or NULL. if NULL, will be initialized from s->curr.
@@ -1205,20 +1397,6 @@ ns_get_efuns(_ns_sess * s, _ns_disp * d)
     else
         return s->efuns;
 }
-
-
-
-/* test if we have a valid callback for function-type "e".
-  !p  a variable of the "_ns_efuns *" type.  will contain a pointer to
-      an efun struct containing a function pointer to the requested function
-      if such a struct exists, or NULL, if it doesn't exist
-   s  a variable of the "_ns_sess *" type, or NULL (see ns_get_efuns())
-   d  a variable of the "_nd_disp *" type, or NULL (see ns_get_efuns())
-   e  the name of an element of "_ns_efuns"
-  !<- conditional execution of next (compound-) statement (which would
-      normally be (p)->(e)(...), the call of the function e).
- */
-#define NS_IF_EFUN_EXISTS(p,s,d,e) if(((p)=ns_get_efuns((s),(d)))&&((p)->e))
 
 
 
@@ -1282,10 +1460,8 @@ disp_fetch_or_make(_ns_sess * s, int n)
 
     d->sess = s;                /* note session on display */
 
-#if 1
     if (!d->sess->curr)         /* note as current on session if first display */
         d->sess->curr = d;
-#endif
 
     return d;
 }
@@ -1407,11 +1583,13 @@ ns_inp_tab(void *xd, char *b, size_t l, size_t m)
         "writelock", "xoff", "xon", "zombie"
     };
 
+    _ns_efuns *efuns;
     _ns_sess *s = (_ns_sess *) xd;
     int nsc = sizeof(sc) / sizeof(char *);
 
-    if (s->efuns->inp_tab)
-        return s->efuns->inp_tab((void *) s, sc, nsc, b, l, m) < 0 ? NS_FAIL : NS_SUCC;
+    if (NS_EFUN_EXISTS(efuns, s, NULL, inp_tab)) {
+        return efuns->inp_tab((void *) s, sc, nsc, b, l, m) < 0 ? NS_FAIL : NS_SUCC;
+    }
 
     fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->inp_tab not set!\n");
     return NS_EFUN_NOT_SET;
@@ -1470,12 +1648,13 @@ ns_parse_esc(char **x)
 /* ns_parse_screen_cmd
    parse a command the user intends to send to the screen program,
    either via .screenrc or using ^A:
-   s   the affected (current) session.  s->current should be set.
-   p   the command
+   s       the affected (current) session.  s->current should be set.
+   p       the command
+   whence  which parsing stage (screenrc, interactive, ...)
    <-  error code */
 
 int
-ns_parse_screen_cmd(_ns_sess * s, char *p)
+ns_parse_screen_cmd(_ns_sess * s, char *p, int whence)
 {
     char *p2;
     long v1 = -1;
@@ -1492,21 +1671,33 @@ ns_parse_screen_cmd(_ns_sess * s, char *p)
             v1 = -1;
     }
 #define IS_CMD(b) (strncasecmp(p,b,strlen(b))==0)
-    if (!p2)
+    if (!p2) {
         fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\" without an argument...\n", p);
-    else if (IS_CMD("defescape"))
+        /* must return success so it's fowarded to screen in interactive mode.
+           that way, the user can read the original reply instead of a fake
+           one from us. */
+        return NS_SUCC;
+    } else if (IS_CMD("defescape"))
         fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"defescape\", did you mean \"escape\"?\n");
-    else if (IS_CMD("defhstatus") || IS_CMD("hardstatus") || IS_CMD("echo") ||
-             IS_CMD("colon") || IS_CMD("nethack") ||
-             IS_CMD("info") || IS_CMD("time") || IS_CMD("title") || IS_CMD("wall") ||
-             IS_CMD("lastmsg") || IS_CMD("msgwait") || IS_CMD("msgminwait"))
+    else if (IS_CMD("defhstatus") || IS_CMD("hardstatus") || IS_CMD("echo") || IS_CMD("colon") || IS_CMD("wall") ||
+#ifdef NS_PARANOID
+             IS_CMD("nethack") ||
+#endif
+             IS_CMD("info") || IS_CMD("time") || IS_CMD("title") || IS_CMD("lastmsg") || IS_CMD("msgwait") || IS_CMD("msgminwait")) {
         fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\", not applicable...\n", p);
-    else if (IS_CMD("escape")) {
+        return NS_NOT_ALLOWED;
+    } else if (IS_CMD("escape")) {
         char x = 0, y = 0;
         if ((x = ns_parse_esc(&p2)) && (y = ns_parse_esc(&p2))) {
-            s->escape = x;
-            s->literal = y;
-            return NS_SUCC;
+            if (s->escdef == NS_ESC_CMDLINE) {
+                fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"escape\"; overridden on command-line...\n", x, y);
+                return NS_NOT_ALLOWED;
+            } else {
+                s->escape = x;
+                s->literal = y;
+                s->escdef = whence;
+                return NS_SUCC;
+            }
         } else
             fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"escape\" because of invalid arguments %o %o...\n", x, y);
     } else if (IS_CMD("defscrollback")) {
@@ -1570,8 +1761,11 @@ ns_parse_screen_key(_ns_sess * s, char c)
       case NS_SCREEN_CMD:      /* send command (statement) to screen server */
           (void) ns_inp_dial((void *) s, "Enter a command to send to the \"screen\" program", 64, &i, ns_inp_tab);
           if (i) {
-              ret = ns_screen_xcommand(s, c, i);
-              (void) ns_parse_screen_cmd(s, i);
+              if ((ret = ns_parse_screen_cmd(s, i, NS_ESC_INTERACTIVE)) == NS_SUCC) {
+                  ret = ns_screen_xcommand(s, c, i);
+              } else if (ret == NS_NOT_ALLOWED) {
+                  menu_dial(NULL, "Sorry, David, I cannot allow that.", 0, NULL, NULL);
+              }
               free(i);
           }
           break;
@@ -1600,24 +1794,72 @@ ns_parse_screen_key(_ns_sess * s, char c)
 
 
 
-/* ns_parse_screenrc -- read the user's screenrc (if we can find it),
-   parse it (we need to know if she changes the escapes etc.), and
-   send it to the actually screen
+/* ns_parse_screen_interactive
+   parse a whole string that may contain screen-escapes that should be
+   handled interactively (that should open dialog boxes etc.).
+   this will normally be called by menus, buttons etc. that want to send
+   input to the add without generating X events for the keystrokes (real
+   keystrokes do not come through here; the keyboard-handler should call
+   ns_parse_screen_key() directly when it sees the session's escape-char).
    s   the session in question
+   c   the string to parse
    <-  error code */
 
 int
-ns_parse_screenrc(_ns_sess * s)
+ns_parse_screen_interactive(_ns_sess * sess, char *c)
+{
+    char *s, *p, *o;
+
+    if (!c || !*c)
+        return NS_FAIL;
+#ifdef NS_PARANOID
+    if (!(s = o = strdup(c)))
+        return NS_FAIL;
+#else
+    s = c;
+#endif
+
+    p = s;
+
+    while ((p = strchr(s, NS_SCREEN_ESCAPE))) {
+        *p = '\0';
+        (void) ns_screen_command(sess, s);
+        *p = NS_SCREEN_ESCAPE;
+        if (*(++p))
+            ns_parse_screen_key(sess, *(p++));
+        s = p;
+    }
+    (void) ns_screen_command(sess, s);
+
+#ifdef NS_PARANOID
+    free(o);
+#endif
+
+    return NS_SUCC;
+}
+
+
+
+/* ns_parse_screenrc -- read the user's screenrc (if we can find it),
+   parse it (we need to know if she changes the escapes etc.), and
+   send it to the actually screen
+   s       the session
+   fn      name of the file in question
+   whence  which screenrc are we in?
+   <-      error code */
+
+int
+ns_parse_screenrc(_ns_sess * s, char *fn, int whence)
 {
     int fd = -1;
     char *rc = NULL;
     char _e = '\0', _l = '\0', *esc = NULL;
 
-    if (s->home) {
+    if (fn) {
         struct stat st;
         ssize_t rd = 0;
 
-        if ((fd = open(s->home, 0)) >= 0) {
+        if ((fd = open(fn, 0)) >= 0) {
             if (!fstat(fd, &st)) {
                 if ((rc = malloc(st.st_size + 1))) {
                     char *p;
@@ -1655,7 +1897,7 @@ ns_parse_screenrc(_ns_sess * s)
                         }
 
                         if (strlen(p))	/* any commands in line? */
-                            ns_parse_screen_cmd(s, p);
+                            ns_parse_screen_cmd(s, p, whence);
                         p = n;  /* done, next line */
                     }
                     free(rc);
@@ -1705,8 +1947,9 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
     type = (strlen(p) > 1) ? NS_SCREEN_STATUS : NS_SCREEN_ST_CLR;
 
     if (type == NS_SCREEN_ST_CLR) {
-        NS_IF_EFUN_EXISTS(efuns, screen, NULL, err_msg)
+        if (NS_EFUN_EXISTS(efuns, screen, NULL, err_msg)) {
             ret = efuns->err_msg(NULL, type, "");
+        }
     }
     /* a screen display can disappear because the program in it dies, or
        because we explicitly ask screen to kill the display.  in the latter
@@ -1723,15 +1966,19 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         p = NULL;
     } else if (!strcmp(p, "New screen...") || !strncmp(p, "msgwait", strlen("msgwait")) || !strncmp(p, "msgminwait", strlen("msgminwait")))
         p = NULL;
+#ifndef NS_PARANOID
+    /* FIXME. */
     else if (sscanf(p, NS_SCREEN_VERSION, &p3, &ma, &mi, &mu, &p2, &d) == 6) {
         if (!strcmp("en", p3))
             screen->backend = NS_MODE_SCREEN;
         else if (!strcmp("am", p3))
             screen->backend = NS_MODE_SCREAM;
-#ifdef NS_DEBUG
+#  ifdef NS_DEBUG
         fprintf(stderr, NS_PREFIX "ns_parse_screen_msg: scre%s %d.%2d.%2d %s a/o %s\n", p3, ma, mi, mu, p2, d);
+#  endif
+    }
 #endif
-    } else if (!strcmp(p, NS_SCREEN_NO_DEBUG))
+    else if (!strcmp(p, NS_SCREEN_NO_DEBUG))
         p = "debug info was not compiled into \"screen\"...";
     else if (!strncmp(p, NS_SCREEN_DK_CMD, strlen(NS_SCREEN_DK_CMD))) {
         p[strlen(p) - 1] = '\0';
@@ -1739,8 +1986,9 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         p = "unknown screen statement ignored";
     }
     if (p) {                    /* status. send to status-line or dialog or whatever */
-        NS_IF_EFUN_EXISTS(efuns, screen, NULL, err_msg)
+        if (NS_EFUN_EXISTS(efuns, screen, NULL, err_msg)) {
             ret = efuns->err_msg(NULL, type, p);
+        }
     }
     return ret;
 }
@@ -1788,7 +2036,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
     if (!screen || !p || !width)
         return NS_FAIL;
 
-    if (!force)
+    if (!force && screen->timestamp)
         return NS_SUCC;
 
     if (p = strdup(p)) {
@@ -1803,17 +2051,26 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
         fprintf(stderr, NS_PREFIX "parse_screen: screen sends ::%s::\n", p);
 #endif
 
-#ifdef NS_PARANOID_
         if (strlen(p) < 2) {    /* special case: display 0 */
             disp = screen->dsps;	/* might not get a status-line in d0! */
             if (disp && !(disp->flags & NS_SCREAM_CURR)) {	/* flags need updating */
                 disp->flags |= NS_SCREAM_CURR;	/* set flag to avoid calling inp_text */
                 ret = ns_upd_stat(screen);
-            }                   /* more than once */
+            } /* more than once */
+            else if (!screen->timestamp) {
+                screen->timestamp = time(NULL);
+                if (screen->delay > 0) {
+                    if (NS_EFUN_EXISTS(efuns, screen, NULL, waitstate)) {
+                        ret = efuns->waitstate(NULL, screen->delay * 1000);
+                    } else {
+                        sleep(screen->delay);
+                    }
+                }
+                (void) ns_screen_command(screen, NS_SCREEN_INIT);
+            }
             free(p);
             return ret;
         }
-#endif
 
         p3 = p;
         while (isspace(*p3))    /* skip left padding */
@@ -1876,8 +2133,9 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                         fprintf(stderr, NS_PREFIX "parse_screen: out of memory in new_display(%d)\n", n);
                         ret = NS_FAIL;
                     } else {
-                        NS_IF_EFUN_EXISTS(efuns, screen, NULL, ins_disp)
+                        if (NS_EFUN_EXISTS(efuns, screen, NULL, ins_disp)) {
                             ret = efuns->ins_disp(screen->userdef, pd[r].real - 1, disp->name);
+                        }
                     }
                 } else if ((tmp = strcmp(disp->name, pd[r].name)) ||	/* upd display */
                            (disp->flags != pd[r].flags)) {
@@ -1891,8 +2149,9 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                     if (pd[r].flags & NS_SCREAM_CURR)
                         disp->sess->curr = disp;
                     disp->flags = pd[r].flags & NS_SCREAM_MASK;
-                    NS_IF_EFUN_EXISTS(efuns, screen, NULL, upd_disp)
+                    if (NS_EFUN_EXISTS(efuns, screen, NULL, upd_disp)) {
                         ret = efuns->upd_disp(screen->userdef, r, disp->flags, disp->name);
+                    }
                 }
 
                 /* remove any displays from list that have disappeared
@@ -1904,8 +2163,9 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                         fprintf(stderr, NS_PREFIX "parse_screen: remove expired middle %d \"%s\"...\n", d3->index, d3->name);
 #endif
                         d4 = d3->prvs;
-                        NS_IF_EFUN_EXISTS(efuns, screen, NULL, del_disp)
+                        if (NS_EFUN_EXISTS(efuns, screen, NULL, del_disp)) {
                             ret = efuns->del_disp(screen->userdef, disp_get_real_by_screen(screen, d3->index));
+                        }
                         disp_kill(d3);
                         d3 = d4;
                     }
@@ -1945,8 +2205,9 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                     if (d2->sess->curr == d2)
                         d2->sess->curr = d3;
                     disp = disp->next;
-                    NS_IF_EFUN_EXISTS(efuns, screen, NULL, del_disp)
+                    if (NS_EFUN_EXISTS(efuns, screen, NULL, del_disp)) {
                         ret = efuns->del_disp(screen->userdef, disp_get_real_by_screen(screen, d2->index));
+                    }
                     disp_kill(d2);
                 }
                 d3->next = NULL;
@@ -1963,26 +2224,12 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
        we could send it before entering this function for the first time,
        but that would break if escapes or screenrc were set from the
        command-line. don't ask. */
-#ifdef NS_DEBUG
-    if (!screen)
-        fprintf(stderr, NS_PREFIX "parse_screen: session went away!?\n\n  CONDITION RED!\n  CONDITION RED!\n  DANGER WILL ROBINSON!!!\n\n");
-    else
-#endif
-    {
-        if (!screen->timestamp) {
-            screen->timestamp = time(NULL);
-#ifdef NS_DEBUG
-            fprintf(stderr, NS_PREFIX "parse_screen: sending NS_SCREEN_INIT with prefix %d...\n", screen->escape);
-#endif
-            ret = ns_screen_command(screen, NS_SCREEN_INIT);
-        }
 #if (NS_SCREEN_UPD_FREQ>0)
-        else if ((t2 - screen->timestamp) > NS_SCREEN_UPD_FREQ) {
-            (void) ns_upd_stat(screen);
-            screen->timestamp = t2;
-        }
-#endif
+    if ((t2 - screen->timestamp) > NS_SCREEN_UPD_FREQ) {
+        (void) ns_upd_stat(screen);
+        screen->timestamp = t2;
     }
+#endif
 
     return ret;
 }

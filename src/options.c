@@ -139,6 +139,7 @@ char *rs_config_file = NULL;
 #ifdef ESCREEN
 char *rs_url = NULL;
 char *rs_hop = NULL;
+int rs_delay = -1;
 #endif
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
@@ -168,6 +169,7 @@ static const struct {
 #ifdef ESCREEN
         OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
         OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
+        OPT_INT('z', "delay", "initial delay in seconds", &rs_delay),
 #endif
 #if DEBUG <= 0
         OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &DEBUG_LEVEL),
@@ -1566,10 +1568,12 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "buttonbar")) {
         if (bool_val) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
+                );
             rs_buttonbars = 1;  /* Reset for future use. */
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
+                );
             rs_buttonbars = 1;  /* Reset for future use. */
         }
 
@@ -3055,9 +3059,11 @@ post_parse(void)
        specified.  If specified, it will either become 3 (on) or 0 (off). */
     if (rs_buttonbars != 1) {
         if (rs_buttonbars) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
+                );
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
+                );
         }
         rs_buttonbars = 1;      /* Reset for future use. */
     }
