@@ -1,19 +1,16 @@
-%define bzip     0
+%if %{!?compression:1}0
+%define compression gz
+%endif
 
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.3
-Release: 0.1
+Release: 0.2
 Copyright: BSD
 Group: User Interface/X
 Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
-%if %{bzip}
-Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.bz2
-Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.bz2
-%else
-Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.gz
-Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.gz
-%endif
+Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.%{compression}
+Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.%{compression}
 URL: http://www.eterm.org/
 BuildRoot: /var/tmp/%{name}-%{version}-root
 
@@ -69,14 +66,14 @@ EOF
 chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 
 %post
-test -x /sbin/ldconfig && /sbin/ldconfig
+/sbin/ldconfig || :
 
 if [ -d /usr/share/terminfo -a ! -f /usr/share/terminfo/E/Eterm ]; then
     tic -o/usr/share/terminfo $RPM_DOC_DIR/%{name}-%{version}/%{name}.ti || :
 fi
 
 %postun
-test -x /sbin/ldconfig && /sbin/ldconfig
+/sbin/ldconfig || :
 
 %clean
 rm -rf $RPM_BUILD_ROOT

@@ -5219,3 +5219,9 @@ Mon May 10 18:43:15 2004                        Michael Jennings (mej)
 
 Revert change from February 29th.  I never could reproduce it anyway.
 ----------------------------------------------------------------------
+Fri Jun 25 17:48:24 2004                        Michael Jennings (mej)
+
+Chris Schoeneman <crs23@bigfoot.com> pointed out that Eterm didn't get
+keypresses if another app (like synergy) decided to listen for its
+events.  This should correct that behavior.
+----------------------------------------------------------------------

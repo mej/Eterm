@@ -688,7 +688,8 @@ scrollbar_init(int width, int height)
     Attributes.override_redirect = TRUE;
     Attributes.save_under = TRUE;
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-    mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask;
+    mask = KeyPressMask | ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask
+        | Button1MotionMask | Button2MotionMask | Button3MotionMask;
     scrollbar_calc_size(width, height);
     scrollbar.anchor_top = scrollbar.scrollarea_start;
     scrollbar.anchor_bottom = scrollbar.scrollarea_end;

@@ -467,7 +467,9 @@ Create_Windows(int argc, char *argv[])
         XClearWindow(Xdisplay, TermWin.vt);
     }
     XDefineCursor(Xdisplay, TermWin.vt, TermWin_cursor);
-    TermWin.mask = (EnterWindowMask | LeaveWindowMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask);
+    TermWin.mask = (KeyPressMask | EnterWindowMask | LeaveWindowMask | ExposureMask
+                    | ButtonPressMask | ButtonReleaseMask | Button1MotionMask
+                    | Button2MotionMask | Button3MotionMask);
     XSelectInput(Xdisplay, TermWin.vt, TermWin.mask);
 
     /* If the user wants a specific desktop, tell the WM that */

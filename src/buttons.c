@@ -91,7 +91,7 @@ buttonbar_t *bbar_create(void)
     xattr.colormap = cmap;
 
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-    mask = EnterWindowMask | LeaveWindowMask | PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
+    mask = KeyPressMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
     gcvalue.foreground = xattr.border_pixel;
 
     bbar->font = load_font(etfonts[def_font_idx], "fixed", FONT_TYPE_X);

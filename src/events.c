@@ -205,7 +205,9 @@ handle_key_press(event_t *ev)
 
     PROF_INIT(handle_key_press);
     D_EVENTS(("handle_key_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
+#if UNUSED_BLOCK
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
+#endif
 
     COUNT_EVENT(keypress_cnt);
     if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT))) {
