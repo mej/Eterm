@@ -1418,14 +1418,10 @@ encouraged.
 
 .RS 5
 .BI font " num" " " "font"
-.br
-.BI "font bold " font
 .RS 5
 Set the
 .IR num th
-multichar font, or the
-.B bold
-multichar font, to
+multichar font to
 .IR font .
 .RE
 .RE
