@@ -388,6 +388,9 @@ handle_focus_in(event_t * ev)
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(Options & Opt_scrollbar);
+    } else {
+      scrollbar_set_focus(TermWin.focus);
+      scrollbar_draw(MODE_SOLID);
     }
 #ifdef USE_XIM
     if (xim_input_context != NULL)
@@ -412,6 +415,9 @@ handle_focus_out(event_t * ev)
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(0);
+    } else {
+      scrollbar_set_focus(TermWin.focus);
+      scrollbar_draw(MODE_SOLID);
     }
 #ifdef USE_XIM
     if (xim_input_context != NULL)

@@ -675,28 +675,6 @@ void
 scrollbar_reset(void)
 {
   D_SCROLLBAR(("scrollbar_reset()\n"));
-#if 0
-  if (gc_scrollbar != None) {
-    XFreeGC(Xdisplay, gc_scrollbar);
-    gc_scrollbar = None;
-  }
-# if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-  if (gc_top != None) {
-    XFreeGC(Xdisplay, gc_top);
-    gc_top = None;
-  }
-  if (gc_bottom != None) {
-    XFreeGC(Xdisplay, gc_bottom);
-    gc_bottom = None;
-  }
-# endif
-# ifdef XTERM_SCROLLBAR
-  if (gc_stipple != None) {
-    XFreeGC(Xdisplay, gc_stipple);
-    gc_stipple = None;
-  }
-# endif
-#endif /* 0 */
   last_top = last_bot = 0;
   scrollbar.init = 0;
 }

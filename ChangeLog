@@ -2985,3 +2985,9 @@ Mon Jan  3 11:14:27 PST 2000	Michael Jennings <mej@eterm.org>
 	menu.
 	
 -------------------------------------------------------------------------------
+Mon Jan  3 12:47:59 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed the bug with a solid scrollbar not updating colors when the
+	focus changed.  Pointed out by cirin <stevenr@houston.rr.com>.
+	
+-------------------------------------------------------------------------------
