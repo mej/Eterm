@@ -1275,9 +1275,44 @@ char *
 builtin_exec(char *param)
 {
 
+  unsigned long fsize;
+  char *Command, *Output = NULL, *OutFile;
+  FILE *fp;
+
   D_PARSE(("builtin_exec(%s) called\n", param));
 
-  return (param);
+  Command = (char *) MALLOC(CONFIG_BUFF);
+  OutFile = tmpnam(NULL);
+  if (strlen(param) + strlen(OutFile) + 8 > CONFIG_BUFF) {
+    print_error("Parse error in file %s, line %lu:  Cannot execute command, line too long",
+                file_peek_path(), file_peek_line());
+    return ((char *) NULL);
+  }
+  strcpy(Command, param);
+  strcat(Command, " >");
+  strcat(Command, OutFile);
+  system(Command);
+  if ((fp = fopen(OutFile, "rb")) != NULL) {
+    fseek(fp, 0, SEEK_END);
+    fsize = ftell(fp);
+    rewind(fp);
+    if (fsize) {
+      Output = (char *) MALLOC(fsize + 1);
+      fread(Output, fsize, 1, fp);
+      Output[fsize] = 0;
+      fclose(fp);
+      remove(OutFile);
+      Output = CondenseWhitespace(Output);
+    } else {
+      print_warning("Command at line %lu of file %s returned no output.", file_peek_line(), file_peek_path());
+    }
+  } else {
+    print_warning("Output file %s could not be created.  (line %lu of file %s)", NONULL(OutFile),
+                  file_peek_line(), file_peek_path());
+  }
+  FREE(Command);
+
+  return (Output);
 }
 
 char *
@@ -1335,10 +1370,9 @@ shell_expand(char *s)
   register unsigned long j, k, l = 0;
   char new[CONFIG_BUFF];
   unsigned char eval_escape = 1, eval_var = 1, eval_exec = 1, eval_func = 1, in_single = 0, in_double = 0;
-  unsigned long fsize, cnt1 = 0, cnt2 = 0;
+  unsigned long cnt1 = 0, cnt2 = 0;
   const unsigned long max = CONFIG_BUFF - 1;
-  char *Command, *Output, *EnvVar, *OutFile;
-  FILE *fp;
+  char *Command, *Output, *EnvVar;
 
   ASSERT_RVAL(s != NULL, (char *) NULL);
 
@@ -1455,72 +1489,22 @@ shell_expand(char *s)
 	  Command = (char *) MALLOC(CONFIG_BUFF);
 	  l = 0;
 	  for (pbuff++; *pbuff && *pbuff != '`' && l < max; pbuff++, l++) {
-	    switch (*pbuff) {
-	      case '$':
-		D_OPTIONS(("Environment variable detected.  Evaluating.\n"));
-		EnvVar = (char *) MALLOC(128);
-		switch (*(++pbuff)) {
-		  case '{':
-		    for (pbuff++, k = 0; *pbuff != '}' && k < 127; k++, pbuff++)
-		      EnvVar[k] = *pbuff;
-		    break;
-		  case '(':
-		    for (pbuff++, k = 0; *pbuff != ')' && k < 127; k++, pbuff++)
-		      EnvVar[k] = *pbuff;
-		    break;
-		  default:
-		    for (k = 0; (isalnum(*pbuff) || *pbuff == '_') && k < 127; k++, pbuff++)
-		      EnvVar[k] = *pbuff;
-		    break;
-		}
-		EnvVar[k] = 0;
-		if ((tmp = getenv(EnvVar))) {
-		  strncpy(Command + l, tmp, max - l);
-                  cnt1 = strlen(tmp) - 1;
-                  cnt2 = max - l - 1;
-                  l += MIN(cnt1, cnt2);
-		}
-		pbuff--;
-		break;
-	      default:
-		Command[l] = *pbuff;
-	    }
+            Command[l] = *pbuff;
 	  }
           ASSERT(l < CONFIG_BUFF);
 	  Command[l] = 0;
-	  OutFile = tmpnam(NULL);
-	  if (l + strlen(OutFile) + 8 > CONFIG_BUFF) {
-	    print_error("Parse error in file %s, line %lu:  Cannot execute command, line too long",
-			file_peek_path(), file_peek_line());
-	    return ((char *) NULL);
-	  }
-	  strcat(Command, " >");
-	  strcat(Command, OutFile);
-	  system(Command);
-	  if ((fp = fopen(OutFile, "rb")) != NULL) {
-	    fseek(fp, 0, SEEK_END);
-	    fsize = ftell(fp);
-	    rewind(fp);
-	    if (fsize) {
-	      Output = (char *) MALLOC(fsize + 1);
-	      fread(Output, fsize, 1, fp);
-	      Output[fsize] = 0;
-	      fclose(fp);
-	      remove(OutFile);
-	      Output = CondenseWhitespace(Output);
-	      strncpy(new + j, Output, max - j);
-              cnt1 = strlen(Output) - 1;
-              cnt2 = max - j - 1;
-	      j += MIN(cnt1, cnt2);
-	      FREE(Output);
-	    } else {
-	      print_warning("Command at line %lu of file %s returned no output.", file_peek_line(), file_peek_path());
-	    }
-	  } else {
-	    print_warning("Output file %s could not be created.  (line %lu of file %s)", NONULL(OutFile),
-			  file_peek_line(), file_peek_path());
-	  }
+          Command = shell_expand(Command);
+          Output = builtin_exec(Command);
 	  FREE(Command);
+	  if (Output && *Output) {
+	    l = strlen(Output) - 1;
+	    strncpy(new + j, Output, max - j);
+            cnt2 = max - j - 1;
+	    j += MIN(l, cnt2);
+	    FREE(Output);
+	  } else {
+	    j--;
+	  }
 	} else {
 	  new[j] = *pbuff;
 	}

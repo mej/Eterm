@@ -205,8 +205,8 @@ eterm_bootstrap(int argc, char *argv[])
   Create_Windows(argc, argv);
   scr_reset();			/* initialize screen */
 
-  /* add scrollBar, do it directly to avoid resize() */
   scrollbar_mapping(Options & Opt_scrollBar);
+  scrollbar_resize(szHint.width, szHint.height);
 
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {
@@ -276,7 +276,6 @@ eterm_bootstrap(int argc, char *argv[])
 
   D_CMD(("init_command()\n"));
   init_command(rs_execArgs);
-  parent_resize();
 
   main_loop();
 

@@ -54,7 +54,7 @@ static unsigned char timeout = 0;
 unsigned char
 check_for_enlightenment(void)
 {
-  static char have_e = -1;
+  static signed char have_e = -1;
 
   if (have_e == -1) {
     if (XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True) != None) {

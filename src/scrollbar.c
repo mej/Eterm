@@ -201,6 +201,8 @@ scrollbar_init(void)
   Cursor cursor;
   long mask;
 
+  D_SCROLLBAR(("scrollbar_init():  Initializing all scrollbar elements.\n"));
+
   Attributes.background_pixel = PixColors[scrollColor];
   Attributes.border_pixel = PixColors[bgColor];
   Attributes.override_redirect = TRUE;
@@ -213,22 +215,26 @@ scrollbar_init(void)
 				CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
   XDefineCursor(Xdisplay, scrollBar.win, cursor);
   XSelectInput(Xdisplay, scrollBar.win, mask);
+  D_SCROLLBAR(("scrollbar_init():  Created scrollbar window 0x%08x\n", scrollBar.win));
 
 #ifdef PIXMAP_SCROLLBAR
   if (scrollbar_uparrow_is_pixmapped()) {
     scrollBar.up_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollBar.up_win, mask);
+    D_SCROLLBAR(("scrollbar_init():  Created scrollbar up arrow window 0x%08x\n", scrollBar.up_win));
   }
   if (scrollbar_downarrow_is_pixmapped()) {
     scrollBar.dn_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollBar.dn_win, mask);
+    D_SCROLLBAR(("scrollbar_init():  Created scrollbar down arrow window 0x%08x\n", scrollBar.dn_win));
   }
   if (scrollbar_anchor_is_pixmapped()) {
     scrollBar.sa_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollBar.sa_win, mask);
+    D_SCROLLBAR(("scrollbar_init():  Created scrollbar anchor window 0x%08x\n", scrollBar.sa_win));
   }
 #endif
 
@@ -237,6 +243,7 @@ scrollbar_init(void)
   } else {
     scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
   }
+  D_SCROLLBAR(("scrollbar_init():  Set scrollbar shadow to %d\n", scrollbar_get_shadow()));
   event_register_dispatcher(scrollbar_dispatch_event, scrollbar_event_init_dispatcher);
 
 }
@@ -376,9 +383,6 @@ sb_handle_expose(event_t * ev)
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
-  if (scrollbar_win_is_scrollbar(ev->xany.window)) {
-    scrollbar_show(0);
-  }
   return 1;
 }
 
@@ -613,6 +617,7 @@ scrollbar_mapping(unsigned char show)
   D_SCROLLBAR(("scrollbar_mapping(%d)\n", show));
 
   if (show && !scrollbar_visible()) {
+    D_SCROLLBAR((" -> Mapping all scrollbar windows.  Returning 1.\n"));
     scrollBar.state = 1;
     XMapWindow(Xdisplay, scrollBar.win);
 #ifdef PIXMAP_SCROLLBAR
@@ -628,6 +633,7 @@ scrollbar_mapping(unsigned char show)
 #endif
     change = 1;
   } else if (!show && scrollbar_visible()) {
+    D_SCROLLBAR((" -> Unmapping all scrollbar windows.  Returning 1.\n"));
     scrollBar.state = 0;
 #ifdef PIXMAP_SCROLLBAR
     if (scrollbar_uparrow_is_pixmapped()) {
@@ -642,6 +648,8 @@ scrollbar_mapping(unsigned char show)
 #endif
     XUnmapWindow(Xdisplay, scrollBar.win);
     change = 1;
+  } else {
+    D_SCROLLBAR((" -> No action required.  Returning 0.\n"));
   }
   return change;
 }

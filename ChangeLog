@@ -2721,3 +2721,11 @@ Fri Oct 29 16:43:19 PDT 1999	Michael Jennings <mej@eterm.org>
 	You'll see what I'm talking about. :-)
 	
 -------------------------------------------------------------------------------
+Tue Nov  2 16:53:56 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Several bugs fixed here, most notably a potential seg fault in
+	Esetroot, and remembering an Eterm's size works again.  Also a minor
+	redraw speedup.  And %exec() now works properly instead of just
+	causing Eterm to crash. :-)
+	
+-------------------------------------------------------------------------------

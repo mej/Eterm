@@ -169,9 +169,17 @@ main(int argc, char *argv[])
   params.flags = PARAMS_VISUALID;
   params.visualid = (DefaultVisual(Xdisplay, screen))->visualid;
   id = Imlib_init_with_params(Xdisplay, &params);
-  im = Imlib_load_image(id, fname);
-  if (debug) {
+  if (id == NULL) {
+    fprintf(stderr, "%s:  Unable to initialize Imlib.\n", *argv);
+    exit(1);
+  } else if (debug) {
     fprintf(stderr, "%s:%d:  The Imlib Data is at %8p\n", __FILE__, __LINE__, id);
+  }
+  im = Imlib_load_image(id, fname);
+  if (im == NULL) {
+    fprintf(stderr, "%s:  Unable to load image file \"%s\".\n", *argv, fname);
+    exit(1);
+  } else if (debug) {
     fprintf(stderr, "%s:%d:  The Imlib Image is at %8p\n", __FILE__, __LINE__, im);
   }
   if (scale) {
