@@ -2053,6 +2053,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   const char *icon_path;
   Imlib_Image temp_im = (Imlib_Image) NULL;
   Imlib_Load_Error im_err;
+  Imlib_Color_Modifier tmp_cmod;
   XWMHints *wm_hints;
   int w = 8, h = 8;
 
@@ -2061,6 +2062,11 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   } else {
     wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
   }
+
+  /* Make sure no shading/tinting is applied to the icon. */
+  tmp_cmod = imlib_create_color_modifier();
+  imlib_context_set_color_modifier(tmp_cmod);
+  imlib_reset_color_modifier();
 
   if (filename && *filename) {
     if ((icon_path = search_path(rs_path, filename)) == NULL)
@@ -2108,6 +2114,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   imlib_context_set_anti_alias(1);
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
+  
   imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, w, h);
   if (check_for_enlightenment()) {
     wm_hints->flags |= IconPixmapHint | IconMaskHint;

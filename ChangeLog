@@ -4552,3 +4552,8 @@ Changed occurances of "noenc" to the correct keyword, "none."  Thanks
 to Laurence J. Lane <ljlane@debian.org> for pointing this one out
 also.
 ----------------------------------------------------------------------
+Sun Apr 14 22:34:41 2002                        Michael Jennings (mej)
+
+Fixed a bug spotted by Charles Clancy <tclancy@uiuc.edu> that caused
+color modifiers to mistakenly be applied to the icon pixmap.
+----------------------------------------------------------------------
