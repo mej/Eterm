@@ -4,7 +4,7 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.2
-Release: 1
+Release: 2
 Copyright: BSD
 Group: User Interface/X
 %if %{bzip}

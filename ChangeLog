@@ -4952,3 +4952,7 @@ A few fixes from Andre Pang <ozone@algorithm.com.au>.  One for big-
 endian machines, one for automake >= 1.6, and one for using the cut
 buffers with the copy/paste script functions.
 ----------------------------------------------------------------------
+Thu Jan  2 14:54:45 2003                        Michael Jennings (mej)
+
+Spec file update.
+----------------------------------------------------------------------
