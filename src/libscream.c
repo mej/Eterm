@@ -48,7 +48,7 @@
 #else
 #  define MALLOC(a) malloc(a)
 #  define FREE(a) free(a)
-#  define STRDUP(a) STRDUP(a)
+#  define STRDUP(a) strdup(a)
 #  ifdef NS_DEBUG
 #    define D_ESCREEN(a)  fprintf(stderr,a);
 #  else
