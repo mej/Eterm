@@ -3042,3 +3042,8 @@ Fri Jan 14 16:34:13 PST 2000	Michael Jennings <mej@eterm.org>
 	keypad thanks to a patch from Marius Gedminas <mgedmin@takas.lt>.
 	
 -------------------------------------------------------------------------------
+Mon Jan 17 13:09:37 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed the faulty assumption that font->per_char is always non-NULL.
+	
+-------------------------------------------------------------------------------

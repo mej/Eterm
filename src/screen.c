@@ -2072,8 +2072,11 @@ scr_refresh(int type)
       if (MONO_BOLD(lastrend)) {
 	if (col < ncols - 1) {
 	  drp[col + 1] |= RS_Dirty;
-	  if (wbyte || (TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].width == TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].rbearing))
+	  if (wbyte || ((TermWin.font->per_char == NULL) ?
+                        (TermWin.font->max_bounds.width == TermWin.font->max_bounds.rbearing) :
+                        (TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].width == TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].rbearing))) {
 	    drp[col + 1] |= RS_Dirty;
+          }
 	} else
 	  boldlast = 1;
       }

@@ -436,7 +436,7 @@ change_font(int init, const char *fontname)
     TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
   else
     TermWin.fprop = 1;	/* Proportional font */
-  if (TermWin.fprop == 1)
+  if (TermWin.fprop == 1 && TermWin.font->per_char)
     for (i = TermWin.font->min_char_or_byte2; i <= TermWin.font->max_char_or_byte2; i++) {
       cw = TermWin.font->per_char[i].width;
       MAX_IT(fw, cw);
@@ -459,11 +459,13 @@ change_font(int init, const char *fontname)
       if (fw != boldFont->max_bounds.width)
 	fw = -1;
     } else {
-      for (i = 0; i < 256; i++) {
-	if (!isprint(i))
-	  continue;
-	cw = boldFont->per_char[i].width;
-	MAX_IT(fw, cw);
+      if (boldFont->per_char) {
+        for (i = 0; i < 256; i++) {
+          if (!isprint(i))
+            continue;
+          cw = boldFont->per_char[i].width;
+          MAX_IT(fw, cw);
+        }
       }
     }
 
