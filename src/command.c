@@ -1846,16 +1846,14 @@ xim_real_init(void)
   }
 
   /* try with XMODIFIERS env. var. */
-  if (xim == NULL && (p = XSetLocaleModifiers("")) != NULL && *p) {
+  if (xim == NULL && getenv("XMODIFIERS") && (p = XSetLocaleModifiers("")) != NULL && *p) {
     xim = XOpenIM(Xdisplay, NULL, NULL, NULL);
   }
 
-#ifndef USE_X11R6_XIM
   /* try with no modifiers base */
   if (xim == NULL && (p = XSetLocaleModifiers("@im=none")) != NULL && *p) {
     xim = XOpenIM(Xdisplay, NULL, NULL, NULL);
   }
-#endif
 
   if (xim == NULL) {
     xim = XOpenIM(Xdisplay, NULL, NULL, NULL);

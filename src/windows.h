@@ -53,9 +53,11 @@ extern void parent_resize(void);
 extern void handle_resize(unsigned int, unsigned int);
 extern void handle_move(int, int);
 #ifdef XTERM_COLOR_CHANGE
+extern void stored_palette(char);
 extern void set_window_color(int, const char *);
 #else
-# define set_window_color(idx,color) ((void)0)
+# define stored_palette(c)           NOP
+# define set_window_color(idx,color) NOP
 #endif /* XTERM_COLOR_CHANGE */
 extern Window find_window_by_coords(Window, int, int, int, int);
 

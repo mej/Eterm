@@ -1161,7 +1161,24 @@ process_xterm_seq(void)
     arg = ch;
     ch = cmd_getc();
   }
-  if (ch == ';') {
+  if (arg == 'R') {
+    stored_palette(RESTORE);
+    redraw_image(image_bg);
+    set_colorfgbg();
+    scr_touch();
+    scr_refresh(DEFAULT_REFRESH);
+    return;
+  } else if (arg == 'P') {
+    unsigned char i, idx;
+
+    idx = ((ch < '9') ? (ch - '0') : (tolower(ch) - 'a' + 10)) + minColor;
+    string[0] = '#';
+    for (i = 1; i < 7; i++) {
+      string[i] = cmd_getc();
+    }
+    set_window_color(idx, string);
+    return;
+  } else if (ch == ';') {
     unsigned long n = 0;
 
     while ((ch = cmd_getc()) != 007) {

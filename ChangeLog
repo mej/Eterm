@@ -3360,3 +3360,12 @@ Fri Mar 17 18:27:51 PST 2000	Michael Jennings <mej@eterm.org>
 	Darren, but you lose.
 	
 -------------------------------------------------------------------------------
+Fri Mar 24 18:16:02 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Added a patch from Kimball Thurston <kimball@sgrail.com> for XIM.  I
+	also added support for two new escape sequences at the request of
+	Cale Gibbard <gibbard@bfree.on.ca>.  "\e]Pnrrggbb" can now be used
+	to modify the color palette at runtime, and "\e]R" will restore the
+	defaults.  These are compatible with the Linux console.
+	
+-------------------------------------------------------------------------------

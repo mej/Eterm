@@ -294,6 +294,7 @@ process_colors(void)
     PixColors[menuTopShadowColor] = get_top_shadow_color(images[image_menu].norm->bg, "menuTopShadowColor");
     PixColors[unfocusedMenuTopShadowColor] = get_top_shadow_color(images[image_menu].disabled->bg, "unfocusedMenuTopShadowColor");
   }
+  stored_palette(SAVE);
 }
 
 /* Create_Windows() - Open and map the window */
@@ -579,12 +580,34 @@ handle_move(int x, int y)
 
 #ifdef XTERM_COLOR_CHANGE
 void
+stored_palette(char op)
+{
+  static Pixel default_colors[NRS_COLORS + NSHADOWCOLORS];
+  static unsigned char stored = 0;
+  unsigned char i;
+
+  if (op == SAVE) {
+    for (i = 0; i < NRS_COLORS; i++) {
+      default_colors[i] = PixColors[i];
+    }
+    stored = 1;
+  } else if (op == RESTORE && stored) {
+    for (i = 0; i < NRS_COLORS; i++) {
+      PixColors[i] = default_colors[i];
+    }
+  }
+}
+
+void
 set_window_color(int idx, const char *color)
 {
 
   XColor xcol;
   int i;
   unsigned int pixel, r, g, b;
+
+  printf("idx == %d, color == \"%s\"\n", idx, NONULL(color));
+  D_X11(("idx == %d, color == \"%s\"\n", idx, NONULL(color)));
 
   if (color == NULL || *color == '\0')
     return;
@@ -622,30 +645,11 @@ set_window_color(int idx, const char *color)
     print_warning("Unable to resolve \"%s\" as a color name.", color);
     return;
   }
-
-  if (!background_is_pixmap() && (idx == bgColor)) {
-    XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-  }
-
-  /* handle colorBD, scrollbar background, etc. */
-
+  redraw_image(image_bg);
   set_colorfgbg();
-  {
-
-    XColor fg, bg;
-
-    fg.pixel = PixColors[fgColor];
-    XQueryColor(Xdisplay, cmap, &fg);
-    bg.pixel = PixColors[bgColor];
-    XQueryColor(Xdisplay, cmap, &bg);
-
-    XRecolorCursor(Xdisplay, TermWin_cursor, &fg, &bg);
-  }
-  /* the only reasonable way to enforce a clean update */
-  scr_poweron();
+  scr_touch();
+  scr_refresh(DEFAULT_REFRESH);
 }
-#else
-# define set_window_color(idx,color) ((void)0)
 #endif /* XTERM_COLOR_CHANGE */
 
 Window
