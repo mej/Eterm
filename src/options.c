@@ -199,10 +199,6 @@ char *rs_name = NULL;
 #ifndef NO_BOLDFONT
 char *rs_boldFont = NULL;
 #endif
-char *rs_font[NFONTS];
-#ifdef MULTI_CHARSET
-char *rs_mfont[NFONTS];
-#endif
 #ifdef PRINTPIPE
 char *rs_print_pipe = NULL;
 #endif
@@ -331,6 +327,7 @@ static const struct {
       OPT_LONG("bold-font", "bold text font", &rs_boldFont),
 #endif
       OPT_STR('F', "font", "normal text font", &rs_font[0]),
+      OPT_ILONG("default-font-index", "set the index of the default font", &def_font_idx),
       OPT_LONG("font1", "font 1", &rs_font[1]),
       OPT_LONG("font2", "font 2", &rs_font[2]),
       OPT_LONG("font3", "font 3", &rs_font[3]),
@@ -1793,8 +1790,8 @@ parse_attributes(char *buff)
     }
     if (isdigit(*tmp)) {
       n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
-      if (n <= 4) {
-	RESET_AND_ASSIGN(rs_font[n], Word(2, tmp));
+      if (n <= 255) {
+        eterm_font_add(&etfonts, PWord(2, tmp), n);
       } else {
 	print_error("Parse error in file %s, line %lu:  Invalid font index %d",
 		    file_peek_path(), file_peek_line(), n);
@@ -1805,6 +1802,9 @@ parse_attributes(char *buff)
 #else
       print_warning("Support for the bold font attribute was not compiled in, ignoring");
 #endif
+
+    } else if (!BEG_STRCASECMP(tmp, "default ")) {
+      def_font_idx = strtoul(PWord(2, tmp), (char **) NULL, 0);
 
     } else {
       tmp = Word(1, tmp);
@@ -3075,6 +3075,7 @@ read_config(char *conf_name)
 void
 init_defaults(void)
 {
+  unsigned char i;
 
   rs_name = StrDup(APL_NAME " " VERSION);
 
@@ -3107,7 +3108,10 @@ init_defaults(void)
 #ifndef NO_BRIGHTCOLOR
   colorfgbg = DEFAULT_RSTYLE;
 #endif
-
+  MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
+  for (i = 0; i < NFONTS; i++) {
+    eterm_font_add(&etfonts, def_fontName[i], i);
+  }
   TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 }
 
@@ -3173,8 +3177,14 @@ post_parse(void)
   }
 #endif
   for (i = 0; i < NFONTS; i++) {
-    if (!rs_font[i]) {
-      rs_font[i] = StrDup(def_fontName[i]);
+    if (rs_font[i]) {
+      if (def_font_idx == 0) {
+        eterm_font_add(&etfonts, rs_font[i], i);
+        RESET_AND_ASSIGN(rs_font[i], NULL);
+      } else {
+        eterm_font_add(&etfonts, rs_font[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
+        RESET_AND_ASSIGN(rs_font[i], NULL);
+      }
     }
 #ifdef MULTI_CHARSET
     if (!rs_mfont[i]) {
@@ -3457,8 +3467,9 @@ save_config(char *path)
   }
   fprintf(fp, "    scrollbar_type %s\n", (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
   fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
-  for (i = 0; i < 5; i++) {
-    fprintf(fp, "    font %d %s\n", i, rs_font[i]);
+  fprintf(fp, "    font default %u\n", (unsigned int) font_idx);
+  for (i = 0; i < font_cnt; i++) {
+    fprintf(fp, "    font %d %s\n", i, etfonts[i]);
   }
 #ifndef NO_BOLDFONT
   if (rs_boldFont) {

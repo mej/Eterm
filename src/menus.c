@@ -843,7 +843,7 @@ menu_draw(menu_t * menu)
 
   scr = ScreenOfDisplay(Xdisplay, Xscreen);
   if (!menu->font) {
-    menu_set_font(menu, rs_font[0]);
+    menu_set_font(menu, etfonts[def_font_idx]);
   }
   gcvalue.foreground = PixColors[menuTextColor];
   XChangeGC(Xdisplay, menu->gc, GCForeground, &gcvalue);

@@ -1652,25 +1652,21 @@ create_fontset(const char *font1, const char *font2)
 
   ASSERT(font1 != NULL);
 
-#ifdef MULTI_CHARSET
-  if (!font2) {
-    font2 = "*";
+  if (font2) {
+    fontname = MALLOC(strlen(font1) + strlen(font2) + sizeof(fs_base) + 2);
+    if (fontname) {
+      strcpy(fontname, font1);
+      strcat(fontname, ",");
+      strcat(fontname, font2);
+      strcat(fontname, fs_base);
+    }
+  } else {
+    fontname = MALLOC(strlen(font1) + sizeof(fs_base) + 1);
+    if (fontname) {
+      strcpy(fontname, font1);
+      strcat(fontname, fs_base);
+    }
   }
-  fontname = MALLOC(strlen(font1) + strlen(font2) + sizeof(fs_base) + 2);
-  if (fontname) {
-    strcpy(fontname, font1);
-    strcat(fontname, fs_base);
-    strcat(fontname, ",");
-    strcat(fontname, font2);
-  }
-#else
-  font2 = NULL;
-  fontname = MALLOC(strlen(font1) + sizeof(fs_base) + 1);
-  if (fontname) {
-    strcpy(fontname, font1);
-    strcat(fontname, fs_base);
-  }
-#endif
   if (fontname) {
     setlocale(LC_ALL, "");
     fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, &ds);
@@ -1703,9 +1699,9 @@ init_locale(void)
     print_error("Setting locale failed.");
   } else {
 #ifdef MULTI_CHARSET
-    TermWin.fontset = create_fontset(rs_font[0], rs_mfont[0]);
+    TermWin.fontset = create_fontset(etfonts[0], rs_mfont[0]);
 #else
-    TermWin.fontset = create_fontset(rs_font[0], (const char *) NULL);
+    TermWin.fontset = create_fontset(etfonts[0], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
 #endif
 #ifdef USE_XIM
 # ifdef MULTI_CHARSET

@@ -45,26 +45,73 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-unsigned char font_change_count = 0;
+char **etfonts = NULL;
+unsigned char font_idx = DEF_FONT_IDX, def_font_idx = DEF_FONT_IDX, font_cnt = 0;
+char *rs_font[NFONTS];
 #ifdef MULTI_CHARSET
+char *rs_mfont[NFONTS];
 const char *def_mfontName[] = {MFONT0, MFONT1, MFONT2, MFONT3, MFONT4};
 #endif
 const char *def_fontName[] = {FONT0, FONT1, FONT2, FONT3, FONT4};
 
-static etfont_t *font_cache = NULL, *cur_font = NULL;
+static cachefont_t *font_cache = NULL, *cur_font = NULL;
 static void font_cache_add(const char *name, unsigned char type, void *info);
 static void font_cache_del(const void *info);
-static etfont_t *font_cache_find(const char *name, unsigned char type);
+static cachefont_t *font_cache_find(const char *name, unsigned char type);
 static void *font_cache_find_info(const char *name, unsigned char type);
+
+void
+eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
+
+  char **flist = *plist;
+
+  D_FONT(("eterm_font_add(\"%s\", %u):  plist == %8p\n", NONULL(fontname), (unsigned int) idx, plist));
+  ASSERT(plist != NULL);
+
+  if (idx >= font_cnt) {
+    unsigned char new_size = sizeof(char *) * (idx + 1);
+
+    if (flist) {
+      *plist = (char **) REALLOC(*plist, new_size);
+      D_FONT((" -> Reallocating flist to a size of %u bytes gives %8p\n", new_size, *plist));
+    } else {
+      *plist = (char **) MALLOC(new_size);
+      D_FONT((" -> Allocating flist with a size of %u bytes gives %8p\n", new_size, *plist));
+    }
+    flist = *plist;
+    MEMSET(flist + font_cnt, 0, sizeof(char *) * (idx - font_cnt));
+    font_cnt = idx + 1;
+  } else {
+    if (flist[idx]) {
+      if ((flist[idx] == fontname) || (!strcasecmp(flist[idx], fontname))) {
+        return;
+      }
+      FREE(flist[idx]);
+    }
+  }
+  flist[idx] = StrDup(fontname);
+  DUMP_FONTS();
+}
+
+void
+eterm_font_delete(char **flist, unsigned char idx) {
+
+  ASSERT(idx < font_cnt);
+
+  if (flist[idx]) {
+    FREE(flist[idx]);
+  }
+  flist[idx] = NULL;
+}
 
 static void
 font_cache_add(const char *name, unsigned char type, void *info) {
 
-  etfont_t *font;
+  cachefont_t *font;
 
   D_FONT(("font_cache_add(%s, %d, %8p) called.\n", NONULL(name), type, info));
 
-  font = (etfont_t *) MALLOC(sizeof(etfont_t));
+  font = (cachefont_t *) MALLOC(sizeof(cachefont_t));
   font->name = StrDup(name);
   font->type = type;
   font->ref_cnt = 1;
@@ -88,7 +135,7 @@ font_cache_add(const char *name, unsigned char type, void *info) {
 static void
 font_cache_del(const void *info) {
 
-  etfont_t *current, *tmp;
+  cachefont_t *current, *tmp;
 
   D_FONT(("font_cache_del(%8p) called.\n", info));
 
@@ -132,10 +179,10 @@ font_cache_del(const void *info) {
   }
 }
 
-static etfont_t *
+static cachefont_t *
 font_cache_find(const char *name, unsigned char type) {
 
-  etfont_t *current;
+  cachefont_t *current;
 
   ASSERT_RVAL(name != NULL, NULL);
 
@@ -149,13 +196,13 @@ font_cache_find(const char *name, unsigned char type) {
     }
   }
   D_FONT(("font_cache_find():  No matches found. =(\n"));
-  return ((etfont_t *) NULL);
+  return ((cachefont_t *) NULL);
 }
 
 static void *
 font_cache_find_info(const char *name, unsigned char type) {
 
-  etfont_t *current;
+  cachefont_t *current;
 
   ASSERT_RVAL(name != NULL, NULL);
 
@@ -181,7 +228,7 @@ void *
 load_font(const char *name, const char *fallback, unsigned char type)
 {
 
-  etfont_t *font;
+  cachefont_t *font;
   XFontStruct *xfont;
 
   D_FONT(("load_font(%s, %s, %d) called.\n", NONULL(name), NONULL(fallback), type));
@@ -195,7 +242,11 @@ load_font(const char *name, const char *fallback, unsigned char type)
       fallback = "fixed";
     } else {
       name = "fixed";
+#ifdef MULTI_CHARSET
+      fallback = "-misc-fixed-medium-r-normal--13-120-75-75-c-60-iso10646-1";
+#else
       fallback = "-misc-fixed-medium-r-normal--13-120-75-75-c-60-iso8859-1";
+#endif
     }
   } else if (fallback == NULL) {
     fallback = "fixed";
@@ -247,69 +298,70 @@ change_font(int init, const char *fontname)
 #ifndef NO_BOLDFONT
   static XFontStruct *boldFont = NULL;
 #endif
-  static short fnum = FONT0_IDX;
   short idx = 0;
   int fh, fw = 0;
   register unsigned long i;
   register int cw;
 
-  if (!init) {
+  D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx, (unsigned int) font_idx));
+
+  if (init) {
+    font_idx = def_font_idx;
+    ASSERT(etfonts != NULL);
+    ASSERT(etfonts[font_idx] != NULL);
+  } else {
     ASSERT(fontname != NULL);
 
-    switch (fontname[0]) {
+    switch (*fontname) {
       case '\0':
-	fnum = FONT0_IDX;
+	font_idx = def_font_idx;
 	fontname = NULL;
 	break;
 
 	/* special (internal) prefix for font commands */
       case FONT_CMD:
-	idx = atoi(fontname + 1);
-	switch (fontname[1]) {
-	  case '+':		/* corresponds to FONT_UP */
-	    fnum += (idx ? idx : 1);
-	    fnum = FNUM_RANGE(fnum);
+	idx = atoi(++fontname);
+	switch (*fontname) {
+	  case '+':
+	    NEXT_FONT(idx);
 	    break;
 
-	  case '-':		/* corresponds to FONT_DN */
-	    fnum += (idx ? idx : -1);
-	    fnum = FNUM_RANGE(fnum);
+	  case '-':
+	    PREV_FONT(idx);
 	    break;
 
 	  default:
-	    if (fontname[1] != '\0' && !isdigit(fontname[1]))
+	    if (*fontname != '\0' && !isdigit(*fontname))
 	      return;
-	    if (idx < 0 || idx >= (NFONTS))
-	      return;
-	    fnum = IDX2FNUM(idx);
+            BOUND(idx, 0, (font_cnt - 1));
+	    font_idx = idx;
 	    break;
 	}
 	fontname = NULL;
 	break;
 
       default:
-        for (idx = 0; idx < NFONTS; idx++) {
-          if (!strcmp(rs_font[idx], fontname)) {
-            fnum = IDX2FNUM(idx);
+        for (idx = 0; idx < font_cnt; idx++) {
+          if (!strcasecmp(etfonts[idx], fontname)) {
+            font_idx = idx;
             fontname = NULL;
             break;
 	  }
 	}
 	break;
     }
-    idx = FNUM2IDX(fnum);
-
-    if ((fontname != NULL) && strcasecmp(rs_font[idx], fontname)) {
-      RESET_AND_ASSIGN(rs_font[idx], StrDup(fontname));
+    if (fontname != NULL) {
+      eterm_font_add(&etfonts, fontname, font_idx);
     }
   }
+  D_FONT((" -> Changing to font index %u (\"%s\")\n", (unsigned int) font_idx, NONULL(etfonts[font_idx])));
   if (TermWin.font) {
-    if (font_cache_find_info(rs_font[idx], FONT_TYPE_X) != TermWin.font) {
+    if (font_cache_find_info(etfonts[font_idx], FONT_TYPE_X) != TermWin.font) {
       free_font(TermWin.font);
-      TermWin.font = load_font(rs_font[idx], "fixed", FONT_TYPE_X);
+      TermWin.font = load_font(etfonts[font_idx], "fixed", FONT_TYPE_X);
     }
   } else {
-    TermWin.font = load_font(rs_font[idx], "fixed", FONT_TYPE_X);
+    TermWin.font = load_font(etfonts[font_idx], "fixed", FONT_TYPE_X);
   }
 
 #ifndef NO_BOLDFONT
@@ -332,7 +384,7 @@ change_font(int init, const char *fontname)
     if (TermWin.fontset) {
       XFreeFontSet(Xdisplay, TermWin.fontset);
     }
-    TermWin.fontset = create_fontset(rs_font[idx], rs_mfont[idx]);
+    TermWin.fontset = create_fontset(etfonts[font_idx], rs_mfont[idx]);
     xim_set_fontset();
   }
 # endif
@@ -392,19 +444,18 @@ change_font(int init, const char *fontname)
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
 
-  szHint.width_inc = TermWin.fwidth;
-  szHint.height_inc = TermWin.fheight;
+  if (init) {
+    szHint.width_inc = TermWin.fwidth;
+    szHint.height_inc = TermWin.fheight;
 
-  szHint.min_width = szHint.base_width + szHint.width_inc;
-  szHint.min_height = szHint.base_height + szHint.height_inc;
+    szHint.min_width = szHint.base_width + szHint.width_inc;
+    szHint.min_height = szHint.base_height + szHint.height_inc;
 
-  szHint.width = szHint.base_width + TermWin.width;
-  szHint.height = szHint.base_height + TermWin.height;
+    szHint.width = szHint.base_width + TermWin.width;
+    szHint.height = szHint.base_height + TermWin.height;
 
-  szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
-
-  if (!init) {
-    font_change_count++;
+    szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
+  } else {
     parent_resize();
   }
   return;

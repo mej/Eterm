@@ -2820,3 +2820,35 @@ Fri Nov 19 18:43:58 PST 1999	Michael Jennings <mej@eterm.org>
 	occurances of calls to the old scrollbar_show() function.
 	
 -------------------------------------------------------------------------------
+Fri Nov 19 23:05:31 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Once again, I've rendered old themes obselete. :-)
+
+	I added a new config file attribute and command-line parameter.  The
+	option is --default-font-index, but I wouldn't necessarily use it.
+	The config file attribute makes more sense. :-)
+
+	Anyway, your themes will now need to have a line like this:
+
+	    font default <index>
+
+	in the attributes section.  This tells Eterm which font it should use
+	on startup.  (<index> is a number between 0 and the highest-numbered
+	font you define.)  You can now have up to 256 fonts.  Font 0 is no
+	longer necessarily the default font; it is the smallest font.  And the
+	larger the font index, the larger the font should be.  (Of course,
+	this assumes you want Ctrl-> and Ctrl-< to increase/decrease your font
+	size.  In reality, you can have your fonts in any order, and those
+	keys will cycle through them in order.)
+
+	Before, font 0 was always the default, and you didn't have much
+	freedom in rearranging your fonts.  Plus, you were limited to 5.  Not
+	any more. :-)  The new system is much more straight-forward, logical,
+	and powerful.
+
+	So please be sure to update your themes by hand, or remove your theme
+	directory before installing this new version.  If your theme lacks
+	the "font default" line, your Eterms will start with the wrong font.
+	:-]
+	
+-------------------------------------------------------------------------------

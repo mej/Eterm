@@ -190,10 +190,10 @@ lookup_key(XEvent * ev)
   /* for some backwards compatibility */
   if (HOTKEY) {
     if (keysym == ks_bigfont) {
-      change_font(0, FONT_UP);
+      change_font(0, BIGGER_FONT);
       LK_RET();
     } else if (keysym == ks_smallfont) {
-      change_font(0, FONT_DN);
+      change_font(0, SMALLER_FONT);
       LK_RET();
     }
   }
@@ -236,12 +236,12 @@ lookup_key(XEvent * ev)
 	  break;
 
 	case XK_KP_Add:	/* Shift+KP_Add = bigger font */
-	  change_font(0, FONT_UP);
+	  change_font(0, BIGGER_FONT);
 	  LK_RET();
 	  break;
 
 	case XK_KP_Subtract:	/* Shift+KP_Subtract = smaller font */
-	  change_font(0, FONT_DN);
+	  change_font(0, SMALLER_FONT);
 	  LK_RET();
 	  break;
       }

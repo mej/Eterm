@@ -320,6 +320,7 @@
 #undef FONT2
 #undef FONT3
 #undef FONT4
+#undef DEF_FONT_IDX
 
 
 /* Leave that blank line there!!  Autoheader needs it.

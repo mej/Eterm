@@ -31,41 +31,40 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 /************ Macros and Definitions ************/
-#define FONT_TYPE_X		(0x01)
-#define FONT_TYPE_TTF		(0x02)
-#define FONT_TYPE_FNLIB		(0x03)
+#define FONT_TYPE_X             (0x01)
+#define FONT_TYPE_TTF           (0x02)
+#define FONT_TYPE_FNLIB         (0x03)
 
 #define font_cache_add_ref(font) ((font)->ref_cnt++)
 
-# define NFONTS	5
-/* special (internal) prefix for font commands */
-# define FONT_CMD	'#'
-# define FONT_DN	"#-"
-# define FONT_UP	"#+"
-#if (FONT0_IDX == 0)
-# define IDX2FNUM(i) (i)
-# define FNUM2IDX(f) (f)
-#else
-# define IDX2FNUM(i) (i == 0? FONT0_IDX : (i <= FONT0_IDX? (i-1) : i))
-# define FNUM2IDX(f) (f == FONT0_IDX ? 0 : (f < FONT0_IDX ? (f+1) : f))
-#endif
-#define FNUM_RANGE(i)	(i <= 0 ? 0 : (i >= NFONTS ? (NFONTS-1) : i))
+#define NFONTS 5
+#define FONT_CMD       '#'
+#define BIGGER_FONT    "#+"
+#define SMALLER_FONT   "#-"
+
+#define NEXT_FONT(i)   do { if (font_idx + ((i)?(i):1) >= font_cnt) {font_idx = font_cnt - 1;} else {font_idx += ((i)?(i):1);} \
+                            while (!etfonts[font_idx]) {if (font_idx == font_cnt) {font_idx--; break;} font_idx++;} } while (0)
+#define PREV_FONT(i)   do { if (font_idx - ((i)?(i):1) < 0) {font_idx = 0;} else {font_idx -= ((i)?(i):1);} \
+                            while (!etfonts[font_idx]) {if (font_idx == 0) break; font_idx--;} } while (0)
+#define DUMP_FONTS()   do {unsigned char i; D_FONT(("DUMP_FONTS():  Font count is %u\n", (unsigned int) font_cnt)); \
+                           for (i = 0; i < font_cnt; i++) {D_FONT(("DUMP_FONTS():  Font %u == \"%s\"\n", (unsigned int) i, NONULL(etfonts[i])));}} while (0)
 
 /************ Structures ************/
-typedef struct font_struct {
+typedef struct cachefont_struct {
   char *name;
   unsigned char type;
   unsigned char ref_cnt;
   union {
     XFontStruct *xfontinfo;
   } fontinfo;
-  struct font_struct *next;
-} etfont_t;
-  
+  struct cachefont_struct *next;
+} cachefont_t;
+
 /************ Variables ************/
-extern unsigned char font_change_count;
+extern unsigned char font_idx, def_font_idx, font_cnt;
 extern const char *def_fontName[];
 extern char *rs_font[NFONTS];
+extern char **etfonts;
 # ifdef MULTI_CHARSET
 extern const char *def_mfontName[];
 extern char *rs_mfont[NFONTS];
@@ -74,6 +73,8 @@ extern char *rs_mfont[NFONTS];
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+extern void eterm_font_add(char ***plist, const char *fontname, unsigned char idx);
+extern void eterm_font_delete(char **flist, unsigned char idx);
 extern void *load_font(const char *, const char *, unsigned char);
 extern void free_font(const void *);
 extern void change_font(int, const char *);

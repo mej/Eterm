@@ -81,11 +81,14 @@ begin main
 # the Eterm defaults.  The "bold" font is the font used if color BD has
 # not been set and Eterm cannot map the foreground color to one of the
 # high-intensity colors (8-15).
-    font 0 fixed
-    font 1 5x7
-    font 2 6x10
+    font default 2
+    font 0 5x7
+    font 1 6x10
+    font 2 fixed
     font 3 8x13
     font 4 9x15
+    font 5 10x20
+    font 6 12x24
 #    font bold 7x14
   end attributes
 
