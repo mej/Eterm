@@ -6,6 +6,7 @@
 # define _DEBUG_H
 
 #include <stdlib.h>
+#include <time.h>
 
 extern unsigned int debug_level;
 
@@ -14,9 +15,9 @@ extern unsigned int debug_level;
 
 #if defined(__FILE__) && defined(__LINE__)
 # ifdef __FUNCTION__
-#  define __DEBUG()  fprintf(stderr, "[debug] %12s | %4d | %30s: ", __FILE__, __LINE__, __FUNCTION__)
+#  define __DEBUG()  fprintf(stderr, "[%lu] %12s | %4d | %30s: ", (unsigned long) time(NULL), __FILE__, __LINE__, __FUNCTION__)
 # else
-#  define __DEBUG()  fprintf(stderr, "[debug] %12s | %4d: ", __FILE__, __LINE__)
+#  define __DEBUG()  fprintf(stderr, "[%lu] %12s | %4d: ", (unsigned long) time(NULL), __FILE__, __LINE__)
 # endif
 #endif
 

@@ -1594,7 +1594,7 @@ scr_expose(int x, int y, int width, int height)
       drawn_rend[i][part_end.col] = RS_Dirty;
 
 #ifdef USE_XIM
-  scr_refresh(SLOW_REFRESH);
+  scr_refresh(FAST_REFRESH);
 #endif
 }
 
@@ -1767,9 +1767,6 @@ scr_refresh(int type)
       break;
     case FAST_REFRESH:
       D_SCREEN(("scr_refresh(FAST_REFRESH) called.\n"));
-      break;
-    case SMOOTH_REFRESH:
-      D_SCREEN(("scr_refresh(SMOOTH_REFRESH) called.\n"));
       break;
   }
   if (type == NO_REFRESH)
@@ -2125,6 +2122,9 @@ scr_refresh(int type)
 #if defined(PIXMAP_SUPPORT) && defined(PIXMAP_BUFFERING)
   XClearWindow(Xdisplay, TermWin.vt);
 #endif
+  if (type == SLOW_REFRESH) {
+    XSync(Xdisplay, False);
+  }
   D_SCREEN(("scr_refresh() exiting.\n"));
 
 #ifdef PROFILE_SCREEN

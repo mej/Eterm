@@ -1019,7 +1019,7 @@ menu_action(menuitem_t * item)
 }
 
 void
-menu_invoke(int x, int y, Window win, menu_t * menu, Time time)
+menu_invoke(int x, int y, Window win, menu_t * menu, Time timestamp)
 {
 
   int root_x, root_y;
@@ -1027,8 +1027,8 @@ menu_invoke(int x, int y, Window win, menu_t * menu, Time time)
 
   REQUIRE(menu != NULL);
 
-  if (time != CurrentTime) {
-    button_press_time = time;
+  if (timestamp != CurrentTime) {
+    button_press_time = timestamp;
   }
   if (win != Xroot) {
     XTranslateCoordinates(Xdisplay, win, Xroot, x, y, &root_x, &root_y, &unused);
@@ -1038,7 +1038,7 @@ menu_invoke(int x, int y, Window win, menu_t * menu, Time time)
 }
 
 void
-menu_invoke_by_title(int x, int y, Window win, char *title, Time time)
+menu_invoke_by_title(int x, int y, Window win, char *title, Time timestamp)
 {
 
   menu_t *menu;
@@ -1051,5 +1051,5 @@ menu_invoke_by_title(int x, int y, Window win, char *title, Time time)
     D_MENU(("Menu \"%s\" not found!\n", title));
     return;
   }
-  menu_invoke(x, y, win, menu, time);
+  menu_invoke(x, y, win, menu, timestamp);
 }

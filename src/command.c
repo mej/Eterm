@@ -2472,17 +2472,19 @@ cmd_getc(void)
 	RETURN_CHAR();
       }
     }
-    /* select statement timed out - better update the screen */
-
     if (retval == 0) {
       refresh_count = 0;
       refresh_limit = 1;
       if (!refreshed) {
 	refreshed = 1;
-	D_CMD(("cmd_getc(): scr_refresh() #2\n"));
+	D_CMD(("cmd_getc(): select() timed out, time to update the screen.\n"));
 	scr_refresh(refresh_type);
-	if (scrollbar_visible())
+        /* FIXME:  This call is only here to update the anchor size/position.
+           It should be replaced with a call to a function that does just that
+           rather than calling a function that updates the background also. */
+	if (scrollbar_visible()) {
 	  scrollbar_show(1);
+        }
 #ifdef USE_XIM
 	xim_send_spot();
 #endif

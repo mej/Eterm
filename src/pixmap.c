@@ -1138,11 +1138,12 @@ get_desktop_window(void)
   unsigned int nchildren;
   Window w, root, *children, parent;
 
+  D_PIXMAP(("get_desktop_window() called.  Current desktop window is 0x%08x\n", (unsigned int) desktop_window));
   if ((prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True)) == None) {
-    D_PIXMAP(("No _XROOTPMAP_ID found.\n"));
+    D_PIXMAP(("get_desktop_window():  No _XROOTPMAP_ID found.\n"));
   }
   if ((prop2 = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", True)) == None) {
-    D_PIXMAP(("No _XROOTCOLOR_PIXEL found.\n"));
+    D_PIXMAP(("get_desktop_window():  No _XROOTCOLOR_PIXEL found.\n"));
   }
   if (prop == None && prop2 == None) {
     return None;
@@ -1153,13 +1154,13 @@ get_desktop_window(void)
 
   for (w = TermWin.parent; w; w = parent) {
 
-    D_PIXMAP(("Current window ID is:  0x%08x\n", w));
+    D_PIXMAP(("  Current window ID is:  0x%08x\n", w));
 
     if ((XQueryTree(Xdisplay, w, &root, &parent, &children, &nchildren)) == False) {
-      D_PIXMAP(("  Egad!  XQueryTree() returned false!\n"));
+      D_PIXMAP(("    Egad!  XQueryTree() returned false!\n"));
       return None;
     }
-    D_PIXMAP(("  Window is 0x%08x with %d children, root is 0x%08x, parent is 0x%08x\n",
+    D_PIXMAP(("    Window is 0x%08x with %d children, root is 0x%08x, parent is 0x%08x\n",
 	      w, nchildren, root, parent));
     if (nchildren) {
       XFree(children);
@@ -1173,19 +1174,21 @@ get_desktop_window(void)
       continue;
     }
     if (type != None) {
-      D_PIXMAP(("  Found desktop as window 0x%08x\n", w));
+      D_PIXMAP(("get_desktop_window():  Found desktop as window 0x%08x\n", w));
       if (w != Xroot) {
         XSelectInput(Xdisplay, w, PropertyChangeMask);
       }
       if (desktop_window == w) {
+        D_PIXMAP(("  Desktop window has not changed.\n"));
         return ((Window) 1);
       } else {
+        D_PIXMAP(("  Desktop window has changed  Updating desktop_window.\n"));
         return (desktop_window = w);
       }
     }
   }
 
-  D_PIXMAP(("No suitable parent found.\n"));
+  D_PIXMAP(("get_desktop_window():  No suitable parent found.\n"));
   return (desktop_window = None);
 
 }
@@ -1201,7 +1204,9 @@ get_desktop_pixmap(void)
   unsigned long length, after;
   unsigned char *data;
 
+  D_PIXMAP(("get_desktop_pixmap() called.  Current desktop pixmap is 0x%08x\n", (unsigned int) desktop_pixmap));
   if (desktop_window == None) {
+    D_PIXMAP(("get_desktop_pixmap():  No desktop window.  Aborting.\n"));
     free_desktop_pixmap();
     return (desktop_pixmap = None);
   }
@@ -1213,6 +1218,11 @@ get_desktop_pixmap(void)
     free_desktop_pixmap();
     return (desktop_pixmap = None);
   }
+  if (color_pixmap != None) {
+    D_PIXMAP(("get_desktop_pixmap():  Removing old solid color pixmap 0x%08x.\n", color_pixmap));
+    XFreePixmap(Xdisplay, color_pixmap);
+    color_pixmap = None;
+  }
   if (prop != None) {
     XGetWindowProperty(Xdisplay, desktop_window, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     if (type == XA_PIXMAP) {
@@ -1220,8 +1230,10 @@ get_desktop_pixmap(void)
       if (p != None) {
         D_PIXMAP(("  Found pixmap 0x%08x\n", p));
         if (desktop_pixmap == p) {
+          D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap is unchanged.\n"));
           return ((Pixmap) 1);
         } else {
+          D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap has changed.  Updating desktop_pixmap\n"));
           free_desktop_pixmap();
           return (desktop_pixmap = p);
         }
@@ -1243,15 +1255,13 @@ get_desktop_pixmap(void)
       gcvalue.background = pix;
       gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground, &gcvalue);
 
-      if (color_pixmap != None) {
-        XFreePixmap(Xdisplay, color_pixmap);
-      }
       color_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, 16, 16, Xdepth);
       XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
+      D_PIXMAP(("get_desktop_pixmap():  Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
       return (desktop_pixmap = color_pixmap);
     }
   }
-  D_PIXMAP(("No suitable attribute found.\n"));
+  D_PIXMAP(("get_desktop_pixmap():  No suitable attribute found.\n"));
   free_desktop_pixmap();
   return (desktop_pixmap = None);
 
