@@ -160,6 +160,7 @@ KeySym ks_bigfont = XK_greater;
 KeySym ks_smallfont = XK_less;
 #endif
 
+/* *INDENT-OFF* */
 /* Options structure */
 static const struct {
     char short_opt;
@@ -172,165 +173,181 @@ static const struct {
 } optList[] = {
 
     OPT_STR('t', "theme", "select a theme", &rs_theme),
-        OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file), OPT_STR('d', "display", "X server to connect to", &display_name),
+    OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file),
+    OPT_STR('d', "display", "X server to connect to", &display_name),
 #if DEBUG <= 0
-        OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &DEBUG_LEVEL),
 #elif DEBUG == 1
-        OPT_ILONG("debug", "level of debugging information to show (0-1)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (0-1)", &DEBUG_LEVEL),
 #elif DEBUG == 2
-        OPT_ILONG("debug", "level of debugging information to show (0-2)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (0-2)", &DEBUG_LEVEL),
 #elif DEBUG == 3
-        OPT_ILONG("debug", "level of debugging information to show (0-3)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (0-3)", &DEBUG_LEVEL),
 #elif DEBUG == 4
-        OPT_ILONG("debug", "level of debugging information to show (0-4)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (0-4)", &DEBUG_LEVEL),
 #else
-        OPT_ILONG("debug", "level of debugging information to show (0-5)", &DEBUG_LEVEL),
+    OPT_ILONG("debug", "level of debugging information to show (0-5)", &DEBUG_LEVEL),
 #endif
-        OPT_BLONG("install", "install a private colormap", &Options, Opt_install),
-        OPT_BOOL('h', "help", "display usage information", NULL, 0), OPT_BLONG("version", "display version and configuration information", NULL, 0),
-/* =======[ Color options ]======= */
-        OPT_BOOL('r', "reverse-video", "reverse video", &Options, Opt_reverse_video),
-        OPT_STR('b', "background-color", "background color", &rs_color[bgColor]),
-        OPT_STR('f', "foreground-color", "foreground color", &rs_color[fgColor]),
-        OPT_LONG("color0", "color 0", &rs_color[minColor]),
-        OPT_LONG("color1", "color 1", &rs_color[minColor + 1]),
-        OPT_LONG("color2", "color 2", &rs_color[minColor + 2]),
-        OPT_LONG("color3", "color 3", &rs_color[minColor + 3]),
-        OPT_LONG("color4", "color 4", &rs_color[minColor + 4]),
-        OPT_LONG("color5", "color 5", &rs_color[minColor + 5]), OPT_LONG("color6", "color 6", &rs_color[minColor + 6]), OPT_LONG("color7", "color 7", &rs_color[minColor + 7]),
+    OPT_BLONG("install", "install a private colormap", &Options, Opt_install),
+    OPT_BOOL('h', "help", "display usage information", NULL, 0),
+    OPT_BLONG("version", "display version and configuration information", NULL, 0),
+    /* =======[ Color options ]======= */
+    OPT_BOOL('r', "reverse-video", "reverse video", &Options, Opt_reverse_video),
+    OPT_STR('b', "background-color", "background color", &rs_color[bgColor]),
+    OPT_STR('f', "foreground-color", "foreground color", &rs_color[fgColor]),
+    OPT_LONG("color0", "color 0", &rs_color[minColor]),
+    OPT_LONG("color1", "color 1", &rs_color[minColor + 1]),
+    OPT_LONG("color2", "color 2", &rs_color[minColor + 2]),
+    OPT_LONG("color3", "color 3", &rs_color[minColor + 3]),
+    OPT_LONG("color4", "color 4", &rs_color[minColor + 4]),
+    OPT_LONG("color5", "color 5", &rs_color[minColor + 5]),
+    OPT_LONG("color6", "color 6", &rs_color[minColor + 6]),
+    OPT_LONG("color7", "color 7", &rs_color[minColor + 7]),
 #ifndef NO_BRIGHTCOLOR
-        OPT_LONG("color8", "color 8", &rs_color[minBright]),
-        OPT_LONG("color9", "color 9", &rs_color[minBright + 1]),
-        OPT_LONG("color10", "color 10", &rs_color[minBright + 2]),
-        OPT_LONG("color11", "color 11", &rs_color[minBright + 3]),
-        OPT_LONG("color12", "color 12", &rs_color[minBright + 4]),
-        OPT_LONG("color13", "color 13", &rs_color[minBright + 5]),
-        OPT_LONG("color14", "color 14", &rs_color[minBright + 6]), OPT_LONG("color15", "color 15", &rs_color[minBright + 7]),
+    OPT_LONG("color8", "color 8", &rs_color[minBright]),
+    OPT_LONG("color9", "color 9", &rs_color[minBright + 1]),
+    OPT_LONG("color10", "color 10", &rs_color[minBright + 2]),
+    OPT_LONG("color11", "color 11", &rs_color[minBright + 3]),
+    OPT_LONG("color12", "color 12", &rs_color[minBright + 4]),
+    OPT_LONG("color13", "color 13", &rs_color[minBright + 5]),
+    OPT_LONG("color14", "color 14", &rs_color[minBright + 6]),
+    OPT_LONG("color15", "color 15", &rs_color[minBright + 7]),
 #endif /* NO_BRIGHTCOLOR */
 #ifndef NO_BOLDUNDERLINE
-        OPT_LONG("colorBD", "bold color", &rs_color[colorBD]), OPT_LONG("colorUL", "underline color", &rs_color[colorUL]),
+    OPT_LONG("colorBD", "bold color", &rs_color[colorBD]),
+    OPT_LONG("colorUL", "underline color", &rs_color[colorUL]),
 #endif /* NO_BOLDUNDERLINE */
-        OPT_LONG("pointer-color", "mouse pointer color", &rs_color[pointerColor]),
+    OPT_LONG("pointer-color", "mouse pointer color", &rs_color[pointerColor]),
 #ifndef NO_CURSORCOLOR
-        OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]), OPT_LONG("cursor-text-color", "cursor text color", &rs_color[cursorColor2]),
+    OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]),
+    OPT_LONG("cursor-text-color", "cursor text color", &rs_color[cursorColor2]),
 #endif /* NO_CURSORCOLOR */
-/* =======[ X11 options ]======= */
-        OPT_STR('g', "geometry", "WxH+X+Y = size and position", &rs_geometry),
-        OPT_BOOL('i', "iconic", "start iconified", &Options, Opt_iconic),
-        OPT_STR('n', "name", "client instance, icon, and title strings", &rs_name),
-        OPT_STR('T', "title", "title string", &rs_title),
-        OPT_LONG("icon-name", "icon name", &rs_iconName),
-        OPT_STR('B', "scrollbar-type", "choose the scrollbar type (motif, next, xterm)", &rs_scrollbar_type),
-        OPT_ILONG("scrollbar-width", "choose the width (in pixels) of the scrollbar", &rs_scrollbar_width),
-        OPT_INT('D', "desktop", "desktop to start on (requires GNOME-compliant window manager)", &rs_desktop),
-        OPT_ILONG("line-space", "number of extra dots between lines", &rs_line_space),
+    /* =======[ X11 options ]======= */
+    OPT_STR('g', "geometry", "WxH+X+Y = size and position", &rs_geometry),
+    OPT_BOOL('i', "iconic", "start iconified", &Options, Opt_iconic),
+    OPT_STR('n', "name", "client instance, icon, and title strings", &rs_name),
+    OPT_STR('T', "title", "title string", &rs_title),
+    OPT_LONG("icon-name", "icon name", &rs_iconName),
+    OPT_STR('B', "scrollbar-type", "choose the scrollbar type (motif, next, xterm)", &rs_scrollbar_type),
+    OPT_ILONG("scrollbar-width", "choose the width (in pixels) of the scrollbar", &rs_scrollbar_width),
+    OPT_INT('D', "desktop", "desktop to start on (requires GNOME-compliant window manager)", &rs_desktop),
+    OPT_ILONG("line-space", "number of extra dots between lines", &rs_line_space),
 #ifndef NO_BOLDFONT
-        OPT_LONG("bold-font", "bold text font", &rs_boldFont),
+    OPT_LONG("bold-font", "bold text font", &rs_boldFont),
 #endif
-        OPT_STR('F', "font", "normal text font", &rs_font[0]),
-        OPT_ILONG("default-font-index", "set the index of the default font", &def_font_idx),
-        OPT_LONG("font1", "font 1", &rs_font[1]),
-        OPT_LONG("font2", "font 2", &rs_font[2]),
-        OPT_LONG("font3", "font 3", &rs_font[3]),
-        OPT_LONG("font4", "font 4", &rs_font[4]),
-        OPT_BLONG("proportional", "toggle proportional font optimizations", &Options, Opt_proportional),
-        OPT_LONG("font-fx", "specify font effects for the terminal fonts", &rs_font_effects),
-/* =======[ Pixmap options ]======= */
+    OPT_STR('F', "font", "normal text font", &rs_font[0]),
+    OPT_ILONG("default-font-index", "set the index of the default font", &def_font_idx),
+    OPT_LONG("font1", "font 1", &rs_font[1]),
+    OPT_LONG("font2", "font 2", &rs_font[2]),
+    OPT_LONG("font3", "font 3", &rs_font[3]),
+    OPT_LONG("font4", "font 4", &rs_font[4]),
+    OPT_BLONG("proportional", "toggle proportional font optimizations", &Options, Opt_proportional),
+    OPT_LONG("font-fx", "specify font effects for the terminal fonts", &rs_font_effects),
+    /* =======[ Pixmap options ]======= */
 #ifdef PIXMAP_SUPPORT
-        OPT_STR('P', "background-pixmap", "background pixmap [scaling optional]", &rs_pixmaps[image_bg]),
-        OPT_STR('I', "icon", "icon pixmap", &rs_icon),
-        OPT_LONG("up-arrow-pixmap", "up arrow pixmap [scaling optional]", &rs_pixmaps[image_up]),
-        OPT_LONG("down-arrow-pixmap", "down arrow pixmap [scaling optional]", &rs_pixmaps[image_down]),
-        OPT_LONG("trough-pixmap", "scrollbar background (trough) pixmap [scaling optional]", &rs_pixmaps[image_sb]),
-        OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[image_sa]),
-        OPT_LONG("menu-pixmap", "menu pixmap [scaling optional]", &rs_pixmaps[image_menu]),
-        OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &image_toggles, IMOPT_TRANS),
-        OPT_BOOL('0', "itrans", "use immotile-optimized transparency", &image_toggles, IMOPT_ITRANS),
-        OPT_BLONG("viewport-mode", "use viewport mode for the background image", &image_toggles, IMOPT_VIEWPORT),
-        OPT_ILONG("shade", "old-style shade percentage (deprecated)", &rs_shade),
-        OPT_LONG("tint", "old-style tint mask (deprecated)", &rs_tint),
-        OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
-        OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
-        OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
-        OPT_LONG("cmod-blue", "blue-only color modifier (\"brightness contrast gamma\")", &rs_cmod_blue),
-        OPT_STR('p', "path", "pixmap file search path", &rs_path), OPT_ILONG("cache", "set Imlib2 image/pixmap cache size", &rs_cache_size),
+    OPT_STR('P', "background-pixmap", "background pixmap [scaling optional]", &rs_pixmaps[image_bg]),
+    OPT_STR('I', "icon", "icon pixmap", &rs_icon),
+    OPT_LONG("up-arrow-pixmap", "up arrow pixmap [scaling optional]", &rs_pixmaps[image_up]),
+    OPT_LONG("down-arrow-pixmap", "down arrow pixmap [scaling optional]", &rs_pixmaps[image_down]),
+    OPT_LONG("trough-pixmap", "scrollbar background (trough) pixmap [scaling optional]", &rs_pixmaps[image_sb]),
+    OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[image_sa]),
+    OPT_LONG("menu-pixmap", "menu pixmap [scaling optional]", &rs_pixmaps[image_menu]),
+    OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &image_toggles, IMOPT_TRANS),
+    OPT_BOOL('0', "itrans", "use immotile-optimized transparency", &image_toggles, IMOPT_ITRANS),
+    OPT_BLONG("viewport-mode", "use viewport mode for the background image", &image_toggles, IMOPT_VIEWPORT),
+    OPT_ILONG("shade", "old-style shade percentage (deprecated)", &rs_shade),
+    OPT_LONG("tint", "old-style tint mask (deprecated)", &rs_tint),
+    OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
+    OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
+    OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
+    OPT_LONG("cmod-blue", "blue-only color modifier (\"brightness contrast gamma\")", &rs_cmod_blue),
+    OPT_STR('p', "path", "pixmap file search path", &rs_path),
+    OPT_ILONG("cache", "set Imlib2 image/pixmap cache size", &rs_cache_size),
 # ifdef BACKGROUND_CYCLING_SUPPORT
-        OPT_STR('N', "anim", "a delay and list of pixmaps for cycling", &rs_anim_pixmap_list),
+    OPT_STR('N', "anim", "a delay and list of pixmaps for cycling", &rs_anim_pixmap_list),
 # endif /* BACKGROUND_CYCLING_SUPPORT */
 #endif /* PIXMAP_SUPPORT */
-/* =======[ Kanji options ]======= */
+    /* =======[ Kanji options ]======= */
 #ifdef MULTI_CHARSET
-        OPT_STR('M', "mfont", "normal text multichar font", &rs_mfont[0]),
-        OPT_LONG("mfont1", "multichar font 1", &rs_mfont[1]),
-        OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
-        OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
-        OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]), OPT_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", &rs_multichar_encoding),
+    OPT_STR('M', "mfont", "normal text multichar font", &rs_mfont[0]),
+    OPT_LONG("mfont1", "multichar font 1", &rs_mfont[1]),
+    OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
+    OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
+    OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
+    OPT_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", &rs_multichar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
-        OPT_LONG("input-method", "XIM input method", &rs_input_method), OPT_LONG("preedit-type", "XIM preedit type", &rs_preedit_type),
+    OPT_LONG("input-method", "XIM input method", &rs_input_method),
+    OPT_LONG("preedit-type", "XIM preedit type", &rs_preedit_type),
 #endif
-/* =======[ Toggles ]======= */
-        OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &Options, Opt_login_shell),
-        OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollbar),
-        OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_write_utmp),
-        OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visual_bell),
-        OPT_BOOL('H', "home-on-output", "jump to bottom on output", &Options, Opt_home_on_output),
-        OPT_BLONG("home-on-input", "jump to bottom on input", &Options, Opt_home_on_input),
-        OPT_BOOL('q', "no-input", "configure for output only", &Options, Opt_no_input),
-        OPT_BLONG("scrollbar-right", "display the scrollbar on the right", &Options, Opt_scrollbar_right),
-        OPT_BLONG("scrollbar-floating", "display the scrollbar with no trough", &Options, Opt_scrollbar_floating),
-        OPT_BLONG("scrollbar-popup", "popup the scrollbar only when focused", &Options, Opt_scrollbar_popup),
-        OPT_BOOL('x', "borderless", "force Eterm to have no borders", &Options, Opt_borderless),
+    /* =======[ Toggles ]======= */
+    OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &Options, Opt_login_shell),
+    OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollbar),
+    OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_write_utmp),
+    OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visual_bell),
+    OPT_BOOL('H', "home-on-output", "jump to bottom on output", &Options, Opt_home_on_output),
+    OPT_BLONG("home-on-input", "jump to bottom on input", &Options, Opt_home_on_input),
+    OPT_BOOL('q', "no-input", "configure for output only", &Options, Opt_no_input),
+    OPT_BLONG("scrollbar-right", "display the scrollbar on the right", &Options, Opt_scrollbar_right),
+    OPT_BLONG("scrollbar-floating", "display the scrollbar with no trough", &Options, Opt_scrollbar_floating),
+    OPT_BLONG("scrollbar-popup", "popup the scrollbar only when focused", &Options, Opt_scrollbar_popup),
+    OPT_BOOL('x', "borderless", "force Eterm to have no borders", &Options, Opt_borderless),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
-        OPT_BOOL('m', "map-alert", "uniconify on beep", &Options, Opt_map_alert),
+    OPT_BOOL('m', "map-alert", "uniconify on beep", &Options, Opt_map_alert),
 # endif
 #endif
 #ifdef META8_OPTION
-        OPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", &Options, Opt_meta8),
+    OPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", &Options, Opt_meta8),
 #endif
-        OPT_BLONG("double-buffer", "use double-buffering to reduce exposes (uses more memory)", &Options, Opt_double_buffer),
-        OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_no_cursor),
-        OPT_BLONG("pause", "pause after the child process exits", &Options, Opt_pause),
-        OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &Options, Opt_xterm_select),
-        OPT_BLONG("select-line", "triple-click selects whole line", &Options, Opt_select_whole_line),
-        OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &Options, Opt_select_trailing_spaces),
-        OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &Options, Opt_report_as_keysyms),
-        OPT_BLONG("buttonbar", "toggle the display of all buttonbars", &rs_buttonbars, BBAR_FORCE_TOGGLE),
-        OPT_BLONG("resize-gravity", "toggle gravitation to nearest corner on resize", &Options, Opt_resize_gravity),
-/* =======[ Keyboard options ]======= */
+    OPT_BLONG("double-buffer", "use double-buffering to reduce exposes (uses more memory)", &Options, Opt_double_buffer),
+    OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_no_cursor),
+    OPT_BLONG("pause", "pause after the child process exits", &Options, Opt_pause),
+    OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &Options, Opt_xterm_select),
+    OPT_BLONG("select-line", "triple-click selects whole line", &Options, Opt_select_whole_line),
+    OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &Options, Opt_select_trailing_spaces),
+    OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &Options, Opt_report_as_keysyms),
+    OPT_BLONG("buttonbar", "toggle the display of all buttonbars", &rs_buttonbars, BBAR_FORCE_TOGGLE),
+    OPT_BLONG("resize-gravity", "toggle gravitation to nearest corner on resize", &Options, Opt_resize_gravity),
+    /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-        OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key), OPT_LONG("small-font-key", "keysym for font size decrease", &rs_smallfont_key),
+    OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key),
+    OPT_LONG("small-font-key", "keysym for font size decrease", &rs_smallfont_key),
 #endif
-        OPT_ILONG("meta-mod", "modifier to interpret as the Meta key", &rs_meta_mod),
-        OPT_ILONG("alt-mod", "modifier to interpret as the Alt key", &rs_alt_mod), OPT_ILONG("numlock-mod", "modifier to interpret as the NumLock key", &rs_numlock_mod),
+    OPT_ILONG("meta-mod", "modifier to interpret as the Meta key", &rs_meta_mod),
+    OPT_ILONG("alt-mod", "modifier to interpret as the Alt key", &rs_alt_mod),
+    OPT_ILONG("numlock-mod", "modifier to interpret as the NumLock key", &rs_numlock_mod),
 #ifdef GREEK_SUPPORT
-        OPT_LONG("greek-keyboard", "greek keyboard mapping (iso or ibm)", &rs_greek_keyboard),
+    OPT_LONG("greek-keyboard", "greek keyboard mapping (iso or ibm)", &rs_greek_keyboard),
 #endif
-        OPT_BLONG("app-keypad", "application keypad mode", &PrivateModes, PrivMode_aplKP), OPT_BLONG("app-cursor", "application cursor key mode", &PrivateModes, PrivMode_aplCUR),
-/* =======[ Misc options ]======= */
-        OPT_INT('L', "save-lines", "lines to save in scrollback buffer", &rs_saveLines), OPT_ILONG("min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
+    OPT_BLONG("app-keypad", "application keypad mode", &PrivateModes, PrivMode_aplKP),
+    OPT_BLONG("app-cursor", "application cursor key mode", &PrivateModes, PrivMode_aplCUR),
+    /* =======[ Misc options ]======= */
+    OPT_INT('L', "save-lines", "lines to save in scrollback buffer", &rs_saveLines),
+    OPT_ILONG("min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
 #ifdef BORDER_WIDTH_OPTION
-        OPT_INT('w', "border-width", "term window border width", &(TermWin.internalBorder)),
+    OPT_INT('w', "border-width", "term window border width", &(TermWin.internalBorder)),
 #endif
 #ifdef PRINTPIPE
-        OPT_LONG("print-pipe", "print command", &rs_print_pipe),
+    OPT_LONG("print-pipe", "print command", &rs_print_pipe),
 #endif
 #ifdef CUTCHAR_OPTION
-        OPT_LONG("cut-chars", "seperators for double-click selection", &rs_cutchars),
+    OPT_LONG("cut-chars", "seperators for double-click selection", &rs_cutchars),
 #endif /* CUTCHAR_OPTION */
-        OPT_LONG("finished-title", "text to add to window title after program termination", &rs_finished_title),
-        OPT_LONG("finished-text", "text to output after program termination", &rs_finished_text),
-        OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
-        OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
-        OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL), OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
+    OPT_LONG("finished-title", "text to add to window title after program termination", &rs_finished_title),
+    OPT_LONG("finished-text", "text to output after program termination", &rs_finished_text),
+    OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
+    OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
+    OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL),
+    OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
 #ifdef ESCREEN
-        OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
-        OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
-        OPT_INT('z', "delay", "initial delay in seconds", &rs_delay),
+    OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
+    OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
+    OPT_INT('z', "delay", "initial delay in seconds", &rs_delay),
 #endif
-        OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
+    OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
 };
+/* *INDENT-ON* */
 
 /* Print usage information */
 #define INDENT "5"

@@ -861,7 +861,8 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
         }
     }
 
-    if ((which == image_max) || (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE))) {
+    if (((which == image_max) || (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE)))
+        && (simg->iml != NULL)) {
         imlib_context_set_image(simg->iml->im);
         imlib_context_set_drawable(d);
         imlib_context_set_anti_alias(1);

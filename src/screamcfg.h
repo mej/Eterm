@@ -30,10 +30,9 @@
 #define NS_SCREEM_CALL       "%s 2>/dev/null || %s"
 #define NS_WRAP_CALL         "export TERM=vt100; screen -wipe; %s"
 #define NS_SCREEN_RC         ".screenrc"
-#define NS_TWIN_CALL         "export TERM=xterm; twin %s"
-#define NS_TWIN_OPTS         "-hw=tty"
+#define NS_TWIN_CALL         "twattach %s 2>/dev/null || twin %s"
 #define NS_TWIN_PARA         "twin@"
-#define NS_TWDISPLAY_OPTS    "-" NS_TWIN_PARA "%s"
+#define NS_TWIN_OPTS         "-hw=tty,TERM=xterm -" NS_TWIN_PARA "%s"
 
 /* this should never change. the escape-char for an out-of-the-box "screen".
    don't change this just because you set something else in your .screenrc */
@@ -50,7 +49,7 @@
 #define NS_SCREEN_UPDATE     "\x01w"
 #define NS_SCREEN_VERSION    "\x01v"
 #define NS_SCREEN_SESSION    "\x01:sessionname\r"
-#define NS_SCREEN_INIT       "\x01:msgminwait 0\r\x01:msgwait 0\r\x01:hardstatus lastline \"%w\"\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:nethack off\r\x0c" NS_SCREEN_UPDATE NS_SCREEN_VERSION NS_SCREEN_SESSION
+#define NS_SCREEN_INIT       "\x01:msgminwait 0\r\x01:msgwait 0\r\x01:hardstatus lastline \"%w\"\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:nethack off\r" NS_SCREEN_UPDATE "\r" NS_SCREEN_VERSION NS_SCREEN_SESSION "\x0c" NS_SCREEN_UPDATE "\r"
 #define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22

@@ -2933,6 +2933,8 @@ escreen_init(char **argv)
     bbar_show(bbar, 1);
     parent_resize();
 
+    bbar_redraw(bbar);          /* get a bar in twin too */
+
     /* add_screen_ctl_button(bbar,"New",'c'); */
     D_CMD(("TermWin.screen->fd = %d\n", TermWin.screen->fd));
     return TermWin.screen->fd;

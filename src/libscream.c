@@ -48,7 +48,7 @@
 #else
 #  define MALLOC(a) malloc(a)
 #  define FREE(a) free(a)
-#  define STRDUP(a) strdup(a)
+#  define STRDUP(a) STRDUP(a)
 #  ifdef NS_DEBUG
 #    define D_ESCREEN(a)  fprintf(stderr,a);
 #  else
@@ -97,7 +97,10 @@ static void ns_desc_hop(_ns_hop *, char *);
 static int ns_parse_screenrc(_ns_sess *, char *, int);
 static int ns_mov_screen_disp(_ns_sess *, int, int);
 static _ns_sess *ns_dst_sess(_ns_sess **);
+
+#ifdef NS_HAVE_SCREEN
 static int ns_inp_tab(void *, char *, size_t, size_t);
+#endif
 
 
 
@@ -973,11 +976,24 @@ ns_make_call_el(char *tmpl, char *dflt, char *opt)
 static char *
 ns_make_call(_ns_sess * sess)
 {
-    char *call, *tmp = NULL, *screen = NULL, *scream = NULL, *screem = NULL;
+    char *call, *tmp = NULL, *screen = NULL, *scream = NULL, *screem = NULL, *twin;
 
 #ifdef NS_HAVE_TWIN
-    if (sess->backend == NS_MODE_TWIN)
-        return ns_make_call_el(NS_TWIN_CALL, NS_TWIN_OPTS, sess->rsrc);
+    if (sess->backend == NS_MODE_TWIN) {
+        int r, l;
+
+        tmp = sess->rsrc ? STRDUP(sess->rsrc) : ns_make_call_el(NS_TWIN_OPTS, ":0", sess->twin_str);
+        l = 1 + strlen(NS_TWIN_CALL) + 2 * strlen(tmp);
+        if ((twin = MALLOC(l))) {
+            r = snprintf(twin, l, NS_TWIN_CALL, tmp ? tmp : "", tmp ? tmp : "");
+#  ifdef NS_PARANOID
+            if ((r < 0) || (r > l))
+                ns_free(&twin);
+#  endif
+        }
+        ns_free(&tmp);
+        return twin;
+    }
 #endif
     /* unless decidedly in other mode... */
     if (sess->backend != NS_MODE_SCREEN)
@@ -992,9 +1008,8 @@ ns_make_call(_ns_sess * sess)
         if ((screem = MALLOC(l))) {
             r = snprintf(screem, l, NS_SCREEM_CALL, scream ? scream : "", screen ? screen : "");
 #ifdef NS_PARANOID
-            if ((r < 0) || (r > l)) {
+            if ((r < 0) || (r > l))
                 ns_free(&screem);
-            }
 #endif
         }
         tmp = screem;
@@ -1384,6 +1399,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 
     sess->backend = NS_MODE_NEGOTIATE;
     if (sess->proto) {
+#warning compiling in libscream
 #ifdef NS_HAVE_SCREEN
         if (!strcmp(sess->proto, "screen")) {
             sess->backend = NS_MODE_SCREEN;
@@ -1671,6 +1687,8 @@ ns_rel_disp(_ns_sess * s, int d)
 int
 ns_add_disp(_ns_sess * s, int after, char *name)
 {
+    int ret = NS_FAIL;
+
     if (!s) {
         return NS_FAIL;
     }
@@ -1685,17 +1703,18 @@ ns_add_disp(_ns_sess * s, int after, char *name)
           if (ns_screen_command(s, "\x01\x03") == NS_SUCC) {
               if (!name || strlen(name))
                   ns_ren_disp(s, -2, name);
-              ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
+              ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
           }
           break;
 #endif
 #ifdef NS_HAVE_TWIN
       case NS_MODE_TWIN:
+          ret = ns_twin_control(s, "twin", TW_MSG_CONTROL_OPEN);
+          printf("ns_add_disp: twin add window after %d -> %d\n", after, ret);
           break;
 #endif
-      default:
-          return NS_FAIL;
     }
+    return ret;
 }
 
 
@@ -2083,15 +2102,21 @@ ns_statement(_ns_sess * s, char *c)
 
     y = x = s->escape;
 
+    if (!c || !*c) {
+        (void) ns_inp_dial(s, "Enter a command to send to the text-window manager", 64, &i,
+#ifdef NS_HAVE_SCREEN
+                           ns_inp_tab
+#else
+                           NULL
+#endif
+            );
+        if (!i || !*i)
+            return NS_FAIL;
+    }
+
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
       case NS_MODE_SCREEN:
-          if (!c || !*c) {
-              (void) ns_inp_dial(s, "Enter a command to send to the \"screen\" program", 64, &i, ns_inp_tab);
-              if (!i || !*i)
-                  return NS_FAIL;
-          }
-
           if ((ret = ns_parse_screen_cmd(s, i ? i : c, NS_ESC_INTERACTIVE)) == NS_SUCC) {
               if (s->escape != x) {
                   y = s->escape;
@@ -2175,6 +2200,83 @@ ns_get_url(_ns_sess * s, int d)
 }
 
 
+
+/****************************************************************************
+ _            _                                 _  __ _      
+| |___      _(_)_ __        ___ _ __   ___  ___(_)/ _(_) ___ 
+| __\ \ /\ / / | '_ \ _____/ __| '_ \ / _ \/ __| | |_| |/ __|
+| |_ \ V  V /| | | | |_____\__ \ |_) |  __/ (__| |  _| | (__ 
+ \__| \_/\_/ |_|_| |_|     |___/ .__/ \___|\___|_|_| |_|\___|
+                               |_|
+twin-sepcific routines
+
+  these routines handle a specific backend, the "twin" program. */
+
+
+#ifdef NS_HAVE_TWIN
+
+int
+ns_twin_command(_ns_sess * sess, udat type, byte * port, udat cmd, byte * data)
+{
+    udat l = 0;
+    tmsgport msgport;
+    tmsg msg;
+    uldat err;
+    byte ret;
+
+    if (data)
+        l = strlen(data);
+
+    if (port) {
+        if ((msgport = Tw_FindMsgPort(sess->twin, TW_NOID, strlen(port), port))) {
+            if (type == TW_MSG_USER_CONTROL) {
+                tevent_control EventC;
+
+                if ((msg = Tw_CreateMsg(sess->twin, TW_MSG_USER_CONTROL, l + TW_SIZEOF_TEVENT_CONTROL))) {
+                    EventC = &msg->Event.EventControl;
+                    EventC->W = TW_NOID;
+                    EventC->Code = cmd;
+                    EventC->Len = l;
+                    EventC->X = EventC->Y = 0;
+
+                    if (l)
+                        memcpy(EventC->Data, data, l);
+
+                    if ((ret = Tw_SendMsg(sess->twin, msgport, msg))) {
+                        printf("controlMsg <- %d\n", ret);
+                        return NS_SUCC;
+                    }
+                }
+            } else {
+                tevent_clientmsg EventC;
+
+                if ((msg = Tw_CreateMsg(sess->twin, TW_MSG_USER_CLIENTMSG, l + TW_SIZEOF_TEVENT_CLIENTMSG))) {
+                    EventC->W = TW_NOID;
+                    EventC->Code = cmd;
+                    EventC->Len = l;
+                    if (l)
+                        memcpy(EventC->Data.b, data, l);
+                    if ((ret = Tw_SendMsg(sess->twin, msgport, msg))) {
+                        printf("clientMsg <- %d\n", ret);
+                        return NS_SUCC;
+                    }
+                }
+            }
+        } else {
+            D_ESCREEN(("msgport \"%s\" not found\n", port));
+            return NS_FAIL;
+        }
+    } else {
+        D_ESCREEN(("no msgport given\n"));
+        return NS_FAIL;
+    }
+
+    err = TwErrno;
+    D_ESCREEN(("libTw error: %s%s\n", TwStrError(err), TwStrErrorDetail(err, TwErrnoDetail)));
+    return NS_FAIL;
+}
+
+#endif
 
 /****************************************************************************
                                                         _  __ _      
@@ -2711,6 +2813,7 @@ ns_screen_weird(_ns_sess * screen, long type, char *doc)
 {
     if (!(err_inhibit & type)) {
         err_inhibit |= type;
+        ns_desc_sess(screen, "ns_screen_weird");
         fprintf(stderr, "parse_screen: %s (%ld) screen sent weird stuff.\n"
                 "This should never happen. It is assumed that you use a\n"
                 "rather unusual configuration for \"screen\".   Please\n"

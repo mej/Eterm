@@ -4743,3 +4743,7 @@ Thu Jun 27 09:14:39 2002                        Michael Jennings (mej)
 
 Fix compile when Escreen support is disabled.
 ----------------------------------------------------------------------
+Fri Jun 28 16:40:55 2002                        Michael Jennings (mej)
+
+Additional twin stuff, plus a bug fix for dragging Escreen buttons.
+----------------------------------------------------------------------

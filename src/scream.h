@@ -219,6 +219,14 @@ int ns_magic_disp(_ns_sess **,_ns_disp **);
 /* send command to screen */
 int ns_screen_command(_ns_sess *, char *);
 
+/* send command to twin */
+#ifdef NS_HAVE_TWIN
+int ns_twin_command(_ns_sess *,udat,byte *,udat,byte *);
+#  define ns_twin_control(s,a,b)   ns_twin_command(s,TW_MSG_USER_CONTROL,(a),(b),NULL)
+#  define ns_twin_message(s,a,b,c) ns_twin_command(s,TW_MSG_USER_CLIENTMSG,(a),(b),(c))
+#endif
+
+
 /* send statement to screen (prefixing it with the session's ^A: equiv) */
 int ns_screen_xcommand(_ns_sess *,char , char *);
 

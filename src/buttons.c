@@ -307,9 +307,10 @@ bbar_handle_button_release(event_t *ev)
                     FREE(u);
                 }
                 return 1;
-            } else if (buttonbar->current != drag) {
+            } else if (bbar->current != drag) {
                 D_ESCREEN(("Button for display %d dragged to display %d\n", fm, to));
                 ns_mov_disp(TermWin.screen, fm, to);
+                bbar->current = drag = NULL;
                 return 1;
             }
         }
