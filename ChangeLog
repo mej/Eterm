@@ -3514,3 +3514,8 @@ Mon Apr 24 18:46:25 PDT 2000	Michael Jennings <mej@eterm.org>
 	fixed properly.
 	
 -------------------------------------------------------------------------------
+Mon Apr 24 20:43:00 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Found the Imlib2 bug and fixed it, so revert this hack.
+	
+-------------------------------------------------------------------------------
