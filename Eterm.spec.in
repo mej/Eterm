@@ -1,5 +1,5 @@
 %define ver      @VERSION@
-%define rel      1
+%define rel      2
 %define prefix   @prefix@
 
 Summary: Enlightened terminal emulator
@@ -9,9 +9,7 @@ Release: %{rel}
 Copyright: BSD
 Group: User Interface/X
 Source0: ftp://ftp.eterm.org/pub/Eterm/Eterm-%{ver}.tar.gz
-Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-scale-1.tar.gz
-Source2: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-scale-2.tar.gz
-Source3: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-tile.tar.gz
+Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-%{ver}.tar.gz
 URL: http://www.eterm.org/
 BuildRoot: /var/tmp/Eterm-root
 Requires: imlib >= 1.9.6
@@ -72,9 +70,7 @@ gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
  for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
   mv $i $i.base ; done)
 
-tar xvfz %{SOURCE1}
-tar xvfz %{SOURCE2}
-tar xvfz %{SOURCE3}
+tar -zxvf %{SOURCE1}
 
 make -C bg all
 make -C bg prefix=$RPM_BUILD_ROOT%{prefix} install
@@ -89,7 +85,7 @@ cat > rpm-Eterm-bg-files <<EOF
 EOF
 find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
        -not -name 'README*' -not -name 014.png \
-        -not -name 40.png -not -name 6.png -not -name backwave.jpg \
+        -not -name 40.png -not -name blackstone.png -not -name backwave.jpg \
         -not -name circuit.png -not -name nebula.jpg \
         -not -name fourthday.jpg -not -name gaia.jpg \
         -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
@@ -128,7 +124,7 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/share/Eterm/themes
 %{prefix}/share/Eterm/pix/014.png
 %{prefix}/share/Eterm/pix/40.png
-%{prefix}/share/Eterm/pix/6.png
+%{prefix}/share/Eterm/pix/blackstone.png
 %{prefix}/share/Eterm/pix/backwave.jpg
 %{prefix}/share/Eterm/pix/circuit.png
 %{prefix}/share/Eterm/pix/nebula.jpg

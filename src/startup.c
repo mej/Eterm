@@ -242,7 +242,7 @@ eterm_bootstrap(int argc, char *argv[])
     display_name = val;		/* use broken `:0' value */
 
   i = strlen(val);
-  display_string = MALLOC((i + 9));
+  display_string = MALLOC(i + 9);
 
   sprintf(display_string, "DISPLAY=%s", val);
   sprintf(windowid_string, "WINDOWID=%u", (unsigned int) TermWin.parent);
@@ -263,7 +263,7 @@ eterm_bootstrap(int argc, char *argv[])
   } else {
     if (rs_term_name != NULL) {
       i = strlen(rs_term_name);
-      term_string = MALLOC((i + 6) * sizeof(char));
+      term_string = MALLOC(i + 6);
 
       sprintf(term_string, "TERM=%s", rs_term_name);
       putenv(term_string);

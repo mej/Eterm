@@ -2180,7 +2180,7 @@ run_command(char *argv[])
 
       argv0 = my_basename(shell);
       if (Options & Opt_loginShell) {
-	char *p = MALLOC((strlen(argv0) + 2) * sizeof(char));
+	char *p = MALLOC(strlen(argv0) + 2);
 
 	p[0] = '-';
 	strcpy(&p[1], argv0);
