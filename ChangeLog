@@ -3777,3 +3777,8 @@ Wed Jul  5 20:07:09 PDT 2000	Michael Jennings <mej@eterm.org>
 	get updated with the pause mode message.
 	
 -------------------------------------------------------------------------------
+Wed Jul  5 20:48:10 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Dammit.  I missed an occurance of XA_COMPOUND_TEXT().
+	
+-------------------------------------------------------------------------------

@@ -2441,7 +2441,7 @@ selection_request(Time tm, int x, int y)
     selection_paste(Xroot, XA_CUT_BUFFER0, False);
   } else {
     prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
-#ifdef MULTI_CHARSET
+#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
     XConvertSelection(Xdisplay, XA_PRIMARY, XA_COMPOUND_TEXT(Xdisplay), prop, TermWin.vt, tm);
 #else
     XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
