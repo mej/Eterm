@@ -850,7 +850,6 @@ void
 process_print_pipe(void)
 {
     const char *const escape_seq = "\033[4i";
-    const char *const rev_escape_seq = "i4[\033";
     int index;
     FILE *fd;
 
@@ -858,14 +857,18 @@ process_print_pipe(void)
         for (index = 0; index < 4; /* nil */ ) {
             unsigned char ch = cmd_getc();
 
-            if (ch == escape_seq[index])
+            if (ch == escape_seq[index]) {
                 index++;
-            else if (index)
-                for ( /*nil */ ; index > 0; index--)
-                    fputc(rev_escape_seq[index - 1], fd);
+            } else if (index) {
+                int i;
 
-            if (index == 0)
+                for (i = 0; index > 0; i++, index--) {
+                    fputc(escape_seq[i], fd);
+                }
+            }
+            if (index == 0) {
                 fputc(ch, fd);
+            }
         }
         pclose_printer(fd);
     }

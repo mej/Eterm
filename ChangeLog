@@ -5168,3 +5168,8 @@ Mon Jan 19 21:02:30 2004                        Michael Jennings (mej)
 
 Patch from David Lloyd <dmlloyd@tds.net> for overstrike support.
 ----------------------------------------------------------------------
+Wed Feb 11 14:06:20 2004                        Michael Jennings (mej)
+
+Fixed handling of escape sequences while printing.  Pointed out by
+Tom A. Cox <tomc@hot.rr.com>.
+----------------------------------------------------------------------
