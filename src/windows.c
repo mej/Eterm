@@ -525,6 +525,9 @@ parent_resize(void)
   D_X11((" -> New parent width/height == %lux%lu\n", szHint.width, szHint.height));
   term_resize(szHint.width, szHint.height);
   scrollbar_resize(szHint.width, szHint.height);
+  if (buffer_pixmap != None) {
+    scr_touch();
+  }
 }
 
 void
@@ -552,6 +555,9 @@ handle_resize(unsigned int width, unsigned int height)
     D_X11((" -> New szHint.width/height == %lux%lu\n", szHint.width, szHint.height));
     scrollbar_resize(width, height);
     scr_reset();
+    if (buffer_pixmap != None) {
+      scr_touch();
+    }
 
     if (curr_screen >= 0) {
       scr_change_screen(curr_screen);

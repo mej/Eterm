@@ -442,11 +442,6 @@ handle_configure_notify(event_t * ev)
       font_chg--;
     }
     if ((width != (unsigned int) szHint.width) || (height != (unsigned int) szHint.height)) {
-      Window win;
-      int unused;
-
-      XGetGeometry(Xdisplay, TermWin.parent, &win, &unused, &unused, &width, &height, &unused, &unused);
-      D_EVENTS((" -> XGetGeometry says I'm %ldx%ld\n", width, height));
       /* We were resized externally.  Handle the resize. */
       D_EVENTS((" -> External resize detected.\n"));
       handle_resize(width, height);
