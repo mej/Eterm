@@ -2379,3 +2379,10 @@ Wed Sep  8 11:11:00 PDT 1999	Michael Jennings <mej@eterm.org>
 	hang around forever when gdb decides to hang.
 	
 -------------------------------------------------------------------------------
+Mon Sep 13 12:23:36 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Removed the tn3270 theme, which nobody uses, and added the cEterm
+	theme.  You get the same colors as Alfredo's original script, but
+	without all the crap on the command line. :-)
+	
+-------------------------------------------------------------------------------

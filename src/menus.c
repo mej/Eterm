@@ -511,7 +511,7 @@ find_menu_by_title(menulist_t * list, char *title)
 
   register unsigned char i;
 
-  ASSERT_RVAL(list != NULL, NULL);
+  REQUIRE_RVAL(list != NULL, NULL);
 
   for (i = 0; i < list->nummenus; i++) {
     if (!strcasecmp(list->menus[i]->title, title)) {
@@ -527,7 +527,7 @@ find_menu_by_window(menulist_t * list, Window win)
 
   register unsigned char i;
 
-  ASSERT_RVAL(list != NULL, NULL);
+  REQUIRE_RVAL(list != NULL, NULL);
 
   for (i = 0; i < list->nummenus; i++) {
     if (list->menus[i]->win == win) {
