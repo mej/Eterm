@@ -4396,3 +4396,7 @@ Sat Sep 22 09:41:26 2001                        Michael Jennings (mej)
 
 Fixes for Solaris where ln requires a certain argument order.
 ----------------------------------------------------------------------
+Wed Sep 26 23:19:37 2001                        Michael Jennings (mej)
+
+Oops.  Let's get rid of that useless code. :P
+----------------------------------------------------------------------

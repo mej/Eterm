@@ -612,9 +612,7 @@ handle_button_press(event_t *ev)
   D_EVENTS(("handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
-  if (Options & Opt_borderless) {
-    XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
-  }
+
   if (action_dispatch(ev, 0)) {
     button_state.ignore_release = 1;
     return 1;
