@@ -4981,3 +4981,8 @@ Patch from Paul Brannan <pbrannan@atdesk.com> to fix a conflict
 between twin's non-standard mouse drag reporting and vim when twin
 support is not enabled.
 ----------------------------------------------------------------------
+Mon Feb 24 21:05:00 2003                        Michael Jennings (mej)
+
+Screw it.  I don't see any way to "sanitize" these, as they put it,
+so we'll just disable that for now until someone can throw me a clue.
+----------------------------------------------------------------------

@@ -1397,16 +1397,20 @@ process_window_mode(unsigned int nargs, int args[])
               tt_write((unsigned char *) buff, strlen(buff));
               break;
           case 20:
+#if FIXME_BLOCK
               XGetIconName(Xdisplay, TermWin.parent, &name);
               snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
+#endif
               break;
           case 21:
+#if FIXME_BLOCK
               XFetchName(Xdisplay, TermWin.parent, &name);
               snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
+#endif
               break;
           default:
               break;
