@@ -3175,6 +3175,30 @@ save_config(char *path, unsigned char save_theme)
         fprintf(fp, "    font bold %s\n", rs_boldFont);
     }
 #endif
+    if (fshadow.do_shadow) {
+        const char *corners[] = {
+            "top_left",
+            "top_right",
+            "bottom_left",
+            "bottom_right"
+        };
+        unsigned char shad = 0;
+
+        fprintf(fp, "    font effects");
+        for (i = 0; i < 4; i++) {
+            if (fshadow.shadow[i]) {
+                fprintf(fp, " %s 0x%08x", corners[i], (unsigned int) fshadow.color[i]);
+                shad = 1;
+            }
+        }
+        if (shad) {
+            fprintf(fp, "\n");
+        } else {
+            fprintf(fp, " none\n");
+        }
+    } else {
+        fprintf(fp, "    font effects none\n");
+    }
     fprintf(fp, "end attributes\n\n");
 
     if (save_theme) {

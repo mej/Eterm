@@ -5075,3 +5075,8 @@ script.  You can now pass "-m /path/to/menufile" to Etbg_update_list
 to generate the entries in the specified file.  Hopefully I'll make
 this process automated, at least on my end, in the near future.
 ----------------------------------------------------------------------
+Wed Aug 20 10:19:50 2003                        Michael Jennings (mej)
+
+When saving settings, make sure to save the font effects too.  Spotted
+by ptiJo <ptiJo@noos.fr>.
+----------------------------------------------------------------------

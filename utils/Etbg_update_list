@@ -7,7 +7,6 @@
 LISTFILE=pixmaps.list
 
 if [ "x$1" = "x-m" ]; then
-    echo "Mmmm, got menu file $2"
     shift
     ETBG_MENUFILE="$1"
     export ETBG_MENUFILE
