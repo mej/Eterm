@@ -3508,3 +3508,9 @@ Tue Apr 18 23:55:42 PDT 2000	Michael Jennings <mej@eterm.org>
 	courtesy of Brian McFee <keebler@sandwich.net>.
 	
 -------------------------------------------------------------------------------
+Mon Apr 24 18:46:25 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Work around that polka-dot-making Imlib2 problem until it can be
+	fixed properly.
+	
+-------------------------------------------------------------------------------

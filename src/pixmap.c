@@ -1053,8 +1053,11 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
       imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, 0, xscaled, yscaled);
       rendered = 1;
-      if (simg->pmap->mask != None) {
-	shaped_window_apply_mask(win, simg->pmap->mask);
+      /* FIXME:  This is a hack around an apparent Imlib2 bug! */
+      if (which == image_up || which == image_down || which == image_st) {
+        if (simg->pmap->mask != None) {
+          shaped_window_apply_mask(win, simg->pmap->mask);
+        }
       }
       if (simg->pmap->pixmap != None) {
         if (pixmap != None) {
