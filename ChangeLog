@@ -4721,3 +4721,8 @@ Thu Jun 20 11:51:59 2002                        Michael Jennings (mej)
 
 Forgot to change the header....
 ----------------------------------------------------------------------
+Thu Jun 20 18:32:22 2002                        Michael Jennings (mej)
+
+Fixed the updating of the status bar for Escreen.  Also changed strdup
+to STRDUP for libast.
+----------------------------------------------------------------------
