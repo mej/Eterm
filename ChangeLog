@@ -5020,3 +5020,8 @@ echo -e "\e]19;cyan\007"
 Note that the setting of bold and underline colors using 18 and 19 are
 Eterm extensions.
 ----------------------------------------------------------------------
+Mon Mar 31 19:00:00 2003                          Simon Horman (horms)
+
+Fixed compilation problem with XIM support which resulted
+in Eterm segfaulting if the XIM server (kinput2) exited.
+----------------------------------------------------------------------
