@@ -265,11 +265,8 @@ are the horizontal/vertical alignment percentages, and
 .I ops
 is a colon-delimited list of operations:
 .BR tiled " (to tile the image), "
-.BR scaled " (for horizontal and vertical scaling), " 
-.BR hscaled " (for horizontal scaling), " 
-.BR vscaled " (for vertical scaling), and " 
 .BR propscaled " (for proportional scaling)."
-Note that some of these operations can be combined for various effects.
+Note that these operations can be combined for various effects.
 .TP
 .BI \-I " pic" ", \-\-icon " pic
 Sets the icon pixmap file to
@@ -1129,11 +1126,8 @@ are the horizontal/vertical alignment percentages, and
 .I ops
 is a colon-delimited list of operations:
 .BR tiled " (to tile the image), "
-.BR scaled " (for horizontal and vertical scaling), " 
-.BR hscaled " (for horizontal scaling), " 
-.BR vscaled " (for vertical scaling), and " 
 .BR propscaled " (for proportional scaling)."
-Note that some of these operations can be combined for various effects.
+Note that these operations can be combined for various effects.
 .RE
 .RE
 

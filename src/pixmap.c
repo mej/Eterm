@@ -124,7 +124,6 @@ image_mode_any(unsigned char mode)
 unsigned short
 parse_pixmap_ops(char *str)
 {
-
   unsigned short op = OP_NONE;
   char *token;
 
@@ -155,7 +154,7 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
   {'\0'};
   unsigned int w = 0, h = 0;
   int x = 0, y = 0;
-  unsigned short op = OP_NONE;
+  unsigned short op;
   int flags;
   unsigned short changed = 0;
   char *p, *opstr;
@@ -172,7 +171,9 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
   }
   if ((opstr = strchr(geom, ':')) != NULL) {
     *opstr++ = '\0';
-    op |= parse_pixmap_ops(opstr);
+    op = parse_pixmap_ops(opstr);
+  } else {
+    op = pmap->op;
   }
   if ((p = strchr(geom, ';')) == NULL)
     p = strchr(geom, '\0');
@@ -189,13 +190,19 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
     flags |= WidthValue;	/* default is tile */
     w = 0;
   }
-  if (flags & WidthValue) {
-    if (!(flags & XValue)) {
-      x = 50;
-    }
-    if (!(flags & HeightValue))
-      h = w;
+  if (!(flags & XValue)) {
+    x = 50;
+  }
+  if (!(flags & HeightValue)) {
+    h = w;
+  }
+  if (!(flags & YValue)) {
+    if (flags & XNegative)
+      flags |= YNegative;
+    y = x;
+  }
 
+  if (flags & (WidthValue | HeightValue)) {
     if (w && !h) {
       w = pmap->w * ((float) w / 100);
       h = pmap->h;
@@ -203,35 +210,16 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
       w = pmap->w;
       h = pmap->h * ((float) h / 100);
     }
-    /* If they want scaling, but didn't give a percentage, assume 100% */
-    if (op & OP_PROPSCALE) {
-      if (!w)
-	w = 100;
-      if (!h)
-	h = 100;
-    } else {
-      if ((op & OP_HSCALE) && !w) {
-	w = 100;
-      }
-      if ((op & OP_VSCALE) && !h) {
-	h = 100;
-      }
-    }
+  }
+  if (pmap->w != (int) w) {
+    pmap->w = (int) w;
+    changed++;
+  }
+  if (pmap->h != (int) h) {
+    pmap->h = (int) h;
+    changed++;
+  }
 
-    if (pmap->w != (int) w) {
-      pmap->w = (int) w;
-      changed++;
-    }
-    if (pmap->h != (int) h) {
-      pmap->h = (int) h;
-      changed++;
-    }
-  }
-  if (!(flags & YValue)) {
-    if (flags & XNegative)
-      flags |= YNegative;
-    y = x;
-  }
   if (!(flags & WidthValue) && geom[0] != '=') {
     x += pmap->x;
     y += pmap->y;
@@ -241,9 +229,9 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
     if (flags & YNegative)
       y += 100;
   }
+  BOUND(x, 0, 100);
+  BOUND(y, 0, 100);
 
-  x = (x <= 0 ? 0 : (x >= 100 ? 100 : x));
-  y = (y <= 0 ? 0 : (y >= 100 ? 100 : y));;
   if (pmap->x != x) {
     pmap->x = x;
     changed++;
@@ -1032,7 +1020,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
       ysize = imlib_image_get_height();
       D_PIXMAP(("w == %d, h == %d, x == %d, y == %d, xsize == %d, ysize == %d\n", w, h, x, y, xsize, ysize));
 
-      if ((simg->pmap->op & OP_PROPSCALE)) {
+      if ((simg->pmap->op & OP_PROPSCALE) && w && h) {
 	double x_ratio, y_ratio;
 
 	x_ratio = ((double) width) / ((double) xsize);

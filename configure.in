@@ -312,7 +312,7 @@ echo "        the --x-libraries parameter to configure.";
 AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT))
 
 # check if we need X_LOCALE definition
-AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE))
+AC_CHECK_LIB(X11, _Xsetlocale, AC_DEFINE(X_LOCALE), AC_DEFINE(NO_XLOCALE))
 
 # For multibyte selection handling
 if test "$MULTICHAR_ENCODING" != "none"; then

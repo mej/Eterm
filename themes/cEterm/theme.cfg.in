@@ -1,4 +1,4 @@
-<Eterm-0.9>
+<Eterm-0.9.1>
 # ^- This must be the first line of any Eterm config file!
 # Format is:  <Eterm-VERSION>  where VERSION is replaced by
 #                              the version it was written for,
@@ -143,7 +143,7 @@ begin imageclasses
       color black #666666
       file bar_vertical_3.png
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
-      geom :scale
+      geom 100
       border 2 2 2 3
     end image
     begin image
@@ -152,11 +152,11 @@ begin imageclasses
       state normal
       color black #666666
       file bar_vertical_1.png
-      geom :scale
+      geom 100
       border 2 2 2 3
       state selected
       file bar_vertical_2.png
-      geom :scale
+      geom 100
       border 2 2 2 3
     end image
     begin image
@@ -165,11 +165,11 @@ begin imageclasses
       state normal
       color black #666666
       file thumb_1.png
-      geom :scale
+      geom 100
       border 3 3 3 3
       state selected
       file thumb_2.png
-      geom :scale
+      geom 100
       border 3 3 3 3
     end image
     begin image
@@ -178,15 +178,15 @@ begin imageclasses
       state normal
       color black #666666
       file button_arrow_up_1.png
-      geom :scale
+      geom 100
       border 2 2 2 2
       state selected
       file button_arrow_up_2.png
-      geom :scale
+      geom 100
       border 2 2 2 2
       state clicked
       file button_arrow_up_3.png
-      geom :scale
+      geom 100
       border 2 2 2 2
     end image
     begin image
@@ -195,15 +195,15 @@ begin imageclasses
       state normal
       color black #666666
       file button_arrow_down_1.png
-      geom :scale
+      geom 100
       border 2 2 2 2
       state selected
       file button_arrow_down_2.png
-      geom :scale
+      geom 100
       border 2 2 2 2
       state clicked
       file button_arrow_down_3.png
-      geom :scale
+      geom 100
       border 2 2 2 2
     end image
     begin image

@@ -987,18 +987,9 @@ process_csi_seq(void)
     return;  /* An NPC.  Punt. */
 
   switch (ch) {
-#ifdef PRINTPIPE
-    case 'i':
-      switch (arg[0]) {
-	case 0:
-	  scr_printscreen(0);  /* Print screen "\e[0i" */
-	  break;
-	case 5:
-	  process_print_pipe();  /* Start printing to print pipe "\e[5i" */
-	  break;
-      }
+    case '@':
+      scr_insdel_chars((arg[0] ? arg[0] : 1), INSERT);
       break;
-#endif
     case 'A':
     case 'e':  /* Cursor up n lines "\e[<n>A" */
       scr_gotorc((arg[0] ? -arg[0] : -1), 0, RELATIVE);
@@ -1023,9 +1014,6 @@ process_csi_seq(void)
     case '`':  /* Cursor to column n "\e[<n>G" */
       scr_gotorc(0, (arg[0] ? arg[0] - 1 : +1), R_RELATIVE);
       break;
-    case 'd':  /* Cursor to row n "\e[<n>d" */
-      scr_gotorc((arg[0] ? arg[0] - 1 : +1), 0, C_RELATIVE);
-      break;
     case 'H':
     case 'f':  /* Cursor to row r, column c "\e[<r>;<c>H" */
       switch (nargs) {
@@ -1043,17 +1031,11 @@ process_csi_seq(void)
     case 'I':  /* Tab right n tab stops "\e[<n>I" */
       scr_tab(arg[0] ? +arg[0] : +1);
       break;
-    case 'Z':  /* Tab left n tab stops "\e[<n>Z" */
-      scr_tab(arg[0] ? -arg[0] : -1);
-      break;
     case 'J':  /* Clear part or all of screen, depending on n "\e[<n>J" */
       scr_erase_screen(arg[0]);
       break;
     case 'K':  /* Clear part or all of line, depending on n "\e[<n>K" */
       scr_erase_line(arg[0]);
-      break;
-    case '@':
-      scr_insdel_chars((arg[0] ? arg[0] : 1), INSERT);
       break;
     case 'L':
       scr_insdel_lines((arg[0] ? arg[0] : 1), INSERT);
@@ -1061,11 +1043,27 @@ process_csi_seq(void)
     case 'M':
       scr_insdel_lines((arg[0] ? arg[0] : 1), DELETE);
       break;
+    case 'P':
+      scr_insdel_chars((arg[0] ? arg[0] : 1), DELETE);
+      break;
+    case 'W':
+      switch (arg[0]) {
+	case 0:
+	  scr_set_tab(1);
+	  break;		/* = ESC H */
+	case 2:
+	  scr_set_tab(0);
+	  break;		/* = ESC [ 0 g */
+	case 5:
+	  scr_set_tab(-1);
+	  break;		/* = ESC [ 3 g */
+      }
+      break;
     case 'X':
       scr_insdel_chars((arg[0] ? arg[0] : 1), ERASE);
       break;
-    case 'P':
-      scr_insdel_chars((arg[0] ? arg[0] : 1), DELETE);
+    case 'Z':  /* Tab left n tab stops "\e[<n>Z" */
+      scr_tab(arg[0] ? -arg[0] : -1);
       break;
 
     case 'c':
@@ -1073,6 +1071,31 @@ process_csi_seq(void)
       tt_printf(VT100_ANS);
 #endif
       break;
+    case 'd':  /* Cursor to row n "\e[<n>d" */
+      scr_gotorc((arg[0] ? arg[0] - 1 : +1), 0, C_RELATIVE);
+      break;
+    case 'g':
+      switch (arg[0]) {
+	case 0:
+	  scr_set_tab(0);
+	  break;		/* delete tab */
+	case 3:
+	  scr_set_tab(-1);
+	  break;		/* clear all tabs */
+      }
+      break;
+#ifdef PRINTPIPE
+    case 'i':
+      switch (arg[0]) {
+	case 0:
+	  scr_printscreen(0);  /* Print screen "\e[0i" */
+	  break;
+	case 5:
+	  process_print_pipe();  /* Start printing to print pipe "\e[5i" */
+	  break;
+      }
+      break;
+#endif
     case 'm':
       process_sgr_mode(nargs, arg);
       break;
@@ -1168,29 +1191,6 @@ process_csi_seq(void)
     case 'u':
       if (!nargs) {
         scr_cursor(RESTORE);
-      }
-      break;
-    case 'g':
-      switch (arg[0]) {
-	case 0:
-	  scr_set_tab(0);
-	  break;		/* delete tab */
-	case 3:
-	  scr_set_tab(-1);
-	  break;		/* clear all tabs */
-      }
-      break;
-    case 'W':
-      switch (arg[0]) {
-	case 0:
-	  scr_set_tab(1);
-	  break;		/* = ESC H */
-	case 2:
-	  scr_set_tab(0);
-	  break;		/* = ESC [ 0 g */
-	case 5:
-	  scr_set_tab(-1);
-	  break;		/* = ESC [ 3 g */
       }
       break;
   }
@@ -1293,7 +1293,9 @@ process_window_mode(unsigned int nargs, int args[])
   int x, y;
   Screen *scr;
   Window dummy_child;
-  char buff[128], *name;
+  int dummy_x, dummy_y;
+  unsigned int dummy_border, dummy_depth;
+  char buff[1024], *name;
 
   if (!nargs)
     return;
@@ -1302,16 +1304,9 @@ process_window_mode(unsigned int nargs, int args[])
     return;
 
   for (i = 0; i < nargs; i++) {
-    if (args[i] == 14) {
-      int dummy_x, dummy_y;
-      unsigned int dummy_border, dummy_depth;
-
-      /* Store current width and height in x and y */
-      XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y), &dummy_border, &dummy_depth);
-    }
     switch (args[i]) {
       case 1:
-	XRaiseWindow(Xdisplay, TermWin.parent);
+	XMapRaised(Xdisplay, TermWin.parent);
 	break;
       case 2:
 	XIconifyWindow(Xdisplay, TermWin.parent, Xscreen);
@@ -1330,8 +1325,8 @@ process_window_mode(unsigned int nargs, int args[])
 	  return;		/* Make sure there are 2 args left */
 	y = args[++i];
 	x = args[++i];
-        UPPER_BOUND(y, scr->height);
-        UPPER_BOUND(x, scr->width);
+        BOUND(y, szHint.min_height, scr->height);
+        BOUND(x, szHint.min_width, scr->width);
 	XResizeWindow(Xdisplay, TermWin.parent, x, y);
 #ifdef USE_XIM
 	xim_set_status_position();
@@ -1354,8 +1349,8 @@ process_window_mode(unsigned int nargs, int args[])
 	  return;		/* Make sure there are 2 args left */
 	y = args[++i];
 	x = args[++i];
-        UPPER_BOUND(y, scr->height / TermWin.fheight);
-        UPPER_BOUND(x, scr->width / TermWin.fwidth);
+        BOUND(y, 1, scr->height / TermWin.fheight);
+        BOUND(x, 1, scr->width / TermWin.fwidth);
 	XResizeWindow(Xdisplay, TermWin.parent,
 		      Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
 		      Height2Pixel(y) + 2 * TermWin.internalBorder);
@@ -1368,6 +1363,8 @@ process_window_mode(unsigned int nargs, int args[])
 	tt_write((unsigned char *) buff, strlen(buff));
 	break;
       case 14:
+        /* Store current width and height in x and y */
+        XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y), &dummy_border, &dummy_depth);
 	snprintf(buff, sizeof(buff), "\033[4;%d;%dt", y, x);
 	tt_write((unsigned char *) buff, strlen(buff));
 	break;
@@ -1475,15 +1472,14 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 	      PrivateModes &= ~(PrivMode_MouseX11);
 	    break;
 
-#ifdef scrollbar_esc
-	  case scrollbar_esc:
-	    PrivCases(PrivMode_scrollbar);
-	    map_scrollbar(state);
-	    break;
-#endif
 	  case 25:		/* visible/invisible cursor */
 	    PrivCases(PrivMode_VisibleCursor);
 	    scr_cursor_visible(state);
+	    break;
+
+	  case 30:
+	    PrivCases(PrivMode_scrollbar);
+	    map_scrollbar(state);
 	    break;
 
 	  case 35:
@@ -1737,9 +1733,10 @@ append_to_icon_name(const char *str)
 
 /*
  * XTerm escape sequences: ESC ] Ps;Pt BEL
- *       0 = change iconName/title
- *       1 = change iconName
+ *       0 = change icon name and window title
+ *       1 = change icon name
  *       2 = change title
+ *       3 = set text property on window
  *      46 = change logfile (not implemented)
  *      50 = change font
  *
@@ -1796,35 +1793,7 @@ xterm_seq(int op, const char *str)
 
     case XTerm_EtermSeq:
 
-      /* Eterm proprietary escape sequences
-
-         Syntax:  ESC ] 6 ; <op> ; <arg> BEL
-
-         where <op> is:  0    Set/toggle transparency
-         1     Set color modifiers
-         3     Force update of pseudo-transparent background
-         10    Set scrollbar type/width
-         11    Set/toggle right-side scrollbar
-         12    Set/toggle floating scrollbar
-         13    Set/toggle popup scrollbar
-         20    Set/toggle visual bell
-         21    Set/toggle map alert
-         22    Set/toggle xterm selection behavior
-         23    Set/toggle triple-click line selection
-         24    Set/toggle viewport mode
-         25    Set/toggle selection of trailing spaces
-         30    Do not use
-         40    Do not use
-         50    Move window to another desktop
-         70    Exit Eterm
-         71    Save current configuration to a file
-         72    Search scrollback for a string
-         and <arg> is an optional argument, depending
-         on the particular sequence being used.  It
-         (along with its preceeding semicolon) may or
-         may not be needed.
-       */
-
+      /* Eterm proprietary escape sequences.  See technical reference for details. */
       D_CMD(("Got XTerm_EtermSeq sequence\n"));
       nstr = (char *) strsep(&tnstr, ";");
       eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
@@ -1832,9 +1801,8 @@ xterm_seq(int op, const char *str)
       /* Yes, there is order to the numbers for this stuff.  And here it is:
          0-9      Image Class/Mode Configuration
          10-19    Scrollbar/Buttonbar/Menu Configuration
-         20-29    Miscellaneous Toggles
-         30-39    Foreground/Text Color Configuration
-         40-49    Background Color Configuration
+         20-39    Miscellaneous Toggles
+         40-49    Foreground/Background Color Configuration
          50-69    Window/Window Manager Configuration/Interaction
          70+      Internal Eterm Operations
        */
@@ -2230,7 +2198,7 @@ xterm_seq(int op, const char *str)
           XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
           XFree(wm_hints);
 	  break;
-	case 30:
+	case 40:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr) {
 	    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
@@ -2239,7 +2207,7 @@ xterm_seq(int op, const char *str)
 	    }
 	  }
 	  break;
-	case 40:
+	case 41:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr) {
 	    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {

@@ -302,6 +302,7 @@
 #undef IMLIB_TRANS
 #undef KS_DELETE
 #undef NO_DELETE_KEY
+#undef X_LOCALE
 #undef NO_XLOCALE
 #undef UTMP_SUPPORT
 #undef MULTI_CHARSET

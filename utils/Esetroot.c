@@ -17,6 +17,7 @@ static const char cvs_ident[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#include <errno.h>
 
 #ifdef PIXMAP_SUPPORT
 #include <X11/Xlib.h>

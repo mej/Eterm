@@ -4280,3 +4280,11 @@ Thu Jun 28 19:01:05 2001                        Michael Jennings (mej)
 
 Finished updating the man page for 0.9.1.
 ----------------------------------------------------------------------
+Tue Jul  3 18:01:24 2001                        Michael Jennings (mej)
+
+All the docs and themes should now be up-to-date.  Unless a
+showstopping bug turns up in the near future, this is pretty much it
+for 0.9.1.  Now we just need some testing to make sure there's
+nothing horridly wrong....  So you all can test while we finish up
+the web site and the backgrounds. :-)
+----------------------------------------------------------------------

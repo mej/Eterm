@@ -82,10 +82,9 @@ Portions of this document were taken from the XTerm documentation.</P>
 </TR>
 <TR>
   <TD><TT>ENQ</TT></TD>
-  <TD>Enquiry (Ctrl-E), Send Device Attributes (DA).  Eterm replies with the
-      string defined by ESCZ_ANSWER in src/feature.h, which is
-      <TT><B>ESC[?1;2c</B></TT> by default.  This response indicates a VT100
-      emulator with Advanced Video Option.</TD>
+  <TD>Enquiry (Ctrl-E), Send Device Attributes (DA).  Eterm ignores
+      ENQ if NO_ENQ_ANS is defined, which it is by default in
+      <TT>src/feature.h</TT>.</TD>
 </TR>
 <TR>
   <TD><TT>ESC</TT></TD>
@@ -100,12 +99,12 @@ Portions of this document were taken from the XTerm documentation.</P>
   <TD>Line Feed or New Line (Ctrl-J)</TD>
 </TR>
 <TR>
-  <TD><TT>SI</TT></TD>
-  <TD>Shift In (Ctrl-O), invokes the G0 (default) character set</TD>
+  <TD><TT>SO</TT></TD>
+  <TD>Shift Out (Ctrl-N), invokes the G1 (alternate) character set</TD>
 </TR>
 <TR>
-  <TD><TT>SO</TT></TD>
-  <TD>Shift Out (Ctrl-O), invokes the G1 (alternate) character set</TD>
+  <TD><TT>SI</TT></TD>
+  <TD>Shift In (Ctrl-O), invokes the G0 (default) character set</TD>
 </TR>
 <TR>
   <TD><TT>SPC</TT></TD>
@@ -163,12 +162,23 @@ Portions of this document were taken from the XTerm documentation.</P>
   <TD>Numeric Keypad (RMKX)</TD>
 </TR>
 <TR>
+  <TD><TT>ESC <B>@</B></TT></TD>
+  <TD>Discards the subsequent character</TD>
+</TR>
+<TR>
   <TD><TT>ESC <B>D</B></TT></TD>
   <TD>Index (IND)</TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>E</B></TT></TD>
   <TD>Next Line (NEL)</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>G</B></TT></TD>
+  <TD>Graphics (an rxvt extension).  Eterm replies to <TT>ESC <B>G
+      Q</B></TT> (query graphics) with <TT>ESC <B>G 0</B></TT> (no
+      graphics available) and ignores all other graphics
+      sequences.</TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>H</B></TT></TD>
@@ -259,7 +269,7 @@ Portions of this document were taken from the XTerm documentation.</P>
   <TD>Tabulator functions
       <UL>
         <LI><I>n</I> == 0:  Tab Set (HTS)
-        <LI><I>n</I> == 2:  Tab Clear (TBC), clear current column (default)
+        <LI><I>n</I> == 2:  Tab Clear (TBC), clear current column
         <LI><I>n</I> == 5:  Tab Clear (TBC), clear all
       </UL>
   </TD>
@@ -324,7 +334,7 @@ Portions of this document were taken from the XTerm documentation.</P>
       </UL>
       <UL>
         <LI><I>n</I> == 4:  Insert Mode (SMIR)/Replace Mode (RMIR)
-        <LI><I>n</I> == 20:  Automatic Newline (LNM)/Normal Linefeed (LNM)
+        <LI><I>n</I> == 20:  Automatic Newline/Normal Linefeed (LNM)
       </UL>
   </TD>
 </TR>
@@ -360,6 +370,10 @@ Portions of this document were taken from the XTerm documentation.</P>
         <LI><I>n</I> == 7:  Request display name (ignored by default for
                             security reasons)
         <LI><I>n</I> == 8:  Request version number in window title
+        <LI><I>n</I> == 9:  Display pixmap/transparency status in
+                            window title (See
+                            <A HREF="#eterm_esc">below</A>.)
+
       </UL>
   </TD>
 </TR>
@@ -368,10 +382,12 @@ Portions of this document were taken from the XTerm documentation.</P>
   <TD>Set Scrolling Region (CSR), where <I>t</I> is the top row and <I>b</I> is
       the bottom row, defaults to the full screen</TD>
 </TR>
+<!--
 <TR>
   <TD><TT>ESC <B>[</B> [ <I>n</I> ] <B>x</B></TT></TD>
   <TD>Request Terminal Parameters (DECREQTPARM)</TD>
 </TR>
+-->
 <TR>
   <TD><TT>ESC <B>[ ?</B> <I>n</I> [ <B>;</B> <I>n</I> ... ] { <B>h</B> | <B>l</B> | <B>s</B> | <B>r</B> | <B>t</B> }</TT></TD>
   <TD>DEC Private Modes (shown as set/reset)
@@ -401,6 +417,8 @@ Portions of this document were taken from the XTerm documentation.</P>
         <LI><I>n</I> == 1000:  (X11 Xterm mouse reporting) Do/Don't send mouse
                                coords on button press and release (see
                                <A HREF="#mouse">below</A>)
+        <LI><I>n</I> == 1010:  Scroll to bottom on tty output
+        <LI><I>n</I> == 1012:  Scroll to bottom on tty input
       </UL>
   </TD>
 </TR>
@@ -442,7 +460,13 @@ Portions of this document were taken from the XTerm documentation.</P>
         <LI><I>n</I> == 0:  Change icon name and window title to <I>string</I>
         <LI><I>n</I> == 1:  Change icon name to <I>string</I>
         <LI><I>n</I> == 2:  Change window title to <I>string</I>
+        <LI><I>n</I> == 3:  Set text property <I>string</I> (format:  var=value)
+        <LI><I>n</I> == 5:  Steal input focus and raise window (See
+                            <A HREF="#eterm_esc">below</A>.)
+        <LI><I>n</I> == 6:  Eterm-specific escape sequences (See
+                            <A HREF="#eterm_esc">below</A>.)
         <LI><I>n</I> == 20:  Image commands (see <A HREF="#image">below</A>)
+        <LI><I>n</I> == 30:  Dump contents of scrollback to file <I>string</I>
         <LI><I>n</I> == 39:  Set the default foreground color to <I>string</I>
         <LI><I>n</I> == 49:  Set the default background color to <I>string</I>
         <LI><I>n</I> == 50:  Set font to <I>string</I>.  rxvt/Eterm extensions:
@@ -463,6 +487,17 @@ Portions of this document were taken from the XTerm documentation.</P>
         <LI><TT><B>I</B></TT>:  Read new icon image from file whose path is <I>string</I>
       </UL>
   </TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] P</B> <I>n rr gg bb</I></TT></TD>
+  <TD>Changes terminal color <I>n</I> ('0' through 'f') to the color
+      represented by the RGB values <I>rr</I>, <I>gg</I>, and
+      <I>bb</I>.  (Compatible with Linux console.)</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] R</B></TT></TD>
+  <TD>Restores the original palette.  (Compatible with Linux
+      console.)</TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>c</B></TT></TD>
@@ -556,10 +591,13 @@ Portions of this document were taken from the XTerm documentation.</P>
 <H3><A NAME="image">Image Escape Sequences</A></H3>
 
 <P>
-The <I>string</I> supplied to the image escape sequence (above) consists of a
-filename (which can be empty) followed by a semicolon, then one or more
-geometry strings.  The following table shows the valid geometry strings and
-their affects on the background image:</P>
+The <I>string</I> supplied to the image escape sequence (above)
+consists of a filename (which can be empty) followed by a semicolon,
+then one or more geometry strings.  Each geometry string contains zero
+or one scale/position adjustment and may optionally be followed by a
+colon and one or more colon-delimited pixmap operations.  The
+following table shows the valid geometry strings and their affects on
+the background image:</P>
 
 <TABLE BORDER=2 CELLSPACING=2 CELLPADDING=5>
 <TR>
@@ -567,18 +605,15 @@ their affects on the background image:</P>
   <TD BGCOLOR="#999999"><FONT SIZE=+1 COLOR="#000000"><B>Function</B></FONT></TD>
 </TR>
 <TR>
-  <TD><TT><B>?</B></TT></TD>
-  <TD>Query scale and position (generally disabled)</TD>
-</TR>
-<TR>
   <TD COLSPAN=2 BGCOLOR="#999999"><FONT SIZE=+1 COLOR="#000000"><B>Adjusting scaling and position</B></FONT></TD>
 </TR>
 <TR>
   <TD><TT><I>W</I><B>x</B><I>H</I><B>+</B><I>X</I><B>+</B><I>Y</I></TT></TD>
-  <TD>Set scaling to <I>W</I>% by <I>H</I>%, and position to <I>X</I>% by
-      <I>Y</I>%.  <I>W</I> and <I>H</I> are percentages of the original image
-      size.  The position is a percentage, where <B>+50+50</B> centers the
-      image in the window.</TD>
+  <TD>Set scaling to <I>W</I>% by <I>H</I>%, and position to <I>X</I>%
+      by <I>Y</I>%.  <I>W</I> and <I>H</I> are percentages of the
+      terminal window size.  <I>X</I> and <I>Y</I> are also
+      percentages; e.g., <B>+50+50</B> centers the image in the
+      window.</TD>
 </TR>
 <TR>
   <TD><TT><I>W</I><B>x</B><I>H</I><B>+</B><I>X</I></TT></TD>
@@ -632,6 +667,25 @@ their affects on the background image:</P>
   <TD><TT><B>0x</B><I>H</I></TT></TD>
   <TD>Multiply vertical scaling factor by <I>H</I>%</TD>
 </TR>
+<TR>
+  <TD><TT><B>0x0</B></TT></TD>
+  <TD>No scaling (show image at normal size).</TD>
+</TR>
+<TR>
+  <TD COLSPAN=2 BGCOLOR="#999999"><FONT SIZE=+1 COLOR="#000000"><B>Pixmap Operations</B></FONT></TD>
+</TR>
+<TR>
+  <TD><TT><B>tile</B></TT></TD>
+  <TD>Tile image.  Scaling/position modifiers above will affect the
+      tile size and origin.</TD>
+</TR>
+<TR>
+  <TD><TT><B>propscale</B></TT></TD>
+  <TD>When scaling, scale proportionally.  That is, maintain the
+      proper aspect ratio for the image.  Any portion of the
+      background not covered by the image is filled with the current
+      background color.</TD>
+</TR>
 </TABLE>
 
 <P>
@@ -644,8 +698,8 @@ Examples:</P>
       "Canyon.jpg", scaling to 200% by 200%, and center it.
   <LI>"<TT><B>\e]20;;100\007</B></TT>" -- Set scaling back to 100%
   <LI>"<TT><B>\e]20;blackstone.png;0x0\007</B></TT>" -- Set background image to
-      "blackstone.png" and tile it
-  <LI>"<TT><B>\e]20;;0x0\007</B></TT>" -- Tile current image instead of scaling
+      "blackstone.png", centered and at original size
+  <LI>"<TT><B>\e]20;;:tile\007</B></TT>" -- Tile current image instead of scaling
 </UL>
 
 <H3><A NAME="mouse">Mouse Reporting</A></H3>
@@ -1094,14 +1148,25 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
 </TR>
 <TR>
   <TD><TT>ESC <B>] 6 ; 1 ;</B> [ <I>class</I> <B>;</B> ] <I>color</I> <B>;</B> <I>attribute</I> <B>;</B> <I>value</I> BEL</TT></TD>
-  <TD>Adjusts a color modifier.  <I>class</I> determines which image class will
-      have its color modifier altered, <B>bg</B> (background, the default),
-      <B>sb</B> (scrollbar trough), <B>sa</B> (scrollbar anchor), <B>up</B>
-      (up arrow), or <B>down</B> (down arrow).  Next comes the <I>color</I>
-      which determines how pixels are modified.  This is either
-      <B>image</B>, <B>red</B>, <B>green</B>, or <B>blue</B>.
-      <I>attribute</I> is one of <B>brightness</B>, <B>contrast</B>, or
-      <B>gamma</B>, and <I>value</I> is the actual integer value (>= 0).</TD>
+  <TD>Adjusts a color modifier.  <I>class</I> determines which image
+      class will have its color modifier altered:  <B>bg</B>
+      (background, the default), <B>up</B> (up arrow), <B>down</B>
+      (down arrow), <B>sb</B> (scrollbar trough), <B>sa</B> (scrollbar
+      anchor), <B>st</B> (scrollbar thumb), <B>menu</B> (popup menu
+      background), <B>menuitem</B> (popup menu items), <B>submenu</B>
+      (menu items which represent submenus), <B>button</B> (buttons on
+      the buttonbar), or <B>bbar</B> (buttonbar).  Next comes the
+      <I>color</I> which determines how pixels are modified.  This is
+      either <B>image</B>, <B>red</B>, <B>green</B>, or <B>blue</B>.
+      <I>attribute</I> is one of <B>brightness</B>, <B>contrast</B>,
+      or <B>gamma</B>, and <I>value</I> is the actual integer value
+      (>= 0).  As stated in the man page, 256 (0x100) is 100%.</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] 6 ; 2 ;</B> { <B>shade</B> | <B>tint</B> } [ <I>class</I> <B>;</B> ] <I>value</I> BEL</TT></TD>
+  <TD>Shade/tint the specified <I>class</I> (see above).  For shading,
+      <I>value</I> is the shade percentage.  For tinting, it is the
+      tint color or mask.</TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>] 6 ; 3 ;</B> BEL</TT></TD>
@@ -1133,6 +1198,10 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
   </TD>
 </TR>
 <TR>
+  <TD><TT>ESC <B>] 6 ; 14 </B> [ <B>;</B> <I>boolean</I> ] BEL</TT></TD>
+  <TD>Set/toggle display of buttonbars.</TD>
+</TR>
+<TR>
   <TD><TT>ESC <B>] 6 ; 20 </B> [ <B>;</B> <I>boolean</I> ] BEL</TT></TD>
   <TD>Set/toggle visual bell.</TD>
 </TR>
@@ -1159,7 +1228,11 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
 </TR>
 <TR>
   <TD><TT>ESC <B>] 6 ; 26 </B> [ <B>;</B> <I>boolean</I> ] BEL</TT></TD>
-  <TD>Set/toggle reporting as keysyms  See the man page for details.</TD>
+  <TD>Set/toggle reporting as keysyms.  See the man page for details.</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] 6 ; 27 </B> [ <B>;</B> <I>boolean</I> ] BEL</TT></TD>
+  <TD>Set/toggle the refusal of keyboard input and focus.</TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>] 6 ; 50 ;</B> <I>desktop</I> BEL</TT></TD>
@@ -1169,69 +1242,36 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
   </TD>
 </TR>
 <TR>
-  <TD><TT>ESC <B>] 6 ; 70 </B> BEL</TT></TD>
-  <TD>Exit Eterm (most useful from a menu).</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 6 ; 71</B> [ ;</B> <I>path</I> ] BEL</TT></TD>
-  <TD>Saves the current configuration to the current theme directory, or to
-      <I>path</I> if specified.  If a file of the same name already exists, it
-      is renamed to <I>path</I><TT>.<I>YYYYMMDD.HHMMSS</I></TT> (where
-      <TT><I>YYYYMMDD.HHMMSS</I></TT> is the current system time).
+  <TD><TT>ESC <B>] 6 ; 72</B> [ ;</B> <I>string</I> ] BEL</TT></TD>
+  <TD>Search for and highlight any occurances of <I>string</I> in the
+      scrollback buffer.
   </TD>
 </TR>
 <TR>
   <TD><TT>ESC <B>] 6 ; 80 ;</B> <I>level</I> BEL</TT></TD>
   <TD>Set the debugging level to <I>level</I>.</TD>
 </TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; </B> { <B>echo</B> | <B>tty_write</B> } <B>:</B> <I>params</I> BEL</TT></TD>
-  <TD>Eterm IPC:  Sends the string <I>params</I> to the client application.</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; parse :</B> <I>params</I> BEL</TT></TD>
-  <TD>Eterm IPC:  Causes Eterm to parse <I>params</I> itself.</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; enl_send :</B> <I>params</I> BEL</TT></TD>
-  <TD>Eterm IPC:  Sends an IPC command to Enlightenment.  Does not wait for a
-      reply.</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; enl_query :</B> <I>params</I> BEL</TT></TD>
-  <TD>Eterm IPC:  Sends an IPC command to Enlightenment and waits for a reply.</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; winop :</B> <I>op</I> [ <I>windowid</I> ] BEL</TT></TD>
-  <TD>Eterm IPC:  Performs a window operation on the window given by
-      <I>windowid</I>.  Valid window operations are <B>raise</B>,
-      <B>lower</B>, <B>map</B>, <B>unmap</B>, <B>kill</B>, and
-      <B>iconify</B>.  The operation should be separated from the
-      window ID by a space.  The default window is the Eterm window itself.</TD>
-</TR>
-<TR>
-  <TD><TT>ESC <B>] 7 ; exit BEL</TT></TD>
-  <TD>Eterm IPC:  Exits Eterm.</TD>
-</TR>
 </TABLE>
 
 <H3><A NAME="trans">Transparency</A></H3>
 
 <P>
-The standard for implementing transparency was a mutual effort between myself,
-Carsten Haitzler &lt;raster@redhat.com&gt;, Gerald Britton &lt;gbritton@mit.edu&gt;, and
-Nat Friedman &lt;nat@nat.org&gt;, based off of an original idea by Nat.  First I'll
-define the standard, then I'll discuss its justification.</P>
+The standard for implementing transparency was a mutual effort between
+myself, Carsten Haitzler &lt;raster@rasterman.com&gt;, Gerald Britton
+&lt;gbritton@mit.edu&gt;, and Nat Friedman &lt;nat@nat.org&gt;, based
+off of an original idea by Nat.  First I'll define the standard, then
+I'll discuss its justification.</P>
 
 <P>
-There are two separate procedures for setting the transparency property (the
-_XROOTPMAP_ID atom in X).  The first is for persistent X clients such as window
-managers.  These clients should proceed through their normal mechanism for
-setting the desktop image.  Once the finalized pixmap has been created, the
-_XROOTPMAP_ID property should be set on the desktop window (the same window
-which will receive the pixmap...note that this is not necessarily the root
-window), and its value should be set to the Pixmap ID.  The following sample
-code (taken from <A HREF="http://www.enlightenment.org/"
+There are two separate procedures for setting the transparency
+property (the _XROOTPMAP_ID atom in X).  The first is for persistent X
+clients such as window managers.  These clients should proceed through
+their normal mechanism for setting the desktop image.  Once the
+finalized pixmap has been created, the _XROOTPMAP_ID property should
+be set on the desktop window (the same window which will receive the
+pixmap...note that this is not necessarily the root window), and its
+value should be set to the Pixmap ID.  The following sample code
+(taken from <A HREF="http://www.enlightenment.org/"
 TARGET="_top">Enlightenment</A>) demonstrates this:</P>
 
 <PRE>

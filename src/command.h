@@ -26,12 +26,9 @@
 # include <X11/Xproto.h>
 # include <X11/keysym.h>
 
-# ifdef NO_XLOCALE
+# if defined(NO_XLOCALE) || !defined(HAVE_X11_LOCALE_H)
 #  include <locale.h>
 # else
-#  ifndef X_LOCALE
-#   define X_LOCALE
-#  endif
 #  include <X11/Xlocale.h>
 # endif
 
@@ -202,7 +199,7 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 # endif
 #endif
 
-#define KBUFSZ		12	/* size of keyboard mapping buffer */
+#define KBUFSZ		64	/* size of keyboard mapping buffer */
 #define STRING_MAX	512	/* max string size for process_xterm_seq() */
 #define ESC_ARGS	32	/* max # of args for esc sequences */
 

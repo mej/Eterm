@@ -34,7 +34,7 @@ have the Imlib library installed.
 # macros I use for compatibility with older versions of the macro
 %configure --bindir=%{_bindir} --libdir=%{_libdir} --mandir=%{_mandir} \
            --datadir=%{_datadir} --sysconfdir=%{_sysconfdir} \
-           --with-backspace=bs --with-delete=execute
+           --with-backspace=bs --with-delete=execute --enable-multi-charset
 make
 
 %install
