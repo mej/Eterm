@@ -345,6 +345,7 @@ handle_mapping_notify(event_t * ev)
   D_EVENTS(("handle_mapping_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   XRefreshKeyboardMapping(&(ev->xmapping));
+  get_modifiers();
   return 1;
 }
 

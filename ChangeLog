@@ -2884,3 +2884,9 @@ Mon Dec  6 17:30:21 PST 1999	Michael Jennings <mej@eterm.org>
 	catching my blunder.
 	
 -------------------------------------------------------------------------------
+Mon Dec  6 21:53:23 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Update our modifier masks when the mappings change.  Note that this
+	will supercede any config file settings you have; that's life.
+	
+-------------------------------------------------------------------------------
