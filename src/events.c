@@ -208,7 +208,7 @@ handle_key_press(event_t *ev)
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
     COUNT_EVENT(keypress_cnt);
-    if (!(eterm_options & OPT_NO_INPUT)) {
+    if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT))) {
         lookup_key(ev);
     }
     PROF_DONE(handle_key_press);
@@ -470,8 +470,8 @@ handle_focus_in(event_t *ev)
                 redraw_image(image_bg);
             }
         }
-        if (eterm_options & OPT_SCROLLBAR_POPUP) {
-            map_scrollbar(eterm_options & OPT_SCROLLBAR);
+        if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP)) {
+            map_scrollbar(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR));
         } else {
             scrollbar_set_focus(TermWin.focus);
             scrollbar_draw(IMAGE_STATE_NORMAL, MODE_SOLID);
@@ -498,7 +498,7 @@ handle_focus_out(event_t *ev)
             images[image_bg].current = images[image_bg].disabled;
             redraw_image(image_bg);
         }
-        if (eterm_options & OPT_SCROLLBAR_POPUP) {
+        if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP)) {
             map_scrollbar(0);
         } else {
             scrollbar_set_focus(TermWin.focus);

@@ -680,7 +680,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
             D_PIXMAP(("Copying %hux%hu rectangle at %d, %d from %ux%u desktop pixmap 0x%08x onto p.\n", width, height, x, y, pw, ph, desktop_pixmap));
             XCopyArea(Xdisplay, desktop_pixmap, p, gc, x, y, width, height, 0, 0);
         }
-        if ((which != image_bg || (image_toggles & IMOPT_ITRANS) || images[image_bg].current != images[image_bg].norm)
+        if ((which != image_bg || (BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS)) || images[image_bg].current != images[image_bg].norm)
             && need_colormod(simg->iml)) {
             colormod_trans(p, simg->iml, gc, width, height);
         }
@@ -1091,7 +1091,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         simg->pmap->pixmap = create_trans_pixmap(simg, which, win, 0, 0, width, height);
         if (simg->pmap->pixmap != None) {
-            if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
+            if ((which == image_bg) && (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_DOUBLE_BUFFER))) {
                 copy_buffer_pixmap(MODE_TRANS, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1117,7 +1117,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         if (simg->pmap->pixmap != None) {
             D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-            if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
+            if ((which == image_bg) && (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_DOUBLE_BUFFER))) {
                 copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1228,7 +1228,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                     bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
                 }
                 D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-                if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
+                if ((which == image_bg) && (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_DOUBLE_BUFFER))) {
                     copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                     XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
                 } else {
@@ -1254,7 +1254,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
 
     /* Fall back to solid mode if all else fails. */
     if (!image_mode_is(which, MODE_MASK)) {
-        if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
+        if ((which == image_bg) && (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_DOUBLE_BUFFER))) {
             copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
             XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
         } else {
@@ -2027,7 +2027,7 @@ get_desktop_pixmap(void)
                 D_PIXMAP(("Desktop pixmap has changed.  Updating desktop_pixmap\n"));
                 free_desktop_pixmap();
                 orig_desktop_pixmap = p;
-                if (!(image_toggles & IMOPT_ITRANS) && need_colormod(images[image_bg].current->iml)) {
+                if (!(BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS)) && need_colormod(images[image_bg].current->iml)) {
                     int px, py;
                     unsigned int pw, ph, pb, pd;
                     Window w;

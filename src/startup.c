@@ -118,7 +118,7 @@ eterm_bootstrap(int argc, char *argv[])
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
 
-    if (eterm_options & OPT_INSTALL) {
+    if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_INSTALL)) {
         cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
         XInstallColormap(Xdisplay, cmap);
     } else {
@@ -235,7 +235,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Initialize the scrollbar */
     scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-    scrollbar_mapping((eterm_options & OPT_SCROLLBAR) && !((eterm_options & OPT_SCROLLBAR_POPUP) && !TermWin.focus));
+    scrollbar_mapping((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR)) && !((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP)) && !TermWin.focus));
 
     /* Initialize the menu subsystem. */
     menu_init();

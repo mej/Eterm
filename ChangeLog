@@ -5093,3 +5093,12 @@ Fri Aug 22 00:09:04 2003                        Michael Jennings (mej)
 
 Had I done it right the first time, this would not have happened. >:I
 ----------------------------------------------------------------------
+Sun Aug 24 11:07:54 2003                        Michael Jennings (mej)
+
+I redid the options variables and constants to try and make things
+more standardized, and to make room for future toggles as well.  This
+should make David Lloyd a bit happier, 'cause now we can get his patch
+in here. :)
+
+Hopefully I didn't break anything....
+----------------------------------------------------------------------

@@ -28,38 +28,39 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 /************ Macros and Definitions ************/
-# define OPT_CONSOLE                    (1LU <<  0)
-# define OPT_LOGIN_SHELL                (1LU <<  1)
-# define OPT_ICONIC                     (1LU <<  2)
-# define OPT_VISUAL_BELL                (1LU <<  3)
-# define OPT_MAP_ALERT                  (1LU <<  4)
-# define OPT_REVERSE_VIDEO              (1LU <<  5)
-# define OPT_WRITE_UTMP                 (1LU <<  6)
-# define OPT_SCROLLBAR                  (1LU <<  7)
-# define OPT_META8                      (1LU <<  8)
-# define OPT_HOME_ON_OUTPUT             (1LU <<  9)
-# define OPT_SCROLLBAR_RIGHT            (1LU << 10)
-# define OPT_BORDERLESS                 (1LU << 11)
-# define OPT_NO_INPUT                   (1LU << 12)
-# define OPT_NO_CURSOR                  (1LU << 13)
-# define OPT_PAUSE                      (1LU << 14)
-# define OPT_HOME_ON_INPUT              (1LU << 15)
-# define OPT_REPORT_AS_KEYSYMS          (1LU << 16)
-# define OPT_XTERM_SELECT               (1LU << 17)
-# define OPT_SELECT_WHOLE_LINE          (1LU << 18)
-# define OPT_SCROLLBAR_POPUP            (1LU << 19)
-# define OPT_SELECT_TRAILING_SPACES     (1LU << 20)
-# define OPT_INSTALL                    (1LU << 21)
-# define OPT_SCROLLBAR_FLOATING         (1LU << 22)
-# define OPT_DOUBLE_BUFFER              (1LU << 23)
-# define OPT_MBYTE_CURSOR               (1LU << 24)
-# define OPT_PROPORTIONAL               (1LU << 25)
-# define OPT_RESIZE_GRAVITY             (1LU << 26)
-# define OPT_SECONDARY_SCREEN           (1LU << 27)
+# define VT_OPTIONS_CONSOLE                       (1LU <<  0)
+# define VT_OPTIONS_VISUAL_BELL                   (1LU <<  1)
+# define VT_OPTIONS_MAP_ALERT                     (1LU <<  2)
+# define VT_OPTIONS_REVERSE_VIDEO                 (1LU <<  3)
+# define VT_OPTIONS_META8                         (1LU <<  4)
+# define VT_OPTIONS_HOME_ON_OUTPUT                (1LU <<  5)
+# define VT_OPTIONS_HOME_ON_INPUT                 (1LU <<  6)
+# define VT_OPTIONS_REPORT_AS_KEYSYMS             (1LU <<  7)
+# define VT_OPTIONS_PROPORTIONAL                  (1LU <<  8)
+# define VT_OPTIONS_SECONDARY_SCREEN              (1LU <<  9)
 
-# define IMOPT_TRANS                    (1U << 0)
-# define IMOPT_ITRANS                   (1U << 1)
-# define IMOPT_VIEWPORT                 (1U << 2)
+# define ETERM_OPTIONS_LOGIN_SHELL                (1LU <<  0)
+# define ETERM_OPTIONS_ICONIC                     (1LU <<  1)
+# define ETERM_OPTIONS_WRITE_UTMP                 (1LU <<  2)
+# define ETERM_OPTIONS_SCROLLBAR                  (1LU <<  3)
+# define ETERM_OPTIONS_SCROLLBAR_RIGHT            (1LU <<  4)
+# define ETERM_OPTIONS_BORDERLESS                 (1LU <<  5)
+# define ETERM_OPTIONS_NO_INPUT                   (1LU <<  6)
+# define ETERM_OPTIONS_NO_CURSOR                  (1LU <<  7)
+# define ETERM_OPTIONS_PAUSE                      (1LU <<  8)
+# define ETERM_OPTIONS_XTERM_SELECT               (1LU <<  9)
+# define ETERM_OPTIONS_SELECT_WHOLE_LINE          (1LU << 10)
+# define ETERM_OPTIONS_SCROLLBAR_POPUP            (1LU << 11)
+# define ETERM_OPTIONS_SELECT_TRAILING_SPACES     (1LU << 12)
+# define ETERM_OPTIONS_INSTALL                    (1LU << 13)
+# define ETERM_OPTIONS_SCROLLBAR_FLOATING         (1LU << 14)
+# define ETERM_OPTIONS_DOUBLE_BUFFER              (1LU << 15)
+# define ETERM_OPTIONS_MBYTE_CURSOR               (1LU << 16)
+# define ETERM_OPTIONS_RESIZE_GRAVITY             (1LU << 17)
+
+# define IMAGE_OPTIONS_TRANS                      (1U  <<  0)
+# define IMAGE_OPTIONS_ITRANS                     (1U  <<  1)
+# define IMAGE_OPTIONS_VIEWPORT                   (1U  <<  2)
 
 # define BBAR_FORCE_TOGGLE              (0x03)
 
@@ -78,10 +79,14 @@
 
 #define RESET_AND_ASSIGN(var, val)  do {if ((var) != NULL) FREE(var);  (var) = (val);} while (0)
 
+#define BITFIELD_SET(var, field)       ((var) |= (field))
+#define BITFIELD_CLEAR(var, field)     ((var) &= ~(field))
+#define BITFIELD_IS_SET(var, field)    ((var) & (field))
+
 /************ Structures ************/
 
 /************ Variables ************/
-extern unsigned long eterm_options, image_toggles;
+extern unsigned long eterm_options, vt_options, image_options;
 extern char *theme_dir, *user_dir;
 extern       char **rs_exec_args;       /* Args to exec (-e or --exec) */
 extern       char  *rs_title;		/* Window title */

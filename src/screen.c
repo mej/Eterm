@@ -357,7 +357,7 @@ scr_poweron(void)
     /* Reset the rendering style to the default colors/style */
     scr_rendition(0, ~RS_None);
 #if NSCREENS
-    if (eterm_options & OPT_SECONDARY_SCREEN) {
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_SECONDARY_SCREEN)) {
         /* Reset the secondary screen */
         scr_change_screen(SECONDARY);
         scr_erase_screen(2);
@@ -432,7 +432,7 @@ scr_change_screen(int scrn)
 
     SWAP_IT(current_screen, scrn, tmp);
 #if NSCREENS
-    if (eterm_options & OPT_SECONDARY_SCREEN) {
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_SECONDARY_SCREEN)) {
         offset = TermWin.saveLines;
         if (!screen.text || !screen.rend)
             return (current_screen);
@@ -1525,11 +1525,11 @@ scr_bell(void)
 {
 #ifndef NO_MAPALERT
 #ifdef MAPALERT_OPTION
-    if (eterm_options & OPT_MAP_ALERT)
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_MAP_ALERT))
 #endif
         XMapWindow(Xdisplay, TermWin.parent);
 #endif
-    if (eterm_options & OPT_VISUAL_BELL) {
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_VISUAL_BELL)) {
         scr_rvideo_mode(!rvideo);
         scr_rvideo_mode(!rvideo);
     } else
@@ -2690,7 +2690,7 @@ selection_make(Time tm)
             *str++ = *t++;
         col = 0;
         if (screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] != WRAP_CHAR) {
-            if (!(eterm_options & OPT_SELECT_TRAILING_SPACES)) {
+            if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SELECT_TRAILING_SPACES))) {
                 for (str--; *str == ' ' || *str == '\t'; str--);
                 str++;
             }
@@ -2710,7 +2710,7 @@ selection_make(Time tm)
     UPPER_BOUND(end_col, TERM_WINDOW_GET_REPORTED_COLS());
     for (; col < end_col; col++)
         *str++ = *t++;
-    if (!(eterm_options & OPT_SELECT_TRAILING_SPACES)) {
+    if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SELECT_TRAILING_SPACES))) {
         for (str--; *str == ' ' || *str == '\t'; str--);
         str++;
     }
@@ -2830,7 +2830,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
     for (;;) {
         for (; beg_col > 0; beg_col--) {
             t = *--stp;
-            if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && eterm_options & OPT_XTERM_SELECT))
+            if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))
                 break;
 #ifdef MULTI_CHARSET
             r = *--srp;
@@ -2838,7 +2838,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
                 break;
 #endif
         }
-        if (!(eterm_options & OPT_XTERM_SELECT)) {
+        if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) {
             if (beg_col == col && beg_col > 0) {
                 if (DELIMIT_TEXT(*stp)) /* space or tab or cutchar */
                     break;
@@ -2864,10 +2864,10 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[beg_row + row_offset - 1][last_col + 1]);
                 r = *(srp - 1);
-                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(eterm_options & OPT_XTERM_SELECT)) && DELIMIT_REND(r) == w2) {
+                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) && DELIMIT_REND(r) == w2) {
                     srp--;
 #else
-                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(eterm_options & OPT_XTERM_SELECT))) {
+                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))) {
 #endif
                     stp--;
                     beg_row--;
@@ -2893,7 +2893,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
     for (;;) {
         for (; end_col < last_col; end_col++) {
             t = *++stp;
-            if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && eterm_options & OPT_XTERM_SELECT))
+            if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))
                 break;
 #ifdef MULTI_CHARSET
             r = *++srp;
@@ -2901,7 +2901,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
                 break;
 #endif
         }
-        if (!(eterm_options & OPT_XTERM_SELECT)) {
+        if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) {
             if (end_col == col && end_col < last_col) {
                 if (DELIMIT_TEXT(*stp)) /* space or tab or cutchar */
                     break;
@@ -2925,9 +2925,9 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
                 stp = screen.text[end_row + row_offset + 1];
 #ifdef MULTI_CHARSET
                 srp = screen.rend[end_row + row_offset + 1];
-                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(eterm_options & OPT_XTERM_SELECT)) && DELIMIT_REND(*srp) == w2) {
+                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) && DELIMIT_REND(*srp) == w2) {
 #else
-                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(eterm_options & OPT_XTERM_SELECT))) {
+                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))) {
 #endif
                     end_row++;
                     end_col = 0;
@@ -3157,7 +3157,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
             selection.beg.row = selection.mark.row;
             selection.end.row = row;
         }
-        if (eterm_options & OPT_SELECT_WHOLE_LINE) {
+        if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SELECT_WHOLE_LINE)) {
             selection.beg.col = 0;
         } else {
             selection.clicks = 2;
@@ -3363,7 +3363,7 @@ void
 xim_get_position(XPoint * pos)
 {
     pos->x = Col2Pixel(screen.col);
-    if (scrollbar_is_visible() && !(eterm_options & OPT_SCROLLBAR_RIGHT)) {
+    if (scrollbar_is_visible() && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))) {
         pos->x += scrollbar_trough_width();
     }
     pos->y = (Height2Pixel(screen.row)
