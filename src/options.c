@@ -219,7 +219,7 @@ static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
 #endif
 #ifdef MULTI_CHARSET
-static char *rs_multchar_encoding = NULL;
+static char *rs_multichar_encoding = NULL;
 #endif
 #ifdef GREEK_SUPPORT
 static char *rs_greek_keyboard = NULL;
@@ -368,7 +368,7 @@ static const struct {
       OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
       OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
       OPT_LONG("mencoding", "multichar encoding mode (eucj or sjis or euckr)",
-	       &rs_multchar_encoding),
+	       &rs_multichar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
       OPT_LONG("input-method", "XIM input method", &rs_input_method),
@@ -2742,16 +2742,16 @@ parse_multichar(char *buff)
 
 #ifdef MULTI_CHARSET
   if (!BEG_STRCASECMP(buff, "encoding ")) {
-    RESET_AND_ASSIGN(rs_multchar_encoding, Word(2, buff));
-    if (rs_multchar_encoding != NULL) {
-      if (BEG_STRCASECMP(rs_multchar_encoding, "eucj")
-	  && BEG_STRCASECMP(rs_multchar_encoding, "sjis")
-	  && BEG_STRCASECMP(rs_multchar_encoding, "euckr")) {
+    RESET_AND_ASSIGN(rs_multichar_encoding, Word(2, buff));
+    if (rs_multichar_encoding != NULL) {
+      if (BEG_STRCASECMP(rs_multichar_encoding, "eucj")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")) {
 	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"",
-		    file_peek_path(), file_peek_line(), rs_multchar_encoding);
+		    file_peek_path(), file_peek_line(), rs_multichar_encoding);
 	return;
       }
-      set_multichar_encoding(rs_multchar_encoding);
+      set_multichar_encoding(rs_multichar_encoding);
     } else {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding",
 		  file_peek_path(), file_peek_line());
@@ -3763,7 +3763,7 @@ save_config(char *path)
 #ifdef MULTI_CHARSET
   fprintf(fp, "  begin multichar\n");
   if (rs_multichar_encoding) {
-    fprintf(fp, "    encoding %s\n", rs_multchar_encoding);
+    fprintf(fp, "    encoding %s\n", rs_multichar_encoding);
   }
   for (i = 0; i < 5; i++) {
     fprintf(fp, "    font %d %s\n", i, rs_mfont[i]);

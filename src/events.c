@@ -235,7 +235,8 @@ handle_property_notify(event_t * ev)
   if (background_is_trans()) {
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
-      D_EVENTS(("handle_property_notify():  On %s.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) prop, (int) ev->xproperty.atom));
+      D_EVENTS(("handle_property_notify():  On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
+                (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
         win = get_desktop_window();
         if (win == (Window) 1) {
@@ -259,7 +260,7 @@ handle_property_notify(event_t * ev)
     }
     if (ev->xany.window == desktop_window) {
       prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
-      D_EVENTS(("handle_property_notify():  On desktop_window [0x%08x].  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
+      D_EVENTS(("handle_property_notify():  On desktop_window [0x%08x].  prop (_XROOTPMAP_ID) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
         pmap = get_desktop_pixmap();
         if (pmap == (Pixmap) 1) {
@@ -268,6 +269,15 @@ handle_property_notify(event_t * ev)
         }
         redraw_all_images();
         return 1;
+      }
+    }
+  }
+  if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
+    prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
+    D_EVENTS(("handle_property_notify():  On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
+    if ((prop != None) && (ev->xproperty.atom == prop)) {
+      if ((enl_ipc_get_win()) != None) {
+        redraw_all_images();
       }
     }
   }
