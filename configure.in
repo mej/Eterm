@@ -846,7 +846,8 @@ AC_CHECK_LIB(Kenny, life_signs, , [
 fi
 
 CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "${sysconfdir}/$PACKAGE/themes:/etc/$PACKAGE/themes:${datadir}/$PACKAGE/themes"`
-AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:$CONFIG_SEARCH_PATH")
+CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "$CONFIG_SEARCH_PATH:${sysconfdir}/$PACKAGE:/etc/$PACKAGE:${datadir}/$PACKAGE"`
+AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:$CONFIG_SEARCH_PATH")
 # Do replacements on theme files and such.  All variables to be replaced
 # by this routine MUST be exported before the awk script runs.
 if test "X$PKGDATADIR" = "X" ; then
@@ -881,7 +882,7 @@ basedir=.
 AM_CONFIG_HEADER(config.h)
 
 AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile pix/Makefile
-          src/Makefile themes/Makefile Eterm.spec Eterm-mdk.spec)
+          src/Makefile themes/Makefile)
 
 # Mega evals to make sure all the relative variables get resolved.
 BINDIR=`eval eval eval eval echo ${bindir}`

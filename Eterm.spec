@@ -2,9 +2,9 @@
 %define strip    0
 
 Summary: Enlightened terminal emulator
-Name: @PACKAGE@
-Version: @VERSION@
-Release: 1
+Name: Eterm
+Version: 0.9.1
+Release: 2
 Copyright: BSD
 Group: User Interface/X
 %if %{bzip}
@@ -24,7 +24,7 @@ Enlightenment window manager users, but it can also be used as a
 replacement for xterm by users without Enlightenment.  Eterm supports
 various themes and is very configurable, in keeping with the
 philosophy of Enlightenment. If you install Eterm, you'll also need to
-have the Imlib library installed.
+have the Imlib2 library installed.
 
 %prep
 %setup -n %{name}-%{version} -b 0 -a 1

@@ -4407,3 +4407,9 @@ Thu Oct 11 05:32:57 2001                        Michael Jennings (mej)
 Jerome De Greef <jdegreef@brutele.be> contributed a configure.ac file
 for those who are using autoconf 2.50 or higher.
 ----------------------------------------------------------------------
+Sun Oct 21 06:15:13 2001                        Michael Jennings (mej)
+
+Fixed a couple remaining bugs in 0.9.1, including that really
+annoying problem people keeping whining about where Eterm won't build
+without Imlib2.  It will now. :P
+----------------------------------------------------------------------

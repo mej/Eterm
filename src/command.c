@@ -1129,7 +1129,9 @@ clean_exit(void)
     menulist_clear(menu_list);
     font_cache_clear();
     eterm_font_list_clear();
+# ifdef PIXMAP_SUPPORT
     FOREACH_IMAGE(free_eterm_image(&(images[idx])););
+# endif
     for (i = 0; i < NRS_COLORS; i++) {
       if (rs_color[i]) {
         FREE(rs_color[i]);

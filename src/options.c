@@ -70,8 +70,10 @@ static void *parse_xim(char *, void *);
 static void *parse_multichar(char *, void *);
 
 static char *rs_pipe_name = NULL;
+#ifdef PIXMAP_SUPPORT
 static int rs_shade = 0;
 static char *rs_tint = NULL;
+#endif
 static unsigned long rs_buttonbars = 1;
 static char *rs_font_effects = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
@@ -2784,8 +2786,7 @@ init_defaults(void)
 void
 post_parse(void)
 {
-
-  register int i, count;
+  register int i;
 
   if (rs_scrollbar_type) {
     if (!strcasecmp(rs_scrollbar_type, "xterm")) {
@@ -2897,10 +2898,12 @@ post_parse(void)
       if (iml->bevel && !(iml->border)) {
         iml->border = iml->bevel->edges;
       }
+#ifdef PIXMAP_SUPPORT
       if (iml->im) {
         imlib_context_set_image(iml->im);
         update_cmod_tables(iml);
       }
+#endif
       images[i].userdef = 1;
     } else {
       simg = images[i].norm = (simage_t *) MALLOC(sizeof(simage_t));
@@ -2942,10 +2945,12 @@ post_parse(void)
         simg->fg = norm_simg->fg;
         simg->bg = norm_simg->bg;
       }
+#ifdef PIXMAP_SUPPORT
       if (iml->im) {
         imlib_context_set_image(iml->im);
         update_cmod_tables(iml);
       }
+#endif
     } else {
       D_PIXMAP(("No \"selected\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
       images[i].selected = images[i].norm;
@@ -2968,10 +2973,12 @@ post_parse(void)
         simg->fg = norm_simg->fg;
         simg->bg = norm_simg->bg;
       }
+#ifdef PIXMAP_SUPPORT
       if (iml->im) {
         imlib_context_set_image(iml->im);
         update_cmod_tables(iml);
       }
+#endif
     } else {
       D_PIXMAP(("No \"clicked\" state for image %s.  Setting fallback to the selected state.\n", get_image_type(i)));
       images[i].clicked = images[i].selected;
@@ -2994,10 +3001,12 @@ post_parse(void)
         simg->fg = norm_simg->fg;
         simg->bg = norm_simg->bg;
       }
+#ifdef PIXMAP_SUPPORT
       if (iml->im) {
         imlib_context_set_image(iml->im);
         update_cmod_tables(iml);
       }
+#endif
     } else {
       D_PIXMAP(("No \"disabled\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
       images[i].disabled = images[i].norm;
@@ -3192,6 +3201,7 @@ post_parse(void)
     } else {
       char *w1, *h1, *temp;
       unsigned long w, h;
+      int count;
 
       count = num_words(rs_anim_pixmap_list) - 1;	/* -1 for the delay */
       rs_anim_pixmaps = (char **) MALLOC(sizeof(char *) * (count + 1));

@@ -1,12 +1,7 @@
-%define name	 @PACKAGE@
-%define ver      @VERSION@
-%define rel      1mdk
-%define prefix   @prefix@
-
 Summary: Enlightened terminal emulator
-Name: %{name}
-Version: %{ver}
-Release: %{rel}
+Name: Eterm
+Version: 0.9.1
+Release: 2mdk
 Copyright: BSD
 Group: Terminals
 Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{ver}.tar.bz2
@@ -27,12 +22,12 @@ Enlightenment window manager users, but it can also be used as a
 replacement for xterm by users without Enlightenment.  Eterm supports
 various themes and is very configurable, in keeping with the
 philosophy of Enlightenment. If you install Eterm, you'll also need to
-have the Imlib library installed.
+have the Imlib2 library installed.
 
 %package backgrounds
 Summary: Backgrounds for Eterm
 Group: Terminals
-Requires: %{name} = %{ver}
+Requires: %{name} = %{version}
 %description backgrounds
 Install this package if you want additional backgrounds for Eterm
 
@@ -47,7 +42,7 @@ if [ -x configure ]
 then
   %configure --with-backspace=bs --with-delete=execute
 else
-  ./autogen.sh --prefix=%{prefix} --with-backspace=bs --with-delete=execute
+  ./autogen.sh --prefix=%{_prefix} --with-backspace=bs --with-delete=execute
 fi
 
 %make

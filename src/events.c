@@ -217,13 +217,13 @@ handle_key_press(event_t *ev)
 unsigned char
 handle_property_notify(event_t *ev)
 {
-  Window win;
-  Pixmap pmap;
-
   D_EVENTS(("handle_property_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
 #ifdef PIXMAP_OFFSET
   if (background_is_trans()) {
+    Window win;
+    Pixmap pmap;
+
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
       D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
                 (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
@@ -287,14 +287,13 @@ handle_property_notify(event_t *ev)
 unsigned char
 handle_destroy_notify(event_t *ev)
 {
-
   D_EVENTS(("handle_destroy_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   if (ev->xdestroywindow.window == ipc_win) {
     D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
     XSelectInput(Xdisplay, ipc_win, None);
     ipc_win = None;
-    check_image_ipc(1);
+    (void) check_image_ipc(1);
   }
   return 1;
 }

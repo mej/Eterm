@@ -1772,12 +1772,12 @@ xterm_seq(int op, const char *str)
 {
 
   XColor xcol;
-  char *nstr, *tnstr, *orig_tnstr, *valptr;
-  unsigned char eterm_seq_op, which = 0;
+  char *nstr, *tnstr, *valptr;
+  unsigned char eterm_seq_op;
   XWMHints *wm_hints;
 #ifdef PIXMAP_SUPPORT
-  unsigned char changed = 0, scaled = 0;
-  char *color, *mod;
+  unsigned char changed = 0, scaled = 0, which = 0;
+  char *color, *mod, *orig_tnstr;
 #endif
 
   if (!str)

@@ -56,7 +56,9 @@ extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int g
 extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_32_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 
+#ifdef PIXMAP_SUPPORT
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
+#endif
 
 Pixmap buffer_pixmap = None;
 #ifdef PIXMAP_OFFSET
@@ -83,7 +85,9 @@ image_t images[image_max] =
   {None, 0, 0, NULL, NULL, NULL, NULL, NULL}
 };
 
+#ifdef PIXMAP_SUPPORT
 static const char *get_iclass_name(unsigned char);
+#endif
 static void copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height);
 
 const char *
@@ -850,15 +854,16 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
 void
 render_simage(simage_t *simg, Window win, unsigned short width, unsigned short height, unsigned char which, renderop_t renderop)
 {
-
   XGCValues gcvalue;
   GC gc;
+  Pixmap pixmap = None;
+  Screen *scr;
+#ifdef PIXMAP_SUPPORT
   short xsize, ysize;
   short xpos = 0, ypos = 0;
-  Pixmap pixmap = None;
   unsigned short rendered = 0;
   unsigned short xscaled = 0, yscaled = 0;
-  Screen *scr;
+#endif
 
   scr = ScreenOfDisplay(Xdisplay, Xscreen);
   if (!scr)
