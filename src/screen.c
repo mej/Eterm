@@ -1624,6 +1624,7 @@ scr_refresh(int type)
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
 #endif
+  int ascent, descent;
 
   PROF_INIT(scr_refresh);
 
@@ -1731,7 +1732,6 @@ scr_refresh(int type)
 
       len = 0;
       buffer[len++] = stp[col];
-      ypixel = TermWin.font->ascent + Row2Pixel(row);
       xpixel = Col2Pixel(col);
       wlen = 1;
 
@@ -1893,17 +1893,30 @@ scr_refresh(int type)
       }
 #endif
 
+#ifdef MULTI_CHARSET
+      if (wbyte) {
+	  ascent = TermWin.mfont->ascent;
+	  descent = TermWin.mfont->descent;
+	  ypixel = TermWin.mfont->ascent + Row2Pixel(row);
+      } else
+#endif
+      {
+	  ascent = TermWin.font->ascent;
+	  descent = TermWin.font->descent;
+	  ypixel = TermWin.font->ascent + Row2Pixel(row);
+      }
+
       /* The actual drawing of the string is done here. */
       if (fprop) {
 	if (back != bgColor) {
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  gcmask |= (GCForeground | GCBackground);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
-	  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1), Height2Pixel(1));
+	  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, Width2Pixel(1), Height2Pixel(1));
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
 	} else {
-	  CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, 1);
+	  CLEAR_CHARS(xpixel, ypixel - ascent, 1);
 	}
         if (TermWin.font->per_char) {
           int fw, cw;
@@ -1922,11 +1935,11 @@ scr_refresh(int type)
           }
         }
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, 1);
-        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(1), ypixel + Height2Pixel(1));
+        UPDATE_BOX(xpixel, ypixel - ascent, xpixel + Width2Pixel(1), ypixel + Height2Pixel(1));
 #ifndef NO_BOLDOVERSTRIKE
 	if (MONO_BOLD(rend)) {
 	  DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, 1);
-          UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(1), ypixel + Height2Pixel(1));
+          UPDATE_BOX(xpixel + 1, ypixel - ascent, xpixel + 1 + Width2Pixel(1), ypixel + Height2Pixel(1));
         }
 #endif
       } else {
@@ -1938,10 +1951,10 @@ scr_refresh(int type)
 
             tmp = gcvalue.foreground;
             xx = xpixel;
-            yy = ypixel - TermWin.font->ascent;
+            yy = ypixel - ascent;
             ww = Width2Pixel(wlen);
             hh = Height2Pixel(1);
-            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
+            CLEAR_CHARS(xpixel, ypixel - ascent, len);
             if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
               yy--;
               hh++;
@@ -1988,18 +2001,18 @@ scr_refresh(int type)
             DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
             UPDATE_BOX(xx, yy, xx + ww, yy + hh);
           } else {
-            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
+            CLEAR_CHARS(xpixel, ypixel - ascent, len);
             DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
-            UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
+            UPDATE_BOX(xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
           }
         } else
 #endif
           {
 #ifdef FORCE_CLEAR_CHARS
-            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
+            CLEAR_CHARS(xpixel, ypixel - ascent, wlen);
 #endif
             DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
-            UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
+            UPDATE_BOX(xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
           }
       }
 
@@ -2007,11 +2020,11 @@ scr_refresh(int type)
 #ifndef NO_BOLDOVERSTRIKE
       if (MONO_BOLD(rend)) {
 	DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, wlen);
-        UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(wlen), ypixel + Height2Pixel(1));
+        UPDATE_BOX(xpixel + 1, ypixel - ascent, xpixel + 1 + Width2Pixel(wlen), ypixel + Height2Pixel(1));
       }
 #endif
 
-      if ((rend & RS_Uline) && (TermWin.font->descent > 1)) {
+      if ((rend & RS_Uline) && (descent > 1)) {
 	XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
         UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
       }
@@ -2021,8 +2034,8 @@ scr_refresh(int type)
 	  XSetForeground(Xdisplay, TermWin.gc, PixColors[cursorColor]);
 	}
 #endif
-	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
-        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+        UPDATE_BOX(xpixel, ypixel - ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
         XSetForeground(Xdisplay, TermWin.gc, PixColors[fgColor]);
       }
       if (gcmask) {		/* restore normal colors */

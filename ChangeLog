@@ -3698,3 +3698,10 @@ Sat Jun 17 19:52:25 PDT 2000	Michael Jennings <mej@eterm.org>
 	the font fx stuff.
 	
 -------------------------------------------------------------------------------
+Tue Jun 20 20:01:07 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Patch from Sung-Hyun Nam <namsh@lgic.co.kr> to fix multi-byte font
+	handling when the ISO-8859 font size doesn't match the multi-byte font
+	size.
+	
+-------------------------------------------------------------------------------
