@@ -2295,3 +2295,10 @@ Wed Aug 18 18:17:14 PDT 1999	Michael Jennings <mej@eterm.org>
 	Thanks to Carl Lewis <carl@dpiwe.tas.gov.au> for pointing this out.
 
 -------------------------------------------------------------------------------
+Thu Aug 19 16:45:36 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Applied patch from Valdis Kletnieks <valdis.kletnieks@vt.edu> which
+	reduces the amount of excess space in menus when using proportional
+	fonts.
+	
+-------------------------------------------------------------------------------

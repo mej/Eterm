@@ -827,6 +827,7 @@ menu_draw(menu_t * menu)
   int ascent, descent, direction;
   XCharStruct chars;
   Screen *scr;
+  unsigned short longest = 0;
 
   ASSERT(menu != NULL);
 
@@ -839,18 +840,20 @@ menu_draw(menu_t * menu)
 
   if (!menu->w) {
     len = strlen(menu->title);
+    longest = XTextWidth(menu->font, menu->title, len);
     height = menu->fheight + 3 * MENU_VGAP;
     for (i = 0; i < menu->numitems; i++) {
       unsigned short j = menu->items[i]->len;
       menuitem_t *item = menu->items[i];
 
+      width = XTextWidth(menu->font, item->text, j);
       if (item->rtext) {
-	j += item->rlen + 2;
+        width += XTextWidth(menu->font, item->rtext, item->rlen) + (2*MENU_HGAP);
       }
-      MAX_IT(len, j);
+      longest = (longest>width)?longest:width;
       height += ((item->type == MENUITEM_SEP) ? (MENU_VGAP) : (menu->fheight)) + MENU_VGAP;
     }
-    width = len * menu->fwidth + (4 * MENU_HGAP);
+    width = longest + (4 * MENU_HGAP);
     if (images[image_submenu].selected->iml->pad) {
       width += images[image_submenu].selected->iml->pad->left + images[image_submenu].selected->iml->pad->right;
     }
