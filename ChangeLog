@@ -4464,3 +4464,13 @@ Thu Jan  3 12:42:41 2002                        Michael Jennings (mej)
 
 This is better.
 ----------------------------------------------------------------------
+Mon Jan 14 13:51:49 2002                        Michael Jennings (mej)
+
+Added a server grab around the setting of the root properties and
+background.  Suggested by Owen Taylor <otaylor@redhat.com> and Olivier
+Chapuis <olivier.chapuis@free.fr>.
+
+Also updated the version number in configure.ac for all those
+mor^H^H^Hpeople using Debian unstable. :-)  Fixed a few compiler
+warnings too.
+----------------------------------------------------------------------

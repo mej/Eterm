@@ -1,7 +1,7 @@
 dnl# $Id: configure.in,v 1.56 2001/10/21 13:21:04 mej Exp $
 
 AC_INIT(src/feature.h)
-AM_INIT_AUTOMAKE(Eterm, 0.9.1)
+AM_INIT_AUTOMAKE(Eterm, 0.9.2)
 
 dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"

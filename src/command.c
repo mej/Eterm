@@ -2103,9 +2103,9 @@ run_command(char **argv)
   privileges(IGNORE);
 
   ptyfd = get_pty();
-  AT_LEAST(num_fds, ptyfd + 1);
   if (ptyfd < 0)
     return (-1);
+  AT_LEAST(num_fds, ((unsigned int) (ptyfd + 1)));
 
   /* store original tty status for restoration clean_exit() -- rgg 04/12/95 */
   lstat(ttydev, &ttyfd_stat);
@@ -2287,9 +2287,9 @@ init_command(char **argv)
   Xfd = XConnectionNumber(Xdisplay);
   D_CMD(("Xfd = %d\n", Xfd));
   cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-  AT_LEAST(num_fds, Xfd + 1);
+  AT_LEAST((int) num_fds, Xfd + 1);
   if (pipe_fd >= 0) {
-    AT_LEAST(num_fds, pipe_fd + 1);
+    AT_LEAST((int) num_fds, pipe_fd + 1);
   }
 
   if ((cmd_fd = run_command(argv)) < 0) {

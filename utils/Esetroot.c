@@ -263,10 +263,11 @@ main(int argc, char *argv[])
     } else {
       XFillRectangle(Xdisplay, p, gc, x, y, scr->width, scr->height);
     }
+    XGrabServer(Xdisplay);
     set_pixmap_property(p);
-    XFlush(Xdisplay);
     XSetWindowBackgroundPixmap(Xdisplay, Xroot, p);
     XClearWindow(Xdisplay, Xroot);
+    XUngrabServer(Xdisplay);
     XFlush(Xdisplay);
   }
 #else
