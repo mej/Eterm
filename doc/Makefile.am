@@ -10,5 +10,5 @@ Eterm.1: $(top_srcdir)/doc/Eterm.1.in
 Eterm.1.html: Eterm.1
 	-nroff -man $< | man2html > $@
 
-EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti FAQ.html Makefile.am Makefile.in
+EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti Makefile.am Makefile.in
 
