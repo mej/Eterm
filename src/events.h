@@ -53,7 +53,6 @@
 # define P_EVENT_TIME(type, start, stop)  real_dprintf(type ":  %ld microseconds\n", P_CMPTIMEVALS_USEC((start), (stop)))
 #else
 # define P_EVENT_TIME(type, start, stop)  NOP
-# define P_SETTIMEVAL(t) NOP
 #endif
 #define EVENT_DATA_ADD_HANDLER(data, type, handler) (data).handlers[(type)] = handler
 

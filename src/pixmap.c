@@ -572,9 +572,9 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     check_image_ipc(0);
     if (image_mode_is(which, MODE_AUTO)) {
       iclass = get_iclass_name(which);
-      if (images[which].current == images[which].selected) {
+      if (simg == images[which].selected) {
         state = "hilited";
-      } else if (images[which].current == images[which].clicked) {
+      } else if (simg == images[which].clicked) {
         state = "clicked";
       } else {
         state = "normal";
@@ -1174,15 +1174,18 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
-	v = XGetPixel(ximg, x, y);
-#define R() (((((v >> br) & mr) * rm) >> 8) & 0xff)
-#define G() (((((v >> bg) & mg) * gm) >> 8) & 0xff)
-#define B() (((((v << bb) & mb) * bm) >> 8) & 0xff)
-	v = ((R() & mr) << br) | ((G() & mg) << bg) | ((B() & mb) >> bb);
-#undef R
-#undef G
-#undef B
-	XPutPixel(ximg, x, y, v);
+        register unsigned int rn, gn, bn;
+
+        v = XGetPixel(ximg, x, y);
+        rn = ((((v >> br) & mr) * rm) >> 8);
+        gn = ((((v >> bg) & mg) * gm) >> 8);
+        bn = ((((v << bb) & mb) * bm) >> 8);
+        if (!((rn & ~mr & 0xfff0) || (gn & ~mg & 0xfff0) || (bn & ~mb & 0xfff0))) {
+          v = ((rn & mr) << br) | ((gn & mg) << bg) | ((bn & mb) >> bb);
+        } else {
+          v = WhitePixel(Xdisplay, Xscreen);
+        }
+        XPutPixel(ximg, x, y, v);
       }
     }
   }

@@ -766,7 +766,13 @@ menuitem_select(menu_t * menu)
   XMoveWindow(Xdisplay, menu->swin, item->x, item->y);
   XMapWindow(Xdisplay, menu->swin);
   if (item->type == MENUITEM_SUBMENU) {
+    render_simage(images[image_submenu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_submenu, 0);
+    if (image_mode_is(image_submenu, MODE_AUTO)) {
+      enl_ipc_sync();
+    }
+#if 0
     paste_simage(images[image_submenu].selected, image_submenu, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
+#endif
   } else {
     render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
     if (image_mode_is(image_menu, MODE_AUTO)) {
@@ -791,14 +797,6 @@ menuitem_deselect(menu_t * menu)
   D_MENU(("menuitem_deselect():  Deselecting item \"%s\"\n", item->text));
   item->state &= ~(MENU_STATE_IS_CURRENT);
   XUnmapWindow(Xdisplay, menu->swin);
-  if (item->type == MENUITEM_SUBMENU) {
-    paste_simage(images[image_submenu].norm, image_submenu, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
-  }
-  draw_string(menu->win, menu->gc, 2 * MENU_HGAP, item->y + item->h - MENU_VGAP, item->text, item->len);
-  if (item->rtext) {
-    draw_string(menu->win, menu->gc, item->x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->y + item->h - MENU_VGAP,
-                item->rtext, item->rlen);
-  }
 }
 
 void
@@ -820,6 +818,20 @@ menu_display_submenu(menu_t * menu, menuitem_t * item)
   current_menu->state &= ~(MENU_STATE_IS_CURRENT);
   current_menu = menu;
   menu->state |= MENU_STATE_IS_CURRENT;
+}
+
+void
+menu_move(menu_t *menu, unsigned short x, unsigned short y) {
+
+  ASSERT(menu != NULL);
+
+  D_MENU(("menu_move():  Moving menu \"%s\" to %hu, %hu\n", menu->title, x, y));
+  menu->x = x;
+  menu->y = y;
+  XMoveWindow(Xdisplay, menu->win, menu->x, menu->y);
+  if (image_mode_is(image_menu, (MODE_TRANS | MODE_VIEWPORT))) {
+    menu_draw(menu);
+  }
 }
 
 void
@@ -870,29 +882,6 @@ menu_draw(menu_t * menu)
     }
     menu->w = width;
     menu->h = height;
-
-    /* Size and render menu window */
-    XResizeWindow(Xdisplay, menu->win, menu->w, menu->h);
-    if (image_mode_is(image_menu, MODE_AUTO)) {
-      pixmap_t *pmap = images[image_menu].norm->pmap;
-
-      if (pmap->pixmap != None) {
-        XFreePixmap(Xdisplay, pmap->pixmap);
-      }
-      pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, width, height, Xdepth);
-      paste_simage(images[image_menu].norm, image_menu, pmap->pixmap, 0, 0, width, height);
-      enl_ipc_sync();
-    } else {
-      render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
-    }
-    menu->bg = images[image_menu].norm->pmap->pixmap;
-
-    /* Size and render selected item window */
-    XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
-    render_simage(images[image_menu].selected, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP, image_menu, 0);
-    if (image_mode_is(image_menu, MODE_AUTO)) {
-      enl_ipc_sync();
-    }
   }
 
   /* If the menu will come up offscreen, move all the other menus out of the way. */
@@ -918,17 +907,35 @@ menu_draw(menu_t * menu)
 
       D_MENU((" -> Checking menu \"%s\" to see if it needs to be moved.\n", tmp->title));
       if (tmp->state & MENU_STATE_IS_MAPPED) {
-        tmp->x += dx;
-        tmp->y += dy;
-        D_MENU(("     -> Yes.  New coordinates for this menu are %hu, %hu.\n", tmp->x, tmp->y));
-        XMoveWindow(Xdisplay, tmp->win, tmp->x, tmp->y);
+        menu_move(tmp, tmp->x + dx, tmp->y + dy);
       }
     }
   }
-  XMoveWindow(Xdisplay, menu->win, menu->x, menu->y);
+  XMoveResizeWindow(Xdisplay, menu->win, menu->x, menu->y, menu->w, menu->h);
+
+  /* Draw menu background */
+  if (image_mode_is(image_menu, MODE_AUTO)) {
+    pixmap_t *pmap = images[image_menu].norm->pmap;
+
+    if (pmap->pixmap != None) {
+      XFreePixmap(Xdisplay, pmap->pixmap);
+    }
+    pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, menu->w, menu->h, Xdepth);
+    paste_simage(images[image_menu].norm, image_menu, pmap->pixmap, 0, 0, menu->w, menu->h);
+    enl_ipc_sync();
+  } else {
+    render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
+  }
+  menu->bg = images[image_menu].norm->pmap->pixmap;
+
+  /* Size and render selected item window */
+  XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
+  render_simage(images[image_menu].selected, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP, image_menu, 0);
+  if (image_mode_is(image_menu, MODE_AUTO)) {
+    enl_ipc_sync();
+  }
   XUnmapWindow(Xdisplay, menu->swin);
   XMapWindow(Xdisplay, menu->win);
-  XRaiseWindow(Xdisplay, menu->win);
 
   str_x = 2 * MENU_HGAP;
   if (images[image_menu].selected->iml->pad) {

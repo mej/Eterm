@@ -69,11 +69,10 @@
 # endif
 
 /********************* Random development stuff ***************************/
-/* #define PROFILE */
-#ifdef PROFILE
-/* #define PROFILE_SCREEN */
-/* #define PROFILE_X_EVENTS */
-/* #define COUNT_X_EVENTS */
+#ifdef ENABLE_PROFILE
+# define PROFILE_SCREEN
+# define PROFILE_X_EVENTS
+# define COUNT_X_EVENTS
 #endif
 
 #define OPTIMIZE_HACKS

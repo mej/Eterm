@@ -128,6 +128,7 @@ extern void menu_reset_submenus(menu_t *);
 extern void menuitem_select(menu_t *);
 extern void menuitem_deselect(menu_t *);
 extern void menu_display_submenu(menu_t *, menuitem_t *);
+extern void menu_move(menu_t *, unsigned short, unsigned short);
 extern void menu_draw(menu_t *);
 extern void menu_display(int, int, menu_t *);
 extern void menu_action(menuitem_t *);

@@ -13,8 +13,7 @@
 /* NOTE: if PROFILE is not defined, all macros in this file will
  * be set to (void)0 so they won't get compiled into binaries.
  */
-#define PROFILE
-# ifdef PROFILE
+# ifdef ENABLE_PROFILE
 
 /* Data structures */
 
@@ -66,7 +65,7 @@ typedef struct {
             P_CMPTIMEVALS_USEC(cnt.start, cnt.stop)); \
 }
 
-# else /* PROFILE */
+# else /* ENABLE_PROFILE */
 
 #  define P_SETTIMEVAL(tv) ((void)0)
 #  define P_UPDATETOTAL(cnt) ((void)0)
@@ -74,6 +73,6 @@ typedef struct {
 #  define P_CMPTIMEVALS_USEC(start, stop) ((void)0)
 #  define P_CALL(f, str) f
 
-# endif /* PROFILE */
+# endif /* ENABLE_PROFILE */
 
 #endif /* _PROFILE_H */

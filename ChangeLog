@@ -3024,3 +3024,10 @@ Mon Jan 10 16:55:51 PST 2000	Michael Jennings <mej@eterm.org>
 	<keebler@sandwich.net>.
 	
 -------------------------------------------------------------------------------
+Tue Jan 11 23:47:36 PST 2000	Michael Jennings <mej@eterm.org>
+
+	More fixes with menus and transparency.  After you build this version,
+	check out the brand new "glass" theme at http://www.eterm.org/.  It
+	looks sweet. :-)
+	
+-------------------------------------------------------------------------------

@@ -2394,6 +2394,10 @@ parse_image(char *buff)
       print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined", file_peek_path(), file_peek_line());
       return;
     }
+    if (images[idx].current == NULL) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined", file_peek_path(), file_peek_line());
+      return;
+    }
     if (!filename) {
       print_error("Parse error in file %s, line %lu:  Missing filename", file_peek_path(), file_peek_line());
       return;
@@ -2405,6 +2409,10 @@ parse_image(char *buff)
 
     if (idx < 0) {
       print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (images[idx].current == NULL) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined", file_peek_path(), file_peek_line());
       return;
     }
     if (!geom) {
@@ -2421,6 +2429,10 @@ parse_image(char *buff)
 
     if (idx < 0) {
       print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (images[idx].current == NULL) {
+      print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined", file_peek_path(), file_peek_line());
       return;
     }
     if (!color) {
@@ -2504,6 +2516,10 @@ parse_image(char *buff)
       print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined", file_peek_path(), file_peek_line());
       return;
     }
+    if (images[idx].current == NULL) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined", file_peek_path(), file_peek_line());
+      return;
+    }
     if (NumWords(buff + 6) < 5) {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"", file_peek_path(), file_peek_line());
       return;
@@ -2535,6 +2551,10 @@ parse_image(char *buff)
   } else if (!BEG_STRCASECMP(buff, "padding ")) {
     if (idx < 0) {
       print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (images[idx].current == NULL) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined", file_peek_path(), file_peek_line());
       return;
     }
     if (NumWords(buff + 8) < 4) {

@@ -140,6 +140,8 @@ extern unsigned int debug_level;
 #  define D_MALLOC(x)			DPRINTF4(x)
 #  define DEBUG_ACTIONS			4
 #  define D_ACTIONS(x)			DPRINTF4(x)
+#  define DEBUG_PROFILE			4
+#  define D_PROFILE(x)			DPRINTF4(x)
 
 #  define DEBUG_X			5
 
@@ -191,5 +193,7 @@ extern unsigned int debug_level;
         } \
     } \
   } while (0)
+
+#include "profile.h"
 
 #endif /* _DEBUG_H */

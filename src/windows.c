@@ -436,6 +436,9 @@ Create_Windows(int argc, char *argv[])
   XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
 
   render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+  if (image_mode_is(image_bg, MODE_AUTO)) {
+    enl_ipc_sync();
+  }
 
   /* graphics context for the vt window */
   {
