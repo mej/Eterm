@@ -1,7 +1,7 @@
 /****************************************************************************
  * scream::scream.h
  * routines to connect to screen and or scream daemons.
- * GNU Public Licence applies.
+ * BSD Licence applies.
  * 2002/04/19  Azundris  incept
  ***************************************************************************/
 
@@ -32,6 +32,7 @@
 #define NS_SCREEN_STATUS  11
 #define NS_SCREEN_ST_CLR  12
 #define NS_EFUN_NOT_SET   13
+#define NS_USER_CXL       14
 
 #define NS_ERR_WEIRDSCREEN 1
 
@@ -46,29 +47,51 @@
 
 #define NS_SCREAM_MASK   (~(NS_SCREAM_UTMP|NS_SCREAM_PRVS))
 
+#define NS_HOP_DOWN        0
+#define NS_HOP_UP          1
+
 
 
 /***************************************************************************/
 
 
 
-typedef struct __ns_sess {  /* a whole screen-session with many clients */
-  int   where;          /* local/remote */
-  int   backend;        /* screen/scream */
-  int   nesting;        /* 0=topLevel, 1=screen within a screen etc */
-  char *proto;          /* protocol.  usually "screen" */
-  char *host;           /* host. numeric or symbolic. often "localhost" */
-  int   port;           /* port. usually TCP22: SSH */
-  char *user;           /* user. often current local user */
-  char *pass;           /* password. used for su. for remote sessions, a
-                           ssh-key should be placed on the remote machine. */
-  char *rsrc;           /* additional parameter to screen/scream. URL-enc */
-  void *userdef;        /* the term-app can store a pointer here */
-  int   fd;             /* fd for communication */
-  char  escape,literal; /* talking to screen: defaults to ^A, a */
+typedef struct __ns_hop {
+  int               localport;
+  char             *fw;
+  int               fwport;
+  int               established;
+  int               delay;
+  int               refcount;
+  struct __ns_sess *sess;    /* first only, others have same host/port */
+  struct __ns_hop  *next;
+} _ns_hop;
+
+
+
+typedef struct __ns_sess {   /* a whole screen-session with many clients */
+  int     where;             /* local/remote */
+  int     backend;           /* screen/scream */
+  int     nesting;           /* 0=topLevel, 1=screen within a screen etc */
+  time_t  timestamp;         /* last updated when? see NS_SCREEN_UPD_FREQ */
+  char   *proto;             /* protocol.  usually "screen" */
+  char   *host;              /* host. numeric or symbolic. ("localhost") */
+  int     port;              /* port. usually TCP22: SSH */
+  char   *user;              /* user. often current local user */
+  char   *pass;              /* password. used for su. for remote sessions, a
+                                ssh-key should be on the remote machine. */
+  char   *rsrc;              /* add'l parameter to screen/scream. URL-enc */
+  char   *home;              /* user's home dir. so we can find .screenrc */
+  void   *userdef;           /* the term-app can store a pointer here */
+  int     fd;                /* fd for communication */
+  char    escape,literal;    /* talking to screen: defaults to ^A, a */
+  int     dsbb;              /* default length of scroll-back buffer */
   struct __ns_efuns *efuns;  /* callbacks into the terminal program. */
+  struct __ns_hop   *hop;    /* tunnel, if any */
   struct __ns_disp  *dsps;   /* first display (that with the lowest index) */
   struct __ns_disp  *curr;   /* current display (NULL for none) */
+  struct __ns_sess  *prvs;   /* previous session in session list */
+  struct __ns_sess  *next;   /* next     session in session list */
 } _ns_sess;
 
 
@@ -105,6 +128,8 @@ typedef struct __ns_efuns {  /* callbacks into the terminal program */
   int   (*err_msg)(void *,int,char *);
   int   (*execute)(void *,char **);
   int   (*inp_text)(void *,int,char *);
+  int   (*inp_dial)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+  int   (*inp_tab)(void *,char *[],int,char *,size_t,size_t);
 } _ns_efuns;
 
 
@@ -128,6 +153,7 @@ _ns_efuns *ns_dst_efuns(_ns_efuns **);
 _ns_efuns *ns_get_efuns(_ns_sess *,_ns_disp *);
 
 /* debug */
+void ns_desc_hop(_ns_hop *,char *);
 void ns_desc_sess(_ns_sess *,char *);
 
 /* convenience */
@@ -135,11 +161,32 @@ _ns_disp *disp_fetch_or_make(_ns_sess *,int);
 
 /* transparent attach/detach */
 _ns_sess *ns_attach_by_sess(_ns_sess **,int *);
-_ns_sess *ns_attach_by_URL(char *,_ns_efuns **,int *,void *);
+_ns_sess *ns_attach_by_URL(char *,char *,_ns_efuns **,int *,void *);
+
+
+/* send command to screen */
+int ns_screen_command(_ns_sess *, char *);
+
+/* send statement to screen */
+int ns_screen_xcommand(_ns_sess *,char , char *);
+
+/* parse and forward a screen-statement */
+int ns_parse_screen_cmd(_ns_sess *,char *);
+
+/* parse and forward a screen-hotkey */
+int ns_parse_screen_key(_ns_sess *,char);
+
+/* parse screen escape setup */
+char ns_parse_esc(char **);
+
+/* init session (read .screenrc, or whatnot) */
+int ns_sess_init(_ns_sess *);
 
 /* what the terminal should call the last line -- screen's "hardstatus"
    changes. submit session, terminal-width, and a pointer to said line. */
-int parse_screen(_ns_sess *,int,int,char *);
+int ns_parse_screen(_ns_sess *,int,int,char *);
+
+
 
 /* things the term might ask screen/scream to do ***************************/
 int ns_scroll2x(_ns_sess *,int);
@@ -151,6 +198,9 @@ int ns_rem_disp(_ns_sess *,int);
 int ns_ren_disp(_ns_sess *,int,char *);
 int ns_log_disp(_ns_sess *,int,char *);
 int ns_upd_stat(_ns_sess *);
+int ns_inp_dial(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+
+
 
 /* register efuns (callbacks) **********************************************/
 void ns_register_ssx(_ns_efuns *,int (*set_scroll_x)(void *,int));
@@ -169,6 +219,9 @@ void ns_register_err(_ns_efuns *,int (*err_msg)(void *,int,char *));
 
 void ns_register_exe(_ns_efuns *,int (*execute)(void *,char **));
 void ns_register_txt(_ns_efuns *,int (*inp_text)(void *,int,char *));
+
+void ns_register_inp(_ns_efuns *,int (*)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t)));
+void ns_register_tab(_ns_efuns *,int (*)(void *,char *[],int,char *,size_t,size_t));
 
 
 

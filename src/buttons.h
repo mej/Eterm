@@ -140,6 +140,8 @@ extern void bbar_draw_all(unsigned char image_state, unsigned char force_modes);
 extern void bbar_calc_positions(void);
 extern unsigned long bbar_calc_total_height(void);
 extern unsigned long bbar_calc_docked_height(unsigned char);
+extern void bbar_redraw(buttonbar_t *bbar);
+extern buttonbar_t *bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, int addright);
 
 _XFUNCPROTOEND
 

@@ -621,6 +621,21 @@ Pick up a "screen" session at
 rather than a local one. URLs look like so (screen://user@host.dom/options),
 with all parts optional, defaulting to current user at localhost,
 respectively. Forces Escreen mode, overrides \-\-exec.
+.TP
+.BI \-Z " lclport:fw:fwport,delay" ", \-\-fw " lclport:fw:fwport,delay
+The URL given to \-U is in an intranet behind firewall
+.I fw
+so we'll build an SSH-tunnel to that firewall (to port 22/SSH, or
+.I fwport
+if given) from our local machine (using any available port-number, or
+.I lclport
+if given). Then, after
+.I delay
+seconds (or a sensible default if not given), we will try to open a
+screen session on the host behind the firewall using
+.I ssh -p localport ... localhost screen
+cf.
+.I ssh -L
 
 .SH THEMES
 

@@ -4643,3 +4643,7 @@ Tue May  7 10:16:56 2002                        Michael Jennings (mej)
 configure.in and configure.ac should no longer differ, so let's not
 maintain both.
 ----------------------------------------------------------------------
+Mon May 13 18:46:06 2002                        Michael Jennings (mej)
+
+Latest Escreen patch from Azundris <hacks@azundris.com>.
+----------------------------------------------------------------------

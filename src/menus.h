@@ -34,6 +34,7 @@
 #define MENUITEM_STRING		(1UL << 2)
 #define MENUITEM_ECHO		(1UL << 3)
 #define MENUITEM_SCRIPT		(1UL << 4)
+#define MENUITEM_ALERT		(1UL << 5)
 
 #define MENU_STATE_IS_MAPPED	(1UL << 0)
 #define MENU_STATE_IS_CURRENT	(1UL << 1)
@@ -63,6 +64,7 @@ typedef struct {
     menu_t *submenu;
     char *string;
     char *script;
+    char *alert;
   } action;
   char *text, *rtext;
   unsigned short len, rlen;
@@ -92,6 +94,10 @@ typedef struct {
 
 /************ Variables ************/
 extern menulist_t *menu_list;
+#ifdef ESCREEN
+extern event_dispatcher_data_t menu_event_data;
+#endif
+
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
@@ -140,6 +146,8 @@ extern void menu_display(int, int, menu_t *);
 extern void menu_action(menuitem_t *);
 extern void menu_invoke(int, int, Window, menu_t *, Time);
 extern void menu_invoke_by_title(int, int, Window, char *, Time);
+extern int  menu_tab(void *,char *[],int,char *,size_t,size_t);
+extern int  menu_dial(void *,char *, int, char **,int (*)(void *,char *,size_t,size_t));
 
 _XFUNCPROTOEND
 

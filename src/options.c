@@ -138,6 +138,7 @@ char *rs_theme = NULL;
 char *rs_config_file = NULL;
 #ifdef ESCREEN
 char *rs_url = NULL;
+char *rs_hop = NULL;
 #endif
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
@@ -166,6 +167,7 @@ static const struct {
         OPT_STR('d', "display", "X server to connect to", &display_name),
 #ifdef ESCREEN
         OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
+        OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
 #endif
 #if DEBUG <= 0
         OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &DEBUG_LEVEL),

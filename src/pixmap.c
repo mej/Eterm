@@ -1066,7 +1066,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                                 XSetClipMask(Xdisplay, gc, mask);
                                 XSetClipOrigin(Xdisplay, gc, 0, 0);
                             }
-                            if (simg->pmap->pixmap) {
+                            if (simg->pmap->pixmap != None) {
                                 LIBAST_X_FREE_PIXMAP(simg->pmap->pixmap);
                                 simg->pmap->pixmap = None;
                             }
@@ -1275,7 +1275,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
             XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
         } else {
             if ((renderop & RENDER_FORCE_PIXMAP) || (simg->iml->bevel != NULL)) {
-                if (simg->pmap->pixmap) {
+                if (simg->pmap->pixmap != None) {
                     LIBAST_X_FREE_PIXMAP(simg->pmap->pixmap);
                 }
                 simg->pmap->pixmap = LIBAST_X_CREATE_PIXMAP(width, height);
@@ -2118,7 +2118,6 @@ get_desktop_pixmap(void)
 void
 free_desktop_pixmap(void)
 {
-
     if (desktop_pixmap_is_mine && desktop_pixmap != None) {
         LIBAST_X_FREE_PIXMAP(desktop_pixmap);
         desktop_pixmap_is_mine = 0;

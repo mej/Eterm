@@ -48,6 +48,9 @@ static const char cvs_ident[] = "$Id$";
 #include "scrollbar.h"
 #include "term.h"
 #include "windows.h"
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
 
 #ifdef META8_OPTION
 unsigned char meta_char = 033;  /* Alt-key prefix */
@@ -191,7 +194,9 @@ get_modifiers(void)
 void
 lookup_key(XEvent * ev)
 {
-
+#ifdef ESCREEN
+    static int escreen_escape = 0;
+#endif
     static int numlock_state = 0;
     int ctrl, meta, shft, len;
     KeySym keysym;
@@ -255,6 +260,21 @@ lookup_key(XEvent * ev)
         kbuf[0] = (keysym & 0xff);
     }
 #endif /* USE_XIM */
+
+#ifdef ESCREEN
+            if (escreen_escape) {
+                if(kbuf[0]) {
+                    escreen_escape=0;
+                    if(kbuf[0]<128)
+                        (void)ns_parse_screen_key(TermWin.screen,kbuf[0]);
+                    LK_RET();
+                }
+            }
+            else if (TermWin.screen&&TermWin.screen->escape==kbuf[0]) {
+                escreen_escape=1;
+                LK_RET();
+            }
+#endif
 
 #ifdef USE_XIM
     /* Don't do anything without a valid keysym. */
@@ -370,6 +390,7 @@ lookup_key(XEvent * ev)
             }
         }
 #endif
+
 
         switch (keysym) {
           case XK_Print:       /* Print the screen contents out to the print pipe */

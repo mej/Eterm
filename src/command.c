@@ -128,6 +128,7 @@ static const char cvs_ident[] = "$Id$";
 #endif
 #include "windows.h"
 #include "buttons.h"
+#include "menus.h"
 
 #ifdef ESCREEN
 #  include "screamcfg.h"
@@ -2106,7 +2107,7 @@ run_command(char **argv)
         char **a = argv;
         if (a) {
             while (*a) {
-                puts(*a);
+                fprintf(stderr, NS_PREFIX "run_command: %s\n",*a);
                 a++;
             }
         }
@@ -2226,7 +2227,11 @@ run_command(char **argv)
         my_euid = my_ruid;
         my_egid = my_rgid;
 
+#ifdef HAVE_USLEEP
         usleep(10);             /* Attempt to force a context switch so that the parent runs before us. */
+#else
+        sleep(1);               /* ugliness */
+#endif
         D_CMD(("[%d] About to spawn shell\n", getpid()));
         if (chdir(initial_dir)) {
             print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
@@ -2289,55 +2294,61 @@ run_command(char **argv)
 int
 set_scroll_x(void *xd, int x)
 {
-    printf("set_scroll_x: %d\n", x);
-    return 0;
+    fprintf(stderr, NS_PREFIX "set_scroll_x: %d\n", x);
+    return NS_FAIL;
 }
 
 int
 set_scroll_y(void *xd, int y)
 {
-    printf("set_scroll_y: %d\n", y);
-    return 0;
+    fprintf(stderr, NS_PREFIX "set_scroll_y: %d\n", y);
+    return NS_FAIL;
 }
 
 int
 set_scroll_w(void *xd, int w)
 {
-    printf("set_scroll_w: %d\n", w);
-    return 0;
+    fprintf(stderr, NS_PREFIX "set_scroll_w: %d\n", w);
+    return NS_FAIL;
 }
 
 int
 set_scroll_h(void *xd, int h)
 {
-    printf("set_scroll_h: %d\n", h);
-    return 0;
+    fprintf(stderr, NS_PREFIX "set_scroll_h: %d\n", h);
+    return NS_FAIL;
 }
 
 int
 redraw(void *xd)
 {
-    puts("redraw");
-    return 0;
+    fprintf(stderr, NS_PREFIX "redraw\n");
+    return NS_FAIL;
 }
 
 int
 redraw_xywh(void *xd, int x, int y, int w, int h)
 {
-    printf("redraw_xywh: %d,%d %dx%d\n", x, y, w, h);
-    return 0;
+    fprintf(stderr, NS_PREFIX "redraw_xywh: %d,%d %dx%d\n", x, y, w, h);
+    return NS_FAIL;
 }
 
 
 
-/* redraw a button bar */
-void
-redraw_buttons(buttonbar_t *bbar)
-{
-    bbar_calc_button_sizes(bbar);
-    bbar_calc_button_positions(bbar);
-    bbar_draw(bbar, IMAGE_STATE_CURRENT, MODE_MASK);
-}
+button_t *screen_button_create(char *text,char code) {
+  button_t *b;
+  char p[3];
+
+  if(!text||!*text||!(b=button_create(text)))
+    return NULL;
+
+  p[0]=NS_SCREEN_ESCAPE;
+  p[1]=code;
+  p[2]='\0';
+
+  button_set_action(b, ACTION_ECHO, p);
+
+  return b; }
 
 
 
@@ -2347,58 +2358,53 @@ redraw_buttons(buttonbar_t *bbar)
 int
 ins_disp(void *xd, int after, char *name)
 {
-    buttonbar_t *bbar = *((buttonbar_t **) xd);
+    buttonbar_t *bbar;
     button_t *button;
-    int state = 1;
-    char p[3] = "\x01x";
+
+    if(!xd||!name||!*name)
+      return NS_FAIL;
+    bbar = *((buttonbar_t **) xd);
+
+    if(!(button=screen_button_create(name,'0' + after + 1)))
+      return NS_FAIL;
 
 #ifdef NS_DEBUG
-    fprintf(stderr, "ins_disp: %s after %d...\n", name, after);
+    fprintf(stderr, NS_PREFIX "ins_disp: %s after %d...\n", name, after);
 #endif
 
-    if (!bbar) {
-        if (!(bbar = bbar_create())) {
-            fprintf(stderr, "ins_disp: failed to create button-bar...\n");
-            return 0;
-        } else {
-            bbar_set_font(bbar, "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1");
-            bbar_set_docked(bbar, BBAR_DOCKED_TOP);
-        }
-        state = 0;
-    }
+    if((bbar=bbar_insert_button(bbar,button,after,FALSE))) {
+      *((buttonbar_t **) xd) = bbar;
+      return NS_SUCC; }
 
-    button = button_create(name);
-    p[1] = '0' + after + 1;
-    button_set_action(button, ACTION_ECHO, p);
-    if (!bbar->buttons || after < 0) {	/* first button */
-        button->next = bbar->buttons;
-        bbar->buttons = button;
-    } else {
-        button_t *b = bbar->buttons;
-        while (after-- > 0 && b->next)
-            b = b->next;
-        button->next = b->next;
-        b->next = button;
-    }
+    button_free(button);
+    return NS_FAIL;
+}
 
-    bbar->current = button;
 
-    *((buttonbar_t **) xd) = bbar;	/* ugly, but it will remain here till
-	   bbar_event_init_dispatcher()
-	   takes a bbar parameter */
 
-    if (!state) {
-        bbar_init(bbar, TermWin.width);
-        bbar_add(bbar);
-    }
 
-    redraw_buttons(bbar);
+/* add supa-dupa right buttons for screen-features.
+   if our user's configured a bbar, we'll add to that,
+   otherwise, we'll create one. */
+int
+add_screen_ctl_button(buttonbar_t **xd,char *name,char key)
+{
+    buttonbar_t *bbar;
+    button_t *button;
 
-    if (!state) {
-        parent_resize();
-    }
+    if(!xd||!name||!*name)
+      return NS_FAIL;
+    bbar = *xd;
 
-    return 0;
+    if(!(button=screen_button_create(name,key)))
+      return NS_FAIL;
+
+    if((bbar=bbar_insert_button(bbar,button,-1,TRUE))) {
+      *xd = bbar;
+      return NS_SUCC; }
+
+    button_free(button);
+    return NS_FAIL;
 }
 
 
@@ -2415,11 +2421,11 @@ del_disp(void *xd, int n)
     int c;
 
     for (c = 0, b2 = bbar->buttons; b2; c++, b2 = b2->next)
-        fprintf(stderr, "%02d: \"%s\"\n", c, b2->text);
+        fprintf(stderr, NS_PREFIX "del_disp: %02d: \"%s\"\n", c, b2->text);
 #endif
 
     if (!bbar || !(button = bbar->buttons))
-        return 0;
+        return NS_FAIL;
 
     b2 = button = bbar->buttons;
     if (!n) {
@@ -2430,8 +2436,8 @@ del_disp(void *xd, int n)
         while (n-- > 0) {
             b2 = button;
             if (!(button = button->next)) {
-                fprintf(stderr, "cannot delete button %d: does not exist...\n", bi);
-                return -1;
+                fprintf(stderr, NS_PREFIX "del_disp: cannot delete button %d: does not exist...\n", bi);
+                return NS_FAIL;
             }
         }
         b2->next = button->next;
@@ -2440,17 +2446,15 @@ del_disp(void *xd, int n)
     }
 
 #ifdef NS_DEBUG_
-    fprintf(stderr, "deleting button %d (%s)...\n", bi, button->text);
+    fprintf(stderr, NS_PREFIX "del_disp: deleting button %d (%s)...\n", bi, button->text);
 #endif
 
     button->next = NULL;
     button_free(button);
 
-    redraw_buttons(bbar);
+    bbar_redraw(bbar);
 
-    *((buttonbar_t **) xd) = bbar;	/* ugly */
-
-    return 0;
+    return NS_SUCC;
 }
 
 
@@ -2468,7 +2472,7 @@ upd_disp(void *xd, int n, int flags, char *name)
     button_t *button;
 
     if (!bbar || !(button = bbar->buttons))
-        return 0;
+        return NS_FAIL;
 
     button = bbar->buttons;
     while (n-- > 0 && button->next)
@@ -2480,7 +2484,7 @@ upd_disp(void *xd, int n, int flags, char *name)
 
         if (!(button->text = strdup(name))) {
             button->len = 0;
-            return -1;
+            return NS_OOM;
         }
 
         button->len = strlen(name);
@@ -2489,11 +2493,9 @@ upd_disp(void *xd, int n, int flags, char *name)
     if (flags >= 0)
         button->flags = flags;
 
-    redraw_buttons(bbar);
+    bbar_redraw(bbar);
 
-    *((buttonbar_t **) xd) = bbar;	/* ugly */
-
-    return 0;
+    return NS_SUCC;
 }
 
 
@@ -2502,11 +2504,9 @@ upd_disp(void *xd, int n, int flags, char *name)
 int
 err_msg(void *xd, int err, char *msg)
 {
-#ifdef NS_DEBUG
-    if (err != NS_SCREEN_ST_CLR)
-        printf("err_msg #%d: \"%s\"\n", err, msg);
-#endif
-    return 0;
+    if(strlen(msg))
+        menu_dial(NULL,msg,0,NULL,NULL);
+    return NS_SUCC;
 }
 
 
@@ -2516,8 +2516,23 @@ int
 inp_text(void *xd, int id, char *txt)
 {
     tt_write(txt, strlen(txt));
-    return 0;
+    return NS_SUCC;
 }
+
+
+
+/* open a dialog */
+int
+inp_dial(void *xd, char *prompt, int maxlen, char **retstr,
+         int (*inp_tab)(void *,char *,size_t,size_t))
+{
+  switch(menu_dial(xd, prompt, maxlen, retstr,inp_tab)) {
+  case 0:
+    return NS_SUCC;
+  case -2:
+    return NS_USER_CXL;
+  default:
+    return NS_FAIL; }}
 
 
 
@@ -2558,6 +2573,8 @@ init_command(char **argv)
     ns_register_exe(efuns, exe_prg);
 
     ns_register_txt(efuns, inp_text);
+    ns_register_inp(efuns, inp_dial);
+    ns_register_tab(efuns, menu_tab);
 #endif
 
     /* Initialize the command connection.  This should be called after
@@ -2588,8 +2605,60 @@ init_command(char **argv)
 
     if (!TermWin.screen_mode)
         cmd_fd = run_command(argv);
-    else if ((TermWin.screen = ns_attach_by_URL(rs_url, &efuns, &ns_err, (void *) &buttonbar)))
+    else if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, (void *) &buttonbar))) {
+        button_t   *button;
+        menu_t     *m;
+        menuitem_t *i;
+        if((m=menu_create(NS_MENU_TITLE))) {
+            char     *sc[]={ "New", "\x01\x03", "Close", "\x01k" };
+            int       n,nsc=sizeof(sc)/sizeof(char *);
+
+	    if(menu_list) {
+            for(n=0;n<menu_list->nummenus;n++) { /* blend in w/ l&f */
+#ifdef NS_DEBUG
+                fprintf(stderr,NS_PREFIX "font: %d: %p\n",n,menu_list->menus[n]->font);
+#endif
+                if(menu_list->menus[n]->font) {
+                    m->font   =menu_list->menus[n]->font;
+                    m->fwidth =menu_list->menus[n]->fwidth;
+                    m->fheight=menu_list->menus[n]->fheight;
+#ifdef MULTI_CHARSET
+                    m->fontset=menu_list->menus[n]->fontset;
+#endif
+                    break; }}}
+
+            for(n=0;n<(nsc-1);n+=2) {
+                if((i=menuitem_create(sc[n]))) {
+#  ifdef NS_DEBUG
+		    fprintf(stderr, NS_PREFIX "register %s (%d)\n",&sc[n+1][1],*sc[n+1]);
+#  endif
+                    menuitem_set_action(i,MENUITEM_ECHO,sc[n+1]);
+                    menu_add_item(m,i); }}
+
+           if((i=menuitem_create("About..."))) {
+                menuitem_set_action(i,MENUITEM_ALERT,"Screen compatibility layer by Azundris <scream@azundris.com>");
+                menu_add_item(m,i); }
+
+            if((button=button_create(NS_MENU_TITLE))) {
+                if(!(buttonbar=bbar_insert_button(buttonbar,button,-1,TRUE))) {
+                    m->font=NULL;
+#ifdef MULTI_CHARSET
+                    m->fontset=NULL;
+#endif
+                    menu_delete(m);
+                    button_set_action(button,ACTION_STRING,NS_MENU_TITLE);
+                    button_free(button); }
+                else {
+                    int j,k=menu_list?menu_list->nummenus:0;
+                    menu_list=menulist_add_menu(menu_list,m);
+                    for (j=k;j<menu_list->nummenus;j++)
+                        event_data_add_mywin(&menu_event_data,menu_list->menus[j]->win);
+                    if(!k)
+                        menu_init();
+                    button_set_action(button,ACTION_MENU,NS_MENU_TITLE); }}}
+/*      add_screen_ctl_button(&buttonbar,"New",'c'); */
         cmd_fd = TermWin.screen->fd;
+    }
 #  undef ETERM_PREFIX
 #  undef ESCREEN_PREFIX
     if (cmd_fd < 0) {

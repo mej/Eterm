@@ -43,6 +43,9 @@ static const char cvs_ident[] = "$Id$";
 #include "script.h"
 #include "term.h"
 #include "windows.h"
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
 
 static inline void draw_string(buttonbar_t *, Drawable, GC, int, int, char *, size_t);
 
@@ -226,7 +229,7 @@ bbar_handle_button_press(event_t *ev)
     }
     if (bbar->current) {
         bbar_click_button(bbar, bbar->current);
-        button_check_action(bbar, bbar->current, 1, ev->xbutton.time);
+        button_check_action(bbar, bbar->current, ev->xbutton.button, ev->xbutton.time);
     }
     return 1;
 }
@@ -768,6 +771,8 @@ bbar_click_button(buttonbar_t *bbar, button_t *button)
 void
 button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Time t)
 {
+    static unsigned char prvs = 0;
+
     switch (button->type) {
       case ACTION_MENU:
           if (press) {
@@ -781,6 +786,36 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
           break;
       case ACTION_ECHO:
           if (!press) {
+#ifdef ESCREEN
+            if(TermWin.screen_mode&&TermWin.screen) { /* translate escapes */
+              if(prvs!=1) {
+                button_t *b=bbar->buttons;
+                _ns_disp *d2=TermWin.screen->dsps;
+                int n=(button->action.string)[1]-'0';
+
+                while(b&&!(b->flags&NS_SCREAM_CURR))  /* find active disp */
+                  b=b->next;       /* when trying to change name of non- */
+                if(b&&b!=button) { /* active display, make that disp active */
+                  button->flags|=NS_SCREAM_CURR; b->flags&=~NS_SCREAM_CURR;
+                  bbar_draw(bbar, IMAGE_STATE_CURRENT, MODE_MASK);
+                  button->flags&=~NS_SCREAM_CURR; b->flags|=NS_SCREAM_CURR;
+
+                  while(d2 && d2->index != n)
+                    d2 = d2->next;
+                  if(d2)
+                    TermWin.screen->curr=d2; /* pre-adjust curr ptr */
+                  else
+                    fprintf(stderr,NS_PREFIX "button_check_action: no display %d in this session : (\n",n);
+                  (void)ns_screen_command(TermWin.screen,button->action.string); }
+
+                if(prvs==2)  /* middle button -- kill */
+                  (void)ns_parse_screen_key(TermWin.screen,NS_SCREEN_KILL);
+                else         /* right button -- rename */
+                  (void)ns_parse_screen_key(TermWin.screen,NS_SCREEN_RENAME); }
+              else           /* left button -- select */
+                (void)ns_screen_command(TermWin.screen,button->action.string); }
+            else             /* not in screen-mode, use normal facilities */
+#endif
               tt_write((unsigned char *) button->action.string, strlen(button->action.string));
           }
           break;
@@ -792,6 +827,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
       default:
           break;
     }
+    prvs=press;
 }
 
 unsigned char
@@ -906,7 +942,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
             gcvalue.foreground = PixColors[button->flags + 2];
             gcvalue.font = bbar->font->fid;
 
-            if (button->flags && (gc = LIBAST_X_CREATE_GC(GCForeground | GCFont, &gcvalue))) {
+            if(button->flags&&(gc=LIBAST_X_CREATE_GC(GCForeground | GCFont, &gcvalue))) {
                 draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
                 XFreeGC(Xdisplay, gc);
             } else
@@ -1014,4 +1050,104 @@ bbar_calc_docked_height(register unsigned char dock_flag)
     }
     D_BBAR(("Returning %d\n", h));
     return h;
+}
+
+
+
+/* redraw a button bar */
+void
+bbar_redraw(buttonbar_t *bbar)
+{
+    bbar_calc_button_sizes(bbar);
+    bbar_calc_button_positions(bbar);
+    bbar_draw(bbar, IMAGE_STATE_CURRENT, MODE_MASK);
+}
+
+
+
+/* insert a button to the given bar, at the given position.
+   create a new bar if required.
+   bar       the bar
+   button    the button
+   after     insert after this button (-1 for before first button)
+   addright  add to rbuttons instead of buttons
+   <-        NULL, or the bar */
+
+buttonbar_t *
+bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, int addright)
+{
+    int state = 1;
+
+    if (!bbar) {
+        if (!(bbar = bbar_create())) {
+            fprintf(stderr, "ins_disp: failed to create button-bar...\n");
+            return NULL;
+        } else {
+            bbar->next=NULL;
+            bbar_set_font(bbar, "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1");
+            bbar_set_docked(bbar, BBAR_DOCKED_TOP);
+        }
+        state = 0;
+    }
+
+    if(addright) {                              /* add to rbuttons */
+      if (!bbar->rbuttons) {	                /* first button */
+        button->next = NULL;
+        bbar->rbuttons = button;
+      } else {
+        int c=0;
+        button_t *b = bbar->rbuttons;
+        do {
+          c++;
+        } while((b=b->next));
+        if(after>=(c-1)) {
+          button->next=bbar->rbuttons;
+          bbar->rbuttons=button; }
+        else {
+          b = bbar->rbuttons;
+          after=c-after-2;
+          while (after-- > 0 && b->next)
+            b = b->next;
+          button->next = b->next;
+          b->next = button; }
+      }
+    }
+    else {                                      /* add to buttons */
+      if (!bbar->buttons || after < 0) {	/* first button */
+        button->next = bbar->buttons;
+        bbar->buttons = button;
+      } else {
+        button_t *b = bbar->buttons;
+        while (after-- > 0 && b->next)
+          b = b->next;
+        button->next = b->next;
+        b->next = button;
+      }
+    }
+
+    bbar->current = button;
+
+    /* add to list of bbars so bbar_event_init_dispatcher() won't break */
+
+    if (!state) {
+      if(buttonbar) {
+        buttonbar_t *bar=buttonbar;
+        while(bar->next)
+          bar=bar->next;
+        bar->next=bbar;
+      }
+      else
+        buttonbar=bbar;
+
+      bbar_init(bbar, TermWin.width);
+      bbar_add(bbar);
+    }
+
+    bbar_redraw(bbar);
+
+    if (!state) {
+        parent_resize();
+    }
+
+    return bbar;
 }
