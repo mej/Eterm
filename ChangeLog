@@ -5111,3 +5111,9 @@ option (--overstrike-bold).  There are also options to deactivate the
 "bold" and "blink" attributes' setting of high-intensity colors, and
 to allow non-default foreground colors to be bolded.
 ----------------------------------------------------------------------
+Mon Oct 27 21:39:29 2003                        Michael Jennings (mej)
+
+Changed -D/--desktop option to use EWMH-compliant desktop atom.
+
+Add support for EWMH icon property.
+----------------------------------------------------------------------

@@ -2188,7 +2188,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 
     if (temp_im == NULL) {
         w = h = 48;
-        temp_im = imlib_create_image_using_data(48, 48, (DATA32 *) icon_data);
+        temp_im = imlib_create_image_using_data(48, 48, (DATA32 *) (icon_data + 2));
         imlib_context_set_image(temp_im);
         imlib_image_set_has_alpha(1);
     }
@@ -2205,7 +2205,12 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 #else
     wm_hints->flags |= IconPixmapHint | IconMaskHint;
 #endif
+
+    /* Set the EWMH icon hint for stupid GNOME WM's. */
+    XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_ICON], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) icon_data, sizeof(icon_data));
+
     imlib_free_image_and_decache();
+
     /* Only set the hints ourselves if we were passed a NULL pointer for pwm_hints */
     if (!pwm_hints) {
         XSetWMHints(Xdisplay, TermWin.parent, wm_hints);

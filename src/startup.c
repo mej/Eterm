@@ -135,7 +135,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Get all our properties set up. */
     MEMSET(props, 0, sizeof(props));
-    props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
+    props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_NET_WM_DESKTOP", False);
     props[PROP_TRANS_PIXMAP] = XInternAtom(Xdisplay, "_XROOTPMAP_ID", False);
     props[PROP_TRANS_COLOR] = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", False);
     props[PROP_SELECTION_DEST] = XInternAtom(Xdisplay, "VT_SELECTION", False);
@@ -146,6 +146,7 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_DELETE_WINDOW] = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
     props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
     props[PROP_DND_SELECTION] = XInternAtom(Xdisplay, "DndSelection", False);
+    props[PROP_EWMH_ICON] = XInternAtom(Xdisplay, "_NET_WM_ICON", False);
 
     if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
