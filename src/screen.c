@@ -2434,7 +2434,11 @@ selection_request(Time tm, int x, int y)
   } else {
     prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-    XConvertSelection(Xdisplay, XA_PRIMARY, XA_COMPOUND_TEXT(Xdisplay), prop, TermWin.vt, tm);
+    if (encoding_method != LATIN1) {
+      XConvertSelection(Xdisplay, XA_PRIMARY, XA_COMPOUND_TEXT(Xdisplay), prop, TermWin.vt, tm);
+    } else {
+      XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
+    }
 #else
     XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
 #endif
@@ -3203,7 +3207,7 @@ selection_send(XSelectionRequestEvent * rq)
 		    (sizeof(target_list) / sizeof(target_list[0])));
     ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-  } else if (rq->target == XA_STRING || rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
+  } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
     XTextProperty xtextp;
     char *l[1];
 
@@ -3216,11 +3220,10 @@ selection_send(XSelectionRequestEvent * rq)
         ev.xselection.property = rq->property;
       }
     }
-#else
+#endif
   } else if (rq->target == XA_STRING) {
     XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target, 8, PropModeReplace, selection.text, selection.len);
     ev.xselection.property = rq->property;
-#endif
   }
   XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);
 }

@@ -3829,3 +3829,8 @@ Tue Aug 22 21:21:20 PDT 2000	Michael Jennings <mej@eterm.org>
 	is already sizeable.
 	
 -------------------------------------------------------------------------------
+Tue Aug 22 21:35:50 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	This should fix the selection problems between Eterm and other apps.
+	
+-------------------------------------------------------------------------------
