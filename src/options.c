@@ -2504,7 +2504,7 @@ parse_image(char *buff, void *state)
     tmp = (int *) MALLOC(sizeof(int));
     return ((void *) tmp);
   }
-  ASSERT_RVAL(state != NULL, (file_skip_to_end(), NULL));
+  ASSERT_RVAL(state != NULL, (void *)(file_skip_to_end(), NULL));
   if (*buff == CONF_END_CHAR) {
     int *tmp;
 
@@ -2973,7 +2973,7 @@ parse_menu(char *buff, void *state)
     menu = menu_create(title);
     return ((void *) menu);
   }
-  ASSERT_RVAL(state != NULL, (file_skip_to_end(), NULL));
+  ASSERT_RVAL(state != NULL, (void *)(file_skip_to_end(), NULL));
   menu = (menu_t *) state;
   if (*buff == CONF_END_CHAR) {
     if (!(*(menu->title))) {
@@ -3021,7 +3021,7 @@ parse_menuitem(char *buff, void *state)
   static menu_t *menu;
   menuitem_t *curitem;
 
-  ASSERT_RVAL(state != NULL, (file_skip_to_end(), NULL));
+  ASSERT_RVAL(state != NULL, (void *)(file_skip_to_end(), NULL));
   if (*buff == CONF_BEGIN_CHAR) {
     menu = (menu_t *) state;
     curitem = menuitem_create(NULL);
@@ -3096,7 +3096,7 @@ parse_bbar(char *buff, void *state)
     bbar = bbar_create();
     return ((void *) bbar);
   }
-  ASSERT_RVAL(state != NULL, (file_skip_to_end(), NULL));
+  ASSERT_RVAL(state != NULL, (void *)(file_skip_to_end(), NULL));
   bbar = (buttonbar_t *) state;
   if (*buff == CONF_END_CHAR) {
     bbar_add(bbar);

@@ -1542,7 +1542,7 @@ directive to allow for separation of the configuration information into
 multiple files.
 
 .SH AUTHORS
-Michael Jennings (mej@eterm.org) and Tuomo Venäläinen (vendu@cc.hut.fi).
+Michael Jennings (mej@eterm.org)
 Man page re-written for version 0.8 by Shaleh (shaleh@debian.org).
 
 .SH URL(s)

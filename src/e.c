@@ -369,6 +369,36 @@ eterm_handle_winop(char *action)
     XMapWindow(Xdisplay, win);
   } else if (!BEG_STRCASECMP(action, "unmap")) {
     XUnmapWindow(Xdisplay, win);
+  } else if (!BEG_STRCASECMP(action, "move")) {
+    int x, y, n;
+    char *xx, *yy;
+
+    n = NumWords(action);
+    if (n == 3 || n == 4) {
+      if (n == 3) {
+        win = TermWin.parent;
+      }
+      xx = PWord(n - 1, action);
+      yy = PWord(n, action);
+      x = (int) strtol(xx, (char **) NULL, 0);
+      y = (int) strtol(yy, (char **) NULL, 0);
+      XMoveWindow(Xdisplay, win, x, y);
+    }
+  } else if (!BEG_STRCASECMP(action, "resize")) {
+    int w, h, n;
+    char *ww, *hh;
+
+    n = NumWords(action);
+    if (n == 3 || n == 4) {
+      if (n == 3) {
+        win = TermWin.parent;
+      }
+      ww = PWord(n - 1, action);
+      hh = PWord(n, action);
+      w = (int) strtol(ww, (char **) NULL, 0);
+      h = (int) strtol(hh, (char **) NULL, 0);
+      XResizeWindow(Xdisplay, win, w, h);
+    }
   } else if (!BEG_STRCASECMP(action, "kill")) {
     XKillClient(Xdisplay, win);
   } else if (!BEG_STRCASECMP(action, "iconify")) {

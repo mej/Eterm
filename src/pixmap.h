@@ -51,7 +51,7 @@
 # define delete_simage(simg)      NOP
 #endif
 #define PIXMAP_EXT NULL
-/*   '[', 2*4 + 2*3 digits + 3 delimiters, ']'. -vendu */
+
 #define GEOM_LEN 19
 
 enum {

@@ -1,78 +1,49 @@
-/* profile.h for Eterm.
- * 25 Mar 1998, vendu.
+/*
+ * Copyright (C) 1997-2000, Michael Jennings
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef _PROFILE_H
 # define _PROFILE_H
 
-/* included for a possible #define PROFILE */
-# include <stdio.h>
+#ifdef ENABLE_PROFILE
+
 # include <sys/time.h>
 # include <unistd.h>
 
-/* NOTE: if PROFILE is not defined, all macros in this file will
- * be set to (void)0 so they won't get compiled into binaries.
- */
-# ifdef ENABLE_PROFILE
-
-/* Data structures */
-
 typedef struct {
-    long long total;
-    struct timeval start;
-    struct timeval stop;
-} P_counter_t;
+  const char *func_name;
+  struct timeval start_time, end_time;
+} prof_time_t;
 
-/* Profiling macros */
+# define PROF_INIT(f)     prof_time_t f##_prof_time = { #f, { 0, 0 }, { 0, 0 } }; gettimeofday(& f##_prof_time.start_time, NULL)
+# define PROF_DONE(f)     gettimeofday(& f##_prof_time.end_time, NULL)
+# define PROF_TIME(f)     do {prof_time_t t = f##_prof_time; unsigned long s, u; s = t.end_time.tv_sec - t.start_time.tv_sec; u = t.end_time.tv_usec - t.start_time.tv_usec; \
+                              if (u > 1000000UL) {s--; u += 1000000UL;} D_PROFILE(("Elapsed time for function %s:  %d.%06d seconds.\n", #f, s, u));} while (0)
+# define PROF_FUNC(f, c)  do {PROF_INIT(f); c; PROF_DONE(f); PROF_TIME(f);} while (0)
+#else
+# define PROF_INIT(f)     NOP
+# define PROF_DONE(f)     NOP
+# define PROF_TIME(f)     NOP
+# define PROF_FUNC(f, c)  NOP
+#endif /* ENABLE_PROFILE */
 
-/* Sets tv to current time.
- * struct timeval tv;
- * Usage: P_SETTIMEVAL(struct timeval tv);
- */
-#  define P_SETTIMEVAL(tv) gettimeofday(&(tv), NULL)
-
-/* NOT FINISHED YET */
-#  define P_UPDATETOTAL(cnt) { \
-    cnt.total += P_CMPTIMEVALS_USEC(cnt.start, cnt.stop); \
-}
-
-/* Declare cnt and initialize by setting to zero.
- * P_counter_t cnt;
- * Usage: P_INITCOUNTER(counter);
- * NOTES: cnt will be declared. This means that you'll
- * probably need to localize a block where to use this; see
- * the definition of P_CALL() elsewhere in this file.
- */
-#  define P_INITCOUNTER(cnt) \
-    P_counter_t cnt = { 0, { 0, 0 }, { 0, 0 } }
-/* Time from start to stop in microseconds
- * struct timeval start, stop;
- */
-#  define P_CMPTIMEVALS_USEC(start, stop) \
-    ((stop.tv_sec - start.tv_sec)*1000000 \
-     + (stop.tv_usec - start.tv_usec))
-
-/* Counts the time spent in the call f and outputs
- * str: <time spent in f in microseconds> to stderr.
- * NOTE: f can be any function call, for example sqrt(5).
- */
-#  define P_CALL(f, str) { \
-    P_INITCOUNTER(cnt); \
-    P_SETTIMEVAL(cnt.start); \
-    f; \
-    P_SETTIMEVAL(cnt.stop); \
-    fprintf(stderr, "%s: %ld\n", str, \
-            P_CMPTIMEVALS_USEC(cnt.start, cnt.stop)); \
-}
-
-# else /* ENABLE_PROFILE */
-
-#  define P_SETTIMEVAL(tv) ((void)0)
-#  define P_UPDATETOTAL(cnt) ((void)0)
-#  define P_INITCOUNTER(cnt) ((void)0)
-#  define P_CMPTIMEVALS_USEC(start, stop) ((void)0)
-#  define P_CALL(f, str) f
-
-# endif /* ENABLE_PROFILE */
-
-#endif /* _PROFILE_H */
+#endif	/* _PROFILE_H */

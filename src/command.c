@@ -45,6 +45,7 @@ static const char cvs_ident[] = "$Id$";
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
+#include <string.h>
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
@@ -105,9 +106,6 @@ static const char cvs_ident[] = "$Id$";
 #include <sys/stat.h>
 #if defined(linux)
 # include <linux/tty.h>		/* For N_TTY_BUF_SIZE. */
-#endif
-#if defined(linux)
-# include <string.h>		/* For strsep(). -vendu */
 #endif
 
 /* Eterm-specific Headers */
@@ -1130,9 +1128,9 @@ clean_exit(void)
  */
 
 #ifdef __sgi
-__inline__ int sgi_get_pty(void);
+inline int sgi_get_pty(void);
 
-__inline__ int
+inline int
 sgi_get_pty(void)
 {
   int fd = -1;
@@ -1146,9 +1144,9 @@ sgi_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTC
-__inline__ int aix_get_pty(void);
+inline int aix_get_pty(void);
 
-__inline__ int
+inline int
 aix_get_pty(void)
 {
 
@@ -1163,9 +1161,9 @@ aix_get_pty(void)
 #endif
 
 #ifdef HAVE_SCO_PTYS
-__inline__ int sco_get_pty(void);
+inline int sco_get_pty(void);
 
-__inline__ int
+inline int
 sco_get_pty(void)
 {
 
@@ -1197,9 +1195,9 @@ sco_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTMX
-__inline__ int svr_get_pty(void);
+inline int svr_get_pty(void);
 
-__inline__ int
+inline int
 svr_get_pty(void)
 {
 
@@ -1230,9 +1228,9 @@ svr_get_pty(void)
 #define PTYCHAR1 "pqrstuvwxyz"
 #define PTYCHAR2 "0123456789abcdefghijklmnopqrstuvwxyz"
 
-__inline__ int gen_get_pty(void);
+inline int gen_get_pty(void);
 
-__inline__ int
+inline int
 gen_get_pty(void)
 {
 

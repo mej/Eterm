@@ -27,6 +27,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if defined(__GNUC__) && !defined(inline)
+# define inline __inline__
+#endif
+
 extern unsigned int debug_level;
 
 /* Assert macros stolen from my work on Ebar.  If these macros break with your cpp, let me know -- mej@eterm.org */

@@ -46,6 +46,7 @@ static const char cvs_ident[] = "$Id$";
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"
+#include "profile.h"
 #include "screen.h"
 #include "scrollbar.h"
 #include "term.h"
@@ -199,21 +200,18 @@ event_win_is_parent(register event_dispatcher_data_t * data, Window win)
 unsigned char
 handle_key_press(event_t * ev)
 {
-
 #ifdef COUNT_X_EVENTS
   static long long keypress_cnt = 0;
 #endif
-#ifdef PROFILE_X_EVENTS
-  struct timeval keypress_start, keypress_stop;
-#endif
 
-  P_SETTIMEVAL(keypress_start);
+  PROF_INIT(handle_key_press);
   D_EVENTS(("handle_key_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
-  COUNT_EVENT(keypress_cnt);
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
+
+  COUNT_EVENT(keypress_cnt);
   lookup_key(ev);
-  P_SETTIMEVAL(keypress_stop);
-  P_EVENT_TIME("KeyPress", keypress_start, keypress_stop);
+  PROF_DONE(handle_key_press);
+  PROF_TIME(handle_key_press);
   return 1;
 }
 
@@ -550,15 +548,11 @@ handle_selection_request(event_t * ev)
 unsigned char
 handle_expose(event_t * ev)
 {
-
 #ifdef COUNT_X_EVENTS
   static long long expose_cnt = 0;
 #endif
-#ifdef PROFILE_X_EVENTS
-  struct timeval expose_start, expose_stop;
-#endif
 
-  P_SETTIMEVAL(expose_start);
+  PROF_INIT(handle_expose);
   D_EVENTS(("handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
@@ -581,8 +575,8 @@ handle_expose(event_t * ev)
     XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
   }
 #endif
-  P_SETTIMEVAL(expose_stop);
-  P_EVENT_TIME("Expose", expose_start, expose_stop);
+  PROF_DONE(handle_expose);
+  PROF_TIME(handle_expose);
   return 1;
 }
 
@@ -712,18 +706,14 @@ handle_button_release(event_t * ev)
 unsigned char
 handle_motion_notify(event_t * ev)
 {
-
 #ifdef COUNT_X_EVENTS
   static long long motion_cnt = 0;
 #endif
-#ifdef PROFILE_X_EVENTS
-  struct timeval motion_start, motion_stop;
-#endif
 
+  PROF_INIT(handle_motion_notify);
   D_EVENTS(("handle_motion_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   COUNT_EVENT(motion_cnt);
-  P_SETTIMEVAL(motion_start);
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if ((PrivateModes & PrivMode_mouse_report) && !(button_state.bypass_keystate))
@@ -743,10 +733,12 @@ handle_motion_notify(event_t * ev)
 #endif
 	selection_extend((ev->xbutton.x), (ev->xbutton.y), (ev->xbutton.state & Button3Mask));
     }
-    P_SETTIMEVAL(motion_stop);
-    P_EVENT_TIME("MotionNotify", motion_start, motion_stop);
+    PROF_DONE(handle_motion_notify);
+    PROF_TIME(handle_motion_notify);
     return 1;
   }
+  PROF_DONE(handle_motion_notify);
+  PROF_TIME(handle_motion_notify);
   return 1;
 }
 

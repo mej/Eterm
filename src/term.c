@@ -41,6 +41,7 @@ static const char cvs_ident[] = "$Id$";
 #include "e.h"
 #include "events.h"
 #include "font.h"
+#include "misc.h"
 #include "startup.h"
 #include "options.h"
 #include "pixmap.h"
@@ -220,21 +221,27 @@ lookup_key(XEvent * ev)
     kbuf[0] = '\0';
     /* Lookup the string equivalent in terms of the XIM input context. */
     len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, &status_return);
+    D_TTY(("XmbLookupString() gave us len %d, keysym 0x%04x, and buffer \"%s\" based on the XIM input context %010p\n",
+           len, keysym, safe_print_string(kbuf, len), xim_input_context));
     /* Whoops, it's too long.  Allocate a new buffer and repeat the call. */
     if (status_return == XBufferOverflow) {
       kbuf = (unsigned char *) MALLOC(len + 1);
       kbuf_alloced = 1;
       len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf, len, &keysym, &status_return);
+      D_TTY(("XmbLookupString() gave us len %d, keysym 0x%04x, and buffer \"%s\" based on the XIM input context %010p\n",
+             len, keysym, safe_print_string(kbuf, len), xim_input_context));
     }
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {
     /* No XIM input context.  Do it the normal way. */
     len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
+    D_TTY(("XLookupString() gave us len %d, keysym 0x%04x, and buffer \"%s\"\n", len, keysym, safe_print_string(kbuf, len)));
     valid_keysym = 1;
   }
 #else /* USE_XIM */
   /* Translate the key event into its corresponding string according to X.  This also gets us a keysym. */
   len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
+  D_TTY(("XLookupString() gave us len %d, keysym 0x%04x, and buffer \"%s\"\n", len, keysym, safe_print_string(kbuf, len)));
 
   /* If there is no string and it's a Latin2-4 character, replace it with the Latin1 character instead. */
   if (!len && (keysym >= 0x0100) && (keysym < 0x0400)) {
@@ -741,17 +748,7 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 
     tt_write(&ch, 1);
   }
-#if DEBUG >= DEBUG_CMD
-  if (debug_level >= DEBUG_CMD) {
-    char *p;
-    int i;
-
-    fprintf(stderr, "key 0x%04x[%d]: `", (unsigned int) keysym, len);
-    for (i = 0, p = (char *) kbuf; i < len; i++, p++)
-      fprintf(stderr, (*p >= ' ' && *p < '\177' ? "%c" : "\\%03o"), *p);
-    fprintf(stderr, "'\n");
-  }
-#endif /* DEBUG_CMD */
+  D_TTY(("After handling:  len %d, keysym 0x%04x, and buffer \"%s\"\n", len, keysym, safe_print_string(kbuf, len)));
   tt_write(kbuf, len);  /* Send the resulting string to the child process */
 
   LK_RET();

@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE(Eterm, 0.9.1)
 dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
-AUTHORS="Michael Jennings (mej@eterm.org) and Tuomo Venäläinen (vendu@cc.hut.fi) "
+AUTHORS="Michael Jennings (mej@eterm.org) "
 AC_SUBST(AUTHORS)
 AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS")
 

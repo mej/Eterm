@@ -45,6 +45,7 @@ static const char cvs_ident[] = "$Id$";
 #include "screen.h"
 #include "scrollbar.h"
 #include "term.h"
+#include "windows.h"
 
 #ifdef PIXMAP_SUPPORT
 static ImlibBorder bord_none = { 0, 0, 0, 0 };
@@ -1556,7 +1557,7 @@ get_desktop_pixmap(void)
   if (desktop_window == None) {
     D_PIXMAP(("No desktop window.  Aborting.\n"));
     free_desktop_pixmap();
-    return (desktop_pixmap = None);
+    return (None);
   }
 
   prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
@@ -1564,7 +1565,7 @@ get_desktop_pixmap(void)
 
   if (prop == None && prop2 == None) {
     free_desktop_pixmap();
-    return (desktop_pixmap = None);
+    return (None);
   }
   if (color_pixmap != None) {
     D_PIXMAP(("Removing old solid color pixmap 0x%08x.\n", color_pixmap));

@@ -3339,3 +3339,11 @@ Wed Mar  8 19:35:36 PST 2000	Michael Jennings <mej@eterm.org>
 	named pipe rather than to /dev/tty0.
 	
 -------------------------------------------------------------------------------
+Tue Mar 14 19:11:26 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Some further fixes for inline functions, 2 new winop actions, brand
+	new and improved profiling macros, some miscellaneous fixes for SGI
+	from Kimball Thurston <kimball@sgrail.com>, and more robust checking
+	in the pasting code.
+	
+-------------------------------------------------------------------------------

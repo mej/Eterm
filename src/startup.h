@@ -41,7 +41,7 @@
 #define THEME_CFG	"theme.cfg"
 #define USER_CFG	"user.cfg"
 
-#define MAX_COLS	200
+#define MAX_COLS	250
 #define MAX_ROWS	128
 
 #ifdef MIN

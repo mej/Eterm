@@ -52,12 +52,12 @@ static Time button_press_time;
 static int button_press_x = 0, button_press_y = 0;
 static menu_t *current_menu;
 
-static __inline__ void grab_pointer(Window win);
-static __inline__ void ungrab_pointer(void);
-static __inline__ void draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len);
-static __inline__ unsigned short center_coords(register unsigned short c1, register unsigned short c2);
+static inline void grab_pointer(Window win);
+static inline void ungrab_pointer(void);
+static inline void draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len);
+static inline unsigned short center_coords(register unsigned short c1, register unsigned short c2);
 
-static __inline__ void
+static inline void
 grab_pointer(Window win)
 {
 
@@ -88,7 +88,7 @@ grab_pointer(Window win)
   }
 }
 
-static __inline__ void
+static inline void
 ungrab_pointer(void)
 {
 
@@ -96,7 +96,7 @@ ungrab_pointer(void)
   XUngrabPointer(Xdisplay, CurrentTime);
 }
 
-static __inline__ void
+static inline void
 draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 
@@ -110,7 +110,7 @@ draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
     XDrawString(Xdisplay, d, gc, x, y, str, len);
 }
 
-static __inline__ unsigned short
+static inline unsigned short
 center_coords(register unsigned short c1, register unsigned short c2)
 {
 

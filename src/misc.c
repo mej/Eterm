@@ -297,9 +297,17 @@ safe_print_string(char *str, unsigned long len)
   char *p;
   unsigned long n = 0, i;
 
+  if (len == ((unsigned long) -1)) {
+    FREE(ret_buff);
+    rb_size = 0;
+    return ((char *) NULL);
+  }
   if (ret_buff == NULL) {
-    ret_buff = (char *) MALLOC(len + 1);
     rb_size = len;
+    ret_buff = (char *) MALLOC(rb_size + 1);
+  } else if (len > rb_size) {
+    rb_size = len;
+    ret_buff = (char *) REALLOC(ret_buff, rb_size + 1);
   }
   for (i = 0, p = ret_buff; i < len; i++, str++, n++) {
     if (n + 2 >= rb_size) {

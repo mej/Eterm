@@ -46,12 +46,12 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-static __inline__ void draw_string(buttonbar_t *, Drawable, GC, int, int, char *, size_t);
+static inline void draw_string(buttonbar_t *, Drawable, GC, int, int, char *, size_t);
 
 buttonbar_t *buttonbar = NULL;
 long bbar_total_h = -1;
 
-static __inline__ void
+static inline void
 draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 

@@ -41,9 +41,7 @@ static const char cvs_ident[] = "$Id$";
 #ifdef PIXMAP_SUPPORT
 # include "pixmap.h"
 #endif
-#ifdef PROFILE_SCREEN
-# include "profile.h"
-#endif
+#include "profile.h"
 #include "term.h"
 
 /* These arrays store the text and rendering info that were last drawn to the screen. */
@@ -107,8 +105,8 @@ static short lost_multi = 0;
 #endif
 
 /* Fill part/all of a drawn line with blanks. */
-__inline__ void blank_line(text_t *, rend_t *, int, rend_t);
-__inline__ void
+inline void blank_line(text_t *, rend_t *, int, rend_t);
+inline void
 blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 {
 /*    int             i = width; */
@@ -121,8 +119,8 @@ blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 }
 
 /* Create a new row in the screen buffer and initialize it. */
-__inline__ void blank_screen_mem(text_t **, rend_t **, int, rend_t);
-__inline__ void
+inline void blank_screen_mem(text_t **, rend_t **, int, rend_t);
+inline void
 blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
 {
   register unsigned int i = TermWin.ncol;
@@ -582,14 +580,7 @@ scroll_text(int row1, int row2, int count, int spec)
 {
   register int i, j;
 
-#ifdef PROFILE_SCREEN
-  static long call_cnt = 0;
-  static long long total_time = 0;
-
-  P_INITCOUNTER(cnt);
-  P_SETTIMEVAL(cnt.start);
-#endif
-
+  PROF_INIT(scroll_text);
   D_SCREEN(("scroll_text(%d,%d,%d,%d): %s\n", row1, row2, count, spec, (current_screen == PRIMARY) ? "Primary" : "Secondary"));
 
   if (count == 0 || (row1 > row2))
@@ -679,12 +670,8 @@ scroll_text(int row1, int row2, int count, int spec)
     }
     count = -count;
   }
-#ifdef PROFILE_SCREEN
-  P_SETTIMEVAL(cnt.stop);
-  total_time += P_CMPTIMEVALS_USEC(cnt.start, cnt.stop);
-  fprintf(stderr, "scroll_text(%ld): %ld microseconds (%d)\n",
-	  ++call_cnt, P_CMPTIMEVALS_USEC(cnt.start, cnt.stop), total_time);
-#endif
+  PROF_DONE(scroll_text);
+  PROF_TIME(scroll_text);
   return count;
 }
 
@@ -1612,12 +1599,8 @@ scr_refresh(int type)
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
 #endif
-#ifdef PROFILE_SCREEN
-  static long call_cnt = 0;
-  static long long total_time = 0;
 
-  P_INITCOUNTER(cnt);
-#endif
+  PROF_INIT(scr_refresh);
 
   switch (type) {
     case NO_REFRESH:
@@ -1632,10 +1615,6 @@ scr_refresh(int type)
   }
   if (type == NO_REFRESH)
     return;
-
-#ifdef PROFILE_SCREEN
-  P_SETTIMEVAL(cnt.start);
-#endif
 
   if (buffer_pixmap) {
     draw_buffer = buffer_pixmap;
@@ -1999,12 +1978,8 @@ scr_refresh(int type)
   refresh_all = 0;
   D_SCREEN(("Exiting.\n"));
 
-#ifdef PROFILE_SCREEN
-  P_SETTIMEVAL(cnt.stop);
-  total_time += P_CMPTIMEVALS_USEC(cnt.start, cnt.stop);
-  fprintf(stderr, "scr_refresh(%ld): %ld microseconds (%d)\n",
-	  ++call_cnt, P_CMPTIMEVALS_USEC(cnt.start, cnt.stop), total_time);
-#endif
+  PROF_DONE(scr_refresh);
+  PROF_TIME(scr_refresh);
 }
 
 int
@@ -2259,7 +2234,9 @@ selection_paste(Window win, unsigned prop, int Delete)
     return;
   for (nread = 0, bytes_after = 1; bytes_after > 0;) {
     if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, Delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
-      XFree(data);
+      if (data != NULL) {
+        XFree(data);
+      }
       return;
     }
     nread += nitems;
@@ -2277,12 +2254,18 @@ selection_paste(Window win, unsigned prop, int Delete)
       xtextp.nitems = nitems;
       XmbTextPropertyToTextList(Xdisplay, &xtextp, &cl, &size);
 
-      for (i = 0 ; i < size ; i ++) {
-        PasteIt(cl[i], strlen(cl[i]));
+      if (cl) {
+        for (i = 0 ; i < size ; i ++) {
+          if (cl[i]) {
+            PasteIt(cl[i], strlen(cl[i]));
+          }
+        }
+        XFreeStringList(cl);
       }
-      XFreeStringList(cl);
     }
-    XFree(data);
+    if (data) {
+      XFree(data);
+    }
   }
 }
 
