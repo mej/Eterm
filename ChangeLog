@@ -2946,3 +2946,9 @@ Tue Dec 21 13:19:06 PST 1999	Michael Jennings <mej@eterm.org>
 	strings like '-0+0'.
 	
 -------------------------------------------------------------------------------
+Tue Dec 21 16:04:39 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a little issue with setting the background pixmap to None via
+	the menu.
+	
+-------------------------------------------------------------------------------

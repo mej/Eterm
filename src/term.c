@@ -2052,7 +2052,7 @@ xterm_seq(int op, const char *str)
 #ifdef PIXMAP_SUPPORT
       FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);});
       if (!strcmp(str, ";")) {
-	load_image("", image_bg);
+        image_set_mode(image_bg, MODE_SOLID);
 	bg_needs_update = 1;
       } else {
 	nstr = (char *) strsep(&tnstr, ";");
@@ -2067,7 +2067,7 @@ xterm_seq(int op, const char *str)
 	    scaled = 1;
 	  }
 	} else {
-	  load_image("", image_bg);
+          image_set_mode(image_bg, MODE_SOLID);
 	  bg_needs_update = 1;
 	}
       }
