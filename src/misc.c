@@ -254,7 +254,7 @@ safe_print_string(char *str, unsigned long len)
       ret_buff = (char *) REALLOC(ret_buff, rb_size + 1);
       p = ret_buff + n;
     }
-    if (*str < ' ') {
+    if ((unsigned char) *str < ' ') {
       *p++ = '^';
       *p++ = *str + '@';
       n++;

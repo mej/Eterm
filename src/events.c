@@ -225,7 +225,8 @@ handle_property_notify(event_t *ev)
     Pixmap pmap;
 
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
-      D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
+      D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n",
+                ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
                 (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
       if (ev->xproperty.atom == props[PROP_DESKTOP]) {
         win = get_desktop_window();
