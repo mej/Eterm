@@ -1538,6 +1538,9 @@ get_ttymode(ttymode_t * tio)
 # ifdef VLNEXT
     tio->c_cc[VLNEXT] = CLNEXT;
 # endif
+# ifdef VSTATUS
+    tio->c_cc[VSTATUS] = CSTATUS;
+# endif
   }
   tio->c_cc[VEOF] = CEOF;
   tio->c_cc[VEOL] = VDISABLE;
@@ -1576,10 +1579,6 @@ get_ttymode(ttymode_t * tio)
 		  | ECHOCTL | ECHOKE
 # endif
       );
-
-  /*
-   * guess an appropriate value for Backspace
-   */
 
 #if defined(FORCE_BACKSPACE) && 0
   PrivMode(1, PrivMode_BackSpace);
@@ -1630,10 +1629,6 @@ get_ttymode(ttymode_t * tio)
   tio->line = NTTYDISC;
 # endif				/* NTTYDISC */
   tio->local = (LCRTBS | LCRTERA | LCTLECH | LPASS8 | LCRTKIL);
-
-  /*
-   * guess an appropriate value for Backspace
-   */
 
 # ifdef FORCE_BACKSPACE
   PrivMode(1, PrivMode_BackSpace);

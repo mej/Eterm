@@ -2512,3 +2512,8 @@ Wed Sep 29 15:30:47 PDT 1999	Michael Jennings <mej@eterm.org>
 	Sorry raster. :-)
 	
 -------------------------------------------------------------------------------
+Fri Oct  1 11:03:21 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Set $COLORTERM_BCE for better SLang compatibility.
+	
+-------------------------------------------------------------------------------

@@ -269,15 +269,17 @@ main(int argc, char *argv[])
   sprintf(windowid_string, "WINDOWID=%u", (unsigned int) TermWin.parent);
 
   /* add entries to the environment:
-   * DISPLAY:   in case we started with -display
-   * WINDOWID:  X window id number of the window
-   * COLORTERM: terminal sub-name and also indicates its color
-   * TERM:      terminal name
+   * DISPLAY:       X display name
+   * WINDOWID:      X windowid of the window
+   * COLORTERM:     Terminal supports color
+   * COLORTERM_BCE: Terminal supports BCE
+   * TERM:          Terminal type for termcap/terminfo
    */
   putenv(display_string);
   putenv(windowid_string);
   if (Xdepth <= 2) {
     putenv("COLORTERM=" COLORTERMENV "-mono");
+    putenv("COLORTERM_BCE=" COLORTERMENV "-mono");
     putenv("TERM=" TERMENV);
   } else {
     if (rs_term_name != NULL) {
@@ -297,6 +299,7 @@ main(int argc, char *argv[])
 #endif
     }
     putenv("COLORTERM=" COLORTERMENV);
+    putenv("COLORTERM_BCE=" COLORTERMENV);
   }
   putenv("ETERM_VERSION=" VERSION);
 

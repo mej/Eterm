@@ -188,6 +188,9 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #ifndef CLNEXT
 # define CLNEXT		'\026'	/* ^V */
 #endif
+#ifndef CSTATUS
+# define CSTATUS	'\024'	/* ^T */
+#endif
 #ifndef VDISCRD
 # ifdef VDISCARD
 #  define VDISCRD	VDISCARD
