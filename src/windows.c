@@ -185,6 +185,9 @@ Create_Windows(int argc, char *argv[])
   Attributes.backing_store = WhenMapped;
   Attributes.colormap = cmap;
 
+  TermWin.x = -1;
+  TermWin.y = -1;
+
   /*
    * grab colors before netscape does
    */

@@ -2729,3 +2729,9 @@ Tue Nov  2 16:53:56 PST 1999	Michael Jennings <mej@eterm.org>
 	causing Eterm to crash. :-)
 	
 -------------------------------------------------------------------------------
+Fri Nov  5 13:04:36 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a small geometry bug pointed out by Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------
