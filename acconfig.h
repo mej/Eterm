@@ -326,7 +326,6 @@
 #undef DEF_FONT_IDX
 #undef MULTICHAR_ENCODING
 #undef IOTRACE
-#undef HAVE_UTEMPTER
 #undef PTY_GRP_NAME
 #undef ENABLE_PROFILE
 #undef KS_HOME

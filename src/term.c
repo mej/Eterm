@@ -1526,6 +1526,20 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 	    else
 	      Options |= Opt_home_on_input;
 	    break;
+          case 1047:            /* Alternate screen & clear */
+            PrivCases(PrivMode_Screen);
+            scr_change_screen(state);
+            scr_erase_screen(0);
+            break;
+          case 1048:            /* Save/restore cursor pos */
+            PrivCases(PrivMode_Screen);
+            scr_cursor(state ? SAVE : RESTORE);
+            break;
+          case 1049:            /* Alternate screen & cursor */
+            PrivCases(PrivMode_Screen);
+            scr_cursor(state ? SAVE : RESTORE);
+            scr_change_screen(state);
+            break;
 	}
       break;
   }

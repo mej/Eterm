@@ -845,8 +845,8 @@ AC_CHECK_LIB(Kenny, life_signs, , [
 ])
 fi
 
-CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "${datadir}/$PACKAGE/themes:${datadir}/$PACKAGE"`
-AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:$CONFIG_SEARCH_PATH")
+CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "${sysconfdir}/$PACKAGE/themes:/etc/$PACKAGE/themes:${datadir}/$PACKAGE/themes"`
+AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:$CONFIG_SEARCH_PATH")
 # Do replacements on theme files and such.  All variables to be replaced
 # by this routine MUST be exported before the awk script runs.
 if test "X$PKGDATADIR" = "X" ; then

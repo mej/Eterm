@@ -4315,3 +4315,14 @@ buttonbars if you enable multibyte support but don't have a specific
 encoding in use.  I also corrected a large number of misplaced
 newlines in error messages; I think that was some Perl-fu gone awry.
 ----------------------------------------------------------------------
+Sun Aug  5 01:52:51 2001                        Michael Jennings (mej)
+
+Okay, first off, I finally found and fixed a typo with regard to the
+utempter support on RedHat-based systems.  I doubt it's ever worked
+properly (sigh).  Secondly, I added support for throwing Eterm's
+termcap entry into the termcap DB on FreeBSD (and possibly other
+*BSD-based) systems thanks to info from Kirby Kuehl
+<vacuum@technotronic.com>.  And finally, added in a patch from Paul
+Brannan <pbranna@clemson.edu> to support some additional escape
+sequences for vim.
+----------------------------------------------------------------------

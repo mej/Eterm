@@ -82,7 +82,7 @@ static const char cvs_ident[] = "$Id$";
 # endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
-# ifndef HAVE_UTEMPTER
+# ifndef HAVE_LIBUTEMPTER
 #  if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
 static char ut_id[5];		/* remember if entry to utmp made */
 #  else
@@ -98,7 +98,7 @@ static int utmp_pos;		/* BSD position of utmp-stamp */
 #   define update_wtmp updwtmpx
 #  else				/* HAVE_UTMPX_H */
 
-#   ifndef HAVE_UTEMPTER
+#   ifndef HAVE_LIBUTEMPTER
 static void
 update_wtmp(char *fname, struct utmp *putmp)
 {
@@ -134,10 +134,10 @@ update_wtmp(char *fname, struct utmp *putmp)
 
   close(fd);
 }
-#   endif /* ifndef HAVE_UTEMPTER */
+#   endif /* ifndef HAVE_LIBUTEMPTER */
 #  endif /* HAVE_UTMPX_H */
 
-#  ifndef HAVE_UTEMPTER
+#  ifndef HAVE_LIBUTEMPTER
 void
 add_utmp_entry(const char *pty, const char *hostname, int fd)
 {
@@ -266,7 +266,7 @@ remove_utmp_entry(void)
   endutent();
 #   endif /* HAVE_UTMPX_H */
 }
-#  endif /* ifndef HAVE_UTEMPTER */
+#  endif /* ifndef HAVE_LIBUTEMPTER */
 
 # else /* USE_SYSV_UTMP */
 /* BSD utmp support */

@@ -28,7 +28,7 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 #ifdef UTMP_SUPPORT
-# ifdef HAVE_UTEMPTER
+# ifdef HAVE_LIBUTEMPTER
 #  include <utempter.h>
 #  define add_utmp_entry(p, h, f)  addToUtmp(p, h, f)
 #  define remove_utmp_entry()      removeFromUtmp()
@@ -83,7 +83,7 @@
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-# ifndef HAVE_UTEMPTER
+# ifndef HAVE_LIBUTEMPTER
 extern void add_utmp_entry(const char *, const char *, int);
 extern void remove_utmp_entry(void);
 # endif
