@@ -4611,3 +4611,7 @@ Fri Apr 26 14:34:08 2002                        Michael Jennings (mej)
 
 Minor tweak so bottom-docked buttonbars are properly placed.
 ----------------------------------------------------------------------
+Sun Apr 28 10:06:32 2002                        Michael Jennings (mej)
+
+Don't require the new libast just yet....
+----------------------------------------------------------------------

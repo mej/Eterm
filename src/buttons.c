@@ -946,7 +946,7 @@ void
 bbar_calc_positions(void)
 {
     register buttonbar_t *bbar;
-    spif_uint32_t top_y, bottom_y;
+    unsigned short top_y, bottom_y;
 
     top_y = 0;
     bottom_y = szHint.height;
