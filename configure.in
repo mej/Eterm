@@ -484,6 +484,7 @@ else
     FOUND_LIBAST=`$LIBAST_CONFIG --version | awk -F. '{print $2}'`
     CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
     LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
+    GRLIBS="$GRLIBS `$LIBAST_CONFIG --libs`"
 fi
 AC_CHECK_LIB(ast, libast_set_program_name, , FOUND_LIBAST=0, $GRLIBS)
 

@@ -17,18 +17,18 @@ else
 fi
 
 if [ "x$1" = "x-h" -o "x$1" = "x--help" ]; then
-  echo "Syntax:  Etbg_update_list [path]"
-  echo "   (The default path is the current directory.)"
-  echo
-  exit 0
+    echo "Syntax:  Etbg_update_list [path]"
+    echo "   (The default path is the current directory.)"
+    echo
+    exit 0
 fi
 
 # Find the pixmap directory
 for i in "$1" "$PWD" "$PWD/pix" "$PWD/../pix" ; do
-  if [ -d "$i/tile" -o -d "$i/scale" ]; then
-    PIXDIR="$i"
-    break
-  fi
+    if [ -d "$i/tile" -o -d "$i/scale" ]; then
+        PIXDIR="$i"
+        break
+    fi
 done
 
 cd $PIXDIR
@@ -48,13 +48,13 @@ begin menu
   title Tiled
 EOF
 if [ -d tile ]; then
-  for i in `(cd tile && ls -1)` ; do 
-    echo '"tile/'$i'@0x0+0+0:tile"' >> $LISTFILE.new
-    echo "  begin menuitem" >&3
-    eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
-    echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
-    echo "  end" >&3
-  done
+    for i in `(cd tile && ls -1)` ; do 
+        echo '"tile/'$i'@0x0+0+0:tile"' >> $LISTFILE.new
+        echo "  begin menuitem" >&3
+        eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
+        echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
+        echo "  end" >&3
+    done
 fi
 cat >&3 <<EOF
 end
@@ -63,40 +63,41 @@ begin menu
 EOF
 
 if [ -d scale ]; then
-  for i in `(cd scale && ls -1)` ; do \
-    echo '"scale/'$i'@100x100"' >> $LISTFILE.new ; \
-    echo "  begin menuitem" >&3
-    eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
-    echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
-    echo "  end" >&3
-  done
+    for i in `(cd scale && ls -1)` ; do \
+        echo '"scale/'$i'@100x100"' >> $LISTFILE.new ; \
+        echo "  begin menuitem" >&3
+        eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
+        echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
+        echo "  end" >&3
+    done
 fi
 echo "end" >&3
 
 # Check to see if the list has changed.  If so, back up the old one.
 if [ -s $LISTFILE ]; then
-  if (diff $LISTFILE $LISTFILE.new >/dev/null 2>&1); then
-    echo "Pixmap list is unchanged."
-    rm -f $LISTFILE.new
-  else
-    echo "Old pixmap list will be saved in $LISTFILE.old"
-    mv -f $LISTFILE $LISTFILE.old
-  fi
+    if (diff $LISTFILE $LISTFILE.new >/dev/null 2>&1); then
+        echo "Pixmap list is unchanged."
+        rm -f $LISTFILE.new
+    else
+        echo "Old pixmap list will be saved in $LISTFILE.old"
+        mv -f $LISTFILE $LISTFILE.old
+    fi
 fi
 if [ -s $LISTFILE.new ]; then
-  mv -f $LISTFILE.new $LISTFILE
+    mv -f $LISTFILE.new $LISTFILE
 fi
 
 # If there's no theme directory nearby, just quit.
 if [ ! -d "../themes" ]; then
-  exit 0
+    exit 0
 fi
 
 # If there is, cd into it and make sure all the themes have list files.
 cd ../themes
 for i in `ls -1` ; do
-  if [ -f $i/theme.cfg -a ! -e $i/$LISTFILE ]; then
-    echo "Creating symlink to $LISTFILE for theme $i"
-    (cd $i && ln -f -s ../../pix/$LISTFILE $LISTFILE)
-  fi
+    if [ -f $i/theme.cfg -a ! -f $i/$LISTFILE ]; then
+        echo "Creating symlink to $LISTFILE for theme $i"
+        rm -f $i/$LISTFILE
+        ln -f -s ../../pix/$LISTFILE $i/$LISTFILE
+    fi
 done

@@ -5130,3 +5130,9 @@ Fri Nov 28 09:04:49 2003                        Michael Jennings (mej)
 
 Changes for compatibility with newer LibAST.
 ----------------------------------------------------------------------
+Tue Dec  9 22:26:17 2003                        Michael Jennings (mej)
+
+Add libast libs to GRLIBS.
+
+Hopefully fixed Etbg_update_list to be Solaris /bin/sh-friendly.
+----------------------------------------------------------------------
