@@ -456,18 +456,26 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       D_PIXMAP(("desktop_pixmap == %08x, simg->pmap->pixmap == %08x\n", desktop_pixmap, simg->pmap->pixmap));
       if (simg->pmap->pixmap != None) {
 	XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
-	if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
-	  XFreeGC(Xdisplay, gc);
-	  gc = XCreateGC(Xdisplay, desktop_pixmap, 0, &gcvalue);
-	  XSetTile(Xdisplay, gc, desktop_pixmap);
-	  XSetTSOrigin(Xdisplay, gc, pw - (x % pw), ph - (y % ph));
-	  XSetFillStyle(Xdisplay, gc, FillTiled);
-	  XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, scr->width, scr->height);
+        if ((pw <= 0) || (ph <= 0)) {
+          print_error("Value of desktop pixmap property is invalid.  Please restart your "
+                      "window manager or use Esetroot to set a new one.");
+          desktop_pixmap = None;
+          D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
+          XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
 	} else {
-	  XCopyArea(Xdisplay, desktop_pixmap, simg->pmap->pixmap, gc, x, y, width, height, 0, 0);
-	}
-        D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-	XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+          if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
+            XFreeGC(Xdisplay, gc);
+            gc = XCreateGC(Xdisplay, desktop_pixmap, 0, &gcvalue);
+            XSetTile(Xdisplay, gc, desktop_pixmap);
+            XSetTSOrigin(Xdisplay, gc, pw - (x % pw), ph - (y % ph));
+            XSetFillStyle(Xdisplay, gc, FillTiled);
+            XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, scr->width, scr->height);
+          } else {
+            XCopyArea(Xdisplay, desktop_pixmap, simg->pmap->pixmap, gc, x, y, width, height, 0, 0);
+          }
+          D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
+          XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+        }
       }
     } else {
       D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
