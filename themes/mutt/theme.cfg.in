@@ -212,11 +212,11 @@ end multichar
       state normal
       color black #999999
       file bar_horizontal_1.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 3
       state selected
       file bar_horizontal_2.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 3
   end image
     begin image
@@ -225,17 +225,17 @@ end multichar
       state normal
       color black #999999
       file menu1.png
-      geom 100x100+0+0:scale
+      geom 100
       border 3 15 3 3
       padding 3 15 3 3
       state selected
       file menu2.png
-      geom 100x100+0+0:scale
+      geom 100
       border 3 15 3 3
       padding 3 15 3 3
       state clicked
       file menu3.png
-      geom 100x100+0+0:scale
+      geom 100
       border 3 15 3 3
       padding 3 15 3 3
   end image
@@ -245,7 +245,7 @@ end multichar
       state normal
       color black #999999
       file bar_horizontal_1.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 2
       state disabled
       color white #333333
@@ -258,15 +258,15 @@ end multichar
       state normal
       color black #cccccc
       file bar_horizontal_1.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 2
       state selected
       file bar_horizontal_2.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 2
       state clicked
       file bar_horizontal_3.png
-      geom 100x100+0+0:scale
+      geom 100
       border 2 3 2 2
   end image
 end
