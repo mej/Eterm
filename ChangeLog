@@ -4069,6 +4069,11 @@ Sat Feb  3 18:25:45 PST 2001	Michael Jennings <mej@eterm.org>
 -------------------------------------------------------------------------------
 Thu Feb  8 17:23:13 PST 2001	Michael Jennings <mej@eterm.org>
 
-	Somehow I managed to be think strcpy but type strcat.  Oops.
+	Somehow I managed to think strcpy but type strcat.  Oops.
+	
+-------------------------------------------------------------------------------
+Mon Mar  5 13:38:01 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Fix for NetBSD from Marc Bevand <bevand_m@epita.fr>.
 	
 -------------------------------------------------------------------------------
