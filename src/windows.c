@@ -431,9 +431,18 @@ Create_Windows(int argc, char *argv[])
     val = rs_desktop;
     XChangeProperty(Xdisplay, TermWin.parent, prop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
   }
+
+  /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */
+  event_init_subsystem((event_dispatcher_t) process_x_event, (event_dispatcher_init_t) event_init_primary_dispatcher);
+
+  /* Time for the scrollbar to create its windows and add itself to the event subsystem. */
+  scrollbar_init();
+
+  /* Same for the menu subsystem. */
+  menu_init();
+
   XMapWindow(Xdisplay, TermWin.vt);
   XMapWindow(Xdisplay, TermWin.parent);
-
   XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
   XClearWindow(Xdisplay, TermWin.vt);
 
@@ -456,15 +465,6 @@ Create_Windows(int argc, char *argv[])
 
   if (Options & Opt_noCursor)
     scr_cursor_visible(0);
-
-  /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */
-  event_init_subsystem((event_dispatcher_t) process_x_event, (event_dispatcher_init_t) event_init_primary_dispatcher);
-
-  /* Time for the scrollbar to create its windows and add itself to the event subsystem. */
-  scrollbar_init();
-
-  /* Same for the menu subsystem. */
-  menu_init();
 
 }
 
