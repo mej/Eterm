@@ -29,7 +29,7 @@
 
 /************ Macros and Definitions ************/
 #ifdef PIXMAP_SUPPORT
-# define background_is_image() (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im)
+# define background_is_image() ((buffer_pixmap) || (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im))
 # define background_is_trans() (images[image_bg].mode & MODE_TRANS)
 # define background_is_viewport() (images[image_bg].mode & MODE_VIEWPORT)
 # define background_is_auto() (images[image_bg].mode & MODE_AUTO)
@@ -44,10 +44,11 @@
 # define CONVERT_TINT_GREEN(t) (((t) & 0x00ff00) >> 8)
 # define CONVERT_TINT_BLUE(t)  ((t) & 0x0000ff)
 #else
-# define background_is_image() ((int)0)
-# define background_is_trans() ((int)0)
-# define background_is_pixmap() ((int)0)
-# define delete_simage(simg) ((void)0)
+# define background_is_image()    NOP
+# define background_is_trans()    NOP
+# define background_is_viewport() NOP
+# define background_is_auto()     NOP
+# define delete_simage(simg)      NOP
 #endif
 #define PIXMAP_EXT NULL
 /*   '[', 2*4 + 2*3 digits + 3 delimiters, ']'. -vendu */
@@ -153,7 +154,7 @@ typedef short renderop_t;
 /************ Variables ************/
 extern image_t images[image_max];
 extern ImlibData *imlib_id;
-extern Pixmap desktop_pixmap, viewport_pixmap;
+extern Pixmap desktop_pixmap, viewport_pixmap, buffer_pixmap;
 extern Window desktop_window;
 
 /************ Function Prototypes ************/

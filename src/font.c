@@ -72,16 +72,29 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
   if (idx >= font_cnt) {
     unsigned char new_size = sizeof(char *) * (idx + 1);
 
-    if (flist) {
-      *plist = (char **) REALLOC(*plist, new_size);
-      D_FONT((" -> Reallocating flist to a size of %u bytes gives %8p\n", new_size, *plist));
+    if (etfonts) {
+      etfonts = (char **) REALLOC(etfonts, new_size);
+#ifdef MULTI_CHARSET
+      etmfonts = (char **) REALLOC(etmfonts, new_size);
+#endif
+      D_FONT((" -> Reallocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
     } else {
-      *plist = (char **) MALLOC(new_size);
-      D_FONT((" -> Allocating flist with a size of %u bytes gives %8p\n", new_size, *plist));
+      etfonts = (char **) MALLOC(new_size);
+#ifdef MULTI_CHARSET
+      etmfonts = (char **) MALLOC(new_size);
+#endif
+      D_FONT((" -> Allocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
     }
-    flist = *plist;
-    MEMSET(flist + font_cnt, 0, sizeof(char *) * (idx - font_cnt));
+    MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
+#ifdef MULTI_CHARSET
+    MEMSET(etmfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
+#endif
     font_cnt = idx + 1;
+#ifdef MULTI_CHARSET
+    flist = ((plist == &etfonts) ? (etfonts) : (etmfonts));
+#else
+    flist = etfonts;
+#endif
   } else {
     if (flist[idx]) {
       if ((flist[idx] == fontname) || (!strcasecmp(flist[idx], fontname))) {
@@ -205,7 +218,7 @@ font_cache_find_info(const char *name, unsigned char type) {
 
   cachefont_t *current;
 
-  ASSERT_RVAL(name != NULL, NULL);
+  REQUIRE_RVAL(name != NULL, NULL);
 
   D_FONT(("font_cache_find_info(%s, %d) called.\n", NONULL(name), type));
 

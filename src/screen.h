@@ -42,22 +42,20 @@
  * CLEAR_CHARS: clear <num> chars starting from pixel position <x,y>
  * ERASE_ROWS : set <num> rows starting from row <row> to the foreground color
  */
-#define drawBuffer	(TermWin.vt)
-#define CLEAR_ROWS(row, num) do { \
-                               XClearArea(Xdisplay, drawBuffer, Col2Pixel(0), Row2Pixel(row), \
-                                          TermWin.width, Height2Pixel(num), 0); \
-                             } while (0)
-#define CLEAR_CHARS(x, y, num) do { \
-                                 D_SCREEN(("CLEAR_CHARS(%d, %d, %d)\n", x, y, num)); \
-                                 XClearArea(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
-                               } while (0)
-#define FAST_CLEAR_CHARS(x, y, num) do { \
-                                      clear_area(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
-                                    } while (0)
-#define ERASE_ROWS(row, num) do { \
-                               XFillRectangle(Xdisplay, drawBuffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), \
-                                              TermWin.width, Height2Pixel(num)); \
-                             } while (0)
+#define CLEAR_ROWS(row, num) ((buffer_pixmap) \
+                               ? (XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), \
+                                  Col2Pixel(0), Row2Pixel(row))) \
+                              : (XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), 0)))
+#define CLEAR_CHARS(x, y, num) ((buffer_pixmap) \
+                               ? (XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(num), Height2Pixel(1), x, y)) \
+                               : (XClearArea(Xdisplay, TermWin.vt, x, y, Width2Pixel(num), Height2Pixel(1), 0)))
+#define ERASE_ROWS(row, num) (XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num)))
+#define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
+#ifndef NO_BRIGHTCOLOR
+# define MONO_BOLD(x)	(((x) & RS_Bold) && fore == fgColor)
+#else
+# define MONO_BOLD(x)	((x) & (RS_Bold|RS_Blink))
+#endif
 
 /* Screen refresh methods */
 #define NO_REFRESH              0       /* Window not visible at all!        */

@@ -509,10 +509,12 @@ handle_expose(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (ev->xany.window == TermWin.vt) {
-    if (refresh_type == NO_REFRESH) {
-      refresh_type = FAST_REFRESH;
+    if (buffer_pixmap == None) {
+      if (refresh_type == NO_REFRESH) {
+        refresh_type = FAST_REFRESH;
+      }
+      scr_expose(ev->xexpose.x, ev->xexpose.y, ev->xexpose.width, ev->xexpose.height);
     }
-    scr_expose(ev->xexpose.x, ev->xexpose.y, ev->xexpose.width, ev->xexpose.height);
   } else {
 
     XEvent unused_xevent;

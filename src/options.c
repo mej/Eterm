@@ -391,6 +391,7 @@ static const struct {
       OPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", &Options, Opt_meta8),
 #endif
       OPT_BLONG("backing-store", "use backing store", &Options, Opt_backing_store),
+      OPT_BLONG("double-buffer", "use double-buffering to reduce exposes (uses more memory)", &Options, Opt_double_buffer),
       OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_noCursor),
       OPT_BLONG("pause", "pause for a keypress after the child process exits", &Options, Opt_pause),
       OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &Options, Opt_xterm_select),
@@ -1956,6 +1957,13 @@ parse_toggles(char *buff)
       Options |= Opt_backing_store;
     } else {
       Options &= ~(Opt_backing_store);
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "double_buffer ")) {
+    if (bool_val) {
+      Options |= Opt_double_buffer;
+    } else {
+      Options &= ~(Opt_double_buffer);
     }
 
   } else if (!BEG_STRCASECMP(buff, "no_cursor ")) {
@@ -3863,6 +3871,7 @@ save_config(char *path)
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
   fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
   fprintf(fp, "    backing_store %d\n", (Options & Opt_backing_store ? 1 : 0));
+  fprintf(fp, "    double_buffer %d\n", (Options & Opt_double_buffer ? 1 : 0));
   fprintf(fp, "    no_cursor %d\n", (Options & Opt_noCursor ? 1 : 0));
   fprintf(fp, "    pause %d\n", (Options & Opt_pause ? 1 : 0));
   fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));

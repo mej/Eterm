@@ -47,8 +47,8 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 
 #ifdef PIXMAP_SUPPORT
-Pixmap desktop_pixmap = None;
-Pixmap viewport_pixmap = None;
+Pixmap desktop_pixmap = None, viewport_pixmap = None;
+Pixmap buffer_pixmap = None;
 Window desktop_window = None;
 unsigned char desktop_pixmap_is_mine = 0;
 ImlibData *imlib_id = NULL;
@@ -69,6 +69,7 @@ image_t images[image_max] =
 
 #ifdef PIXMAP_SUPPORT
 static const char *get_iclass_name(unsigned char);
+static void copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height);
 
 const char *
 get_image_type(unsigned short type)
@@ -475,6 +476,34 @@ redraw_image(unsigned char which) {
   }
 }
 
+static void
+copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height)
+{
+  GC gc;
+  XGCValues gcvalue;
+
+  ASSERT(buffer_pixmap == None);
+  buffer_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, width, height, Xdepth);
+  gcvalue.foreground = (Pixel) fill;
+  gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground, &gcvalue);
+  XSetGraphicsExposures(Xdisplay, gc, False);
+
+  if (mode == MODE_SOLID) {
+    simage_t *simg;
+
+    simg = images[image_bg].current;
+    if (simg->pmap->pixmap) {
+      XFreePixmap(Xdisplay, simg->pmap->pixmap);
+    }
+    simg->pmap->pixmap = XCreatePixmap(Xdisplay, TermWin.vt, width, height, Xdepth);
+    XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
+    XCopyArea(Xdisplay, simg->pmap->pixmap, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
+  } else {
+    XCopyArea(Xdisplay, (Pixmap) fill, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
+  }
+  XFreeGC(Xdisplay, gc);
+}
+
 void
 render_simage(simage_t * simg, Window win, unsigned short width, unsigned short height, unsigned char which, renderop_t renderop)
 {
@@ -516,6 +545,11 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   gcvalue.foreground = gcvalue.background = PixColors[bgColor];
   gc = XCreateGC(Xdisplay, win, GCForeground | GCBackground, &gcvalue);
   pixmap = simg->pmap->pixmap;	/* Save this for later */
+
+  if ((which == image_bg) && (buffer_pixmap != None)) {
+    XFreePixmap(Xdisplay, buffer_pixmap);
+    buffer_pixmap = None;
+  }
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
     char buff[255];
@@ -569,7 +603,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
                       "window manager or use Esetroot to set a new one.");
           desktop_pixmap = None;
           D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
-          XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+          if ((which == image_bg) && (Options & Opt_double_buffer)) {
+            copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
+            XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+          } else {
+            XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+          }
 	} else {
           if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
             XFreeGC(Xdisplay, gc);
@@ -588,12 +627,22 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
             Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
           }
           D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-          XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+          if ((which == image_bg) && (Options & Opt_double_buffer)) {
+            copy_buffer_pixmap(MODE_TRANS, (unsigned long) simg->pmap->pixmap, width, height);
+            XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+          } else {
+            XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+          }
         }
       }
     } else {
       D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
-      XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+      if ((which == image_bg) && (Options & Opt_double_buffer)) {
+        copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
+        XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+      } else {
+        XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+      }
     }
   } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
     D_PIXMAP(("Viewport mode enabled.  viewport_pixmap == 0x%08x and simg->pmap->pixmap == 0x%08x\n", viewport_pixmap, simg->pmap->pixmap));
@@ -655,7 +704,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
     }
     D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-    XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+    if ((which == image_bg) && (Options & Opt_double_buffer)) {
+      copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
+      XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+    } else {
+      XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+    }
   } else
 # endif
   if (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE)) {
@@ -744,7 +798,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 	shaped_window_apply_mask(win, simg->pmap->mask);
       }
     } else {
-      XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+      if ((which == image_bg) && (Options & Opt_double_buffer)) {
+        copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
+        XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+      } else {
+        XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
+      }
       reset_simage(simg, RESET_ALL);
     }
     if (simg->pmap->pixmap != None) {
@@ -774,7 +833,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 	Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
       D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-      XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+      if ((which == image_bg) && (Options & Opt_double_buffer)) {
+        copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
+        XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+      } else {
+        XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+      }
     }
   } else {
     unsigned short cidx;
@@ -797,7 +861,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       break;
     }
     
-    XSetWindowBackground(Xdisplay, win, PixColors[cidx]);
+    if ((which == image_bg) && (Options & Opt_double_buffer)) {
+      copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
+      XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+    } else {
+      XSetWindowBackground(Xdisplay, win, PixColors[cidx]);
+    }
     image_set_mode(which, MODE_SOLID);
   }
   XClearWindow(Xdisplay, win);

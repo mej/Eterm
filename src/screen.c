@@ -1090,11 +1090,20 @@ scr_erase_screen(int mode)
   rend_t ren;
   long gcmask;
   XGCValues gcvalue;
+  Drawable draw_buffer;
+  Pixmap pmap = None;
 
   D_SCREEN(("scr_erase_screen(%d) at screen row: %d\n", mode, screen.row));
   REFRESH_ZERO_SCROLLBACK;
   RESET_CHSTAT;
   row_offset = TermWin.saveLines;
+
+  if (buffer_pixmap) {
+    draw_buffer = buffer_pixmap;
+    pmap = images[image_bg].current->pmap->pixmap;
+  } else {
+    draw_buffer = TermWin.vt;
+  }
 
   switch (mode) {
     case 0:			/* erase to end of screen */
@@ -1553,17 +1562,17 @@ scr_expose(int x, int y, int width, int height)
   if (drawn_text == NULL)	/* sanity check */
     return;
 
-  part_beg.col = Pixel2Col(x);	/* round down */
-  part_beg.row = Pixel2Row(y);	/* round down */
-  full_beg.col = Pixel2Col(x + TermWin.fwidth - 1);	/* round up */
-  full_beg.row = Pixel2Row(y + TermWin.fheight - 1);	/* round up */
+  part_beg.col = Pixel2Col(x);
+  part_beg.row = Pixel2Row(y);
+  part_end.col = Pixel2Width(x + width + TermWin.fwidth - 1);
+  part_end.row = Pixel2Row(y + height + TermWin.fheight - 1);
 
-  part_end.col = Pixel2Width(x + width + TermWin.fwidth - 1);	/* round up */
-  part_end.row = Pixel2Row(y + height + TermWin.fheight - 1);	/* round up */
-  full_end.col = Pixel2Width(x + width);	/* round down */
-  full_end.row = Pixel2Row(y + height);		/* round down */
+  full_beg.col = Pixel2Col(x + TermWin.fwidth - 1);
+  full_beg.row = Pixel2Row(y + TermWin.fheight - 1);
+  full_end.col = Pixel2Width(x + width);
+  full_end.row = Pixel2Row(y + height);
 
-/* sanity checks */
+  /* sanity checks */
   MAX_IT(part_beg.col, 0);
   MAX_IT(full_beg.col, 0);
   MAX_IT(part_end.col, 0);
@@ -1608,6 +1617,13 @@ scr_expose(int x, int y, int width, int height)
   if (part_end.col != full_end.col)
     for (i = full_beg.row; i <= full_end.row; i++)
       drawn_rend[i][part_end.col] = RS_Dirty;
+
+  if (buffer_pixmap) {
+    x = Col2Pixel(full_beg.col);
+    y = Row2Pixel(full_beg.row);
+    XCopyArea(Xdisplay, images[image_bg].current->pmap->pixmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(full_end.col - full_beg.col + 1),
+              Height2Pixel(full_end.row - full_beg.row + 1), x, y);
+  }
 
 #ifdef USE_XIM
   scr_refresh(FAST_REFRESH);
@@ -1713,15 +1729,6 @@ scr_printscreen(int fullhist)
  * screen.text/screen.rend contain what the screen will change to.
  */
 
-#define DRAW_STRING(Func, x, y, str, len)				\
-    Func(Xdisplay, drawBuffer, TermWin.gc, x, y, str, len)
-
-#ifndef NO_BRIGHTCOLOR
-# define MONO_BOLD(x)	(((x) & RS_Bold) && fore == fgColor)
-#else
-# define MONO_BOLD(x)	((x) & (RS_Bold|RS_Blink))
-#endif
-
 void
 scr_refresh(int type)
 {
@@ -1753,8 +1760,9 @@ scr_refresh(int type)
   XGCValues gcvalue;		/* Graphics Context values                   */
   char buf[MAX_COLS + 1];
   register char *buffer = buf;
+  Drawable draw_buffer;
+  Pixmap pmap = images[image_bg].current->pmap->pixmap;
   int (*draw_string) (), (*draw_image_string) ();
-  int (*clear_area) () = XClearArea;
 
 #ifndef NO_BOLDFONT
   int bfont = 0;		/* we've changed font to bold font           */
@@ -1791,6 +1799,12 @@ scr_refresh(int type)
 #ifdef PROFILE_SCREEN
   P_SETTIMEVAL(cnt.start);
 #endif
+
+  if (buffer_pixmap) {
+    draw_buffer = buffer_pixmap;
+  } else {
+    draw_buffer = TermWin.vt;
+  }
 
   row_offset = TermWin.saveLines - TermWin.view_start;
   fprop = TermWin.fprop;
@@ -2050,13 +2064,13 @@ scr_refresh(int type)
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  gcmask |= (GCForeground | GCBackground);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
-	  XFillRectangle(Xdisplay, drawBuffer, TermWin.gc,
+	  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc,
 			 xpixel, ypixel - TermWin.font->ascent,
 			 Width2Pixel(1), Height2Pixel(1));
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
 	} else {
-	  FAST_CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, 1);
+	  CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, 1);
 	}
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, 1);
 #ifndef NO_BOLDOVERSTRIKE
@@ -2066,13 +2080,13 @@ scr_refresh(int type)
       } else
 #ifdef PIXMAP_SUPPORT
       if (background_is_pixmap() && (back == bgColor)) {
-	FAST_CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
+	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
       } else
 #endif
       {
 #ifdef FORCE_CLEAR_CHARS
-	FAST_CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
+	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
 #endif
 	DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
       }
@@ -2084,7 +2098,7 @@ scr_refresh(int type)
 #endif
 
       if ((rend & RS_Uline) && (TermWin.font->descent > 1))
-	XDrawLine(Xdisplay, drawBuffer, TermWin.gc,
+	XDrawLine(Xdisplay, draw_buffer, TermWin.gc,
 		  xpixel, ypixel + 1,
 		  xpixel + Width2Pixel(len) - 1, ypixel + 1);
       if (is_cursor == 1) {
@@ -2095,7 +2109,7 @@ scr_refresh(int type)
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
 	}
 #endif
-	XDrawRectangle(Xdisplay, drawBuffer, TermWin.gc,
+	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc,
 		       xpixel, ypixel - TermWin.font->ascent,
 		       Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
       }
@@ -2127,17 +2141,18 @@ scr_refresh(int type)
       screen.rend[row][col - 1] &= ~RS_Cursor;
 #endif
   }
-  if (boldlast) {
-    XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
-	       1, TermWin_TotalHeight() - 1, 0);
+  if (buffer_pixmap) {
+    XClearWindow(Xdisplay, TermWin.vt);
+  } else {
+    if (boldlast) {
+      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
+                 1, TermWin_TotalHeight() - 1, 0);
+    }
+    if (boldlast) {
+      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
+                 1, TermWin_TotalHeight() - 1, 0);
+    }
   }
-  if (boldlast) {
-    XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
-	       1, TermWin_TotalHeight() - 1, 0);
-  }
-#if defined(PIXMAP_SUPPORT) && defined(PIXMAP_BUFFERING)
-  XClearWindow(Xdisplay, TermWin.vt);
-#endif
   if (type == SLOW_REFRESH) {
     XSync(Xdisplay, False);
   }

@@ -72,6 +72,7 @@
 # define Opt_select_trailing_spaces	(1LU << 22)
 # define Opt_install                	(1LU << 23)
 # define Opt_scrollbar_floating		(1LU << 24)
+# define Opt_double_buffer		(1LU << 25)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_VIEWPORT                 (1U << 1)

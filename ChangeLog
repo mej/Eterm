@@ -2902,3 +2902,14 @@ Wed Dec  8 19:05:06 PST 1999	Michael Jennings <mej@eterm.org>
 	Updated the man page once again.
 	
 -------------------------------------------------------------------------------
+Fri Dec 10 23:33:16 PST 1999	Michael Jennings <mej@eterm.org>
+
+	I finally got around to implementing double-buffering, although it
+	seems to still have some issues with font changes.  But if you don't
+	change fonts, it works great. :-)
+
+	I also fixed the multibyte font stuff with help from Sung-Hyun Nam
+	<namsh@lgic.co.kr>.  There seem to be some new issues here, though,
+	with the background pixmap.  But I'm to tired to look deeper tonight.
+	
+-------------------------------------------------------------------------------

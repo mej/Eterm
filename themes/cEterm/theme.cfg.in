@@ -92,6 +92,18 @@ begin main
 #    font bold 7x14
   end attributes
 
+# The Multichar support options.  Same goes for these fonts as for the normal
+# ones.  The "encoding" attribute can be either "eucj" or "sjis" or "euckr"
+# or big5 or gb
+#  begin multichar
+#    font 0 k14
+#    font 1 jiskan16
+#    font 2 jiskan18
+#    font 3 jiskan24
+#    font 4 jiskan26
+#    encoding eucj
+#  end multichar
+
 # Define the imageclasses.
   begin imageclasses
 
@@ -219,7 +231,7 @@ begin main
     end image
   end
 
-%include "cEterm-menu.cfg"
+%include "menus.cfg"
 
 # This section *must* come after the menu definitions if you want
 # menu actions to work.  C'est la vie. :-)
@@ -232,18 +244,6 @@ begin main
     bind ctrl button3 to menu Eterm
     bind anymod 0xffbe to menu Eterm
   end actions
-
-# The Multichar support options.  Same goes for these fonts as for the normal
-# ones.  The "encoding" attribute can be either "eucj" or "sjis" or "euckr"
-# or big5 or gb
-#  begin multichar
-#    font 0 k14
-#    font 1 jiskan16
-#    font 2 jiskan18
-#    font 3 jiskan24
-#    font 4 jiskan26
-#    encoding eucj
-#  end multichar
 
 # The XIM support options.
 # input_method: set the name of your favorate input method program

@@ -442,13 +442,8 @@ Create_Windows(int argc, char *argv[])
   XMapWindow(Xdisplay, TermWin.vt);
   XMapWindow(Xdisplay, TermWin.parent);
   XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-  XClearWindow(Xdisplay, TermWin.vt);
 
-#ifdef PIXMAP_SUPPORT
-  if (background_is_image()) {
-    render_simage(images[image_bg].norm, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
-  }
-#endif /* PIXMAP_SUPPORT */
+  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
 
   /* graphics context for the vt window */
   {
@@ -624,7 +619,7 @@ set_window_color(int idx, const char *color)
     return;
   }
 
-  if (idx == bgColor) {
+  if (!background_is_pixmap() && (idx == bgColor)) {
     XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
   }
 
