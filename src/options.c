@@ -94,7 +94,7 @@ static char *rs_multichar_encoding = NULL;
 static char *rs_greek_keyboard = NULL;
 #endif
 
-unsigned long Options = (Opt_scrollbar | Opt_select_trailing_spaces), image_toggles = 0;
+unsigned long Options = (Opt_scrollbar | Opt_select_trailing_spaces | Opt_secondary_screen), image_toggles = 0;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_exec_args = NULL;     /* Args to exec (-e or --exec) */
 char *rs_title = NULL;          /* Window title */
@@ -309,6 +309,7 @@ static const struct {
     OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &Options, Opt_report_as_keysyms),
     OPT_BLONG("buttonbar", "toggle the display of all buttonbars", &rs_buttonbars, BBAR_FORCE_TOGGLE),
     OPT_BLONG("resize-gravity", "toggle gravitation to nearest corner on resize", &Options, Opt_resize_gravity),
+    OPT_BLONG("secondary-screen", "toggle use of secondary screen", &Options, Opt_secondary_screen),
     /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
     OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key),

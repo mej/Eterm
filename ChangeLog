@@ -4789,3 +4789,8 @@ Updates to the termcap/terminfo stuff to make everything work on *BSD.
 Thanks to Thomas Dickey <dickey@herndon4.his.com> and Will Yardley
 <william@hq.newdream.net> for their assistance with this.
 ----------------------------------------------------------------------
+Sun Sep 22 00:34:42 2002                        Michael Jennings (mej)
+
+Added an option to disable the secondary screen as requested by Marc
+Merlin <marc@merlins.org>.
+----------------------------------------------------------------------

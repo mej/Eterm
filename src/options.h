@@ -69,6 +69,7 @@
 # define Opt_mbyte_cursor		(1LU << 24)
 # define Opt_proportional               (1LU << 25)
 # define Opt_resize_gravity             (1LU << 26)
+# define Opt_secondary_screen           (1LU << 27)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_ITRANS                   (1U << 1)

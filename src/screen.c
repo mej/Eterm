@@ -357,14 +357,16 @@ scr_poweron(void)
     /* Reset the rendering style to the default colors/style */
     scr_rendition(0, ~RS_None);
 #if NSCREENS
-    /* Reset the secondary screen */
-    scr_change_screen(SECONDARY);
-    scr_erase_screen(2);
-    swap.tscroll = 0;
-    swap.bscroll = TermWin.nrow - 1;
-    swap.row = swap.col = 0;
-    swap.charset = 0;
-    swap.flags = Screen_DefaultFlags;
+    if (Options & Opt_secondary_screen) {
+        /* Reset the secondary screen */
+        scr_change_screen(SECONDARY);
+        scr_erase_screen(2);
+        swap.tscroll = 0;
+        swap.bscroll = TermWin.nrow - 1;
+        swap.row = swap.col = 0;
+        swap.charset = 0;
+        swap.flags = Screen_DefaultFlags;
+    }
 #endif
     /* Reset the primary screen */
     scr_change_screen(PRIMARY);
@@ -430,30 +432,30 @@ scr_change_screen(int scrn)
 
     SWAP_IT(current_screen, scrn, tmp);
 #if NSCREENS
-    offset = TermWin.saveLines;
-    if (!screen.text || !screen.rend)
-        return (current_screen);
-    for (i = TermWin.nrow; i--;) {
-        SWAP_IT(screen.text[i + offset], swap.text[i], t0);
-        SWAP_IT(screen.rend[i + offset], swap.rend[i], r0);
+    if (Options & Opt_secondary_screen) {
+        offset = TermWin.saveLines;
+        if (!screen.text || !screen.rend)
+            return (current_screen);
+        for (i = TermWin.nrow; i--;) {
+            SWAP_IT(screen.text[i + offset], swap.text[i], t0);
+            SWAP_IT(screen.rend[i + offset], swap.rend[i], r0);
+        }
+        SWAP_IT(screen.row, swap.row, tmp);
+        SWAP_IT(screen.col, swap.col, tmp);
+        SWAP_IT(screen.charset, swap.charset, tmp);
+        SWAP_IT(screen.flags, swap.flags, tmp);
+        screen.flags |= Screen_VisibleCursor;
+        swap.flags |= Screen_VisibleCursor;
     }
-    SWAP_IT(screen.row, swap.row, tmp);
-    SWAP_IT(screen.col, swap.col, tmp);
-    SWAP_IT(screen.charset, swap.charset, tmp);
-    SWAP_IT(screen.flags, swap.flags, tmp);
-    screen.flags |= Screen_VisibleCursor;
-    swap.flags |= Screen_VisibleCursor;
-
 #else
 # ifndef DONT_SCROLL_ME
-    if (current_screen == PRIMARY)
-        if (current_screen == PRIMARY) {
-            scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0);
-            for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++)
-                if (screen.text[i] == NULL) {
-                    blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
-                }
-        }
+    if (current_screen == PRIMARY) {
+        scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0);
+        for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++)
+            if (screen.text[i] == NULL) {
+                blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
+            }
+    }
 # endif
 #endif
 

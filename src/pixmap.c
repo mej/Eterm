@@ -2200,8 +2200,6 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
         wm_hints->flags |= IconWindowHint;
     }
     imlib_free_image_and_decache();
-    wm_hints->icon_x = wm_hints->icon_y = 0;
-    wm_hints->flags |= IconPositionHint;
     /* Only set the hints ourselves if we were passed a NULL pointer for pwm_hints */
     if (!pwm_hints) {
         XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
