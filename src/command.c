@@ -1762,7 +1762,7 @@ init_locale(void)
   char *locale = NULL;
 
   locale = setlocale(LC_ALL, "");
-  TermWin.fontset = (XFontSet) -1;
+  TermWin.fontset = (XFontSet) 0;
   if (locale == NULL) {
     print_error("Setting locale failed.\n");
   } else {
@@ -1776,7 +1776,7 @@ init_locale(void)
 #else
 	TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
 #endif
-        if (xim_real_init() != -1) {
+        if ((TermWin.fontset == (XFontSet) 0) || (xim_real_init() != -1)) {
           return;
         }
 
