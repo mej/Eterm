@@ -27,7 +27,7 @@ philosophy of Enlightenment. If you install Eterm, you'll also need to
 have the Imlib2 library installed.
 
 %prep
-%setup -n %{name}-%{version} -b 0 -a 1
+%setup -a 1
 
 %build
 # When using the configure macro, I also specify all the directory

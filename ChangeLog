@@ -4479,3 +4479,7 @@ Tue Jan 29 23:46:18 2002                        Michael Jennings (mej)
 Improved debugging of image finding problems, and improved reporting
 of Imlib2 load errors.
 ----------------------------------------------------------------------
+Sun Feb  3 15:51:38 2002                        Michael Jennings (mej)
+
+Apparently I forgot to commit these copyright date changes. :(
+----------------------------------------------------------------------

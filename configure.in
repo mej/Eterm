@@ -237,7 +237,7 @@ if test -c /dev/ptyp128 ; then
   PTY_MECH="SCO $PTY_MECH"
 fi
 if test "X$PTY_MECH" = "X"; then
-  AC_MSG_RESULT(generic pty's only)
+  AC_MSG_RESULT(generic only)
 else
   AC_MSG_RESULT($PTY_MECH)
 fi
@@ -437,11 +437,15 @@ AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes")
 dnl#
 dnl# LibAST
 dnl#
-AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
-if test "$FOUND_LIBAST" -eq "1"; then
-  AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
-  test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
+AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
+if test "$LIBAST_CONFIG" = "false"; then
+    FOUND_LIBAST=0
+else
+    FOUND_LIBAST=1
+    CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
+    LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
 fi
+AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
 
 if test "$FOUND_LIBAST" -ne "1"; then
   echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
@@ -474,8 +478,6 @@ if test "$FOUND_LIBAST" -eq "1"; then
     GRLIBS="-last $GRLIBS"
     AC_DEFINE(HAVE_LIBAST)
     test "$prefix" = "NONE" && prefix="`$LIBAST_CONFIG --prefix`"
-    CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
-    LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
     SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"
     for i in $SUPPORT_FLAGS ; do
       case $i in
@@ -521,9 +523,13 @@ AC_ARG_WITH(backspace,
             elif test "$withval" = "del"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-?)
               AC_DEFINE(FORCE_DELETE)
+            elif test "$withval" = "detect" -o "$withval" = "auto"; then 
+              AC_MSG_RESULT(attempt to auto-detect)
             else
               AC_MSG_RESULT(default)
+              AC_DEFINE(FORCE_BACKSPACE)
             fi, AC_MSG_RESULT(default)
+                AC_DEFINE(FORCE_BACKSPACE)
 )
 AC_MSG_CHECKING(for delete key configuration)
 AC_ARG_WITH(delete,
@@ -538,11 +544,13 @@ AC_ARG_WITH(delete,
               AC_DEFINE(NO_DELETE_KEY)
             elif test "$withval" = "execute"; then
               AC_MSG_RESULT(send execute sequence)
+            elif test "$withval" = "del"; then
+              AC_MSG_RESULT(send Ctrl-?)
+              AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
             else
               AC_MSG_RESULT(forcing Delete to send "$withval")
               AC_DEFINE_UNQUOTED(KS_DELETE, "$withval")
             fi, AC_MSG_RESULT(default)
-                AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
 )
 XTERM_HOME="\033\133H"
 LINUX_HOME="\033\1331~"
