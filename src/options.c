@@ -92,7 +92,7 @@ static char *rs_multichar_encoding = NULL;
 static char *rs_greek_keyboard = NULL;
 #endif
 
-unsigned long Options = (Opt_scrollbar), image_toggles = 0;
+unsigned long Options = (Opt_scrollbar | Opt_select_trailing_spaces), image_toggles = 0;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_exec_args = NULL;	/* Args to exec (-e or --exec) */
 char *rs_title = NULL;		/* Window title */
@@ -2740,7 +2740,6 @@ init_defaults(void)
   }
 #endif
 
-  Options = (Opt_scrollbar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
   rs_term_name = NULL;
 #ifdef CUTCHAR_OPTION

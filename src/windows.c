@@ -93,10 +93,10 @@ get_tint_by_color_name(const char *color)
   unsigned long r, g, b, t;
 
   wcol.pixel = WhitePixel(Xdisplay, Xscreen);
-  XQueryColor(Xdisplay, Xcmap, &wcol);
+  XQueryColor(Xdisplay, cmap, &wcol);
 
   D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", color, wcol.red, wcol.green, wcol.blue));
-  if (!XParseColor(Xdisplay, Xcmap, color, &xcol)) {
+  if (!XParseColor(Xdisplay, cmap, color, &xcol)) {
     print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
     return 0xffffff;
   }
