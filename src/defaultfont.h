@@ -18,7 +18,7 @@ extern void eterm_default_font_locale(char ***fonts, char ***mfonts, char **menc
  * List of encoding labels.
  * Note "encoding" is not "character set" nor "encoding method".
  *
- * In Rxvt, "encoding" is implemented as a pair of "encoding method"
+ * In Eterm, "encoding" is implemented as a pair of "encoding method"
  * (implemented as ENC_METHOD in screen.h) and font specification,
  * i.e., defaultfont[] in this file.
  *
@@ -49,7 +49,7 @@ struct name2encoding {
 };
 
 /*
- * Used for tables of encoding labels -> Rxvt internal informations.
+ * Used for tables of encoding labels -> Eterm internal informations.
  *
  */
 

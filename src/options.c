@@ -56,6 +56,10 @@ static const char cvs_ident[] = "$Id$";
 #include "windows.h"
 #include "defaultfont.h"
 
+#ifndef CONFIG_BUFF
+# define CONFIG_BUFF 20480
+#endif
+
 static void *parse_color(char *, void *);
 static void *parse_attributes(char *, void *);
 static void *parse_toggles(char *, void *);

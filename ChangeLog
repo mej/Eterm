@@ -4518,3 +4518,10 @@ have multiple locales on my system, but what I did test looked fine.
 
 I also fixed a CONFIG_BUFF constant missing from options.h
 ----------------------------------------------------------------------
+Thu Feb 21 19:06:18 2002                        Michael Jennings (mej)
+
+I think Ted made the right call for the wrong reason.  I'm adding the
+fallback value for CONFIG_BUFF so that people using the older libast
+will be able to use 0.9.2.  I'd like to get 0.9.2 out the door soon,
+but libast 0.5 is far from ready. :-)
+----------------------------------------------------------------------

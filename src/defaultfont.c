@@ -130,7 +130,7 @@ const struct name2encoding l2e[] = {
  *  I'd like these names edited by native speakers.
  *
  *  enc_label   -->   ENCODING_METHOD and font informations
- *                    which as needed for Rxvt to work.
+ *                    which as needed for Eterm to work.
  */
 const struct defaultfont defaultfont[] = {
 #ifdef MULTI_CHARSET
