@@ -2546,7 +2546,7 @@ parse_bbar(char *buff, void *state)
     if (text == icon) {
       text = NULL;
     } else {
-      text = get_word(1, text);
+      text = get_word(2, buff);
     }
     if (!text && !icon) {
       print_error("Parse error in file %s, line %lu:  Missing button specifications\n", file_peek_path(), file_peek_line());
@@ -3287,6 +3287,7 @@ save_config(char *path, unsigned char save_theme)
   struct stat fst;
   simage_t *simg;
   action_t *action;
+  buttonbar_t *bbar;
 
   D_OPTIONS(("Saving %s config to \"%s\"\n", (save_theme ? "theme" : "user"), NONULL(path)));
 
@@ -3817,6 +3818,67 @@ save_config(char *path, unsigned char save_theme)
   }
   fprintf(fp, "end xim\n\n");
 #endif
+
+  if (save_theme) {
+    for (bbar = buttonbar; bbar; bbar = bbar->next) {
+      unsigned long tmp;
+      button_t *b;
+
+      fprintf(fp, "begin button_bar\n");
+      fprintf(fp, "    font '%s'\n", NONULL(get_font_name(bbar->font)));
+      if (bbar_is_top_docked(bbar)) {
+        fprintf(fp, "    dock top\n");
+      } else if (bbar_is_bottom_docked(bbar)) {
+        fprintf(fp, "    dock bottom\n");
+      } else {
+        fprintf(fp, "    dock none\n");
+      }
+      fprintf(fp, "    visible %s\n", (bbar_is_visible(bbar) ? "yes" : "no"));
+      for (b = bbar->buttons; b; b = b->next) {
+        if (b->len) {
+          fprintf(fp, "    button \"%s\" ", safe_print_string(b->text, b->len));
+        } else {
+          fprintf(fp, "    button ");
+        }
+        if (b->icon && b->icon->iml) {
+          imlib_context_set_image(b->icon->iml->im);
+          fprintf(fp, "icon \"%s\" ", NONULL(imlib_image_get_filename()));
+        }
+        fprintf(fp, "action ");
+        if (b->type == ACTION_STRING) {
+          fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));
+        } else if (b->type == ACTION_ECHO) {
+          fprintf(fp, "echo '%s'\n", safe_print_string(b->action.string, -1));
+        } else if (b->type == ACTION_MENU) {
+          fprintf(fp, "menu \"%s\"\n", (b->action.menu)->title);
+        } else if (b->type == ACTION_SCRIPT) {
+          fprintf(fp, "script '%s'\n", b->action.script);
+        }
+      }
+      for (b = bbar->rbuttons; b; b = b->next) {
+        if (b->len) {
+          fprintf(fp, "    rbutton \"%s\" ", safe_print_string(b->text, b->len));
+        } else {
+          fprintf(fp, "    rbutton ");
+        }
+        if (b->icon && b->icon->iml) {
+          imlib_context_set_image(b->icon->iml->im);
+          fprintf(fp, "icon \"%s\" ", NONULL(imlib_image_get_filename()));
+        }
+        fprintf(fp, "action ");
+        if (b->type == ACTION_STRING) {
+          fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));
+        } else if (b->type == ACTION_ECHO) {
+          fprintf(fp, "echo '%s'\n", safe_print_string(b->action.string, -1));
+        } else if (b->type == ACTION_MENU) {
+          fprintf(fp, "menu \"%s\"\n", (b->action.menu)->title);
+        } else if (b->type == ACTION_SCRIPT) {
+          fprintf(fp, "script '%s'\n", b->action.script);
+        }
+      }
+    }
+    fprintf(fp, "end button_bar\n\n");
+  }
 
   fprintf(fp, "begin toggles\n");
   fprintf(fp, "    map_alert %d\n", (Options & Opt_map_alert ? 1 : 0));

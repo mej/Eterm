@@ -315,6 +315,31 @@ font_cache_find_info(const char *name, unsigned char type) {
   return (NULL);
 }
 
+const char *
+get_font_name(void *info)
+{
+  cachefont_t *current;
+
+  REQUIRE_RVAL(info != NULL, NULL);
+
+  D_FONT(("get_font_name(%8p) called.\n", info));
+
+  /* This is also a simple search, but it returns the fontinfo rather than the cache entry. */
+  for (current = font_cache; current; current = current->next) {
+    D_FONT((" -> Checking current (%8p), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
+    if ((current->type == FONT_TYPE_X) && (((void *) current->fontinfo.xfontinfo) == info)) {
+      D_FONT(("    -> Match!\n"));
+      return current->name;
+#if UNUSED_BLOCK
+    } else if ((current->type == FONT_TYPE_TTF) && (0)) {
+    } else if ((current->type == FONT_TYPE_FNLIB) && (0)) {
+#endif
+    }
+  }
+  D_FONT(("No matches found. =(\n"));
+  return (NULL);
+}
+
 /* load_font() is the function that should be used to allocate fonts. */
 void *
 load_font(const char *name, const char *fallback, unsigned char type)

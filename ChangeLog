@@ -4589,3 +4589,7 @@ Wed Apr 24 16:56:48 2002                        Michael Jennings (mej)
 Fixed bug where initial options would get parsed even if they were
 part of a -e/--exec expression.
 ----------------------------------------------------------------------
+Wed Apr 24 22:27:51 2002                        Michael Jennings (mej)
+
+Save buttonbar info when we save theme settings.
+----------------------------------------------------------------------

@@ -94,6 +94,7 @@ extern void font_cache_clear(void);
 extern void *load_font(const char *, const char *, unsigned char);
 extern void free_font(const void *);
 extern void change_font(int, const char *);
+extern const char *get_font_name(void *);
 extern void set_shadow_color_by_name(unsigned char, const char *);
 extern void set_shadow_color_by_pixel(unsigned char, Pixel);
 extern unsigned char parse_font_fx(const char *line);
