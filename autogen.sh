@@ -14,7 +14,7 @@ DIE=0
 
 echo "Generating configuration files for Eterm, please wait...."
 
-LIBTOOLIZE_CHOICES="$LIBTOOLIZE libtoolize"
+LIBTOOLIZE_CHOICES="$LIBTOOLIZE libtoolize glibtoolize"
 AUTOHEADER_CHOICES="$AUTOHEADER autoheader213 autoheader-2.13 autoheader"
 ACLOCAL_CHOICES="$ACLOCAL aclocal14 aclocal-1.4 aclocal"
 AUTOMAKE_CHOICES="$AUTOMAKE automake14 automake-1.4 automake"
