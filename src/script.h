@@ -31,12 +31,26 @@
 /************ Macros and Definitions ************/
 
 /************ Structures ************/
+typedef void (*eterm_script_handler_function_t)(char **);
+typedef struct {
+  char *name;
+  eterm_script_handler_function_t handler;
+} eterm_script_handler_t;
 
 /************ Variables ************/
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+/* Handlers */
+extern void script_handler_exit(char **);
+extern void script_handler_save(char **);
+extern void script_handler_search(char **);
+extern void script_handler_spawn(char **);
+extern void script_handler_nop(char **);
+
+/* Engine */
+extern eterm_script_handler_t *script_find_handler(const char *);
 extern void script_parse(char *);
 
 _XFUNCPROTOEND

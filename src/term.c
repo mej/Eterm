@@ -1841,7 +1841,7 @@ xterm_seq(int op, const char *str)
          30-39    Foreground/Text Color Configuration
          40-49    Background Color Configuration
          50-69    Window/Window Manager Configuration/Interaction
-         70-79    Internal Eterm Operations
+         70+      Internal Eterm Operations
        */
       switch (eterm_seq_op) {
 #ifdef PIXMAP_SUPPORT
@@ -2269,6 +2269,7 @@ xterm_seq(int op, const char *str)
 	    XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) & xev);
 	  }
 	  break;
+#if 0
 	case 70:
 	  /* Exit Eterm */
 	  exit(0);
@@ -2287,6 +2288,7 @@ xterm_seq(int op, const char *str)
 	    save_config(NULL, SAVE_USER_CONFIG);
 	  }
 	  break;
+#endif
 	case 72:
 	  /* Search scrollback buffer for a string.  NULL to clear. */
 	  nstr = (char *) strsep(&tnstr, ";");
@@ -2296,6 +2298,7 @@ xterm_seq(int op, const char *str)
 	    scr_search_scrollback(NULL);
 	  }
 	  break;
+#if 0
 	case 73:
 	  /* Spawn a subprogram */
 	  nstr = (char *) strsep(&tnstr, ";");
@@ -2303,6 +2306,7 @@ xterm_seq(int op, const char *str)
 	    system_no_wait(nstr);
 	  }
 	  break;
+#endif
 	case 80:
 	  /* Set debugging level */
 	  nstr = (char *) strsep(&tnstr, ";");

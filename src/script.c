@@ -34,11 +34,26 @@ static const char cvs_ident[] = "$Id$";
 #include <signal.h>
 
 #include "command.h"
-#include "startup.h"
 #include "options.h"
 #include "pixmap.h"
-#include "system.h"
+#include "screen.h"
 #include "script.h"
+#include "startup.h"
+#include "system.h"
+
+static eterm_script_handler_t script_handlers[] =
+{
+  { "die",       script_handler_exit },
+  { "exec",      script_handler_spawn },
+  { "exit",      script_handler_exit },
+  { "quit",      script_handler_exit },
+  { "save",      script_handler_save },
+  { "search",    script_handler_search },
+  { "spawn",     script_handler_spawn },
+
+  { "nop", script_handler_nop }
+};
+static size_t handler_count = sizeof(script_handlers) / sizeof(eterm_script_handler_t);
 
 #if 0
 void
@@ -104,6 +119,81 @@ eterm_handle_winop(char *action)
 }
 #endif
 
+/********* HANDLERS **********/
+void
+script_handler_exit(char **params)
+{
+  unsigned char code = 0;
+  char *tmp;
+
+  if (params && *params) {
+    if (isdigit(params[0][0]) || (params[0][0] == '-' && isdigit(params[0][1]))) {
+      code = (unsigned char) atoi(params[0]);
+    } else {
+      tmp = join(" ", params);
+      printf("Exiting:  %s\n", tmp);
+      FREE(tmp);
+    }
+  }
+  exit(code);
+}
+
+void
+script_handler_save(char **params)
+{
+  if (params && *params) {
+    if (!strcasecmp(params[0], "theme")) {
+      save_config(params[1], SAVE_THEME_CONFIG);
+    } else {
+      save_config(params[0], SAVE_USER_CONFIG);
+    }
+  } else {
+    save_config(NULL, SAVE_USER_CONFIG);
+  }
+}
+
+void
+script_handler_search(char **params)
+{
+  scr_search_scrollback(params ? params[0] : NULL);
+}
+
+void
+script_handler_spawn(char **params)
+{
+  char *tmp;
+
+  if (params && *params) {
+    tmp = join(" ", params);
+    system_no_wait(tmp);
+    FREE(tmp);
+  } else {
+    system_no_wait("Eterm");
+  }
+}
+
+void
+script_handler_nop(char **params)
+{
+  USE_VAR(params);
+}
+
+/********* ENGINE *********/
+eterm_script_handler_t *
+script_find_handler(const char *name)
+{
+  register unsigned long i;
+
+  for (i = 0; i < handler_count; i++) {
+    /* Small optimization.  Only call strcasecmp() if the first letter matches. */
+    if ((tolower(name[0]) == tolower(script_handlers[i].name[0]))
+        && !strcasecmp(name, script_handlers[i].name)) {
+      return &script_handlers[i];
+    }
+  }
+  return NULL;
+}
+
 void
 script_parse(char *s)
 {
@@ -112,6 +202,7 @@ script_parse(char *s)
   register unsigned long i;
   char *func_name, *params, *tmp;
   size_t len;
+  eterm_script_handler_t *func;
 
   REQUIRE(s != NULL);
 
@@ -137,25 +228,37 @@ script_parse(char *s)
         func_name[len] = 0;
       } else {
         print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
+        free_array((void **) token_list, 0);
         return;
       }
     } else {
       func_name = STRDUP(pstr);
     }
-    if (func_name) {
-      chomp(func_name);
+    if (!func_name) {
+      free_array((void **) token_list, 0);
+      return;
     }
     if (params) {
       params++;
-      if ((tmp = strchr(params, ')')) != NULL) {
+      if ((tmp = strrchr(params, ')')) != NULL) {
         *tmp = 0;
       } else {
         print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
+        free_array((void **) token_list, 0);
         return;
       }
       param_list = split(", \t", params);
     }
-    D_SCRIPT(("Calling function %s with parameters:  %s\n", NONULL(func_name), NONULL(params)));
+    D_SCRIPT(("Calling function %s with parameters:  %s\n", func_name, NONULL(params)));
+    if ((func = script_find_handler(func_name)) != NULL) {
+      (func->handler)(param_list);
+    } else {
+      print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);
+    }
   }
 
+  if (params) {
+    free_array((void **) param_list, 0);
+  }
+  free_array((void **) token_list, 0);
 }

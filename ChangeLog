@@ -4089,3 +4089,40 @@ Fri May  4 23:56:12 PDT 2001	Michael Jennings <mej@eterm.org>
 	backgrounds.
 	
 -------------------------------------------------------------------------------
+Tue May  8 19:53:56 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	You can now create key, mouse button, menu item, and buttonbar button
+	bindings which trigger the parsing of a "script."  I've thrown in a
+	few functions already to replace some icky escape sequences; there
+	will be many more functions forthcoming, although I don't know how
+	many of them (if any) will make it in prior to release.
+
+	The usage is pretty simple.  Where before you might've said:
+
+	    action string "\e]6;70\a"
+
+	you would now say:
+
+	    action script "exit();"
+
+	You can call as many functions as you like per script.  Use a
+	semi-colon (';') to separate each function call.  If you only call
+	one function, the ';' is optional.  If you aren't passing parameters
+	to the function, the parentheses are also optional.  Parameters are
+	separated by commas and/or whitespace.
+
+	Valid functions currently are:
+
+	    die():     die() is a synonym for exit().
+	    exec():    exec() is a synonym for spawn().
+	    exit():    Exit Eterm.  Takes an optional exit code or message.
+	    quit():    quit() is a synonym for exit().
+	    save():    Save the config.  Specify "theme" to save the theme
+	               config.  Also takes an optional path & filename.
+	    search():  Search the scrollback buffer for a string.
+	    spawn():   Spawns a sub-program.  Defaults to "Eterm".
+
+	You will need the libast dated today to build and run this Eterm.
+	You will also need to update your themes.
+	
+-------------------------------------------------------------------------------

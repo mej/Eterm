@@ -19,7 +19,7 @@ begin main
   begin color
 
 # Foreground, background, cursor, scrollbar, pointer colors
-    foreground white
+    foreground #aaaaaa
     background black
     cursor #ffff00
     cursor_text #880000
@@ -302,8 +302,8 @@ begin main
     button Eterm action menu Eterm
     button Messages action menu Messages
     button Mailbox action menu Mailbox
-    rbutton icon help.png action string "\e]6;73;Eterm -e man Eterm\a"
-    rbutton icon exit.png action string "\e]6;70\a"
+    rbutton icon help.png action script "spawn(Eterm -e man Eterm)"
+    rbutton icon exit.png action script "exit"
   end button_bar
 
 # The XIM support options.
