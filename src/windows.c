@@ -78,6 +78,30 @@ const char *def_fontName[] =
 };
 Cursor TermWin_cursor;		/* cursor for vt window */
 
+void
+set_text_property(Window win, char *propname, char *value)
+{
+  XTextProperty prop;
+  Atom atom;
+
+  ASSERT(propname != NULL);
+
+  if (value == NULL) {
+    atom = XInternAtom(Xdisplay, propname, True);
+    if (atom == None) {
+      return;
+    }
+    XDeleteProperty(Xdisplay, win, atom);
+  } else {
+    atom = XInternAtom(Xdisplay, propname, False);
+    prop.value = value;
+    prop.encoding = XA_STRING;
+    prop.format = 8;
+    prop.nitems = strlen(value);
+    XSetTextProperty(Xdisplay, win, &prop, atom);
+  }
+}
+
 Pixel
 get_bottom_shadow_color(Pixel norm_color, const char *type)
 {

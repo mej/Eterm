@@ -62,6 +62,7 @@ extern const char *rs_mfont[NFONTS];
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+extern void set_text_property(Window, char *, char *);
 extern Pixel get_bottom_shadow_color(Pixel, const char *);
 extern Pixel get_top_shadow_color(Pixel, const char *);
 extern void Create_Windows(int, char * []);

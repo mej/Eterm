@@ -1628,11 +1628,11 @@ xterm_seq(int op, const char *str)
 {
 
   XColor xcol;
-  char *nstr, *tnstr, *orig_tnstr;
+  char *nstr, *tnstr, *orig_tnstr, *valptr;
   unsigned char eterm_seq_op, which = 0;
 #ifdef PIXMAP_SUPPORT
   unsigned char changed = 0, scaled = 0;
-  char *color, *mod, *valptr;
+  char *color, *mod;
 #endif
 
   if (!str)
@@ -1647,7 +1647,13 @@ xterm_seq(int op, const char *str)
       set_title(str);
       break;
     case XTerm_prop:
-      
+      if ((nstr = strsep(&tnstr, ";")) == NULL) {
+        break;
+      }
+      if ((valptr = strchr(nstr, '=')) != NULL) {
+        *(valptr++) = 0;
+      }
+      set_text_property(TermWin.parent, nstr, valptr);
       break;
     case XTerm_name:
       set_title(str);		/* drop */

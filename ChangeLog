@@ -2440,3 +2440,10 @@ Mon Sep 20 21:00:46 PDT 1999	Michael Jennings <mej@eterm.org>
 	background image.
 	
 -------------------------------------------------------------------------------
+Mon Sep 20 21:25:46 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Added support for xterm's property change escape sequence as requested
+	by Greg Badros <gjb@cs.washington.edu>, the originator of the
+	sequence.
+	
+-------------------------------------------------------------------------------
