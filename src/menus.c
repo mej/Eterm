@@ -964,6 +964,7 @@ menu_draw(menu_t * menu)
   menu->bg = images[image_menu].norm->pmap->pixmap;
   D_MENU(("menu_draw():  Menu background is 0x%08x\n", menu->bg));
   XMapWindow(Xdisplay, menu->win);
+  XRaiseWindow(Xdisplay, menu->win);
 
   str_x = 2 * MENU_HGAP;
   if (images[image_menu].selected->iml->pad) {
