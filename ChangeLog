@@ -4133,3 +4133,10 @@ Wed May  9 17:18:11 PDT 2001	Michael Jennings <mej@eterm.org>
 	files as pointed out by Laurence J. Lane <ljlane@debian.org>.
 	
 -------------------------------------------------------------------------------
+Wed May  9 23:03:20 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Fixed the handling of menus larger than the screen, an issue noted by
+	Laurence J. Lane <ljlane@debian.org>.  While I was at it, I also made
+	the pointer move along with the menu when a move is necessary.
+	
+-------------------------------------------------------------------------------

@@ -1013,11 +1013,17 @@ menu_draw(menu_t *menu)
 
     if (dx >= 0) {
       dx = 0;
+    } else if (menu->w > scr->width) {
+      dx = -menu->x;
+      menu->x = 0;
     } else {
       menu->x = scr->width - menu->w;
     }
     if (dy >= 0) {
       dy = 0;
+    } else if (menu->h > scr->height) {
+      dy = -menu->y;
+      menu->y = 0;
     } else {
       menu->y = scr->height - menu->h;
     }
@@ -1030,7 +1036,24 @@ menu_draw(menu_t *menu)
       }
       D_MENU((" -> Checking menu \"%s\" to see if it needs to be moved.\n", tmp->title));
       if (tmp->state & MENU_STATE_IS_MAPPED) {
-        menu_move(tmp, tmp->x + dx, tmp->y + dy);
+        int x = tmp->x + dx, y = tmp->y + dy;
+        int this_dx, this_dy;
+
+        if (x < 0) {
+          x = 0;
+          this_dx = -tmp->x;
+        } else {
+          this_dx = dx;
+        }
+        if (y < 0) {
+          y = 0;
+          this_dy = -tmp->y;
+        } else {
+          this_dy = 0;
+        }
+        D_MENU((" -> Moving menu to %d, %d (a change of %d, %d from %d, %d)\n", x, y, this_dx, this_dy, tmp->x, tmp->y));
+        XWarpPointer(Xdisplay, tmp->win, None, 0, 0, tmp->w, tmp->h, this_dx, this_dy);
+        menu_move(tmp, x, y);
       }
     }
   }
