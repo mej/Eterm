@@ -5190,3 +5190,7 @@ Wed Mar  3 15:50:17 2004                        Michael Jennings (mej)
 
 Ported over the autogen.sh changes from LibAST and fixed configure.in.
 ----------------------------------------------------------------------
+Thu Mar 11 09:07:13 2004                        Michael Jennings (mej)
+
+Fixed window sizing race condition noted by Virgil <virgil@yak.net>.
+----------------------------------------------------------------------

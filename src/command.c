@@ -2146,6 +2146,7 @@ run_command(char **argv)
         PrivateModes |= PrivMode_scrollbar;
         SavedModes |= PrivMode_scrollbar;
     }
+    tt_winsize(ptyfd);
 #if DEBUG >= DEBUG_TTYMODE && defined(HAVE_TERMIOS_H)
     if (DEBUG_LEVEL >= DEBUG_TTYMODE) {
         debug_ttymode(&tio);
