@@ -5,7 +5,7 @@
  * bearing this same message or a similar one, is distributed under
  * the GNU Public License (GPL) as outlined in the COPYING file.
  *
- * Copyright (C) 1997, Michael Jennings and Tuomo Venalainen
+ * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ static const char cvs_ident[] = "$Id$";
 #include "e.h"
 #include "events.h"
 #include "font.h"
-#include "main.h"
+#include "startup.h"
 #include "menus.h"
 #include "misc.h"
 #include "options.h"
@@ -615,8 +615,8 @@ menuitem_create(char *text)
 
   menuitem_t *menuitem;
 
-  menuitem = (menuitem_t *) MALLOC(sizeof(menu_t));
-  MEMSET(menuitem, 0, sizeof(menu_t));
+  menuitem = (menuitem_t *) MALLOC(sizeof(menuitem_t));
+  MEMSET(menuitem, 0, sizeof(menuitem_t));
 
   if (text) {
     menuitem->text = StrDup(text);

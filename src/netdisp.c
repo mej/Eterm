@@ -62,7 +62,7 @@ static const char cvs_ident[] = "$Id$";
 #include <net/if.h>
 #include <net/if_arp.h>
 
-#include "main.h"
+#include "startup.h"
 
 /* return a pointer to a static buffer */
 char *

@@ -14,7 +14,7 @@
 #define _SCREEN_H
 
 #include <X11/Xfuncproto.h>
-#include "main.h"
+#include "startup.h"
 
 /************ Macros and Definitions ************/
 #define WRAP_CHAR		(MAX_COLS + 1)

@@ -25,7 +25,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/debug.h"
 #include "command.h"
 #include "debug.h"
-#include "main.h"
+#include "startup.h"
 #include "mem.h"
 #include "graphics.h"
 #include "screen.h"

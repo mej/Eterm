@@ -115,7 +115,7 @@ static const char cvs_ident[] = "$Id$";
 
 /* Eterm-specific Headers */
 #include "command.h"
-#include "main.h"
+#include "startup.h"
 #include "../libmej/debug.h"
 #include "debug.h"
 #include "../libmej/mem.h"

@@ -10,7 +10,7 @@ static const char cvs_ident[] = "$Id$";
 #include <stdio.h>
 
 #ifdef USE_POSIX_THREADS
-# include "main.h"
+# include "startup.h"
 # include "debug.h"
 # include "screen.h"
 

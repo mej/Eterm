@@ -21,7 +21,7 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"		/* for tt_printf() */
 #include "debug.h"
 #include "graphics.h"
-#include "main.h"
+#include "startup.h"
 #include "screen.h"
 
 /* commands:

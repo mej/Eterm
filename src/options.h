@@ -6,7 +6,7 @@
  * bearing this same message or a similar one, is distributed under
  * the GNU Public License (GPL) as outlined in the COPYING file.
  *
- * Copyright (C) 1997, Michael Jennings and Tuomo Venalainen
+ * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,10 +38,10 @@
 
 #define OPT_STR(s, l, d, p)         { s, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
 #define OPT_INT(s, l, d, p)         { s, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define OPT_BOOL(s, l, d, p, v, m)  { s, l, "(bool) " d, OPT_BOOLEAN,  (const int *)    p, v, m }
+#define OPT_BOOL(s, l, d, v, m)     { s, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
 #define OPT_LONG(l, d, p)           { 0, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
 #define OPT_ARGS(s, l, d, p)        { s, l, "(str)  " d, OPT_ARGUMENT, (const char ***) p, 0, 0 }
-#define OPT_BLONG(l, d, p, v, m)    { 0, l, "(bool) " d, OPT_BOOLEAN,  (const int *)    p, v, m }
+#define OPT_BLONG(l, d, v, m)       { 0, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
 #define OPT_ILONG(l, d, p)          { 0, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
 #define optList_numoptions()        (sizeof(optList)/sizeof(optList[0]))
 
@@ -214,15 +214,9 @@ extern       char  *rs_geometry;	/* Geometry string */
 extern        int   rs_desktop;         /* Startup desktop */
 extern        int   rs_saveLines;	/* Lines in the scrollback buffer */
 extern unsigned short rs_min_anchor_size; /* Minimum size, in pixels, of the scrollbar anchor */
-extern const char  *rs_scrollBar_right;
-extern const char  *rs_scrollBar_floating;
-extern const char  *rs_scrollbar_popup;
-extern       char  *rs_viewport_mode;
 extern       char  *rs_term_name;
 extern const char  *rs_menubar;
 extern const char  *rs_menu;
-extern const char  *rs_menubar_move;
-extern const char  *rs_pause;
 extern       char  *rs_icon;
 extern       char  *rs_scrollbar_type;
 extern unsigned long rs_scrollbar_width;
@@ -231,14 +225,12 @@ extern       char  *rs_anim_pixmap_list;
 extern       char **rs_anim_pixmaps;
 extern     time_t   rs_anim_delay;
 extern char *rs_path;
-extern const char *rs_saveUnder;
 extern char *rs_noCursor;
 #ifdef USE_XIM
 extern char *rs_inputMethod;
 extern char *rs_preeditType;
 #endif
 extern char *rs_name;
-extern char *rs_pixmapScale;
 extern char *rs_config_file;
 extern unsigned int rs_line_space;
 #ifndef NO_BOLDFONT

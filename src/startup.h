@@ -1,11 +1,11 @@
-/*  main.h -- Eterm main program header file
+/* startup.h -- Eterm main program header file
  *
  * This file is original work by Michael Jennings <mej@eterm.org> and
  * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
  * bearing this same message or a similar one, is distributed under
  * the GNU Public License (GPL) as outlined in the COPYING file.
  *
- * Copyright (C) 1997, Michael Jennings and Tuomo Venalainen
+ * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
  * 
  */
 
-#ifndef _MAIN_H
-# define _MAIN_H
+#ifndef _STARTUP_H
+# define _STARTUP_H
 # include <X11/Xfuncproto.h>
 # include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 # include <ctype.h>
@@ -126,4 +126,4 @@ extern short bg_needs_update;
 #endif
 extern const char *display_name;
 
-#endif	/* whole file */
+#endif

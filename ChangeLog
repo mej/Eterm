@@ -2549,3 +2549,10 @@ Thu Oct  7 16:39:48 PDT 1999	Michael Jennings <mej@eterm.org>
 	wasn't working.  It is now. :-)
 	
 -------------------------------------------------------------------------------
+Thu Oct  7 18:48:31 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Shaved off around 100 KB of memory usage per Eterm by moving more
+	code into the shared library, removing lots of unneeded variables, and
+	fixing some small leaks here and there.
+	
+-------------------------------------------------------------------------------
