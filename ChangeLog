@@ -4474,3 +4474,8 @@ Also updated the version number in configure.ac for all those
 mor^H^H^Hpeople using Debian unstable. :-)  Fixed a few compiler
 warnings too.
 ----------------------------------------------------------------------
+Tue Jan 29 23:46:18 2002                        Michael Jennings (mej)
+
+Improved debugging of image finding problems, and improved reporting
+of Imlib2 load errors.
+----------------------------------------------------------------------

@@ -125,6 +125,30 @@ image_mode_any(unsigned char mode)
 }
 
 #ifdef PIXMAP_SUPPORT
+const char *
+imlib_strerror(Imlib_Load_Error err)
+{
+  switch (err) {
+    case IMLIB_LOAD_ERROR_NONE:  return "Success"; break;
+    case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:  return "No such file or directory"; break;
+    case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:  return "Is a directory"; break;
+    case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:  return "Permission denied"; break;
+    case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:  return "No loader available for that file format"; break;
+    case IMLIB_LOAD_ERROR_PATH_TOO_LONG:  return "Path too long"; break;
+    case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:  return "Path component does not exist"; break;
+    case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:  return "Path component is not a directory"; break;
+    case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:  return "Path points outside address space"; break;
+    case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:  return "Too many symbolic links in path"; break;
+    case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:  return "Out of memory"; break;
+    case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:  return "No more file descriptors"; break;
+    case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:  return "Permission denied"; break;
+    case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:  return "Disk full"; break;
+    case IMLIB_LOAD_ERROR_UNKNOWN:
+    default:  return "Unknown error"; break;
+  }
+  ASSERT_NOTREACHED_RVAL("");
+}
+
 unsigned short
 parse_pixmap_ops(char *str)
 {
@@ -1191,8 +1215,13 @@ search_path(const char *pathlist, const char *file)
     }
     if (!S_ISDIR(fst.st_mode)) {
       return name;
+    } else {
+      D_OPTIONS(("%s is a directory.\n", name));
     }
+  } else {
+    D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
   }
+
   if ((p = strchr(file, '@')) == NULL)
     p = strchr(file, '\0');
   len = (p - file);
@@ -1208,9 +1237,18 @@ search_path(const char *pathlist, const char *file)
 
   D_OPTIONS(("Checking for file \"%s\"\n", name));
   if (!access(name, R_OK)) {
-    stat(name, &fst);
-    if (!S_ISDIR(fst.st_mode))
+    if (stat(name, &fst)) {
+      D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
+    } else {
+      D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+    }
+    if (!S_ISDIR(fst.st_mode)) {
       return name;
+    } else {
+      D_OPTIONS(("%s is a directory.\n", name));
+    }
+  } else {
+    D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
   }
   for (path = pathlist; path != NULL && *path != '\0'; path = p) {
     int n;
@@ -1247,9 +1285,18 @@ search_path(const char *pathlist, const char *file)
 
       D_OPTIONS(("Checking for file \"%s\"\n", name));
       if (!access(name, R_OK)) {
-	stat(name, &fst);
-	if (!S_ISDIR(fst.st_mode))
-	  return name;
+        if (stat(name, &fst)) {
+          D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
+        } else {
+          D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+        }
+        if (!S_ISDIR(fst.st_mode)) {
+          return name;
+        } else {
+          D_OPTIONS(("%s is a directory.\n", name));
+        }
+      } else {
+        D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
       }
     }
   }
@@ -1262,6 +1309,7 @@ load_image(const char *file, simage_t *simg)
 {
   const char *f;
   Imlib_Image *im;
+  Imlib_Load_Error im_err;
   char *geom;
 
   ASSERT_RVAL(file != NULL, 0);
@@ -1282,9 +1330,9 @@ load_image(const char *file, simage_t *simg)
       f = search_path(getenv(PATH_ENV), file);
     }
     if (f != NULL) {
-      im = imlib_load_image_immediately(f);
+      im = imlib_load_image_with_error_return(f, &im_err);
       if (im == NULL) {
-	print_error("Unable to load image file \"%s\"\n", file);
+	print_error("Unable to load image file \"%s\" -- %s\n", file, imlib_strerror(im_err));
 	return 0;
       } else {
 	reset_simage(simg, (RESET_IMLIB_IM | RESET_PMAP_PIXMAP | RESET_PMAP_MASK));
@@ -1292,6 +1340,8 @@ load_image(const char *file, simage_t *simg)
       }
       D_PIXMAP(("Found image %8p.\n", im));
       return 1;
+    } else {
+      print_error("Unable to locate file \"%s\" in image path.\n");
     }
   }
   reset_simage(simg, RESET_ALL_SIMG);

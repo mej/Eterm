@@ -2070,7 +2070,6 @@ parse_image(char *buff, void *state)
       return NULL;
     }
     if (!load_image(filename, images[idx].current)) {
-      print_error("Unable to locate image \"%s\" in the image path.\n", NONULL(filename));
       images[idx].mode &= ~(MODE_IMAGE | ALLOW_IMAGE);
       D_PIXMAP(("New image mode is 0x%02x, iml->im is 0x%08x\n", images[idx].mode, images[idx].current->iml->im));
     }
