@@ -222,10 +222,6 @@
  */
 #define NO_VT100_ANS
 
-/* Checks the current value of the window title and icon name before setting them.
- Can save unnecessary screen refreshes */
-#define SMART_WINDOW_TITLE 
-
 /* Allow changing of the foreground and background colors with "\E]39;color^G" */
 /* #define XTERM_COLOR_CHANGE */
 

@@ -1583,67 +1583,39 @@ set_colorfgbg(void)
 }
 #endif /* NO_BRIGHTCOLOR */
 
-#ifdef SMART_WINDOW_TITLE
 static void
 set_title(const char *str)
 {
+  static char *name = NULL;
 
-  char *name;
-
-  if (!str) str = APL_NAME "-" VERSION;
-  if (XFetchName(Xdisplay, TermWin.parent, &name) == 0) {
-    D_X11(("set_title():  XFetchName() failed.\n"));
-    name = NULL;
+  if (!str) {
+    str = APL_NAME "-" VERSION;
   }
   if (name == NULL || strcmp(name, str)) {
+    if (name != NULL) {
+      FREE(name);
+    }
     D_X11(("set_title():  Setting window title to \"%s\"\n", str));
     XStoreName(Xdisplay, TermWin.parent, str);
-#if DEBUG >= DEBUG_X11
-    if (debug_level >= DEBUG_X11) {
-      if (name) XFree(name);
-      if (XFetchName(Xdisplay, TermWin.parent, &name) == 0) {
-        print_error("set_title():  Unable to set the window title to \"%s\"!  What the heck is going on?!\n");
-      } else if (!name || strcmp(name, str)) {
-        print_error("set_title():  Window title still says \"%s\" after being set to \"%s\".  I am a confused Eterm. :(\n", NONULL(name), str);
-      } else {
-        D_X11(("set_title():  Succeeded.\n"));
-      }
-    }
-#endif
+    name = StrDup(str);
   }
-  if (name) XFree(name);
 }
 
 static void
 set_icon_name(const char *str)
 {
-
-  char *name;
+  static char *name = NULL;
 
   if (!str) str = APL_NAME "-" VERSION;
-  if (XGetIconName(Xdisplay, TermWin.parent, &name) == 0) {
-    D_X11(("set_icon_name():  XGetIconName() failed.\n"));
-    name = NULL;
-  }
   if (name == NULL || strcmp(name, str)) {
+    if (name != NULL) {
+      FREE(name);
+    }
     D_X11(("set_icon_name():  Setting window icon name to \"%s\"\n", str));
     XSetIconName(Xdisplay, TermWin.parent, str);
-#if DEBUG >= DEBUG_X11
-    if (debug_level >= DEBUG_X11) {
-      if (name) XFree(name);
-      if (XGetIconName(Xdisplay, TermWin.parent, &name) == 0) {
-        print_error("set_icon_name():  Unable to set the window icon name to \"%s\"!  What the heck is going on?!\n");
-      } else if (!name || strcmp(name, str)) {
-        print_error("set_icon_name():  Window icon name still says \"%s\" after being set to \"%s\".  I am a confused Eterm. :(\n", NONULL(name), str);
-      } else {
-        D_X11(("set_icon_name():  Succeeded.\n"));
-      }
-    }
-#endif
+    name = StrDup(str);
   }
-  if (name) XFree(name);
 }
-#endif
 
 /*
  * XTerm escape sequences: ESC ] Ps;Pt BEL

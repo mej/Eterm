@@ -1763,17 +1763,14 @@ scr_refresh(int type)
   Drawable draw_buffer;
   Pixmap pmap = images[image_bg].current->pmap->pixmap;
   int (*draw_string) (), (*draw_image_string) ();
-
+  register int low_x = 99999, low_y = 99999, high_x = 0, high_y = 0;
 #ifndef NO_BOLDFONT
   int bfont = 0;		/* we've changed font to bold font           */
-
 #endif
-
 #ifdef OPTIMIZE_HACKS
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
 #endif
-
 #ifdef PROFILE_SCREEN
   static long call_cnt = 0;
   static long long total_time = 0;
@@ -2064,24 +2061,26 @@ scr_refresh(int type)
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  gcmask |= (GCForeground | GCBackground);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
-	  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc,
-			 xpixel, ypixel - TermWin.font->ascent,
-			 Width2Pixel(1), Height2Pixel(1));
+	  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1), Height2Pixel(1));
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
 	} else {
 	  CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, 1);
 	}
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, 1);
+        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(1), ypixel + Height2Pixel(1));
 #ifndef NO_BOLDOVERSTRIKE
-	if (MONO_BOLD(rend))
+	if (MONO_BOLD(rend)) {
 	  DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, 1);
+          UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(1), ypixel + Height2Pixel(1));
+        }
 #endif
       } else
 #ifdef PIXMAP_SUPPORT
       if (background_is_pixmap() && (back == bgColor)) {
 	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
+        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(len), ypixel + Height2Pixel(1));
       } else
 #endif
       {
@@ -2089,18 +2088,21 @@ scr_refresh(int type)
 	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
 #endif
 	DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
+        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(len), ypixel + Height2Pixel(1));
       }
 
       /* do the convoluted bold overstrike */
 #ifndef NO_BOLDOVERSTRIKE
-      if (MONO_BOLD(rend))
+      if (MONO_BOLD(rend)) {
 	DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, wlen);
+        UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(len), ypixel + Height2Pixel(1));
+      }
 #endif
 
-      if ((rend & RS_Uline) && (TermWin.font->descent > 1))
-	XDrawLine(Xdisplay, draw_buffer, TermWin.gc,
-		  xpixel, ypixel + 1,
-		  xpixel + Width2Pixel(len) - 1, ypixel + 1);
+      if ((rend & RS_Uline) && (TermWin.font->descent > 1)) {
+	XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(len) - 1, ypixel + 1);
+        UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(len) - 1, ypixel + 1);
+      }
       if (is_cursor == 1) {
 #ifndef NO_CURSORCOLOR
 	if (PixColors[cursorColor] != PixColors[bgColor]) {
@@ -2109,9 +2111,8 @@ scr_refresh(int type)
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
 	}
 #endif
-	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc,
-		       xpixel, ypixel - TermWin.font->ascent,
-		       Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
       }
       if (gcmask) {		/* restore normal colors */
 	gcvalue.foreground = PixColors[fgColor];
@@ -2142,7 +2143,7 @@ scr_refresh(int type)
 #endif
   }
   if (buffer_pixmap) {
-    XClearWindow(Xdisplay, TermWin.vt);
+    XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
   } else {
     if (boldlast) {
       XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,

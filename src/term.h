@@ -148,11 +148,6 @@ enum color_list {
                               default:  PrivMode(state, bit); break; \
                             }} while (0)
 
-#ifndef SMART_WINDOW_TITLE
-# define set_title(str)     XStoreName(Xdisplay, TermWin.parent, ((str) ? (str) : (APL_NAME "-" VERSION)))
-# define set_icon_name(str) XSetIconName(Xdisplay, TermWin.parent, ((str) ? (str) : (APL_NAME "-" VERSION)))
-#endif
-
 /************ Variables ************/
 #ifdef META8_OPTION
 extern unsigned char meta_char;	/* Alt-key prefix */

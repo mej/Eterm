@@ -754,11 +754,6 @@ version(void)
 #else
   printf(" -NO_VT100_ANS");
 #endif
-#ifdef SMART_WINDOW_TITLE
-  printf(" +SMART_WINDOW_TITLE");
-#else
-  printf(" -SMART_WINDOW_TITLE");
-#endif
 #ifdef XTERM_COLOR_CHANGE
   printf(" +XTERM_COLOR_CHANGE");
 #else

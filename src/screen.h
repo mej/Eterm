@@ -49,6 +49,8 @@
 #define CLEAR_CHARS(x, y, num) ((buffer_pixmap) \
                                ? (XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(num), Height2Pixel(1), x, y)) \
                                : (XClearArea(Xdisplay, TermWin.vt, x, y, Width2Pixel(num), Height2Pixel(1), 0)))
+#define UPDATE_BOX(x1, y1, x2, y2)  do {if (buffer_pixmap) {if (x1 < low_x) low_x = x1; if (x2 > high_x) high_x = x2; \
+                                                            if (y1 < low_y) low_y = y1; if (y2 > high_y) high_y = y2;}} while (0)
 #define ERASE_ROWS(row, num) (XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num)))
 #define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
 #ifndef NO_BRIGHTCOLOR
