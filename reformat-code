@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for i in *.c src/*.c utils/*.c ; do
+  if test -f $i; then
+    echo Reformatting $i
+    indent -bap -br -ce -ci4 -cli2 -cs -di1 -i2 -l140 -lp -lps -nbc -npcs -nss -nsob -psl $i
+  fi
+done
+

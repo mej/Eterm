@@ -1,0 +1,1627 @@
+ChangeLog
+=========
+
+This file contains a listing of modifications to Eterm in CVS on a per-commit
+basis.  Dates are included, as are nicknames/names/initials for the persons
+making the changes.
+	
+
+Thu Sep  3 17:27:35 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Removed RELNOTES.Eterm and split it into README and ChangeLog.  I also
+	fixed options.c so that keysym definitions are at least accepted.  Now
+	I'll have to find a tn3270 to test with. :-)
+
+-------------------------------------------------------------------------------
+Thu Sep  3 17:57:38 CDT 1998	Michael Jennings <mej@mw.3com.com>	
+
+	Added the trans theme and fixed doc/Makefile.in to remove Esetroot on
+	"make distclean"
+
+-------------------------------------------------------------------------------
+Thu Sep  3 18:36:10 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added the --shade option to replace the DARKEN_TRANSPARENCY #define.
+
+-------------------------------------------------------------------------------
+Thu Sep  3 20:28:22 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed problems compiling with MENUBAR_MAX == 0 and without pixmap
+	support and/or transparency support.
+
+	Some unneeded code was removed from main.c as well.
+
+	Added the --enable-menus (or --disable-menus) option to the configure
+	script to automatically disable menubar support.
+
+-------------------------------------------------------------------------------
+Fri Sep  4 11:28:30 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added in the Eterm man page Shaleh <shaleh@debian.org> fixed up for us.
+	Thanks Shaleh!
+
+	Also updated the doc/FAQ.html file with the latest FAQ from the web.
+	
+-------------------------------------------------------------------------------
+Fri Sep  4 11:36:33 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Ripped the RELNOTES.Eterm stuff out of ChangeLog and put it in
+	ReleaseNotes.  I decided not to use the name RELNOTES because it does
+	annoying things with trying to Tab-complete "README". =)  From now on,
+	ChangeLog will be the detail and RELNOTES will be the summary.
+
+-------------------------------------------------------------------------------
+Fri Sep  4 13:24:49 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug mandrake pointed out where supplying a pixmap would kill
+	a transparent Eterm.
+	
+--------------------------------------------------------------------------------
+Fri Sep  4 13:47:32 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the bug pointed out by technoir that made transparent Eterms
+	flicker when there were two on the desktop at the same time and one was
+	moving.
+	
+-------------------------------------------------------------------------------
+Fri Sep  4 15:42:55 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed scrollbar_floating with transparency so that the root image
+	shows through underneath the scrollbar.  The effect is really sweet. :)
+	
+--------------------------------------------------------------------------------
+Fri Sep  4 16:22:29 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed scrollbar_floating without transparency so that it shows the
+	background color instead of white.
+	
+-------------------------------------------------------------------------------
+Fri Sep  4 18:48:08 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added the --tint option.  Specify a shade of tinting for a pseudo-
+	transparent Eterm.  It implies --shade.  Choices are red, green, blue,
+	purple, orange, or yellow.
+	
+-------------------------------------------------------------------------------
+Fri Sep  4 19:31:18 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a stupid mistake in doing the tinting.  Also enabled "yes" and
+	"no" as valid boolean values.
+
+-------------------------------------------------------------------------------
+Fri Sep  4 21:34:09 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the color names.  Thanks to technoir for assistance with this.
+	Choices are now red, green, blue, cyan, magenta, yellow.
+	
+-------------------------------------------------------------------------------
+Sat Sep  5 14:28:18 1998	sdh
+
+	Apply focus color change to menubar and scrollbars.  Remove old
+	code that was surrounded by CHANGE_SCROLLCOLOR_ON_FOCUS.  Toss
+	update flag that was exported by scrollbar.h and let menubar.c &
+	scrollbar.c track focus independently.  Old code was doing a bunch
+	of XCreateGC's without ever freeing the gc.  Still a bit kludgy,
+	but no more so than the shadow color code for the menu/scroll bar.
+
+	New config option, unfocusedscrollbar <color>.  Command line
+	option --unfocused-scrollbar-color <color>.  Add config entry to
+	themes/Eterm/MAIN.
+
+	Turn on CHANGE_SCROLLCOLOR_ON_FOCUS by default in feature.h.
+
+	Add color init entry for menuTextColor def_colorName (main.c).
+
+	Why does menubar.c use the global Attributes exported by main.c?
+	
+-------------------------------------------------------------------------------
+Tue Sep  8 13:50:10 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Updated the menubar files to take advantage of some of the newer
+	background images in the collection.  Also removed the pixmap menu from
+	the "trans" theme since it's all ignored anyway.
+	
+-------------------------------------------------------------------------------
+Tue Sep  8 15:14:00 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Cleaned up the changes made by "sdh" (whoever that is). :-)  If the
+	unfocused color is not defined, it will revert to the scrollbar color,
+	creating a way to "turn the option off," so to speak.  It also makes
+	sure that people who don't want to see the difference don't see it.
+
+	Added autogen.sh for the tragically habitual. ;-)
+	
+	By the way, a few pointers for those messing with Eterm.  For one,
+	feature.h is created from feature.h.in, so changing feature.h does
+	not affect the final distributed form of Eterm.  I had to update
+	src/feature.h.in to define CHANGE_SCROLLCOLOR_ON_FOCUS in order to see
+	the changes take effect.  For two, if you change the MAIN.in for Eterm,
+	please change the other themes too.
+	
+-------------------------------------------------------------------------------
+Tue Sep  8 17:16:34 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed transparency so that it works on any desktop, not just the root.
+	Only works with E, so non-E users are S.O.L.  (Sorry, that's life.)
+	Thanks to raster for helping me with this. :-)
+	
+-------------------------------------------------------------------------------
+Tue Sep  8 20:52:18 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added a new feature.  This was requested by Nick Vargish
+	<nav@patriot.net>.  Basically, the new option --watch-bg (or config
+	file toggle "watch_bg") tells Eterm to keep track of the mod time of
+	the background pixmap.  If the pixmap changes, Eterm updates and
+	redraws the background.  When coupled with an outside program, this
+	can produce cycling and/or animated backgrounds.
+
+	NOTE:  This feature is highly experimental.  It can crash Eterm if not
+	done properly and carefully.  In fact, at this point it's more of a
+	demonstration/proof-of-concept than a feature.  If there is enough
+	interest, I will internalize more of it.
+	
+-------------------------------------------------------------------------------
+Sun Sep 13 13:18:31 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the scrollbar_floating option with transparency (again).  sdh's
+	changes on 9/5 screwed it up.  The pixmap now shows through once again.
+	And there was much rejoicing.
+	
+-------------------------------------------------------------------------------
+Sun Sep 13 16:08:06 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added .cvsignore files.
+	
+-------------------------------------------------------------------------------
+Mon Sep 14 10:11:41 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug pointed out by Hans Engren <h@ns.engren.org> which kept
+	Eterm and Esetroot from working under certain conditions.
+	
+-------------------------------------------------------------------------------
+Mon Sep 14 11:38:06 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Final documentation cleanups before the release of 0.8.6.
+	
+-------------------------------------------------------------------------------
+Mon Sep 14 12:04:43 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Final compilation cleanups before release of 0.8.6.  With this commit,
+	CVS will contain the release version of 0.8.6.
+	
+-------------------------------------------------------------------------------
+Mon Sep 14 12:58:32 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Installed 0.8.7 into CVS.  This release has some major changes in it.
+	For one, Eterm now uses automake and libtool.  The old libmej is now
+	built as a shared library as well as a static one.  Also, everything
+	but the main() function has been moved into a library, libEterm.  Since
+	most people use lots of Eterms at once, creating a shared library will
+	reduce the text segment of each Eterm significantly, saving quite a bit
+	of memory per Eterm.
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 13:10:20 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug compiling on Linux.  (Damn Linux having dprintf!) ;-P
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 13:23:00 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed another bug on Linux, this time with linking Esetroot.
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 14:10:05 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Removed MIN_ANCHOR_SIZE and added -a (--min-anchor-size) option.  It
+	is 0 by default so ppl won't complain about the scroll-up "bug".
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 15:03:57 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Changed the pixmap setting code in Esetroot so it will (hopefully) work
+	better.  Geez, if everyone would just use Enlightenment, it would save
+	me so much grief.... ;-)
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 16:00:26 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the scaling problem in Esetroot pointed out by technoir thanks
+	to some code swiped from Enlightenment.  I also nuked the code that
+	was killing Enlightenment when running Esetroot.  (Not an E bug, just
+	lame code.) =P
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 17:25:53 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Choosing a pixmap in a transparent Eterm now works.  I also renamed
+	StrSep() to strsep() and changed configure.in to check for strsep().
+	That allowed me to remove some really annoying #ifdef's in command.c.
+	
+-------------------------------------------------------------------------------
+Tue Sep 15 17:59:24 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added initial support for an escape code sequence set to mess with the
+	various transparency options.  It doesn't work yet, so don't bother
+	trying to use it.  Some of it will even crash Eterm at this point, but
+	I'm going home anyway.  :-)
+	
+-------------------------------------------------------------------------------
+Wed Sep 16 11:42:16 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Initial work on a patch for CygWin32 support.  Also updated autogen.sh
+	to create libtool stuff.
+	
+-------------------------------------------------------------------------------
+Wed Sep 16 15:25:32 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed some misc. problems with the new escape sequences.  Toggling
+	transparency on and off now works (more or less).  At least stuff won't
+	crash. :-)  Still some kinks to iron out, as always.
+	
+-------------------------------------------------------------------------------
+Wed Sep 16 17:21:52 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the escape sequence for Pixmap -> None (again).  Also made the
+	transparency toggle work for not having a pixmap.
+	
+-------------------------------------------------------------------------------
+Wed Sep 16 18:20:47 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Updated the default themes to include the Trans menu.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 13:05:30 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Hack for newer Linux versions in which the real uid must be nonzero to
+	open the display.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 13:50:50 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Moved the #define for the Linux fix into config.h
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 16:59:17 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	This version has a working CygWin32 port! :-)  Some minor hacking may
+	still be required.
+
+	Also included a test for something with transparency.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 17:29:39 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Changed code to use setres*id() functions if they are there (Linux and
+	HP-UX only AFAIK).  This is a vast security improvement for Linux.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 17:49:19 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Hopefully fixed privileges() for systems without setres*id() or saved
+	uids.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 17:58:17 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	More .cvsignore entries.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 19:03:22 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Changed the --watch-bg option to --watch-pixmap, which will hopefully
+	make it less tempting for people to think it has something to do with
+	transparency.
+
+	Also added the --watch-desktop option which causes Eterm to monitor
+	the desktop pixmap for changes and update accordingly.  It doesn't
+	cause flicker like it used to.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 19:36:56 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Some config file parser cleanups and additions to the trans theme.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 20:03:57 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Makefile and theme cleanups.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 20:45:03 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a major bug which caused Eterm to seg fault in trans theme.
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 20:56:33 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed another seg fault bug, this time with changing the pixmap via
+	escape sequence.  Doh!
+	
+-------------------------------------------------------------------------------
+Thu Sep 17 21:03:34 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Changed the scrollbar_floating attribute back on for the trans theme.
+	Geez, is there no end to the stuff I've screwed up today?? =P
+	
+-------------------------------------------------------------------------------
+Fri Sep 18 09:33:30 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added some checks to autogen.sh
+	
+-------------------------------------------------------------------------------
+Fri Sep 18 11:18:59 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Put in the #define IMLIB_TRANS, which will make Eterm use Imlib to do
+	the transparency stuff.  There's a problem with it, though, either in
+	Imlib_create_image_from_drawable() or the way I'm calling it.  For
+	obvious reasons, it's off by default.
+	
+-------------------------------------------------------------------------------
+Fri Sep 18 16:39:15 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	As expected, raster's imlib fix corrected the problem.  Imlib
+	transparency rendering now works as expected.  It is still off by
+	default since tinting and shading aren't in yet.
+
+	Also in this commit is a "fix" to autogen.sh.  I got complaints (well,
+	actually one complaint) about autogen.sh not running configure, so now
+	it does.  IMHO, this behavior is incorrect, as the function of autogen
+	should be to GENerate the AUTOconf/AUTOmake stuff, not run it.  But
+	since "all the other apps in cvs" run configure, for the sake of
+	standardization and nothing more, I'll do it.
+
+-------------------------------------------------------------------------------
+Mon Sep 21 15:45:17 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the aforementioned memory leak as well as some others.  Dangling
+	pointers were cut in half. :)
+
+	Imlib transparency still needs to be worked on (read:  sped up).  One
+	thing at a time though.
+
+	I also fixed some duplicate rendering that was going on with
+	pseudo-transparency.
+	
+-------------------------------------------------------------------------------
+Mon Sep 21 16:10:46 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the transparency toggle.
+	
+-------------------------------------------------------------------------------
+Mon Sep 21 17:05:31 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed bug in Imlib transparency code.
+	
+-------------------------------------------------------------------------------
+Mon Sep 21 19:46:44 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Looks like Imlib-based transparency is working now.  It only reads the
+	desktop image once.  After that, it uses the same desktop pixmap
+	throughout.  So startup is much slower, but through the rest of the
+	run it's much faster.
+	
+-------------------------------------------------------------------------------
+Mon Sep 21 20:53:44 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added --shade-pct.  When Imlib-based transparency is enabled, you can
+	specify a percentage by which to shade the background (0 being no
+	shading, 100 being all black, not to mention rather pointless).
+	
+-------------------------------------------------------------------------------
+Tue Sep 22 10:41:32 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	With Imlib-based transparency, Eterm now takes --tint as a numerical
+	option.  You specify a 24-bit RGB mask for colored tinting, such as
+	"--tint 0xffafaf" for a deep red tint or "--tint 0xefefff" for a slight
+	blue tint.
+	
+-------------------------------------------------------------------------------
+Tue Sep 22 14:48:03 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug in non-Imlib-based transparency.  I also made preparations
+	for letting non-Imlib-based transparency do shading percentages and
+	tinting masks.  Works on 8bpp, but since that's the only thing I can
+	test, I'll wait until tomorrow and make sure the other pixel depths
+	work before I go further.
+
+	Imlib-based transparency is pretty slow, but there's more that can be
+	done with it as far as RGB curves and stuff, so I plan to keep support
+	for it in there.  But I'd stick to using Xlib-based transparency for
+	now.
+	
+-------------------------------------------------------------------------------
+Tue Sep 22 18:28:49 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the menubar code so that the menus aren't clipped by the window
+	or screen edge.  There's still one small problem, but I'll look at that
+	later. :)
+	
+-------------------------------------------------------------------------------
+Tue Sep 22 21:20:16 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	If root_pixmap() returns None, transparency gets turned off instead of
+	rendering on a null pixmap.
+	
+-------------------------------------------------------------------------------
+Wed Sep 23 10:26:01 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed that one last menubar bug.
+	
+-------------------------------------------------------------------------------
+Wed Sep 23 11:46:44 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a segfault in Esetroot.  Also fixed --watch-desktop to work
+	again (just for you, Nat). ;-)
+	
+-------------------------------------------------------------------------------
+Wed Sep 23 19:07:11 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Some bug fixes pertaining to root_pixmap() failing, transparency and
+	background pixmaps coinciding, etc.
+
+	Also changed the shell_expand() function in options.c so that \'
+	within single quotes would insert a single quote.  This differs from
+	the shell behavior, but I prefer it. :)
+	
+-------------------------------------------------------------------------------
+Thu Sep 24 17:14:29 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug with tiling pixmaps in transparency code.  (Didn't do it
+	the way raster wanted it, but it works for now.  I'll make it better
+	later.  Unless raster wants to patch it....) :-)
+
+	Fixed a bug building without CHANGE_SCROLLCOLOR_ON_FOCUS support.
+
+	Changed config file magic numbers to "Eterm-0.8".
+
+	The latter two are thanks to Casey Zacek <casey@netcomi.com>
+	
+-------------------------------------------------------------------------------
+Fri Sep 25 22:32:30 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug in Esetroot.c and the CUTCHARS default in src/feature.h.in
+	
+-------------------------------------------------------------------------------
+Fri Sep 25 22:35:44 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Missed another typo in Esetroot.c
+	
+-------------------------------------------------------------------------------
+Sat Sep 26 21:11:48 EDT 1998    mandrake <mandrake@mandrake.net>
+
+	cleaned up a lot of stuff so it compiles a little cleaner.
+
+-------------------------------------------------------------------------------
+Tue Sep 29 14:04:39 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed utmp.c for OpenBSD thanks to Jason Ish <jason@obskure.net>
+	
+-------------------------------------------------------------------------------
+Tue Sep 29 17:14:11 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Removed the variables mandrake commented out, except for the one that
+	was still needed.  I uncommented that one and put it in #ifdef's to
+	fix the compiler warnings.
+	
+-------------------------------------------------------------------------------
+Thu Oct  8 15:24:10 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Some transparency speed-ups (I hope).  Still trying to figure out why
+	I'm not getting ReparentNotify events. =P  Also fixed the bug mandrake
+	pointed out with transparency and the desktop dragbar under E.
+
+	Also some fixes from Fritz Mueller <fritzm@digidesign.com> for X
+	servers which lie about pixel depth and for a bug in Eterm's magic
+	number checker.
+	
+-------------------------------------------------------------------------------
+Thu Oct  8 15:29:01 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Correct order:  Compile FIRST, commit SECOND.  Doh!! =P
+	
+-------------------------------------------------------------------------------
+Fri Oct  9 12:06:10 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added --with-debugging[=num] to support debugging levels up through 5.
+
+	Also added stack trace dump if the OS supports it.  In order of
+	preference, the methods are:  U_STACK_TRACE() (on HP-UX in libcl),
+	pstack (on Solaris), gdb, dbx.
+
+-------------------------------------------------------------------------------
+Fri Oct  9 12:18:32 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Oops, forgot to add libmej/snprintf.c to the repository. =P
+	
+-------------------------------------------------------------------------------
+Sun Oct 11 17:35:18 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed autogen.sh so that VERSION was defined again.  Apparently
+	running autoheader before other stuff in autogen.sh is a Bad Thing.
+	
+-------------------------------------------------------------------------------
+Tue Oct 13 17:38:30 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	If the desktop pixmap goes away (which happens if you're on another
+	desktop for awhile), we'll just use the old one until it comes back.
+
+	Also added Id strings to all C files.
+	
+-------------------------------------------------------------------------------
+Tue Oct 13 18:18:03 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added Id strings to the Makefile.am files, src/feature.h.in,
+	configure.in, and autogen.sh.  Also added an entry to keep CVS quiet.
+	
+-------------------------------------------------------------------------------
+Wed Oct 14 12:55:13 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed the bug with dragging a transparent Eterm across E's desktop
+	dragbar.  It reparents to the root window for a bit, but once you drop
+	the window, it changes backdrops right on cue.  Also works when moving
+	Eterm windows between desktops.  Note that this requires the use of
+	the -W (--watch-desktop) option.
+	
+-------------------------------------------------------------------------------
+Wed Oct 14 13:02:37 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Nuked some leftover code from testing.  (oops)
+	
+-------------------------------------------------------------------------------
+Wed Oct 14 14:49:01 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added some debugging code to Esetroot.c and added the -x switch to turn
+	on debugging.  Hopefully this will help me track down the DISPLAY bug.
+	
+-------------------------------------------------------------------------------
+Wed Oct 14 14:54:46 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Blah.  Forgot to "if (debug)" out a couple lines. =P
+	
+-------------------------------------------------------------------------------
+Mon Oct 19 15:33:48 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed transparency stuff so it wouldn't take up mondo CPU time.  Since
+	we're getting events for other windows now, we need to make sure we
+	only act on events that are ours.
+
+	Also fixed scrollbar coloring in transparent mode.
+	
+-------------------------------------------------------------------------------
+Mon Oct 19 17:03:47 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	New features courtesy a patch from James Antill <james@crazylands.org>
+	as described here:
+
+	\e[9n prints the pixmap filename in the title bar.  In transparency
+	mode, prints transparency info to the title bar.
+
+	--home-on-input option which split off part of --home-on-echo
+
+	Replaced "strncasecmp(buff, "string ", num)" with macro.
+	
+-------------------------------------------------------------------------------
+Wed Oct 21 11:11:04 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug with -W and -x together.
+	
+-------------------------------------------------------------------------------
+Wed Oct 21 12:26:53 CDT 1998	Michael Jennings <mej@mw.3com.com>
+
+	Final documentation cleanups for 0.8.7 release tomorrow.  Barring bug
+	fixes in the next 24 hours or so, this is 0.8.7 as it will be released
+	sometime tomorrow morning.
+	
+-------------------------------------------------------------------------------
+Thu Oct 22 23:38:47 PDT 1998 Manish Singh <yosh@gimp.org>
+
+	* strings.c, strings.h: make everything consistent
+
+-------------------------------------------------------------------------------
+Mon Oct 26 22:26:47 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Major changes to the man page.  Hopefully people who actually bother
+	to read the man page will find it easier to mess with the MAIN file.
+	
+-------------------------------------------------------------------------------
+Mon Nov  2 13:24:21 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Lots of changes here.  This is the first commit of 0.8.8.  The new
+	features are:
+
+	--shade now takes a percentage of shading.  0% is no shading, 100% is
+	all black, and anything in between goes.  Percent sign optional.
+
+	--tint now takes a 24-bit hexadecimal mask.  0xffffff is no tinting,
+	0x000000 is black, and anything in between goes.  It will also take
+	decimal or octal if you *really* have the urge, but hex is the most
+	readable.
+
+	-V (--menubar-move) now allows dragging the menubar to move the
+	window.  It is on by default if the -x (--borderless) option is used,
+	and off by default otherwise.
+
+	The transparency/shading/tinting escape sequences now work.
+
+	FORCE_BACKSPACE and FORCE_DELETE have been fixed.
+
+	KS_DELETE (the strings associated with pressing the Delete key) is
+	now set to ^? by default.
+
+	-N (--anim) options for background pixmap cycling.  Syntax is
+	"<delay> <background> <background> ..." where <delay> is the delay in
+	seconds between updates and <background> is either "0 0 <file>" or
+	"-1 -1 <file>" or "<file>".  This feature should still be considered
+	beta.
+
+	--with-cc argument to configure for forcing a build with an alternative
+	compiler (for those who have pgcc but want to use gcc, etc.).
+	
+-------------------------------------------------------------------------------
+Mon Nov  2 16:11:37 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Feh.  Got rid of the warning in command.c.  Chalk that one up to
+	laziness on my part. =P
+	
+-------------------------------------------------------------------------------
+Tue Nov  3 19:56:15 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added an optional boolean parameter to ESC ] 6 ; 0 escape sequence.
+	Also added code to clear the shading/tinting when loading a new
+	pixmap.  This will be an option soon, but not tonight.
+	
+-------------------------------------------------------------------------------
+Thu Nov  5 19:17:58 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added support for the old color strings to the escape sequence handler
+	for tinting.  They won't work on the command line, though.
+
+	xerror_handler() will no longer exit Eterm.  We'll see how that goes.
+
+	New --disable-stack-trace option to configure to disable stack
+	tracing on abnormal termination.
+	
+-------------------------------------------------------------------------------
+Fri Nov  6 09:26:38 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Shading and tinting were broken for 2 days, and nobody told me.  Feh.
+	
+-------------------------------------------------------------------------------
+Mon Nov  9 15:38:11 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	No, I said *don't* exit on X errors.  And I meant it.  Really.
+	
+-------------------------------------------------------------------------------
+Mon Nov  9 20:00:08 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added src/Eterm.xpm as the default Eterm icon pixmap.
+
+	Added the -I/--icon parameters to specify an alternate icon pixmap.
+	The attribute "icon <filename>" is valid in the pixmaps context of the
+	config file.
+	
+	Note that -I used to be --print-pipe.  Not any more.
+
+-------------------------------------------------------------------------------
+Tue Nov 10 11:47:42 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug when no background image was specified.  Dunno how on
+	earth that happened....
+
+	When Eterm gets the escape sequence to change the title, it will also
+	change the icon name.  Not compliant with other terms, but I don't
+	care.  What mandrake wants, mandrake gets. ;-)  Besides, sometimes you
+	have to violate standards in favor of useability.  This is one of
+	those times.
+
+	When an icon is specified, use XGetIconSizes() to pick a size for it.
+	When using the default, it's 64x64.  The WM can cope. :-)
+
+	No, mandrake, it's still not ICCCM, but I'm working on it. :-)
+
+	And no, raster, it doesn't snapshot the window.  I'll leave that one
+	to you to write.  You can thank me later. >:)
+	
+-------------------------------------------------------------------------------
+Tue Nov 10 20:11:54 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Now the hosts in the chooser theme change the title bar instead of the
+	menubar title, thanks to a new extended menubar function called
+	"apptitle:".  See themes/chooser/chooser.menu for an example of it in
+	action.
+
+	Kterm (Kanji Eterm) now supports multi-byte fonts in the menubar,
+	thanks to Sung-Hyun Nam <namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------
+Wed Nov 11 12:18:00 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Wheee.  Minor bug fix.  Also redid the cvs_ident string declarations
+	to make egcs happy. =P
+	
+-------------------------------------------------------------------------------
+Thu Nov 12 16:33:17 KST 1998    Sung-Hyun Nam  <namsh@lgic.co.kr>
+
+	KANJI: Minor memory leak fix.  Change XLOCALE stuff.
+
+-------------------------------------------------------------------------------
+Thu Nov 12 03:10:50 EST 1998	Gerald Britton <gbritton@mit.edu>
+
+	Esetroot.c: Fixed an X server memory leak.
+
+------------------------------------------------------------------------------- 
+Thu Nov 12 08:54:58 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Reverted Gerald's change.  Been there, done that.  It kills E.  Sorry,
+	but if the X server doesn't work right, that's not my problem.  I'm
+	not going to kill E over it.  Tough break.
+	
+------------------------------------------------------------------------------- 
+Mon Nov 16 19:31:29 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Finally got around to doing that icon window thing to make mandrake
+	and ICCCM (the next-to-worst acronym in history, second only to i18n)
+	happy.  Are we there yet?
+	
+------------------------------------------------------------------------------- 
+Tue Nov 17 11:17:57 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Fixes for Digital UNIX from <wd@unx.dec.com>.  These were all "Stupid
+	KainX" bugs that I didn't catch because GNU's cpp is more forgiving
+	than most vendors' cpp's.
+	
+------------------------------------------------------------------------------- 
+Tue Nov 24 13:39:34 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	This is the Correct (tm) fix to the memory leak pointed out by
+	Gerald.  He and I had a pow-wow of sorts via e-mail with Nat and
+	raster, and this is the solution that wasn't crapped on by anyone.
+	:-)
+
+	Just to document what we came up with....  Esetroot sets the
+	_XROOTPMAP_ID property as always, but now it sets a companion property
+	as well, ESETROOT_PMAP_ID.  Both are set to the same pixmap ID.  When
+	Esetroot runs, it checks to see if _XROOTPMAP_ID == ESETROOT_PMAP_ID,
+	and if so, it knows that it set the pixmap itself and can safely do
+	an XKillClient() on it.  If they are not equal, calling XKillClient()
+	would kill the application which did set it, most likely a window
+	manager like Enlightenment or the patched versions of AfterStep or
+	WindowMaker.
+
+	No window manager code changes should be necessary.  If, however,
+	a person were to write a "helper app" that sets the background (like
+	Esetroot does), further memory leaks could be avoided by having that
+	program set/change ESETROOT_PMAP_ID.
+	
+------------------------------------------------------------------------------- 
+Tue Nov 24 16:26:22 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added -center (-c) option to Esetroot for centering the pixmap.  Most
+	of these changes are from a patch submitted by Ralph Giles
+	<ralphbla@sfu.ca>.
+	
+------------------------------------------------------------------------------- 
+Tue Nov 24 20:05:05 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Some fairly useless stuff that I really don't even want to document
+	for fear it might actually get used, and people will expect more out
+	of it than they should.  If you really wanna know, diff it. :)
+	
+------------------------------------------------------------------------------- 
+Tue Nov 24 21:48:24 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	New feature.  --pause will make Eterm wait for a keypress when the
+	child process exits.  Useful most often in combination with -e.
+
+	Also removed all traces of --watch-pixmap.  Good riddance.  -N
+	(--anim) is much smoother and less bug-prone.
+	
+------------------------------------------------------------------------------- 
+Wed Nov 25 11:47:05 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Some bug fixes in the ongoing saga of KainX vs. The Solaris 7 64-Bit
+	Kernel.
+	
+------------------------------------------------------------------------------- 
+Fri Dec  4 16:11:03 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Ok, this should make Eterm compliant with the GNU FHS.  I also did a
+	LOT of futzing around with configure.in, so if I broke something in
+	doing either of these things, please let me know.
+	
+------------------------------------------------------------------------------- 
+Fri Dec  4 19:45:39 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Feh.  Thanks Pavlov. :-)
+	
+------------------------------------------------------------------------------- 
+Mon Dec  7 18:04:09 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	FreeBSD fixes, fixes for building without Imlib support (oops), and
+	fixes for the RPATH problem with Debian and autofs.  Thanks to Murray
+	Stokely <murray@cdrom.com> for continued help on the FreeBSD front.
+	
+------------------------------------------------------------------------------- 
+Tue Dec  8 12:10:55 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Another of the Eterm-specific escape sequences.  This one is \e]6;3\a
+	which will force Eterm to update the pseudo-transparent background.
+	To those who've complained about -W making things too slow...Merry
+	Christmas. :-)
+	
+------------------------------------------------------------------------------- 
+Tue Dec  8 16:55:44 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Another oopsie from the December 4th changes.
+	
+------------------------------------------------------------------------------- 
+Fri Dec 18 13:44:04 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	The long awaited selection options.  There are two new options here.
+	The first, --xterm-select, duplicates xterm's treatment of cutchars
+	(which is broken, IMHO, but some people want it).  The second,
+	--select-line, causes Eterm to select the whole line on a triple-click.
+	The default is now to select only to the end of the line plus the
+	current word.  The corresponding config file attributes, xterm_select
+	and select_line, both go in the toggles context.
+	
+------------------------------------------------------------------------------- 
+Mon Dec 28 18:20:01 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	From the Trying-to-Please-All-the-People-All-the-Time department...
+	%random() seeds based on process ID *and* time(NULL) now.  Feh.
+	
+------------------------------------------------------------------------------- 
+Tue Dec 29 16:52:34 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	A new Eterm feature.  This one is called "Viewport Mode."  It is
+	toggled on by the --viewport-mode parameter or the viewport_mode
+	attribute in the toggles section.  The basic concept is that the
+	background of the Eterm window becomes a viewport to a background
+	image.  Kinda like pseudo-transparency, but not related to the desktop
+	in any way.  As you move the Eterm window, the background moves too.
+	Scaled pixmaps are scaled up to the size of the desktop, and a portion
+	shows through as the background.
+
+	Okay, so it's kinda hard to describe. :-)  Just try it and see.  I
+	recommend getting several of them open at once using the same scaled
+	image.  The effect is interesting. :-)
+
+	Shading and tinting don't yet work with it, but I'm getting there.  At
+	least it won't crash your X server, like it did mine earlier. :-)
+
+	Credit to es9 on IRC for the idea.
+	
+------------------------------------------------------------------------------- 
+Tue Dec 29 17:12:57 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	And Tynian said, "Let there be Debian Stuff."  And there was Debian
+	Stuff.  And it was good.
+
+------------------------------------------------------------------------------- 
+Tue Dec 29 17:51:21 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Viewport + shading/tinting escape sequences is fixed.  I also fixed a
+	bug with shading/tinting.
+	
+------------------------------------------------------------------------------- 
+Wed Dec 30 12:07:18 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	Added an Eterm.spec.in file as submitted by techn0ir, with a couple
+	minor changes.  I know nothing about this file, so I have no clue how
+	well it will work, if at all.
+
+	configure.in now generates Eterm.spec from Eterm.spec.in to do
+	automatic version updating.
+
+	Minor changes to the Description section in the Debian stuff.
+
+	AUTHOR'S NOTE:  None of the RPM/DEB information contained herein was
+	authored by me.  I have no idea whether or not it will work; I rely on
+	the package maintainers for that.  Though the authors recognize the
+	utility and necessity of binary distributions for the various flavors
+	of UNIX, we cannot in good conscious support any binary packages
+	ourselves, for the simple reason that we don't know them all, and thus
+	cannot support them all.  Out of fairness, if we can't support them
+	all, we shouldn't support any of them.  Furthermore, binary
+	distributions (especially when packaged by people other than the OS
+	distributors) tend to be quirky, and we cannot support all these
+	quirks ourselves.  So let me make it clear once again that any RPM's
+	and DEB's of Eterm that may exist are supported ONLY by their
+	respective maintainers, NOT by the authors of Eterm.  Any problems
+	which arise with these packaged distributions should be directed to
+	the package maintainer.
+
+	With that said, we would also like to extend our thanks to the
+	various package maintainers, with special mention of Brian Almeida
+	<bma@debian.org> and Sean Perry <shaleh@debian.org>, for their
+	continued support and assistance with packaged Eterm distributions.
+	
+------------------------------------------------------------------------------- 
+Thu Dec 31 16:15:09 CST 1998	Michael Jennings <mej@mw.3com.com>
+
+	www.eterm.org is now alive and kicking.  All pointers to
+	www.tcserv.com have been changed to point to the new URL.
+	
+------------------------------------------------------------------------------- 
+Mon Jan  4 13:32:32 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Hopefully fixed a bug with backquote commands that don't return any
+	output.
+
+	Hopefully fixed a bug with shell_expand() being called with a NULL.
+	In the process, I added some ASSERT() macros which may or may not be
+	portable.  If they are, I will replace all assert() calls with them.
+	If not, I'll nuke the one I put in. :)
+
+	There seems to be a bug in main_loop() at command.c:4668 that has been
+	uncovered by one person's mutt.  I added some debugging stuff to help
+	track it down.
+	
+------------------------------------------------------------------------------- 
+Mon Jan  4 14:31:06 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Stupid KainX error #13,471.8:  Don't use macros you don't have.
+	
+------------------------------------------------------------------------------- 
+Mon Jan  4 16:30:54 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Work-around for what is either a bug or unexpected behavior in
+	Enlightenment.  Other WM's leave coordinate setting for negative
+	geometries up to the app.  Enlightenment seems to do it itself.  So if
+	Eterm is running under Enlightenment, it will not do the offsetting
+	itself.
+
+	I'm curious to know if this is a bug in E or in everybody else. :)
+
+------------------------------------------------------------------------------- 
+Fri Jan  8 14:40:36 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Documentation updates for 0.8.8.  Wheeeeee. :)
+	
+------------------------------------------------------------------------------- 
+Mon Jan 11 14:30:02 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Use Imlib_best_color_match() for all colors we allocate so that we
+	coexist peacefully with Imlib, E, Netscape, et al.  This should make
+	raster's day a little brighter.... =)
+	
+------------------------------------------------------------------------------- 
+Mon Jan 11 16:12:35 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed typos in MAIN.in files.
+	
+------------------------------------------------------------------------------- 
+Mon Jan 11 16:34:41 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Long-awaited transparency improvement for tiled desktops.  Let's hope
+	it doesn't break anything.
+	
+------------------------------------------------------------------------------- 
+Tue Jan 12 13:17:41 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Integrate random background functionality into Eterm distribution.
+	
+------------------------------------------------------------------------------- 
+Thu Jan 21 10:49:02 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Add some more verbose output when color allocation fails.
+	
+------------------------------------------------------------------------------- 
+Thu Jan 21 10:55:02 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Yes, Virginia, there is a 0.8.9.  Back to adding features.  Ugh. =)
+	
+------------------------------------------------------------------------------- 
+Thu Jan 21 14:17:15 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	More for 0.8.9....
+	
+------------------------------------------------------------------------------- 
+Thu Jan 21 15:15:52 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Mouse wheel support.  Does it work?  I dunno, since I don't have a
+	wheeled mouse and can't test it, but it should.
+	
+------------------------------------------------------------------------------- 
+Thu Jan 21 17:59:47 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	New --version option to display compile-time #define's.  Also
+	switched --help output to stdout instead of stderr (people were
+	complaining about not being able to grep it...apparently
+	"Eterm --help 2>&1 | grep foo" was too much work).
+	
+------------------------------------------------------------------------------- 
+Thu Jan 28 11:58:26 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed typos in MAIN files.
+
+	Also, there's code in command.c to attempt to set the desktop on which
+	to open in Enlightenment.  It's commented out because it doesn't work
+	and I'm not sure why. =}
+	
+------------------------------------------------------------------------------- 
+Thu Jan 28 12:29:20 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	An attempt at a fix, or at least to help find the bug.
+	
+------------------------------------------------------------------------------- 
+Tue Feb  2 15:10:43 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Tinting and shading speedups (about 30%) thanks to a patch from
+	Michael Pearson <alcaron@ozemail.com.au>.
+
+------------------------------------------------------------------------------- 
+Tue Feb  2 23:27:20 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	You want scrollbars?  We've got scrollbars. :)
+
+	New --scrollbar-type option.  Takes a string parameter, one of
+	"xterm", "next", or "motif".  I'm sure we can all guess what it does.
+	:-)
+
+	More work on this tomorrow, but I need sleep.
+	
+------------------------------------------------------------------------------- 
+Wed Feb  3 10:43:45 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed a bug with tiled desktop pixmaps and shading/tinting.  Thanks to
+	t'Sade <tsade@sil-usa.com> and Michael Pearson <alcaron@ozemail.com.au>
+	for helping me track this down.
+	
+------------------------------------------------------------------------------- 
+Wed Feb  3 12:26:20 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	The resize-to-crash bug has *finally* been squashed once and for all,
+	thanks to a patch from Sebastien van Klinkenberg <klinkens@wanadoo.fr>.
+	Thanks Sebastien!!
+	
+------------------------------------------------------------------------------- 
+Wed Feb  3 14:55:26 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	scrollbar_type now works in the attributes context of the MAIN file.
+
+	New option --scrollbar-width (and scrollbar_width in the attributes
+	context in the MAIN file).  Takes a positive integer and specifies
+	scrollbar width (in pixels).
+
+	Always update the background on startup.  This will help in cases of
+	override_redirect (-x), no window manager, or a buggy window manager
+	(reported with Window Maker 0.50.2).
+	
+------------------------------------------------------------------------------- 
+Mon Feb  8 12:16:38 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fix for a tiny hiccup.
+	
+------------------------------------------------------------------------------- 
+Thu Feb 11 19:39:00 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Ctrl-Click behavior has changed.  Ctrl+Button1 now does the old raise-
+	and-steal-focus thing.  Ctrl+Button2 toggles the scrollbar.  Ctrl+
+	Button3 toggles the menubar.  These behaviors can all be turned off in
+	src/feature.h but are on by default.
+	
+------------------------------------------------------------------------------- 
+Thu Feb 11 22:32:15 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added the --menubar boolean option to toggle whether or not the
+	menubar is visible on startup.  There's also the "menubar" attribute
+	in the toggles section, or you can put a boolean value after the
+	filename for the "menu" attribute (e.g., "menu Eterm.menu off").  The
+	visibility of the menubar can subsequently be toggled by the escape
+	sequence or by Ctrl+Button3 on the term window.
+	
+------------------------------------------------------------------------------- 
+Thu Feb 11 23:34:10 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added support for popup scrollbars (i.e., the scrollbar goes away
+	when Eterm loses focus, and comes back when Eterm regains focus).
+	This is the --scrollbar-popup option or the "scrollbar_popup"
+	attribute in the toggles context.  Idea courtesy Rahsheen Porter
+	<rahsheen@neuplanet.cx>.  Thanks!
+
+	Also, thanks to OctobrX <x@themes.org> for the menubar ideas above.
+	
+------------------------------------------------------------------------------- 
+Mon Feb 15 19:38:54 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	New -D (--desktop) option (and "desktop" attribute in the "attributes"
+	context) to choose what desktop to load on.  NOTE:  This requires a
+	GNOME-compliant window manager which supports the _WIN_WORKSPACE
+	property as defined by http://www.gnome.org/devel/gnomewm/.
+
+	No, I will NOT use the Eterm*desktop Xrdb resource.  Read the FAQ for
+	info on why I refuse to use Xrdb in any way, shape, or form.  I would
+	rather wait for other WM's to reach the 21st century.  (Enlightenment,
+	of course, is already compliant.)
+
+	Also changed some short options for stuff that is never used, namely
+	the -D, -U, -B, and -A options for the pixmapped scrollbar that we
+	don't even have. =)  -D became --desktop, and -B became
+	--scrollbar-type.
+
+	Muchas gracias to raster <raster@redhat.com> for his assistance with
+	the desktop thing.
+	
+------------------------------------------------------------------------------- 
+Mon Feb 15 20:00:59 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Work around a nasty Solaris X bug in _XFlushInt(), called by
+	XUnmapWindow().  If we're not unmapped after 3 seconds, call _exit().
+	If _exit() isn't around, use abort().
+	
+------------------------------------------------------------------------------- 
+Tue Feb 16 11:21:59 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Implemented scrollbar type and width changing via an escape sequence,
+	namely "\e]6;10;<type>;<width>\a".  <type> is either "xterm", "next",
+	"motif", or blank.  <width> is a positive integer of reasonable value
+	or blank.  Leaving both values blank does nothing.
+	
+------------------------------------------------------------------------------- 
+Wed Feb 17 18:54:44 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Two whole days' worth of work here.  I added bunches of escape
+	sequences.  You can now set, configure, or toggle just about every
+	part of Eterm via escape sequences, and have the changes live-updated.
+	Look at src/command.c starting at line 6136 for the individual
+	sequences.  There's oodles.  You can change scrollbar type, width,
+	and location.  You can change screens.  You can change selection
+	behavior.  You can even move Eterm to a new desktop.  All via escape
+	sequences.
+
+	Along with this, I redid all the *.menu files.  They are now much
+	more organized.  They also have support for all (if not *all*, nearly
+	so) the escape-code-configurable aspects of Eterm.
+
+	Look for a GUI theme generator/configuration applet (gtk+-based) in
+	the near (?) future that will take advantage of this. =)
+
+	Also, no more trying to load the CVS directory as a background pixmap.
+	=}
+	
+------------------------------------------------------------------------------- 
+Thu Feb 18 10:26:56 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Patch from John Ellson <ellson@lucent.com>.  Render style was not
+	getting properly reset for line wrapping.  His patched fixed extra
+	underscores...I also fixed the other stuff, including rev. video.
+
+	Patch from Ryan Murray <rmurray@cyberhqz.com> to add an rpath to
+	Esetroot when linking.
+
+	Thanks guys!
+	
+------------------------------------------------------------------------------- 
+Thu Feb 18 14:06:05 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Dammit.  I hate stupid bugs, and this is a big one.  Re-enable our
+	own system() call, this time one that works.  If you setuid Eterm, you
+	NEED this fix ASAP.  'Nuff said.
+	
+------------------------------------------------------------------------------- 
+Tue Mar  2 14:31:03 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Applied and corrected patch from Alexander Savelyev <fano@ham.kiev.ua>
+	for supporting DESTDIR and for utmp on BSDI.
+
+	Also fixed Esetroot for systems where root visual != highest visual.
+	Thanks to Tomas Ogren <stric@ing.umu.se> for the patch.
+	
+------------------------------------------------------------------------------- 
+Tue Mar  2 17:27:22 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	The -C (--console) switch works again, at least on Solaris and Linux.
+	
+------------------------------------------------------------------------------- 
+Wed Mar  3 09:44:21 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Debian info updates from Brian M. Almeida <bma@debian.org>
+	
+------------------------------------------------------------------------------- 
+Wed Mar  3 17:58:55 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Reformatted code using new script, aptly-named "reformat-code," which
+	calls indent.  Now if only there were a few more indent options, like
+	one to keep the brace and the end of the function definition, and one
+	to force a blank line *before* the declaration section.
+
+	Also lots of utmp.c cleanups, including one that should fix the dying
+	on glibc 2.1.
+	
+------------------------------------------------------------------------------- 
+Wed Mar  3 18:04:49 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Oops, forgot some Debian files.
+	
+------------------------------------------------------------------------------- 
+Thu Mar 11 14:30:53 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Changed the default colors from names to rgb values (failsafe), and
+	modified almost all of them to match colors Netscape uses.
+	
+------------------------------------------------------------------------------- 
+Thu Mar 11 15:51:05 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Remove move-themes.in from distribution list.
+	
+------------------------------------------------------------------------------- 
+Sun Mar 14 12:32:36 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	By popular demand, the bright blue scrollbar/menubar scheme has been
+	nixed in favor of a red/gray scheme that blends with the ShinyMetal
+	Enlightenment theme.  I originally chose the blue to match the window
+	border color in my StarTrek theme for E 0.10+.  I guess it was time
+	for a change.... =)
+	
+------------------------------------------------------------------------------- 
+Tue Mar 16 09:21:53 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Checkpoint commit.  We're on our way to making debugging output a dual
+	compile- and run-time option.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 16 17:34:35 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	. in config search path can cause nasty, hard-to-find weirdness.  So
+	I nixed it.  I apologize in advance if you used it, but if you did,
+	you probably have bigger problems.
+	
+------------------------------------------------------------------------------- 
+Wed Mar 17 16:59:25 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Completely redid all the debugging stuff to facilitate the creation
+	of a run-time option for it.  The option isn't there yet; that comes
+	next.
+	
+------------------------------------------------------------------------------- 
+Thu Mar 18 14:24:48 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Finally fixed a long-standing font alignment problem in the menubar
+	when using nexus, shine, and similar fonts with 0 descent.  I then
+	nixed the lame hackish work-around I put in awhile back so I could
+	ignore it for a bit longer. =)
+	
+------------------------------------------------------------------------------- 
+Thu Mar 18 18:05:30 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed another long-standing problem, this time with the placement and
+	appearance of the menubar arrows, especially when --border-width is
+	used.
+	
+------------------------------------------------------------------------------- 
+Fri Mar 19 12:15:35 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	New --debug option to vary the level of debugging output shown.  Valid
+	values are integers 0 through DEBUG, where DEBUG is the value you set
+	when calling ./configure with --with-debugging=N.
+	
+------------------------------------------------------------------------------- 
+Fri Mar 19 17:34:52 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Implemented two new escape codes.  One is a simple "exit" feature than
+	can be used from the menubar.  The other is a feature to save the
+	current settings to a given file.  I added these two sequences to the
+	menubar files.  The sequence for saving settings defaults to saving to
+	the current theme, which is the behavior most users would expect.
+
+	WARNING:  This saves *everything*, so if you have randomized
+	backgrounds, tints, etc., DON'T use this!  They will go away!
+
+	I haven't tested the save thing very thoroughly, so I'm not sure *all*
+	the current settings save properly.... =)
+	
+------------------------------------------------------------------------------- 
+Fri Mar 19 18:20:28 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	After further consideration, added a routine to create a backup of the
+	current MAIN file before overwriting it.  The backup is named with a
+	timestamp, as in "MAIN.YYYYMMDD.HHMMSS", so as not to conflict with
+	any other backup files.
+	
+------------------------------------------------------------------------------- 
+Mon Mar 22 10:23:58 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Changed configure.in so that the default level of debugging support
+	compiled in is 4 (the maximum level that does not sync X events).  The
+	run-time default is still 0, however.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 23 18:16:40 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Whoops.  Inverted one set of arrows too many. =)
+	
+------------------------------------------------------------------------------- 
+Tue Mar 23 18:50:36 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added support in the options macros for specifying a variable to which
+	the bitmask should be applied.  (The variable Options had always been
+	used before.)  This will enable the manipulation of multiple bitmask
+	variables via command-line options with no additional code needed.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 23 19:43:38 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added long-awaited options to set the keypad and cursor key modes on
+	startup.
+
+	--app-keypad (or the "app_keypad" boolean attribute in the keyboard
+	context) will start in "application keypad" mode.  NOTE:  The new
+	default is to start in normal (numeric) keypad mode.
+
+	--app-cursor (or the "app_cursor" boolean attribute in the keyboard
+	context) will start in "application cursor key" mode.  The default
+	continues to be normal cursor key mode.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 23 21:28:57 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Nuked several bugs relating to printpipe.  Also enabled it by default.
+
+	Removed the forceable addition of the '-g' flag to CFLAGS if
+	debugging is enabled.
+	
+------------------------------------------------------------------------------- 
+Fri Mar 26 17:54:03 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Lots of code cleanups here, plus a bugfix for menubars.  I might have
+	done other stuff too, I forget.... =)
+	
+------------------------------------------------------------------------------- 
+Fri Mar 26 19:07:15 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added another little helper app.  This one is doc/Etbg, written by
+	Brian McFee <keebler@themes.org> in a fit of boredom.  Thanks keeb!
+	
+------------------------------------------------------------------------------- 
+Fri Mar 26 22:08:45 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	The rewrite of the Eterm Technical Reference.  It's HTML now, and is
+	(at least to me) much more readable.  I've still got lots to add, but
+	it's fleshed out enough to replace the old one now.
+	
+------------------------------------------------------------------------------- 
+Mon Mar 29 11:25:24 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Oops.  Forgot to add the Kanji stuff to main.h.  Thanks to Sung-Hyun
+	Nam <namsh@lgic.co.kr> for catching this.
+	
+------------------------------------------------------------------------------- 
+Mon Mar 29 19:37:38 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	This is an attempt to fix X locale support, which was broken on Linux
+	(XFree86?).  Please (!) let me know if I broke stuff, especially you
+	who use KANJI.
+	
+------------------------------------------------------------------------------- 
+Mon Mar 29 20:19:29 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Pre-emptive Kanji fix.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 30 13:07:05 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	More robust font set for XIC.  Should be able to handle any charset.
+	
+------------------------------------------------------------------------------- 
+Tue Mar 30 17:20:50 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Technical reference now includes complete documentation for all the
+	Eterm-specific escape sequences.
+	
+------------------------------------------------------------------------------- 
+Wed Mar 31 18:47:18 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added support for the "ESC ] {l|I|L} string ESC \" sequences, a la
+	dtterm.  'l' sets the title, 'I' sets the icon pixmap filename (or the
+	default Eterm icon if "string" is missing), and 'L' sets the icon
+	name.  Thanks to Mark Bowyer <Mark.Bowyer@uk.sun.com> for pointing
+	these out.
+
+	Look for more dtterm sequence support coming soon.
+	
+------------------------------------------------------------------------------- 
+Wed Mar 31 19:56:07 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	More work on the Technical Reference.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  1 10:25:35 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	At this point, the initial revision of the Eterm Technical Reference
+	is complete.  I'm looking for comments, suggestions, errata, and so
+	forth. :-)
+	
+------------------------------------------------------------------------------- 
+Thu Apr  1 10:37:57 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Some rearranging.  Now doc/ just contains documentation.  The utility
+	programs have been put in utils/.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  1 12:06:15 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	New, improved color grid script, Etcolors.sh.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  1 12:40:15 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	New, improved menu utility, Etmenu.sh.  Modified utils/Makefile.am to
+	install these new utilities.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  1 17:48:47 CST 1999	Michael Jennings <mej@mw.3com.com>
+
+	Doh!  Man page booboo.  Thanks to Jim Niemira <urmane@urmane.org> for
+	pointing this out to me.
+	
+------------------------------------------------------------------------------- 
+Mon Apr  5 14:18:09 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Support several dtterm escape sequences for window operations.
+	Documentation is forthcoming.
+	
+------------------------------------------------------------------------------- 
+Mon Apr  5 14:41:11 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added a rule to build an HTML-ized man page in doc/.
+	
+------------------------------------------------------------------------------- 
+Mon Apr  5 14:55:41 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Gah!  I'd love to know who the idiot was who decided to put height
+	before width.... >:P
+	
+------------------------------------------------------------------------------- 
+Mon Apr  5 15:15:42 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Documentation for new window ops sequences:
+
+	ESC [ n [ ; n [ ... ] ] t
+	
+	n == 1: Un-iconify window 
+	n == 2: Iconify window 
+	n == 3: Move window. Must by followed by ;x;y 
+	n == 4: Resize window. Must by followed by ;height;width 
+	n == 5: Raise window 
+	n == 6: Lower window 
+	n == 7: Refresh window 
+	n == 8: Resize text area. Must by followed by ;height;width, with
+	        height and width given in characters. 
+	n == 13: Report window position
+	n == 14: Report window size in pixels
+	n == 18: Report text area size in characters
+	n == 20: Report icon name
+	n == 21: Report window title
+	
+------------------------------------------------------------------------------- 
+Tue Apr  6 13:33:18 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added support for UNIX 98 pty's under glibc 2.1, thanks to a patch
+	from Mikolaj Habryn <dichro-7815e9e@eris.rcpt.to>.
+
+	Also added a new option to configure.  Use --without-sense-of-humor
+	to disable the little libKenny joke (for the humorously-challenged).
+	Credit to Paula Bailey <pmbail01@slug.louisville.edu> for the idea.
+	And this :-P is me sticking my tongue out at the people who made it
+	necessary! :-)
+	
+------------------------------------------------------------------------------- 
+Wed Apr  7 10:14:00 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed several bugs related to the %include directive and magic number
+	version checking in the config file parser, thanks to a patch from
+	Boris Badenov <sluskyb@lizards-lair.stwing.org>.
+
+	Also fixed a couple oversights in Makefile.am in doc/ and utils/,
+	pointed out by Sung-Hyun Nam <namsh@lgic.co.kr>.
+
+	Thanks guys!  :-)
+	
+------------------------------------------------------------------------------- 
+Thu Apr  8 13:01:02 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Trying to get pty code in order.  There are some problems with glibc
+	2.1 systems still.  I totally rearranged the pty-finding code, so I
+	NEED lots of testing on this stuff.  Let me know if I broke/fixed
+	anything.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  8 14:43:42 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Still trying to get that pty code in order.... :(
+	
+------------------------------------------------------------------------------- 
+Thu Apr  8 15:34:31 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	And again.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  8 16:21:21 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Now that the pty problems seem to be fixed (at least on Solaris and
+	Linux), let's be a little more robust with failures.
+	
+------------------------------------------------------------------------------- 
+Thu Apr  8 18:11:46 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Fixed some assorted bugs and problems that occur when pixmaps.list is
+	not present.  Also fixed a bug for output files that cannot be
+	created.
+	
+------------------------------------------------------------------------------- 
+Thu Apr 15 16:01:03 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	The borderless Eterm options will now make Eterm set the MWM hints
+	so that the window manager will render it borderless.  (If the WM
+	does not support the MWM hints, however, Eterm will fall back on the
+	traditional override_redirect behavior.)  I've only tested this on
+	Enlightenment, but it should work for other window managers too.
+	
+------------------------------------------------------------------------------- 
+Thu Apr 15 17:42:35 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added the type of each variable to the help output, as well as some
+	additional info on how to use the command-line options.  You're
+	welcome, llane. :-)
+	
+------------------------------------------------------------------------------- 
+Fri Apr 16 18:03:26 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added a -fit option to Esetroot which scales the image to fit the
+	screen while maintaining its true proportion.  Thanks to Remo
+	Strotkamp <remo@ccrl.nj.nec.com> for the idea and some code.
+	
+------------------------------------------------------------------------------- 
+Mon Apr 19 13:55:09 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Two bugfix patches.  One is for compiling on SGI IRIX, thanks to
+	Kimball Thurston <kimball@sgrail.com>.  The other was a fix for the
+	recently-discovered segfault problem.  Thanks yet again to
+	Sebastien van Klinkenberg <klinkens@wanadoo.fr>. :-)
+	
+------------------------------------------------------------------------------- 
+Mon Apr 19 19:42:54 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Two more bugfixes.  Eterm now installs its X error handler earlier to
+	catch more errors without dying.  Also, another patch from Sebastien
+	van Klinkenberg <klinkens@wanadoo.fr> for the segfault bug.
+	
+------------------------------------------------------------------------------- 
+Tue Apr 20 15:20:00 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	I think this fixes all remaining menu flickering problems.  I also
+	removed a goto while I was at it, because goto's are evil.
+	
+------------------------------------------------------------------------------- 
+Tue Apr 20 16:05:50 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added a new option.  --select-trailing-spaces (or the attribute
+	select_trailing_spaces in the toggles context of the config file)
+	causes Eterm to keep spaces at the end of a line as part of the
+	selection.  The new default behavior is to remove these trailing
+	spaces.  If you select text in mutt (or other SLang programs), you
+	will thank me.
+
+	Also did some options-related cleanups in preparation for release.
+	
+------------------------------------------------------------------------------- 
+Wed Apr 21 09:58:36 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	This should take care of the man page for the release of 0.8.9.
+	
+------------------------------------------------------------------------------- 
+Wed Apr 21 10:20:33 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Added support, documentation, and .menu file entries for an escape
+	code to toggle the select-trailing-spaces feature.
+	
+------------------------------------------------------------------------------- 
+Fri Apr 23 15:55:18 CDT 1999	Michael Jennings <mej@mw.3com.com>
+
+	Support the omission of the operator in an xterm escape sequence.
+	Adding support for the dtterm stuff broke this.
+	
+------------------------------------------------------------------------------- 

@@ -1,0 +1,1263 @@
+.TH ETERM 1 @DATE@ "X Version 11" "X Tools"
+.SH NAME
+Eterm \(em
+an Enlightened terminal emulator for the X Window System
+.SH SYNOPSIS
+.B Eterm
+.RI [ options ]
+
+.SH DESCRIPTION
+.PP
+.B Eterm
+\(em version
+.B @VERSION@
+\(em is a color vt102 terminal emulator intended as an
+.IR xterm (1)
+replacement for users who want a term program integrated with
+Enlightenment, or
+simply want a little more "eye candy".
+.B Eterm
+uses Imlib for advanced graphic abilities.  See below for details.
+.SH OPTIONS
+The
+.B Eterm
+options are listed below.
+In keeping with the freedom-of-choice philosophy, options may be eliminated
+or default values chosen at compile-time, so options and defaults listed
+may not accurately reflect the version installed on your system.
+
+Options that do not take a parameter (besides -h and --help) are boolean.  If
+you use the POSIX (short) option, you are forcing the parameter to "true".  If
+you use the long option, you can use any of the accepted boolean values, which
+are "yes", "on", "1", and "true" to turn the option on, or "no", "off", "0", or
+"false" to turn the option off.  The same is true for boolean values in the
+configuration file.
+.LP
+.TP
+.BI \-t " theme" ", \-\-theme " theme
+Load specified
+.I theme\.
+Consult the FAQ for more details on what constitutes an Eterm
+.I theme\.
+.TP
+.BI \-X " conffile" ", \-\-config-file " conffile
+Use an alternative config file name.  Otherwise Eterm uses the default,
+which is 
+.I MAIN\.
+.TP
+.BR "\-h" , " \-\-help"
+Print out a message describing available options.
+.TP
+.BR \-\-version
+Print
+.B Eterm
+version and compile-time configuration.
+.TP
+.BI \-\-debug " level"
+Show debugging output.
+.I level
+is an integer between 0 and 5 which determines how verbose the debugging
+output is.
+.TP
+.BR "\-r" , " \-\-reverse-video"
+Reverse video, swaps the foreground and background colors.
+.TP
+.BI \-b " color" ", \-\-background-color " color
+Set
+.I color
+as the background color.
+.B NOTE:
+this will actually be the foreground color if reverse video is also
+selected.
+.TP
+.BI \-f " color" ", \-\-foreground-color " color
+Set
+.I color
+as the foreground (text) color.
+.B NOTE:
+this will actually be the background color if reverse video is also
+selected.
+.TP
+.BI \-\-color0 " color"
+.TP
+.BI ...
+.TP
+.BI \-\-color15 " color"
+Use
+.I color
+as color X.
+.TP
+.BI \-\-colorBD " color"
+Use
+.I color
+as the bold color.
+.TP
+.BI \-\-colorUL " color"
+Use
+.I color
+as the underline color.
+.TP
+.BI \-\-menu-text-color " color"
+Use
+.I color
+as the menu text color (only makes sense if menu is enabled).
+.TP
+.BI \-S " color" ", \-\-scrollbar-color " color
+Use
+.I color
+as the scrollbar color (only makes sense if scrollbar is enabled).
+.TP
+.BI \-\-unfocused-scrollbar-color " color
+Use
+.I color
+as the scrollbar color when window does not have focus 
+(only makes sense if scrollbar is enabled).
+.TP
+.BI \-\-pointer-color " color"
+Use
+.I color
+as the pointer color.
+.TP
+.BI \-c " color" ", \-\-cursor-color " color
+Use
+.I color
+as the cursor color.
+.TP
+.BI \-\-cursor-text-color " color"
+Use
+.I color
+as the cursor text color.
+.TP
+.BI \-d " displayname" ", \-\-display " displayname
+Attempt to open a window on the named X display
+.I displayname.
+In the absence of this option, the display specified by the
+.B DISPLAY
+environment variable is used.
+.TP
+.BI \-g " geom" ", \-\-geometry " geom
+Window geometry as Width x Height+X coord+Y coord, i.e 100x200+0+100
+.TP
+.BR "\-i" , "\-\-iconic"
+Start in iconified state (only if the window manager supports
+iconification).
+.TP
+.BI \-n " name" ", \-\-name " name
+Sets name of current instance to
+.I name.
+This will affect the icon title and the window title string unless
+they are otherwise explicitly set.
+.TP
+.BI \-T " title" ", \-\-title " title
+Sets window's title text to
+.I title.
+.TP
+.BI \-\-icon-name " text"
+Sets the icon title text to
+.I text.
+.TP
+.BI \-B " type" ", \-\-scrollbar-type " type
+Specifies the
+.I type
+scrollbar style should be used.
+.I type
+can be any of
+.BR "motif" ", " "xterm" ", or " "next" "."
+.TP
+.BI \-\-scrollbar-width " width"
+Set the width of the scrollbar, in pixels, to
+.IR width "."
+Eterm does not impose any restrictions on this value, but it should be reasonable.
+.TP
+.BI \-D " desktop" ", \-\-desktop " desktop
+Starts the Eterm on the specified desktop.
+.I desktop
+should be an integer between 0 and your highest-numbered desktop.
+.BR "NOTE" ":  "
+You must have a GNOME-compliant window manager for this feature to work.  Please see
+http://www.gnome.org/devel/gnomewm/ for more information on the
+.B _WIN_WORKSPACE
+property and how to support it.
+.TP
+.BI \-\-bold-font " font"
+Sets the bold text font to
+.I font.
+.TP
+.BI \-F " font" ", \-\-font " font
+Sets the normal text font to
+.I font.
+.TP
+.BI \-\-font1 " font"
+.TP
+.BI ...
+.TP
+.BI \-\-font4 " font"
+Sets font X to
+.I font.
+.TP
+.BI \-P " pic" ", \-\-background-pixmap " pic
+Use
+.I pic
+as the background image.
+.I pic
+can be in any format that Imlib understands.  Currently this means just
+about anything, including JPG, PNG, GIF, TIFF, PPM, etc.  The image is
+tiled by default.  To scale the image, use the
+.B --scale
+option below.
+.TP
+.BI \-I " pic" ", \-\-icon " pic
+Sets the icon pixmap file to
+.IR "pic" "."
+Works similarly to the
+.B -P
+option above.
+.TP
+.BI \-\-up-arrow-pixmap " pic"
+As above, except the scrollbar's up-arrow is set.  
+.B NOTE:
+This is not currently implemented.
+.TP
+.BI \-\-down-arrow-pixmap " pic"
+As above, except the scrollbar's down-arrow is set.
+.B NOTE:
+This is not currently implemented.
+.TP
+.BI \-\-trough-pixmap " pic"
+As above, except the scrollbar's background (trough) is set.
+.B NOTE:
+This is not currently implemented.
+.TP
+.BI \-\-anchor-pixmap " pic"
+As above, except the scrollbar's anchor image is set.
+.B NOTE:
+This is not currently implemented.
+.TP
+.BR "\-@" , " \-\-scale"
+Scale the image rather than tile.  Only makes sense if the background pixmap
+option is used (see above).
+.TP
+.BR "\-W" , " \-\-watch-desktop"
+In a pseudo-transparent Eterm, this will watch the desktop for changes to the
+image, Eterm moving to a different desktop, etc.  Use with the transparency
+options below.
+.TP
+.BR "\-O" , " \-\-trans"
+This gives a pseudo-transparent Eterm.  The image is taken directly from the
+root window, so any requests for changing the pixmap are ignored.  If you do
+not use Enlightenment (http://www.enlightenment.org/) as your window manager,
+you will need to use the
+.I Esetroot
+program in the
+.B doc/
+directory to set your root background image.
+.TP
+.BI \-\-shade " percentage"
+Darkens the background pixmap (either an image file or the transparent
+portion can be shaded).  The amount of shading is controlled by the
+specified
+.IR percentage ,
+which may or may not be followed by a percent sign.
+.TP
+.BI \-\-tint " mask"
+Tints the background pixmap (either an image file or the transparent
+portion can be shaded).  The
+.I mask
+is an integer, usually specified in hexadecimal in the form
+.BR " " "0x" "RRGGBB" ","
+where
+.BR "RR" ", " "GG" ", and " "BB"
+are hexadecimal numbers between
+.BR "00" " and " "ff" " (" "0" " and"
+.BR "255" " decimal)"
+which represent the brightness of the image's red, green, and blue
+values, respectively.  A value of
+.B 00
+will mask that color out entirely, while a value of
+.B ff
+will not change that color at all.  Some common tints are:
+.RS 10
+none      0xffffff
+.br
+red       0xff8080
+.br
+green     0x80ff80
+.br
+blue      0x8080ff
+.br
+cyan      0x80ffff
+.br
+magenta   0xff80ff
+.br
+yellow    0xffff80
+.RE
+.TP
+.BI \-p " newpath" ", \-\-path " newpath
+Sets the pic search path.  When the
+.B --background-pixmap
+or other pixmap options are used, this path will be used to find the image.
+.TP
+.BI \-N " list" ", \-\-anim " list
+Specifies an animation list to be use in cycling the background pixmap.  The
+.I list
+consists of two or more words.  The first word defines the delay, in seconds,
+between updates of the background.  This should be set to a reasonable value
+to insure that Eterm doesn't spend all its time rendering backgrounds.  All
+remaining words have the same syntax as the
+.B background
+attribute in a configuration file (two integers followed by the image filename),
+except that the two integers are optional.  If they are specified, remember to
+group them with the filename using quotes.  The following are both valid:
+.RS 10
+Eterm -N '10 image1.jpg image2.jpg'
+.br
+Eterm -N '10 "0 0 image1.jpg" "-1 -1 image2.jpg"'
+.RE
+.TP
+.BR "\-l", " \-\-login-shell"
+Makes the new shell a login shell.
+.TP
+.BR "\-s", " \-\-scrollbar"
+Enables the scrollbar. (Default)
+.TP
+.BR \-\-menubar
+Enables the menubar. (Default)
+.TP
+.BR "\-u", " \-\-utmp-logging"
+Tries to enable proper utmp logging.  For this to work, Eterm probably needs
+to run setuid or setgid, usually setuid root.
+.TP
+.BR "\-v", " \-\-visual-bell"
+Enables the "visual bell".  Means the window will flash or blink rather
+than beep.
+.TP
+.BR "\-H", " \-\-home-on-echo"
+Jump to bottom on output.
+.TP
+.BR "\-\-home-on-input"
+Jump to bottom on input.
+.TP
+.BR "\-E", " \-\-home-on-refresh"
+Jump to bottom on refresh (^L)
+.TP
+.BR "\-\-scrollbar-right"
+Display scrollbar on the right hand side.
+.TP
+.BR "\-\-scrollbar-floating"
+Display the scrollbar without a trough.
+.TP
+.BR "\-\-scrollbar-popup"
+Display the scrollbar only when the Eterm window is focused.
+.TP
+.BR "\-x", " \-\-borderless"
+This option forces Eterm to have no borders.  This also means that the
+window can not be moved (unless the
+.BR \-V " or " \-\-menubar-move
+option is specified) or resized.  Recommend using
+.B --geometry
+as well with this option.
+.TP
+.BR "\-m", " \-\-map-alert"
+Un-iconify on beep.
+.TP
+.BR "\-8", " \-\-meta8"
+Causes the Meta key to set the 8th bit in the char.
+.TP
+.BR "\-\-save-under"
+If supported by the X server, tries to use backing store for faster
+refreshes.
+.TP
+.BR "\-\-no-cursor"
+Disables the text cursor.
+.TP
+.BR \-V ", " \-\-menubar-move
+This options causes Eterm to enable the moving of the Eterm window by
+dragging the right-hand side of the menubar.  This is useful for
+borderless Eterms (and is, in fact, on by default if the
+.BR \-x " or " \-\-borderless
+option is specified).
+.TP
+.BR \-\-pause
+After the child process terminates, Eterm will wait for a keypress
+before exiting.
+.TP
+.BR \-\-xterm-select
+Duplicate's xterm's treatment of cutchars.  The only real difference is
+what happens when you double click on a single cutchar between two
+words.  If this option is on, only that single character gets selected.
+If it is off, that character is selected along with the two words.  The
+latter behavior is useful for double-clicking on the space between someone's
+first and last names, or the @ sign in an e-mail address, etc.
+.TP
+.BR \-\-select-line
+If activated, this option causes a triple click to select the entire line
+from beginning to end.  If off, a triple-click selects just from the current
+word to the end of the line.
+.TP
+.BR \-\-viewport-mode
+This activates a special Eterm mode which is hard to describe in words.
+Basically, imagine the effect you get with pseudo-transparency, where
+the desktop background moves through the Eterm window as you move the
+window, so that it always aligns with the desktop image.  Now, imagine
+the same effect, but the image used isn't the desktop image but any
+pixmap you choose.  The image is scaled or tiled up to the size of the
+desktop, and dragging the Eterm around the screen reveals different
+portions of the image as you move, much like a small viewport window
+in a ship or submarine does.  The effect is especially keen if you
+open several Eterms in this mode with the same image.
+.TP
+.BI \-\-big-font-key " keysym"
+Specify a keysym to increase the font size.  Default is Shift and the +
+key on the keypad.  Ctrl-> or Meta-> may also work (if you #define one
+of the hotkeys in src/feature.h).
+.TP
+.BI \-\-small-font-key " keysym"
+Specify a keysym to decrease the font size.  Default is Shift and the -
+key on the keypad.  Ctrl-< or Meta-< may also work (if you #define one
+of the hotkeys in src/feature.h).
+.TP
+.BR \-\-app-keypad
+Start Eterm in application keypad mode (as opposed to normal keypad mode).
+.TP
+.BR \-\-app-cursor
+Start Eterm in application cursor key mode (as opposed to normal cursor
+key mode).
+.TP
+.BI \-L " num" ", \-\-save-lines " num
+Set the number of lines in the scrollback buffer to
+.I num.
+.TP
+.BI \-a " size" ", \-\-min-anchor-size " size
+Specifies the minimum size, in pixels high, of the scrollbar anchor.
+.B NOTE:
+This causes abnormal scrolling behavior when combined with large
+scrollback buffers!
+.TP
+.BI \-w " width" ", \-\-border-width " width
+Set the window's border width to
+.I width.
+The border this controls is the gap between the edge of the X window and
+the edge of the terminal window; this has nothing to do with the window
+border's your window manager supplies.
+.TP
+.BI \-\-print-pipe " pipe"
+The pipe for the PrintScreen function.
+.TP
+.BI \-\-cut-chars " separators"
+The seperators for double-click selection.
+.TP
+.BI \-M " file" ", \-\-menu " file
+Replace default menubar file with
+.IR file .
+To disable the menubar altogether, do not specify a bogus value for
+.IR file .
+Instead, use the boolean option
+.B \-\-menubar off
+.TP
+.BI \-\-term-name " TERM"
+Use
+.I TERM
+for the value $TERM.
+.TP
+.BR "\-C", " \-\-console"
+Grab console messages.  Depending on your system, Eterm may need to be
+setuid root to do this.
+.TP
+.BI \-e " command" ", \-\-exec " command
+Execute
+.I command
+rather than a shell.
+
+.SH SPECIAL LANGUAGE FEATURES
+The following are
+.B *NOT*
+compiled in by default.
+.PP
+.TP
+.B Kanji (Japanese character) options
+.TP
+.BI \-K " font" ", \-\-kanji-font " font
+Use
+.I font
+as the default kanji font.
+.TP
+.BI \-\-kanji-font1 " font"
+.TP
+.BI ...
+.TP
+.BI \-\-kanji-font4 " font"
+Use
+.I font
+as kanji font X.
+.TP
+.BR "\-\-kanji-encoding"
+Use Kanji encoding mode (eucj or sjis).
+.TP
+.B Greek options
+.TP
+.BR "\-\-greek-keyboard"
+Use Greek keyboard mapping (iso or ibm).
+
+.SH THEMES
+
+Eterm is built on the philosophy of Freedom of Choice.  Each user should be
+able to choose the environment in which he wishes to exist, and the tools he
+uses should support that.  In accordance with that philosophy, Eterm is
+extremely configurable.  Eterm supports a concept called "themes," which should
+be familiar to users of Enlightenment, icewm, or Microsoft Windows 95/98/NT.
+The general concept of a theme is a collection of resources that change as many
+aspects of a programs look and feel as possible.  For example, an Enlightenment
+theme allows you to customize menus, window borders, desktops, icons, iconbars,
+and everything else about how E looks and feels.
+
+An Eterm theme consists of a primary configuration file, always called "MAIN",
+residing in a directory bearing the same name as the theme. This directory must
+be a child of one of the directories specified by CONFIG_SEARCH_PATH in
+src/feature.h, in the environment variable defined by PATHENV in src/feature.h,
+or in the default PATH. The theme may also contain additional configuration
+files referenced by the primary MAIN file, pixmaps, menu files, documentation,
+etc., which are allowable as extensions to the minimum requirement of an Eterm
+theme. 
+
+By convention and default, Eterm themes should be stored under
+~/.Eterm/themes/<theme_name>/ or @THEMEDIR@/<theme_name>.
+
+All command line options can be enabled/disabled in the theme's configuration
+file (the default is @THEMEDIR@/Eterm/MAIN).  The next section contains details
+on the format and usage of the configuration file.
+
+.SH CONFIGURATION
+
+Since Eterm @VERSION@ is based on the concept of themes, it is vital that you
+have a thorough understanding of the previous section before taking on this
+one.  The previous section and this one were written by the same person who
+wrote the Eterm code which handles options, config files, and themes, so it's
+probably the most authoritative documentation on the subject you're going to
+find.
+
+From here on out, I will assume you've read the above text and know how to
+change the default value for the theme and the config file name.  Just realize
+that when I subsequently refer to MAIN, if you are using a different name,
+substitute the name you supplied in place of MAIN.  I may also refer to the
+Eterm theme.  If you are using a different theme, substitute your theme's name
+in place of Eterm.  It is highly recommended that you have a copy of the Eterm
+theme MAIN file that comes with Eterm handy while you read this documentation.
+
+Okay, first the general idea.  The MAIN file is composed of comments and
+non-comments.  Comments begin with a pound sign and continue to the end of the
+line.  Lines of whitespace are also ignored.  The rest of the file is the config
+stuff, which is divided into sections (called "contexts") and variables (called
+"attributes").  There are eight valid contexts:  color, attributes, pixmaps,
+toggles, keyboard, misc, kanji, and main.  Each attribute must be inside a
+certain context to be valid.  For instance, while the "foreground" attribute is
+perfectly acceptable in the color context, it would be rejected if found in,
+say, the toggles context.  This allows for better organization of the config
+file.
+
+Each context must be enclosed in a begin...end pair that specifies the type of
+section.  The statement "begin toggles" starts the toggles context, and the
+next "end" statement would terminate it.
+
+The rest of this section will contain a step-by-step analysis of the config
+file, including what can go in each section.  Note that some attributes (and
+even entire contexts) may not be available depending on what support was
+compiled into Eterm by the person who built it.
+.LP
+.TP
+MAGIC NUMBER
+
+The first line of the config file must contain a "magic number" type line
+that lets Eterm verify that it's reading an Eterm config file and not
+something else (like an Enlightenment 0.13 and earlier config file).  The
+line should look like this:
+
+<Eterm-VERSION>
+
+where VERSION is the Eterm version for which the config file is intended.
+For example, config files written for Eterm 0.8 should have "<Eterm-0.8>"
+as their first line, followed immediately by a newline.
+.TP
+MAIN CONTEXT
+
+There are very few things that are valid within the "main" context.  In
+fact, the only non-comment lines allowed in the main context are begin's
+and end's for other contexts.  According to the internal mechanism of
+Eterm, each context can have any number of subcontexts, but as it is
+currently implemented, only main has any.  Valid subcontexts for main are
+color, attributes, pixmaps, toggles, keyboard, misc, and kanji.  They can
+appear in any order.  The order I list them here is simply the order in
+which they appear in the default themes, which was arbitrarily chosen for
+continuity.
+.TP
+COLOR CONTEXT
+
+This context contains color specifications.  With the exception of
+.B tint
+and the terminal colors 0-15, all
+.IR color s
+should be either a valid color name or an RGB string as outlined in the
+.IR X11 (7)
+man page.
+
+.RS 5
+.BI foreground " color"
+.RS 5
+Use
+.I color
+for the foreground (text) color.
+.RE
+
+.BI background " color"
+.RS 5
+Use
+.I color
+for the background color.
+.RE
+
+.BI tint " mask"
+.RS 5
+Tints the background pixmap (either an image file or the transparent
+portion can be shaded).  The
+.I mask
+is an integer, usually specified in hexadecimal in the form
+.BR " " "0x" "RRGGBB" ","
+where
+.BR "RR" ", " "GG" ", and " "BB"
+are hexadecimal numbers between
+.BR "00" " and " "ff" " (" "0" " and"
+.BR "255" " decimal)"
+which represent the brightness of the image's red, green, and blue
+values, respectively.  A value of
+.B 00
+will mask that color out entirely, while a value of
+.B ff
+will not change that color at all.  Some common tints are:
+.RS 5
+none      0xffffff
+.br
+red       0xff8080
+.br
+green     0x80ff80
+.br
+blue      0x8080ff
+.br
+cyan      0x80ffff
+.br
+magenta   0xff80ff
+.br
+yellow    0xffff80
+.RE
+.RE
+
+.BI shade " percentage"
+.RS 5
+Darkens the background pixmap (either an image file or the transparent
+portion can be shaded).  The amount of shading is controlled by the
+specified
+.IR percentage ,
+which may or may not be followed by a percent sign.
+.RE
+
+.BI cursor " color"
+.RS 5
+Use
+.I color
+for the cursor color.
+.RE
+
+.BI cursor_text " color"
+.RS 5
+Use
+.I color
+for the cursor text color.
+.RE
+
+.BI menu_text " color"
+.RS 5
+Use
+.I color
+for the menu text color.
+.RE
+
+.BI scrollbar " color"
+.RS 5
+Use
+.I color
+for the scrollbar color.
+.RE
+
+.BI unfocusedscrollbar " color"
+.RS 5
+Use
+.I color
+for the scrollbar color if Eterm is unfocused.
+.RE
+
+.BI pointer " color"
+.RS 5
+Use
+.I color
+for the mouse pointer color.
+.RE
+
+.BR video " { " normal " | " reverse " }"
+.RS 5
+.B normal
+will not reverse the foreground and background colors.
+.B reverse
+(meaning reverse video) will.
+.RE
+
+.BI color " num" " " "color"
+.RS 5
+Set terminal color
+.I num
+(0-15) to the color name, string, or set of 3 decimal/hex/octal RGB values
+specified by
+.IR color .
+.RE
+
+.BR color " { " "bd" " | " "ul" " }"
+.I color
+.RS 5
+Set terminal bold
+.BR " " "(" bd ") or underline (" ul ") color"
+to the color name, string, or set of 3 decimal/hex/octal RGB values
+specified by
+.IR color .
+.RE
+.RE
+
+.TP
+ATTRIBUTES CONTEXT
+
+This context contains X11 attributes.  Most of these are dependent upon the
+cooperation of the window manager.
+
+.RS 5
+.BI geometry " geom"
+.RS 5
+Use the geometry string
+.I geom
+to specify the startup geometry.
+.I geom
+should be in the format 
+.BI " " W x H+X+Y
+where
+.I W
+is the width,
+.I H
+is the height, and
+.I +X
+and
+.I +Y
+are the X and Y offsets.  If the signs on
+.I X
+and
+.I Y
+are positive, the coordinates are offsets (in pixels) from the left and top,
+respectively, of the screen.  If the signs are negative, the offsets are
+relative to the right and bottom of the screen, respectively.
+.RE
+
+.BI title " title"
+.RS 5
+Use
+.I title
+as the text in the title bar of the Eterm window.
+.RE
+
+.BI name " name"
+.RS 5
+Use
+.I name
+as the resource name of the Eterm window.
+.RE
+
+.BI iconname " name"
+.RS 5
+Use
+.I name
+as the icon name of the Eterm window icon.
+.RE
+
+.BI desktop " num"
+.RS 5
+Start Eterm on desktop
+.IR num .
+.BR NOTE ":  "
+This requires a GNOME-compliant Window Manager.  Please see
+http://www.gnome.org/devel/gnomewm/ for more information on the
+.B _WIN_WORKSPACE
+property and how to support it.
+.RE
+
+.BI scrollbar_type " type"
+.RS 5
+Use a scrollbar with the
+.IR type " style.  " type " can"
+be any of
+.BR motif ", " xterm ", or " next "."
+.RE
+
+.BI scrollbar_width " num"
+.RS 5
+Use a scrollbar that is
+.I num
+pixels wide.
+.RE
+
+.BI font " num" " " "font"
+.br
+.BI "font bold " font
+.RS 5
+Set the
+.IR num th
+font (0-4), or the
+.B bold
+font, to
+.IR font .
+.RE
+.RE
+
+.TP
+PIXMAPS CONTEXT
+
+This context contains attributes related to pixmaps.
+
+.RS 5
+.BI background " x_scale y_scale filename"
+.RS 5
+Use
+.I filename
+as the background image for the Eterm window.
+.I filename
+can be an absolute path, relative to the current theme, or relative to one of
+the directories in the
+.B path
+attribute listed below.  The
+.IR x_scale " and " y_scale
+values should be either both 0 (tile) or both -1 (scale).
+.RE
+
+.BI path " directory_list"
+.RS 5
+Specifies a colon-delimited list of directories relative to which Eterm should
+search for image and menu files.  The syntax for
+.I directory_list
+is precisely the same as that of the
+.B $PATH
+environment variable in UNIX shells.
+.RE
+
+.BI icon " filename"
+.RS 5
+Use
+.I filename
+as the icon image for the Eterm window.
+.I filename
+can be an absolute path, relative to the current theme, or relative to one of
+the directories in the
+.B path
+attribute listed above.
+.RE
+
+.BI anim " interval" "" " images ..."
+.RS 5
+Specifies an animation list to be use in cycling the background pixmap.
+.I interval
+defines the delay, in seconds, between updates of the background.  This
+should be set to a reasonable value to insure that Eterm doesn't spend all
+its time rendering backgrounds.  All remaining words have the same syntax as the
+.B background
+attribute in a configuration file (two integers followed by the image filename),
+except that the two integers are optional.  If they are specified, remember to
+group them with the filename using quotes.  The following are both valid:
+.RS 5
+anim 10 image1.jpg image2.jpg
+.br
+anim 10 "0 0 image1.jpg" "-1 -1 image2.jpg"
+.RE
+.RE
+.RE
+
+.TP
+TOGGLES CONTEXT
+
+This context contains boolean variables which can be toggled on or off.  Valid
+values for the attributes in this section are "yes", "on", "1", and "true" to
+turn the option on, or "no", "off", "0", or "false" to turn the option off.
+These values are denoted by
+.IR boolean .
+They all default to false unless otherwise noted.
+
+.RS 5
+.BI map_alert " boolean"
+.RS 5
+If true, Eterm will un-iconify itself when it receives a beep (ASCII 0x07).
+.RE
+
+.BI visual_bell " boolean"
+.RS 5
+If true, Eterm will flash rather than sending a beep.
+.RE
+
+.BI login_shell " boolean"
+.RS 5
+If true, Eterm will prepend '-' to the shell name when calling it.  Depending
+on your shell, this may modify its startup behavior.
+.RE
+
+.BI scrollbar " boolean"
+.RS 5
+This turns on and off the display of the scrollbar.  Default is on.
+.RE
+
+.BI menubar " boolean"
+.RS 5
+This turns on and off the display of the menubar.  Default is on.
+.RE
+
+.BI utmp_logging " boolean"
+.RS 5
+If true, Eterm will attempt to make an entry in the utmp file to record the
+login information.  Eterm may need to run privileged to do this.
+.RE
+
+.BI meta8 " boolean"
+.RS 5
+Toggles the interpretation of the Meta key setting the 8th bit in a
+character.
+.RE
+
+.BI iconic " boolean"
+.RS 5
+If true, Eterm will launch as an icon.
+.RE
+
+.BI home_on_echo " boolean"
+.RS 5
+Zoom to the bottom of the scrollback buffer on output.
+.RE
+
+.BI home_on_input " boolean"
+.RS 5
+Zoom to the bottom of the scrollback buffer on input.
+.RE
+
+.BI home_on_refresh " boolean"
+.RS 5
+Zoom to the bottom of the scrollback buffer on refresh (Ctrl-L).
+.RE
+
+.BI scrollbar_floating " boolean"
+.RS 5
+If true, the scrollbar will have no trough.
+.RE
+
+.BI scrollbar_right " boolean"
+.RS 5
+If true, Eterm will put the scrollbar on the right of the window (default is left).
+.RE
+
+.BI scrollbar_popup " boolean"
+.RS 5
+If true, Eterm will hide the scrollbar when the Eterm window loses focus and restore
+it when focus is regained.  Default is to not change the scrollbar state based on
+focus.
+.RE
+
+.BI borderless " boolean"
+.RS 5
+If true, Eterm will run with no window borders.  This also means that the
+window can not be moved or resized.  You will want to specify a
+.B geometry
+with this attribute.
+.RE
+
+.BI save_under " boolean"
+.RS 5
+If true, Eterm will use a backing store.
+.RE
+
+.BI trans " boolean"
+.RS 5
+Toggles Eterm's pseudo-transparency feature.  Yes, it's fake.  Yes, it will
+always be fake.  Don't ask.
+.RE
+
+.BI watch_desktop " boolean"
+.RS 5
+This option is required if you want Eterm to watch for updates to the desktop
+background image, including moving across desktops.  There is a speed sacrifice
+that must be made for this feature, although I've tried to make it as small as
+possible.
+.RE
+
+.BI no_cursor " boolean"
+.RS 5
+If true, Eterm will not display a text cursor.
+.RE
+
+.BI menubar_move " boolean"
+.RS 5
+This options causes Eterm to enable the moving of the Eterm window by
+dragging the right-hand side of the menubar.  This is useful for
+borderless Eterms (and is, in fact, on by default if the
+.BR borderless
+attribute is true).
+.RE
+
+.BI pause " boolean"
+.RS 5
+After the child process terminates, Eterm will wait for a keypress
+before exiting.
+.RE
+
+.BI xterm_select " boolean"
+.RS 5
+Duplicate's xterm's treatment of cutchars.  The only real difference is
+what happens when you double click on a single cutchar between two
+words.  If this option is on, only that single character gets selected.
+If it is off, that character is selected along with the two words.  The
+latter behavior is useful for double-clicking on the space between someone's
+first and last names, or the @ sign in an e-mail address, etc.
+.RE
+
+.BI select_line " boolean"
+.RS 5
+If true, this attribute causes a triple-click to select from the current
+word to the end of the line.  If off, a triple click selects the entire
+line from beginning to end.
+.RE
+
+.BI select_trailing_spaces " boolean"
+.RS 5
+If true, this attribute causes spaces at the end of a line to be included
+as part of the selection text when selecting.  The default is to strip
+these trailing spaces.
+.RE
+
+.BI viewport_mode " boolean"
+.RS 5
+This activates a special Eterm mode which is hard to describe in words.
+Basically, imagine the effect you get with pseudo-transparency, where
+the desktop background moves through the Eterm window as you move the
+window, so that it always aligns with the desktop image.  Now, imagine
+the same effect, but the image used isn't the desktop image but any
+pixmap you choose.  The image is scaled or tiled up to the size of the
+desktop, and dragging the Eterm around the screen reveals different
+portions of the image as you move, much like a small viewport window
+in a ship or submarine does.  The effect is especially keen if you
+open several Eterms in this mode with the same image.
+.RE
+.RE
+
+.TP
+KEYBOARD CONTEXT
+
+This context contains keyboard-related configuration options.
+
+.RS 5
+.BI smallfont_key " keysym"
+.RS 5
+Specify a keysym to decrease the font size.  Default is Shift and the - key on
+the keypad.  Ctrl-< or Meta-< may also work (if you #define one of the hotkeys
+in src/feature.h).
+.RE
+
+.BI bigfont_key " keysym"
+.RS 5
+Specify a keysym to increase the font size.  Default is Shift and the + key on
+the keypad.  Ctrl-> or Meta-> may also work (if you #define one of the hotkeys
+in src/feature.h).
+.RE
+
+.BI keysym " keysym" " " "string"
+.RS 5
+Define keysym
+.I keysym
+to send
+.I string
+instead of its default.
+.I keysym
+must be between 0xff00 and 0xffff or Eterm will complain.
+.RE
+
+.BI greek " boolean"
+.BR " " "{ " "iso" " | " "ibm" " }"
+.RS 5
+Turn on/off greek keyboard support, and set which greek mode to use.
+.RE
+
+.BI app_keypad " boolean"
+.RS 5
+Turn on/off application keypad mode on startup.
+.RE
+
+.BI app_cursor " boolean"
+.RS 5
+Turn on/off application cursor key mode on startup.
+.RE
+.RE
+
+.TP
+MISC CONTEXT
+
+This context contains miscellaneous attributes that really didn't belong
+anywhere else.
+
+.RS 5
+.BI print_pipe " command"
+.RS 5
+Set the command to which to pipe print requests (printscreen) to
+.IR command .
+.RE
+
+.BI save_lines " num"
+.RS 5
+Set the number of lines in the scrollback buffer to
+.IR num .
+.RE
+
+.BI cut_chars " string"
+.RS 5
+Define the characters used as word delimiters to the characters contained in
+.IR string .
+.RE
+
+.BI min_anchor_size " num"
+.RS 5
+Sets the minimum size, in pixels, of the scrollbar anchor (the part your mouse
+grabs onto and moves around) to
+.IR num .
+.RE
+
+.BI border_width " num"
+.RS 5
+Sets the width of the border between the text window and the X window to
+.IR num .
+.RE
+
+.BI menu " file"
+.RS 5
+Loads menubar code from
+.IR file .
+The way to turn the menubar off is to not have this line in the config file,
+but passing some bogus filename (or
+.BR /dev/null )
+as
+.I file
+will work too, though it may produce an error message.
+.RE
+
+.BI term_name " name"
+.RS 5
+Use
+.I name
+as the
+.B $TERM
+environment variable, which controls which termcap/terminfo entry gets used.
+The default is
+.BR xterm .
+.RE
+
+.BI exec " command"
+.RS 5
+Rather than executing a shell, this will cause Eterm to spawn
+.I command
+as its child process.  You can only have one of these!
+.RE
+.RE
+
+.TP
+KANJI CONTEXT
+
+This context contains attributes which are only used when Eterm is compiled
+with Kanji support.  This context is not valid in a normal Eterm.
+
+.RS 5
+.BI font " num" " " "font"
+.RS 5
+Set the
+.IR num th
+kanji font (0-4) to
+.IR font .
+.RE
+
+.BR encoding " { " "eucj" " | " "sjis" " }"
+.RS 5
+Set the kanji encoding method.
+.RE
+.RE
+
+.TP
+BUILT-IN FUNCTIONS
+
+Eterm has a set of built-in functions which are available in config files.
+They can be used anywhere their output would be valid.  Built-in functions
+are prefixed with the
+.B %
+character.
+
+.RS 5
+.BI %random( params )
+.RS 5
+This function randomly chooses one of the words which compose
+.I params
+and returns that.  "Words" are defined in shell terms, meaning that single or
+double quotes can be used to separate individual words of
+.I params
+which contain spaces.  And you can even get creative and use a
+backquote-executed command to generate the list of words to pass to
+.BR %random() .
+The default themes that come with Eterm demonstrate this technique, in fact.
+But keep in mind that random pixmaps aren't the only thing you can do with this
+function.  You can randomize anything...colors, toggles, fonts, tinting...you
+name it!
+.RE
+
+.BI %exec( command )
+.RS 5
+Executes
+.I command
+and returns the result.  Basically it's exactly like using backquotes, except
+that it hasn't been implemented yet, so use backquotes instead. :-}
+.RE
+
+.BI %appname()
+.RS 5
+Returns the application name, a hyphen, and the version number.  Currently this
+is the string 
+.BR Eterm-@VERSION@ .
+.RE
+
+.BI %version()
+.RS 5
+Returns the version number.  Currently this
+is the string 
+.BR @VERSION@ .
+.RE
+.RE
+
+.TP
+INCLUDES
+
+Eterm supports the
+.BI %include " file"
+directive to allow for separation of the configuration information into
+separate files.
+
+.SH AUTHORS
+Tuomo Venalainen (vendu@cc.hut.fi) and Michael Jennings (mej@tcserv.com).
+Man page re-written for version 0.8 by Shaleh (shaleh@debian.org).
+
+.SH URL(s)
+Eterm Home Page -- http://www.eterm.org/
+.br
+Eterm FAQ -- http://www.eterm.org/FAQ.html
+.br
+Eterm iFAQ -- http://www.eterm.org/cgi-bin/ifaq.cgi
+.br
+Resurrection -- http://ganja.tky.hut.fi/Resurrection/
+.br

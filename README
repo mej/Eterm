@@ -1,0 +1,124 @@
+Release notes for Eterm Development Release 0.8
+-----------------------------------------------
+
+Software Requirements
+---------------------
+- The usual X11R6 stuff
+- Rasterman's Imlib and the libraries it needs. Visit
+  http://www.labs.redhat.com/imlib/ for more information.
+- Even though Eterm works with any window manager, you just might get extra
+  fancies by using the Enlightenment window manager from Rasterman and
+  Mandrake - http://www.enlightenment.org/ for more information. Now go see
+  what your desktop can look like with E. :) -vendu
+
+Documentation to read
+---------------------
+- The FAQ at http://www.eterm.org/
+- Run "Eterm -h" - you'll see the command line options.
+
+ATTENTION!  Active Tags Warning!
+--------------------------------
+
+NOTE: It looks like the latest resize-crashes happen in the active tags
+code. We'll try to get this fixed as soon as possible. Until then, if you
+want to use tags, you may want to see the FIXME notes in screen.c for what
+NULL pointer checks to remove.
+
+Preliminary support for active tags by Nat Friedman has been added.
+Thanks, Nat :) (http://dingus.mit.edu/ for more info)
+
+This will definitely need more work :) Sorry if it's buggy (I'd expect it
+to be >:). -vendu
+
+Building Eterm 0.8
+------------------
+
+From the toplevel Eterm source tree directory:
+    ./configure
+    make
+	
+With better optimization flags
+
+ - For gcc 2.7.2.1 and older:  make "CFLAGS=-O2 -fno-strength-reduce"
+ - For Intel-based platforms with new gcc compilers:  make "CFLAGS=-O2 -m486"
+ - For Intel-based platforms with new gcc compilers, more optimization:
+     make "CFLAGS=-O3 -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+ - For Pentium machines with egcs or pgcc:
+     make "CFLAGS=-O6 -mpentium -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+       - Eterm seems to compile OK with pgcc 1.0.1. DEFINITELY use the -malign
+         flags, they seem to speed things up quite considerably for Pentium
+         processors :)
+	
+Installing Eterm
+----------------
+
+After performing the build step above, run:
+    make install
+
+Standard Disclaimer
+-------------------
+
+The authors don't take any responsibility for any damage this program
+may do. We are doing this in our spare time. If you don't like this
+program, don't use it.
+
+Eterm is based on rxvt 2.21. This development release of Eterm
+has been hacked together by Tuomo Venalainen (vendu@cc.hut.fi)
+and Michael Jennings (mej@tcserv.com). Thanks to Rasterman
+(aka Carsten Haitzler) and Michael Kellen, as well as to all the
+other people who have provided patches.  Thanks to all regulars 
+from the #E IRC channel for helping us test Eterm.
+
+The development of Eterm will be continued. The sources need to be
+converted into human-readable format ;-). More features will be added
+as well. We'll continue cleaning up and patching the sources to make
+Eterm more robust, secure and portable.
+
+NOTE: Support for libXpm was dropped off in DR 0.3. Imlib does a much
+      better job at loading and scaling the background pixmaps. And hey,
+      it's Eterm, ya know :-)
+
+Future Plans
+------------
+
+There will be minimal further development on this incarnation of Eterm.
+We have begun Project Resurrection, which is a complete rewrite of Eterm
+with a completely different philosophy of design.  Please visit
+http://ganja.tky.hut.fi/Resurrection/ for more information.
+
+Notes
+-----
+
+- In case you need utmp support, you'll have to run Eterm "setuid root"
+  As root, do: "chmod 4755 Eterm" Make SURE the Eterm binary is owned by
+  user=root, group=root (on BSD, i think it should be group=wheel):
+
+	1. chown root.root Eterm
+	2. (BSD) chown root.wheel Eterm
+
+  Note that in this version, utmp support will be turned on automagically
+  only on Linux and FreeBSD. If you want to try it on other platforms,
+  add -DUTMP_SUPPORT to your compilation flags. An example:
+    make "CFLAGS=-O -DUTMP_SUPPORT"
+
+- The only fonts I know that will display ANSI art correctly are Raster's
+  nexus and vga;
+- If you want to use colorful ANSI prompts (at least bash can show them),
+  make sure to make them end with a new line character ('\n')>
+
+Development Notes
+-----------------
+
+- ATTENTION! Ignore warnings like this:
+  options.c:1454: warning: unsigned int format, long unsigned int arg (arg 3)
+  - type casting or otherwise screwing around can break text colors bad :)
+- The sources don't compile with the GCC profiling flag (-gp) yet;
+
+Troubleshooting
+---------------
+
+- See feature.h;
+- In case you have problems, try commenting out #define NDEBUG in feature.h:
+  /* #define NDEBUG */
+
+E-n-Joy! ;-)   -- vendu & mej

@@ -1,0 +1,11 @@
+As of 31 August 1998, Eterm is now available via anonymous CVS from
+anoncvs.gnome.org.  If you don't know how to use CVS, don't use it.
+The authors, of course, don't guarantee anything whatsoever about
+Eterm being functional; we guarantee even less if you get it from
+CVS.  We will try to remember to test things before we commit them,
+but we make no promises. :-)
+
+Happy terming!
+
+mej
+

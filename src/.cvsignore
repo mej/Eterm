@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+.deps
+.libs
+Eterm
+libEterm.la
+feature.h
+VERSION.h
+*.lo
+*.da

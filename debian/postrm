@@ -1,0 +1,9 @@
+#!/bin/sh -e
+# Automatically added by dh_installmenu
+if test -x /usr/bin/update-menus ; then update-menus ; fi
+# End automatically added section
+# Automatically added by dh_suidregister
+if command -v suidunregister >/dev/null 2>&1 && [ -e /etc/suid.conf ]; then
+        suidunregister -s eterm /usr/X11R6/bin/Eterm
+fi
+# End automatically added section

@@ -1,0 +1,17 @@
+config.log
+config.sub
+config.cache
+config.guess
+configure
+ltconfig
+ltmain.sh
+Makefile
+Makefile.in
+aclocal.m4
+config.status
+config.h
+libtool
+stamp-h
+move-themes
+Eterm.spec
+config.h.in

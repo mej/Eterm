@@ -1,0 +1,223 @@
+# standard settings for an Eterm control menu
+[menu:Eterm]
+
+/Eterm/*
+
+./Font/*
+{Normal}				^@\e]50;#
+{Larger}				^@\e]50;#+
+{Smaller}				^@\e]50;#-
+{-}
+{Font 1}				^@\e]50;#1
+{Font 2}				^@\e]50;#2
+{Font 3}				^@\e]50;#3
+{Font 4}				^@\e]50;#4
+
+../Terminal/*
+./Toggles/*
+{Cursor Visible}			^@\e[?25t
+{Home on Echo}				^@\e[?1010t
+{Home on Refresh}			^@\e[?1011t
+{Home on Input}				^@\e[?1012t
+{Map Alert}				^@\e]6;21\a
+{Primary/Secondary Screen}		^@\e[?47t
+{Reverse Video}				^@\e[?5t
+{Select Trailing Spaces}		^@\e]6;25\a
+{Select Whole Line on Triple-click}	^@\e]6;23\a
+{Visual Bell}				^@\e]6;20\a
+{X11 Mouse Reporting}			^@\e[?1000t
+{Xterm Selection Behavior}		^@\e]6;22\a
+../Keys/*
+{Application Arrow Keys}		^@\e[?1t
+{Application Keypad}			^@\e[?66t
+{Backspace/Delete}			^@\e[?67t
+{Xterm Shift-Keys}			^@\e[?35t
+../Menubar/*
+{Toggle Visibility}{Ctrl-Button3}	^@\e[?10t
+{Refresh Menubar}			^@\e[?10h
+{Toggle Window Move by Menubar}		^@\e]6;15\a
+../Scrollbar/*
+{Toggle Visibility}{Ctrl-Button2}	^@\e[?30t
+{Swap Sides}				^@\e]6;11\a
+{Toggle Floating}			^@\e]6;12\a
+{Toggle Popup Mode}			^@\e]6;13\a
+{-}
+{Motif (Traditional) Style}		^@\e]6;10;motif;;\a
+{NeXT Style}				^@\e]6;10;next;;\a
+{Xterm Style}				^@\e]6;10;xterm;;\a
+./Width/*
+{5}					^@\e]6;10;;5;\a
+{6}					^@\e]6;10;;6;\a
+{7}					^@\e]6;10;;7;\a
+{8}					^@\e]6;10;;8;\a
+{9}					^@\e]6;10;;9;\a
+{10}					^@\e]6;10;;10;\a
+{11}					^@\e]6;10;;11;\a
+{12}					^@\e]6;10;;12;\a
+{13}					^@\e]6;10;;13;\a
+{14}					^@\e]6;10;;14;\a
+{15}					^@\e]6;10;;15;\a
+{16}					^@\e]6;10;;16;\a
+{17}					^@\e]6;10;;17;\a
+{18}					^@\e]6;10;;18;\a
+{19}					^@\e]6;10;;19;\a
+{20}					^@\e]6;10;;20;\a
+../
+../Move to Desktop/*
+{0}					^@\e]6;50;0;\a
+{1}					^@\e]6;50;1;\a
+{2}					^@\e]6;50;2;\a
+{3}					^@\e]6;50;3;\a
+{4}					^@\e]6;50;4;\a
+{5}					^@\e]6;50;5;\a
+{6}					^@\e]6;50;6;\a
+{7}					^@\e]6;50;7;\a
+../
+{-}
+{Steal Focus}{Ctrl-Button1}		^@\e]5;\a
+{Full Reset}				^@\ec
+
+../Background/*
+./Transparency/*
+{Force Update}				^@\e]6;3\a
+{Toggle Desktop Watching}		^@\e]6;4\a
+{Toggle Transparency}			^@\e]6;0\a
+../Pixmap/*
+{None}					^@\e[m\e]20;;\a
+{Toggle Viewport Mode}			^@\e]6;24\a
+./Tiled/*
+{70's Marble}				^@\e]20;70s_marble.png;0x0+50+50\a
+{7m}					^@\e]10;[pixmap:7m.png;0x0+50+50]
+{Alabama Clay}				^@\e]10;[pixmap:dirt.png;0x0+50+50]
+{Anomaly}				^@\e]20;a8.png;0x0+50+50\a
+{Black Stone}				^@\e]20;blackstone.png;0x0+50+50\a
+{Blue Ether}				^@\e]10;[pixmap:ether_blue.png;0x0+50+50]
+{Blue Marble}				^@\e]10;[pixmap:blue_marble.png;0x0+50+50]
+{Blue Maze}				^@\e]10;[pixmap:blue_maze.png;0x0+50+50]
+{Blue Puzzle}				^@\e]10;[pixmap:026.png;0x0+50+50]
+{Circuit}				^@\e]10;[pixmap:circuit.png;0x0+50+50]
+{Cyber Playground}			^@\e]10;[pixmap:cyber_bg.png;0x0+50+50]
+{Dark Marble}				^@\e]10;[pixmap:dark_marble.png;0x0+50+50]
+{Dimples}				^@\e]20;014.png;0x0+50+50\a
+{Ether}					^@\e]10;[pixmap:ether.png;0x0+50+50]
+{Giger 1}				^@\e]10;[pixmap:giger1.png;0x0+50+50]
+{Giger 2}				^@\e]10;[pixmap:giger2.png;0x0+50+50]
+{Gray Matter}				^@\e]10;[pixmap:22.png;0x0+50+50]
+{Gray Waves}				^@\e]10;[pixmap:gray_waves.png;0x0+50+50]
+{Jungle}				^@\e]20;43.png;0x0+50+50\a
+{Lava}					^@\e]20;4.png;0x0+50+50\a
+{Light B1}				^@\e]10;[pixmap:lightb1.png;0x0+50+50]
+{Maple Leaves}				^@\e]10;[pixmap:maple1.png;0x0+50+50]
+{Marble}				^@\e]10;[pixmap:marbled.png;0x0+50+50]
+{Pebbles}				^@\e]10;[pixmap:pebble1.png;0x0+50+50]
+{Purple Rain}				^@\e]20;024.png;0x0+50+50\a
+{Purple Clouds}				^@\e]10;[pixmap:7.png;0x0+50+50]
+{Rainstorm}				^@\e]20;15.png;0x0+50+50\a
+{Red Whisper}				^@\e]10;[pixmap:40.png;0x0+50+50]
+{Soft Marble}				^@\e]10;[pixmap:soft.png;0x0+50+50]
+{Space 1}				^@\e]10;[pixmap:space.png;0x0+50+50]
+{Space 2}				^@\e]10;[pixmap:starry.png;0x0+50+50]
+{Whirlpool}				^@\e]20;015.png;0x0+50+50\a
+
+../Scaled/*
+{Alien Spheres}				^@\e]20;alien_spheres.jpg;100x100+50+50\a
+{Atlantis}				^@\e]20;atlantis.jpg;100x100+50+50\a
+{Before the Storm}			^@\e]20;before_the_storm.jpg;100x100+50+50\a
+{Bladerunner}				^@\e]20;Bladerunner-bg.png;100x100+50+50\a
+{Canyon}				^@\e]20;Canyon.jpg;100x100+50+50\a
+{CaveFire}				^@\e]20;Cavefire-bg.png;100x100+50+50\a
+{Crater Lake}				^@\e]20;crater_lake.jpg;100x100+50+50\a
+{Daughter}				^@\e]20;Daughter.jpg;100x100+50+50\a
+{Dragon}				^@\e]20;Dragon.jpg;100x100+50+50\a
+{DVXVB}					^@\e]20;dvxvb.jpg;100x100+50+50\a
+{Elysium}				^@\e]20;elysium.jpg;100x100+50+50\a
+{Evocation}				^@\e]20;Evocation.jpg;100x100+50+50\a
+{Hourglass}				^@\e]20;hour.jpg;100x100+50+50\a
+{Ice Moon}				^@\e]20;icemoon.jpg;100x100+50+50\a
+{Iron Temple}				^@\e]20;iron_temple.jpg;100x100+50+50\a
+{Lake of Fire}				^@\e]20;lake_of_fire.jpg;100x100+50+50\a
+{Lighthouse}				^@\e]20;lighthouse.jpg;100x100+50+50\a
+{Monolith}				^@\e]20;monolith.jpg;100x100+50+50\a
+{Nebula}				^@\e]20;nebula.jpg;100x100+50+50\a
+{Neopolis}				^@\e]20;neopolis.jpg;100x100+50+50\a
+{Neopolis Horizon}			^@\e]20;Neopolis-horizon.png;100x100+50+50\a
+{Planet A}				^@\e]20;planeta.png;100x100+50+50\a
+{Pond}					^@\e]20;pond.png;100x100+50+50\a
+{Poseidon}				^@\e]20;poseidon.png;100x100+50+50\a
+{Return to Giza}			^@\e]20;return_to_giza.jpg;100x100+50+50\a
+{Ripple}				^@\e]20;ripple.png;100x100+50+50\a
+{River of Lead}				^@\e]20;river_of_lead.jpg;100x100+50+50\a
+{Silence}				^@\e]20;silence.jpg;100x100+50+50\a
+{Sun}					^@\e]20;sun.png;100x100+50+50\a
+{Tunnel}				^@\e]20;tunnel.jpg;100x100+50+50\a
+{Wasteland}				^@\e]20;wasteland.jpg;100x100+50+50\a
+../
+{-}
+./Attrib/*
+{Full}					^@\e]20;;100x100+50+50;
+{Tiled}					^@\e]20;;0
+{Center}				^@\e]20;;=+50+50;
+../
+../Shade/*
+{0%}					^@\e]6;1;0%\a
+{10%}					^@\e]6;1;10%\a
+{20%}					^@\e]6;1;20%\a
+{30%}					^@\e]6;1;30%\a
+{40%}					^@\e]6;1;40%\a
+{50%}					^@\e]6;1;50%\a
+{60%}					^@\e]6;1;60%\a
+{70%}					^@\e]6;1;70%\a
+{80%}					^@\e]6;1;80%\a
+{90%}					^@\e]6;1;90%\a
+{100%}					^@\e]6;1;100%\a
+../Tint/*
+{No Tint}				^@\e]6;2;0xffffff\a
+{Red Tint}				^@\e]6;2;0xff8080\a
+{Green Tint}				^@\e]6;2;0x80ff80\a
+{Blue Tint}				^@\e]6;2;0x8080ff\a
+{Cyan Tint}				^@\e]6;2;0x80ffff\a
+{Magenta Tint}				^@\e]6;2;0xff80ff\a
+{Yellow Tint}				^@\e]6;2;0xffff80\a
+../
+
+../
+{-}
+{Version}				^@\e[8n
+{Status}				^@\e[9n
+{-}
+{Save Current Settings}			^@\e]6;71\a
+{Exit Eterm}				^@\e]6;70\a
+/
+
+/IRC/*
+./Server/*
+{irc.concentric.net:6673}	/server irc.cris.com 6673\r
+{irc.ais.net:6673}		/server irc.ais.net 6673\r
+{irc.vol.com:6666}		/server irc.vol.com 6666\r
+{irc.frontiernet.net:6666}	/server irc.frontiernet.net 6666\r
+{irc.primenet.com:6666}		/server irc.primenet.com 6666\r
+{irc.mcs.net:6666}		/server irc.mcs.net 6666\r
+
+../Join/*
+{#E}			/join #E\r
+{#StarTrek}		/join #StarTrek\r
+{#Babylon5}		/join #Babylon5\r
+{#Linux}		/join #Linux\r
+{#LinuxWareZ}		/join #LinuxWareZ\r
+{#OS2}			/join #OS2\r
+
+../Part/*
+{#E}			/part #E\r
+{#StarTrek}		/part #StarTrek\r
+{#Babylon5}		/part #Babylon5\r
+{#Linux}		/part #Linux\r
+{#LinuxWareZ}		/part #LinuxWareZ\r
+{#OS2}			/part #OS2\r
+{-}
+{Current Channel}	/part\r
+/
+
+# make sure the change gets updated
+[show]
+[done]
+#--------------------------------------------------------------------- eof

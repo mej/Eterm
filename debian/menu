@@ -1,0 +1,2 @@
+?package(eterm):needs=X11 section=XShells\
+  title="Eterm" command="/usr/bin/X11/Eterm"

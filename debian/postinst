@@ -1,0 +1,29 @@
+#!/bin/sh -e
+
+ldconfig
+
+if [ -x /usr/bin/update-menus ] ; then update-menus ; fi
+
+cd /usr/share/Eterm/themes
+for theme_dir in `ls -1`
+do
+	if [ -d $theme_dir ]
+	then
+		cd $theme_dir
+		echo "Linking pixmaps.list in $theme_dir"
+		ln -sf /usr/share/Eterm/pix/pixmaps.list pixmaps.list
+		cd ..
+	fi
+done
+
+# Register with suidmanager
+if command -v suidregister >/dev/null 2>&1 && [ -e /etc/suid.conf ]; then
+        suidregister -s eterm /usr/X11R6/bin/Eterm root root 4755
+else
+        chown root.root /usr/X11R6/bin/Eterm
+        chmod 4755 /usr/X11R6/bin/Eterm
+fi
+
+if command -v install-docs >/dev/null 2>&1; then
+	install-docs -i /usr/share/doc-base/eterm
+fi

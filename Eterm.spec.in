@@ -1,0 +1,79 @@
+# Note that this is NOT a relocatable package
+%define ver      @VERSION@
+%define rel      SNAP
+%define prefix   /usr
+
+Summary: Eterm Enlightened Terminal Emulator for X Windows
+Name: Eterm
+Version: %ver
+Release: %rel
+Copyright: GPL
+Group: X11/Applications
+Source: ftp://ftp.enlightenment.org/pub/Eterm/Eterm-%{ver}.tar.gz
+BuildRoot: /tmp/Eterm-root
+Packager: technoir <technoir@themes.org>
+URL: http://e.themes.org/
+Requires: imlib >= 1.8
+
+Docdir: %{prefix}/doc
+
+%description
+Eterm is a color vt102 terminal emulator intended as an xterm replacement for users who want a term program integrated with Enlightenment, or simply want a little more "eye candy". Eterm uses Imlib for advanced graphic abilities.  
+
+%changelog
+
+* Wed Dec 30 1998 mej <mej@mw.3com.com>
+
+- Added spec file.  Created by techn0ir <technoir@themes.org>
+
+
+%prep
+%setup
+
+%build
+# Optimize that damned code all the way
+if [ ! -z "`echo -n ${RPM_OPT_FLAGS} | grep pentium`" ]; then
+  if [ ! -z `which egcs` ]; then
+    CC="egcs" 
+  else
+    if [ ! -z `which pgcc` ]; then
+      CC="pgcc"
+    fi
+  fi
+  CFLAGS="${RPM_OPT_FLAGS}"
+else
+  CFLAGS="${RPM_OPT_FLAGS}"
+fi
+if [ ! -f configure ]; then
+  CFLAGS="$RPM_OPT_FLAGS" ./autogen.sh --prefix=%prefix
+else
+  CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix
+fi
+
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+
+make prefix=$RPM_BUILD_ROOT%{prefix} install
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post
+
+%postun
+
+%files
+%defattr(-, root, root)
+
+%{prefix}/bin/*
+%(prefix)/doc/*
+%{prefix}/lib/*
+%{prefix}/share/*
+%{prefix}/man/*
+
+
+%doc COPYING
+%doc ChangeLog
+%doc README
