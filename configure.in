@@ -1,5 +1,8 @@
 dnl# $Id$
 
+PATH=$PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/ucb/bin
+export PATH
+
 AC_INIT(src/feature.h)
 AM_INIT_AUTOMAKE(Eterm, 0.9.2)
 
@@ -129,8 +132,8 @@ AC_CHECK_PROG(AR, ar, ar, false)
 AC_CHECK_PROG(MV, mv, mv, true)
 AC_CHECK_PROG(TIC, tic, tic, true)
 AC_LN_S
-AC_PATH_PROG(PERL, perl, /usr/bin/perl, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
-AC_PATH_PROG(AWK, awk, /usr/bin/awk, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
+AC_PATH_PROG(PERL, perl, perl)
+AC_PROG_AWK
 export PERL AWK
 
 AC_CHECK_SIZEOF(int, 4)
