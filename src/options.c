@@ -2077,7 +2077,7 @@ parse_keyboard(char *buff)
 
 	*p = len;
 	strncpy(p + 1, str, len);
-	KeySym_map[sym] = p;
+	KeySym_map[sym] = (unsigned char *) p;
       }
     }
 #else
@@ -2364,7 +2364,7 @@ parse_image(char *buff)
     if (allow_list) {
       char *allow;
 
-      for (; (allow = strsep(&allow_list, " ")) != NULL;) {
+      for (; (allow = (char *) strsep(&allow_list, " ")) != NULL;) {
 	if (!BEG_STRCASECMP("image", allow)) {
 	  images[idx].mode |= ALLOW_IMAGE;
 	} else if (!BEG_STRCASECMP("transparent", allow)) {

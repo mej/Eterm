@@ -97,6 +97,13 @@ extern void *memmem(void *, size_t, void *, size_t);
 #ifndef HAVE_USLEEP
 extern void usleep(unsigned long);
 #endif
+#ifndef HAVE_SNPRINTF
+# ifdef HAVE_STDARG_H
+#  include <stdarg.h>
+# endif
+extern int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
+extern int snprintf(char *str, size_t count, const char *fmt, ...);
+#endif
 /*
 #ifndef HAVE_NANOSLEEP
 extern void nanosleep(unsigned long);

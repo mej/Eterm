@@ -1003,10 +1003,10 @@ menu_action(menuitem_t * item)
       D_MENU(("Internal Program Error:  menu_action() called for a submenu.\n"));
       break;
     case MENUITEM_STRING:
-      cmd_write(item->action.string, strlen(item->action.string));
+      cmd_write((unsigned char *) item->action.string, strlen(item->action.string));
       break;
     case MENUITEM_ECHO:
-      tt_write(item->action.string, strlen(item->action.string));
+      tt_write((unsigned char *) item->action.string, strlen(item->action.string));
       break;
     default:
       fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);

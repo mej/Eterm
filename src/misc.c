@@ -251,7 +251,7 @@ parse_escaped_string(char *str)
   if (!BEG_STRCASECMP(str, "\033x") && *(pnew - 1) != '\r') {
     D_STRINGS(("Adding carriage return\n"));
     *(pnew++) = '\r';
-  } else if (!BEG_STRCASECMP(str, "\e]") && *(pnew - 1) != '\a') {
+  } else if (!BEG_STRCASECMP(str, "\033]") && *(pnew - 1) != '\a') {
     D_STRINGS(("Adding bell character\n"));
     *(pnew++) = '\a';
   }

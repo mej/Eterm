@@ -130,7 +130,7 @@ parse_pixmap_ops(char *str)
   REQUIRE_RVAL(str && *str, OP_NONE);
   D_PIXMAP(("parse_pixmap_ops(str [%s]) called.\n", str));
 
-  for (; (token = strsep(&str, ":"));) {
+  for (; (token = (char *) strsep(&str, ":"));) {
     if (!BEG_STRCASECMP("tiled", token)) {
       op |= OP_TILE;
     } else if (!BEG_STRCASECMP("hscaled", token)) {
@@ -152,7 +152,8 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
 
   static char str[GEOM_LEN + 1] =
   {'\0'};
-  int w = 0, h = 0, x = 0, y = 0;
+  unsigned int w = 0, h = 0;
+  int x = 0, y = 0;
   unsigned short op = OP_NONE;
   int flags;
   unsigned short changed = 0;
@@ -216,12 +217,12 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
       }
     }
 
-    if (pmap->w != w) {
-      pmap->w = w;
+    if (pmap->w != (int) w) {
+      pmap->w = (int) w;
       changed++;
     }
-    if (pmap->h != h) {
-      pmap->h = h;
+    if (pmap->h != (int) h) {
+      pmap->h = (int) h;
       changed++;
     }
   }
@@ -1005,7 +1006,7 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
   XImage *ximg;
   register unsigned long v, i;
   unsigned long x, y;
-  unsigned int r, g, b;
+  int r, g, b;
   unsigned short rm, gm, bm, shade;
   ImlibColor ctab[256];
   int real_depth = 0;

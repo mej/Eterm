@@ -2642,3 +2642,12 @@ Wed Oct 27 17:36:35 PDT 1999	Michael Jennings <mej@eterm.org>
 	Modified libtool flags per recommendation of HJ Lu <hjl@gnu.org>.
 	
 -------------------------------------------------------------------------------
+Wed Oct 27 18:46:04 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed lots of issues revealed by the -ansi -pedantic flags.  The only
+	warnings you get with those flags now are implicit declaration
+	warnings for non-ANSI functions and warnings specific to certain OS's
+	and their non-ANSI implementations of ANSI functions, neither of
+	which I can do much about. :-)
+	
+-------------------------------------------------------------------------------

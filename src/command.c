@@ -1031,7 +1031,7 @@ Child_signal(int sig)
       const char *message = "\r\nPress any key to exit " APL_NAME "....";
 
       scr_refresh(DEFAULT_REFRESH);
-      scr_add_lines(message, 1, strlen(message));
+      scr_add_lines((unsigned char *) message, 1, strlen(message));
       scr_refresh(DEFAULT_REFRESH);
       keypress_exit = 1;
       return;
@@ -1043,7 +1043,7 @@ Child_signal(int sig)
   D_CMD(("Child_signal: installing signal handler\n"));
   signal(SIGCHLD, Child_signal);
 
-  return ((RETSIGTYPE) 0);
+  SIG_RETURN(0);
 }
 
 /* Handles signals usually sent by a user, like HUP, TERM, INT. */
@@ -1062,6 +1062,7 @@ Exit_signal(int sig)
 
   D_CMD(("Exit_signal(): exit(%s)\n", sig_to_str(sig)));
   exit(sig);
+  SIG_RETURN(0);
 }
 
 /* Handles abnormal termination signals -- mej */
@@ -1081,6 +1082,7 @@ SegvHandler(int sig)
 
   /* Exit */
   exit(sig);
+  SIG_RETURN(0);
 }
 
 /*
@@ -1122,6 +1124,8 @@ clean_exit(void)
  */
 
 #ifdef __sgi
+inline int sgi_get_pty(void);
+
 inline int
 sgi_get_pty(void)
 {
@@ -1135,6 +1139,8 @@ sgi_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTC
+inline int aix_get_pty(void);
+
 inline int
 aix_get_pty(void)
 {
@@ -1150,6 +1156,8 @@ aix_get_pty(void)
 #endif
 
 #ifdef HAVE_SCO_PTYS
+inline int sco_get_pty(void);
+
 inline int
 sco_get_pty(void)
 {
@@ -1183,6 +1191,7 @@ sco_get_pty(void)
 
 #ifdef HAVE_DEV_PTMX
 inline int svr_get_pty(void);
+
 inline int
 svr_get_pty(void)
 {
@@ -1215,6 +1224,7 @@ svr_get_pty(void)
 #define PTYCHAR2 "0123456789abcdefghijklmnopqrstuvwxyz"
 
 inline int gen_get_pty(void);
+
 inline int
 gen_get_pty(void)
 {
@@ -2308,17 +2318,17 @@ check_pixmap_change(int sig)
   static unsigned char in_cpc = 0;
 
   if (in_cpc)
-    CPC_RETURN(0);
+    SIG_RETURN(0);
   in_cpc = 1;
   D_PIXMAP(("check_pixmap_change(%d):  rs_anim_delay == %lu seconds, last_update == %lu\n", sig, rs_anim_delay, last_update));
   if (!rs_anim_delay)
-    CPC_RETURN(0);
+    SIG_RETURN(0);
   if (last_update == 0) {
     last_update = time(NULL);
     old_handler = signal(SIGALRM, check_pixmap_change);
     alarm(rs_anim_delay);
     in_cpc = 0;
-    CPC_RETURN(0);
+    SIG_RETURN(0);
   }
   now = time(NULL);
   D_PIXMAP(("now %lu >= %lu (last_update %lu + rs_anim_delay %lu) ?\n", now, last_update + rs_anim_delay, last_update, rs_anim_delay));
@@ -2336,9 +2346,9 @@ check_pixmap_change(int sig)
   }
   in_cpc = 0;
   if (old_handler) {
-    CPC_RETURN((*old_handler) (sig));
+    SIG_RETURN((*old_handler) (sig));
   } else {
-    CPC_RETURN(sig);
+    SIG_RETURN(sig);
   }
 }
 #endif /* BACKGROUND_CYCLING_SUPPORT */
@@ -2517,9 +2527,9 @@ tt_printf(const unsigned char *fmt,...)
   va_list arg_ptr;
 
   va_start(arg_ptr, fmt);
-  vsprintf(buf, fmt, arg_ptr);
+  vsprintf((char *) buf, (char *) fmt, arg_ptr);
   va_end(arg_ptr);
-  tt_write(buf, strlen(buf));
+  tt_write(buf, strlen((char *) buf));
 }
 
 /* Read and process output from the application */

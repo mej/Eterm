@@ -83,7 +83,7 @@ set_text_property(Window win, char *propname, char *value)
     XDeleteProperty(Xdisplay, win, atom);
   } else {
     atom = XInternAtom(Xdisplay, propname, False);
-    prop.value = value;
+    prop.value = (unsigned char *) value;
     prop.encoding = XA_STRING;
     prop.format = 8;
     prop.nitems = strlen(value);
@@ -96,7 +96,7 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
 {
 
   XColor xcol;
-  unsigned int r, g, b;
+  int r, g, b;
 
   xcol.pixel = norm_color;
   XQueryColor(Xdisplay, cmap, &xcol);
@@ -121,7 +121,7 @@ get_top_shadow_color(Pixel norm_color, const char *type)
 {
 
   XColor xcol, white;
-  unsigned int r, g, b;
+  int r, g, b;
 
 # ifdef PREFER_24BIT
   white.red = white.green = white.blue = r = g = b = ~0;
@@ -166,7 +166,7 @@ Create_Windows(int argc, char *argv[])
   CARD32 val;
   int i, x = 0, y = 0, flags;
   unsigned int width = 0, height = 0;
-  unsigned int r, g, b;
+  int r, g, b;
   MWMHints mwmhints;
 
   if (Options & Opt_borderless) {

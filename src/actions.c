@@ -58,7 +58,7 @@ unsigned char
 action_handle_string(event_t *ev, action_t *action) {
 
   REQUIRE_RVAL(action->param.string != NULL, 0);
-  cmd_write(action->param.string, strlen(action->param.string));
+  cmd_write((unsigned char *) action->param.string, strlen(action->param.string));
   return 1;
   ev = NULL;
 }
@@ -67,7 +67,7 @@ unsigned char
 action_handle_echo(event_t *ev, action_t *action) {
 
   REQUIRE_RVAL(action->param.string != NULL, 0);
-  tt_write(action->param.string, strlen(action->param.string));
+  tt_write((unsigned char *) action->param.string, strlen(action->param.string));
   return 1;
   ev = NULL;
 }

@@ -183,7 +183,8 @@ static RETSIGTYPE
 enl_ipc_timeout(int sig)
 {
   timeout = 1;
-  return ((RETSIGTYPE) sig);
+  SIG_RETURN(sig);
+  sig = 0;
 }
 
 char *
@@ -285,13 +286,13 @@ eterm_ipc_parse(char *str)
   }
   if (!strcasecmp(str, "echo") || !strcasecmp(str, "tty_write")) {
     if (params) {
-      tt_write(params, strlen(params));
+      tt_write((unsigned char *) params, strlen(params));
     } else {
       print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
     }
   } else if (!strcasecmp(str, "parse")) {
     if (params) {
-      cmd_write(params, strlen(params));
+      cmd_write((unsigned char *) params, strlen(params));
     } else {
       print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
     }
@@ -307,9 +308,9 @@ eterm_ipc_parse(char *str)
 
       reply = enl_send_and_wait(params);
       snprintf(header, sizeof(header), "Enlightenment IPC Reply to \"%s\":\n\n", params);
-      tt_write(header, strlen(header));
-      tt_write(reply, strlen(reply));
-      tt_write("\n", 1);
+      tt_write((unsigned char *) header, strlen(header));
+      tt_write((unsigned char *) reply, strlen(reply));
+      tt_write((unsigned char *) "\n", 1);
       FREE(reply);
     } else {
       print_error("IPC Error:  Invalid syntax in command \"%s\"", str);

@@ -115,9 +115,9 @@ typedef struct {
   short beg, end;				/* beg/end of slider sub-window */
   short top, bot;				/* top/bot of slider */
   unsigned char state;				/* scrollbar state */
-  unsigned char type:2;				/* scrollbar type (see above) */
-  unsigned char init:1;				/* has scrollbar been drawn? */
-  unsigned char shadow:5;			/* shadow width */
+  unsigned int type:2;                          /* scrollbar type (see above) */
+  unsigned int init:1;                          /* has scrollbar been drawn? */
+  unsigned int shadow:5;                        /* shadow width */
   unsigned short width, height;			/* scrollbar width and height, without the shadow */
   unsigned short win_width, win_height;		/* scrollbar window dimensions */
   short up_arrow_loc, down_arrow_loc;		/* y coordinates for arrows */

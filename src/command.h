@@ -261,12 +261,10 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #define PTYCHAR1 "pqrstuvwxyz"
 #define PTYCHAR2 "0123456789abcdefghijklmnopqrstuvwxyz"
 
-#ifdef BACKGROUND_CYCLING_SUPPORT
-# if RETSIGTYPE != void
-#  define CPC_RETURN(x) return ((RETSIGTYPE) x)
-# else
-#  define CPC_RETURN(x) return
-# endif
+#if RETSIGTYPE != void
+# define SIG_RETURN(x) return ((RETSIGTYPE) x)
+#else
+# define SIG_RETURN(x) return
 #endif
 
 #define CHARS_READ() (cmdbuf_ptr < cmdbuf_endp)

@@ -323,8 +323,9 @@ LowerStr(char *str)
 
   register char *tmp;
 
-  for (tmp = str; *tmp; tmp++)
+  for (tmp = str; *tmp; tmp++) {
     *tmp = tolower(*tmp);
+  }
   D_STRINGS(("LowerStr() returning %s\n", str));
   return (str);
 }
@@ -335,8 +336,9 @@ UpStr(char *str)
 
   register char *tmp;
 
-  for (tmp = str; *tmp; tmp++)
+  for (tmp = str; *tmp; tmp++) {
     *tmp = toupper(*tmp);
+  }
   D_STRINGS(("UpStr() returning %s\n", str));
   return (str);
 }

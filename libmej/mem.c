@@ -353,17 +353,6 @@ void
 HandleSigSegv(int sig)
 {
 
-  static unsigned char segv_again = 0;
-
-  /* Reinstate ourselves as the SIGSEGV handler if we're replaced */
-  (void) signal(SIGSEGV, HandleSigSegv);
-
-  /* Recursive seg faults are not cool.... */
-  if (segv_again) {
-    printf("Recursive segmentation fault detected!\n");
-    _exit(EXIT_FAILURE);
-  }
-  segv_again = 1;
 #if DEBUG >= DEBUG_MALLOC
   fprintf(stderr, "Fatal memory fault (%d)!  Dumping memory table.\n", sig);
   memrec_dump();

@@ -141,19 +141,19 @@ lookup_key(XEvent * ev)
     Status status_return;
 
     kbuf[0] = '\0';
-    len = XmbLookupString(Input_Context, &ev->xkey, (char *)kbuf,
+    len = XmbLookupString(Input_Context, &ev->xkey, (char *) kbuf,
                           sizeof(short_buf), &keysym, &status_return);
     if (status_return == XBufferOverflow) {
       kbuf = (unsigned char *) MALLOC(len + 1);
       kbuf_alloced = 1;
-      len = XmbLookupString(Input_Context, &ev->xkey, (char *)kbuf, len, &keysym, &status_return);
+      len = XmbLookupString(Input_Context, &ev->xkey, (char *) kbuf, len, &keysym, &status_return);
     }
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {
-    len = XLookupString(&ev->xkey, kbuf, sizeof(short_buf), &keysym, NULL);
+    len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
   }
 #else /* USE_XIM */
-  len = XLookupString(&ev->xkey, kbuf, sizeof(kbuf), &keysym, NULL);
+  len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
 
   /*
    * have unmapped Latin[2-4] entries -> Latin1
@@ -181,7 +181,7 @@ lookup_key(XEvent * ev)
   }
 
   if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
-    len = sprintf(kbuf, "\e[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));
+    len = sprintf((char *) kbuf, "\033[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));
     tt_write(kbuf, len);
     LK_RET();
   }
@@ -523,7 +523,7 @@ lookup_key(XEvent * ev)
 
 #define FKEY(n,fkey) do { \
 len = 5; \
-sprintf(kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
+sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 } while (0);
 
 	case XK_F1:		/* "\033[11~" */
@@ -647,7 +647,7 @@ sprintf(kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
     int i;
 
     fprintf(stderr, "key 0x%04X[%d]: `", (unsigned int) keysym, len);
-    for (i = 0, p = kbuf; i < len; i++, p++)
+    for (i = 0, p = (char *) kbuf; i < len; i++, p++)
       fprintf(stderr, (*p >= ' ' && *p < '\177' ? "%c" : "\\%03o"), *p);
     fprintf(stderr, "'\n");
   }
@@ -662,7 +662,7 @@ sprintf(kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 FILE *
 popen_printer(void)
 {
-  FILE *stream = popen(rs_print_pipe, "w");
+  FILE *stream = (FILE *) popen(rs_print_pipe, "w");
 
   if (stream == NULL)
     print_error("can't open printer pipe \"%s\" -- %s", rs_print_pipe, strerror(errno));
@@ -749,11 +749,11 @@ process_escape_seq(void)
       scr_index(UP);
       break;
     case 'E':
-      scr_add_lines("\n\r", 1, 2);
+      scr_add_lines((unsigned char *) "\n\r", 1, 2);
       break;
     case 'G':
       if ((ch = cmd_getc()) == 'Q') {  /* query graphics */
-        tt_printf("\033G0\n");  /* no graphics */
+        tt_printf((unsigned char *) "\033G0\n");  /* no graphics */
       } else {
         do {
           ch = cmd_getc();
@@ -769,7 +769,7 @@ process_escape_seq(void)
       /*case 'N': scr_single_shift (2);   break; */
       /*case 'O': scr_single_shift (3);   break; */
     case 'Z':
-      tt_printf(ESCZ_ANSWER);
+      tt_printf((unsigned char *) ESCZ_ANSWER);
       break;			/* steal obsolete ESC [ c */
     case '[':
       process_csi_seq();
@@ -929,14 +929,14 @@ process_csi_seq(void)
     case 'n':			/* request for information */
       switch (arg[0]) {
 	case 5:
-	  tt_printf("\033[0n");
+	  tt_printf((unsigned char *) "\033[0n");
 	  break;		/* ready */
 	case 6:
 	  scr_report_position();
 	  break;
 #if defined (ENABLE_DISPLAY_ANSWER)
 	case 7:
-	  tt_printf("%s\n", display_name);
+	  tt_printf((unsigned char *) "%s\n", display_name);
 	  break;
 #endif
 	case 8:
@@ -1076,12 +1076,12 @@ process_xterm_seq(void)
       }
     }
     string[n] = '\0';
-    xterm_seq(arg, string);
+    xterm_seq(arg, (char *) string);
 
   } else {
     unsigned long n = 0;
 
-    for (; ch != '\e'; ch = cmd_getc()) {
+    for (; ch != '\033'; ch = cmd_getc()) {
       if (ch) {
 	if (ch == '\t')
 	  ch = ' ';		/* translate '\t' to space */
@@ -1099,13 +1099,13 @@ process_xterm_seq(void)
     }
     switch (arg) {
       case 'l':
-	xterm_seq(XTerm_title, string);
+	xterm_seq(XTerm_title, (char *) string);
 	break;
       case 'L':
-	xterm_seq(XTerm_iconName, string);
+	xterm_seq(XTerm_iconName, (char *) string);
 	break;
       case 'I':
-	set_icon_pixmap(string, NULL);
+	set_icon_pixmap((char *) string, NULL);
 	break;
       default:
 	break;
@@ -1119,7 +1119,7 @@ process_window_mode(unsigned int nargs, int args[])
 {
 
   register unsigned int i;
-  unsigned int x, y;
+  int x, y;
   Screen *scr;
   Window dummy_child;
   char buff[128], *name;
@@ -1136,7 +1136,7 @@ process_window_mode(unsigned int nargs, int args[])
       unsigned int dummy_border, dummy_depth;
 
       /* Store current width and height in x and y */
-      XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, &x, &y, &dummy_border, &dummy_depth);
+      XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y), &dummy_border, &dummy_depth);
     }
     switch (args[i]) {
       case 1:
@@ -1150,7 +1150,7 @@ process_window_mode(unsigned int nargs, int args[])
 	  return;		/* Make sure there are 2 args left */
 	x = args[++i];
 	y = args[++i];
-	if (x > (unsigned long) scr->width || y > (unsigned long) scr->height)
+	if (((unsigned int) x > (unsigned int) scr->width) || ((unsigned int) y > (unsigned int) scr->height))
 	  return;		/* Don't move off-screen */
 	XMoveWindow(Xdisplay, TermWin.parent, x, y);
 	break;
@@ -1189,27 +1189,27 @@ process_window_mode(unsigned int nargs, int args[])
 	break;
       case 13:
 	XTranslateCoordinates(Xdisplay, TermWin.parent, Xroot, 0, 0, &x, &y, &dummy_child);
-	snprintf(buff, sizeof(buff), "\e[3;%d;%dt", x, y);
-	tt_write(buff, strlen(buff));
+	snprintf(buff, sizeof(buff), "\033[3;%d;%dt", x, y);
+	tt_write((unsigned char *) buff, strlen(buff));
 	break;
       case 14:
-	snprintf(buff, sizeof(buff), "\e[4;%d;%dt", y, x);
-	tt_write(buff, strlen(buff));
+	snprintf(buff, sizeof(buff), "\033[4;%d;%dt", y, x);
+	tt_write((unsigned char *) buff, strlen(buff));
 	break;
       case 18:
-	snprintf(buff, sizeof(buff), "\e[8;%d;%dt", TermWin.nrow, TermWin.ncol);
-	tt_write(buff, strlen(buff));
+	snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TermWin.nrow, TermWin.ncol);
+	tt_write((unsigned char *) buff, strlen(buff));
 	break;
       case 20:
 	XGetIconName(Xdisplay, TermWin.parent, &name);
-	snprintf(buff, sizeof(buff), "\e]L%s\e\\", name);
-	tt_write(buff, strlen(buff));
+	snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
+	tt_write((unsigned char *) buff, strlen(buff));
 	XFree(name);
 	break;
       case 21:
 	XFetchName(Xdisplay, TermWin.parent, &name);
-	snprintf(buff, sizeof(buff), "\e]l%s\e\\", name);
-	tt_write(buff, strlen(buff));
+	snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
+	tt_write((unsigned char *) buff, strlen(buff));
 	XFree(name);
 	break;
       default:
@@ -1599,7 +1599,7 @@ xterm_seq(int op, const char *str)
       set_title(str);
       break;
     case XTerm_prop:
-      if ((nstr = strsep(&tnstr, ";")) == NULL) {
+      if ((nstr = (char *) strsep(&tnstr, ";")) == NULL) {
         break;
       }
       if ((valptr = strchr(nstr, '=')) != NULL) {
@@ -1648,7 +1648,7 @@ xterm_seq(int op, const char *str)
        */
 
       D_CMD(("Got XTerm_EtermSeq sequence\n"));
-      nstr = strsep(&tnstr, ";");
+      nstr = (char *) strsep(&tnstr, ";");
       eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
       D_CMD(("    XTerm_EtermSeq operation is %d\n", eterm_seq_op));
       /* Yes, there is order to the numbers for this stuff.  And here it is:
@@ -1664,7 +1664,7 @@ xterm_seq(int op, const char *str)
       switch (eterm_seq_op) {
 #ifdef PIXMAP_OFFSET
 	case 0:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
           if (nstr) {
             if (BOOL_OPT_ISTRUE(nstr)) {
               D_CMD(("   Request to enable transparency.\n"));
@@ -1695,7 +1695,7 @@ xterm_seq(int op, const char *str)
           redraw_all_images();
 	  break;
 	case 1:
-          if ((color = strsep(&tnstr, ";")) == NULL) {
+          if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
             break;
           }
           if ((strlen(color) == 2) || (!strcasecmp(color, "down"))) {
@@ -1713,16 +1713,16 @@ xterm_seq(int op, const char *str)
             } else {
               break;
             }
-            if ((color = strsep(&tnstr, ";")) == NULL) {
+            if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
               break;
             }
           } else {
             which = image_bg;
           }
-          if ((mod = strsep(&tnstr, ";")) == NULL) {
+          if ((mod = (char *) strsep(&tnstr, ";")) == NULL) {
             break;
           }
-          if ((valptr = strsep(&tnstr, ";")) == NULL) {
+          if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
             break;
           }
 	  D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
@@ -1809,7 +1809,7 @@ xterm_seq(int op, const char *str)
 	  break;
 #endif
 	case 10:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
 	    if (!strcasecmp(nstr, "xterm")) {
 #ifdef XTERM_SCROLLBAR
@@ -1837,7 +1837,7 @@ xterm_seq(int op, const char *str)
 	    map_scrollbar(1);
 	    scrollbar_show(0);
 	  }
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
 	    scrollBar.width = strtoul(nstr, (char **) NULL, 0);
 	    if (scrollBar.width == 0) {
@@ -1851,7 +1851,7 @@ xterm_seq(int op, const char *str)
 	  }
 	  break;
 	case 11:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollBar_right);
 	  scrollbar_reset();
 	  map_scrollbar(0);
@@ -1859,7 +1859,7 @@ xterm_seq(int op, const char *str)
 	  scrollbar_show(0);
 	  break;
 	case 12:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollBar_floating);
 	  scrollbar_reset();
 	  map_scrollbar(0);
@@ -1867,42 +1867,42 @@ xterm_seq(int op, const char *str)
 	  scrollbar_show(0);
 	  break;
 	case 13:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_popup);
 	  break;
 	case 20:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_visualBell);
 	  break;
 #ifdef MAPALERT_OPTION
 	case 21:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_mapAlert);
 	  break;
 #endif
 	case 22:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_xterm_select);
 	  break;
 	case 23:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_select_whole_line);
 	  break;
 	case 24:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
           FOREACH_IMAGE(if (!image_mode_is(idx, MODE_VIEWPORT) && image_mode_is(idx, ALLOW_VIEWPORT)) {image_set_mode(idx, MODE_VIEWPORT);});
           redraw_all_images();
 	  break;
 	case 25:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_select_trailing_spaces);
 	  break;
 	case 26:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_report_as_keysyms);
 	  break;
 	case 30:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr) {
 	    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
 	      PixColors[fgColor] = xcol.pixel;
@@ -1911,7 +1911,7 @@ xterm_seq(int op, const char *str)
 	  }
 	  break;
 	case 40:
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr) {
 	    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
 	      PixColors[bgColor] = xcol.pixel;
@@ -1921,7 +1921,7 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 50:
 	  /* Change desktops */
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
 	    XClientMessageEvent xev;
 
@@ -1941,7 +1941,7 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 71:
 	  /* Save current config */
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
 	    save_config(nstr);
 	  } else {
@@ -1950,7 +1950,7 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 80:
 	  /* Set debugging level */
-	  nstr = strsep(&tnstr, ";");
+	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
 	    debug_level = (unsigned int) strtoul(nstr, (char **) NULL, 0);
 	  }
@@ -1968,14 +1968,14 @@ xterm_seq(int op, const char *str)
 	load_image("", image_bg);
 	bg_needs_update = 1;
       } else {
-	nstr = strsep(&tnstr, ";");
+	nstr = (char *) strsep(&tnstr, ";");
 	if (nstr) {
 	  if (*nstr) {
 	    set_pixmap_scale("", images[image_bg].current->pmap);
 	    bg_needs_update = 1;
 	    load_image(nstr, image_bg);
 	  }
-	  while ((nstr = strsep(&tnstr, ";")) && *nstr) {
+	  while ((nstr = (char *) strsep(&tnstr, ";")) && *nstr) {
 	    changed += set_pixmap_scale(nstr, images[image_bg].current->pmap);
 	    scaled = 1;
 	  }
@@ -1991,7 +1991,7 @@ xterm_seq(int op, const char *str)
       break;
 
     case XTerm_EtermIPC:
-      for (; (nstr = strsep(&tnstr, ";"));) {
+      for (; (nstr = (char *) strsep(&tnstr, ";"));) {
 	eterm_ipc_parse(nstr);
       }
       break;

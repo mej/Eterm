@@ -1384,7 +1384,7 @@ scr_rvideo_mode(int mode)
 void
 scr_report_position(void)
 {
-  tt_printf("\033[%d;%dR", screen.row + 1, screen.col + 1);
+  tt_printf((unsigned char *) "\033[%d;%dR", screen.row + 1, screen.col + 1);
 }
 
 /* ------------------------------------------------------------------------- *
@@ -2227,7 +2227,8 @@ PasteIt(unsigned char *data, unsigned int nitems)
 void
 selection_paste(Window win, unsigned prop, int Delete)
 {
-  long nread, bytes_after, nitems;
+  long nread;
+  unsigned long bytes_after, nitems;
   unsigned char *data;
   Atom actual_type;
   int actual_fmt;
@@ -2444,7 +2445,8 @@ selection_make(Time tm)
     return;
   }
   i = (selection.end.row - selection.beg.row + 1) * (TermWin.ncol + 1) + 1;
-  new_selection_text = str = MALLOC(i * sizeof(char));
+  str = MALLOC(i * sizeof(char));
+  new_selection_text = (unsigned char *) str;
 
   col = max(selection.beg.col, 0);
   row = selection.beg.row + TermWin.saveLines;
@@ -2487,7 +2489,7 @@ selection_make(Time tm)
   if (i)
     *str++ = '\n';
   *str = '\0';
-  if ((i = strlen(new_selection_text)) == 0) {
+  if ((i = strlen((char *) new_selection_text)) == 0) {
     FREE(new_selection_text);
     return;
   }
@@ -3039,7 +3041,7 @@ selection_send(XSelectionRequestEvent * rq)
     target_list[1] = (Atom32) XA_STRING;
     XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
 		    (8 * sizeof(target_list[0])), PropModeReplace,
-		    (char *) target_list,
+		    (unsigned char *) target_list,
 		    (sizeof(target_list) / sizeof(target_list[0])));
     ev.xselection.property = rq->property;
   } else if (rq->target == XA_STRING) {
@@ -3062,7 +3064,7 @@ mouse_report(XButtonEvent * ev)
   button_number = ((ev->button == AnyButton) ? 3 : (ev->button - Button1));
   key_state = ((ev->state & (ShiftMask | ControlMask))
 	       + ((ev->state & Mod1Mask) ? 2 : 0));
-  tt_printf("\033[M%c%c%c",
+  tt_printf((unsigned char *) "\033[M%c%c%c",
 	    (32 + button_number + (key_state << 2)),
 	    (32 + Pixel2Col(ev->x) + 1),
 	    (32 + Pixel2Row(ev->y) + 1));

@@ -60,7 +60,7 @@ static GC scrollbarGC;
 static short last_top = 0, last_bot = 0;	/* old (drawn) values */
 #ifdef XTERM_SCROLLBAR		/* bitmap scrollbar */
 static GC shadowGC;
-static char xterm_sb_bits[] =
+static unsigned char xterm_sb_bits[] =
 {0xaa, 0x0a, 0x55, 0x05};	/* 12x2 bitmap */
 #endif
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
@@ -390,19 +390,19 @@ sb_handle_button_press(event_t * ev)
   if (button_state.report_mode) {
     /* Mouse report disabled scrollbar.  Arrows send cursor key up/down, trough sends pageup/pagedown */
     if (scrollbar_upButton(ev->xany.window, ev->xbutton.y))
-      tt_printf("\033[A");
+      tt_printf((unsigned char *) "\033[A");
     else if (scrollbar_dnButton(ev->xany.window, ev->xbutton.y))
-      tt_printf("\033[B");
+      tt_printf((unsigned char *) "\033[B");
     else
       switch (ev->xbutton.button) {
 	case Button2:
-	  tt_printf("\014");
+	  tt_printf((unsigned char *) "\014");
 	  break;
 	case Button1:
-	  tt_printf("\033[6~");
+	  tt_printf((unsigned char *) "\033[6~");
 	  break;
 	case Button3:
-	  tt_printf("\033[5~");
+	  tt_printf((unsigned char *) "\033[5~");
 	  break;
       }
   } else
@@ -498,7 +498,8 @@ sb_handle_button_release(event_t * ev)
 {
 
   Window root, child;
-  int root_x, root_y, win_x, win_y, mask;
+  int root_x, root_y, win_x, win_y;
+  unsigned int mask;
 
   D_EVENTS(("sb_handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -719,7 +720,7 @@ scrollbar_show(short mouseoffset)
 
 #ifdef XTERM_SCROLLBAR
     if (scrollBar.type == SCROLLBAR_XTERM) {
-      gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollBar.win, xterm_sb_bits, 12, 2);
+      gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollBar.win, (char *) xterm_sb_bits, 12, 2);
       if (!gcvalue.stipple) {
 	print_error("Unable to create xterm scrollbar bitmap.  Reverting to default scrollbar.");
 	scrollBar.type = SCROLLBAR_MOTIF;
