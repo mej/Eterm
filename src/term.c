@@ -420,10 +420,10 @@ lookup_key(XEvent * ev)
 	case XK_KP_Up:		/* \033Ox or standard */
 	case XK_KP_Right:	/* \033Ov or standard */
 	case XK_KP_Down:	/* \033Ow or standard */
-	  if ((PrivateModes && PrivMode_aplKP) ? !shft : shft) {
+	  if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
 	    len = 3;
 	    strcpy(kbuf, "\033OZ");
-	    kbuf[2] = ("txvw"[keysym - XK_KP_Left]);
+	    kbuf[2] = ("txvr"[keysym - XK_KP_Left]);
 	    break;
 	  } else {
 	    /* translate to std. cursor key */

@@ -3036,3 +3036,9 @@ Wed Jan 12 00:14:11 PST 2000	Michael Jennings <mej@eterm.org>
 	This should fix the NONE problem.
 	
 -------------------------------------------------------------------------------
+Fri Jan 14 16:34:13 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a minor emulation problem pertaining to the down arrow on the
+	keypad thanks to a patch from Marius Gedminas <mgedmin@takas.lt>.
+	
+-------------------------------------------------------------------------------
