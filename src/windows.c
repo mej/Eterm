@@ -606,7 +606,8 @@ resize_window1(unsigned int width, unsigned int height)
     if (curr_screen >= 0)	/* this is not the first time thru */
       scr_change_screen(curr_screen);
     first_time = 0;
-  } else if (Options & Opt_pixmapTrans || Options & Opt_viewport_mode) {
+  } else if (((Options & Opt_pixmapTrans) || (images[image_bg].mode & MODE_TRANS))
+             || ((Options & Opt_viewport_mode) || (images[image_bg].mode & MODE_VIEWPORT))) {
     resize_subwindows(width, height);
     scrollbar_show(0);
     scr_expose(0, 0, width, height);
@@ -637,12 +638,8 @@ void
 resize_window(void)
 {
   Window root;
-  XEvent dummy;
   int x, y;
   unsigned int border, depth, width, height;
-
-  while (XCheckTypedWindowEvent(Xdisplay, TermWin.parent,
-				ConfigureNotify, &dummy));
 
   /* do we come from an fontchange? */
   if (font_change_count > 0) {
@@ -650,9 +647,7 @@ resize_window(void)
     return;
   }
   XGetGeometry(Xdisplay, TermWin.parent, &root, &x, &y, &width, &height, &border, &depth);
-
   /* parent already resized */
-
   resize_window1(width, height);
 }
 
