@@ -27,6 +27,12 @@
 #include <X11/Xatom.h>
 #ifdef PIXMAP_SUPPORT
 # include <Imlib2.h>
+#else
+typedef struct {
+  int left, top, right, bottom;
+} Imlib_Border;
+typedef void *Imlib_Image;
+typedef void *Imlib_Color_Modifier;
 #endif
 
 #include "misc.h"

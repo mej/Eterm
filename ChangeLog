@@ -3751,3 +3751,15 @@ Mon Jul  3 12:50:00 PDT 2000	Michael Jennings <mej@eterm.org>
 	but keys Eterm uses (like Shift-PgUp) will still work as expected.
 	
 -------------------------------------------------------------------------------
+Wed Jul  5 18:31:39 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Several people have asked for the spec file to be in the tarball so
+	that rpm -ta <tarball> works properly.  I've put it in there, but I
+	don't recommend doing it that way.  I use /usr/local as my prefix, and
+	there's a good chance I'll forget to change it before doing a dist
+	tarball.
+
+	I also put some dummy crap in pixmap.h so that compiling without
+	Imlib2.h works again.
+	
+-------------------------------------------------------------------------------
