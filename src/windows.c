@@ -493,14 +493,18 @@ set_width(unsigned short width)
 void
 update_size_hints(void)
 {
+  D_X11(("update_size_hints() called.\n"));
   szHint.base_width = (2 * TermWin.internalBorder);
   szHint.base_height = (2 * TermWin.internalBorder);
   szHint.base_width += ((scrollbar_visible()) ? (scrollbar_trough_width()) : (0));
+  D_X11(("Size Hints:  base width/height == %lux%lu\n", szHint.base_width, szHint.base_height));
 
   szHint.min_width = szHint.base_width + szHint.width_inc;
   szHint.min_height = szHint.base_height + szHint.height_inc;
   szHint.width = szHint.base_width + TermWin.width;
   szHint.height = szHint.base_height + TermWin.height;
+  D_X11(("             Minimum width/height == %lux%lu, width/height == %lux%lu\n",
+         szHint.min_width, szHint.min_height, szHint.width, szHint.height));
 
   szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
   XSetWMNormalHints(Xdisplay, TermWin.parent, &szHint);
@@ -510,10 +514,11 @@ update_size_hints(void)
 void
 term_resize(int width, int height)
 {
-  D_SCREEN(("term_resize(%d, %d)\n", width, height));
+  D_X11(("term_resize(%d, %d)\n", width, height));
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
-  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollBar_right) ? (0) : (scrollbar_trough_width())), 0, width, height + 1);
+  D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
+  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollBar_right) ? (0) : ((scrollbar_visible()) ? (scrollbar_trough_width()) : (0))), 0, width, height + 1);
   render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
   if (image_mode_is(image_bg, MODE_AUTO)) {
     enl_ipc_sync();
@@ -524,8 +529,10 @@ term_resize(int width, int height)
 void
 parent_resize(void)
 {
+  D_X11(("parent_resize() called.\n"));
   update_size_hints();
   XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
+  D_X11((" -> New parent width/height == %lux%lu\n", szHint.width, szHint.height));
   term_resize(szHint.width, szHint.height);
   scrollbar_resize(szHint.width, szHint.height);
 }
@@ -537,6 +544,7 @@ handle_resize(unsigned int width, unsigned int height)
   int new_ncol = (width - szHint.base_width) / TermWin.fwidth;
   int new_nrow = (height - szHint.base_height) / TermWin.fheight;
 
+  D_EVENTS(("handle_resize(%u, %u)\n", width, height));
   if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
     int curr_screen = -1;
 
@@ -556,29 +564,24 @@ handle_resize(unsigned int width, unsigned int height)
       scr_change_screen(curr_screen);
     }
     first_time = 0;
-  } else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
+  }
+#if 0
+ else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
     term_resize(width, height);
     scrollbar_resize(width, height);
     scr_touch();
   }
+#endif
 }
 
-/* Handle configure notify events telling us we've been resized */
 void
-handle_external_resize(void)
+handle_move(int x, int y)
 {
-  Window root;
-  int x, y;
-  unsigned int border, depth, width, height;
-
-  /* If the font change count is non-zero, this event
-     is telling us we resized ourselves.  Ignore it. */
-  if (font_change_count > 0) {
-    font_change_count--;
-    return;
+  if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
+    redraw_all_images();
   }
-  XGetGeometry(Xdisplay, TermWin.parent, &root, &x, &y, &width, &height, &border, &depth);
-  handle_resize(width, height);
+  TermWin.x = x;
+  TermWin.y = y;
 }
 
 #ifdef XTERM_COLOR_CHANGE

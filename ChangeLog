@@ -2651,3 +2651,15 @@ Wed Oct 27 18:46:04 PDT 1999	Michael Jennings <mej@eterm.org>
 	which I can do much about. :-)
 	
 -------------------------------------------------------------------------------
+Thu Oct 28 13:12:17 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	I fixed the popup scrollbar bug with transparency, but I fixed lots
+	more than that.  I removed a lot of duplicate event handling, lots of
+	duplicate redraws, and lots of unnecessary transparency updates.  In
+	doing so, I fixed the latency problem people had been reporting with
+	several shaded/tinted transparent Eterms while changing desktops.  I
+	also threw solid color transparency support in the mix while I was at
+	it.  All in all, you should notice significant speedups in transparent
+	Eterms.
+	
+-------------------------------------------------------------------------------

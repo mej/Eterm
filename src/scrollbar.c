@@ -108,26 +108,25 @@ Draw_up_button(int x, int y, int state)
   pt[1].x = x + sz2 - 1;
   pt[1].y = y;
   XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# if (SHADOW > 1)
-  /* doubled */
-  pt[0].x++;
-  pt[0].y--;
-  pt[1].y++;
-  XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# endif
+  if (scrollbar_get_shadow() > 1) {
+    pt[0].x++;
+    pt[0].y--;
+    pt[1].y++;
+    XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
+  }
   /* draw shadow */
   pt[0].x = x + sz2;
   pt[0].y = y;
   pt[1].x = x + sz - 1;
   pt[1].y = y + sz - 1;
   XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# if (SHADOW > 1)
-  /* doubled */
-  pt[0].y++;
-  pt[1].x--;
-  pt[1].y--;
-  XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# endif
+  if (scrollbar_get_shadow() > 1) {
+    /* doubled */
+    pt[0].y++;
+    pt[1].x--;
+    pt[1].y--;
+    XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
+  }
 }
 
 /* draw triangular down button with a shadow of SHADOW (1 or 2) pixels */
@@ -172,26 +171,26 @@ Draw_dn_button(int x, int y, int state)
   pt[1].x = x + sz2 - 1;
   pt[1].y = y + sz - 1;
   XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# if (SHADOW > 1)
-  /* doubled */
-  pt[0].x++;
-  pt[0].y++;
-  pt[1].y--;
-  XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# endif
+  if (scrollbar_get_shadow() > 1) {
+    /* doubled */
+    pt[0].x++;
+    pt[0].y++;
+    pt[1].y--;
+    XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
+  }
   /* draw shadow */
   pt[0].x = x + sz2;
   pt[0].y = y + sz - 1;
   pt[1].x = x + sz - 1;
   pt[1].y = y;
   XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# if (SHADOW > 1)
-  /* doubled */
-  pt[0].y--;
-  pt[1].x--;
-  pt[1].y++;
-  XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-# endif
+  if (scrollbar_get_shadow() > 1) {
+    /* doubled */
+    pt[0].y--;
+    pt[1].x--;
+    pt[1].y++;
+    XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
+  }
 }
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 
@@ -233,6 +232,11 @@ scrollbar_init(void)
   }
 #endif
 
+  if (scrollBar.type == SCROLLBAR_XTERM) {
+    scrollbar_set_shadow(0);
+  } else {
+    scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
+  }
   event_register_dispatcher(scrollbar_dispatch_event, scrollbar_event_init_dispatcher);
 
 }
@@ -243,7 +247,9 @@ scrollbar_event_init_dispatcher(void)
 
   MEMSET(&scrollbar_event_data, 0, sizeof(event_dispatcher_data_t));
 
+#if 0
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, ConfigureNotify, sb_handle_configure_notify);
+#endif
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, EnterNotify, sb_handle_enter_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, LeaveNotify, sb_handle_leave_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, FocusIn, sb_handle_focus_in);
@@ -268,6 +274,7 @@ scrollbar_event_init_dispatcher(void)
 
 }
 
+#if 0
 unsigned char
 sb_handle_configure_notify(event_t * ev)
 {
@@ -277,8 +284,9 @@ sb_handle_configure_notify(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_PARENT(ev, &scrollbar_event_data), 0);
 
   redraw_image(image_sb);
-  return 0;
+  return 1;
 }
+#endif
 
 unsigned char
 sb_handle_enter_notify(event_t * ev)
@@ -304,7 +312,7 @@ sb_handle_enter_notify(event_t * ev)
     images[image_sb].current = images[image_sb].selected;
     render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -331,7 +339,7 @@ sb_handle_leave_notify(event_t * ev)
     images[image_sb].current = images[image_sb].norm;
     render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -342,7 +350,7 @@ sb_handle_focus_in(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -353,7 +361,7 @@ sb_handle_focus_out(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -371,7 +379,7 @@ sb_handle_expose(event_t * ev)
   if (scrollbar_win_is_scrollbar(ev->xany.window)) {
     scrollbar_show(0);
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -663,11 +671,6 @@ scrollbar_reset(void)
   }
 #endif
   last_top = last_bot = 0;
-  if (scrollBar.type == SCROLLBAR_XTERM) {
-    scrollbar_set_shadow(0);
-  } else {
-    scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
-  }
   scrollBar.init = 0;
 }
 
@@ -697,6 +700,7 @@ scrollbar_resize(int width, int height)
 #endif
   width -= scrollbar_trough_width();
   XMoveResizeWindow(Xdisplay, scrollBar.win, ((Options & Opt_scrollBar_right) ? (width) : (0)), 0, scrollbar_trough_width(), height);
+  D_X11((" -> New scrollbar width/height == %lux%lu\n", scrollbar_trough_width(), height));
   scrollBar.init = 0;
   scrollbar_show(0);
 }
@@ -880,7 +884,7 @@ scrollbar_show(short mouseoffset)
     }
   }
   if (image_mode_is(image_up, MODE_AUTO) || image_mode_is(image_down, MODE_AUTO) || image_mode_is(image_sb, MODE_AUTO) || image_mode_is(image_sa, MODE_AUTO)) {
-    enl_ipc_sync();
+    //    enl_ipc_sync();
   }
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 

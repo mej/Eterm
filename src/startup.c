@@ -276,9 +276,7 @@ eterm_bootstrap(int argc, char *argv[])
 
   D_CMD(("init_command()\n"));
   init_command(rs_execArgs);
-  if (Options & Opt_borderless) {
-    handle_external_resize();
-  }
+  parent_resize();
 
   main_loop();
 

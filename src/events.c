@@ -44,6 +44,7 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "e.h"
 #include "events.h"
+#include "font.h"
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"
@@ -226,6 +227,8 @@ handle_property_notify(event_t * ev)
 {
 
   Atom prop;
+  Window win;
+  Pixmap pmap;
 
   D_EVENTS(("handle_property_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -234,12 +237,20 @@ handle_property_notify(event_t * ev)
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
       D_EVENTS(("handle_property_notify():  On %s.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
-        if (desktop_pixmap != None) {
-          free_desktop_pixmap();
+        win = get_desktop_window();
+        if (win == (Window) 1) {
+          /* The desktop window is unchanged.  Ignore this event. */
+          return 1;
         }
-        desktop_window = get_desktop_window();
+        /* The desktop window has changed somehow. */
         if (desktop_window == None) {
+          free_desktop_pixmap();
           FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
+          return 1;
+        }
+        pmap = get_desktop_pixmap();
+        if (pmap == (Pixmap) 1) {
+          /* Pixmap is unchanged */
           return 1;
         }
         redraw_all_images();
@@ -250,8 +261,10 @@ handle_property_notify(event_t * ev)
       prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
       D_EVENTS(("handle_property_notify():  On desktop_window [0x%08x].  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
-        if (desktop_pixmap != None) {
-          free_desktop_pixmap();
+        pmap = get_desktop_pixmap();
+        if (pmap == (Pixmap) 1) {
+          /* Pixmap is unchanged */
+          return 1;
         }
         redraw_all_images();
         return 1;
@@ -314,7 +327,7 @@ handle_client_message(event_t * ev)
     return 1;
   }
 #endif /* OFFIX_DND */
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -372,7 +385,7 @@ handle_focus_in(event_t * ev)
       XSetICFocus(Input_Context);
 #endif
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -396,7 +409,7 @@ handle_focus_out(event_t * ev)
       XUnsetICFocus(Input_Context);
 #endif
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -409,11 +422,34 @@ handle_configure_notify(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, &unused_xevent));
-  handle_external_resize();
+  if (ev->xany.window == TermWin.parent) {
+    int x = ev->xconfigurerequest.x, y = ev->xconfigurerequest.y;
+    unsigned int width = ev->xconfigurerequest.width, height = ev->xconfigurerequest.height;
+
+    D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  TermWin.x == %hd, TermWin.y == %hd\n",
+              width, height, x, y, TermWin.x, TermWin.y));
+    /* If the font change count is non-zero, this event is telling us we resized ourselves. */
+    if (font_change_count > 0) {
+      font_change_count--;
+    }
+    if ((width != (unsigned int) szHint.width) || (height != (unsigned int) szHint.height)) {
+      /* We were resized externally.  Handle the resize. */
+      D_EVENTS((" -> External resize detected.\n"));
+      handle_resize(width, height);
 #ifdef USE_XIM
-  xim_set_status_position();
+      xim_set_status_position();
 #endif
-  return 0;
+      /* A resize requires the additional handling of a move */
+      handle_move(x, y);
+    } else if ((x != TermWin.x) || (y != TermWin.y)) {
+      /* There was an external move, but no resize.  Handle the move. */
+      D_EVENTS((" -> External move detected.\n"));
+      handle_move(x, y);
+    } else {
+      D_EVENTS((" -> Bogus ConfigureNotify detected, ignoring.\n"));
+    }
+  }
+  return 1;
 }
 
 unsigned char
@@ -474,12 +510,14 @@ handle_expose(event_t * ev)
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
   }
+#if 0
   if (desktop_window != None) {
     XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
   }
+#endif
   P_SETTIMEVAL(expose_stop);
   P_EVENT_TIME("Expose", expose_start, expose_stop);
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -643,7 +681,7 @@ handle_motion_notify(event_t * ev)
     P_EVENT_TIME("MotionNotify", motion_start, motion_stop);
     return 1;
   }
-  return 0;
+  return 1;
 }
 
 unsigned char
@@ -654,7 +692,9 @@ process_x_event(event_t * ev)
 #endif
 
   COUNT_EVENT(event_cnt);
+#if 0
   D_EVENTS(("process_x_event(ev [%8p] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
+#endif
   if (primary_data.handlers[ev->type] != NULL) {
     return ((primary_data.handlers[ev->type]) (ev));
   }

@@ -224,6 +224,7 @@ menu_handle_expose(event_t * ev)
 {
 
   XEvent unused_xevent;
+  menu_t *menu;
 
   D_EVENTS(("menu_handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -231,7 +232,10 @@ menu_handle_expose(event_t * ev)
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
-  return 0;
+  if ((menu = find_menu_by_window(menu_list, ev->xany.window)) != NULL) {
+    menu_draw(menu);
+  }
+  return 1;
 }
 
 unsigned char

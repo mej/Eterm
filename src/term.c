@@ -1728,7 +1728,6 @@ xterm_seq(int op, const char *str)
 	  D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
 	  if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
 	    free_desktop_pixmap();
-	    desktop_pixmap = None;	/* Force the re-read */
 	  }
 	  if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
 	    XFreePixmap(Xdisplay, viewport_pixmap);
@@ -1797,14 +1796,12 @@ xterm_seq(int op, const char *str)
           redraw_all_images();
 	  break;
 	case 3:
-          if (desktop_pixmap != None) {
-            free_desktop_pixmap();
-          }
           get_desktop_window();
           if (desktop_window == None) {
             FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
             break;
           }
+          get_desktop_pixmap();
           redraw_all_images();
 	  break;
 #endif

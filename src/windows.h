@@ -51,7 +51,7 @@ extern void update_size_hints(void);
 extern void term_resize(int, int);
 extern void parent_resize(void);
 extern void handle_resize(unsigned int, unsigned int);
-extern void handle_external_resize(void);
+extern void handle_move(int, int);
 #ifdef XTERM_COLOR_CHANGE
 extern void set_window_color(int, const char *);
 #else

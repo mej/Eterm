@@ -43,7 +43,7 @@
 #define scrollbar_isMotion()	(scrollBar.state == 'm')
 #define scrollbar_isUp()	(scrollBar.state == 'U')
 #define scrollbar_isDn()	(scrollBar.state == 'D')
-#define scrollbar_isUpDn()	isupper (scrollBar.state)
+#define scrollbar_isUpDn()	(isupper(scrollBar.state))
 #define scrollbar_setNone()	do { D_SCROLLBAR(("scrollbar_setNone():  Cancelling motion.\n")); scrollBar.state = 1; } while (0)
 #define scrollbar_setMotion()	do { D_SCROLLBAR(("scrollbar_setMotion()\n")); scrollBar.state = 'm'; } while (0)
 #define scrollbar_setUp()	do { D_SCROLLBAR(("scrollbar_setUp()\n")); scrollBar.state = 'U'; } while (0)
@@ -55,10 +55,10 @@
 # define scrollbar_win_is_uparrow(w)        ((w) == scrollBar.up_win)
 # define scrollbar_win_is_downarrow(w)      ((w) == scrollBar.dn_win)
 # define scrollbar_win_is_anchor(w)         ((w) == scrollBar.sa_win)
-# define scrollbar_is_pixmapped()           ((images[image_sb].current->iml->im) && (images[image_sb].mode & MODE_MASK))
-# define scrollbar_uparrow_is_pixmapped()   ((images[image_up].current->iml->im) && (images[image_up].mode & MODE_MASK))
-# define scrollbar_downarrow_is_pixmapped() ((images[image_down].current->iml->im) && (images[image_down].mode & MODE_MASK))
-# define scrollbar_anchor_is_pixmapped()    ((images[image_sa].current->iml->im) && (images[image_sa].mode & MODE_MASK))
+# define scrollbar_is_pixmapped()           (images[image_sb].mode & MODE_MASK)
+# define scrollbar_uparrow_is_pixmapped()   (images[image_up].mode & MODE_MASK)
+# define scrollbar_downarrow_is_pixmapped() (images[image_down].mode & MODE_MASK)
+# define scrollbar_anchor_is_pixmapped()    (images[image_sa].mode & MODE_MASK)
 # define scrollbar_upButton(w, y)	    ( scrollbar_uparrow_is_pixmapped() ? scrollbar_win_is_uparrow(w) \
                                               : ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollBar.end && (y) <= scrollbar_dn_loc()) \
                                                  || (scrollBar.type != SCROLLBAR_NEXT && (y) < scrollBar.beg)))
@@ -102,7 +102,7 @@
                                  : ((scrollBar.type == SCROLLBAR_NEXT) ? (scrollBar.end + scrollBar.width + 2) : (scrollBar.end + 1)))
 
 /* Scrollbar operations */
-#define map_scrollbar(show) do {if (scrollbar_mapping(show)) {scr_touch(); parent_resize();} PrivMode(show, PrivMode_scrollBar); } while (0)
+#define map_scrollbar(show) do {PrivMode(show, PrivMode_scrollBar); if (scrollbar_mapping(show)) {scr_touch(); parent_resize();} } while (0)
 #define scrollbar_get_shadow()		(scrollBar.shadow)
 #define scrollbar_set_shadow(s)		do { scrollBar.shadow = (s); } while (0)
 #define scrollbar_get_win() (scrollBar.win)

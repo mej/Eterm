@@ -94,13 +94,13 @@ enum {
 
 /* Helper macros */
 #define FOREACH_IMAGE(x)                  do {unsigned char idx; for (idx = 0; idx < image_max; idx++) { x } } while (0)
-#define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
-                                              scr_touch(); scrollbar_show(0); enl_ipc_sync();} while (0)
 #define image_set_mode(which, bit)        do {images[which].mode &= ~(MODE_MASK); images[which].mode |= (bit);} while (0)
 #define image_allow_mode(which, bit)      (images[which].mode |= (bit))
 #define image_disallow_mode(which, bit)   (images[which].mode &= ~(bit))
 #define image_mode_is(which, bit)         (images[which].mode & (bit))
 #define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
+#define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
+                                              scr_touch(); scrollbar_show(0); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
@@ -158,6 +158,7 @@ extern Window desktop_window;
 _XFUNCPROTOBEGIN
 
 extern const char *get_image_type(unsigned short);
+extern unsigned char image_mode_any(unsigned char);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
 extern unsigned char check_image_ipc(unsigned char);

@@ -94,24 +94,25 @@
 
 /************ Structures ************/
 typedef struct {
-    int   internalBorder; 	/* Internal border size */
-    short width,  height;	/* window size [pixels] */
-    short fwidth, fheight;	/* font width and height [pixels] */
-    short fprop;		/* font is proportional */
-    short ncol, nrow;		/* window size [characters] */
-    short focus;		/* window has focus */
-    short saveLines;		/* number of lines that fit in scrollback */
-    short nscrolled;		/* number of line actually scrolled */
-    short view_start;		/* scrollback view starts here */
-    Window parent, vt;		/* parent (main) and vt100 window */
-    GC gc;			/* GC for drawing text */
-    XFontStruct	* font;		/* main font structure */
-    XFontSet fontset;
+  int   internalBorder; 	/* Internal border size */
+  short x, y;                   /* TermWin.parent coordinates */
+  short width,  height;  	/* window size [pixels] */
+  short fwidth, fheight;	/* font width and height [pixels] */
+  short fprop;		        /* font is proportional */
+  short ncol, nrow;		/* window size [characters] */
+  short focus;		        /* window has focus */
+  short saveLines;		/* number of lines that fit in scrollback */
+  short nscrolled;		/* number of line actually scrolled */
+  short view_start;		/* scrollback view starts here */
+  Window parent, vt;		/* parent (main) and vt100 window */
+  GC gc;			/* GC for drawing text */
+  XFontStruct	* font;		/* main font structure */
+  XFontSet fontset;
 # ifndef NO_BOLDFONT
-    XFontStruct	* boldFont;	/* bold font */
+  XFontStruct	* boldFont;	/* bold font */
 # endif
 # ifdef MULTI_CHARSET
-    XFontStruct	* mfont;	/* multibyte font structure */
+  XFontStruct	* mfont;	/* multibyte font structure */
 # endif
 } TermWin_t;
 

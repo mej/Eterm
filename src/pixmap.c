@@ -120,6 +120,15 @@ get_image_type(unsigned short type)
   return ("");
 }
 
+unsigned char
+image_mode_any(unsigned char mode)
+{
+  unsigned char ismode = 0;
+
+  FOREACH_IMAGE(if (image_mode_is(idx, mode)) ismode=1;);
+  return ismode;
+}
+
 unsigned short
 parse_pixmap_ops(char *str)
 {
@@ -557,7 +566,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       return;
     }
     if (desktop_pixmap == None) {
-      desktop_pixmap = get_desktop_pixmap();
+      get_desktop_pixmap();
       last_x = last_y = -1;
       if (desktop_pixmap != None && need_colormod()) {
 	pixmap = desktop_pixmap;
@@ -972,17 +981,6 @@ load_image(const char *file, short type)
   return 0;
 }
 
-void
-free_desktop_pixmap(void)
-{
-
-  if (desktop_pixmap_is_mine) {
-    XFreePixmap(Xdisplay, desktop_pixmap);
-    desktop_pixmap_is_mine = 0;
-  }
-  desktop_pixmap = None;
-}
-
 # ifdef PIXMAP_OFFSET
 
 #  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0xff || (mod)->contrast != 0xff || (mod)->gamma != 0xff))
@@ -1179,7 +1177,11 @@ get_desktop_window(void)
       if (w != Xroot) {
         XSelectInput(Xdisplay, w, PropertyChangeMask);
       }
-      return (desktop_window = w);
+      if (desktop_window == w) {
+        return ((Window) 1);
+      } else {
+        return (desktop_window = w);
+      }
     }
   }
 
@@ -1195,37 +1197,77 @@ get_desktop_pixmap(void)
   Pixmap p;
   Atom prop, type, prop2;
   int format;
+  static Pixmap color_pixmap = None;
   unsigned long length, after;
   unsigned char *data;
 
-  if (desktop_window == None)
-    return None;
+  if (desktop_window == None) {
+    free_desktop_pixmap();
+    return (desktop_pixmap = None);
+  }
 
   prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
   prop2 = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", True);
 
   if (prop == None && prop2 == None) {
-    return None;
+    free_desktop_pixmap();
+    return (desktop_pixmap = None);
   }
   if (prop != None) {
     XGetWindowProperty(Xdisplay, desktop_window, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     if (type == XA_PIXMAP) {
       p = *((Pixmap *) data);
-      D_PIXMAP(("  Found pixmap 0x%08x\n", p));
-      return p;
+      if (p != None) {
+        D_PIXMAP(("  Found pixmap 0x%08x\n", p));
+        if (desktop_pixmap == p) {
+          return ((Pixmap) 1);
+        } else {
+          free_desktop_pixmap();
+          return (desktop_pixmap = p);
+        }
+      }
     }
   }
   if (prop2 != None) {
     XGetWindowProperty(Xdisplay, desktop_window, prop2, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     if (type == XA_CARDINAL) {
-      D_PIXMAP(("  Solid color not yet supported.\n"));
-      return None;
+
+      XGCValues gcvalue;
+      GC gc;
+      Pixel pix;
+
+      free_desktop_pixmap();
+      pix = *((Pixel *) data);
+      D_PIXMAP(("  Found solid color 0x%08x\n", pix));
+      gcvalue.foreground = pix;
+      gcvalue.background = pix;
+      gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground, &gcvalue);
+
+      if (color_pixmap != None) {
+        XFreePixmap(Xdisplay, color_pixmap);
+      }
+      color_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, 16, 16, Xdepth);
+      XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
+      return (desktop_pixmap = color_pixmap);
     }
   }
   D_PIXMAP(("No suitable attribute found.\n"));
-  return None;
+  free_desktop_pixmap();
+  return (desktop_pixmap = None);
 
 }
+
+void
+free_desktop_pixmap(void)
+{
+
+  if (desktop_pixmap_is_mine && desktop_pixmap != None) {
+    XFreePixmap(Xdisplay, desktop_pixmap);
+    desktop_pixmap_is_mine = 0;
+  }
+  desktop_pixmap = None;
+}
+
 # endif				/* PIXMAP_OFFSET */
 
 void
