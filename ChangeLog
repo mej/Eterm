@@ -3488,3 +3488,14 @@ Thu Apr 13 21:15:03 PDT 2000	Michael Jennings <mej@eterm.org>
 	Fixed an image loading problem.
 	
 -------------------------------------------------------------------------------
+Mon Apr 17 22:25:27 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	I fixed the problem reported by Joakim Bodin <bodin@dreamhosted.com>
+	with spawned processes.  Also fixed Esetroot as reported by Wayne
+	Johnson <bigman1@alltel.net>.
+
+	Support for buttons higher than 5 was also added to the action
+	bindings code for those (like me) with IntelliMouse Explorers and
+	XFree86 4.0. :-)
+	
+-------------------------------------------------------------------------------

@@ -571,6 +571,12 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
       D_PIXMAP(("Tiling image at %dx%d\n", xsize, ysize));
       imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask, 0);
     }
+    if (viewport_pixmap == None) {
+      print_error("Delayed image load failure for \"%s\".  Using solid color mode.", imlib_image_get_filename());
+      image_set_mode(image_bg, MODE_SOLID);
+      reset_simage(simg, RESET_ALL_SIMG);
+      return None;
+    }
     D_PIXMAP(("Created viewport_pixmap == 0x%08x\n", viewport_pixmap));
   } else {
     XGetGeometry(Xdisplay, viewport_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
@@ -725,7 +731,11 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     } else {
       imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, 0, w, h);
     }
-    ASSERT(pmap != None);
+    if (pmap == None) {
+      print_error("Delayed image load failure for \"%s\".", imlib_image_get_filename());
+      reset_simage(simg, RESET_ALL_SIMG);
+      return;
+    }
     gc = XCreateGC(Xdisplay, d, 0, NULL);
     if (mask) {
       XSetClipMask(Xdisplay, gc, mask);
@@ -1083,6 +1093,10 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
              and handle exposes by copying from simg->pmap->pixmap. */
           XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
         }
+      } else {
+        print_error("Delayed image load failure for \"%s\".  Using solid color mode.", imlib_image_get_filename());
+        image_set_mode(which, MODE_SOLID);
+        reset_simage(simg, RESET_ALL_SIMG);
       }
     } else {
       image_set_mode(which, MODE_SOLID);

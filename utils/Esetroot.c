@@ -97,7 +97,7 @@ main(int argc, char *argv[])
   char *displayname = NULL;
   char *fname = NULL;
   Imlib_Image im;
-  Pixmap p, temp_pmap;
+  Pixmap p, temp_pmap, m;
   register unsigned char i;
   GC gc;
   XGCValues gcv;
@@ -166,7 +166,7 @@ main(int argc, char *argv[])
   }
   imlib_context_set_display(Xdisplay);
   imlib_context_set_visual(DefaultVisual(Xdisplay, DefaultScreen(Xdisplay)));
-  im = imlib_load_image(fname);
+  im = imlib_load_image_immediately(fname);
   if (im == NULL) {
     fprintf(stderr, "%s:  Unable to load image file \"%s\".\n", *argv, fname);
     exit(1);
@@ -214,7 +214,8 @@ main(int argc, char *argv[])
   imlib_context_set_anti_alias(1);
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
-  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, NULL, 0, w, h);
+  imlib_context_set_drawable(Xroot);
+  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, &m, 0, w, h);
   if (debug) {
     fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, (unsigned int) temp_pmap);
   }

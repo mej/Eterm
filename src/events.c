@@ -779,8 +779,8 @@ xerror_handler(Display * display, XErrorEvent * event)
 
   strcpy(err_string, "");
   XGetErrorText(display, event->error_code, err_string, sizeof(err_string));
-  print_error("XError in function %s (request %d.%d):  %s (error %d)", request_code_to_name(event->request_code),
-	      event->request_code, event->minor_code, err_string, event->error_code);
+  print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)", request_code_to_name(event->request_code),
+	      (int) event->resourceid, event->request_code, event->minor_code, err_string, event->error_code);
 #if DEBUG > DEBUG_X11
   if (debug_level >= DEBUG_X11) {
     dump_stack_trace();

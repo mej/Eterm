@@ -2914,14 +2914,7 @@ parse_actions(char *buff, void *state)
       } else if (!BEG_STRCASECMP(str, "mod5")) {
         mod |= MOD_MOD5;
       } else if (!BEG_STRCASECMP(str, "button")) {
-        switch (*(str+6)) {
-        case '1': button = Button1; break;
-        case '2': button = Button2; break;
-        case '3': button = Button3; break;
-        case '4': button = Button4; break;
-        case '5': button = Button5; break;
-        default: break;
-        }
+        button = *(str + 6) - '0';
       } else if (isdigit(*str)) {
         keysym = (KeySym) strtoul(str, (char **) NULL, 0);
       } else {

@@ -83,6 +83,7 @@ action_dispatch(event_t *ev, KeySym keysym) {
   unsigned int m = (AltMask | MetaMask | NumLockMask);
 
   ASSERT(ev != NULL);
+  D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x\n", ev, ev->xbutton.button, keysym, ev->xkey.state));
   for (action = action_list; action; action = action->next) {
     D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
     if (ev->xany.type == ButtonPress) {

@@ -99,7 +99,6 @@ system_wait(char *command)
 
   D_OPTIONS(("system_wait(%s) called.\n", command));
 
-  old_handler = signal(SIGCHLD, dummy_handler);
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
@@ -120,7 +119,6 @@ system_no_wait(char *command)
 
   D_OPTIONS(("system_no_wait(%s) called.\n", command));
 
-  old_handler = signal(SIGCHLD, dummy_handler);
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);

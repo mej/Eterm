@@ -1028,7 +1028,7 @@ handle_child_signal(int sig)
   /* If the child that exited is the command we spawned, or if the
      child exited before fork() returned in the parent, it must be
      our immediate child that exited.  We exit gracefully. */
-  if (pid == cmd_pid || cmd_pid == -1) {
+  if (pid == cmd_pid && cmd_pid != -1) {
     if (Options & Opt_pause) {
       const char *message = "\r\nPress any key to exit " APL_NAME "....";
 
@@ -2151,7 +2151,7 @@ run_command(char *argv[])
     my_euid = my_ruid;
     my_egid = my_rgid;
 
-    /* command interpreter path */
+    usleep(10);  /* Attempt to force a context switch so that the parent runs before us. */
     D_CMD(("[%d] About to spawn shell\n", getpid()));
     if (chdir(initial_dir)) {
       print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
