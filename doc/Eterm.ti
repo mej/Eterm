@@ -150,4 +150,4 @@ Eterm|Eterm-color|eterm|Eterm with xterm-style color support (X Window System),
 # Revert to the original foreground/background pair
 	op=\e[39;49m,
 # Set foreground color, background color
-	setaf=\e[%p1%{30}%+%dm, setab=\e[%p1%{40}%+%dm,
+	setaf=\e[3%p1%dm, setab=\e[4%p1%dm,

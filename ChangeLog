@@ -3161,3 +3161,10 @@ Thu Feb 10 15:10:01 PST 2000	Michael Jennings <mej@eterm.org>
 	that's broken, and enjoy!
 
 -------------------------------------------------------------------------------
+Mon Feb 14 16:35:01 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Oops.  Little variable clash there.  Always ended up with
+	$ETERM_*_ROOT set to "in".  I finally got around to investigating it.
+	:-)
+	
+-------------------------------------------------------------------------------

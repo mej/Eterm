@@ -3062,14 +3062,16 @@ conf_find_file(const char *file, const char *dir, const char *pathlist) {
     strcpy(name, file);
   }
   len = strlen(name);
-  D_OPTIONS(("conf_find_file():  Checking for file \"%s\"\n", name));
+  D_OPTIONS(("Checking for file \"%s\"\n", name));
   if ((!access(name, R_OK)) && (!stat(name, &fst)) && (!S_ISDIR(fst.st_mode))) {
+    D_OPTIONS(("Found \"%s\"\n", name));
     return ((char *) name);
   }
 
   /* maxpathlen is the longest possible path we can stuff into name[].  The - 2 saves room for
      an additional / and the trailing null. */
   if ((maxpathlen = sizeof(name) - len - 2) <= 0) {
+    D_OPTIONS(("Too big.  I lose. :(\n", name));
     return ((char *) NULL);
   }
 
@@ -3093,8 +3095,9 @@ conf_find_file(const char *file, const char *dir, const char *pathlist) {
       full_path[n] = '\0';
       strcat(full_path, name);
 
-      D_OPTIONS(("conf_find_file():  Checking for file \"%s\"\n", full_path));
+      D_OPTIONS(("Checking for file \"%s\"\n", full_path));
       if ((!access(full_path, R_OK)) && (!stat(full_path, &fst)) && (!S_ISDIR(fst.st_mode))) {
+        D_OPTIONS(("Found \"%s\"\n", full_path));
         return ((char *) full_path);
       }
     }
@@ -3136,7 +3139,7 @@ char *
 conf_parse(char *conf_name, const char *dir, const char *path) {
 
   FILE *fp;
-  char *name = NULL, *outfile, *p;
+  char *name = NULL, *outfile, *p = ".";
   char buff[CONFIG_BUFF], orig_dir[PATH_MAX];
   register unsigned long i = 0;
   unsigned char id = 0;
@@ -3150,7 +3153,10 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
       if ((p = strrchr(name, '/')) != NULL) {
         getcwd(orig_dir, PATH_MAX);
         *p = 0;
+        p = name;
         chdir(name);
+      } else {
+        p = ".";
       }
     } else {
       return NULL;
@@ -3264,7 +3270,8 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
   if (*orig_dir) {
     chdir(orig_dir);
   }
-  return (StrDup(name));
+  D_OPTIONS(("Returning \"%s\"\n", p));
+  return (StrDup(p));
 }
 
 char *

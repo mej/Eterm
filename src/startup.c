@@ -161,6 +161,7 @@ eterm_bootstrap(int argc, char *argv[])
   if ((theme_dir = conf_parse_theme(rs_theme, THEME_CFG, 1)) != NULL) {
     char *tmp;
 
+    D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
     tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
     sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
     putenv(tmp);
@@ -168,6 +169,7 @@ eterm_bootstrap(int argc, char *argv[])
   if ((user_dir = conf_parse_theme(rs_theme, (rs_config_file ? rs_config_file : USER_CFG), 0)) != NULL) {
     char *tmp;
 
+    D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
     tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
     sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
     putenv(tmp);
