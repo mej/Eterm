@@ -1098,6 +1098,7 @@ install_handlers(void)
 {
   /* Ignore SIGHUP */
   /* signal(SIGHUP, handle_exit_signal); */
+  signal(SIGHUP, SIG_IGN);
 #ifndef __svr4__
   signal(SIGINT,  handle_exit_signal);
 #endif
@@ -1110,6 +1111,7 @@ install_handlers(void)
   signal(SIGFPE,  handle_crash);
   signal(SIGILL,  handle_crash);
   signal(SIGSYS,  handle_crash);
+  signal(SIGPIPE, SIG_IGN);
 }
 
 /* Exit gracefully, clearing the utmp entry and restoring tty attributes */
@@ -2290,17 +2292,19 @@ init_command(char **argv)
 void
 tt_winsize(int fd)
 {
-
   struct winsize ws;
 
-  if (fd < 0)
-    return;
+  if (fd < 0) return;
 
-  ws.ws_col = (unsigned short) TermWin.ncol;
+  MEMSET(&ws, 0, sizeof(struct winsize));
+
   ws.ws_row = (unsigned short) TermWin.nrow;
+  ws.ws_col = (unsigned short) TermWin.ncol;
 #ifndef __CYGWIN32__
-  ws.ws_xpixel = ws.ws_ypixel = 0;
+  ws.ws_xpixel = (unsigned short) TermWin.width;
+  ws.ws_ypixel = (unsigned short) TermWin.height;
 #endif
+  D_CMD(("%hdx%hd (%hdx%hd)\n", ws.ws_row, ws.ws_col, ws.ws_xpixel, ws.ws_ypixel));
   ioctl(fd, TIOCSWINSZ, &ws);
 }
 

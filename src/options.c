@@ -3677,7 +3677,7 @@ save_config(char *path, unsigned char save_theme)
         unsigned long tmp;
 
         if ((XGetFontProperty(menu->font, XA_FONT_NAME, &tmp)) == True) {
-          fprintf(fp, "    font \"%s\"\n", ((char *) tmp));
+          fprintf(fp, "    font '%s'\n", ((char *) tmp));
         }
       }
       for (j = 0; j < menu->numitems; j++) {
@@ -3693,13 +3693,13 @@ save_config(char *path, unsigned char save_theme)
           }
           fprintf(fp, "      action ");
           if (item->type == MENUITEM_STRING) {
-            fprintf(fp, "string \"%s\"\n", safe_print_string(item->action.string, -1));
+            fprintf(fp, "string '%s'\n", safe_print_string(item->action.string, -1));
           } else if (item->type == MENUITEM_ECHO) {
-            fprintf(fp, "echo \"%s\"\n", safe_print_string(item->action.string, -1));
+            fprintf(fp, "echo '%s'\n", safe_print_string(item->action.string, -1));
           } else if (item->type == MENUITEM_SUBMENU) {
             fprintf(fp, "submenu \"%s\"\n", (item->action.submenu)->title);
           } else if (item->type == MENUITEM_SCRIPT) {
-            fprintf(fp, "script \"%s\"\n", item->action.script);
+            fprintf(fp, "script '%s'\n", item->action.script);
           }
           fprintf(fp, "    end\n");
         }
@@ -3754,13 +3754,13 @@ save_config(char *path, unsigned char save_theme)
     }
     fprintf(fp, " to ");
     if (action->type == ACTION_STRING) {
-      fprintf(fp, "string \"%s\"\n", safe_print_string(action->param.string, -1));
+      fprintf(fp, "string '%s'\n", safe_print_string(action->param.string, -1));
     } else if (action->type == ACTION_ECHO) {
-      fprintf(fp, "echo \"%s\"\n", safe_print_string(action->param.string, -1));
+      fprintf(fp, "echo '%s'\n", safe_print_string(action->param.string, -1));
     } else if (action->type == ACTION_MENU) {
       fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title);
     } else if (action->type == ACTION_SCRIPT) {
-      fprintf(fp, "script \"%s\"\n", action->param.script);
+      fprintf(fp, "script '%s'\n", action->param.script);
     }
   }
   fprintf(fp, "end actions\n\n");
@@ -3851,7 +3851,7 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "begin misc\n");
 #ifdef PRINTPIPE
   if (rs_print_pipe) {
-    fprintf(fp, "    print_pipe \"%s\"\n", rs_print_pipe);
+    fprintf(fp, "    print_pipe '%s'\n", rs_print_pipe);
   }
 #endif
   fprintf(fp, "    save_lines %d\n", rs_saveLines);
@@ -3868,7 +3868,7 @@ save_config(char *path, unsigned char save_theme)
   }
 #ifdef CUTCHAR_OPTIONS
   if (rs_cutchars) {
-    fprintf(fp, "    cut_chars \"%s\"\n", rs_cutchars);
+    fprintf(fp, "    cut_chars '%s'\n", rs_cutchars);
   }
 #endif
   fprintf(fp, "end misc\n\n");
