@@ -3932,3 +3932,9 @@ Mon Oct 30 07:45:16 PST 2000	Michael Jennings <mej@eterm.org>
 	dependency on libast, which is now distributed separately.
 	
 -------------------------------------------------------------------------------
+Tue Oct 31 19:33:09 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Apparently AC_PREFIX() is too stupid to handle programs with hyphens
+	in their names.
+	
+-------------------------------------------------------------------------------

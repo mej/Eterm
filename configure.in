@@ -414,7 +414,7 @@ if test "$FOUND_LIBAST" -eq "1"; then
   if test ! -z "$LIBAST_CONFIG"; then
     GRLIBS="-last $GRLIBS"
     AC_DEFINE(HAVE_LIBAST)
-    AC_PREFIX(libast-config)
+    test "$prefix" = "NONE" && prefix="`$LIBAST_CONFIG --prefix`"
     CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
     LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
     SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"
