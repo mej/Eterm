@@ -302,6 +302,16 @@ if test "x$HAVE_SAVED_UIDS" = "x"; then
         AC_MSG_RESULT(no)
     fi
 fi
+AC_MSG_CHECKING(if strict ICCCM compliance should be enabled)
+AC_ARG_ENABLE(strict-icccm,
+[  --enable-strict-icccm   compile with strict ICCCM compliant WM icon support], [
+              if test "$enableval" = "yes"; then
+                  AC_MSG_RESULT(yes)
+                  AC_DEFINE(STRICT_ICCCM)
+              else
+                  AC_MSG_RESULT(no)
+              fi
+], AC_MSG_RESULT(no))
 
 dnl#
 dnl# X LIBRARIES

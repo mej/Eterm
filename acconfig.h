@@ -364,6 +364,7 @@
 #undef HAVE_SAVED_UIDS
 #undef MOUSEWHEEL
 #undef ESCREEN
+#undef STRICT_ICCCM
 
 
 /* Leave that blank line there!!  Autoheader needs it.

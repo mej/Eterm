@@ -2197,14 +2197,14 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
     imlib_context_set_dither(1);
     imlib_context_set_blend(0);
     imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, w, h);
-    if (check_for_enlightenment()) {
-        wm_hints->flags |= IconPixmapHint | IconMaskHint;
-    } else {
-        wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
-        shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
-        XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
-        wm_hints->flags |= IconWindowHint;
-    }
+#ifdef STRICT_ICCCM
+    wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
+    shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
+    XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
+    wm_hints->flags |= IconWindowHint;
+#else
+    wm_hints->flags |= IconPixmapHint | IconMaskHint;
+#endif
     imlib_free_image_and_decache();
     /* Only set the hints ourselves if we were passed a NULL pointer for pwm_hints */
     if (!pwm_hints) {

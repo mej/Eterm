@@ -5046,3 +5046,8 @@ font list in parallel with the normal font list.
 
 Also tweaked the default fonts to be less error-prone.
 ----------------------------------------------------------------------
+Mon May 12 22:07:45 2003                        Michael Jennings (mej)
+
+Use icon window instead of icon pixmap only if strict ICCCM compliance
+is requested via ./configure --enable-strict-icccm
+----------------------------------------------------------------------
