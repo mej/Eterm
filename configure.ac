@@ -1,4 +1,7 @@
-dnl# $Id: configure.in,v 1.56 2001/10/21 13:21:04 mej Exp $
+dnl# $Id: configure.in,v 1.59 2002/02/03 20:53:05 mej Exp $
+
+PATH=$PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/ucb/bin
+export PATH
 
 AC_INIT(src/feature.h)
 AM_INIT_AUTOMAKE(Eterm, 0.9.2)
@@ -50,12 +53,12 @@ if test -z "${CFLAGS}"; then
     CFLAGS="$CCOPTS"
 fi
 
-AC_ARG_WITH(cc, [  --with-cc=compiler      force Eterm to build with a particular compiler (like pgcc, egcs, etc.)],
+AC_ARG_WITH(cc, [  --with-cc=compiler      force Eterm to build with a particular compiler (like pgcc, egcs, etc.)], [
             CC=$withval, 
   if test -z "$CC"; then
     CC=check
   fi
-)
+])
 
 if test "$CC" = "check"; then
   dnl# Check for Pentium compiler
@@ -134,8 +137,8 @@ AC_CHECK_PROG(AR, ar, ar, false)
 AC_CHECK_PROG(MV, mv, mv, true)
 AC_CHECK_PROG(TIC, tic, tic, true)
 AC_LN_S
-AC_PATH_PROG(PERL, perl, /usr/bin/perl, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
-AC_PATH_PROG(AWK, awk, /usr/bin/awk, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
+AC_PATH_PROG(PERL, perl, perl)
+AC_PROG_AWK
 export PERL AWK
 
 AC_CHECK_SIZEOF(int, 4)
@@ -198,7 +201,7 @@ dnl# Utility stuff
 dnl#
 dnl# Did they want debugging?
 AC_MSG_CHECKING(for debugging level)
-AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num is an integer 0-9],
+AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num is an integer 0-9], [
               if test "$withval" = "yes"; then
                   withval=4
               else
@@ -210,9 +213,9 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
               else
                   echo "no debugging"
                   AC_DEFINE_UNQUOTED(DEBUG, 0)
-              fi, echo "4"
+              fi], [echo "4"
                   AC_DEFINE_UNQUOTED(DEBUG, 4)
-)
+])
 
 AC_CHECK_FUNC(ptsname,
               HAVE_PTSNAME=yes
@@ -239,13 +242,13 @@ if test -c /dev/ptyp128 ; then
   PTY_MECH="SCO $PTY_MECH"
 fi
 if test "X$PTY_MECH" = "X"; then
-  AC_MSG_RESULT(generic pty's only)
+  AC_MSG_RESULT(generic only)
 else
   AC_MSG_RESULT($PTY_MECH)
 fi
 AC_MSG_CHECKING(for pty group)
 AC_ARG_WITH(pty-group,
-[  --with-pty-group[=gid]  specify the group that should own pty files],
+[  --with-pty-group[=gid]  specify the group that should own pty files], [
             if test "$withval" = "yes"; then 
               PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
               if test ! -z "$PTY_GRP_NAME"; then
@@ -260,7 +263,7 @@ AC_ARG_WITH(pty-group,
               AC_MSG_RESULT($withval)
               AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$withval")
             fi
-            ,
+            ], [
             PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
             if test ! -z "$PTY_GRP_NAME"; then
               AC_MSG_RESULT($PTY_GRP_NAME)
@@ -268,9 +271,9 @@ AC_ARG_WITH(pty-group,
             else
               AC_MSG_RESULT(none)
             fi
-)
+])
 AC_MSG_CHECKING(for saved uids)
-AC_ARG_WITH(saved-uids, [  --with(out)-saved-uids  specify that your OS has (does not have) saved uids, default is to guess],
+AC_ARG_WITH(saved-uids, [  --with(out)-saved-uids  specify that your OS has (does not have) saved uids, default is to guess], [
             if test "$withval" = "yes"; then
                 AC_MSG_RESULT(user specified yes)
                 HAVE_SAVED_UIDS=1
@@ -278,7 +281,7 @@ AC_ARG_WITH(saved-uids, [  --with(out)-saved-uids  specify that your OS has (doe
                 AC_MSG_RESULT(user specified no)
                 HAVE_SAVED_UIDS=0
             fi
-)
+])
 if test "x$HAVE_SAVED_UIDS" = "x"; then
     case `uname -s` in
         Linux | linux | GNU*Linux)  HAVE_SAVED_UIDS=1 ;;
@@ -334,44 +337,45 @@ dnl# FEATURES
 dnl#
 AC_MSG_CHECKING(if Pablo support is wanted)
 AC_ARG_WITH(pablo,
-[  --with-pablo[=DIR]      compile with Pablo I/O Tracing support (using Pablo prefix DIR)],
+[  --with-pablo[=DIR]      compile with Pablo I/O Tracing support (using Pablo prefix DIR)], [
             if test "$withval" != "no"; then 
               AC_MSG_RESULT(yes)
               if test "$withval" != "yes"; then
                 CPPFLAGS="$CPPFLAGS -I${withval}/include"
                 LDFLAGS="$LDFLAGS -L${withval}/lib"
               fi
-              AC_CHECK_HEADER(IOTrace.h, 
-                              AC_CHECK_LIB(PabloTraceExt, initIOTrace,
+              AC_CHECK_HEADER(IOTrace.h, [
+                              AC_CHECK_LIB(PabloTraceExt, initIOTrace, [
                                            AC_DEFINE(IOTRACE)
                                            LIBS="$LIBS -lPabloTraceExt -lPabloTrace"
                                            echo "Pablo support enabled.  Headers in ${withval}/include.  Libraries in ${withval}/lib."
-                                           , 
+                                           ], [
                                            echo "*** ERROR:  Pablo support was requested but the Pablo libraries could not be"
                                            echo "***         found.  Please check config.log for further information."
                                            echo "***         Pablo support will NOT be included."
-                                           , -lPabloTrace)
-                              ,
+                                           ], -lPabloTrace)
+                              ], [
                               echo "*** ERROR:  Pablo support was requested but the Pablo header files could not be"
                               echo "***         found.  Please check the value you passed to --with-pablo."
-                              echo "***         Pablo support will NOT be included.")
+                              echo "***         Pablo support will NOT be included."
+                              ])
             else
               AC_MSG_RESULT(no)
-            fi, AC_MSG_RESULT(no)
+            fi], AC_MSG_RESULT(no)
 )
 AC_MSG_CHECKING(if profiling macros should be included)
 AC_ARG_ENABLE(profile,
-[  --enable-profile        compile with code profiling macros enabled],
+[  --enable-profile        compile with code profiling macros enabled], [
             if test "$enableval" = "yes"; then 
               AC_MSG_RESULT(yes)
               AC_DEFINE(ENABLE_PROFILE)
             else
               AC_MSG_RESULT(no)
-            fi, AC_MSG_RESULT(no)
+            fi], AC_MSG_RESULT(no)
 )
 AC_MSG_CHECKING(for pixmap support)
 AC_ARG_WITH(imlib,
-[  --with-imlib[=DIR]      compile with Imlib support (Imlib residing in DIR/lib) (default)],
+[  --with-imlib[=DIR]      compile with Imlib support (Imlib residing in DIR/lib) (default)], [
             if test "$withval" != "no"; then 
               AC_MSG_RESULT(yes)
               if test "$withval" != "yes"; then
@@ -387,47 +391,47 @@ AC_ARG_WITH(imlib,
               AC_WARN(*** is generally a bad idea since it really doesn't save    ***)
               AC_WARN(*** much memory.  And the developers almost never test that ***)
               AC_WARN(*** configuration.  So I'd reconsider if I were you....     ***)
-            fi, AC_MSG_RESULT(yes)
+            fi], [AC_MSG_RESULT(yes)
                 USE_IMLIB=1
-)
+])
 if test $USE_IMLIB -eq 1 ; then
   AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl", , $GRLIBS)
   AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $GRLIBS)
-  AC_CHECK_LIB(Imlib2, imlib_create_image,
+  AC_CHECK_LIB(Imlib2, imlib_create_image, [
                GRLIBS="-lImlib2 $GRLIBS"
                AC_DEFINE(HAVE_LIBIMLIB2)
                AC_DEFINE(PIXMAP_SUPPORT)
                AC_DEFINE(BACKING_STORE)
-              ,
+              ], [
                AC_WARN(*** Pixmap support has been disabled because Imlib2 was not found ***)
                AC_WARN(*** or could not be linked.  Eterm should still work, but it will ***)
                AC_WARN(*** not be very happy.  Check config.log for more detailed        ***)
                AC_WARN(*** information on why my attempt to link with Imlib2 failed.     ***)
-              , $GRLIBS)
+              ], $GRLIBS)
 
 fi
 
 AC_MSG_CHECKING(for transparency support)
 AC_ARG_ENABLE(trans,
-[  --enable-trans          compile with transparency support],
+[  --enable-trans          compile with transparency support], [
             if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
               AC_DEFINE(PIXMAP_OFFSET)
             else
               AC_MSG_RESULT(no)
-            fi, AC_MSG_RESULT(yes)
+            fi], [AC_MSG_RESULT(yes)
                 AC_DEFINE(PIXMAP_OFFSET)
-)
+])
 
 AC_MSG_CHECKING(for MMX support)
 HAVE_MMX=""
-AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines],
+AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines], [
                test "x$enableval" = "xyes" && HAVE_MMX="yes"
-              ,
+              ], [
                if test x$build_os = xlinux-gnu; then
                  grep mmx /proc/cpuinfo >/dev/null 2>&1 && HAVE_MMX="yes"
                fi
-              )
+              ])
 if test "x$HAVE_MMX" = "xyes"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_MMX)
@@ -439,11 +443,15 @@ AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes")
 dnl#
 dnl# LibAST
 dnl#
-AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
-if test "$FOUND_LIBAST" -eq "1"; then
-  AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
-  test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
+AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
+if test "$LIBAST_CONFIG" = "false"; then
+    FOUND_LIBAST=0
+else
+    FOUND_LIBAST=1
+    CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
+    LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
 fi
+AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
 
 if test "$FOUND_LIBAST" -ne "1"; then
   echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
@@ -476,8 +484,6 @@ if test "$FOUND_LIBAST" -eq "1"; then
     GRLIBS="-last $GRLIBS"
     AC_DEFINE(HAVE_LIBAST)
     test "$prefix" = "NONE" && prefix="`$LIBAST_CONFIG --prefix`"
-    CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
-    LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
     SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"
     for i in $SUPPORT_FLAGS ; do
       case $i in
@@ -499,7 +505,7 @@ fi
 
 AC_MSG_CHECKING(for utmp support)
 AC_ARG_ENABLE(utmp,
-[  --enable-utmp           compile with utmp support],
+[  --enable-utmp           compile with utmp support], [
             if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
               UTMP=1
@@ -507,31 +513,35 @@ AC_ARG_ENABLE(utmp,
             else
               AC_MSG_RESULT(no)
               UTMP=0
-            fi, AC_MSG_RESULT(yes)
+            fi], [AC_MSG_RESULT(yes)
                 AC_DEFINE(UTMP_SUPPORT)
                 UTMP=1
-)
+])
 if test $UTMP -eq 1; then
   AC_CHECK_LIB(utempter, addToUtmp)
 fi
 AC_MSG_CHECKING(for backspace key configuration)
 AC_ARG_WITH(backspace,
-[  --with-backspace=KEY    force backspace to send KEY (KEY is either \"bs\" for ^H or \"del\" for ^?)],
+[  --with-backspace=KEY    force backspace to send KEY (KEY is either \"bs\" for ^H or \"del\" for ^?)], [
             if test "$withval" = "bs"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-H)
               AC_DEFINE(FORCE_BACKSPACE)
             elif test "$withval" = "del"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-?)
               AC_DEFINE(FORCE_DELETE)
+            elif test "$withval" = "detect" -o "$withval" = "auto"; then 
+              AC_MSG_RESULT(attempt to auto-detect)
             else
               AC_MSG_RESULT(default)
-            fi, AC_MSG_RESULT(default)
-)
+              AC_DEFINE(FORCE_BACKSPACE)
+            fi], [AC_MSG_RESULT(default)
+                AC_DEFINE(FORCE_BACKSPACE)
+])
 AC_MSG_CHECKING(for delete key configuration)
 AC_ARG_WITH(delete,
 [  --with-delete=SETTING   force delete to SETTING (\"server\" to use the X server value always,
                           \"execute\" to send the old default execute escape sequence,
-                          or a quoted string to use a specific string)],
+                          or a quoted string to use a specific string)], [
             if test "$withval" = "server"; then
               AC_MSG_RESULT(X server value)
               AC_DEFINE(NO_DELETE_KEY)
@@ -540,17 +550,19 @@ AC_ARG_WITH(delete,
               AC_DEFINE(NO_DELETE_KEY)
             elif test "$withval" = "execute"; then
               AC_MSG_RESULT(send execute sequence)
+            elif test "$withval" = "del"; then
+              AC_MSG_RESULT(send Ctrl-?)
+              AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
             else
               AC_MSG_RESULT(forcing Delete to send "$withval")
               AC_DEFINE_UNQUOTED(KS_DELETE, "$withval")
-            fi, AC_MSG_RESULT(default)
-                AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
+            fi], AC_MSG_RESULT(default)
 )
 XTERM_HOME="\033\133H"
 LINUX_HOME="\033\1331~"
 AC_MSG_CHECKING(for home key configuration)
 AC_ARG_WITH(home,
-[  --with-home=SEQUENCE    specify which sequence to use for the Home key ("xterm", "linux", or "vt102")],
+[  --with-home=SEQUENCE    specify which sequence to use for the Home key ("xterm", "linux", or "vt102")], [
             if test "$withval" = "xterm"; then 
               AC_MSG_RESULT(emulate xterm)
               AC_DEFINE_UNQUOTED(KS_HOME, "$XTERM_HOME")
@@ -559,13 +571,13 @@ AC_ARG_WITH(home,
               AC_DEFINE_UNQUOTED(KS_HOME, "$LINUX_HOME")
             else
               AC_MSG_RESULT(default vt102)
-            fi, AC_MSG_RESULT(default)
+            fi], AC_MSG_RESULT(default)
 )
 XTERM_END="\033\133F"
 LINUX_END="\033\1334~"
 AC_MSG_CHECKING(for end key configuration)
 AC_ARG_WITH(end,
-[  --with-end=SEQUENCE     specify which sequence to use for the End key ("xterm", "linux", or "vt102")],
+[  --with-end=SEQUENCE     specify which sequence to use for the End key ("xterm", "linux", or "vt102")], [
             if test "$withval" = "xterm"; then 
               AC_MSG_RESULT(emulate xterm)
               AC_DEFINE_UNQUOTED(KS_END, "$XTERM_END")
@@ -574,37 +586,37 @@ AC_ARG_WITH(end,
               AC_DEFINE_UNQUOTED(KS_END, "$LINUX_END")
             else
               AC_MSG_RESULT(default vt102)
-            fi, AC_MSG_RESULT(default)
+            fi], AC_MSG_RESULT(default)
 )
 AC_MSG_CHECKING(if mousewheel support should be enabled)
 AC_ARG_WITH(mousewheel,
-[  --without-mousewheel    disable built-in mousewheel support],
+[  --without-mousewheel    disable built-in mousewheel support], [
             if test "$withval" = "no"; then 
               AC_MSG_RESULT(no)
             else
               AC_MSG_RESULT(yes)
               AC_DEFINE(MOUSEWHEEL)
-            fi, AC_MSG_RESULT(yes)
+            fi], [AC_MSG_RESULT(yes)
                 AC_DEFINE(MOUSEWHEEL)
-)
+])
 
 MULTICHAR_ENCODING=""
 AC_MSG_CHECKING(for multi-charset support)
 AC_ARG_ENABLE(multi-charset,
-[  --enable-multi-charset  compile with multibyte font support],
+[  --enable-multi-charset  compile with multibyte font support], [
             if test "$enableval" = "no"; then
               MULTI_CHARSET_TYPE=""
             elif test "$enableval" = "yes"; then
               MULTI_CHARSET_TYPE="unicode"
             else
               MULTI_CHARSET_TYPE="$enableval"
-            fi,
+            fi], [
             if (xlsfonts | grep 10646 >&5 2>&5); then
               MULTI_CHARSET_TYPE="unicode"
             else
               MULTI_CHARSET_TYPE=""
             fi
-           )
+           ])
 
 if test "x$MULTI_CHARSET_TYPE" != "x"; then
   if test "$MULTI_CHARSET_TYPE" = "kanji"; then
@@ -717,7 +729,7 @@ export MFONT0 MFONT1 MFONT2 MFONT3 MFONT4 MULTICHAR_ENCODING
 
 AC_MSG_CHECKING(for XIM support)
 AC_ARG_ENABLE(xim,
-[  --enable-xim            compile with XIM support (default)],
+[  --enable-xim            compile with XIM support (default)], [
             if test "$enableval" = "no"; then 
               AC_MSG_RESULT(no)
 	      XIM="FALSE"
@@ -725,47 +737,49 @@ AC_ARG_ENABLE(xim,
               AC_MSG_RESULT(yes)
 	      AC_DEFINE(USE_XIM)
 	      XIM="TRUE"
-            fi, AC_MSG_RESULT(yes)
+            fi], [AC_MSG_RESULT(yes)
 	        AC_DEFINE(USE_XIM)
 	        XIM="TRUE"
-)
+])
 
 AC_MSG_CHECKING(for Greek keyboard support)
 AC_ARG_ENABLE(greek,
-[  --enable-greek          compile with support for Greek keyboards],
+[  --enable-greek          compile with support for Greek keyboards], [
             if test "$enableval" = "yes"; then 
               AC_MSG_RESULT(yes)
               AC_DEFINE(GREEK_SUPPORT)
             else
               AC_MSG_RESULT(no)
-            fi, AC_MSG_RESULT(no)
+            fi], AC_MSG_RESULT(no)
 )
 
 CONFIG_BUFF_SIZE=20480
 AC_MSG_CHECKING(for the buffer size of the config file parser)
 AC_ARG_WITH(config-buffer-size,
 [  --with-config-buffer-size
-                         specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)],
+                         specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)], [
             if test "$withval" != "yes" -a "$withval" != "no"; then
               CONFIG_BUFF_SIZE=$withval
-            fi)
+            fi
+])
 AC_MSG_RESULT($CONFIG_BUFF_SIZE bytes)
 AC_DEFINE_UNQUOTED(CONFIG_BUFF, $CONFIG_BUFF_SIZE)
 
 AC_ARG_WITH(terminfo,
-[  --without-terminfo      do not compile the Eterm terminfo file],
+[  --without-terminfo      do not compile the Eterm terminfo file], [
             if test "$withval" = "no"; then 
               TIC=true
-            fi)
+            fi
+])
 
 AC_ARG_WITH(theme-update,
-[  --with-theme-update     existing themes will be forceably removed and new ones installed],
+[  --with-theme-update     existing themes will be forceably removed and new ones installed], [
             if test "$withval" = "yes"; then 
               REMOVE_THEMES=yes
             else
               REMOVE_THEMES=no
-            fi, REMOVE_THEMES=no
-)
+            fi], [REMOVE_THEMES=no
+])
 AC_SUBST(REMOVE_THEMES)
 
 dnl# AC_MSG_CHECKING(which threads library to use)
@@ -799,12 +813,12 @@ if test "$exec_prefix" = "NONE"; then
 fi
 
 dnl Stack Tracing toys
-AC_ARG_ENABLE(stack-trace, [  --disable-stack-trace   disable stack trace on abnormal termination],
+AC_ARG_ENABLE(stack-trace, [  --disable-stack-trace   disable stack trace on abnormal termination], [
   if test "$enableval" = "no"; then
     AC_DEFINE(NO_STACK_TRACE)
     NO_STACK_TRACE=1
   fi
-)
+])
 
 if test "$NO_STACK_TRACE" != "1"; then
   AC_PATH_PROG(DBX, dbx, no)
@@ -839,10 +853,11 @@ else
 fi
 
 dnl# Enable/disable humor
-AC_ARG_WITH(sense-of-humor, [  --without-sense-of-humor   Specify this if you have no sense of humor],
+AC_ARG_WITH(sense-of-humor, [  --without-sense-of-humor   Specify this if you have no sense of humor], [
             if test "$withval" = "no"; then
               HUMOR=none
-            fi)
+            fi
+])
 
 if test -z "$HUMOR"; then
 AC_CHECK_LIB(Kenny, life_signs, , [
@@ -886,8 +901,8 @@ basedir=.
 
 AM_CONFIG_HEADER(config.h)
 
-AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile pix/Makefile
-          src/Makefile themes/Makefile)
+AC_OUTPUT([Makefile bg/Makefile doc/Makefile utils/Makefile pix/Makefile
+          src/Makefile themes/Makefile])
 
 # Mega evals to make sure all the relative variables get resolved.
 BINDIR=`eval eval eval eval echo ${bindir}`
