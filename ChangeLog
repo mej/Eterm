@@ -5117,3 +5117,12 @@ Changed -D/--desktop option to use EWMH-compliant desktop atom.
 
 Add support for EWMH icon property.
 ----------------------------------------------------------------------
+Fri Nov  7 12:26:11 2003                        Michael Jennings (mej)
+
+Fixed stupid mathematical blunder in the font handling code pointed
+out by Laurence J. Lane <ljlane@debian.org>.
+
+Allow save_buff() script function to dump to stderr if no file is
+specified.  Note that script functions CANNOT be triggered by escape
+sequences.
+----------------------------------------------------------------------

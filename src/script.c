@@ -316,6 +316,8 @@ script_handler_save_buff(char **params)
 {
     if (params && *params) {
         scr_dump_to_file(params[0]);
+    } else {
+        scr_dump();
     }
 }
 

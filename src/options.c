@@ -979,7 +979,7 @@ parse_attributes(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "font ")) {
 
         char *tmp = get_pword(2, buff);
-        unsigned char n;
+        unsigned long n;
 
         if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
             if (parse_font_fx(get_pword(2, tmp)) != 1) {
@@ -997,7 +997,7 @@ parse_attributes(char *buff, void *state)
                             file_peek_path(), file_peek_line());
             }
         } else if (isdigit(*tmp)) {
-            n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
+            n = strtoul(tmp, (char **) NULL, 0);
             if (n <= 255) {
                 eterm_font_add(&etfonts, get_pword(2, tmp), n);
             } else {
@@ -2351,7 +2351,7 @@ parse_multichar(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "font ")) {
 
         char *tmp = get_pword(2, buff);
-        unsigned char n;
+        unsigned long n;
 
         if (num_words(buff) != 3) {
             print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n",
@@ -2359,7 +2359,7 @@ parse_multichar(char *buff, void *state)
             return NULL;
         }
         if (isdigit(*tmp)) {
-            n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
+            n = strtoul(tmp, (char **) NULL, 0);
             if (n <= 255) {
                 eterm_font_add(&etmfonts, get_pword(2, tmp), n);
             } else {
