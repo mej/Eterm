@@ -101,20 +101,36 @@
 # define Xdepth		DEBUG_DEPTH
 #endif
 
+enum {
+  PROP_DESKTOP,
+  PROP_TRANS_PIXMAP,
+  PROP_TRANS_COLOR,
+  PROP_SELECTION_DEST,
+  PROP_SELECTION_INCR,
+  PROP_SELECTION_TARGETS,
+  PROP_ENL_COMMS,
+  PROP_ENL_MSG,
+  PROP_DELETE_WINDOW,
+  PROP_DND_PROTOCOL,
+  PROP_DND_SELECTION,
+  NUM_PROPS
+};
+
 /************ Structures ************/
 typedef struct {
   int   internalBorder; 	/* Internal border size */
   short x, y;                   /* TermWin.parent coordinates */
   short width,  height;  	/* window size [pixels] */
   short fwidth, fheight;	/* font width and height [pixels] */
-  short fprop;		        /* font is proportional */
+  unsigned int fprop:1;		/* font is proportional */
+  unsigned int focus:1;		/* window has focus */
   short ncol, nrow;		/* window size [characters] */
-  short focus;		        /* window has focus */
   short saveLines;		/* number of lines that fit in scrollback */
   short nscrolled;		/* number of line actually scrolled */
   short view_start;		/* scrollback view starts here */
   Window parent, vt;		/* parent (main) and vt100 window */
   GC gc;			/* GC for drawing text */
+  long mask;                    /* X Event mask for TermWin.vt */
   XFontStruct	* font;		/* main font structure */
   XFontSet fontset;
 #ifndef NO_BOLDFONT
@@ -135,6 +151,7 @@ extern char *orig_argv0;
 extern short bg_needs_update;
 #endif
 extern char *display_name;
+extern Atom props[NUM_PROPS];
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

@@ -428,13 +428,13 @@ Create_Windows(int argc, char *argv[])
     XClearWindow(Xdisplay, TermWin.vt);
   }
   XDefineCursor(Xdisplay, TermWin.vt, TermWin_cursor);
-  XSelectInput(Xdisplay, TermWin.vt, (EnterWindowMask | LeaveWindowMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button3MotionMask));
+  TermWin.mask = (EnterWindowMask | LeaveWindowMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button3MotionMask);
+  XSelectInput(Xdisplay, TermWin.vt, TermWin.mask);
 
   /* If the user wants a specific desktop, tell the WM that */
   if (rs_desktop != -1) {
-    prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
     val = rs_desktop;
-    XChangeProperty(Xdisplay, TermWin.parent, prop, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
+    XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
   }
 
   /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */

@@ -144,7 +144,6 @@ int Xfd = -1;			/* file descriptor of X server connection */
 unsigned int num_fds = 0;	/* number of file descriptors being used */
 struct stat ttyfd_stat;		/* original status of the tty we will use */
 int refresh_count = 0, refresh_limit = 1, refresh_type = FAST_REFRESH;
-Atom wmDeleteWindow;
 unsigned char cmdbuf_base[CMD_BUF_SIZE], *cmdbuf_ptr, *cmdbuf_endp;
 /* Addresses pasting large amounts of data
  * code pinched from xterm
@@ -153,10 +152,6 @@ static char *v_buffer;		/* pointer to physical buffer */
 static char *v_bufstr = NULL;	/* beginning of area to write */
 static char *v_bufptr;		/* end of area to write */
 static char *v_bufend;		/* end of physical buffer */
-/* OffiX Dnd (drag 'n' drop) support */
-#ifdef OFFIX_DND
-static Atom DndProtocol, DndSelection;
-#endif /* OFFIX_DND */
 #ifdef USE_XIM
 XIM xim_input_method = NULL;
 XIC xim_input_context = NULL;	/* input context */
@@ -2253,19 +2248,11 @@ run_command(char **argv)
 void
 init_command(char **argv)
 {
-
-  /* Initialize the command connection.        This should be called after
+  /* Initialize the command connection.  This should be called after
      the X server connection is established. */
 
   /* Enable delete window protocol */
-  wmDeleteWindow = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
-  XSetWMProtocols(Xdisplay, TermWin.parent, &wmDeleteWindow, 1);
-
-#ifdef OFFIX_DND
-  /* Enable OffiX Dnd (drag 'n' drop) protocol */
-  DndProtocol = XInternAtom(Xdisplay, "DndProtocol", False);
-  DndSelection = XInternAtom(Xdisplay, "DndSelection", False);
-#endif /* OFFIX_DND */
+  XSetWMProtocols(Xdisplay, TermWin.parent, &(props[PROP_DELETE_WINDOW]), 1);
 
   init_locale();
 
@@ -2419,7 +2406,6 @@ check_pixmap_change(int sig)
 unsigned char
 cmd_getc(void)
 {
-
 #define TIMEOUT_USEC 2500
   static short refreshed = 0;
   fd_set readfds;
@@ -2435,11 +2421,12 @@ cmd_getc(void)
    * time-out
    */
   if (refresh_count >= (refresh_limit * (TermWin.nrow - 1))) {
+    D_CMD(("Refresh count %d >= limit %d * rows.  (Refresh period %d.)\n",
+           refresh_count, refresh_limit, REFRESH_PERIOD));
     if (refresh_limit < REFRESH_PERIOD)
       refresh_limit++;
     refresh_count = 0;
     refreshed = 1;
-    D_CMD(("scr_refresh() #1\n"));
 #ifdef PROFILE
     P_CALL(scr_refresh(refresh_type), "cmd_getc()->scr_refresh()");
 #else
@@ -2637,6 +2624,8 @@ main_loop(void)
   register int ch;
 
   D_CMD(("PID %d\n", getpid()));
+  D_CMD(("Command buffer base == %8p, length %lu, end at %8p\n", cmdbuf_base, CMD_BUF_SIZE,
+         cmdbuf_base + CMD_BUF_SIZE - 1));
 
 #ifdef BACKGROUND_CYCLING_SUPPORT
   if (rs_anim_delay) {
@@ -2651,6 +2640,9 @@ main_loop(void)
 
       /*           unsigned char * str; */
       register unsigned char *str;
+
+      D_CMD(("Command buffer contains %d characters.\n", cmdbuf_endp - cmdbuf_ptr));
+      D_VT(("\n%s\n\n", safe_print_string(cmdbuf_ptr - 1, cmdbuf_endp - cmdbuf_ptr + 1)));
 
       /*
        * point to the start of the string,
@@ -2680,10 +2672,8 @@ main_loop(void)
 	  break;
 	}
       }
-      D_SCREEN(("Adding lines, str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n", str, cmdbuf_ptr,
-		cmdbuf_endp));
-      D_SCREEN(("Command buffer base == %8p, length %lu, end at %8p\n", cmdbuf_base, CMD_BUF_SIZE,
-		cmdbuf_base + CMD_BUF_SIZE - 1));
+      D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
+                nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
       scr_add_lines(str, nlines, (cmdbuf_ptr - str));
     } else {
       switch (ch) {

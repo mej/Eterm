@@ -2366,6 +2366,7 @@ selection_write(unsigned char *data, size_t len)
   unsigned char *p, *cr = "\r";
 
   D_SELECT(("Writing %lu characters of selection data to tty.\n", len));
+  D_SELECT(("\n%s\n\n", safe_print_string((char *) data, len)));
   for (p = data, num = 0; len--; p++) {
     /* Write out each line, replacing newlines with carriage returns. */
     if (*p != '\n') {
@@ -2398,7 +2399,8 @@ selection_fetch(Window win, unsigned prop, int delete)
     return;
   }
   for (nread = 0, bytes_after = 1; bytes_after > 0;) {
-    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
+    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)
+        || (actual_type == None) || (data == NULL)) {
       D_SELECT(("Unable to fetch the value of property %d from window 0x%08x\n", (int) prop, (int) win));
       if (data != NULL) {
         XFree(data);
@@ -2406,16 +2408,29 @@ selection_fetch(Window win, unsigned prop, int delete)
       return;
     }
     nread += nitems;
+    D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n",
+              (int) actual_type, actual_fmt, nitems, data, bytes_after));
 
+    if (nitems == 0) {
+      D_SELECT(("Retrieval of incremental selection complete.\n"));
+      TermWin.mask &= ~(PropertyChangeMask);
+      XSelectInput(Xdisplay, TermWin.vt, TermWin.mask);
+      return;
+    }
     if (actual_type == XA_STRING) {
       /* We can handle strings directly. */
       selection_write(data, nitems);
+    } else if (actual_type == props[PROP_SELECTION_INCR]) {
+      D_SELECT(("Incremental selection transfer initiated.  Length is at least %u bytes.\n", (unsigned) *((unsigned *) data)));
+      TermWin.mask |= PropertyChangeMask;
+      XSelectInput(Xdisplay, TermWin.vt, TermWin.mask);
     } else {
       int size, i;
       XTextProperty xtextp;
       char **cl = NULL;
 
       /* It's not a string, so convert it to one (or more). */
+      D_SELECT(("Selection is not a string.  Converting.\n"));
       xtextp.value = data;
       xtextp.encoding = actual_type;
       xtextp.format = actual_fmt;
@@ -2423,7 +2438,8 @@ selection_fetch(Window win, unsigned prop, int delete)
       XmbTextPropertyToTextList(Xdisplay, &xtextp, &cl, &size);
 
       if (cl) {
-        for (i = 0 ; i < size ; i ++) {
+        D_SELECT(("Got string list 0x%08x with %d strings.\n", cl, size));
+        for (i = 0; i < size; i++) {
           if (cl[i]) {
             selection_write(cl[i], strlen(cl[i]));
           }
@@ -2439,58 +2455,61 @@ selection_fetch(Window win, unsigned prop, int delete)
 
 /* Copy a specific string of a given length to the buffer specified. */
 void
-selection_copy_string(Atom selection_atom, Atom prop, char *str, size_t len)
+selection_copy_string(Atom sel, char *str, size_t len)
 {
   if (str == NULL || len == 0) {
     return;
   }
-  D_SELECT(("Copying selection to selection %d, buffer %d\n", (int) selection_atom, (int) prop));
-  XSetSelectionOwner(Xdisplay, selection_atom, TermWin.vt, CurrentTime);
-  if (XGetSelectionOwner(Xdisplay, selection_atom) != TermWin.vt) {
-    print_error("Can't take ownership of selection\n");
+  if (IS_SELECTION(sel)) {
+    D_SELECT(("Copying selection to selection %d\n", (int) sel));
+    XSetSelectionOwner(Xdisplay, sel, TermWin.vt, CurrentTime);
+    if (XGetSelectionOwner(Xdisplay, sel) != TermWin.vt) {
+      print_error("Can't take ownership of selection\n");
+    }
+  } else {
+    D_SELECT(("Copying selection to cut buffer %d\n", (int) sel));
+    XChangeProperty(Xdisplay, Xroot, sel, XA_STRING, 8, PropModeReplace, str, len);
   }
-  XChangeProperty(Xdisplay, Xroot, prop, XA_STRING, 8, PropModeReplace, str, len);
 }
 
 /* Copy the currently-selected text to the buffer specified. */
 void
-selection_copy(Atom selection_atom, Atom prop)
+selection_copy(Atom sel)
 {
-  selection_copy_string(selection_atom, prop, selection.text, selection.len);
+  selection_copy_string(sel, selection.text, selection.len);
 }
 
 /* Paste the specified selection from the specified buffer. */
 void
-selection_paste(Atom selection_atom, Atom prop)
+selection_paste(Atom sel)
 {
-  static Atom dest_prop = None;
-
-  if (dest_prop == None) {
-    dest_prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
-  }
-
   if (selection.text != NULL) {
     /* If we have a selection of our own, paste it. */
     D_SELECT(("Pasting my current selection of length %lu\n", selection.len));
     selection_write(selection.text, selection.len);
-  } else if (XGetSelectionOwner(Xdisplay, selection_atom) == None) {
-    /* If nobody owns the current selection, just try to paste it ourselves. */
-    D_SELECT(("Pasting un-owned current selection %d\n", (int) prop));
-    selection_fetch(Xroot, prop, False);
-  } else {
-    /* If someone owns the current selection, send a request to that client to
-       convert the selection to the appropriate form (usually XA_STRING) and
-       save it for us in the VT_SELECTION property.  We'll then get a SelectionNotify. */
-    D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", selection_atom, dest_prop));
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-    if (encoding_method != LATIN1) {
-      XConvertSelection(Xdisplay, selection_atom, XA_COMPOUND_TEXT(Xdisplay), dest_prop, TermWin.vt, CurrentTime);
+  } else if (IS_SELECTION(sel)) {
+    if (XGetSelectionOwner(Xdisplay, sel) == None) {
+      /* If nobody owns the current selection, just try to paste it ourselves. */
+      D_SELECT(("Current selection %d unowned.  Attempting to paste the default cut buffer.\n", (int) sel));
+      selection_fetch(Xroot, XA_CUT_BUFFER0, False);
     } else {
-      XConvertSelection(Xdisplay, selection_atom, XA_STRING, dest_prop, TermWin.vt, CurrentTime);
-    }
+      /* If someone owns the current selection, send a request to that client to
+         convert the selection to the appropriate form (usually XA_STRING) and
+         save it for us in the VT_SELECTION property.  We'll then get a SelectionNotify. */
+      D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
+#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
+      if (encoding_method != LATIN1) {
+        XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+      } else {                         
+        XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+      }
 #else
-    XConvertSelection(Xdisplay, selection_atom, XA_STRING, dest_prop, TermWin.vt, CurrentTime);
+      XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
 #endif
+    }
+  } else {
+    D_SELECT(("Pasting cut buffer %d.\n", (int) sel));
+    selection_fetch(Xroot, sel, False);
   }
 }
 
@@ -2711,7 +2730,7 @@ selection_make(Time tm)
   selection.text = new_selection_text;
   selection.screen = current_screen;
 
-  selection_copy(XA_PRIMARY, XA_CUT_BUFFER0);
+  selection_copy(XA_PRIMARY);
   D_SELECT(("selection.len=%d\n", selection.len));
   return;
   tm = 0;
@@ -3226,10 +3245,6 @@ selection_send(XSelectionRequestEvent * rq)
 {
   XEvent ev;
   Atom32 target_list[2];
-  static Atom xa_targets = None;
-
-  if (xa_targets == None)
-    xa_targets = XInternAtom(Xdisplay, "TARGETS", False);
 
   ev.xselection.type = SelectionNotify;
   ev.xselection.property = None;
@@ -3239,8 +3254,8 @@ selection_send(XSelectionRequestEvent * rq)
   ev.xselection.target = rq->target;
   ev.xselection.time = rq->time;
 
-  if (rq->target == xa_targets) {
-    target_list[0] = (Atom32) xa_targets;
+  if (rq->target == props[PROP_SELECTION_TARGETS]) {
+    target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
     target_list[1] = (Atom32) XA_STRING;
     XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
 		    (8 * sizeof(target_list[0])), PropModeReplace,

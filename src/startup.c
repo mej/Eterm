@@ -66,6 +66,7 @@ Display *Xdisplay;		/* display */
 Colormap cmap;
 char *display_name = NULL;
 unsigned int colorfgbg;
+Atom props[NUM_PROPS];
 
 int
 eterm_bootstrap(int argc, char *argv[])
@@ -130,6 +131,20 @@ eterm_bootstrap(int argc, char *argv[])
 #endif
 
   get_modifiers();  /* Set up modifier masks before parsing config files. */
+
+  /* Get all our properties set up. */
+  MEMSET(props, 0, sizeof(props));
+  props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
+  props[PROP_TRANS_PIXMAP] = XInternAtom(Xdisplay, "_XROOTPMAP_ID", False);
+  props[PROP_TRANS_COLOR] = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", False);
+  props[PROP_SELECTION_DEST] = XInternAtom(Xdisplay, "VT_SELECTION", False);
+  props[PROP_SELECTION_INCR] = XInternAtom(Xdisplay, "INCR", False);
+  props[PROP_SELECTION_TARGETS] = XInternAtom(Xdisplay, "TARGETS", False);
+  props[PROP_ENL_COMMS] = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
+  props[PROP_ENL_MSG] = XInternAtom(Xdisplay, "ENL_MSG", False);
+  props[PROP_DELETE_WINDOW] = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
+  props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
+  props[PROP_DND_SELECTION] = XInternAtom(Xdisplay, "DndSelection", False);
 
   /* Initialize the parser */
   conf_init_subsystem();

@@ -34,7 +34,6 @@
 
 /************ Variables ************/
 extern Window ipc_win;
-extern Atom ipc_atom;
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

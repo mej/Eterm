@@ -217,8 +217,6 @@ handle_key_press(event_t *ev)
 unsigned char
 handle_property_notify(event_t *ev)
 {
-
-  Atom prop;
   Window win;
   Pixmap pmap;
 
@@ -227,10 +225,9 @@ handle_property_notify(event_t *ev)
 #ifdef PIXMAP_OFFSET
   if (background_is_trans()) {
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
-      prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
       D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
-                (int) prop, (int) ev->xproperty.atom));
-      if (ev->xproperty.atom == prop) {
+                (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
+      if (ev->xproperty.atom == props[PROP_DESKTOP]) {
         win = get_desktop_window();
         if (win == (Window) 1) {
           /* The desktop window is unchanged.  Ignore this event. */
@@ -252,9 +249,9 @@ handle_property_notify(event_t *ev)
       }
     }
     if (ev->xany.window == desktop_window) {
-      prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
-      D_EVENTS(("On desktop_window [0x%08x].  prop (_XROOTPMAP_ID) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
-      if (ev->xproperty.atom == prop) {
+      D_EVENTS(("On desktop_window [0x%08x].  prop (_XROOTPMAP_ID) == %d, ev->xproperty.atom == %d\n",
+                (int) desktop_window, (int) props[PROP_TRANS_PIXMAP], (int) ev->xproperty.atom));
+      if (ev->xproperty.atom == props[PROP_TRANS_PIXMAP]) {
         pmap = get_desktop_pixmap();
         if (pmap == (Pixmap) 1) {
           /* Pixmap is unchanged */
@@ -267,14 +264,21 @@ handle_property_notify(event_t *ev)
   }
 #endif
   if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
-    prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
-    D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
-    if ((prop != None) && (ev->xproperty.atom == prop)) {
+    D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == %d, ev->xproperty.atom == %d\n", (int) props[PROP_ENL_COMMS], (int) ev->xproperty.atom));
+    if ((props[PROP_ENL_COMMS] != None) && (ev->xproperty.atom == props[PROP_ENL_COMMS])) {
       if ((enl_ipc_get_win()) != None) {
 #ifdef PIXMAP_SUPPORT
         redraw_images_by_mode(MODE_AUTO);
 #endif
       }
+    }
+  }
+  if (ev->xany.window == TermWin.vt) {
+    D_EVENTS(("PropertyNotify on term window for atom %d, state %d.  Selection atoms are %d and %d.\n", ev->xproperty.atom,
+              ev->xproperty.state, props[PROP_SELECTION_DEST], props[PROP_SELECTION_INCR]));
+    if (ev->xproperty.atom == props[PROP_SELECTION_DEST] && ev->xproperty.state == PropertyNewValue) {
+      D_SELECT(("Fetching next part of incremental selection.\n"));
+      selection_fetch(ev->xproperty.window, ev->xproperty.atom, True);
     }
   }
   return 1;
@@ -303,9 +307,9 @@ handle_client_message(event_t *ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
-  if (ev->xclient.format == 32 && ev->xclient.data.l[0] == (signed) wmDeleteWindow)
+  if (ev->xclient.format == 32 && ev->xclient.data.l[0] == (signed) props[PROP_DELETE_WINDOW])
     exit(EXIT_SUCCESS);
-  if (ev->xclient.format == 8 && ev->xclient.message_type == ipc_atom) {
+  if (ev->xclient.format == 8 && ev->xclient.message_type == props[PROP_ENL_MSG]) {
     char buff[13];
     unsigned char i;
 
@@ -318,15 +322,15 @@ handle_client_message(event_t *ev)
   }
 #ifdef OFFIX_DND
   /* OffiX Dnd (drag 'n' drop) protocol */
-  if (ev->xclient.message_type == DndProtocol && ((ev->xclient.data.l[0] == DndFile)
-						  || (ev->xclient.data.l[0] == DndDir) || (ev->xclient.data.l[0] == DndLink))) {
+  if (ev->xclient.message_type == props[PROP_DND_PROTOCOL]
+      && ((ev->xclient.data.l[0] == DndFile) || (ev->xclient.data.l[0] == DndDir) || (ev->xclient.data.l[0] == DndLink))) {
     /* Get DnD data */
     Atom ActualType;
     int ActualFormat;
     unsigned char *data;
     unsigned long Size, RemainingBytes;
 
-    XGetWindowProperty(Xdisplay, Xroot, DndSelection, 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
+    XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
     if (data != NULL) {
       XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
       selection_paste(Xroot, XA_CUT_BUFFER0, True);
@@ -708,7 +712,7 @@ handle_button_release(event_t *ev)
 	  break;
 
 	case Button2:
-          selection_paste(XA_PRIMARY, XA_CUT_BUFFER0);
+          selection_paste(XA_PRIMARY);
 	  break;
         default: break;
       }

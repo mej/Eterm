@@ -300,11 +300,11 @@ lookup_key(XEvent * ev)
   switch (keysym) {
     case SunXK_Copy:
     case SunXK_Cut:
-      selection_copy(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP);
+      selection_copy(XA_CLIPBOARD(Xdisplay));
       LK_RET();
       break;
     case SunXK_Paste:
-      selection_paste(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP);
+      selection_paste(XA_CLIPBOARD(Xdisplay));
       LK_RET();
       break;
     case SunXK_Front:
@@ -338,7 +338,7 @@ lookup_key(XEvent * ev)
 	  break;
 
         case XK_Insert:  /* Shift-Ins pastes the current selection. */
-	  selection_paste(XA_PRIMARY, XA_CUT_BUFFER0);
+	  selection_paste(XA_PRIMARY);
 	  LK_RET();
 	  break;
 
@@ -2262,7 +2262,7 @@ xterm_seq(int op, const char *str)
 	    rs_desktop = (int) strtol(nstr, (char **) NULL, 0);
 	    xev.type = ClientMessage;
 	    xev.window = TermWin.parent;
-	    xev.message_type = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
+	    xev.message_type = props[PROP_DESKTOP];
 	    xev.format = 32;
 	    xev.data.l[0] = rs_desktop;
 	    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &rs_desktop, 1);

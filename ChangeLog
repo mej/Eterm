@@ -4157,3 +4157,12 @@ Wed May 16 18:09:55 PDT 2001	Michael Jennings <mej@eterm.org>
 	ENQ (^E) response disabled.
 	
 -------------------------------------------------------------------------------
+Thu May 24 00:14:54 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Finally got the selection stuff cleaned up.  Hopefully this will be
+	the last time I have to deal with it for awhile.  While I was at it,
+	I implemented incremental selection transfers.  Unfortunately, it
+	doesn't seem like too many people support it.  kedit doesn't, and it's
+	broken in Emacs (*grumble*).  Works in gvim though.
+	
+-------------------------------------------------------------------------------

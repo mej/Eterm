@@ -41,7 +41,6 @@ static const char cvs_ident[] = "$Id$";
 #include "system.h"
 
 Window ipc_win = None, my_ipc_win = None;
-Atom ipc_atom = None;
 static unsigned char timeout = 0;
 
 /* Returns true if running under E, false otherwise */
@@ -51,7 +50,7 @@ check_for_enlightenment(void)
   static signed char have_e = -1;
 
   if (have_e == -1) {
-    if (XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True) != None) {
+    if (props[PROP_ENL_COMMS] != None) {
       D_ENL(("Enlightenment detected.\n"));
       have_e = 1;
     } else {
@@ -67,7 +66,7 @@ enl_ipc_get_win(void)
 {
 
   unsigned char *str = NULL;
-  Atom prop, prop2;
+  Atom prop;
   unsigned long num, after;
   int format;
   Window dummy_win;
@@ -76,12 +75,11 @@ enl_ipc_get_win(void)
 
   D_ENL(("Searching for IPC window.\n"));
 
-  prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
-  if (prop == None) {
+  if (props[PROP_ENL_COMMS] == None) {
     D_ENL((" -> Enlightenment is not running.  You lose!\n"));
     return None;
   }
-  XGetWindowProperty(Xdisplay, Xroot, prop, 0, 14, False, AnyPropertyType, &prop2, &format, &num, &after, &str);
+  XGetWindowProperty(Xdisplay, Xroot, props[PROP_ENL_COMMS], 0, 14, False, AnyPropertyType, &prop, &format, &num, &after, &str);
   if (str) {
     sscanf((char *) str, "%*s %x", (unsigned int *) &ipc_win);
     XFree(str);
@@ -93,7 +91,7 @@ enl_ipc_get_win(void)
     }
     str = NULL;
     if (ipc_win != None) {
-      XGetWindowProperty(Xdisplay, ipc_win, prop, 0, 14, False, AnyPropertyType, &prop2, &format, &num, &after, &str);
+      XGetWindowProperty(Xdisplay, ipc_win, props[PROP_ENL_COMMS], 0, 14, False, AnyPropertyType, &prop, &format, &num, &after, &str);
       if (str) {
 	XFree(str);
       } else {
@@ -120,7 +118,6 @@ enl_ipc_get_win(void)
 void
 enl_ipc_send(char *str)
 {
-
   static char *last_msg = NULL;
   char buff[21];
   register unsigned short i;
@@ -147,17 +144,12 @@ enl_ipc_send(char *str)
     }
   }
   len = strlen(str);
-  ipc_atom = XInternAtom(Xdisplay, "ENL_MSG", False);
-  if (ipc_atom == None) {
-    D_ENL(("IPC error:  Unable to find/create ENL_MSG atom.\n"));
-    return;
-  }
   for (; XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev););  /* Discard any out-of-sync messages */
   ev.xclient.type = ClientMessage;
   ev.xclient.serial = 0;
   ev.xclient.send_event = True;
   ev.xclient.window = ipc_win;
-  ev.xclient.message_type = ipc_atom;
+  ev.xclient.message_type = props[PROP_ENL_MSG];
   ev.xclient.format = 8;
 
   for (i = 0; i < len + 1; i += 12) {

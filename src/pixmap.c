@@ -1800,7 +1800,7 @@ Window
 get_desktop_window(void)
 {
 
-  Atom prop, type, prop2;
+  Atom type;
   int format;
   unsigned long length, after;
   unsigned char *data;
@@ -1808,15 +1808,6 @@ get_desktop_window(void)
   Window w, root, *children, parent;
 
   D_PIXMAP(("Current desktop window is 0x%08x\n", (unsigned int) desktop_window));
-  if ((prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True)) == None) {
-    D_PIXMAP(("No _XROOTPMAP_ID found.\n"));
-  }
-  if ((prop2 = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", True)) == None) {
-    D_PIXMAP(("No _XROOTCOLOR_PIXEL found.\n"));
-  }
-  if (prop == None && prop2 == None) {
-    return None;
-  }
   if ((desktop_window != None) && (desktop_window != Xroot)) {
     XSelectInput(Xdisplay, desktop_window, None);
   }
@@ -1835,12 +1826,11 @@ get_desktop_window(void)
       XFree(children);
     }
 
-    if (prop != None) {
-      XGetWindowProperty(Xdisplay, w, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
-    } else if (prop2 != None) {
-      XGetWindowProperty(Xdisplay, w, prop2, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
-    } else {
-      continue;
+
+    if ((XGetWindowProperty(Xdisplay, w, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data)) != Success) {
+      if ((XGetWindowProperty(Xdisplay, w, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data)) != Success) {
+        continue;
+      }
     }
     XFree(data);
     if (type != None) {
@@ -1860,15 +1850,13 @@ get_desktop_window(void)
 
   D_PIXMAP(("No suitable parent found.\n"));
   return (desktop_window = None);
-
 }
 
 Pixmap
 get_desktop_pixmap(void)
 {
-
   Pixmap p;
-  Atom prop, type, prop2;
+  Atom type;
   int format;
   static Pixmap color_pixmap = None, orig_desktop_pixmap;
   unsigned long length, after;
@@ -1884,97 +1872,84 @@ get_desktop_pixmap(void)
     return (None);
   }
 
-  prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
-  prop2 = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", True);
-
-  if (prop == None && prop2 == None) {
-    free_desktop_pixmap();
-    return (None);
-  }
   if (color_pixmap != None) {
     D_PIXMAP(("Removing old solid color pixmap 0x%08x.\n", color_pixmap));
     LIBAST_X_FREE_PIXMAP(color_pixmap);
     color_pixmap = None;
   }
-  if (prop != None) {
-    XGetWindowProperty(Xdisplay, desktop_window, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
-    if (type == XA_PIXMAP) {
-      p = *((Pixmap *) data);
-      XFree(data);
-      if (p != None) {
-        D_PIXMAP(("  Found pixmap 0x%08x\n", p));
-        if (orig_desktop_pixmap == p) {
-          D_PIXMAP(("Desktop pixmap is unchanged.\n"));
-          return ((Pixmap) 1);
-        } else {
-          D_PIXMAP(("Desktop pixmap has changed.  Updating desktop_pixmap\n"));
-          free_desktop_pixmap();
-          orig_desktop_pixmap = p;
-          if (!(image_toggles & IMOPT_ITRANS) && need_colormod(images[image_bg].current->iml)) {
-            int px, py;
-            unsigned int pw, ph, pb, pd;
-            Window w;
-            GC gc;
-            XGCValues gcvalue;
-            Screen *scr = ScreenOfDisplay(Xdisplay, Xscreen);
+  XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
+  if (type == XA_PIXMAP) {
+    p = *((Pixmap *) data);
+    XFree(data);
+    if (p != None) {
+      D_PIXMAP(("  Found pixmap 0x%08x\n", p));
+      if (orig_desktop_pixmap == p) {
+        D_PIXMAP(("Desktop pixmap is unchanged.\n"));
+        return ((Pixmap) 1);
+      } else {
+        D_PIXMAP(("Desktop pixmap has changed.  Updating desktop_pixmap\n"));
+        free_desktop_pixmap();
+        orig_desktop_pixmap = p;
+        if (!(image_toggles & IMOPT_ITRANS) && need_colormod(images[image_bg].current->iml)) {
+          int px, py;
+          unsigned int pw, ph, pb, pd;
+          Window w;
+          GC gc;
+          XGCValues gcvalue;
+          Screen *scr = ScreenOfDisplay(Xdisplay, Xscreen);
 
-            gcvalue.foreground = gcvalue.background = PixColors[bgColor];
-            gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
-            XGetGeometry(Xdisplay, p, &w, &px, &py, &pw, &ph, &pb, &pd);
-            D_PIXMAP(("XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
-            if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
-              desktop_pixmap = LIBAST_X_CREATE_PIXMAP(pw, ph);
-              XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
-              colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, pw, ph);
-            } else {
-              desktop_pixmap = LIBAST_X_CREATE_PIXMAP(scr->width, scr->height);
-              XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
-              colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, scr->width, scr->height);
-            }
-            LIBAST_X_FREE_GC(gc);
-            desktop_pixmap_is_mine = 1;
-            D_PIXMAP(("Returning 0x%08x\n", (unsigned int) desktop_pixmap));
-            return (desktop_pixmap);
+          gcvalue.foreground = gcvalue.background = PixColors[bgColor];
+          gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
+          XGetGeometry(Xdisplay, p, &w, &px, &py, &pw, &ph, &pb, &pd);
+          D_PIXMAP(("XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
+          if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
+            desktop_pixmap = LIBAST_X_CREATE_PIXMAP(pw, ph);
+            XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
+            colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, pw, ph);
           } else {
-            desktop_pixmap_is_mine = 0;
-            D_PIXMAP(("Returning 0x%08x\n", (unsigned int) p));
-            return (desktop_pixmap = p);
+            desktop_pixmap = LIBAST_X_CREATE_PIXMAP(scr->width, scr->height);
+            XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
+            colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, scr->width, scr->height);
           }
+          LIBAST_X_FREE_GC(gc);
+          desktop_pixmap_is_mine = 1;
+          D_PIXMAP(("Returning 0x%08x\n", (unsigned int) desktop_pixmap));
+          return (desktop_pixmap);
+        } else {
+          desktop_pixmap_is_mine = 0;
+          D_PIXMAP(("Returning 0x%08x\n", (unsigned int) p));
+          return (desktop_pixmap = p);
         }
       }
-    } else {
-      XFree(data);
     }
+  } else {
+    XFree(data);
   }
-  if (prop2 != None) {
-    XGetWindowProperty(Xdisplay, desktop_window, prop2, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
-    if (type == XA_CARDINAL) {
+  XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
+  if (type == XA_CARDINAL) {
+    XGCValues gcvalue;
+    GC gc;
+    Pixel pix;
 
-      XGCValues gcvalue;
-      GC gc;
-      Pixel pix;
+    free_desktop_pixmap();
+    pix = *((Pixel *) data);
+    XFree(data);
+    D_PIXMAP(("  Found solid color 0x%08x\n", pix));
+    gcvalue.foreground = pix;
+    gcvalue.background = pix;
+    gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
 
-      free_desktop_pixmap();
-      pix = *((Pixel *) data);
-      XFree(data);
-      D_PIXMAP(("  Found solid color 0x%08x\n", pix));
-      gcvalue.foreground = pix;
-      gcvalue.background = pix;
-      gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
-
-      color_pixmap = LIBAST_X_CREATE_PIXMAP(16, 16);
-      XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
-      D_PIXMAP(("Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
-      LIBAST_X_FREE_GC(gc);
-      return (desktop_pixmap = color_pixmap);
-    } else {
-      XFree(data);
-    }
+    color_pixmap = LIBAST_X_CREATE_PIXMAP(16, 16);
+    XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
+    D_PIXMAP(("Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
+    LIBAST_X_FREE_GC(gc);
+    return (desktop_pixmap = color_pixmap);
+  } else {
+    XFree(data);
   }
   D_PIXMAP(("No suitable attribute found.\n"));
   free_desktop_pixmap();
   return (desktop_pixmap = None);
-
 }
 
 void

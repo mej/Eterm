@@ -127,16 +127,15 @@ script_handler_copy(char **params)
 {
   unsigned char i;
   char *buffer_id;
-  Atom sel = XA_PRIMARY, buf = XA_CUT_BUFFER0;
+  Atom sel = XA_PRIMARY;
 
   if (params) {
     for (i = 0; (buffer_id = params[i]) != NULL; i++) {
       if (*buffer_id) {
         if (*buffer_id >= '0' && *buffer_id <= '7') {
-          buf = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+          sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
         } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
-          buf = X_CLIPBOARD_PROP;
-          sel = X_CLIPBOARD_SELECTION;
+          sel = XA_CLIPBOARD(Xdisplay);
         } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
           sel = XA_PRIMARY;
         } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
@@ -147,7 +146,7 @@ script_handler_copy(char **params)
       }
     }
   }
-  selection_copy(sel, buf);
+  selection_copy(sel);
 }
 
 void
@@ -173,16 +172,15 @@ script_handler_paste(char **params)
 {
   unsigned char i;
   char *buffer_id;
-  Atom sel = XA_PRIMARY, buf = XA_CUT_BUFFER0;
+  Atom sel = XA_PRIMARY;
 
   if (params) {
     for (i = 0; (buffer_id = params[i]) != NULL; i++) {
       if (*buffer_id) {
         if (*buffer_id >= '0' && *buffer_id <= '7') {
-          buf = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+          sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
         } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
-          buf = X_CLIPBOARD_PROP;
-          sel = X_CLIPBOARD_SELECTION;
+          sel = XA_CLIPBOARD(Xdisplay);
         } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
           sel = XA_PRIMARY;
         } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
@@ -193,7 +191,7 @@ script_handler_paste(char **params)
       }
     }
   }
-  selection_paste(sel, buf);
+  selection_paste(sel);
 }
 
 void

@@ -16,18 +16,17 @@
 #include <X11/Xfuncproto.h>
 #include "startup.h"
 
-#ifdef XA_CLIPBOARD
-# define X_CLIPBOARD_SELECTION  XA_CLIPBOARD(Xdisplay)
-# define X_CLIPBOARD_PROP       XA_CLIPBOARD(Xdisplay)
-#else
-# define X_CLIPBOARD_SELECTION  XA_PRIMARY
-# define X_CLIPBOARD_PROP       XA_CUT_BUFFER0
+#ifndef XA_CLIPBOARD
+# define XA_CLIPBOARD(d)        XA_PRIMARY
 #endif
 
 /************ Macros and Definitions ************/
 #define WRAP_CHAR		(0xff)
 #define PROP_SIZE       	4096
 #define TABSIZE         	8	/* default tab size */
+
+#define IS_SELECTION(a)         (((a) == XA_PRIMARY) || ((a) == XA_SECONDARY) || ((a) == XA_CLIPBOARD(Xdisplay)))
+#define IS_CUT_BUFFER(a)        (((a) >= XA_CUT_BUFFER0) && ((a) <= XA_CUT_BUFFER7))
 
 #define ZERO_SCROLLBACK do { \
                           D_SCREEN(("ZERO_SCROLLBACK()\n")); \
@@ -286,9 +285,9 @@ extern void scr_dump_to_file(const char *);
 extern void selection_check(void);
 extern void selection_write(unsigned char *, size_t);
 extern void selection_fetch(Window, unsigned, int);
-extern void selection_copy_string(Atom, Atom, char *, size_t);
-extern void selection_copy(Atom, Atom);
-extern void selection_paste(Atom, Atom);
+extern void selection_copy_string(Atom, char *, size_t);
+extern void selection_copy(Atom);
+extern void selection_paste(Atom);
 extern void selection_reset(void);
 extern void selection_clear(void);
 extern void selection_setclr(int, int, int, int, int);
