@@ -169,9 +169,9 @@ kstate_end(void)
   int i;
 
   for (i = 0; i < pStateNow->num_xlat; i++)
-    free(pStateNow->xlat[i].pval);
+    FREE(pStateNow->xlat[i].pval);
   if (pStateNow->num_xlat > 0)
-    free(pStateNow->xlat);
+    FREE(pStateNow->xlat);
 }
 
 /*
@@ -246,22 +246,22 @@ kstate_add_xlat(char *str)
     return;
   /* add a new xlat table in state */
   if (pStateNow->num_xlat == 0) {
-    pStateNow->xlat = malloc(sizeof(K_XLAT));
+    pStateNow->xlat = MALLOC(sizeof(K_XLAT));
   } else			/* prefer contiguous data, realloc */
-    pStateNow->xlat = realloc(pStateNow->xlat, (pStateNow->num_xlat + 1) * sizeof(K_XLAT));
+    pStateNow->xlat = REALLOC(pStateNow->xlat, (pStateNow->num_xlat + 1) * sizeof(K_XLAT));
   xlat = &pStateNow->xlat[pStateNow->num_xlat];
   /* parse str and derive first, last, values */
   xlat->first = (u_int) atoi(strtok(str, "-"));
   xlat->last = (u_int) atoi(strtok(NULL, ":"));
   i = 0;
-  pval_tmp = calloc(MAX_VAL, sizeof(K_XLAT));
+  pval_tmp = CALLOC(MAX_VAL, sizeof(K_XLAT));
   while ((sval = strtok(NULL, ",")) != NULL) {
     pval_tmp[i++] = (u_int) (atoi(sval));
   }
-  xlat->pval = calloc(i, sizeof(K_XLAT));
+  xlat->pval = CALLOC(i, sizeof(K_XLAT));
   if (xlat->pval != NULL)
     memcpy(xlat->pval, pval_tmp, i * sizeof(u_int));
-  free(pval_tmp);
+  FREE(pval_tmp);
   pStateNow->num_xlat++;
 }
 

@@ -955,7 +955,7 @@ get_options(int argc, char *argv[])
 
 	  register unsigned short k, len = argc - i;
 
-	  rs_execArgs = (char **) malloc(sizeof(char *) * (argc - i + 1));
+	  rs_execArgs = (char **) MALLOC(sizeof(char *) * (argc - i + 1));
 
 	  for (k = 0; k < len; k++) {
 	    rs_execArgs[k] = StrDup(argv[k + i]);
@@ -967,7 +967,7 @@ get_options(int argc, char *argv[])
 
 	  register unsigned short k;
 
-	  rs_execArgs = (char **) malloc(sizeof(char *) * (NumWords(val_ptr) + 1));
+	  rs_execArgs = (char **) MALLOC(sizeof(char *) * (NumWords(val_ptr) + 1));
 
 	  for (k = 0; val_ptr; k++) {
 	    rs_execArgs[k] = Word(1, val_ptr);
@@ -1075,7 +1075,7 @@ get_options(int argc, char *argv[])
 	    k = i + 1;
 	  }
 	  D_OPTIONS(("len == %d  k == %d\n", len, k));
-	  rs_execArgs = (char **) malloc(sizeof(char *) * len);
+	  rs_execArgs = (char **) MALLOC(sizeof(char *) * len);
 
 	  if (k == i) {
 	    rs_execArgs[0] = StrDup((char *) (val_ptr));
@@ -2051,7 +2051,7 @@ parse_keyboard(char *buff)
 	len = 255;		/* We can only handle lengths that will fit in a char */
       if (len && KeySym_map[sym] == NULL) {
 
-	char *p = malloc(len + 1);
+	char *p = MALLOC(len + 1);
 
 	*p = len;
 	strncpy(p + 1, str, len);
@@ -2209,7 +2209,7 @@ parse_misc(char *buff)
 
     Options |= Opt_exec;
 
-    RESET_AND_ASSIGN(rs_execArgs, (char **) malloc(sizeof(char *) * ((n = NumWords(PWord(2, buff))) + 1)));
+    RESET_AND_ASSIGN(rs_execArgs, (char **) MALLOC(sizeof(char *) * ((n = NumWords(PWord(2, buff))) + 1)));
 
     for (k = 0; k < n; k++) {
       rs_execArgs[k] = Word(k + 2, buff);
@@ -3417,11 +3417,11 @@ post_parse(void)
 	  h = strtol(h1, (char **) NULL, 0);
 	  if (w || h) {
 	    rs_anim_pixmaps[i] = Word(3, temp);
-	    rs_anim_pixmaps[i] = (char *) realloc(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 9);
+	    rs_anim_pixmaps[i] = (char *) REALLOC(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 9);
 	    strcat(rs_anim_pixmaps[i], "@100x100");
 	  } else {
 	    rs_anim_pixmaps[i] = Word(3, temp);
-	    rs_anim_pixmaps[i] = (char *) realloc(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 5);
+	    rs_anim_pixmaps[i] = (char *) REALLOC(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 5);
 	    strcat(rs_anim_pixmaps[i], "@0x0");
 	  }
 	  FREE(temp);

@@ -1000,7 +1000,7 @@ process_csi_seq(void)
 	  break;
 #if defined (ENABLE_DISPLAY_ANSWER)
 	case 7:
-	  tt_printf((unsigned char *) "%s\n", display_name);
+	  tt_write((unsigned char *) display_name, strlen(display_name));
 	  break;
 #endif
 	case 8:
@@ -1532,7 +1532,7 @@ set_colorfgbg(void)
   int fg = -1, bg = -1;
 
   if (!colorfgbg_env) {
-    colorfgbg_env = (char *) malloc(30);
+    colorfgbg_env = (char *) MALLOC(30);
     strcpy(colorfgbg_env, "COLORFGBG=default;default;bg");
   }
   for (i = BlackColor; i <= WhiteColor; i++) {

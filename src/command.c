@@ -2533,13 +2533,13 @@ tt_write(const unsigned char *buf, unsigned int count)
  * Only use for small ammounts of data.
  */
 void
-tt_printf(const unsigned char *fmt,...)
+tt_printf(const unsigned char *fmt, ...)
 {
   static unsigned char buf[256];
   va_list arg_ptr;
 
   va_start(arg_ptr, fmt);
-  vsprintf((char *) buf, (char *) fmt, arg_ptr);
+  vsnprintf((char *) buf, sizeof(buf), (char *) fmt, arg_ptr);
   va_end(arg_ptr);
   tt_write(buf, strlen((char *) buf));
 }
@@ -2649,7 +2649,7 @@ v_writeBig(int f, char *d, int len)
 
   if (v_bufstr == NULL && len > 0) {
 
-    v_buffer = malloc(len);
+    v_buffer = MALLOC(len);
     v_bufstr = v_buffer;
     v_bufptr = v_buffer;
     v_bufend = v_buffer + len;
@@ -2679,7 +2679,7 @@ v_writeBig(int f, char *d, int len)
 	/* Don't use XtRealloc because an error is not fatal. */
 	int size = v_bufptr - v_buffer;		/* save across realloc */
 
-	v_buffer = realloc(v_buffer, size + len);
+	v_buffer = REALLOC(v_buffer, size + len);
 	if (v_buffer) {
 	  v_bufstr = v_buffer;
 	  v_bufptr = v_buffer + size;
@@ -2732,7 +2732,7 @@ v_writeBig(int f, char *d, int len)
     int size = v_bufptr - v_buffer;
     int allocsize = size ? size : 1;
 
-    v_buffer = realloc(v_buffer, allocsize);
+    v_buffer = REALLOC(v_buffer, allocsize);
     if (v_buffer) {
       v_bufstr = v_buffer + start;
       v_bufptr = v_buffer + size;

@@ -3007,3 +3007,9 @@ Wed Jan  5 21:23:56 PST 2000	Michael Jennings <mej@eterm.org>
 	Copyright date updates.
 	
 -------------------------------------------------------------------------------
+Fri Jan  7 20:11:48 PST 2000	Michael Jennings <mej@eterm.org>
+
+	A patch from Sung-Hyun Nam <namsh@lgic.co.kr> to improve multi-byte
+	font configuration in the default theme files.
+	
+-------------------------------------------------------------------------------
