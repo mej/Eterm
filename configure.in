@@ -916,6 +916,17 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl# Enable/disable name reporting escape sequences
+AC_MSG_CHECKING(if we should enable name reporting escape sequences)
+AC_ARG_ENABLE(name-eporting-escapes, [  --enable-name-reporting-escapes  Specify this to enable title/icon name reporting], [
+              if test "$enableval" = "yes"; then
+                  AC_MSG_RESULT(yes)
+                  AC_DEFINE(ENABLE_NAME_REPORTING_ESCAPES, 1, [Defined to enable title/icon name reporting escape sequences.])
+              else
+                  AC_MSG_RESULT(no)
+              fi
+], [AC_MSG_RESULT(no)])
+
 dnl# Enable/disable humor
 AC_ARG_WITH(sense-of-humor, [  --without-sense-of-humor   Specify this if you have no sense of humor], [
             if test "$withval" = "no"; then

@@ -1398,6 +1398,7 @@ process_window_mode(unsigned int nargs, int args[])
               snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TERM_WINDOW_GET_REPORTED_ROWS(), TERM_WINDOW_GET_REPORTED_COLS());
               tt_write((unsigned char *) buff, strlen(buff));
               break;
+#ifdef ENABLE_NAME_REPORTING_ESCAPES
           case 20:
               XGetIconName(Xdisplay, TermWin.parent, &name);
               snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
@@ -1410,6 +1411,7 @@ process_window_mode(unsigned int nargs, int args[])
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
               break;
+#endif
           default:
               break;
         }
