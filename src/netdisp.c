@@ -1,7 +1,3 @@
-/*--------------------------------*-C-*---------------------------------*
- * File:	netdisp.c
- */
-/*{{{ notes: */
 /*----------------------------------------------------------------------*
  * support for resolving the actual IP number of the host for remote
  * DISPLAYs.  When the display is local (i.e. :0), we add support for
@@ -26,17 +22,7 @@ static const char cvs_ident[] = "$Id$";
 
 #include "config.h"
 #include "feature.h"
-#include "main.h"
 
-/* Put in a dummy routine if this is disabled, inline it if possible */
-#ifndef DISPLAY_IS_IP
-inline const char *
-network_display(const char *display)
-{
-  return (display);
-}
-#else
-/*{{{ includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,19 +34,14 @@ network_display(const char *display)
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-
-/* On Solaris link with -lsocket and -lnsl */
 #include <sys/types.h>
 #include <sys/socket.h>
-
-/* these next two are probably only on Sun (not Solaris) */
 #ifdef HAVE_SYS_SOCKIO_H
 # include <sys/sockio.h>
 #endif
 #ifdef HAVE_SYS_BYTEORDER_H
 # include <sys/byteorder.h>
 #endif
-
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -71,17 +52,24 @@ network_display(const char *display)
 #  include <time.h>
 # endif
 #endif
-
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 
-/*----------------------------------------------------------------------*/
+#include "main.h"
+
+/* Put in a dummy routine if this is disabled, inline it if possible */
+#ifndef DISPLAY_IS_IP
+inline const char *
+network_display(const char *display)
+{
+  return (display);
+}
+#else
 /* return a pointer to a static buffer */
 char *
 network_display(const char *display)

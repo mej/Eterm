@@ -13,9 +13,8 @@
 
 typedef RETSIGTYPE (*sighandler_t)(int);
 
-extern int my_ruid, my_rgid, my_euid, my_egid;
-
-extern int system_wait(char *command);
-extern int system_no_wait(char *command);
+extern int wait_for_chld(int);
+extern int system_wait(char *);
+extern int system_no_wait(char *);
 
 #endif /* _SYSTEM_H_ */

@@ -4,7 +4,7 @@
  *         -- 20 December 1996                            *
  **********************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -24,12 +24,10 @@
  * 
  */
 
-#if !defined(DEBUG_C) && !defined(DEBUG_CC)
-  extern int real_dprintf(const char *, ...);
-#endif
-
 #ifndef _LIBMEJ_DEBUG_H
 # define _LIBMEJ_DEBUG_H
+
+extern int real_dprintf(const char *, ...);
 
 #include "../src/debug.h"
 

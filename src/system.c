@@ -11,20 +11,17 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <string.h>
 #include <signal.h>
 #ifdef HAVE_SYS_WAIT_H
 #  include <sys/wait.h>
 #endif
 
-#include "strings.h"
-#include "options.h"
-#include "screen.h"
-#include "system.h"
 #include "../libmej/debug.h"
 #include "debug.h"
-
-int system_wait(char *command);
-int system_no_wait(char *command);
+#include "command.h"
+#include "misc.h"
+#include "system.h"
 
 int
 wait_for_chld(int system_pid)
@@ -37,8 +34,7 @@ wait_for_chld(int system_pid)
   while (1) {
     do {
       errno = 0;
-    } while (((pid = waitpid(system_pid, &status, WNOHANG)) == -1) &&
-	     (errno == EINTR) || !pid);
+    } while ((((pid = waitpid(system_pid, &status, WNOHANG)) == -1) && (errno == EINTR)) || !pid);
     /* If the child that exited is the command we spawned, or if the
        child exited before fork() returned in the parent, it must be
        our immediate child that exited.  We exit gracefully. */
@@ -50,12 +46,14 @@ wait_for_chld(int system_pid)
       } else if (WIFSIGNALED(status)) {
 	code = WTERMSIG(status);
 	D_OPTIONS(("wait_for_chld():  Child process was terminated by unhandled signal %lu\n", code));
+      } else {
+	code = 0;
       }
       return (code);
     }
     errno = save_errno;
   }
-  return;
+  return 0;
 }
 
 /* Replace the system() call with a fork-and-exec that unprivs the child process */
@@ -70,7 +68,7 @@ system_wait(char *command)
 
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
-    setreuid(my_rgid, my_rgid);
+    setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
     print_error("system_wait():  execl(%s) failed -- %s", command, strerror(errno));
     exit(EXIT_FAILURE);
@@ -90,7 +88,7 @@ system_no_wait(char *command)
 
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
-    setreuid(my_rgid, my_rgid);
+    setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
     print_error("system_no_wait():  execl(%s) failed -- %s", command, strerror(errno));
     exit(EXIT_FAILURE);

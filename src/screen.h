@@ -12,11 +12,49 @@
  *----------------------------------------------------------------------*/
 #ifndef _SCREEN_H
 #define _SCREEN_H
-/* includes */
+
 #include <X11/Xfuncproto.h>
 #include "main.h"
 
-/* defines */
+/************ Macros and Definitions ************/
+#define WRAP_CHAR		(MAX_COLS + 1)
+#define PROP_SIZE       	4096
+#define TABSIZE         	8	/* default tab size */
+
+#define ZERO_SCROLLBACK do { \
+                          D_SCREEN(("ZERO_SCROLLBACK()\n")); \
+                          if (Options & Opt_homeOnEcho) TermWin.view_start = 0; \
+                        } while (0)
+#define REFRESH_ZERO_SCROLLBACK do { \
+                                  D_SCREEN(("REFRESH_ZERO_SCROLLBACK()\n")); \
+                                  if (Options & Opt_homeOnRefresh) TermWin.view_start = 0; \
+                                } while (0)
+#define CHECK_SELECTION	do { \
+                          if (selection.op) selection_check(); \
+                        } while (0)
+
+/*
+ * CLEAR_ROWS : clear <num> rows starting from row <row>
+ * CLEAR_CHARS: clear <num> chars starting from pixel position <x,y>
+ * ERASE_ROWS : set <num> rows starting from row <row> to the foreground color
+ */
+#define drawBuffer	(TermWin.vt)
+#define CLEAR_ROWS(row, num) do { \
+                               XClearArea(Xdisplay, drawBuffer, Col2Pixel(0), Row2Pixel(row), \
+                                          TermWin.width, Height2Pixel(num), 0); \
+                             } while (0)
+#define CLEAR_CHARS(x, y, num) do { \
+                                 D_SCREEN(("CLEAR_CHARS(%d, %d, %d)\n", x, y, num)); \
+                                 XClearArea(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
+                               } while (0)
+#define FAST_CLEAR_CHARS(x, y, num) do { \
+                                      clear_area(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
+                                    } while (0)
+#define ERASE_ROWS(row, num) do { \
+                               XFillRectangle(Xdisplay, drawBuffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), \
+                                              TermWin.width, Height2Pixel(num)); \
+                             } while (0)
+
 /* Screen refresh methods */
 #define NO_REFRESH              0       /* Window not visible at all!        */
 #define FAST_REFRESH            (1<<1)  /* Fully exposed window              */
@@ -28,7 +66,6 @@
 #define RESTORE	'r'
 #define REVERT IGNORE
 #define INVOKE RESTORE
-extern void privileges(int);
 
 /* flags for scr_gotorc() */
 #define C_RELATIVE		1	/* col movement is relative */
@@ -61,7 +98,7 @@ enum {
 #define RS_acsFont		0x10000000u	/* ACS graphics character set */
 #define RS_ukFont		0x20000000u	/* UK character set */
 #define RS_fontMask		(RS_acsFont|RS_ukFont)
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 #define RS_multi0		0x40000000u	/* only multibyte characters */
 #define RS_multi1		0x80000000u	/* multibyte 1st byte */
 #define RS_multi2		(RS_multi0|RS_multi1)	/* multibyte 2nd byte */
@@ -75,7 +112,6 @@ enum {
 
 #define RS_attrMask		(0xFF000000u|RS_Bold|RS_Blink)
 
-/* macros */
 /* how to build & extract colors and attributes */
 #define GET_FGCOLOR(r)	(((r) & RS_fgMask)>>8)
 #define GET_BGCOLOR(r)	(((r) & RS_bgMask)>>16)
@@ -87,18 +123,6 @@ enum {
 #define SET_ATTR(r,a)		(((r) & ~RS_attrMask)| (a))
 #define DEFAULT_RSTYLE		(RS_None | (fgColor<<8) | (bgColor<<16))
 
-/* extern variables */
-#ifndef NO_BRIGHTCOLOR
-extern unsigned int colorfgbg;
-#endif
-
-/* types */
-typedef unsigned char text_t;
-typedef unsigned int rend_t;
-typedef struct {
-    int             row, col;
-} row_col_t;
-
 /* screen_t flags */
 #define Screen_Relative		(1<<0)	/* relative origin mode flag         */
 #define Screen_VisibleCursor	(1<<1)	/* cursor visible?                   */
@@ -107,6 +131,12 @@ typedef struct {
 #define Screen_WrapNext		(1<<4)	/* need to wrap for next char?       */
 #define Screen_DefaultFlags	(Screen_VisibleCursor|Screen_Autowrap)
 
+/************ Structures ************/
+typedef unsigned char text_t;
+typedef unsigned int rend_t;
+typedef struct {
+    int             row, col;
+} row_col_t;
 /*
  * screen accounting:
  * screen_t elements
@@ -114,7 +144,7 @@ typedef struct {
  *              buffer.  Each line is length (TermWin.ncol + 1)
  *              The final character is either the _length_ of the line or
  *              for wrapped lines: (MAX_COLS + 1) 
- *   rend:      Contains rendition information: font, bold, colour, etc.
+ *   rend:      Contains rendition information: font, bold, color, etc.
  * * Note: Each line for both text and rend are only allocated on demand, and
  *              text[x] is allocated <=> rend[x] is allocated  for all x.
  *   row:       Cursor row position                   : 0 <= row < TermWin.nrow
@@ -147,7 +177,6 @@ typedef struct {
  *   Rows [TermWin.saveLines] ... [TermWin.saveLines + TermWin.nrow - 1]
  *     normal `unscrolled' screen region
  */
-
 typedef struct {
     text_t        **text;	/* _all_ the text                            */
     rend_t        **rend;	/* rendition, uses RS_ flags                 */
@@ -158,7 +187,6 @@ typedef struct {
     short           charset;	/* character set number [0..3]               */
     unsigned int    flags;
 } screen_t;
-
 typedef struct {
     short           row,	/* cursor row                                */
                     col,	/* cursor column                             */
@@ -166,7 +194,6 @@ typedef struct {
     char            charset_char;
     rend_t          rstyle;	/* rendition style                           */
 } save_t;
-
 typedef struct {
     unsigned char  *text;	/* selected text                             */
     int             len;	/* length of selected text                   */
@@ -175,87 +202,86 @@ typedef struct {
 	SELECTION_INIT,		/* marked a point                            */
 	SELECTION_BEGIN,	/* started a selection                       */
 	SELECTION_CONT,		/* continued selection                       */
-	SELECTION_DONE,		/* selection put in CUT_BUFFER0              */
+	SELECTION_DONE		/* selection put in CUT_BUFFER0              */
     } op;			/* current operation                         */
     short           screen;	/* screen being used                         */
     short           clicks;	/* number of clicks                          */
     row_col_t       beg, mark, end;
 } selection_t;
 
-#ifdef USE_ACTIVE_TAGS
-extern screen_t screen;
+/************ Variables ************/
+#ifndef NO_BRIGHTCOLOR
+extern unsigned int colorfgbg;
 #endif
 
-/* prototypes: */
+/************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-void blank_dline(text_t * et, rend_t * er, int width, rend_t efs);
-void blank_sline(text_t * et, rend_t * er, int width);
-void make_screen_mem(text_t ** tp, rend_t ** rp, int row);
-void scr_reset(void);
-void scr_release(void);
-void scr_poweron(void);
-void scr_cursor(int mode);
-int scr_change_screen(int scrn);
-void scr_color(unsigned int color, unsigned int Intensity);
-void scr_rendition(int set, int style);
-int scroll_text(int row1, int row2, int count, int spec);
-void scr_add_lines(const unsigned char *str, int nlines, int len);
-void scr_backspace(void);
-void scr_tab(int count);
-void scr_gotorc(int row, int col, int relative);
-void scr_index(int direction);
-void scr_erase_line(int mode);
-void scr_erase_screen(int mode);
-void scr_E(void);
-void scr_insdel_lines(int count, int insdel);
-void scr_insdel_chars(int count, int insdel);
-void scr_scroll_region(int top, int bot);
-void scr_cursor_visible(int mode);
-void scr_autowrap(int mode);
-void scr_relative_origin(int mode);
-void scr_insert_mode(int mode);
-void scr_set_tab(int mode);
-void scr_rvideo_mode(int mode);
-void scr_report_position(void);
-void set_font_style(void);
-void scr_charset_choose(int set);
-void scr_charset_set(int set, unsigned int ch);
-void eucj2jis(unsigned char *str, int len);
-void sjis2jis(unsigned char *str, int len);
-void set_kanji_encoding(const char *str);
-int scr_get_fgcolor(void);
-int scr_get_bgcolor(void);
-void scr_expose(int x, int y, int width, int height);
-void scr_touch(void);
-int scr_move_to(int y, int len);
-int scr_page(int direction, int nlines);
-void scr_bell(void);
-void scr_printscreen(int fullhist);
-void scr_refresh(int type);
-void selection_check(void);
-void PasteIt(unsigned char *data, unsigned int nitems);
-void selection_paste(Window win, unsigned prop, int Delete);
-void selection_request(Time tm, int x, int y);
-void selection_reset(void);
-void selection_clear(void);
-void selection_setclr(int set, int startr, int startc, int endr, int endc);
-void selection_start(int x, int y);
-void selection_start_colrow(int col, int row);
-void selection_make(Time tm);
-void selection_click(int clicks, int x, int y);
-void selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end);
-void selection_extend(int x, int y, int flag);
-void selection_extend_colrow(int col, int row, int flag, int cont);
-void selection_rotate(int x, int y);
-void selection_send(XSelectionRequestEvent * rq);
-void mouse_report(XButtonEvent * ev);
-void mouse_tracking(int report, int x, int y, int firstrow, int lastrow);
-void debug_PasteIt(unsigned char *data, int nitems);
-int debug_selection(void);
-void debug_colors(void);
+extern void blank_line(text_t *, rend_t *, int, rend_t);
+extern void blank_dline(text_t *, rend_t *, int, rend_t);
+extern void blank_sline(text_t *, rend_t *, int);
+extern void make_screen_mem(text_t **, rend_t **, int);
+extern void scr_reset(void);
+extern void scr_release(void);
+extern void scr_poweron(void);
+extern void scr_cursor(int);
+extern int scr_change_screen(int);
+extern void scr_color(unsigned int, unsigned int);
+extern void scr_rendition(int, int);
+extern int scroll_text(int, int, int, int);
+extern void scr_add_lines(const unsigned char *, int, int);
+extern void scr_backspace(void);
+extern void scr_tab(int);
+extern void scr_gotorc(int, int, int);
+extern void scr_index(int);
+extern void scr_erase_line(int);
+extern void scr_erase_screen(int);
+extern void scr_E(void);
+extern void scr_insdel_lines(int, int);
+extern void scr_insdel_chars(int, int);
+extern void scr_scroll_region(int, int);
+extern void scr_cursor_visible(int);
+extern void scr_autowrap(int);
+extern void scr_relative_origin(int);
+extern void scr_insert_mode(int);
+extern void scr_set_tab(int);
+extern void scr_rvideo_mode(int);
+extern void scr_report_position(void);
+extern void set_font_style(void);
+extern void scr_charset_choose(int);
+extern void scr_charset_set(int, unsigned int);
+extern void set_multichar_encoding(const char *);
+extern int scr_get_fgcolor(void);
+extern int scr_get_bgcolor(void);
+extern void scr_expose(int, int, int, int);
+extern void scr_touch(void);
+extern int scr_move_to(int, int);
+extern int scr_page(int, int);
+extern void scr_bell(void);
+extern void scr_printscreen(int);
+extern void scr_refresh(int);
+extern void selection_check(void);
+extern void PasteIt(unsigned char *, unsigned int);
+extern void selection_paste(Window, unsigned, int);
+extern void selection_request(Time, int, int);
+extern void selection_reset(void);
+extern void selection_clear(void);
+extern void selection_setclr(int, int, int, int, int);
+extern void selection_start(int, int);
+extern void selection_start_colrow(int, int);
+extern void selection_make(Time);
+extern void selection_click(int, int, int);
+extern void selection_delimit_word(int, int, row_col_t *, row_col_t *);
+extern void selection_extend(int, int, int);
+extern void selection_extend_colrow(int, int, int, int);
+extern void selection_rotate(int, int);
+extern void selection_send(XSelectionRequestEvent *);
+extern void mouse_report(XButtonEvent *);
+extern void mouse_tracking(int, int, int, int, int);
+extern void debug_PasteIt(unsigned char *, int);
+extern int debug_selection(void);
+extern void debug_colors(void);
 
 _XFUNCPROTOEND
 
-#endif	/* whole file */
-/*----------------------- end-of-file (C header) -----------------------*/
+#endif

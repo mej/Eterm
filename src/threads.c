@@ -4,9 +4,11 @@
 
 static const char cvs_ident[] = "$Id$";
 
+#include "config.h"
+#include "feature.h"
+
 #include <stdio.h>
 
-#include "feature.h"
 #ifdef USE_POSIX_THREADS
 # include "main.h"
 # include "debug.h"

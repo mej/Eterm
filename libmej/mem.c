@@ -5,7 +5,7 @@
  *       -- 07 January 1997                                    *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -27,6 +27,9 @@
 
 static const char cvs_ident[] = "$Id$";
 
+#include "config.h"
+#include "../src/feature.h"
+
 #include "global.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-#define MEM_C
+
 #include "debug.h"
 #include "mem.h"
 
@@ -44,12 +47,11 @@ static const char cvs_ident[] = "$Id$";
  * The beginning of each one's respective function. (The ones with capitalized
  * letters. I'm not sure that they'll be useful outside of gdb. Maybe. 
  */
-#if DEBUG >= DEBUG_MALLOC
+#ifdef MALLOC_CALL_DEBUG
 static int malloc_count = 0;
 static int calloc_count = 0;
 static int realloc_count = 0;
 static int free_count = 0;
-
 #endif
 
 MemRec memrec =
@@ -240,38 +242,26 @@ void *
 Malloc(size_t size)
 {
 
-#if 0
-  char *temp = NULL;
-
-#endif
   void *temp = NULL;
 
-#if DEBUG >= DEBUG_MALLOC
-  ++malloc_count;
 #ifdef MALLOC_CALL_DEBUG
+  ++malloc_count;
   if (!(malloc_count % MALLOC_MOD)) {
     fprintf(stderr, "Calls to malloc(): %d\n", malloc_count);
   }
 #endif
-#endif
-
-#if DEBUG >= DEBUG_MALLOC
 
   if (!memrec.init) {
     D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
     memrec_init();
   }
-#endif
 
-#if 0
-  temp = (char *) malloc(size);
-#endif
-  temp = malloc(size);
+  temp = (void *) malloc(size);
   if (!temp)
     return NULL;
-#if DEBUG >= DEBUG_MALLOC
-  memrec_add_var(temp, size);
-#endif
+  if (debug_level >= DEBUG_MALLOC) {
+    memrec_add_var(temp, size);
+  }
   return (temp);
 }
 
@@ -279,33 +269,27 @@ void *
 Realloc(void *ptr, size_t size)
 {
 
-  char *temp = NULL;
+  void *temp = NULL;
 
-#if DEBUG >= DEBUG_MALLOC
+#ifdef MALLOC_CALL_DEBUG
   ++realloc_count;
-# ifdef MALLOC_CALL_DEBUG
   if (!(realloc_count % REALLOC_MOD)) {
     fprintf(stderr, "Calls to realloc(): %d\n", realloc_count);
   }
-# endif
 #endif
-/* 
- * Redundant. You know the drill :)
- * #if DEBUG >= DEBUG_MALLOC
- */
+
   if (!memrec.init) {
     D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
     memrec_init();
   }
-/* #endif */
 
   if (ptr == NULL) {
-    temp = (char *) Malloc(size);
+    temp = (void *) Malloc(size);
   } else {
-    temp = (char *) realloc(ptr, size);
-#if DEBUG >= DEBUG_MALLOC
-    memrec_chg_var(ptr, temp, size);
-#endif
+    temp = (void *) realloc(ptr, size);
+    if (debug_level >= DEBUG_MALLOC) {
+      memrec_chg_var(ptr, temp, size);
+    }
   }
   if (!temp)
     return NULL;
@@ -318,27 +302,22 @@ Calloc(size_t count, size_t size)
 
   char *temp = NULL;
 
-#if DEBUG >= DEBUG_MALLOC
-  ++calloc_count;
 #ifdef MALLOC_CALL_DEBUG
+  ++calloc_count;
   if (!(calloc_count % CALLOC_MOD)) {
     fprintf(stderr, "Calls to calloc(): %d\n", calloc_count);
   }
 #endif
-#endif
-
-#if DEBUG >= DEBUG_MALLOC
 
   if (!memrec.init) {
     D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
     memrec_init();
   }
-#endif
 
   temp = (char *) calloc(count, size);
-#if DEBUG >= DEBUG_MALLOC
-  memrec_add_var(temp, size * count);
-#endif
+  if (debug_level >= DEBUG_MALLOC) {
+    memrec_add_var(temp, size * count);
+  }
   if (!temp)
     return NULL;
   return (temp);
@@ -348,25 +327,22 @@ void
 Free(void *ptr)
 {
 
-#if DEBUG >= DEBUG_MALLOC
-  ++free_count;
 #ifdef MALLOC_CALL_DEBUG
+  ++free_count;
   if (!(free_count % FREE_MOD)) {
     fprintf(stderr, "Calls to free(): %d\n", free_count);
   }
 #endif
-#endif
-#if DEBUG >= DEBUG_MALLOC
+
   if (!memrec.init) {
     D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
     memrec_init();
   }
-#endif
 
   if (ptr) {
-#if DEBUG >= DEBUG_MALLOC
-    memrec_rem_var(ptr);
-#endif
+    if (debug_level >= DEBUG_MALLOC) {
+      memrec_rem_var(ptr);
+    }
     free(ptr);
   } else {
     D_MALLOC(("Caught attempt to free NULL pointer\n"));
@@ -384,12 +360,12 @@ HandleSigSegv(int sig)
 
   /* Recursive seg faults are not cool.... */
   if (segv_again) {
-    printf("RECURSIVE SEGMENTATION FAULT DETECTED!\n");
+    printf("Recursive segmentation fault detected!\n");
     _exit(EXIT_FAILURE);
   }
   segv_again = 1;
 #if DEBUG >= DEBUG_MALLOC
-  fprintf(stderr, "SEGMENTATION FAULT!  DUMPING MEMORY TABLE\n");
+  fprintf(stderr, "Fatal memory fault (%d)!  Dumping memory table.\n", sig);
   memrec_dump();
 #endif
   exit(EXIT_FAILURE);

@@ -4,7 +4,7 @@
  *          -- 16 January 1997                                 *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -27,9 +27,6 @@
 #ifndef _GLOBAL_H_
 
 #define _GLOBAL_H_
-
-#include "config.h"
-#include "src/feature.h"
 
 /* Other compile-time defines */
 #ifdef LINUX

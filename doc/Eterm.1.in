@@ -1249,7 +1249,7 @@ directive to allow for separation of the configuration information into
 separate files.
 
 .SH AUTHORS
-Tuomo Venalainen (vendu@cc.hut.fi) and Michael Jennings (mej@tcserv.com).
+Michael Jennings (mej@eterm.org) and Tuomo Venäläinen (vendu@cc.hut.fi).
 Man page re-written for version 0.8 by Shaleh (shaleh@debian.org).
 
 .SH URL(s)

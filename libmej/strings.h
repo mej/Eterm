@@ -4,7 +4,7 @@
  *           -- 08 January 1997                                *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -66,15 +66,15 @@
 #  include <regex.h>
 #endif
 
-#ifndef STRINGS_C
 extern char *LeftStr(const char *, unsigned long);
 extern char *MidStr(const char *, unsigned long, unsigned long);
 extern char *RightStr(const char *, unsigned long);
 #if defined(HAVE_REGEX_H) || defined(IRIX)
 extern unsigned char Match(const char *, const char *);
 #endif
-extern char *Word(unsigned long index, const char *str);
-extern char *PWord(unsigned long index, char *str);
+extern char *Word(unsigned long, const char *);
+extern char *PWord(unsigned long, char *);
+extern unsigned long NumWords(const char *);
 extern char *StripWhitespace(char *);
 extern char *LowerStr(char *);
 extern char *UpStr(char *);
@@ -82,6 +82,7 @@ extern char *StrCaseStr(char *, const char *);
 extern char *StrCaseChr(char *, char);
 extern char *StrCasePBrk(char *, char *);
 extern char *StrRev(char *);
+extern char *StrDup(const char *);
 #if !(HAVE_STRSEP)
 extern char *strsep(char **, char *);
 #endif
@@ -101,6 +102,5 @@ extern void usleep(unsigned long);
 extern void nanosleep(unsigned long);
 #endif
 */
-#endif
 
 #endif /* _STRINGS_H_ */

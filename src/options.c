@@ -1,7 +1,7 @@
 /*  options.c -- Eterm options module
  *            -- 25 July 1997, mej
  *
- * This file is original work by Michael Jennings <mej@tcserv.com> and
+ * This file is original work by Michael Jennings <mej@eterm.org> and
  * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
  * bearing this same message or a similar one, is distributed under
  * the GNU Public License (GPL) as outlined in the COPYING file.
@@ -26,92 +26,38 @@
 
 static const char cvs_ident[] = "$Id$";
 
-#include "main.h"
+#include "config.h"
 #include "feature.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
 #include <X11/keysym.h>
+
 #include "../libmej/debug.h"
+#include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "debug.h"
-#include "mem.h"
-#include "strings.h"
+#include "actions.h"
 #include "command.h"
+#include "events.h"
 #include "grkelot.h"
-#include "menubar.h"
+#include "main.h"
+#include "menus.h"
 #include "options.h"
 #include "pixmap.h"
 #include "scrollbar.h"
 #include "screen.h"
 #include "system.h"
-
-#if PATH_MAX < 1024
-#  undef PATH_MAX
-#  define PATH_MAX 1024
-#endif
-
-const char *true_vals[] =
-{"1", "on", "true", "yes"};
-const char *false_vals[] =
-{"0", "off", "false", "no"};
-
-char **rs_execArgs = NULL;	/* Args to exec (-e or --exec) */
-char *rs_title = NULL;		/* Window title */
-char *rs_iconName = NULL;	/* Icon name */
-char *rs_geometry = NULL;	/* Geometry string */
-int rs_desktop = -1;
-char *rs_path = NULL;
-int rs_saveLines = SAVELINES;	/* Lines in the scrollback buffer */
-
-#ifdef KEYSYM_ATTRIBUTE
-unsigned char *KeySym_map[256];	/* probably mostly empty */
-
-#endif
-#if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-/* recognized when combined with HOTKEY */
-KeySym ks_bigfont = XK_greater;
-KeySym ks_smallfont = XK_less;
-
-#endif
-#ifdef PIXMAP_SUPPORT
-char *rs_pixmapScale = NULL;
-const char *rs_saveUnder = NULL;
-char *rs_icon = NULL;
-
-# ifdef BACKGROUND_CYCLING_SUPPORT
-char *rs_anim_pixmap_list = NULL;
-char **rs_anim_pixmaps = NULL;
-time_t rs_anim_delay = 0;
-
-# endif
-# ifdef PIXMAP_OFFSET
-char *rs_viewport_mode = NULL;
-const char *rs_pixmapTrans = NULL;
-unsigned long rs_tintMask = 0xffffff;
-unsigned int rs_shadePct = 0;
-
-#  ifdef WATCH_DESKTOP_OPTION
-const char *rs_watchDesktop = NULL;
-
-#  endif
-# endif
-char *rs_pixmaps[11] =
-{NULL, NULL, NULL, NULL, NULL, NULL, NULL,
- NULL, NULL, NULL, NULL};
-
-#endif
-char *rs_noCursor = NULL;
-
-#ifdef USE_THEMES
-char *rs_theme = NULL;
-char *rs_config_file = NULL;
-
-#endif
+#include "term.h"
+#include "windows.h"
 
 /* local functions referenced */
 char *chomp(char *);
@@ -121,23 +67,152 @@ void parse_attributes(char *);
 void parse_toggles(char *);
 void parse_keyboard(char *);
 void parse_misc(char *);
-void parse_pixmaps(char *);
-void parse_kanji(char *);
+void parse_imageclasses(char *);
+void parse_image(char *);
+void parse_actions(char *);
+void parse_menu(char *);
+void parse_menuitem(char *);
+void parse_xim(char *);
+void parse_multichar(char *);
 void parse_undef(char *);
 char *builtin_random(char *);
 char *builtin_exec(char *);
 char *builtin_version(char *);
 char *builtin_appname(char *);
 
-/* local variables */
+const char *true_vals[] =
+{"1", "on", "true", "yes"};
+const char *false_vals[] =
+{"0", "off", "false", "no"};
+/* This structure defines a context and its attributes */
+struct context_struct {
+  const unsigned char id;
+  const char *description;
+  void (*ctx_handler) (char *);
+  const unsigned char valid_sub_contexts[CTX_MAX];
+} contexts[] = {
+
+  {
+    CTX_NULL, "none", NULL, {
+      CTX_MAIN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_MAIN, "main", parse_main, {
+      CTX_COLOR, CTX_ATTRIBUTES, CTX_TOGGLES, CTX_KEYBOARD,
+      CTX_MISC, CTX_IMAGECLASSES, CTX_ACTIONS,
+      CTX_MENU, CTX_XIM, CTX_MULTI_CHARSET, 0, 0, 0
+    }
+  },
+  {
+    CTX_COLOR, "color", parse_color, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_ATTRIBUTES, "attributes", parse_attributes, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_TOGGLES, "toggles", parse_toggles, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_KEYBOARD, "keyboard", parse_keyboard, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_MISC, "misc", parse_misc, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_IMAGECLASSES, "imageclasses", parse_imageclasses, {
+      CTX_IMAGE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_IMAGE, "image", parse_image, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_ACTIONS, "actions", parse_actions, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_MENU, "menu", parse_menu, {
+      CTX_MENUITEM, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_MENUITEM, "menuitem", parse_menuitem, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_XIM, "xim", parse_xim, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_MULTI_CHARSET, "multichar", parse_multichar, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  },
+  {
+    CTX_UNDEF, NULL, parse_undef, {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
+  }
+
+};
+unsigned char id_stack[MAX_CTX_DEPTH];
+unsigned short cur_ctx = 0;
+file_state file_stack[MAX_FILE_DEPTH];
+short cur_file = -1;
+eterm_func builtins[] =
+{
+  {"random", builtin_random, -1},
+  {"exec", builtin_exec, -1},
+  {"version", builtin_version, 0},
+  {"appname", builtin_appname, 0},
+  {(char *) NULL, (eterm_function_ptr) NULL, 0}
+};
+unsigned long Options = (Opt_scrollBar);
+static menu_t *curmenu;
+char *theme_dir = NULL, *user_dir = NULL;
+char **rs_execArgs = NULL;	/* Args to exec (-e or --exec) */
+char *rs_title = NULL;		/* Window title */
+char *rs_iconName = NULL;	/* Icon name */
+char *rs_geometry = NULL;	/* Geometry string */
+int rs_desktop = -1;
+char *rs_path = NULL;
+int rs_saveLines = SAVELINES;	/* Lines in the scrollback buffer */
+#ifdef USE_XIM
+char *rs_inputMethod = NULL;
+char *rs_preeditType = NULL;
+#endif
+char *rs_name = NULL;
+#ifndef NO_BOLDFONT
+const char *rs_boldFont = NULL;
+#endif
+const char *rs_font[NFONTS];
+#ifdef MULTI_CHARSET
+const char *rs_mfont[NFONTS];
+#endif
+#ifdef PRINTPIPE
+char *rs_print_pipe = NULL;
+#endif
+char *rs_cutchars = NULL;
 const char *rs_loginShell = NULL;
 const char *rs_utmpLogging = NULL;
 const char *rs_scrollBar = NULL;
-
-#if (MENUBAR_MAX)
-const char *rs_menubar = NULL;
-
-#endif
+const char *rs_install = NULL;
 const char *rs_app_keypad = NULL;
 const char *rs_app_cursor = NULL;
 const char *rs_homeOnEcho = NULL;
@@ -151,64 +226,64 @@ const char *rs_pause = NULL;
 const char *rs_xterm_select = NULL;
 const char *rs_select_whole_line = NULL;
 const char *rs_select_trailing_spaces = NULL;
+const char *rs_report_as_keysyms = NULL;
 unsigned short rs_min_anchor_size = 0;
-
 char *rs_scrollbar_type = NULL;
 unsigned long rs_scrollbar_width = 0;
-const char *rs_term_name = NULL;
-
-#if MENUBAR_MAX
-const char *rs_menubar_move = NULL;
-const char *rs_menu = NULL;
-
-#endif
-
+char *rs_term_name = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
-
 #endif
-
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
 static const char *rs_mapAlert = NULL;
-
 # endif
 #endif
 static const char *rs_visualBell = NULL;
 static const char *rs_reverseVideo = NULL;
-
 #ifdef META8_OPTION
 static const char *rs_meta8 = NULL;
-
 #endif
-#ifdef KANJI
-static char *rs_kanji_encoding = NULL;
-
+#ifdef MULTI_CHARSET
+static char *rs_multchar_encoding = NULL;
 #endif
 #ifdef GREEK_SUPPORT
 static char *rs_greek_keyboard = NULL;
-
+#endif
+#ifdef PIXMAP_SUPPORT
+char *rs_pixmapScale = NULL;
+const char *rs_saveUnder = NULL;
+char *rs_icon = NULL;
+char *rs_cmod_image = NULL;
+char *rs_cmod_red = NULL;
+char *rs_cmod_green = NULL;
+char *rs_cmod_blue = NULL;
+# ifdef BACKGROUND_CYCLING_SUPPORT
+char *rs_anim_pixmap_list = NULL;
+char **rs_anim_pixmaps = NULL;
+time_t rs_anim_delay = 0;
+# endif
+# ifdef PIXMAP_OFFSET
+char *rs_viewport_mode = NULL;
+const char *rs_pixmapTrans = NULL;
+# endif
+static char *rs_pixmaps[image_max];
+#endif
+char *rs_noCursor = NULL;
+char *rs_theme = NULL;
+char *rs_config_file = NULL;
+unsigned int rs_line_space = 0;
+#ifdef KEYSYM_ATTRIBUTE
+unsigned char *KeySym_map[256];	/* probably mostly empty */
+#endif
+#if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
+/* recognized when combined with HOTKEY */
+KeySym ks_bigfont = XK_greater;
+KeySym ks_smallfont = XK_less;
 #endif
 
-extern char initial_dir[PATH_MAX + 1];
-
 /* Options structure */
-
-#define OPT_BOOLEAN          0x0001
-#define OPT_INTEGER          0x0002
-#define OPT_STRING           0x0004
-#define OPT_ARGUMENT         0x0008
-
-#define OPT_STR(s, l, d, p)         { s, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_INT(s, l, d, p)         { s, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define OPT_BOOL(s, l, d, p, v, m)  { s, l, "(bool) " d, OPT_BOOLEAN,  (const int *)    p, v, m }
-#define OPT_LONG(l, d, p)           { 0, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_ARGS(s, l, d, p)        { s, l, "(str)  " d, OPT_ARGUMENT, (const char ***) p, 0, 0 }
-#define OPT_BLONG(l, d, p, v, m)    { 0, l, "(bool) " d, OPT_BOOLEAN,  (const int *)    p, v, m }
-#define OPT_ILONG(l, d, p)          { 0, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define optList_numoptions()    (sizeof(optList)/sizeof(optList[0]))
-
 static const struct {
   char short_opt;
   char *long_opt;
@@ -219,12 +294,9 @@ static const struct {
   int mask;
 } optList[] = {
 
-#ifdef USE_THEMES		/* These two MUST be first! */
   OPT_STR('t', "theme", "select a theme", &rs_theme),
       OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file),
-#endif /* USE_THEMES */
-      OPT_BOOL('h', "help", "display usage information", NULL, NULL, 0),
-      OPT_BLONG("version", "display version and configuration information", NULL, NULL, 0),
+      OPT_STR('d', "display", "X server to connect to", &display_name),
 #if DEBUG <= 0
       OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &debug_level),
 #elif DEBUG == 1
@@ -238,6 +310,10 @@ static const struct {
 #else
       OPT_ILONG("debug", "level of debugging information to show (0-5)", &debug_level),
 #endif
+      OPT_BLONG("install", "install a private colormap", &rs_install, &Options, Opt_install),
+
+      OPT_BOOL('h', "help", "display usage information", NULL, NULL, 0),
+      OPT_BLONG("version", "display version and configuration information", NULL, NULL, 0),
 
 /* =======[ Color options ]======= */
       OPT_BOOL('r', "reverse-video", "reverse video", &rs_reverseVideo, &Options, Opt_reverseVideo),
@@ -265,13 +341,11 @@ static const struct {
       OPT_LONG("colorBD", "bold color", &rs_color[colorBD]),
       OPT_LONG("colorUL", "underline color", &rs_color[colorUL]),
 #endif /* NO_BOLDUNDERLINE */
+      OPT_LONG("menur-color", "menu color", &rs_color[menuColor]),
       OPT_LONG("menu-text-color", "menu text color", &rs_color[menuTextColor]),
-#ifdef KEEP_SCROLLCOLOR
       OPT_STR('S', "scrollbar-color", "scrollbar color", &rs_color[scrollColor]),
-# ifdef CHANGE_SCROLLCOLOR_ON_FOCUS
+      OPT_LONG("unfocused-menu-color", "unfocused menu color", &rs_color[unfocusedMenuColor]),
       OPT_LONG("unfocused-scrollbar-color", "unfocused scrollbar color", &rs_color[unfocusedScrollColor]),
-# endif
-#endif /* KEEP_SCROLLCOLOR */
       OPT_LONG("pointer-color", "mouse pointer color", &rs_color[pointerColor]),
 #ifndef NO_CURSORCOLOR
       OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]),
@@ -279,7 +353,6 @@ static const struct {
 #endif /* NO_CURSORCOLOR */
 
 /* =======[ X11 options ]======= */
-      OPT_STR('d', "display", "X server to connect to", &display_name),
       OPT_STR('g', "geometry", "WxH+X+Y = size and position", &rs_geometry),
       OPT_BOOL('i', "iconic", "start iconified", NULL, &Options, Opt_iconic),
       OPT_STR('n', "name", "client instance, icon, and title strings", &rs_name),
@@ -288,6 +361,7 @@ static const struct {
       OPT_STR('B', "scrollbar-type", "choose the scrollbar type (motif, next, xterm)", &rs_scrollbar_type),
       OPT_ILONG("scrollbar-width", "choose the width (in pixels) of the scrollbar", &rs_scrollbar_width),
       OPT_INT('D', "desktop", "desktop to start on (requires GNOME-compliant window manager)", &rs_desktop),
+      OPT_ILONG("line-space", "number of extra dots between lines", &rs_line_space),
 #ifndef NO_BOLDFONT
       OPT_LONG("bold-font", "bold text font", &rs_boldFont),
 #endif
@@ -299,20 +373,20 @@ static const struct {
 
 /* =======[ Pixmap options ]======= */
 #ifdef PIXMAP_SUPPORT
-      OPT_STR('P', "background-pixmap", "background pixmap [scaling optional]", &rs_pixmaps[pixmap_bg]),
+      OPT_STR('P', "background-pixmap", "background pixmap [scaling optional]", &rs_pixmaps[image_bg]),
       OPT_STR('I', "icon", "icon pixmap", &rs_icon),
-      OPT_LONG("up-arrow-pixmap", "up arrow pixmap [scaling optional]", &rs_pixmaps[pixmap_up]),
-      OPT_LONG("down-arrow-pixmap", "down arrow pixmap [scaling optional]", &rs_pixmaps[pixmap_dn]),
-      OPT_LONG("trough-pixmap", "scrollbar background (trough) pixmap [scaling optional]", &rs_pixmaps[pixmap_sb]),
-      OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[pixmap_sa]),
+      OPT_LONG("up-arrow-pixmap", "up arrow pixmap [scaling optional]", &rs_pixmaps[image_up]),
+      OPT_LONG("down-arrow-pixmap", "down arrow pixmap [scaling optional]", &rs_pixmaps[image_down]),
+      OPT_LONG("trough-pixmap", "scrollbar background (trough) pixmap [scaling optional]", &rs_pixmaps[image_sb]),
+      OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[image_sa]),
+      OPT_LONG("menu-pixmap", "menu pixmap [scaling optional]", &rs_pixmaps[image_menu]),
       OPT_BOOL('@', "scale", "scale rather than tile", &rs_pixmapScale, &Options, Opt_pixmapScale),
 # ifdef PIXMAP_OFFSET
-#  ifdef WATCH_DESKTOP_OPTION
-      OPT_BOOL('W', "watch-desktop", "watch the desktop background image for changes", &rs_watchDesktop, &Options, Opt_watchDesktop),
-#  endif
       OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &rs_pixmapTrans, &Options, Opt_pixmapTrans),
-      OPT_ILONG("shade", "percentage to shade the background in a pseudo-transparent Eterm", &rs_shadePct),
-      OPT_ILONG("tint", "RGB brightness mask for color tinting in a pseudo-transparent Eterm", &rs_tintMask),
+      OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
+      OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
+      OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
+      OPT_LONG("cmod-blue", "blue-only color modifier (\"brightness contrast gamma\")", &rs_cmod_blue),
 # endif
       OPT_STR('p', "path", "pixmap file search path", &rs_path),
 # ifdef BACKGROUND_CYCLING_SUPPORT
@@ -321,19 +395,23 @@ static const struct {
 #endif /* PIXMAP_SUPPORT */
 
 /* =======[ Kanji options ]======= */
-#ifdef KANJI
-      OPT_STR('K', "kanji-font", "normal text kanji font", &rs_kfont[0]),
-      OPT_LONG("kanji-font1", "kanji font 1", &rs_kfont[1]),
-      OPT_LONG("kanji-font2", "kanji font 2", &rs_kfont[2]),
-      OPT_LONG("kanji-font3", "kanji font 3", &rs_kfont[3]),
-      OPT_LONG("kanji-font4", "kanji font 4", &rs_kfont[4]),
-      OPT_LONG("kanji-encoding", "kanji encoding mode (eucj or sjis)", &rs_kanji_encoding),
-#endif /* KANJI */
+#ifdef MULTI_CHARSET
+      OPT_STR('M', "mfont", "normal text multichar font", &rs_mfont[0]),
+      OPT_LONG("mfont1", "multichar font 1", &rs_mfont[1]),
+      OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
+      OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
+      OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
+      OPT_LONG("mencoding", "multichar encoding mode (eucj or sjis or euckr)",
+	       &rs_multchar_encoding),
+#endif /* MULTI_CHARSET */
+#ifdef USE_XIM
+      OPT_LONG("input-method", "XIM input method", &rs_inputMethod),
+      OPT_LONG("preedit-type", "XIM preedit type", &rs_preeditType),
+#endif
 
 /* =======[ Toggles ]======= */
       OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &rs_loginShell, &Options, Opt_loginShell),
       OPT_BOOL('s', "scrollbar", "display scrollbar", &rs_scrollBar, &Options, Opt_scrollBar),
-      OPT_BLONG("menubar", "display menubar", &rs_menubar, NULL, 0),
       OPT_BOOL('u', "utmp-logging", "make a utmp entry", &rs_utmpLogging, &Options, Opt_utmpLogging),
       OPT_BOOL('v', "visual-bell", "visual bell", &rs_visualBell, &Options, Opt_visualBell),
       OPT_BOOL('H', "home-on-echo", "jump to bottom on output", &rs_homeOnEcho, &Options, Opt_homeOnEcho),
@@ -355,13 +433,11 @@ static const struct {
       OPT_BLONG("save-under", "use backing store", &rs_saveUnder, &Options, Opt_saveUnder),
 #endif
       OPT_BLONG("no-cursor", "disable the text cursor", &rs_noCursor, &Options, Opt_noCursor),
-#if MENUBAR_MAX
-      OPT_BOOL('V', "menubar-move", "dragging the menubar will move the window", &rs_menubar_move, &Options, Opt_menubar_move),
-#endif
       OPT_BLONG("pause", "pause for a keypress after the child process exits", &rs_pause, &Options, Opt_pause),
       OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &rs_xterm_select, &Options, Opt_xterm_select),
       OPT_BLONG("select-line", "triple-click selects whole line", &rs_select_whole_line, &Options, Opt_select_whole_line),
       OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &rs_select_trailing_spaces, &Options, Opt_select_trailing_spaces),
+      OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &rs_report_as_keysyms, &Options, Opt_report_as_keysyms),
 #ifdef PIXMAP_OFFSET
       OPT_BLONG("viewport-mode", "use viewport mode for the background image", &rs_viewport_mode, &Options, Opt_viewport_mode),
 #endif
@@ -389,9 +465,6 @@ static const struct {
 #ifdef CUTCHAR_OPTION
       OPT_LONG("cut-chars", "seperators for double-click selection", &rs_cutchars),
 #endif /* CUTCHAR_OPTION */
-#if MENUBAR_MAX
-      OPT_STR('M', "menu", "Default menubar file", &rs_menu),
-#endif
       OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
       OPT_BOOL('C', "console", "grab console messages", NULL, &Options, Opt_console),
       OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_execArgs)
@@ -403,7 +476,7 @@ static void
 usage(void)
 {
 
-  int i, col;
+  unsigned short i, col;
 
   printf("Eterm Enlightened Terminal Emulator for X Windows\n");
   printf("Copyright (c) 1997-1999, Tuomo Venalainen and Michael Jennings\n\n");
@@ -444,8 +517,6 @@ usage(void)
 static void
 version(void)
 {
-
-  int i, col;
 
   printf("Eterm " VERSION "\n");
   printf("Copyright (c) 1997-1999, Tuomo Venalainen and Michael Jennings\n\n");
@@ -496,9 +567,6 @@ version(void)
 #if DEBUG >= DEBUG_THREADS
   printf(" +DEBUG_THREADS");
 #endif
-#if DEBUG >= DEBUG_TAGS
-  printf(" +DEBUG_TAGS");
-#endif
 #if DEBUG >= DEBUG_MENU
   printf(" +DEBUG_MENU");
 #endif
@@ -507,15 +575,6 @@ version(void)
 #endif
 #if DEBUG >= DEBUG_COLORS
   printf(" +DEBUG_COLORS");
-#endif
-#if DEBUG >= DEBUG_MENUARROWS
-  printf(" +DEBUG_MENUARROWS");
-#endif
-#if DEBUG >= DEBUG_MENU_LAYOUT
-  printf(" +DEBUG_MENU_LAYOUT");
-#endif
-#if DEBUG >= DEBUG_MENUBAR_STACKING
-  printf(" +DEBUG_MENUBAR_STACKING");
 #endif
 #if DEBUG >= DEBUG_X
   printf(" +DEBUG_X");
@@ -542,11 +601,6 @@ version(void)
   printf(" +COUNT_X_EVENTS");
 #else
   printf(" -COUNT_X_EVENTS");
-#endif
-#ifdef USE_ACTIVE_TAGS
-  printf(" +USE_ACTIVE_TAGS");
-#else
-  printf(" -USE_ACTIVE_TAGS");
 #endif
 #ifdef OPTIMIZE_HACKS
   printf(" +OPTIMIZE_HACKS");
@@ -598,29 +652,10 @@ version(void)
 #else
   printf(" -BACKING_STORE");
 #endif
-#ifdef USE_IMLIB
-#  ifdef OLD_IMLIB
-  printf(" +USE_IMLIB (OLD_IMLIB)");
-#  elif defined(NEW_IMLIB)
-  printf(" +USE_IMLIB (NEW_IMLIB)");
-#  endif
-#else
-  printf(" -USE_IMLIB");
-#endif
-#ifdef USE_THEMES
-  printf(" +USE_THEMES");
-#else
-  printf(" -USE_THEMES");
-#endif
 #ifdef USE_EFFECTS
   printf(" +USE_EFFECTS");
 #else
   printf(" -USE_EFFECTS");
-#endif
-#ifdef WATCH_DESKTOP_OPTION
-  printf(" +WATCH_DESKTOP_OPTION");
-#else
-  printf(" -WATCH_DESKTOP_OPTION");
 #endif
 #ifdef NO_CURSORCOLOR
   printf(" +NO_CURSORCOLOR");
@@ -712,10 +747,10 @@ version(void)
 #else
   printf(" -KEYSYM_ATTRIBUTE");
 #endif
-#ifdef NO_XLOCALE
-  printf(" +NO_XLOCALE");
+#ifdef USE_XIM
+  printf(" +XIM");
 #else
-  printf(" -NO_XLOCALE");
+  printf(" -XIM");
 #endif
 #ifdef UNSHIFTED_SCROLLKEYS
   printf(" +UNSHIFTED_SCROLLKEYS");
@@ -752,16 +787,6 @@ version(void)
 #else
   printf(" -NEXT_SCROLLBAR");
 #endif
-#ifdef KEEP_SCROLLCOLOR
-  printf(" +KEEP_SCROLLCOLOR");
-#else
-  printf(" -KEEP_SCROLLCOLOR");
-#endif
-#ifdef CHANGE_SCROLLCOLOR_ON_FOCUS
-  printf(" +CHANGE_SCROLLCOLOR_ON_FOCUS");
-#else
-  printf(" -CHANGE_SCROLLCOLOR_ON_FOCUS");
-#endif
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
   printf(" +SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
 #else
@@ -772,20 +797,10 @@ version(void)
 #else
   printf(" -USE_SMOOTH_REFRESH");
 #endif
-#ifdef MENUBAR_SHADOW_IN
-  printf(" +MENUBAR_SHADOW_IN");
-#else
-  printf(" -MENUBAR_SHADOW_IN");
-#endif
 #ifdef MENU_SHADOW_IN
   printf(" +MENU_SHADOW_IN");
 #else
   printf(" -MENU_SHADOW_IN");
-#endif
-#ifdef MENU_TEXT_FLOATING
-  printf(" +MENU_TEXT_FLOATING");
-#else
-  printf(" -MENU_TEXT_FLOATING");
 #endif
 #ifdef CTRL_CLICK_RAISE
   printf(" +CTRL_CLICK_RAISE");
@@ -802,10 +817,10 @@ version(void)
 #else
   printf(" -GREEK_SUPPORT");
 #endif
-#ifdef KANJI
-  printf(" +KANJI");
+#ifdef MULTI_CHARSET
+  printf(" +MULTI_CHARSET");
 #else
-  printf(" -KANJI");
+  printf(" -MULTI_CHARSET");
 #endif
 #ifdef DISPLAY_IS_IP
   printf(" +DISPLAY_IS_IP");
@@ -846,11 +861,6 @@ version(void)
   printf(" +MAPALERT_OPTION");
 #else
   printf(" -MAPALERT_OPTION");
-#endif
-#ifdef ENABLE_CORE_DUMPS
-  printf(" +ENABLE_CORE_DUMPS");
-#else
-  printf(" -ENABLE_CORE_DUMPS");
 #endif
 #ifdef UTMP_SUPPORT
   printf(" +UTMP_SUPPORT");
@@ -935,11 +945,6 @@ version(void)
 #else
   printf(" -SCROLLBAR_CONTINUOUS_DELAY\n");
 #endif
-#ifdef MENUBAR_MAX
-  printf(" MENUBAR_MAX=%d\n", MENUBAR_MAX);
-#else
-  printf(" -MENUBAR_MAX\n");
-#endif
 #ifdef ESCZ_ANSWER
   printf(" ESCZ_ANSWER=\"%s\"\n", ESCZ_ANSWER);
 #else
@@ -955,27 +960,20 @@ version(void)
 #else
   printf(" -CONFIG_SEARCH_PATH\n");
 #endif
-#ifdef CONFIG_FILE_NAME
-  printf(" CONFIG_FILE_NAME=\"%s\"\n", CONFIG_FILE_NAME);
+#ifdef THEME_CFG
+  printf(" THEME_CFG=\"%s\"\n", THEME_CFG);
 #else
-  printf(" -CONFIG_FILE_NAME\n");
+  printf(" -THEME_CFG\n");
+#endif
+#ifdef USER_CFG
+  printf(" USER_CFG=\"%s\"\n", USER_CFG);
+#else
+  printf(" -USER_CFG\n");
 #endif
 
   printf("\n");
   exit(EXIT_SUCCESS);
 }
-
-/* This defines how many mistakes to allow before giving up
-   and printing the usage                          -- mej   */
-#define BAD_THRESHOLD 3
-#define CHECK_BAD()  do { \
-	               if (++bad_opts >= BAD_THRESHOLD) { \
-			 print_error("error threshold exceeded, giving up"); \
-			 usage(); \
-		       } else { \
-			 print_error("attempting to continue, but performance may be unpredictable"); \
-		       } \
-                     } while(0)
 
 void
 get_options(int argc, char *argv[])
@@ -984,7 +982,7 @@ get_options(int argc, char *argv[])
   register unsigned long i, j, l;
   unsigned char bad_opts = 0;
 
-  for (i = 1; i < argc; i++) {
+  for (i = 1; i < (unsigned long) argc; i++) {
 
     register char *opt = argv[i];
     char *val_ptr = NULL;
@@ -1053,7 +1051,7 @@ get_options(int argc, char *argv[])
 	  rs_execArgs = (char **) malloc(sizeof(char *) * (argc - i + 1));
 
 	  for (k = 0; k < len; k++) {
-	    rs_execArgs[k] = strdup(argv[k + i]);
+	    rs_execArgs[k] = StrDup(argv[k + i]);
 	    D_OPTIONS(("rs_execArgs[%d] == %s\n", k, rs_execArgs[k]));
 	  }
 	  rs_execArgs[k] = (char *) NULL;
@@ -1115,7 +1113,7 @@ get_options(int argc, char *argv[])
 	} else {		/* String value */
 	  D_OPTIONS(("String option detected\n"));
 	  if (val_ptr && optList[j].pval) {
-	    *((const char **) optList[j].pval) = strdup(val_ptr);
+	    *((const char **) optList[j].pval) = StrDup(val_ptr);
 	  }
 	}
       }
@@ -1182,15 +1180,15 @@ get_options(int argc, char *argv[])
 	  rs_execArgs = (char **) malloc(sizeof(char *) * len);
 
 	  if (k == i) {
-	    rs_execArgs[0] = strdup((char *) (val_ptr));
+	    rs_execArgs[0] = StrDup((char *) (val_ptr));
 	    D_OPTIONS(("rs_execArgs[0] == %s\n", rs_execArgs[0]));
 	    k++;
 	  } else {
-	    rs_execArgs[0] = strdup(argv[k - 1]);
+	    rs_execArgs[0] = StrDup(argv[k - 1]);
 	    D_OPTIONS(("rs_execArgs[0] == %s\n", rs_execArgs[0]));
 	  }
 	  for (; k < argc; k++) {
-	    rs_execArgs[k - i] = strdup(argv[k]);
+	    rs_execArgs[k - i] = StrDup(argv[k]);
 	    D_OPTIONS(("rs_execArgs[%d] == %s\n", k - i, rs_execArgs[k - i]));
 	  }
 	  rs_execArgs[len - 1] = (char *) NULL;
@@ -1214,7 +1212,7 @@ get_options(int argc, char *argv[])
 	  } else {		/* String value */
 	    D_OPTIONS(("String option detected\n"));
 	    if (optList[j].pval) {
-	      *((const char **) optList[j].pval) = strdup(val_ptr);
+	      *((const char **) optList[j].pval) = StrDup(val_ptr);
 	    }
 	  }			/* End if value type */
 	}			/* End if option type */
@@ -1223,14 +1221,13 @@ get_options(int argc, char *argv[])
   }				/* End main for loop */
 }
 
-#ifdef USE_THEMES
 void
 get_initial_options(int argc, char *argv[])
 {
 
   register unsigned long i, j;
 
-  for (i = 1; i < argc; i++) {
+  for (i = 1; i < (unsigned long) argc; i++) {
 
     register char *opt = argv[i];
     char *val_ptr = NULL;
@@ -1251,6 +1248,12 @@ get_initial_options(int argc, char *argv[])
 	j = 0;
       } else if (!BEG_STRCASECMP(opt, "config-file")) {
 	j = 1;
+      } else if (!BEG_STRCASECMP(opt, "display")) {
+	j = 2;
+      } else if (!BEG_STRCASECMP(opt, "debug")) {
+	j = 3;
+      } else if (!BEG_STRCASECMP(opt, "install")) {
+	j = 4;
       } else
 	continue;
 
@@ -1266,13 +1269,46 @@ get_initial_options(int argc, char *argv[])
 	}
       }
       D_OPTIONS(("hasequal == %d  val_ptr == %10.8p \"%s\"\n", hasequal, val_ptr, val_ptr));
-      if (val_ptr == NULL) {
-	print_error("long option --%s requires a string value", opt);
+      if (val_ptr == NULL && j != 4) {
+	print_error("long option --%s requires a%s value", opt, (j == 3 ? "n integer" : " string"));
 	continue;
       }
-      D_OPTIONS(("String option detected\n"));
-      if (val_ptr && optList[j].pval) {
-	*((const char **) optList[j].pval) = strdup(val_ptr);
+      if (j == 3) {
+	D_OPTIONS(("Integer option detected\n"));
+	*((int *) optList[j].pval) = strtol(val_ptr, (char **) NULL, 0);
+      } else if (j == 4) {
+	if (val_ptr) {
+	  if (BOOL_OPT_ISTRUE(val_ptr)) {
+	    D_OPTIONS(("\"%s\" == TRUE\n", val_ptr));
+	    if (optList[j].maskvar) {
+	      *(optList[j].maskvar) |= optList[j].mask;
+	    }
+	    if (optList[j].pval) {
+	      *((const char **) optList[j].pval) = *true_vals;
+	    }
+	  } else if (BOOL_OPT_ISFALSE(val_ptr)) {
+	    D_OPTIONS(("\"%s\" == FALSE\n", val_ptr));
+	    if (optList[j].maskvar) {
+	      *(optList[j].maskvar) &= ~(optList[j].mask);
+	    }
+	    if (optList[j].pval) {
+	      *((const char **) optList[j].pval) = *false_vals;
+	    }
+	  }
+	} else {		/* No value, so force it on */
+	  D_OPTIONS(("Forcing option --%s to TRUE\n", opt));
+	  if (optList[j].maskvar) {
+	    *(optList[j].maskvar) |= optList[j].mask;
+	  }
+	  if (optList[j].pval) {
+	    *((const char **) optList[j].pval) = *true_vals;
+	  }
+	}
+      } else {
+	D_OPTIONS(("String option detected\n"));
+	if (val_ptr && optList[j].pval) {
+	  *((const char **) optList[j].pval) = StrDup(val_ptr);
+	}
       }
     } else {			/* It's a POSIX option */
 
@@ -1284,6 +1320,8 @@ get_initial_options(int argc, char *argv[])
 	  j = 0;
 	} else if (opt[pos] == 'X') {
 	  j = 1;
+	} else if (opt[pos] == 'd') {
+	  j = 2;
 	} else
 	  continue;
 
@@ -1303,190 +1341,14 @@ get_initial_options(int argc, char *argv[])
 	}
 	D_OPTIONS(("String option detected\n"));
 	if (optList[j].pval) {
-	  *((const char **) optList[j].pval) = strdup(val_ptr);
+	  *((const char **) optList[j].pval) = StrDup(val_ptr);
 	}
       }				/* End for loop */
     }				/* End if (islong) */
   }				/* End main for loop */
 }
 
-#endif
-
 /***** The Config File Section *****/
-
-/* Max length of a line in the config file */
-#define CONFIG_BUFF 20480
-
-/* The context identifier.  This tells us what section of the config file
-   we're in, for syntax checking purposes and the like.            -- mej */
-
-#define CTX_NULL         0
-#define CTX_MAIN         1
-#define CTX_COLOR        2
-#define CTX_ATTRIBUTES   3
-#define CTX_TOGGLES      4
-#define CTX_KEYBOARD     5
-#define CTX_MISC         6
-#define CTX_PIXMAPS      7
-#define CTX_KANJI        8
-#define CTX_UNDEF        ((unsigned char) -1)
-#define CTX_MAX          8
-
-/* This structure defines a context and its attributes */
-
-struct context_struct {
-
-  const unsigned char id;
-  const char *description;
-  void (*ctx_handler) (char *);
-  const unsigned char valid_sub_contexts[CTX_MAX];
-
-} contexts[] = {
-
-  {
-    CTX_NULL, "none", NULL, {
-      CTX_MAIN, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_MAIN, "main", parse_main, {
-      CTX_COLOR, CTX_ATTRIBUTES, CTX_TOGGLES,
-	  CTX_KEYBOARD, CTX_MISC, CTX_PIXMAPS,
-	  CTX_KANJI, 0
-    }
-  },
-  {
-    CTX_COLOR, "color", parse_color, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_ATTRIBUTES, "attributes", parse_attributes, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_TOGGLES, "toggles", parse_toggles, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_KEYBOARD, "keyboard", parse_keyboard, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_MISC, "misc", parse_misc, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_PIXMAPS, "pixmaps", parse_pixmaps, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_KANJI, "kanji", parse_kanji, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  },
-  {
-    CTX_UNDEF, NULL, parse_undef, {
-      0, 0, 0, 0, 0, 0, 0, 0
-    }
-  }
-
-};
-
-#define ctx_name_to_id(the_id, n, i) do { \
-                                       for ((i)=0; (i) <= CTX_MAX; (i)++) { \
-                                         if (!strcasecmp((n), contexts[(i)].description)) { \
-		                           (the_id) = contexts[(i)].id; \
-					   break; \
-					 } \
-			               } \
-                                       if ((i) > CTX_MAX) (the_id) = CTX_UNDEF; \
-                                     } while (0)
-
-#define ctx_id_to_name(id) (contexts[(id)].description)
-#define ctx_id_to_func(id) (contexts[(id)].ctx_handler)
-
-/* The context stack.  This keeps track of the current context and each
-   previous one.  You MUST define MAX_CTX_DEPTH to the absolute maximum
-   number of context levels deep your contexts go, or the results can be
-   Very Bad.  I recommend erring on the side of caution.          -- mej */
-
-#define MAX_CTX_DEPTH 10
-#define ctx_push(ctx) id_stack[++cur_ctx] = (ctx)
-#define ctx_pop()  (id_stack[cur_ctx--])
-#define ctx_peek() (id_stack[cur_ctx])
-
-unsigned char id_stack[MAX_CTX_DEPTH];
-unsigned short cur_ctx = 0;
-
-/* The file state stack.  This keeps track of the file currently being
-   parsed.  This allows for %include directives.                  -- mej */
-
-typedef struct file_state_struct {
-
-  FILE *fp;
-  char *path;
-  unsigned long line;
-  unsigned char skip_to_end;
-
-} file_state;
-
-#define MAX_FILE_DEPTH 10
-#define file_push(fs) do { \
-                        cur_file++; \
-                        file_stack[cur_file].fp = (fs).fp; \
-                        file_stack[cur_file].path = (fs).path; \
-                        file_stack[cur_file].line = (fs).line; \
-			file_stack[cur_file].skip_to_end = (fs).skip_to_end; \
-                      } while (0)
-
-#define file_pop()    (cur_file--)
-#define file_peek(fs) do { \
-                        (fs).fp = file_stack[cur_file].fp; \
-                        (fs).path = file_stack[cur_file].path; \
-                        (fs).line = file_stack[cur_file].line; \
-			(fs).skip_to_end = file_stack[cur_file].skip_to_end; \
-                      } while (0)
-#define file_peek_fp()   (file_stack[cur_file].fp)
-#define file_peek_path() (file_stack[cur_file].path)
-#define file_peek_line() (file_stack[cur_file].line)
-#define file_peek_skip() (file_stack[cur_file].skip_to_end)
-
-#define file_poke_fp(f)    ((file_stack[cur_file].fp) = (f))
-#define file_poke_path(p)  ((file_stack[cur_file].path) = (p))
-#define file_poke_line(l)  ((file_stack[cur_file].line) = (l))
-#define file_poke_skip(s)  ((file_stack[cur_file].skip_to_end) = (s))
-
-#define file_inc_line()     (file_stack[cur_file].line++)
-
-file_state file_stack[MAX_FILE_DEPTH];
-short cur_file = -1;
-
-/* The function structures */
-
-typedef char *(*eterm_function_ptr) (char *);
-typedef struct eterm_function_struct {
-
-  char *name;
-  eterm_function_ptr ptr;
-  int params;
-
-} eterm_func;
-
-eterm_func builtins[] =
-{
-  {"random", builtin_random, -1},
-  {"exec", builtin_exec, -1},
-  {"version", builtin_version, 0},
-  {"appname", builtin_appname, 0},
-  {(char *) NULL, (eterm_function_ptr) NULL, 0}
-};
-
 char *
 builtin_random(char *param)
 {
@@ -1494,7 +1356,7 @@ builtin_random(char *param)
   unsigned long n, index;
   static unsigned int rseed = 0;
 
-  D_OPTIONS(("builtin_random(%s) called\n", param));
+  D_PARSE(("builtin_random(%s) called\n", param));
 
   if (rseed == 0) {
     rseed = (unsigned int) (getpid() * time(NULL) % ((unsigned int) -1));
@@ -1502,7 +1364,7 @@ builtin_random(char *param)
   }
   n = NumWords(param);
   index = (int) (n * ((float) rand()) / (RAND_MAX + 1.0)) + 1;
-  D_OPTIONS(("random index == %lu\n", index));
+  D_PARSE(("random index == %lu\n", index));
 
   return (Word(index, param));
 }
@@ -1511,7 +1373,7 @@ char *
 builtin_exec(char *param)
 {
 
-  D_OPTIONS(("builtin_exec(%s) called\n", param));
+  D_PARSE(("builtin_exec(%s) called\n", param));
 
   return (param);
 }
@@ -1520,7 +1382,7 @@ char *
 builtin_version(char *param)
 {
 
-  D_OPTIONS(("builtin_version(%s) called\n", param));
+  D_PARSE(("builtin_version(%s) called\n", param));
 
   return (Word(1, VERSION));
 }
@@ -1529,7 +1391,7 @@ char *
 builtin_appname(char *param)
 {
 
-  D_OPTIONS(("builtin_appname(%s) called\n", param));
+  D_PARSE(("builtin_appname(%s) called\n", param));
 
   return (Word(1, APL_NAME "-" VERSION));
 }
@@ -1565,7 +1427,7 @@ shell_expand(char *s)
   register char *tmp;
   register char *new;
   register char *pbuff = s, *tmp1;
-  register unsigned long j, k, l;
+  register unsigned long j, k, l = 0;
   unsigned char eval_escape = 1, eval_var = 1, eval_exec = 1, eval_func = 1, in_single = 0, in_double = 0;
   unsigned long fsize;
   char *Command, *Output, *EnvVar, *OutFile;
@@ -1628,7 +1490,7 @@ shell_expand(char *s)
       case '%':
 	D_OPTIONS(("%% detected.\n"));
 	for (k = 0, pbuff++; builtins[k].name != NULL; k++) {
-	  D_OPTIONS(("Checking for function %%%s, pbuff == \"%s\"\n", builtins[k].name, pbuff));
+	  D_PARSE(("Checking for function %%%s, pbuff == \"%s\"\n", builtins[k].name, pbuff));
 	  l = strlen(builtins[k].name);
 	  if (!strncasecmp(builtins[k].name, pbuff, l) &&
 	      ((pbuff[l] == '(') || (pbuff[l] == ' ' && pbuff[l + 1] == ')'))) {
@@ -1722,7 +1584,7 @@ shell_expand(char *s)
 	  strcat(Command, " >");
 	  strcat(Command, OutFile);
 	  system(Command);
-	  if ((fp = fopen(OutFile, "rb")) >= 0) {
+	  if ((fp = fopen(OutFile, "rb")) != NULL) {
 	    fseek(fp, 0, SEEK_END);
 	    fsize = ftell(fp);
 	    rewind(fp);
@@ -1730,7 +1592,7 @@ shell_expand(char *s)
 	      Output = (char *) MALLOC(fsize + 1);
 	      fread(Output, fsize, 1, fp);
 	      Output[fsize] = 0;
-	      D_OPTIONS(("Command returned \"%s\"\n", Output));
+	      D_PARSE(("Command returned \"%s\"\n", Output));
 	      fclose(fp);
 	      remove(OutFile);
 	      Output = CondenseWhitespace(Output);
@@ -1817,7 +1679,7 @@ shell_expand(char *s)
   }
   new[j] = 0;
 
-  D_OPTIONS(("shell_expand(%s) returning \"%s\"\n", s, new));
+  D_PARSE(("shell_expand(%s) returning \"%s\"\n", s, new));
 
   strcpy(s, new);
   FREE(new);
@@ -1832,7 +1694,7 @@ parse_main(char *buff)
 
   ASSERT(buff != NULL);
 
-  print_error("parse error in file %s, line %lu:  Attribute "
+  print_error("Parse error in file %s, line %lu:  Attribute "
 	      "\"%s\" is not valid within context main\n",
 	      file_peek_path(), file_peek_line(), buff);
 }
@@ -1848,51 +1710,35 @@ parse_color(char *buff)
   } else if (!BEG_STRCASECMP(buff, "background ")) {
     rs_color[bgColor] = Word(2, buff);
 
-  } else if (!BEG_STRCASECMP(buff, "tint ")) {
-#ifdef PIXMAP_OFFSET
-    rs_tintMask = strtoul(buff + 5, (char **) NULL, 0);
-#else
-    print_error("warning:  support for the tint attribute was not compiled in, ignoring");
-#endif
-
-  } else if (!BEG_STRCASECMP(buff, "shade ")) {
-#ifdef PIXMAP_OFFSET
-    rs_shadePct = strtoul(buff + 5, (char **) NULL, 0);
-#else
-    print_error("warning:  support for the shade attribute was not compiled in, ignoring");
-#endif
-
   } else if (!BEG_STRCASECMP(buff, "cursor ")) {
 
 #ifndef NO_CURSORCOLOR
     rs_color[cursorColor] = Word(2, buff);
 #else
-    print_error("warning:  support for the cursor attribute was not compiled in, ignoring");
+    print_warning("Support for the cursor attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "cursor_text ")) {
 #ifndef NO_CURSORCOLOR
     rs_color[cursorColor2] = Word(2, buff);
 #else
-    print_error("warning:  support for the cursor_text attribute was not compiled in, ignoring");
+    print_warning("Support for the cursor_text attribute was not compiled in, ignoring");
 #endif
+
+  } else if (!BEG_STRCASECMP(buff, "menu ")) {
+    rs_color[menuColor] = Word(2, buff);
 
   } else if (!BEG_STRCASECMP(buff, "menu_text ")) {
     rs_color[menuTextColor] = Word(2, buff);
 
   } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
-#if defined(KEEP_SCROLLCOLOR)
     rs_color[scrollColor] = Word(2, buff);
-#else
-    print_error("warning:  support for the scrollbar color attribute was not compiled in, ignoring");
-#endif
+
+  } else if (!BEG_STRCASECMP(buff, "unfocusedmenu ")) {
+    rs_color[unfocusedMenuColor] = Word(2, buff);
 
   } else if (!BEG_STRCASECMP(buff, "unfocusedscrollbar ")) {
-#if defined(KEEP_SCROLLCOLOR) && defined(CHANGE_SCROLLCOLOR_ON_FOCUS)
     rs_color[unfocusedScrollColor] = Word(2, buff);
-#else
-    print_error("warning:  support for the unfocusedscrollbar color attribute was not compiled in, ignoring");
-#endif
 
   } else if (!BEG_STRCASECMP(buff, "pointer ")) {
     rs_color[pointerColor] = Word(2, buff);
@@ -1905,7 +1751,7 @@ parse_color(char *buff)
       Options |= Opt_reverseVideo;
       rs_reverseVideo = *true_vals;
     } else if (BEG_STRCASECMP(tmp, "normal")) {
-      print_error("parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video",
+      print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video",
 		  file_peek_path(), file_peek_line(), tmp);
     }
   } else if (!BEG_STRCASECMP(buff, "color ")) {
@@ -1915,7 +1761,7 @@ parse_color(char *buff)
 
     n = NumWords(buff);
     if (n < 3) {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
 		  "attribute color", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       return;
     }
@@ -1924,7 +1770,7 @@ parse_color(char *buff)
     if (!isdigit(*r1)) {
       if (isdigit(*tmp)) {
 	n = strtoul(tmp, (char **) NULL, 0);
-	if (n >= 0 && n <= 7) {
+	if (n <= 7) {
 	  index = minColor + n;
 	} else if (n >= 8 && n <= 15) {
 	  index = minBright + n - 8;
@@ -1936,26 +1782,26 @@ parse_color(char *buff)
 #ifndef NO_BOLDUNDERLINE
 	  rs_color[colorBD] = Word(1, r1);
 #else
-	  print_error("warning:  support for the color bd attribute was not compiled in, ignoring");
+	  print_warning("Support for the color bd attribute was not compiled in, ignoring");
 #endif
 	  return;
 	} else if (!BEG_STRCASECMP(tmp, "ul ")) {
 #ifndef NO_BOLDUNDERLINE
 	  rs_color[colorUL] = Word(1, r1);
 #else
-	  print_error("warning:  support for the color ul attribute was not compiled in, ignoring");
+	  print_warning("Support for the color ul attribute was not compiled in, ignoring");
 #endif
 	  return;
 	} else {
 	  tmp = Word(1, tmp);
-	  print_error("parse error in file %s, line %lu:  Invalid color index \"%s\"",
+	  print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"",
 		      file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-	  free(tmp);
+	  FREE(tmp);
 	}
       }
     }
     if (n != 5) {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
 		  "attribute color", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       return;
     }
@@ -1966,7 +1812,7 @@ parse_color(char *buff)
       r = strtoul(r1, (char **) NULL, 0);
       g = strtoul(g1, (char **) NULL, 0);
       b = strtoul(b1, (char **) NULL, 0);
-      if (n >= 0 && n <= 7) {
+      if (n <= 7) {
 	index = minColor + n;
 	rs_color[index] = MALLOC(14);
 	sprintf(rs_color[index], "#%02x%02x%02x", r, g, b);
@@ -1975,7 +1821,7 @@ parse_color(char *buff)
 	rs_color[index] = MALLOC(14);
 	sprintf(rs_color[index], "#%02x%02x%02x", r, g, b);
       } else {
-	print_error("parse error in file %s, line %lu:  Invalid color index %lu",
+	print_error("Parse error in file %s, line %lu:  Invalid color index %lu",
 		    file_peek_path(), file_peek_line(), n);
       }
 
@@ -1987,7 +1833,7 @@ parse_color(char *buff)
       b = strtoul(b1, (char **) NULL, 0);
       sprintf(rs_color[colorBD], "#%02x%02x%02x", r, g, b);
 #else
-      print_error("warning:  support for the color bd attribute was not compiled in, ignoring");
+      print_warning("Support for the color bd attribute was not compiled in, ignoring");
 #endif
 
     } else if (!BEG_STRCASECMP(tmp, "ul ")) {
@@ -1998,17 +1844,17 @@ parse_color(char *buff)
       b = strtoul(b1, (char **) NULL, 0);
       sprintf(rs_color[colorUL], "#%02x%02x%02x", r, g, b);
 #else
-      print_error("warning:  support for the color ul attribute was not compiled in, ignoring");
+      print_warning("Support for the color ul attribute was not compiled in, ignoring");
 #endif
 
     } else {
       tmp = Word(1, tmp);
-      print_error("parse error in file %s, line %lu:  Invalid color index \"%s\"",
+      print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"",
 		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      free(tmp);
+      FREE(tmp);
     }
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
 		"within context color", file_peek_path(), file_peek_line(), buff);
   }
 }
@@ -2020,22 +1866,22 @@ parse_attributes(char *buff)
   ASSERT(buff != NULL);
 
   if (!BEG_STRCASECMP(buff, "geometry ")) {
-    rs_geometry = Word(2, buff);
+    RESET_AND_ASSIGN(rs_geometry, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "title ")) {
-    rs_title = Word(2, buff);
+    RESET_AND_ASSIGN(rs_title, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "name ")) {
-    rs_name = Word(2, buff);
+    RESET_AND_ASSIGN(rs_name, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "iconname ")) {
-    rs_iconName = Word(2, buff);
+    RESET_AND_ASSIGN(rs_iconName, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "desktop ")) {
     rs_desktop = (int) strtol(buff, (char **) NULL, 0);
 
   } else if (!BEG_STRCASECMP(buff, "scrollbar_type ")) {
-    rs_scrollbar_type = Word(2, buff);
+    RESET_AND_ASSIGN(rs_scrollbar_type, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "scrollbar_width ")) {
     rs_scrollbar_width = strtoul(PWord(2, buff), (char **) NULL, 0);
@@ -2046,7 +1892,7 @@ parse_attributes(char *buff)
     unsigned char n;
 
     if (NumWords(buff) != 3) {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
 		  "attribute font", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       return;
     }
@@ -2055,25 +1901,25 @@ parse_attributes(char *buff)
       if (n <= 4) {
 	rs_font[n] = Word(2, tmp);
       } else {
-	print_error("parse error in file %s, line %lu:  Invalid font index %d",
+	print_error("Parse error in file %s, line %lu:  Invalid font index %d",
 		    file_peek_path(), file_peek_line(), n);
       }
     } else if (!BEG_STRCASECMP(tmp, "bold ")) {
 #ifndef NO_BOLDFONT
       rs_boldFont = Word(2, tmp);
 #else
-      print_error("warning:  support for the bold font attribute was not compiled in, ignoring");
+      print_warning("Support for the bold font attribute was not compiled in, ignoring");
 #endif
 
     } else {
       tmp = Word(1, tmp);
-      print_error("parse error in file %s, line %lu:  Invalid font index \"%s\"",
+      print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"",
 		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      free(tmp);
+      FREE(tmp);
     }
 
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
 		"within context attributes", file_peek_path(), file_peek_line(), (buff ? buff : ""));
   }
 }
@@ -2088,7 +1934,7 @@ parse_toggles(char *buff)
   ASSERT(buff != NULL);
 
   if (!tmp) {
-    print_error("parse error in file %s, line %lu:  Missing boolean value in context toggles", file_peek_path(), file_peek_line());
+    print_error("Parse error in file %s, line %lu:  Missing boolean value in context toggles", file_peek_path(), file_peek_line());
     return;
   }
   if (BOOL_OPT_ISTRUE(tmp)) {
@@ -2096,7 +1942,7 @@ parse_toggles(char *buff)
   } else if (BOOL_OPT_ISFALSE(tmp)) {
     bool_val = 0;
   } else {
-    print_error("parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles",
+    print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles",
 		file_peek_path(), file_peek_line(), tmp);
     return;
   }
@@ -2111,7 +1957,7 @@ parse_toggles(char *buff)
       rs_mapAlert = *false_vals;
     }
 #else
-    print_error("warning:  support for the map_alert attribute was not compiled in, ignoring");
+    print_warning("Support for the map_alert attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "visual_bell ")) {
@@ -2138,16 +1984,6 @@ parse_toggles(char *buff)
       Options &= ~(Opt_scrollBar);
       rs_scrollBar = *false_vals;
     }
-  } else if (!BEG_STRCASECMP(buff, "menubar ")) {
-#if (MENUBAR_MAX)
-    if (bool_val) {
-      rs_menubar = *true_vals;
-    } else {
-      rs_menubar = *false_vals;
-    }
-#else
-    print_error("warning:  support for the menubar attribute was not compiled in, ignoring");
-#endif
 
   } else if (!BEG_STRCASECMP(buff, "utmp_logging ")) {
 #ifdef UTMP_SUPPORT
@@ -2159,7 +1995,7 @@ parse_toggles(char *buff)
       rs_utmpLogging = *false_vals;
     }
 #else
-    print_error("warning:  support for the utmp_logging attribute was not compiled in, ignoring");
+    print_warning("Support for the utmp_logging attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "meta8 ")) {
@@ -2172,7 +2008,7 @@ parse_toggles(char *buff)
       rs_meta8 = *false_vals;
     }
 #else
-    print_error("warning:  support for the meta8 attribute was not compiled in, ignoring");
+    print_warning("Support for the meta8 attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "iconic ")) {
@@ -2252,33 +2088,7 @@ parse_toggles(char *buff)
       rs_saveUnder = *false_vals;
     }
 #else
-    print_error("warning:  support for the save_under attribute was not compiled in, ignoring");
-#endif
-
-  } else if (!BEG_STRCASECMP(buff, "trans ")) {
-#ifdef PIXMAP_OFFSET
-    if (bool_val) {
-      Options |= Opt_pixmapTrans;
-      rs_pixmapTrans = *true_vals;
-    } else {
-      Options &= ~(Opt_pixmapTrans);
-      rs_pixmapTrans = *false_vals;
-    }
-#else
-    print_error("warning:  support for the trans attribute was not compiled in, ignoring");
-#endif
-
-  } else if (!BEG_STRCASECMP(buff, "watch_desktop ")) {
-#ifdef WATCH_DESKTOP_OPTION
-    if (bool_val) {
-      Options |= Opt_watchDesktop;
-      rs_watchDesktop = *true_vals;
-    } else {
-      Options &= ~(Opt_watchDesktop);
-      rs_watchDesktop = *false_vals;
-    }
-#else
-    print_error("warning:  support for the watch_desktop attribute was not compiled in, ignoring");
+    print_warning("Support for the save_under attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "no_cursor ")) {
@@ -2289,19 +2099,6 @@ parse_toggles(char *buff)
       Options &= ~(Opt_noCursor);
       rs_noCursor = (char *) false_vals;
     }
-
-  } else if (!BEG_STRCASECMP(buff, "menubar_move ")) {
-#if MENUBAR_MAX
-    if (bool_val) {
-      Options |= Opt_menubar_move;
-      rs_menubar_move = (char *) true_vals;
-    } else {
-      Options &= ~(Opt_menubar_move);
-      rs_menubar_move = (char *) false_vals;
-    }
-#else
-    print_error("warning:  support for the menubar_move attribute was not compiled in, ignoring");
-#endif
 
   } else if (!BEG_STRCASECMP(buff, "pause ")) {
     if (bool_val) {
@@ -2339,27 +2136,19 @@ parse_toggles(char *buff)
       rs_select_trailing_spaces = (char *) false_vals;
     }
 
-  } else if (!BEG_STRCASECMP(buff, "viewport_mode ")) {
-#ifdef PIXMAP_OFFSET
+  } else if (!BEG_STRCASECMP(buff, "report_as_keysyms ")) {
     if (bool_val) {
-      Options |= Opt_viewport_mode;
-      rs_viewport_mode = (char *) true_vals;
+      Options |= Opt_report_as_keysyms;
+      rs_report_as_keysyms = (char *) true_vals;
     } else {
-      Options &= ~(Opt_viewport_mode);
-      rs_viewport_mode = (char *) false_vals;
+      Options &= ~(Opt_report_as_keysyms);
+      rs_report_as_keysyms = (char *) false_vals;
     }
-#else
-    print_error("warning:  support for the viewport_mode attribute was not compiled in, ignoring");
-#endif
 
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles", file_peek_path(), file_peek_line(), buff);
   }
 }
-
-#define to_keysym(p,s) do { KeySym sym; \
-if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
-                           } while (0)
 
 void
 parse_keyboard(char *buff)
@@ -2369,18 +2158,18 @@ parse_keyboard(char *buff)
 
   if (!BEG_STRCASECMP(buff, "smallfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-    rs_smallfont_key = Word(2, buff);
+    RESET_AND_ASSIGN(rs_smallfont_key, Word(2, buff));
     to_keysym(&ks_smallfont, rs_smallfont_key);
 #else
-    print_error("warning:  support for the smallfont_key attribute was not compiled in, ignoring");
+    print_warning("Support for the smallfont_key attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "bigfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-    rs_bigfont_key = Word(2, buff);
+    RESET_AND_ASSIGN(rs_bigfont_key, Word(2, buff));
     to_keysym(&ks_bigfont, rs_bigfont_key);
 #else
-    print_error("warning:  support for the bigfont_key attribute was not compiled in, ignoring");
+    print_warning("Support for the bigfont_key attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "keysym ")) {
@@ -2395,7 +2184,7 @@ parse_keyboard(char *buff)
       if (sym >= 0xff00)
 	sym -= 0xff00;
       if (sym < 0 || sym > 0xff) {
-	print_error("parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff",
+	print_error("Parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff",
 		    file_peek_path(), file_peek_line(), sym + 0xff00);
 	return;
       }
@@ -2414,7 +2203,7 @@ parse_keyboard(char *buff)
       }
     }
 #else
-    print_error("warning:  support for the keysym attributes was not compiled in, ignoring");
+    print_warning("Support for the keysym attributes was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "greek ")) {
@@ -2423,29 +2212,29 @@ parse_keyboard(char *buff)
     char *tmp = PWord(2, buff);
 
     if (!tmp) {
-      print_error("parse error in file %s, line %lu:  Missing boolean value for attribute greek",
+      print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute greek",
 		  file_peek_path(), file_peek_line());
       return;
     }
     if (BOOL_OPT_ISTRUE(tmp)) {
-      rs_greek_keyboard = Word(3, buff);
+      RESET_AND_ASSIGN(rs_greek_keyboard, Word(3, buff));
       if (BEG_STRCASECMP(rs_greek_keyboard, "iso")) {
 	greek_setmode(GREEK_ELOT928);
       } else if (BEG_STRCASECMP(rs_greek_keyboard, "ibm")) {
 	greek_setmode(GREEK_IBM437);
       } else {
-	print_error("parse error in file %s, line %lu:  Invalid greek keyboard mode \"%s\"",
+	print_error("Parse error in file %s, line %lu:  Invalid greek keyboard mode \"%s\"",
 		    file_peek_path(), file_peek_line(), (rs_greek_keyboard ? rs_greek_keyboard : ""));
       }
     } else if (BOOL_OPT_ISFALSE(tmp)) {
       /* This space intentionally left no longer blank =^) */
     } else {
-      print_error("parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s",
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s",
 		  file_peek_path(), file_peek_line(), tmp, buff);
       return;
     }
 #else
-    print_error("warning:  support for the greek attribute was not compiled in, ignoring");
+    print_warning("Support for the greek attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "app_keypad ")) {
@@ -2453,7 +2242,7 @@ parse_keyboard(char *buff)
     char *tmp = PWord(2, buff);
 
     if (!tmp) {
-      print_error("parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad",
+      print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad",
 		  file_peek_path(), file_peek_line());
       return;
     }
@@ -2464,7 +2253,7 @@ parse_keyboard(char *buff)
       PrivateModes &= ~(PrivMode_aplKP);
       rs_app_keypad = (char *) false_vals;
     } else {
-      print_error("parse error in file %s, line %lu:  Invalid boolean value \"%s\" for "
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for "
 		  "attribute app_keypad", file_peek_path(), file_peek_line(), tmp);
       return;
     }
@@ -2474,7 +2263,7 @@ parse_keyboard(char *buff)
     char *tmp = PWord(2, buff);
 
     if (!tmp) {
-      print_error("parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor",
+      print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor",
 		  file_peek_path(), file_peek_line());
       return;
     }
@@ -2485,17 +2274,16 @@ parse_keyboard(char *buff)
       PrivateModes &= ~(PrivMode_aplCUR);
       rs_app_cursor = (char *) false_vals;
     } else {
-      print_error("parse error in file %s, line %lu:  Invalid boolean value \"%s\" for "
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for "
 		  "attribute app_cursor", file_peek_path(), file_peek_line(), tmp);
       return;
     }
 
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
 		"within context keyboard", file_peek_path(), file_peek_line(), buff);
   }
 }
-#undef to_keysym
 
 void
 parse_misc(char *buff)
@@ -2505,10 +2293,10 @@ parse_misc(char *buff)
 
   if (!BEG_STRCASECMP(buff, "print_pipe ")) {
 #ifdef PRINTPIPE
-    rs_print_pipe = strdup(PWord(2, buff));
+    RESET_AND_ASSIGN(rs_print_pipe, StrDup(PWord(2, buff)));
     chomp(rs_print_pipe);
 #else
-    print_error("warning:  support for the print_pipe attribute was not compiled in, ignoring");
+    print_warning("Support for the print_pipe attribute was not compiled in, ignoring");
 #endif
 
   } else if (!BEG_STRCASECMP(buff, "save_lines ")) {
@@ -2521,27 +2309,14 @@ parse_misc(char *buff)
 #ifdef BORDER_WIDTH_OPTION
     TermWin.internalBorder = (short) strtol(PWord(2, buff), (char **) NULL, 0);
 #else
-    print_error("warning:  support for the border_width attribute was not compiled in, ignoring");
+    print_warning("Support for the border_width attribute was not compiled in, ignoring");
 #endif
 
-  } else if (!BEG_STRCASECMP(buff, "menu ")) {
-#if MENUBAR_MAX
-    rs_menu = Word(2, buff);
-    if (NumWords(buff) > 2) {
-      char *btmp = Word(3, buff);
-
-      if (BOOL_OPT_ISTRUE(btmp)) {
-	rs_menubar = *true_vals;
-      } else if (BOOL_OPT_ISFALSE(btmp)) {
-	rs_menubar = *false_vals;
-      }
-    }
-#else
-    print_error("warning:  support for menus was not compiled in, ignoring");
-#endif
+  } else if (!BEG_STRCASECMP(buff, "line_space ")) {
+    rs_line_space = strtol(PWord(2, buff), (char **) NULL, 0);
 
   } else if (!BEG_STRCASECMP(buff, "term_name ")) {
-    rs_term_name = Word(2, buff);
+    RESET_AND_ASSIGN(rs_term_name, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "debug ")) {
     debug_level = (unsigned int) strtoul(PWord(2, buff), (char **) NULL, 0);
@@ -2552,7 +2327,7 @@ parse_misc(char *buff)
 
     Options |= Opt_exec;
 
-    rs_execArgs = (char **) malloc(sizeof(char *) * ((n = NumWords(PWord(2, buff))) + 1));
+    RESET_AND_ASSIGN(rs_execArgs, (char **) malloc(sizeof(char *) * ((n = NumWords(PWord(2, buff))) + 1)));
 
     for (k = 0; k < n; k++) {
       rs_execArgs[k] = Word(k + 2, buff);
@@ -2562,283 +2337,563 @@ parse_misc(char *buff)
 
   } else if (!BEG_STRCASECMP(buff, "cut_chars ")) {
 #ifdef CUTCHAR_OPTION
-    rs_cutchars = Word(2, buff);
+    RESET_AND_ASSIGN(rs_cutchars, Word(2, buff));
     chomp(rs_cutchars);
 #else
-    print_error("warning:  support for the cut_chars attribute was not compiled in, ignoring");
+    print_warning("Support for the cut_chars attribute was not compiled in, ignoring");
 #endif
 
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
 		"within context misc", file_peek_path(), file_peek_line(), buff);
   }
 }
 
 void
-parse_pixmaps(char *buff)
+parse_imageclasses(char *buff)
 {
-
-  long w, h;
-  char *w1, *h1;
-  unsigned long n;
 
 #ifdef PIXMAP_SUPPORT
   ASSERT(buff != NULL);
 
-  if (!BEG_STRCASECMP(buff, "background ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute background",
-		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmapScale = (char *) true_vals;
-      Options |= Opt_pixmapScale;
-      rs_pixmaps[pixmap_bg] = Word(4, buff);
-      rs_pixmaps[pixmap_bg] = (char *) realloc(rs_pixmaps[pixmap_bg], strlen(rs_pixmaps[pixmap_bg]) + 9);
-      strcat(rs_pixmaps[pixmap_bg], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_bg] = Word(4, buff);
-    }
-
-  } else if (!BEG_STRCASECMP(buff, "icon ")) {
-    rs_icon = Word(2, buff);
-
-# ifdef PIXMAP_SCROLLBAR
-  } else if (!BEG_STRCASECMP(buff, "scroll_up ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_up", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_up] = Word(4, buff);
-      rs_pixmaps[pixmap_up] = (char *) realloc(rs_pixmaps[pixmap_up], strlen(rs_pixmaps[pixmap_up]) + 9);
-      strcat(rs_pixmaps[pixmap_up], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_up] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_up_clicked ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_up_clicked", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_upclk] = Word(4, buff);
-      rs_pixmaps[pixmap_upclk] = (char *) realloc(rs_pixmaps[pixmap_upclk], strlen(rs_pixmaps[pixmap_upclk]) + 9);
-      strcat(rs_pixmaps[pixmap_upclk], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_upclk] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_down ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_down", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_dn] = Word(4, buff);
-      rs_pixmaps[pixmap_dn] = (char *) realloc(rs_pixmaps[pixmap_dn], strlen(rs_pixmaps[pixmap_dn]) + 9);
-      strcat(rs_pixmaps[pixmap_dn], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_dn] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_down_clicked ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_down_clicked", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_dnclk] = Word(4, buff);
-      rs_pixmaps[pixmap_dnclk] = (char *) realloc(rs_pixmaps[pixmap_dnclk], strlen(rs_pixmaps[pixmap_dnclk]) + 9);
-      strcat(rs_pixmaps[pixmap_dnclk], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_dnclk] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_background ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_background", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_sb] = Word(4, buff);
-      rs_pixmaps[pixmap_sb] = (char *) realloc(rs_pixmaps[pixmap_sb], strlen(rs_pixmaps[pixmap_sb]) + 9);
-      strcat(rs_pixmaps[pixmap_sb], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_sb] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_anchor ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_anchor", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_sa] = Word(4, buff);
-      rs_pixmaps[pixmap_sa] = (char *) realloc(rs_pixmaps[pixmap_sa], strlen(rs_pixmaps[pixmap_sa]) + 9);
-      strcat(rs_pixmaps[pixmap_sa], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_sa] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "scroll_anchor_clicked ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "scroll_anchor_clicked", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_saclk] = Word(4, buff);
-      rs_pixmaps[pixmap_saclk] = (char *) realloc(rs_pixmaps[pixmap_saclk], strlen(rs_pixmaps[pixmap_saclk]) + 9);
-      strcat(rs_pixmaps[pixmap_saclk], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_saclk] = Word(4, buff);
-    }
-# endif				/* PIXMAP_SCROLLBAR */
-# ifdef PIXMAP_MENUBAR
-  } else if (!BEG_STRCASECMP(buff, "menu_background ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "menu_background", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_mb] = Word(4, buff);
-      rs_pixmaps[pixmap_mb] = (char *) realloc(rs_pixmaps[pixmap_mb], strlen(rs_pixmaps[pixmap_mb]) + 9);
-      strcat(rs_pixmaps[pixmap_mb], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_mb] = Word(4, buff);
-    }
-  } else if (!BEG_STRCASECMP(buff, "menu_selected ")) {
-
-    if ((n = NumWords(buff) < 4) || (n > 6)) {
-      char *tmp = PWord(2, buff);
-
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute "
-		  "menu_selected", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      return;
-    }
-    w1 = PWord(2, buff);
-    h1 = PWord(3, buff);
-    w = strtol(w1, (char **) NULL, 0);
-    h = strtol(h1, (char **) NULL, 0);
-    if (w || h) {
-      rs_pixmaps[pixmap_ms] = Word(4, buff);
-      rs_pixmaps[pixmap_ms] = (char *) realloc(rs_pixmaps[pixmap_ms], strlen(rs_pixmaps[pixmap_ms]) + 9);
-      strcat(rs_pixmaps[pixmap_ms], "@100x100");
-    } else {
-      rs_pixmaps[pixmap_ms] = Word(4, buff);
-    }
-# endif				/* PIXMAP_MENUBAR */
+  if (!BEG_STRCASECMP(buff, "icon ")) {
+    RESET_AND_ASSIGN(rs_icon, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "path ")) {
-    rs_path = Word(2, buff);
+    RESET_AND_ASSIGN(rs_path, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "anim ")) {
 # ifdef BACKGROUND_CYCLING_SUPPORT
     char *tmp = PWord(2, buff);
 
     if (tmp) {
-      rs_anim_pixmap_list = strdup(tmp);
+      rs_anim_pixmap_list = StrDup(tmp);
     } else {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim", file_peek_path(), file_peek_line());
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim", file_peek_path(), file_peek_line());
     }
 # else
-    print_error("warning:  support for the anim attribute was not compiled in, ignoring");
+    print_warning("Support for the anim attribute was not compiled in, ignoring");
 # endif
 
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
-		"within context pixmaps", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+		"within context imageclasses", file_peek_path(), file_peek_line(), buff);
   }
 #else
-  print_error("warning:  pixmap support was not compiled in, ignoring entire context");
+  print_warning("Pixmap support was not compiled in, ignoring entire context");
   file_poke_skip(1);
 #endif
 }
 
 void
-parse_kanji(char *buff)
+parse_image(char *buff)
+{
+  static short idx = -1;
+
+#ifdef PIXMAP_SUPPORT
+  ASSERT(buff != NULL);
+
+  if (!BEG_STRCASECMP(buff, "type ")) {
+    char *type = PWord(2, buff);
+
+    if (!type) {
+      print_error("Parse error in file %s, line %lu:  Missing image type", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!strcasecmp(type, "background")) {
+      idx = image_bg;
+    } else if (!strcasecmp(type, "trough")) {
+      idx = image_sb;
+    } else if (!strcasecmp(type, "anchor")) {
+      idx = image_sa;
+    } else if (!strcasecmp(type, "up_arrow")) {
+      idx = image_up;
+    } else if (!strcasecmp(type, "down_arrow")) {
+      idx = image_down;
+    } else if (!strcasecmp(type, "left_arrow")) {
+      idx = image_left;
+    } else if (!strcasecmp(type, "right_arrow")) {
+      idx = image_right;
+    } else if (!strcasecmp(type, "menu")) {
+      idx = image_menu;
+    } else if (!strcasecmp(type, "submenu")) {
+      idx = image_submenu;
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid image type \"%s\"", file_peek_path(), file_peek_line(), type);
+      return;
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "state ")) {
+    char *state = PWord(2, buff), new = 0;
+
+    if (!state) {
+      print_error("Parse error in file %s, line %lu:  Missing state", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"state\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!strcasecmp(state, "normal")) {
+      if (images[idx].norm == NULL) {
+	images[idx].norm = (simage_t *) MALLOC(sizeof(simage_t));
+	new = 1;
+      }
+      images[idx].current = images[idx].norm;
+    } else if (!strcasecmp(state, "selected")) {
+      if (images[idx].selected == NULL) {
+	images[idx].selected = (simage_t *) MALLOC(sizeof(simage_t));
+	new = 1;
+      }
+      images[idx].current = images[idx].selected;
+    } else if (!strcasecmp(state, "clicked")) {
+      if (images[idx].clicked == NULL) {
+	images[idx].clicked = (simage_t *) MALLOC(sizeof(simage_t));
+	new = 1;
+      }
+      images[idx].current = images[idx].clicked;
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid state \"%s\"", file_peek_path(), file_peek_line(), state);
+      return;
+    }
+    if (new) {
+      images[idx].current->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
+      images[idx].current->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
+      MEMSET(images[idx].current->pmap, 0, sizeof(pixmap_t));
+      MEMSET(images[idx].current->iml, 0, sizeof(imlib_t));
+    }
+  } else if (!BEG_STRCASECMP(buff, "mode ")) {
+    char *mode = PWord(2, buff);
+    char *allow_list = PWord(4, buff);
+
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!mode) {
+      print_error("Parse error in file %s, line %lu:  Missing mode line", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!BEG_STRCASECMP(mode, "image ")) {
+      images[idx].mode = MODE_IMAGE;
+    } else if (!BEG_STRCASECMP(mode, "trans ")) {
+      images[idx].mode = MODE_TRANS;
+    } else if (!BEG_STRCASECMP(mode, "viewport ")) {
+      images[idx].mode = MODE_VIEWPORT;
+    } else if (!BEG_STRCASECMP(mode, "auto ")) {
+      images[idx].mode = MODE_AUTO;
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), mode);
+    }
+    if (allow_list) {
+      char *allow;
+
+      for (; (allow = strsep(&allow_list, " ")) != NULL;) {
+	if (!BEG_STRCASECMP("image", allow)) {
+	  images[idx].mode |= ALLOW_IMAGE;
+	} else if (!BEG_STRCASECMP("transparent", allow)) {
+	  images[idx].mode |= ALLOW_TRANS;
+	} else if (!BEG_STRCASECMP("viewport", allow)) {
+	  images[idx].mode |= ALLOW_VIEWPORT;
+	} else if (!BEG_STRCASECMP("auto", allow)) {
+	  images[idx].mode |= ALLOW_AUTO;
+	} else {
+	  print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), allow);
+	}
+      }
+    }
+  } else if (!BEG_STRCASECMP(buff, "file ")) {
+    char *filename = PWord(2, buff);
+
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!filename) {
+      print_error("Parse error in file %s, line %lu:  Missing filename", file_peek_path(), file_peek_line());
+      return;
+    }
+    load_image(filename, idx);
+
+  } else if (!BEG_STRCASECMP(buff, "geom ")) {
+    char *geom = PWord(2, buff);
+
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!geom) {
+      print_error("Parse error in file %s, line %lu:  Missing geometry string", file_peek_path(), file_peek_line());
+      return;
+    }
+    set_pixmap_scale(geom, images[idx].current->pmap);
+
+  } else if (!BEG_STRCASECMP(buff, "cmod ") || !BEG_STRCASECMP(buff, "colormod ")) {
+    char *color = PWord(2, buff);
+    char *mods = PWord(3, buff);
+    unsigned char n;
+    imlib_t *iml = images[idx].current->iml;
+
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!color) {
+      print_error("Parse error in file %s, line %lu:  Missing color name", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!mods) {
+      print_error("Parse error in file %s, line %lu:  Missing modifier(s)", file_peek_path(), file_peek_line());
+      return;
+    }
+    n = NumWords(mods);
+
+    if (!BEG_STRCASECMP(color, "image ")) {
+      RESET_AND_ASSIGN(iml->mod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      iml->mod->contrast = iml->mod->gamma = 0xff;
+      iml->mod->brightness = (int) strtol(mods, (char **) NULL, 0);
+      if (n > 1) {
+        iml->mod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
+      }
+      if (n > 2) {
+        iml->rmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
+      }
+    } else if (!BEG_STRCASECMP(color, "red ")) {
+      RESET_AND_ASSIGN(iml->rmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      iml->rmod->contrast = iml->rmod->gamma = 0xff;
+      iml->rmod->brightness = (int) strtol(mods, (char **) NULL, 0);
+      if (n > 1) {
+        iml->rmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
+      }
+      if (n > 2) {
+        iml->rmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
+      }
+    } else if (!BEG_STRCASECMP(color, "green ")) {
+      RESET_AND_ASSIGN(iml->gmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      iml->gmod->contrast = iml->gmod->gamma = 0xff;
+      iml->gmod->brightness = (int) strtol(mods, (char **) NULL, 0);
+      if (n > 1) {
+        iml->gmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
+      }
+      if (n > 2) {
+        iml->gmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
+      }
+    } else if (!BEG_STRCASECMP(color, "blue ")) {
+      RESET_AND_ASSIGN(iml->bmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      iml->bmod->contrast = iml->bmod->gamma = 0xff;
+      iml->bmod->brightness = (int) strtol(mods, (char **) NULL, 0);
+      if (n > 1) {
+        iml->bmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
+      }
+      if (n > 2) {
+        iml->bmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
+      }
+    } else {
+      print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"", file_peek_path(), file_peek_line());
+      return;
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "border ")) {
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"border\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (NumWords(buff + 7) < 4) {
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"", file_peek_path(), file_peek_line());
+      return;
+    }
+    RESET_AND_ASSIGN(images[idx].current->iml->border, (ImlibBorder *) MALLOC(sizeof(ImlibBorder)));
+
+    images[idx].current->iml->border->left = (unsigned short) strtoul(PWord(2, buff), (char **) NULL, 0);
+    images[idx].current->iml->border->right = (unsigned short) strtoul(PWord(3, buff), (char **) NULL, 0);
+    images[idx].current->iml->border->top = (unsigned short) strtoul(PWord(4, buff), (char **) NULL, 0);
+    images[idx].current->iml->border->bottom = (unsigned short) strtoul(PWord(5, buff), (char **) NULL, 0);
+
+    if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
+	&& (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
+      FREE(images[idx].current->iml->border);
+      images[idx].current->iml->border = (ImlibBorder *) NULL;	/* No sense in wasting CPU time and memory if there are no borders */
+    }
+  } else if (!BEG_STRCASECMP(buff, "bevel ")) {
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (NumWords(buff + 6) < 5) {
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (images[idx].current->iml->bevel != NULL) {
+      FREE(images[idx].current->iml->bevel->edges);
+      FREE(images[idx].current->iml->bevel);
+    }
+    images[idx].current->iml->bevel = (bevel_t *) MALLOC(sizeof(bevel_t));
+    images[idx].current->iml->bevel->edges = (ImlibBorder *) MALLOC(sizeof(ImlibBorder));
+
+    if (!BEG_STRCASECMP(PWord(2, buff), "down")) {
+      images[idx].current->iml->bevel->up = 0;
+    } else {
+      images[idx].current->iml->bevel->up = 1;
+    }
+    images[idx].current->iml->bevel->edges->left = (unsigned short) strtoul(PWord(3, buff), (char **) NULL, 0);
+    images[idx].current->iml->bevel->edges->right = (unsigned short) strtoul(PWord(4, buff), (char **) NULL, 0);
+    images[idx].current->iml->bevel->edges->top = (unsigned short) strtoul(PWord(5, buff), (char **) NULL, 0);
+    images[idx].current->iml->bevel->edges->bottom = (unsigned short) strtoul(PWord(6, buff), (char **) NULL, 0);
+
+    if ((images[idx].current->iml->bevel->edges->left == 0) && (images[idx].current->iml->bevel->edges->right == 0)
+	&& (images[idx].current->iml->bevel->edges->top == 0) && (images[idx].current->iml->bevel->edges->bottom == 0)) {
+      FREE(images[idx].current->iml->bevel->edges);
+      images[idx].current->iml->bevel->edges = (ImlibBorder *) NULL;
+      FREE(images[idx].current->iml->bevel);
+      images[idx].current->iml->bevel = (bevel_t *) NULL;
+    }
+  } else if (!BEG_STRCASECMP(buff, "padding ")) {
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (NumWords(buff + 8) < 4) {
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"", file_peek_path(), file_peek_line());
+      return;
+    }
+    RESET_AND_ASSIGN(images[idx].current->iml->pad, (ImlibBorder *) MALLOC(sizeof(ImlibBorder)));
+
+    images[idx].current->iml->pad->left = (unsigned short) strtoul(PWord(2, buff), (char **) NULL, 0);
+    images[idx].current->iml->pad->right = (unsigned short) strtoul(PWord(3, buff), (char **) NULL, 0);
+    images[idx].current->iml->pad->top = (unsigned short) strtoul(PWord(4, buff), (char **) NULL, 0);
+    images[idx].current->iml->pad->bottom = (unsigned short) strtoul(PWord(5, buff), (char **) NULL, 0);
+
+    if ((images[idx].current->iml->pad->left == 0) && (images[idx].current->iml->pad->right == 0)
+	&& (images[idx].current->iml->pad->top == 0) && (images[idx].current->iml->pad->bottom == 0)) {
+      FREE(images[idx].current->iml->pad);
+      images[idx].current->iml->pad = (ImlibBorder *) NULL;
+    }
+  } else {
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+		"within context image", file_peek_path(), file_peek_line(), buff);
+  }
+#else
+  print_warning("Pixmap support was not compiled in, ignoring entire context");
+  file_poke_skip(1);
+#endif
+}
+
+void
+parse_actions(char *buff)
+{
+  unsigned short mod = MOD_NONE;
+  unsigned char button = BUTTON_NONE;
+  KeySym keysym = 0;
+  char *to, *str;
+  unsigned short i;
+
+  ASSERT(buff != NULL);
+
+  if (!BEG_STRCASECMP(buff, "bind ")) {
+    for (i = 2; (str = Word(i, buff)) && strcasecmp(str, "to"); i++) {
+      if (!BEG_STRCASECMP(str, "anymod")) {
+        mod = MOD_ANY;
+      } else if (!BEG_STRCASECMP(str, "ctrl")) {
+        mod |= MOD_CTRL;
+      } else if (!BEG_STRCASECMP(str, "shift")) {
+        mod |= MOD_SHIFT;
+      } else if (!BEG_STRCASECMP(str, "lock")) {
+        mod |= MOD_LOCK;
+      } else if (!BEG_STRCASECMP(str, "mod1") || !BEG_STRCASECMP(str, "alt") || !BEG_STRCASECMP(str, "meta")) {
+        mod |= MOD_MOD1;
+      } else if (!BEG_STRCASECMP(str, "mod2")) {
+        mod |= MOD_MOD2;
+      } else if (!BEG_STRCASECMP(str, "mod3")) {
+        mod |= MOD_MOD3;
+      } else if (!BEG_STRCASECMP(str, "mod4")) {
+        mod |= MOD_MOD4;
+      } else if (!BEG_STRCASECMP(str, "mod5")) {
+        mod |= MOD_MOD5;
+      } else if (!BEG_STRCASECMP(str, "button")) {
+        switch (*(str+6)) {
+        case '1': button = Button1; break;
+        case '2': button = Button2; break;
+        case '3': button = Button3; break;
+        case '4': button = Button4; break;
+        case '5': button = Button5; break;
+        default: break;
+        }
+      } else if (isdigit(*str)) {
+        keysym = (KeySym) strtoul(str, (char **) NULL, 0);
+      } else {
+        keysym = XStringToKeysym(str);
+      }
+      FREE(str);
+    }
+    if (!str) {
+      print_error("Parse error in file %s, line %lu:  Syntax error (\"to\" not found)", file_peek_path(), file_peek_line());
+      FREE(str);
+      return;
+    }
+    FREE(str);
+    if ((button == BUTTON_NONE) && (keysym == 0)) {
+      print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action", file_peek_path(), file_peek_line());
+      return;
+    }
+    i++;
+    str = PWord(i, buff);
+    if (!BEG_STRCASECMP(str, "string")) {
+      str = Word(i+1, buff);
+      action_add(mod, button, keysym, ACTION_STRING, (void *) str);
+      FREE(str);
+    } else if (!BEG_STRCASECMP(str, "echo")) {
+      str = Word(i+1, buff);
+      action_add(mod, button, keysym, ACTION_ECHO, (void *) str);
+      FREE(str);
+    } else if (!BEG_STRCASECMP(str, "menu")) {
+      menu_t *menu;
+
+      str = Word(i+1, buff);
+      menu = find_menu_by_title(menu_list, str);
+      action_add(mod, button, keysym, ACTION_MENU, (void *) menu);
+      FREE(str);
+    } else {
+      print_error("Parse error in file %s, line %lu:  Syntax error (\"to\" not found)", file_peek_path(), file_peek_line());
+      return;
+    }
+
+  } else {
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+		"within context action", file_peek_path(), file_peek_line(), buff);
+  }
+}
+
+void
+parse_menu(char *buff)
 {
 
-#ifdef KANJI
+  ASSERT(buff != NULL);
+
+  if (!BEG_STRCASECMP(buff, "title ")) {
+    char *title = Word(2, buff);
+
+    curmenu = menu_create(title);
+    menu_list = menulist_add_menu(menu_list, curmenu);
+    FREE(title);
+
+  } else if (!BEG_STRCASECMP(buff, "font ")) {
+    char *name = Word(2, buff);
+
+    if (!curmenu) {
+      print_error("Parse error in file %s, line %lu:  You must set the menu title before choosing a font.", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!name) {
+      print_error("Parse error in file %s, line %lu:  Missing font name.", file_peek_path(), file_peek_line());
+      return;
+    }
+    menu_set_font(curmenu, name);
+
+  } else if (!BEG_STRCASECMP(buff, "sep") || !BEG_STRCASECMP(buff, "-")) {
+    menuitem_t *item;
+
+    item = menuitem_create((char *) NULL);
+    menu_add_item(curmenu, item);
+    menuitem_set_action(item, MENUITEM_SEP, (char *) NULL);
+
+  } else {
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+		"within context menu", file_peek_path(), file_peek_line(), buff);
+  }
+}
+
+void
+parse_menuitem(char *buff)
+{
+
+  static menuitem_t *curitem;
+
+  ASSERT(buff != NULL);
+
+  if (!BEG_STRCASECMP(buff, "text ")) {
+    char *text = Word(2, buff);
+
+    curitem = menuitem_create(text);
+    menu_add_item(curmenu, curitem);
+    FREE(text);
+
+  } else if (!BEG_STRCASECMP(buff, "rtext ")) {
+    char *rtext = Word(2, buff);
+
+    menuitem_set_rtext(curitem, rtext);
+    FREE(rtext);
+
+  } else if (!BEG_STRCASECMP(buff, "icon ")) {
+
+  } else if (!BEG_STRCASECMP(buff, "action ")) {
+    char *type = PWord(2, buff);
+    char *action = Word(3, buff);
+
+    if (!BEG_STRCASECMP(type, "submenu ")) {
+      menuitem_set_action(curitem, MENUITEM_SUBMENU, action);
+
+    } else if (!BEG_STRCASECMP(type, "string ")) {
+      menuitem_set_action(curitem, MENUITEM_STRING, action);
+
+    } else if (!BEG_STRCASECMP(type, "echo ")) {
+      menuitem_set_action(curitem, MENUITEM_ECHO, action);
+
+    } else if (!BEG_STRCASECMP(type, "separator")) {
+      menuitem_set_action(curitem, MENUITEM_SEP, action);
+
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid menu item action \"%s\"", file_peek_path(), file_peek_line(), type);
+    }
+    FREE(action);
+
+  } else {
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
+		"within context menu", file_peek_path(), file_peek_line(), buff);
+  }
+}
+
+void
+parse_xim(char *buff)
+{
+#ifdef USE_XIM
+  ASSERT(buff != NULL);
+
+  if (!BEG_STRCASECMP(buff, "input_method ")) {
+    rs_inputMethod = Word(2, buff);
+  } else if (!BEG_STRCASECMP(buff, "preedit_type ")) {
+    rs_preeditType = Word(2, buff);
+  } else {
+    print_error("Parse error in file %s, line %lu:\n"
+		"Attribute \"%s\" is not valid within context xim",
+		file_peek_path(), file_peek_line(), buff);
+  }
+#else
+  print_warning("XIM support was not compiled in, ignoring entire context");
+  file_poke_skip(1);
+#endif
+}
+
+void
+parse_multichar(char *buff)
+{
+#ifdef MULTI_CHARSET
   ASSERT(buff != NULL);
 
   if (!BEG_STRCASECMP(buff, "encoding ")) {
-    if ((rs_kanji_encoding = Word(2, buff)) != NULL) {
-      if (BEG_STRCASECMP(rs_kanji_encoding, "eucj") && BEG_STRCASECMP(rs_kanji_encoding, "sjis")) {
-	print_error("parse error in file %s, line %lu:  Invalid kanji encoding mode \"%s\"",
-		    file_peek_path(), file_peek_line(), rs_kanji_encoding);
+    if ((rs_multchar_encoding = Word(2, buff)) != NULL) {
+      if (BEG_STRCASECMP(rs_multchar_encoding, "eucj")
+	  && BEG_STRCASECMP(rs_multchar_encoding, "sjis")
+	  && BEG_STRCASECMP(rs_multchar_encoding, "euckr")) {
+	print_error("Parse error in file %s, line %lu:"
+		    " Invalid multichar encoding mode \"%s\"",
+		    file_peek_path(), file_peek_line(), rs_multchar_encoding);
 	return;
       }
-      set_kanji_encoding(rs_kanji_encoding);
+      set_multichar_encoding(rs_multchar_encoding);
     } else {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding", file_peek_path(), file_peek_line());
+      print_error("Parse error in file %s, line %lu: "
+		  " Invalid parameter list \"\" for attribute encoding",
+		  file_peek_path(), file_peek_line());
     }
   } else if (!BEG_STRCASECMP(buff, "font ")) {
 
@@ -2846,30 +2901,35 @@ parse_kanji(char *buff)
     unsigned char n;
 
     if (NumWords(buff) != 3) {
-      print_error("parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
-		  "attribute font", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+      print_error("Parse error in file %s, line %lu:"
+		  " Invalid parameter list \"%s\" for attribute font",
+		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       return;
     }
     if (isdigit(*tmp)) {
       n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
       if (n <= 4) {
-	rs_kfont[n] = Word(2, tmp);
+	rs_mfont[n] = Word(2, tmp);
       } else {
-	print_error("parse error in file %s, line %lu:  Invalid font index %d",
+	print_error("Parse error in file %s, line %lu:"
+		    " Invalid font index %d",
 		    file_peek_path(), file_peek_line(), n);
       }
     } else {
       tmp = Word(1, tmp);
-      print_error("parse error in file %s, line %lu:  Invalid font index \"%s\"",
+      print_error("Parse error in file %s, line %lu:"
+		  " Invalid font index \"%s\"",
 		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
-      free(tmp);
+      FREE(tmp);
     }
   } else {
-    print_error("parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
-		"within context kanji", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:"
+		" Attribute \"%s\" is not valid within context multichar",
+		file_peek_path(), file_peek_line(), buff);
   }
 #else
-  print_error("warning:  kanji support was not compiled in, ignoring entire context");
+  print_warning("Multichar support was not compiled in,"
+		" ignoring entire context");
   file_poke_skip(1);
 #endif
 }
@@ -2880,280 +2940,232 @@ parse_undef(char *buff)
 
   ASSERT(buff != NULL);
 
-  print_error("parse error in file %s, line %lu:  Undefined subcontext \"%s\" within context %s",
+  print_error("Parse error in file %s, line %lu:  Undefined subcontext \"%s\" within context %s",
 	      file_peek_path(), file_peek_line(), PWord(2, buff),
-	      ctx_id_to_name(ctx_peek()));
+	      ctx_id_to_name(ctx_peek_last()));
   file_poke_skip(1);
 
 }
 
-/* The config file reader.  This loads a file called MAIN, which is
-   located by searching CONFIG_SEARCH_PATH, PATH_ENV, and $PATH.  If 
-   it can't find a config file, it displays a warning but continues.
-   -- mej */
+/* The config file reader.  This looks for the config file by searching CONFIG_SEARCH_PATH and PATH_ENV.
+   If it can't find a config file, it displays a warning but continues. -- mej */
 
-#ifdef USE_THEMES
-int
-find_theme(char *path, char *name)
-{
-
-  register char *search_path = strdup(path);
-  register char *cur_path, *conf_name;
-  int ver;
-  char buff[256];
-  char *theme_root, *end_ptr;
-  char working_dir[PATH_MAX + 1];
-
-  if (!name)
-    return (0);
-
-  D_OPTIONS(("Searching for theme %s\n", name));
-
-  for (cur_path = strtok(search_path, ":"); !file_peek_fp() && cur_path;
-       cur_path = strtok((char *) NULL, ":")) {
-
-    D_OPTIONS(("cur_path == %s\n", cur_path));
-    if (!BEG_STRCASECMP(cur_path, "~/")) {
-      chdir(getenv("HOME"));
-      cur_path += 2;
-    }
-    if (chdir(cur_path)) {
-      continue;
-    }
-    getcwd(working_dir, PATH_MAX);
-    D_OPTIONS(("cur_path == %s   wd == %s\n", cur_path, working_dir));
-    if (chdir(name)) {
-      continue;
-    }
-    if (rs_config_file) {
-      conf_name = rs_config_file;
-    } else {
-      conf_name = CONFIG_FILE_NAME;
-    }
-    file_poke_fp(fopen(conf_name, "rt"));
-    if (file_peek_fp()) {
-      fgets(buff, 256, file_peek_fp());
-      D_OPTIONS(("Magic line \"%s\" [%s]  VERSION == \"%s\"  size == %lu\n",
-		 buff, buff + 7, VERSION, sizeof(VERSION) - 1));
-      if (BEG_STRCASECMP(buff, "<Eterm-")) {
-	file_poke_fp(NULL);
-      } else {
-	if ((end_ptr = strchr(buff, '>')) != NULL) {
-	  *end_ptr = 0;
-	}
-	if ((ver = BEG_STRCASECMP(buff + 7, VERSION)) > 0) {
-	  print_error("warning:  config file is designed for a newer version of Eterm");
-#ifdef WARN_OLDER
-	} else if (ver < 0) {
-	  print_error("warning:  config file is designed for an older version of Eterm");
-#endif
-	}
-	theme_root = (char *) MALLOC(strlen(working_dir) + strlen(cur_path) + strlen(name) + 16 + 1);
-	sprintf(theme_root, "ETERM_THEME_ROOT=%s/%s", working_dir, name);
-	putenv(theme_root);
-	D_OPTIONS(("%s\n", theme_root));
-      }
-    }
-  }
-  return ((int) file_peek_fp());
-}
-
-#endif
-
-int
-find_config_file(char *path, char *name)
-{
-
-  register char *search_path = strdup(path);
-  register char *cur_path;
-  int ver;
-  char buff[256], *end_ptr;
-
-#if DEBUG >= DEBUG_OPTIONS
-  char *pwd2;
-
-#endif
-
-  if (!name)
-    return (0);
-
-  D_OPTIONS(("Searching for config file %s\n", name));
-
-  for (cur_path = strtok(search_path, ":"); !file_peek_fp() && cur_path;
-       cur_path = strtok((char *) NULL, ":")) {
-
-    D_OPTIONS(("cur_path == %s\n", cur_path));
-    if (!BEG_STRCASECMP(cur_path, "~/")) {
-      chdir(getenv("HOME"));
-      cur_path += 2;
-    }
-    chdir(cur_path);
-#if DEBUG >= DEBUG_OPTIONS
-    if (debug_level >= DEBUG_OPTIONS) {
-      pwd2 = (char *) malloc(2048);
-      getcwd(pwd2, 2048);
-      DPRINTF(("cur_path == %s   wd == %s\n", cur_path, pwd2));
-      free(pwd2);
-    }
-#endif
-
-    file_poke_fp(fopen(name, "rt"));
-    if (file_peek_fp()) {
-      fgets(buff, 256, file_peek_fp());
-      D_OPTIONS(("Magic line \"%s\" [%s]  VERSION == \"%s\"  size == %lu\n",
-		 buff, buff + 7, VERSION, sizeof(VERSION) - 1));
-      if (BEG_STRCASECMP(buff, "<Eterm-")) {
-	file_poke_fp(NULL);
-      } else {
-	if ((end_ptr = strchr(buff, '>')) != NULL) {
-	  *end_ptr = 0;
-	}
-	if ((ver = BEG_STRCASECMP(buff + 7, VERSION)) > 0) {
-	  print_error("warning:  config file is designed for a newer version of Eterm");
-#ifdef WARN_OLDER
-	} else if (ver < 0) {
-	  print_error("warning:  config file is designed for an older version of Eterm");
-#endif
-	}
-      }
-    }
-  }
-  return ((int) file_peek_fp());
-}
-
-void
-read_config(void)
+char *
+find_theme(char *path, char *theme_name, char *conf_name)
 {
 
   register char *search_path;
-  char *env_path, *path_env, *desc;
-  char buff[CONFIG_BUFF];
-  char *conf_name, *end_ptr;
-  register unsigned long i = 0;
-  register char *loop_path;	/* -nf */
-  register char *cur_path;	/* -nf */
-  int ver;
-  unsigned char id;
-  file_state fs =
-  {NULL, CONFIG_FILE_NAME, 1, 0};
+  register char *cur_path;
+  char working_path[PATH_MAX + 1];
+  char *theme_dir = NULL;
+  struct stat fst;
+  unsigned long len;
 
-  env_path = getenv("PATH");
-  if (env_path)
-    i += strlen(env_path);
+  ASSERT(path != NULL && conf_name != NULL);
+
+  search_path = StrDup(path);
+  if (theme_name) {
+    D_OPTIONS(("Searching for config file %s in theme %s\n", conf_name, theme_name));
+  } else {
+    D_OPTIONS(("Searching for config file %s (no theme)\n", conf_name));
+  }
+
+  for (cur_path = strtok(search_path, ":"); cur_path; cur_path = strtok((char *) NULL, ":")) {
+
+    if (!BEG_STRCASECMP(cur_path, "~/")) {
+      snprintf(working_path, PATH_MAX, "%s/%s/%s%s%s", getenv("HOME"), cur_path + 2, (theme_name ? theme_name : ""), (theme_name ? "/" : ""), conf_name);
+    } else {
+      snprintf(working_path, PATH_MAX, "%s/%s%s%s", cur_path, (theme_name ? theme_name : ""), (theme_name ? "/" : ""), conf_name);
+    }
+    D_OPTIONS(("Checking for a valid config file at \"%s\"\n", working_path));
+
+    if (!access(working_path, R_OK)) {
+      stat(working_path, &fst);
+      if (!S_ISDIR(fst.st_mode)) {
+	if (open_config_file(working_path)) {
+	  len = strlen(working_path) - strlen(conf_name);
+	  theme_dir = (char *) MALLOC(len);
+	  snprintf(theme_dir, len, "%s", working_path);
+	  if (theme_name) {
+	    D_OPTIONS(("Found config file %s in theme %s at %s\n", conf_name, theme_name, theme_dir));
+	  } else {
+	    D_OPTIONS(("Found config file %s at %s\n", conf_name, theme_dir));
+	  }
+	  break;
+	} else {
+	  D_OPTIONS((" -> Not a valid config file.\n"));
+	}
+      } else {
+	D_OPTIONS((" -> That is a directory.\n"));
+      }
+    } else {
+      D_OPTIONS((" -> Read access forbidden -- %s\n", strerror(errno)));
+    }
+  }
+  FREE(search_path);
+  return (theme_dir);
+}
+
+unsigned char
+open_config_file(char *name)
+{
+
+  FILE *fp;
+  int ver;
+  char buff[256], *end_ptr;
+
+  ASSERT(name != NULL);
+
+  fp = fopen(name, "rt");
+  if (fp != NULL) {
+    fgets(buff, 256, fp);
+    D_OPTIONS(("Magic line \"%s\" [%s]  VERSION == \"%s\"  size == %lu\n", buff, buff + 7, VERSION, sizeof(VERSION) - 1));
+    if (BEG_STRCASECMP(buff, "<Eterm-")) {
+      fclose(fp);
+      fp = NULL;
+    } else {
+      if ((end_ptr = strchr(buff, '>')) != NULL) {
+	*end_ptr = 0;
+      }
+      if ((ver = BEG_STRCASECMP(buff + 7, VERSION)) > 0) {
+	print_warning("Config file is designed for a newer version of Eterm");
+#ifdef WARN_OLDER
+      } else if (ver < 0) {
+	print_warning("Config file is designed for an older version of Eterm");
+#endif
+      }
+    }
+  }
+  file_poke_fp(fp);
+  return ((unsigned char) (fp == NULL ? 0 : 1));
+}
+
+void
+read_config(char *conf_name)
+{
+
+  register char *search_path;
+  char *path_env, *desc, *outfile;
+  char buff[CONFIG_BUFF];
+  char *root = NULL;
+  register unsigned long i = 0;
+  static char first_time = 1;
+  unsigned char id = CTX_UNDEF;
+  file_state fs =
+  {NULL, NULL, NULL, 1, 0};
+
+  D_OPTIONS(("read_config(conf_name [%s]) called.\n", conf_name));
   path_env = getenv(PATH_ENV);
   if (path_env)
     i += strlen(path_env);
   i += sizeof(CONFIG_SEARCH_PATH) + 3;
   search_path = (char *) MALLOC(i);
-  strcpy(search_path, CONFIG_SEARCH_PATH);
-  if (path_env) {
-    strcat(search_path, ":");
-    strcat(search_path, path_env);
-  }
-  if (env_path) {
-    strcat(search_path, ":");
-    strcat(search_path, env_path);
-  }
+  snprintf(search_path, i, "%s%s%s", CONFIG_SEARCH_PATH, (path_env ? ":" : ""), (path_env ? path_env : ""));
   file_push(fs);
 
-  getcwd(initial_dir, PATH_MAX);
-
-#ifdef USE_THEMES
-  if (rs_config_file) {
-    conf_name = rs_config_file;
-  } else {
-    conf_name = CONFIG_FILE_NAME;
+  if (rs_theme) {
+    root = find_theme(search_path, rs_theme, conf_name);
   }
-  if (!find_theme(search_path, rs_theme)) {
-    if (!find_theme(search_path, "Eterm")) {
-      if (!find_theme(search_path, "DEFAULT")) {
-	find_config_file(search_path, conf_name);
-	FREE(rs_theme);
-	rs_theme = NULL;
+  if (root == NULL) {
+    root = find_theme(search_path, "Eterm", conf_name);
+    if (root == NULL) {
+      root = find_theme(search_path, "DEFAULT", conf_name);
+      if (root == NULL) {
+	root = find_theme(search_path, (char *) NULL, conf_name);
+	if (rs_theme != NULL) {
+	  FREE(rs_theme);
+	  rs_theme = NULL;
+	}
       }
     }
   }
-#else
-  conf_name = CONFIG_FILE_NAME;
-  find_config_file(search_path, conf_name);
-#endif
-
-  /* Modifications by NFin8 to print out search path when unable to find the configuration
-     file. Done 2/17/98 -nf */
-  loop_path = strdup(search_path);
-  if (!file_peek_fp()) {
-    print_error("unable to find/open config file %s, I looked in:", conf_name);
-    for (cur_path = strtok(loop_path, ":"); cur_path; cur_path = strtok((char *) NULL, ":")) {
-      fprintf(stderr, "\t%s\n", cur_path);
+  FREE(search_path);
+  if (root == NULL) {
+    D_OPTIONS((" -> Config file search failed.\n"));
+    if (first_time) {
+      print_error("Unable to find/open config file %s.  Continuing with defaults.", conf_name);
     }
-    print_error("...continuing with defaults");
-    FREE(search_path);
     return;
   }
-  FREE(search_path);
+  D_OPTIONS((" -> Config file search succeeded with root == %s\n", root));
+  if (first_time) {
+    theme_dir = root;
+    root = (char *) MALLOC(strlen(theme_dir) + 17 + 1);
+    sprintf(root, "ETERM_THEME_ROOT=%s", theme_dir);
+    putenv(root);
+    chdir(theme_dir);
+  } else {
+    user_dir = root;
+    root = (char *) MALLOC(strlen(theme_dir) + 16 + 1);
+    sprintf(root, "ETERM_USER_ROOT=%s", theme_dir);
+    putenv(root);
+    chdir(user_dir);
+  }
+  first_time = 0;
 
   file_poke_path(conf_name);
-  ctx_peek() = 0;		/* <== This looks weird, but works -- mej */
+  ctx_poke(0);
   for (; cur_file >= 0;) {
     for (; fgets(buff, CONFIG_BUFF, file_peek_fp());) {
       file_inc_line();
       if (!strchr(buff, '\n')) {
-	print_error("parse error in file %s, line %lu:  line too long", file_peek_path(), file_peek_line());
+	print_error("Parse error in file %s, line %lu:  line too long", file_peek_path(), file_peek_line());
 	for (; fgets(buff, CONFIG_BUFF, file_peek_fp()) && !strrchr(buff, '\n'););
+	continue;
+      }
+      if (!(*buff) || *buff == '\n') {
 	continue;
       }
       chomp(buff);
       switch (*buff) {
 	case '#':
-	case 0:
+	case '<':
 	  break;
 	case '%':
+	  D_OPTIONS(("read_config():  Parsing line #%lu of file %s\n", file_peek_line(), file_peek_path()));
 	  if (!BEG_STRCASECMP(PWord(1, buff + 1), "include ")) {
 	    shell_expand(buff);
 	    fs.path = Word(2, buff + 1);
+	    fs.outfile = (char *) NULL;
 	    fs.line = 1;
-	    fs.skip_to_end = 0;
-	    if ((fs.fp = fopen(fs.path, "rt")) == NULL) {
-	      print_error("I/O error in file %s, line %lu:  Unable to open %%include file %s "
+	    fs.flags = 0;
+	    file_push(fs);
+	    if (!open_config_file(fs.path)) {
+	      print_error("Error in file %s, line %lu:  Unable to locate %%included config file %s "
 			  "(%s), continuing", file_peek_path(), file_peek_line(), fs.path,
 			  strerror(errno));
-	    } else {
-	      file_push(fs);
-	      fgets(buff, CONFIG_BUFF, file_peek_fp());
-	      chomp(buff);
-	      D_OPTIONS(("Magic line \"%s\" [%s]  VERSION == \"%s\" "
-			 "size == %lu\n", buff, buff + 7, VERSION, sizeof(VERSION) - 1));
-	      if ((end_ptr = strchr(buff, '>')) != NULL) {
-		*end_ptr = 0;
-	      }
-	      if (BEG_STRCASECMP(buff, "<Eterm-")) {
-		print_error("parse error in file %s:  Not a valid Eterm config file.  "
-			    "This file will be ignored.", file_peek_path());
-		file_pop();
-	      } else {
-		if ((end_ptr = strchr(buff, '>')) != NULL) {
-		  *end_ptr = 0;
-		}
-		if ((ver = BEG_STRCASECMP(buff + 7, VERSION)) > 0) {
-		  print_error("warning:  %%included file %s is designed for a newer version of Eterm", file_peek_path());
-#ifdef WARN_OLDER
-		} else if (ver < 0) {
-		  print_error("warning:  %%included file %s is designed for an older version of Eterm", file_peek_path());
-#endif
-		}
-	      }
+	      file_pop();
+	    }
+	  } else if (!BEG_STRCASECMP(PWord(1, buff + 1), "preproc ")) {
+	    char cmd[PATH_MAX];
+	    FILE *fp;
+
+	    if (file_peek_preproc()) {
+	      continue;
+	    }
+	    outfile = tmpnam(NULL);
+	    snprintf(cmd, PATH_MAX, "%s < %s > %s", PWord(2, buff), file_peek_path(), outfile);
+	    system(cmd);
+	    fp = fopen(outfile, "rt");
+	    if (fp != NULL) {
+	      fclose(file_peek_fp());
+	      file_poke_fp(fp);
+	      file_poke_preproc(1);
+	      file_poke_outfile(outfile);
 	    }
 	  } else {
-	    print_error("parse error in file %s, line %lu:  Undefined macro \"%s\"", file_peek_path(), file_peek_line(), buff);
+	    print_error("Parse error in file %s, line %lu:  Undefined macro \"%s\"", file_peek_path(), file_peek_line(), buff);
 	  }
 	  break;
 	case 'b':
+	  D_OPTIONS(("read_config():  Parsing line #%lu of file %s\n", file_peek_line(), file_peek_path()));
 	  if (file_peek_skip())
 	    continue;
 	  if (!BEG_STRCASECMP(buff, "begin ")) {
 	    desc = PWord(2, buff);
 	    ctx_name_to_id(id, desc, i);
 	    if (id == CTX_UNDEF) {
+	      ctx_push(id);
 	      parse_undef(buff);
 	    } else {
 	      if (ctx_peek()) {
@@ -3164,14 +3176,14 @@ read_config(void)
 		      break;
 		    }
 		  } else {
-		    print_error("parse error in file %s, line %lu:  subcontext %s is not valid "
+		    print_error("Parse error in file %s, line %lu:  subcontext %s is not valid "
 				"within context %s", file_peek_path(), file_peek_line(),
 				contexts[id].description, contexts[ctx_peek()].description);
 		    break;
 		  }
 		}
 	      } else if (id != CTX_MAIN) {
-		print_error("parse error in file %s, line %lu:  subcontext %s is not valid "
+		print_error("Parse error in file %s, line %lu:  subcontext %s is not valid "
 			    "outside context main", file_peek_path(), file_peek_line(),
 			    contexts[id].description);
 		break;
@@ -3182,22 +3194,30 @@ read_config(void)
 	    break;
 	  }
 	case 'e':
+	  D_OPTIONS(("read_config():  Parsing line #%lu of file %s\n", file_peek_line(), file_peek_path()));
 	  if (!BEG_STRCASECMP(buff, "end ") || !strcasecmp(buff, "end")) {
-	    ctx_pop();
-	    file_poke_skip(0);
+	    if (ctx_get_depth()) {
+	      (void) ctx_pop();
+	      file_poke_skip(0);
+	    }
 	    break;
 	  }
 	default:
+	  D_OPTIONS(("read_config():  Parsing line #%lu of file %s\n", file_peek_line(), file_peek_path()));
 	  if (file_peek_skip())
 	    continue;
 	  if ((id = ctx_peek())) {
 	    shell_expand(buff);
 	    (*ctx_id_to_func(id)) (buff);
 	  } else {
-	    print_error("parse error in file %s, line %lu:  No established context to parse \"%s\"",
+	    print_error("Parse error in file %s, line %lu:  No established context to parse \"%s\"",
 			file_peek_path(), file_peek_line(), buff);
 	  }
       }
+    }
+    fclose(file_peek_fp());
+    if (file_peek_preproc()) {
+      remove(file_peek_outfile());
     }
     file_pop();
   }
@@ -3208,7 +3228,7 @@ void
 init_defaults(void)
 {
 
-  rs_name = APL_NAME " " VERSION;
+  rs_name = StrDup(APL_NAME " " VERSION);
 
 #if DEBUG >= DEBUG_MALLOC
   if (debug_level >= DEBUG_MALLOC) {
@@ -3233,9 +3253,6 @@ init_defaults(void)
   rs_iconName = NULL;		/* icon name for window */
   rs_geometry = NULL;		/* window geometry */
 
-#if (MENUBAR_MAX)
-  rs_menu = NULL;
-#endif
 #ifdef PIXMAP_SUPPORT
   rs_path = NULL;
 #endif
@@ -3244,7 +3261,6 @@ init_defaults(void)
 #endif
 
   TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
-
 }
 
 /* Sync up options with our internal data after parsing options and configs */
@@ -3281,9 +3297,9 @@ post_parse(void)
     scrollBar.width = rs_scrollbar_width;
   }
   if (scrollBar.type == SCROLLBAR_XTERM) {
-    sb_shadow = 0;
+    scrollbar_set_shadow(0);
   } else {
-    sb_shadow = (Options & Opt_scrollBar_floating) ? 0 : SHADOW;
+    scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
   }
 
   /* set any defaults not already set */
@@ -3316,11 +3332,96 @@ post_parse(void)
   for (i = 0; i < NFONTS; i++) {
     if (!rs_font[i])
       rs_font[i] = def_fontName[i];
-#ifdef KANJI
-    if (!rs_kfont[i]) {
-      rs_kfont[i] = def_kfontName[i];
+#ifdef MULTI_CHARSET
+    if (!rs_mfont[i]) {
+      rs_mfont[i] = def_kfontName[i];
     }
 #endif
+  }
+
+  /* Clean up image stuff */
+  for (i = 0; i < image_max; i++) {
+    if (!(images[i].norm)) {
+      images[i].norm = (simage_t *) MALLOC(sizeof(simage_t));
+      images[i].norm->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
+      images[i].norm->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
+      MEMSET(images[i].norm->pmap, 0, sizeof(pixmap_t));
+      MEMSET(images[i].norm->iml, 0, sizeof(imlib_t));
+      images[i].mode = MODE_IMAGE & ALLOW_IMAGE;
+    }
+    images[i].current = images[i].norm;
+    if (rs_pixmaps[i]) {
+      reset_simage(images[i].norm, RESET_ALL);
+      load_image(rs_pixmaps[i], i);
+      FREE(rs_pixmaps[i]);	/* These are created by StrDup() */
+    }
+    if (!(images[i].selected)) {
+      images[i].selected = images[i].norm;
+    }
+    if (!(images[i].clicked)) {
+      images[i].clicked = images[i].selected;
+    }
+  }
+
+  if (rs_cmod_image) {
+    unsigned char n = NumWords(rs_cmod_image);
+    imlib_t *iml = images[image_bg].norm->iml;
+
+    RESET_AND_ASSIGN(iml->mod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    iml->mod->contrast = iml->mod->gamma = 0xff;
+    iml->mod->brightness = (int) strtol(rs_cmod_image, (char **) NULL, 0);
+    if (n > 1) {
+      iml->mod->contrast = (int) strtol(PWord(2, rs_cmod_image), (char **) NULL, 0);
+    }
+    if (n > 2) {
+      iml->mod->gamma = (int) strtol(PWord(3, rs_cmod_image), (char **) NULL, 0);
+    }
+    FREE(rs_cmod_image);
+  }
+  if (rs_cmod_red) {
+    unsigned char n = NumWords(rs_cmod_red);
+    imlib_t *iml = images[image_bg].norm->iml;
+
+    RESET_AND_ASSIGN(iml->rmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    iml->rmod->contrast = iml->rmod->gamma = 0xff;
+    iml->rmod->brightness = (int) strtol(rs_cmod_red, (char **) NULL, 0);
+    if (n > 1) {
+      iml->rmod->contrast = (int) strtol(PWord(2, rs_cmod_red), (char **) NULL, 0);
+    }
+    if (n > 2) {
+      iml->rmod->gamma = (int) strtol(PWord(3, rs_cmod_red), (char **) NULL, 0);
+    }
+    FREE(rs_cmod_red);
+  }
+  if (rs_cmod_green) {
+    unsigned char n = NumWords(rs_cmod_green);
+    imlib_t *iml = images[image_bg].norm->iml;
+
+    RESET_AND_ASSIGN(iml->gmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    iml->gmod->contrast = iml->gmod->gamma = 0xff;
+    iml->gmod->brightness = (int) strtol(rs_cmod_green, (char **) NULL, 0);
+    if (n > 1) {
+      iml->gmod->contrast = (int) strtol(PWord(2, rs_cmod_green), (char **) NULL, 0);
+    }
+    if (n > 2) {
+      iml->gmod->gamma = (int) strtol(PWord(3, rs_cmod_green), (char **) NULL, 0);
+    }
+    FREE(rs_cmod_green);
+  }
+  if (rs_cmod_blue) {
+    unsigned char n = NumWords(rs_cmod_blue);
+    imlib_t *iml = images[image_bg].norm->iml;
+
+    RESET_AND_ASSIGN(iml->bmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    iml->bmod->contrast = iml->bmod->gamma = 0xff;
+    iml->bmod->brightness = (int) strtol(rs_cmod_blue, (char **) NULL, 0);
+    if (n > 1) {
+      iml->bmod->contrast = (int) strtol(PWord(2, rs_cmod_blue), (char **) NULL, 0);
+    }
+    if (n > 2) {
+      iml->bmod->gamma = (int) strtol(PWord(3, rs_cmod_blue), (char **) NULL, 0);
+    }
+    FREE(rs_cmod_blue);
   }
 
 #ifdef XTERM_REVERSE_VIDEO
@@ -3337,13 +3438,6 @@ post_parse(void)
     if (!rs_color[i])
       rs_color[i] = def_colorName[i];
   }
-
-#ifdef CHANGE_SCOLLCOLOR_ON_FOCUS
-  /* If they don't set the unfocused color, use the scrollbar color to "turn the option off" */
-  if (!rs_color[unfocusedScrollColor]) {
-    rs_color[unfocusedScrollColor] = rs_color[scrollColor];
-  }
-#endif
 
 #ifndef XTERM_REVERSE_VIDEO
   /* this is how we implement reverseVideo */
@@ -3376,28 +3470,12 @@ post_parse(void)
   color_aliases(pointerColor);
   color_aliases(borderColor);
 
-  /* add startup-menu: */
-#if (MENUBAR_MAX)
-  /* In a borderless Eterm where the user hasn't said otherwise, make the menubar move the window */
-  if (Options & Opt_borderless && rs_menubar_move == NULL) {
-    Options |= Opt_menubar_move;
-  }
-  delay_menu_drawing = 1;
-  menubar_read(rs_menu);
-  delay_menu_drawing--;
-  if (rs_menubar == *false_vals) {
-    delay_menu_drawing = 0;
-  }
-#else
-  delay_menu_drawing = 0;
-#endif
-
 #ifdef BACKGROUND_CYCLING_SUPPORT
   if (rs_anim_pixmap_list != NULL) {
     rs_anim_delay = strtoul(rs_anim_pixmap_list, (char **) NULL, 0);
     fflush(stdout);
     if (rs_anim_delay == 0) {
-      free(rs_anim_pixmap_list);
+      FREE(rs_anim_pixmap_list);
       rs_anim_pixmap_list = NULL;
     } else {
       char *w1, *h1, *temp;
@@ -3422,17 +3500,17 @@ post_parse(void)
 	  if (w || h) {
 	    rs_anim_pixmaps[i] = Word(3, temp);
 	    rs_anim_pixmaps[i] = (char *) realloc(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 9);
-	    strcat(rs_anim_pixmaps[i], ";100x100");
+	    strcat(rs_anim_pixmaps[i], "@100x100");
 	  } else {
 	    rs_anim_pixmaps[i] = Word(3, temp);
-	    rs_anim_pixmaps[i] = (char *) realloc(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 9);
-	    strcat(rs_anim_pixmaps[i], ";0x0");
+	    rs_anim_pixmaps[i] = (char *) realloc(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 5);
+	    strcat(rs_anim_pixmaps[i], "@0x0");
 	  }
 	  FREE(temp);
 	}
       }
       rs_anim_pixmaps[count] = NULL;
-      free(rs_anim_pixmap_list);
+      FREE(rs_anim_pixmap_list);
     }
   } else {
     rs_anim_delay = 0;
@@ -3456,7 +3534,7 @@ save_config(char *path)
 
   if (!path) {
     path = (char *) MALLOC(PATH_MAX + 1);
-    snprintf(path, PATH_MAX, "%s/MAIN", getenv("ETERM_THEME_ROOT"));
+    snprintf(path, PATH_MAX, "%s/%s", getenv("ETERM_THEME_ROOT"), (rs_config_file ? rs_config_file : USER_CFG));
     path[PATH_MAX] = 0;
   }
   if (!lstat(path, &fst)) {
@@ -3482,8 +3560,6 @@ save_config(char *path)
   fprintf(fp, "  begin color\n");
   fprintf(fp, "    foreground %s\n", rs_color[fgColor]);
   fprintf(fp, "    background %s\n", rs_color[bgColor]);
-  fprintf(fp, "    tint 0x%06x\n", rs_tintMask);
-  fprintf(fp, "    shade %lu%%\n", rs_shadePct);
   fprintf(fp, "    cursor %s\n", rs_color[cursorColor]);
   fprintf(fp, "    cursor_text %s\n", rs_color[cursorColor2]);
   fprintf(fp, "    menu_text %s\n", rs_color[menuTextColor]);
@@ -3521,37 +3597,18 @@ save_config(char *path)
   }
 #ifndef NO_BOLDFONT
   if (rs_boldFont) {
-    fprintf(fp, "    font bold %s\n", i, rs_boldFont);
+    fprintf(fp, "    font bold %s\n", rs_boldFont);
   }
 #endif
   fprintf(fp, "  end attributes\n\n");
 
-  fprintf(fp, "  begin pixmaps\n");
-  if (rs_pixmaps[pixmap_bg] && *rs_pixmaps[pixmap_bg]) {
-    fprintf(fp, "    background %s %s\n", (Options & Opt_pixmapScale ? "-1 -1" : "0 0"), rs_pixmaps[pixmap_bg]);
-  }
-  if (rs_icon) {
-    fprintf(fp, "    icon %s\n", rs_icon);
-  }
-  if (rs_path) {
-    fprintf(fp, "    path \"%s\"\n", rs_path);
-  }
-  if (rs_anim_delay) {
-    fprintf(fp, "    anim %d ", rs_anim_delay);
-    for (i = 0; rs_anim_pixmaps[i]; i++) {
-      fprintf(fp, "\"%s\" ", rs_anim_pixmaps[i]);
-    }
-    fprintf(fp, "\n");
-  }
-  fprintf(fp, "  end pixmaps\n\n");
-
-#ifdef KANJI
-  fprintf(fp, "  begin kanji\n");
-  fprintf(fp, "    encoding %s\n", rs_kanji_encoding);
+#ifdef MULTI_CHARSET
+  fprintf(fp, "  begin multichar\n");
+  fprintf(fp, "    encoding %s\n", rs_multchar_encoding);
   for (i = 0; i < 5; i++) {
-    fprintf(fp, "    font %d %s\n", i, rs_kfont[i]);
+    fprintf(fp, "    font %d %s\n", i, rs_mfont[i]);
   }
-  fprintf(fp, "  end kanji\n\n");
+  fprintf(fp, "  end multichar\n\n");
 #endif
 
   fprintf(fp, "  begin toggles\n");
@@ -3559,7 +3616,6 @@ save_config(char *path)
   fprintf(fp, "    visual_bell %d\n", (Options & Opt_visualBell ? 1 : 0));
   fprintf(fp, "    login_shell %d\n", (Options & Opt_loginShell ? 1 : 0));
   fprintf(fp, "    scrollbar %d\n", (Options & Opt_scrollBar ? 1 : 0));
-  fprintf(fp, "    menubar %d\n", (menuBar.state ? 1 : 0));
   fprintf(fp, "    utmp_logging %d\n", (Options & Opt_utmpLogging ? 1 : 0));
   fprintf(fp, "    meta8 %d\n", (Options & Opt_meta8 ? 1 : 0));
   fprintf(fp, "    iconic %d\n", (Options & Opt_iconic ? 1 : 0));
@@ -3571,15 +3627,11 @@ save_config(char *path)
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
   fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
   fprintf(fp, "    save_under %d\n", (Options & Opt_saveUnder ? 1 : 0));
-  fprintf(fp, "    trans %d\n", (Options & Opt_pixmapTrans ? 1 : 0));
-  fprintf(fp, "    watch_desktop %d\n", (Options & Opt_watchDesktop ? 1 : 0));
   fprintf(fp, "    no_cursor %d\n", (Options & Opt_noCursor ? 1 : 0));
-  fprintf(fp, "    menubar_move %d\n", (Options & Opt_menubar_move ? 1 : 0));
   fprintf(fp, "    pause %d\n", (Options & Opt_pause ? 1 : 0));
   fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));
   fprintf(fp, "    select_line %d\n", (Options & Opt_select_whole_line ? 1 : 0));
   fprintf(fp, "    select_trailing_spaces %d\n", (Options & Opt_select_trailing_spaces ? 1 : 0));
-  fprintf(fp, "    viewport_mode %d\n", (Options & Opt_viewport_mode ? 1 : 0));
   fprintf(fp, "  end toggles\n\n");
 
   fprintf(fp, "  begin keyboard\n");
@@ -3614,7 +3666,6 @@ save_config(char *path)
   fprintf(fp, "    save_lines %d\n", rs_saveLines);
   fprintf(fp, "    min_anchor_size %d\n", rs_min_anchor_size);
   fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
-  fprintf(fp, "    menu %s\n", rs_menu);
   fprintf(fp, "    term_name %s\n", getenv("TERM"));
   fprintf(fp, "    debug %d\n", debug_level);
   if (Options & Opt_exec && rs_execArgs) {

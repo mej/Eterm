@@ -4,6 +4,4 @@ Makefile.in
 .libs
 Esetroot
 Etbg
-Etcolors.sh
-Etmenu.sh
-
+Ettable

@@ -1,3 +1,6 @@
+#include "config.h"
+#include "../src/feature.h"
+
 #include "global.h"
 #include <errno.h>
 
@@ -13,7 +16,7 @@ static const char cvs_ident[] = "$Id$";
  * junk....
  */
 
-#ifndef HAVE_SNPRINTF
+#if !defined(HAVE_SNPRINTF) || (HAVE_SNPRINTF_BUG == 1)
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>

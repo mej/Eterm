@@ -10,7 +10,8 @@
 
 static const char cvs_ident[] = "$Id$";
 
-#include "main.h"
+#include "config.h"
+#include "feature.h"
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -20,6 +21,7 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"		/* for tt_printf() */
 #include "debug.h"
 #include "graphics.h"
+#include "main.h"
 #include "screen.h"
 
 /* commands:
@@ -448,11 +450,6 @@ Gr_scroll(int count)
   for (grwin = gr_root; grwin != NULL; grwin = next) {
     next = grwin->next;
     grwin->y -= (count * TermWin.fheight);
-# ifdef USE_ACTIVE_TAGS
-    fprintf(stderr, "FUCK YOU!\n");
-    if (grwin == TermWin.vt)
-      tag_hide();
-# endif
     if ((grwin->y + grwin->h) < -(TermWin.saveLines * TermWin.fheight))
       Gr_DestroyWindow(grwin);
     else

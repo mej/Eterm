@@ -1,0 +1,14 @@
+# $Id$
+
+EXTRA_DIST =  bar_horizontal_1.png bar_horizontal_2.png bar_horizontal_3.png bar_vertical_1.png bar_vertical_2.png \
+              bar_vertical_3.png button_arrow_down_1.png button_arrow_down_2.png button_arrow_down_3.png \
+              button_arrow_up_1.png button_arrow_up_2.png button_arrow_up_3.png menu1.png menu2.png menu3.png
+
+pixmapdir = $(pkgdatadir)/pix
+
+install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(pixmapdir)
+	@for i in $(EXTRA_DIST) ; do \
+	  echo $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
+	  $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
+	done

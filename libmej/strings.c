@@ -4,7 +4,7 @@
  *           -- 08 January 1997                                *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -26,6 +26,9 @@
 
 static const char cvs_ident[] = "$Id$";
 
+#include "config.h"
+#include "../src/feature.h"
+
 #include "global.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +41,6 @@ static const char cvs_ident[] = "$Id$";
 #include <ctype.h>
 #include "debug.h"
 #include "mem.h"
-#define STRINGS_C
 #include "strings.h"
 
 #ifndef HAVE_MEMMEM
@@ -51,7 +53,7 @@ memmem(void *haystack, register size_t haystacklen, void *needle, register size_
   register char *hs = (char *) haystack;
   register char *n = (char *) needle;
   register unsigned long i;
-  register len = haystacklen - needlelen;
+  register size_t len = haystacklen - needlelen;
 
   for (i = 0; i < len; i++) {
     if (!memcmp(hs + i, n, needlelen)) {
@@ -396,6 +398,19 @@ StrRev(register char *str)
 
 }
 
+char *
+StrDup(register const char *str)
+{
+
+  register char *newstr;
+  register unsigned long len;
+
+  len = strlen(str) + 1;  /* Copy NUL byte also */
+  newstr = (char *) MALLOC(len);
+  memcpy(newstr, str, len);
+  return (newstr);
+}
+
 #if !(HAVE_STRSEP)
 char *
 strsep(char **str, register char *sep)
@@ -404,7 +419,7 @@ strsep(char **str, register char *sep)
   register char *s = *str;
   char *sptr;
 
-  D_STRINGS(("StrSep(%s, %s) called.\n", *str, sep));
+  D_STRINGS(("strsep(%s, %s) called.\n", *str, sep));
   sptr = s;
   for (; *s && !strchr(sep, *s); s++);
   if (!*s) {

@@ -4,7 +4,7 @@
  *       -- 07 January 1997                                    *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -41,12 +41,12 @@ typedef struct memrec_struct {
 #  define CALLOC(type,n)	calloc((n),(sizeof(type)))
 #  define REALLOC(mem,sz)	fixed_realloc((mem),(sz))
 #  define FREE(ptr)		free(ptr)
-#elif defined(DEBUG) || !defined(NDEBUG)
+#elif (DEBUG >= DEBUG_MALLOC)
 #  define MALLOC(sz)		Malloc(sz)
 #  define CALLOC(type,n)	Calloc((n),(sizeof(type)))
 #  define REALLOC(mem,sz)	Realloc((mem),(sz))
 /* #  define FREE(ptr)		Free(ptr) */
-#  define FREE(ptr)		{ Free(ptr); ptr = NULL; }
+#  define FREE(ptr)		do { Free(ptr); ptr = NULL; } while(0)
 #  define MALLOC_MOD 25
 #  define REALLOC_MOD 25
 #  define CALLOC_MOD 25
@@ -58,15 +58,13 @@ typedef struct memrec_struct {
 #  define FREE(ptr)		free(ptr)
 #endif
 
-#ifndef MEM_C
-
 extern char *SafeStr(char *, unsigned short);
 extern MemRec memrec;
 extern void memrec_init(void);
-void memrec_add_var(void *, size_t);
-void memrec_rem_var(void *);
-void memrec_chg_var(void *, void *, size_t);
-void memrec_dump(void);
+extern void memrec_add_var(void *, size_t);
+extern void memrec_rem_var(void *);
+extern void memrec_chg_var(void *, void *, size_t);
+extern void memrec_dump(void);
 extern void *Malloc(size_t);
 extern void *Realloc(void *, size_t);
 extern void *Calloc(size_t, size_t);
@@ -76,7 +74,6 @@ extern void HandleSigSegv(int);
 extern char *GarbageCollect(char *, size_t);
 extern char *FileGarbageCollect(char *, size_t);
 extern void *fixed_realloc(void *, size_t);
-#endif /* MEM_C */
 
 #endif /* _MEM_H_ */
 

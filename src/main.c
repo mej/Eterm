@@ -1,7 +1,7 @@
 /*  main.c -- Eterm main() function
  *         -- 22 August 1998, mej
  *
- * This file is original work by Michael Jennings <mej@tcserv.com> and
+ * This file is original work by Michael Jennings <mej@eterm.org> and
  * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
  * bearing this same message or a similar one, is distributed under
  * the GNU Public License (GPL) as outlined in the COPYING file.
@@ -26,15 +26,12 @@
 
 static const char cvs_ident[] = "$Id$";
 
-/* includes */
-#include "main.h"
-#ifdef USE_ACTIVE_TAGS
-# include "activetags.h"
-# include "activeeterm.h"
-#endif
+#include "config.h"
+#include "feature.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -46,30 +43,26 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xatom.h>
 #include <X11/Xos.h>
 
-#include "command.h"
-#include "feature.h"
 #include "../libmej/debug.h"	/* from libmej */
 #include "debug.h"
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
-/* For strsep(). -vendu */
-#if defined(linux)
-# include <string.h>
-#endif
-#include "string.h"
+#include "main.h"
+#include "actions.h"
+#include "command.h"
+#include "eterm_utmp.h"
+#include "events.h"
 #include "graphics.h"
-#include "scrollbar.h"
-#include "menubar.h"
-#include "screen.h"
 #include "options.h"
 #include "pixmap.h"
+#include "screen.h"
+#include "scrollbar.h"
+#include "term.h"
 #ifdef USE_POSIX_THREADS
 # include "threads.h"
 #endif
+#include "windows.h"
 
-/* Global attributes */
-XWindowAttributes attr;
-XSetWindowAttributes Attributes;
 char *orig_argv0;
 
 #ifdef PIXMAP_SUPPORT
@@ -77,204 +70,32 @@ char *orig_argv0;
    that doesn't send the right events (*cough*
    Window Maker *cough*) -- mej */
 short bg_needs_update = 1;
-
 #endif
-
-/* extern functions referenced */
-#ifdef DISPLAY_IS_IP
-extern char *network_display(const char *display);
-
-#endif
-
-extern void get_initial_options(int, char **);
-extern void menubar_read(const char *filename);
-
 #ifdef USE_POSIX_THREADS
 static void **retval;
 static int join_value;
 static pthread_t main_loop_thr;
 static pthread_attr_t main_loop_attr;
-
 # ifdef MUTEX_SYNCH
 pthread_mutex_t mutex;
-
 # endif
 #endif
-
-#ifdef PIXMAP_SUPPORT
-extern void render_pixmap(Window win, imlib_t image, pixmap_t pmap,
-			  int which, renderop_t renderop);
-
-# ifdef BACKING_STORE
-extern const char *rs_saveUnder;
-
-# endif
-
-extern char *rs_noCursor;
-
-# ifdef USE_IMLIB
-extern ImlibData *imlib_id;
-
-# endif
-#endif
-
-/* extern variables referenced */
-extern int my_ruid, my_rgid, my_euid, my_egid;
-extern unsigned int rs_shadePct;
-extern unsigned long rs_tintMask;
-
-/* extern variables declared here */
 TermWin_t TermWin;
 Display *Xdisplay;		/* display */
-
-char *rs_color[NRS_COLORS];
-Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
-
-unsigned long Options = (Opt_scrollBar);
+Colormap cmap;
 unsigned int debug_level = 0;	/* Level of debugging information to display */
-
 const char *display_name = NULL;
-char *rs_name = NULL;		/* client instance (resource name) */
-
-#ifndef NO_BOLDFONT
-const char *rs_boldFont = NULL;
-
-#endif
-const char *rs_font[NFONTS];
-
-#ifdef KANJI
-const char *rs_kfont[NFONTS];
-
-#endif
-
-#ifdef PRINTPIPE
-char *rs_print_pipe = NULL;
-
-#endif
-
-char *rs_cutchars = NULL;
-
-/* local variables */
-Cursor TermWin_cursor;		/* cursor for vt window */
 unsigned int colorfgbg;
-menuBar_t menuBar;
-
-XSizeHints szHint =
-{
-  PMinSize | PResizeInc | PBaseSize | PWinGravity,
-  0, 0, 80, 24,			/* x, y, width, height */
-  1, 1,				/* Min width, height */
-  0, 0,				/* Max width, height - unused */
-  1, 1,				/* increments: width, height */
-  {1, 1},			/* increments: x, y */
-  {0, 0},			/* Aspect ratio - unused */
-  0, 0,				/* base size: width, height */
-  NorthWestGravity		/* gravity */
-};
-
-char *def_colorName[] =
-{
-  "rgb:0/0/0", "rgb:ff/ff/ff",	/* fg/bg */
-  "rgb:0/0/0",			/* 0: black             (#000000) */
-#ifndef NO_BRIGHTCOLOR
-    /* low-intensity colors */
-  "rgb:cc/00/00",		/* 1: red     */
-  "rgb:00/cc/00",		/* 2: green   */
-  "rgb:cc/cc/00",		/* 3: yellow  */
-  "rgb:00/00/cc",		/* 4: blue    */
-  "rgb:cc/00/cc",		/* 5: magenta */
-  "rgb:00/cc/cc",		/* 6: cyan    */
-  "rgb:fa/eb/d7",		/* 7: white   */
-    /* high-intensity colors */
-  "rgb:33/33/33",		/* 8: bright black */
-#endif				/* NO_BRIGHTCOLOR */
-  "rgb:ff/00/00",		/* 1/9:  bright red     */
-  "rgb:00/ff/00",		/* 2/10: bright green   */
-  "rgb:ff/ff/00",		/* 3/11: bright yellow  */
-  "rgb:00/00/ff",		/* 4/12: bright blue    */
-  "rgb:ff/00/ff",		/* 5/13: bright magenta */
-  "rgb:00/ff/ff",		/* 6/14: bright cyan    */
-  "rgb:ff/ff/ff",		/* 7/15: bright white   */
-#ifndef NO_CURSORCOLOR
-  NULL, NULL,			/* cursorColor, cursorColor2 */
-#endif				/* NO_CURSORCOLOR */
-  NULL, NULL			/* pointerColor, borderColor */
-#ifndef NO_BOLDUNDERLINE
-  ,NULL, NULL			/* colorBD, colorUL */
-#endif				/* NO_BOLDUNDERLINE */
-  ,"rgb:ff/ff/ff"		/* menuTextColor */
-#ifdef KEEP_SCROLLCOLOR
-  ,"rgb:b2/b2/b2"		/* scrollColor: match Netscape color */
-# ifdef CHANGE_SCROLLCOLOR_ON_FOCUS
-  ,NULL				/* unfocusedscrollColor: somebody chose black? */
-# endif
-#endif
-};
-
-#ifdef KANJI
-/* Kanji font names, roman fonts sized to match */
-const char *def_kfontName[] =
-{
-  KFONT0, KFONT1, KFONT2, KFONT3, KFONT4
-};
-
-#endif /* KANJI */
-const char *def_fontName[] =
-{
-  FONT0, FONT1, FONT2, FONT3, FONT4
-};
-
-/* extern functions referenced */
-#ifdef PIXMAP_SUPPORT
-/* the originally loaded pixmap and its scaling */
-extern pixmap_t bgPixmap;
-extern void set_bgPixmap(const char * /* file */ );
-
-# ifdef USE_IMLIB
-extern imlib_t imlib_bg;
-
-# endif
-# ifdef PIXMAP_SCROLLBAR
-extern pixmap_t sbPixmap;
-extern pixmap_t upPixmap, up_clkPixmap;
-extern pixmap_t dnPixmap, dn_clkPixmap;
-extern pixmap_t saPixmap, sa_clkPixmap;
-
-#  ifdef USE_IMLIB
-extern imlib_t imlib_sb, imlib_sa, imlib_saclk;
-
-#  endif
-# endif
-# ifdef PIXMAP_MENUBAR
-extern pixmap_t mbPixmap, mb_selPixmap;
-
-#  ifdef USE_IMLIB
-extern imlib_t imlib_mb, imlib_ms;
-
-#  endif
-# endif
-
-extern int scale_pixmap(const char *geom, pixmap_t * pmap);
-
-#endif /* PIXMAP_SUPPORT */
-
-/* have we changed the font? Needed to avoid race conditions
- * while window resizing  */
-int font_change_count = 0;
-
-static void resize(void);
-
-extern XErrorHandler xerror_handler(Display *, XErrorEvent *);
-extern void Create_Windows(int, char **);
 
 /* main() */
 int
 main(int argc, char *argv[])
 {
 
-  int i, count;
+  int i;
   char *val;
   static char windowid_string[20], *display_string, *term_string;	/* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+  ImlibInitParams params;
 
   orig_argv0 = argv[0];
 
@@ -285,13 +106,14 @@ main(int argc, char *argv[])
 #endif
 
   /* Security enhancements -- mej */
+  putenv("IFS= \t");
   my_ruid = getuid();
   my_euid = geteuid();
   my_rgid = getgid();
   my_egid = getegid();
   privileges(REVERT);
+  getcwd(initial_dir, PATH_MAX);
 
-  TermWin.wm_parent = None;
   init_defaults();
 
   /* Open display, get options/resources and create the window */
@@ -308,25 +130,7 @@ main(int argc, char *argv[])
   }
 #endif
 
-#ifdef USE_THEMES
   get_initial_options(argc, argv);
-#endif
-  read_config();
-#ifdef PIXMAP_SUPPORT
-  if (rs_path) {
-    rs_path = REALLOC(rs_path, strlen(rs_path) + strlen(initial_dir) + 2);
-    strcat(rs_path, ":");
-    strcat(rs_path, initial_dir);
-  }
-#endif
-  get_options(argc, argv);
-#ifdef USE_ACTIVE_TAGS
-  tag_init();
-#endif
-  D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
-  D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(),
-	  getegid()));
-
 #ifdef NEED_LINUX_HACK
   privileges(INVOKE);		/* xdm in new Linux versions requires ruid != root to open the display -- mej */
 #endif
@@ -334,12 +138,10 @@ main(int argc, char *argv[])
 #ifdef NEED_LINUX_HACK
   privileges(REVERT);
 #endif
-
   if (!Xdisplay) {
     print_error("can't open display %s", display_name);
     exit(EXIT_FAILURE);
   }
-
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {
     XSetErrorHandler((XErrorHandler) abort);
@@ -350,15 +152,68 @@ main(int argc, char *argv[])
   XSetErrorHandler((XErrorHandler) xerror_handler);
 #endif
 
+  if (Options & Opt_install) {
+    cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
+    XInstallColormap(Xdisplay, cmap);
+#ifdef PIXMAP_SUPPORT
+    params.cmap = cmap;
+    params.flags = PARAMS_COLORMAP;
+#endif
+  } else {
+    cmap = Xcmap;
+#ifdef PIXMAP_SUPPORT
+    params.flags = 0;
+#endif
+  }
+
   /* Since we always use Imlib now, let's initialize it here. */
-  imlib_id = Imlib_init(Xdisplay);
+#ifdef PIXMAP_SUPPORT
+  if (params.flags) {
+    imlib_id = Imlib_init_with_params(Xdisplay, &params);
+  } else {
+    imlib_id = Imlib_init(Xdisplay);
+  }
+  if (!imlib_id) {
+    fatal_error("Unable to initialize Imlib.  Aborting.");
+  }
+#endif
+
+  read_config(THEME_CFG);
+  read_config((rs_config_file ? rs_config_file : USER_CFG));
+
+#if defined(PIXMAP_SUPPORT)
+  if (rs_path || theme_dir || user_dir) {
+    register unsigned long len;
+    register char *tmp;
+
+    len = strlen(initial_dir);
+    if (rs_path) {
+      len += strlen(rs_path) + 1;	/* +1 for the colon */
+    }
+    if (theme_dir) {
+      len += strlen(theme_dir) + 1;
+    }
+    if (user_dir) {
+      len += strlen(user_dir) + 1;
+    }
+    tmp = MALLOC(len + 1);	/* +1 here for the NUL */
+    snprintf(tmp, len + 1, "%s%s%s%s%s%s%s", (rs_path ? rs_path : ""), (rs_path ? ":" : ""), initial_dir,
+	     (theme_dir ? ":" : ""), (theme_dir ? theme_dir : ""), (user_dir ? ":" : ""), (user_dir ? user_dir : ""));
+    tmp[len] = '\0';
+    FREE(rs_path);
+    rs_path = tmp;
+    D_OPTIONS(("New rs_path set to \"%s\"\n", rs_path));
+  }
+#endif
+  get_options(argc, argv);
+  D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
+  D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(),
+	  getegid()));
 
   post_parse();
 
 #ifdef PREFER_24BIT
-  Xdepth = DefaultDepth(Xdisplay, Xscreen);
-  Xcmap = DefaultColormap(Xdisplay, Xscreen);
-  Xvisual = DefaultVisual(Xdisplay, Xscreen);
+  cmap = DefaultColormap(Xdisplay, Xscreen);
 
   /*
    * If depth is not 24, look for a 24bit visual.
@@ -369,8 +224,8 @@ main(int argc, char *argv[])
     if (XMatchVisualInfo(Xdisplay, Xscreen, 24, TrueColor, &vinfo)) {
       Xdepth = 24;
       Xvisual = vinfo.visual;
-      Xcmap = XCreateColormap(Xdisplay, RootWindow(Xdisplay, Xscreen),
-			      Xvisual, AllocNone);
+      cmap = XCreateColormap(Xdisplay, RootWindow(Xdisplay, Xscreen),
+			     Xvisual, AllocNone);
     }
   }
 #endif
@@ -381,13 +236,7 @@ main(int argc, char *argv[])
 
   /* add scrollBar, do it directly to avoid resize() */
   scrollbar_mapping(Options & Opt_scrollBar);
-  /* we can now add menuBar */
-  if (delay_menu_drawing) {
-    delay_menu_drawing = 0;
-    menubar_mapping(1);
-  } else if (rs_menubar == *false_vals) {
-    menubar_mapping(0);
-  }
+
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {
     XSynchronize(Xdisplay, True);
@@ -420,10 +269,10 @@ main(int argc, char *argv[])
   sprintf(windowid_string, "WINDOWID=%u", (unsigned int) TermWin.parent);
 
   /* add entries to the environment:
-   * @ DISPLAY:   in case we started with -display
-   * @ WINDOWID:  X window id number of the window
-   * @ COLORTERM: terminal sub-name and also indicates its color
-   * @ TERM:      terminal name
+   * DISPLAY:   in case we started with -display
+   * WINDOWID:  X window id number of the window
+   * COLORTERM: terminal sub-name and also indicates its color
+   * TERM:      terminal name
    */
   putenv(display_string);
   putenv(windowid_string);
@@ -447,12 +296,9 @@ main(int argc, char *argv[])
       putenv("TERM=" TERMENV);
 #endif
     }
-#ifdef PIXMAP_SUPPORT
-    putenv("COLORTERM=" COLORTERMENV "-pixmap");
-#else
     putenv("COLORTERM=" COLORTERMENV);
-#endif
   }
+  putenv("ETERM_VERSION=" VERSION);
 
   D_CMD(("init_command()\n"));
   init_command(rs_execArgs);

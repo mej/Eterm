@@ -23,28 +23,21 @@
 
 static const char cvs_ident[] = "$Id$";
 
-/* includes, defines */
 #include "config.h"
 #include "feature.h"
-#include "screen.h"
-
-int my_ruid, my_euid, my_rgid, my_egid;		/* These are needed regardless of utmp support -- mej */
 
 #ifdef UTMP_SUPPORT
 
 #include <stdio.h>
 #include <string.h>
-
 /* For some systems (HP-UX in particular), sys/types.h must be included
    before utmp*.h -- mej */
 #include <sys/types.h>
 #include <sys/stat.h>
-
 /* Unsupported/broken utmpx.h on HP-UX, AIX, and glibc 2.1 */
-#if defined(_HPUX_SOURCE) || defined(_AIX) || (defined(__GLIBC__) && __GLIBC__ >= 2)
+#if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
 #  undef HAVE_UTMPX_H
 #endif
-
 #ifdef HAVE_UTMPX_H
 # include <utmpx.h>
 # define USE_SYSV_UTMP
@@ -54,7 +47,6 @@ int my_ruid, my_euid, my_rgid, my_egid;		/* These are needed regardless of utmp 
 #  define USE_SYSV_UTMP
 # endif
 #endif
-
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -65,72 +57,37 @@ int my_ruid, my_euid, my_rgid, my_egid;		/* These are needed regardless of utmp 
 #  include <time.h>
 # endif
 #endif
-
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef HAVE_LASTLOG_H
-# include <lastlog.h>
-#endif
 #include <pwd.h>
-
 #include <errno.h>
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
-
-#ifndef UTMP_FILENAME
-#  ifdef UTMP_FILE
-#    define UTMP_FILENAME UTMP_FILE
-#  elif defined(_PATH_UTMP)
-#    define UTMP_FILENAME _PATH_UTMP
-#  else
-#    define UTMP_FILENAME "/etc/utmp"
-#  endif
+#ifdef HAVE_LASTLOG_H
+# include <lastlog.h>
+#endif
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+# include <ttyent.h>
 #endif
 
-#ifndef LASTLOG_FILENAME
-# ifdef _PATH_LASTLOG
-#  define LASTLOG_FILENAME _PATH_LASTLOG
-# else
-#  define LASTLOG_FILENAME "/usr/adm/lastlog"	/* only on BSD systems */
-# endif
-#endif
+#include "eterm_utmp.h"
+#include "debug.h"
+#include "../libmej/debug.h"
+#include "command.h"
+#include "screen.h"
 
-#ifndef WTMP_FILENAME
-#  ifdef WTMP_FILE
-#    define WTMP_FILENAME WTMP_FILE
-#  elif defined(_PATH_WTMP)
-#    define WTMP_FILENAME _PATH_WTMP
-#  elif defined(SYSV)
-#    define WTMP_FILENAME "/etc/wtmp"
-#  else
-#    define WTMP_FILENAME "/usr/adm/wtmp"
-#  endif
-#endif
-
-#ifndef TTYTAB_FILENAME
-#  ifdef TTYTAB
-#    define TTYTAB_FILENAME TTYTAB_FILENAME
-#  else
-#    define TTYTAB_FILENAME "/etc/ttytab"
-#  endif
-#endif
-
-#ifndef USER_PROCESS
-#  define USER_PROCESS 7
-#endif
-#ifndef DEAD_PROCESS
-#  define DEAD_PROCESS 8
+/* screen.h includes config.h again, so re-fix these.  Pointed out by Sung-Hyun Nam <namsh@lgic.co.kr> */
+#if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
+#  undef HAVE_UTMPX_H
 #endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
 #if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
 static char ut_id[5];		/* remember if entry to utmp made */
-
 #else
 static int utmp_pos;		/* BSD position of utmp-stamp */
-
 #endif
 
 #ifdef USE_SYSV_UTMP
@@ -156,10 +113,6 @@ update_wtmp(char *fname, struct utmp *putmp)
   lck.l_len = 0;		/* end at ``largest possible eof'' */
   lck.l_start = 0;
   lck.l_type = F_WRLCK;		/* we want a write lock */
-
-#   if !defined(EACCESS) && defined(EAGAIN)
-#     define EACCESS EAGAIN
-#   endif
 
   /* attempt lock with F_SETLK - F_SETLKW would cause a deadlock! */
   while (retry--) {
@@ -187,16 +140,16 @@ update_wtmp(char *fname, struct utmp *putmp)
 void
 makeutent(const char *pty, const char *hostname)
 {
-  struct passwd *pwent = getpwuid(getuid());
+  struct passwd *pwent = getpwuid(my_ruid);
 
 #ifdef HAVE_UTMPX_H
   struct utmpx utmp;
   struct utmp utmp2;
-  memset(&utmp, 0, sizeof(struct utmpx));
+  MEMSET(&utmp, 0, sizeof(struct utmpx));
 
 #else
   struct utmp utmp;
-  memset(&utmp, 0, sizeof(struct utmp));
+  MEMSET(&utmp, 0, sizeof(struct utmp));
 
 #endif
 
@@ -255,7 +208,6 @@ makeutent(const char *pty, const char *hostname)
   pututline(&utmp2);
   pututxline(&utmp);
 #else
-  /* if (!utmpInhibit) */
   pututline(&utmp);
 #endif
   update_wtmp(WTMP_FILENAME, &utmp);
@@ -321,8 +273,6 @@ cleanutent(void)
 /* BSD utmp support */
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
-
-#include <ttyent.h>
 
 /* used to hold the line we are using */
 static char ut_line[32];
@@ -436,10 +386,10 @@ write_utmp(struct utmp *putmp)
 void
 makeutent(const char *pty, const char *hostname)
 {
-  struct passwd *pwent = getpwuid(getuid());
+  struct passwd *pwent = getpwuid(my_ruid);
   struct utmp utmp;
 
-  memset(&utmp, 0, sizeof(struct utmp));
+  MEMSET(&utmp, 0, sizeof(struct utmp));
 
   if (!strncmp(pty, "/dev/", 5))
     pty += 5;			/* skip /dev/ prefix */
@@ -486,7 +436,7 @@ cleanutent(void)
   privileges(INVOKE);
   if (!ut_id[0] && (fd = fopen(UTMP_FILENAME, "r+")) != NULL) {
     struct utmp utmp;
-    memset(&utmp, 0, sizeof(struct utmp));
+    MEMSET(&utmp, 0, sizeof(struct utmp));
 
     fseek(fd, utmp_pos, 0);
     fwrite(&utmp, sizeof(struct utmp), 1, fd);

@@ -26,12 +26,17 @@
 #include <stdio.h>
 #include <string.h>
 
-int 
+#ifndef FALSE
+#  define FALSE (0)
+#endif
+#ifndef TRUE
+#  define TRUE (!FALSE)
+#endif
+
+int
 main(int argc, char **argv)
 {
-  enum {
-    FALSE, TRUE
-  } scale = FALSE, trans = FALSE;
+  int scale = FALSE, trans = FALSE;
   unsigned int i, pic = 0, tint = 0, shade = 0;
 
   for (i = 1; i < argc; i++) {

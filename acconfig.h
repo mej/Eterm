@@ -270,6 +270,9 @@
 /* Do we need our own nanosleep()? */
 #undef HAVE_NANOSLEEP
 
+/* Is our snprintf() implementation buggy? */
+#undef HAVE_SNPRINTF_BUG
+
 /* Debugging level */
 #undef DEBUG
 
@@ -285,6 +288,29 @@
 
 /* Do we have the X shape extension? */
 #undef HAVE_X_SHAPE_EXT
+
+/* Support for various features */
+#undef USE_ACTIVE_TAGS
+#undef USE_POSIX_THREADS
+#undef MUTEX_SYNCH
+#undef PIXMAP_SUPPORT
+#undef PIXMAP_OFFSET
+#undef BACKING_STORE
+#undef FORCE_BACKSPACE
+#undef FORCE_DELETE
+#undef IMLIB_TRANS
+#undef KS_DELETE
+#undef NO_DELETE_KEY
+#undef NO_XLOCALE
+#undef PIXMAP_MENUBAR
+#undef PIXMAP_SCROLLBAR
+#undef UTMP_SUPPORT
+#undef MULTI_CHARSET
+#undef USE_XIM
+#undef USE_X11R6_XIM
+#undef NO_XLOCALE
+#undef GREEK_SUPPORT
+#undef CONFIG_SEARCH_PATH
 
 
 /* Leave that blank line there!!  Autoheader needs it.

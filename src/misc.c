@@ -1,18 +1,32 @@
-/*--------------------------------*-C-*---------------------------------*
- * File:	misc.c
+/*  misc.c -- Eterm toolkit routines
+
+ * This file is original work by Michael Jennings <mej@eterm.org> and
+ * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
+ * bearing this same message or a similar one, is distributed under
+ * the GNU Public License (GPL) as outlined in the COPYING file.
  *
- * miscellaneous service routines
+ * Copyright (C) 1997, Michael Jennings and Tuomo Venalainen
  *
- * Copyright 1996,97
- * mj olesen <olesen@me.QueensU.CA> Queen's Univ at Kingston
- *
- * You can do what you like with this source code provided you don't make
- * money from it and you include an unaltered copy of this message
- * (including the copyright).  As usual, the author accepts no
- * responsibility for anything, nor does he guarantee anything whatsoever.
- *----------------------------------------------------------------------*/
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * 
+ */
 
 static const char cvs_ident[] = "$Id$";
+
+#include "config.h"
+#include "feature.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -20,16 +34,15 @@ static const char cvs_ident[] = "$Id$";
 #include <string.h>
 #include <unistd.h>
 
+#include "../libmej/debug.h"
+#include "debug.h"
+#include "../libmej/mem.h"
+#include "../libmej/strings.h"
 #include "command.h"
 #include "main.h"
 #include "misc.h"
-#include "debug.h"
-#include "../libmej/debug.h"
-#include "../libmej/strings.h"
-#include "mem.h"
 #include "options.h"
 
-/*----------------------------------------------------------------------*/
 const char *
 my_basename(const char *str)
 {
@@ -155,8 +168,6 @@ str_trim(char *str)
  * returns the converted string length
  */
 
-#define MAKE_CTRL_CHAR(c) ((c) == '?' ? 127 : ((toupper(c)) - '@'))
-
 int
 parse_escaped_string(char *str)
 {
@@ -164,20 +175,20 @@ parse_escaped_string(char *str)
   register char *pold, *pnew;
   unsigned char i;
 
-  D_MENUBAR(("parse_escaped_string(\"%s\")\n", str));
+  D_STRINGS(("parse_escaped_string(\"%s\")\n", str));
 
   for (pold = pnew = str; *pold; pold++, pnew++) {
-    D_MENUBAR(("Looking at \"%s\"\n", pold));
+    D_STRINGS(("Looking at \"%s\"\n", pold));
     if (!BEG_STRCASECMP(pold, "m-")) {
       *pold = '\\';
       *(pold + 1) = 'e';
     } else if (!BEG_STRCASECMP(pold, "c-")) {
       *(++pold) = '^';
     }
-    D_MENUBAR(("Operating on \'%c\'\n", *pold));
+    D_STRINGS(("Operating on \'%c\'\n", *pold));
     switch (*pold) {
       case '\\':
-	D_MENUBAR(("Backslash + %c\n", *(pold + 1)));
+	D_STRINGS(("Backslash + %c\n", *(pold + 1)));
 	switch (tolower(*(++pold))) {
 	  case '0':
 	  case '1':
@@ -191,7 +202,7 @@ parse_escaped_string(char *str)
 	      i = (i * 8) + (*pold - '0');
 	    }
 	    pold--;
-	    D_MENUBAR(("Octal number evaluates to %d\n", i));
+	    D_STRINGS(("Octal number evaluates to %d\n", i));
 	    *pnew = i;
 	    break;
 	  case 'n':
@@ -228,7 +239,7 @@ parse_escaped_string(char *str)
 	}
 	break;
       case '^':
-	D_MENUBAR(("Caret + %c\n", *(pold + 1)));
+	D_STRINGS(("Caret + %c\n", *(pold + 1)));
 	pold++;
 	*pnew = MAKE_CTRL_CHAR(*pold);
 	break;
@@ -238,17 +249,17 @@ parse_escaped_string(char *str)
   }
 
   if (!BEG_STRCASECMP(str, "\033x") && *(pnew - 1) != '\r') {
-    D_MENUBAR(("Adding carriage return\n"));
+    D_STRINGS(("Adding carriage return\n"));
     *(pnew++) = '\r';
-  } else if (!BEG_STRCASECMP(str, "\0\e]") && *(pnew - 1) != '\a') {
-    D_MENUBAR(("Adding bell character\n"));
+  } else if (!BEG_STRCASECMP(str, "\e]") && *(pnew - 1) != '\a') {
+    D_STRINGS(("Adding bell character\n"));
     *(pnew++) = '\a';
   }
   *pnew = 0;
 
-#if DEBUG >= DEBUG_MENU
-  if (debug_level >= DEBUG_MENU) {
-    D_MENUBAR(("New value is:\n\n"));
+#if DEBUG >= DEBUG_STRINGS
+  if (debug_level >= DEBUG_STRINGS) {
+    D_STRINGS(("New value is:\n\n"));
     HexDump(str, (size_t) (pnew - str));
   }
 #endif
@@ -262,16 +273,10 @@ find_file(const char *file, const char *ext)
 
   const char *f;
 
-#if defined(PIXMAP_SUPPORT) || (MENUBAR_MAX)
+#if defined(PIXMAP_SUPPORT)
   if ((f = search_path(rs_path, file, ext)) != NULL) {
     return (f);
-  } else
-# ifdef PATH_ENV
-  if ((f = search_path(getenv(PATH_ENV), file, ext)) != NULL) {
-    return (f);
-  } else
-# endif
-  if ((f = search_path(getenv("PATH"), file, ext)) != NULL) {
+  } else if ((f = search_path(getenv(PATH_ENV), file, ext)) != NULL) {
     return (f);
   } else {
     return (search_path(initial_dir, file, ext));
@@ -376,4 +381,3 @@ Draw_Triangle(Window win, GC topShadow, GC botShadow, int x, int y, int w, int t
 #endif
   }
 }
-/*----------------------- end-of-file (C source) -----------------------*/

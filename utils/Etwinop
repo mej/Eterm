@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Eterm Window Operation Aid
+#
+# $Id$
+
+if [ $# -eq 0 ]; then
+  echo "Syntax:  Etwinop { raise | lower | map | unmap | iconify | kill } [windowid]"
+  echo
+  exit 0
+fi
+
+# Code to figure out if we need 'echo -n' or 'echo "\c"', stolen from configure
+if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
+  # Stardent Vistra SVR4 grep lacks -e, says ghazi@caip.rutgers.edu.
+  if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
+    ac_n= ac_c='
+'
+  else
+    ac_n=-n ac_c=
+  fi
+else
+  ac_n= ac_c='\c'
+fi
+
+if [ "X$2" = "X" ]; then
+  winop="$1"
+else
+  winop="$1 $2"
+fi
+
+echo $ac_n "]7;winop:$winop$ac_c"

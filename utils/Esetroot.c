@@ -4,7 +4,7 @@
  *             users to use Eterm's support for pseudotransparency.
  *
  * Written by Nat Friedman <ndf@mit.edu> with modifications by Gerald Britton
- * <gbritton@mit.edu> and Michael Jennings <mej@tcserv.com>
+ * <gbritton@mit.edu> and Michael Jennings <mej@eterm.org>
  *
  */
 

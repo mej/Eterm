@@ -4,6 +4,8 @@
 
 DIE=0
 
+echo "Generating configuration files for Eterm, please wait...."
+
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
 	echo
         echo "You must have autoconf installed to compile Eterm."
@@ -32,11 +34,16 @@ if test "$DIE" -eq 1; then
         exit 1
 fi
 
+echo "  libtoolize --copy --force"
 libtoolize --copy --force
-aclocal $ACLOCAL_FLAGS
-automake --add-missing
-autoconf
+echo "  aclocal -I . $ACLOCAL_FLAGS"
+aclocal -I . $ACLOCAL_FLAGS
+echo "  autoheader"
 autoheader
+echo "  automake --add-missing"
+automake --add-missing
+echo "  autoconf"
+autoconf
 
 if [ -x config.status -a -z "$*" ]; then
   ./config.status --recheck
@@ -49,4 +56,11 @@ else
     sleep 1
   fi
   ./configure "$@"
+fi
+
+if [ -f cvs.motd ]; then
+  echo "ATTENTION CVS Users!"
+  echo ""
+  cat cvs.motd
+  echo ""
 fi

@@ -6,7 +6,6 @@
 # define _PROFILE_H
 
 /* included for a possible #define PROFILE */
-/* # include "feature.h" */
 # include <stdio.h>
 # include <sys/time.h>
 # include <unistd.h>

@@ -4,7 +4,7 @@
  *            -- 2 April 1997                                  *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -63,14 +63,6 @@ static DTMap USMap = {
   "PM"
 };
 
-#ifndef STRPTIME_C
-#  ifdef __cplusplus
-extern "C" {
-#  else
-extern {
-#  endif
-  extern char *strptime(char *, const char *, struct tm *);
-}
-#endif
+extern char *strptime(char *, const char *, struct tm *);
 
 #endif /* _STRPTIME_H_ */

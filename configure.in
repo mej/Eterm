@@ -1,12 +1,12 @@
 dnl# $Id$
 
-AC_INIT(src/feature.h.in)
-AM_INIT_AUTOMAKE(Eterm, 0.8.9)
+AC_INIT(src/feature.h)
+AM_INIT_AUTOMAKE(Eterm, 0.9)
 
 dnl# Set some basic variables
-DATE="21 January 1999"
+DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
-AUTHORS="Tuomo Venalainen (vendu@cc.hut.fi) and Michael Jennings (mej@tcserv.com)"
+AUTHORS="Tuomo Venalainen (vendu@cc.hut.fi) and Michael Jennings (mej@eterm.org)"
 AC_SUBST(AUTHORS)
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
@@ -139,6 +139,7 @@ AC_TYPE_UID_T
 dnl# Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf)
+dps_snprintf_oflow()
 
 dnl# Check for the need for -lutil on BSD systems
 AC_CHECK_FUNC(login, 
@@ -152,14 +153,6 @@ AC_CHECK_FUNC(logout,
   AC_DEFINE(HAVE_LOGOUT)
 ))
 AC_CHECK_FUNC(getpwuid, , AC_CHECK_LIB(sun, getpwuid, LIBS="$LIBS -lsun"))
-
-dnl# Check for POSIX threads library
-dnl# Don't comment this back in before multithreading actually works,
-dnl# so people don't need thread-safe X libs to be able to run unthreaded
-dnl# Eterm :) -vendu
-#AC_CHECK_LIB(pthread, pthread_create, CFLAGS="$CFLAGS -D_REENTRANT";
-#                                      THREADLIBS="-lpthread", ,
-#             -D_REENTRANT -L/usr/lib -L/lib -L/usr/local/lib)
 
 dnl# Did they want debugging?
 AC_MSG_CHECKING(for debugging level)
@@ -178,34 +171,144 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
                   AC_DEFINE_UNQUOTED(DEBUG, 4)
 )
 
-dnl# Check for support for menus
-AC_MSG_CHECKING(whether or not to enable menubar support)
-AC_ARG_ENABLE(menus, [  --disable-menus         disable support for menubars (support enabled by default)],
-              if test "$enableval" != "no"; then 
-                  echo "yes" ; MENUSED="";
-              else echo "no" ; MENUSED='s/define MENUBAR_MAX .*/define MENUBAR_MAX 0/g';
-              fi, echo "yes" ; MENUSED="")
-
-dnl# Check for graphics libraries.
-dnl# Force Imlib flags - see below. -vendu
-AC_MSG_CHECKING(whether or not to enable pixmap support)
+dnl#
+dnl# FEATURES
+dnl#
+AC_MSG_CHECKING(for pixmap support)
 AC_ARG_WITH(imlib,
-[  --with-imlib[=DIR]      compile with Imlib support (Imlib residing in DIR/lib) [default]
-  --without-imlib         compile with pixmap support disabled],
+[  --with-imlib[=DIR]      compile with Imlib support (Imlib residing in DIR/lib) (default)],
             if test "$withval" != "no"; then 
-                echo "yes" ; CFLAGS="$CFLAGS -I${withval}/include -L${withval}/lib";
-                GRLIBS="-lImlib" ; PIXMAPSED="";
-            else echo "no" ; PIXMAPSED='s/define PIXMAP_SUPPORT/undef PIXMAP_SUPPORT/g';
-                GRLIBS="";
-            fi, echo "yes" ; GRLIBS="-lImlib" ; PIXMAPSED="")
+              AC_MSG_RESULT(yes)
+              CFLAGS="$CFLAGS -I${withval}/include -L${withval}/lib"
+              GRLIBS="-lImlib"
+              AC_DEFINE(PIXMAP_SUPPORT)
+              AC_DEFINE(PIXMAP_SCROLLBAR)
+              AC_DEFINE(PIXMAP_MENUBAR)
+              AC_DEFINE(BACKING_STORE)
+            else
+              AC_MSG_RESULT(no)
+              GRLIBS=""
+            fi, AC_MSG_RESULT(yes)
+                GRLIBS="-lImlib"
+                AC_DEFINE(PIXMAP_SUPPORT)
+                AC_DEFINE(PIXMAP_SCROLLBAR)
+                AC_DEFINE(PIXMAP_MENUBAR)
+                AC_DEFINE(BACKING_STORE)
+)
+AC_MSG_CHECKING(for transparency support)
+AC_ARG_ENABLE(trans,
+[  --enable-trans[=imlib]  compile with transparency support ("=imlib" will use Imlib instead of Xlib for transparency)],
+            if test "$enableval" = "imlib"; then 
+              AC_MSG_RESULT(yes, using Imlib)
+              AC_DEFINE(PIXMAP_OFFSET)
+              AC_DEFINE(IMLIB_TRANS)
+            elif test "$enableval" != "no"; then 
+              AC_MSG_RESULT(yes)
+              AC_DEFINE(PIXMAP_OFFSET)
+            else
+              AC_MSG_RESULT(no)
+            fi, AC_MSG_RESULT(yes)
+                AC_DEFINE(PIXMAP_OFFSET)
+)
+AC_MSG_CHECKING(for utmp support)
+AC_ARG_ENABLE(utmp,
+[  --enable-utmp           compile with utmp support],
+            if test "$enableval" != "no"; then 
+              AC_MSG_RESULT(yes)
+              AC_DEFINE(UTMP_SUPPORT)
+            else
+              AC_MSG_RESULT(no)
+            fi, AC_MSG_RESULT(yes)
+                AC_DEFINE(UTMP_SUPPORT)
+)
+AC_MSG_CHECKING(for backspace key configuration)
+AC_ARG_WITH(backspace,
+[  --with-backspace=KEY    force backspace to send KEY (KEY is either "bs" for ^H or "del" for ^?)],
+            if test "$withval" = "bs"; then 
+              AC_MSG_RESULT(forcing Backspace to send Ctrl-H)
+              AC_DEFINE(FORCE_BACKSPACE)
+            elif test "$withval" = "del"; then 
+              AC_MSG_RESULT(forcing Backspace to send Ctrl-?)
+              AC_DEFINE(FORCE_DELETE)
+            else
+              AC_MSG_RESULT(default)
+            fi, AC_MSG_RESULT(default)
+)
+AC_MSG_CHECKING(for delete key configuration)
+AC_ARG_WITH(delete,
+[  --with-delete=SETTING   force delete to SETTING ("server" to use the X server value always or
+                          a quoted string to use a specific string)],
+            if test "$withval" = "server"; then 
+              AC_MSG_RESULT(X server value)
+              AC_DEFINE(NO_DELETE_KEY)
+            else
+              AC_MSG_RESULT(forcing Delete to send "$withval")
+              AC_DEFINE_UNQUOTED(KS_DELETE, "$withval")
+            fi, AC_MSG_RESULT(default)
+                AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
+)
+AC_MSG_CHECKING(for multi-charset support)
+AC_ARG_ENABLE(multi-charset,
+[  --enable-multi-charset  compile with multi-charset support],
+            if test "$enableval" = "yes"; then 
+              AC_MSG_RESULT(yes)
+              AC_DEFINE(MULTI_CHARSET)
+            else
+              AC_MSG_RESULT(no)
+            fi, AC_MSG_RESULT(no)
+)
+AC_MSG_CHECKING(for XIM support)
+AC_ARG_ENABLE(xim,
+[  --enable-xim            compile with XIM support],
+            if test "$enableval" = "yes"; then 
+              AC_MSG_RESULT(yes)
+	      AC_DEFINE(USE_XIM)
+	      XIM="TRUE"
+            else
+              AC_MSG_RESULT(no)
+	      XIM="FALSE"
+            fi, AC_MSG_RESULT(no)
+)
+AC_MSG_CHECKING(for Greek keyboard support)
+AC_ARG_ENABLE(greek,
+[  --enable-greek          compile with support for Greek keyboards],
+            if test "$enableval" = "yes"; then 
+              AC_MSG_RESULT(yes)
+              AC_DEFINE(GREEK_SUPPORT)
+            else
+              AC_MSG_RESULT(no)
+            fi, AC_MSG_RESULT(no)
+)
+AC_MSG_CHECKING(which threads library to use)
+AC_ARG_WITH(threads,
+[  --with-threads[=STYLE]  compile with threads support, STYLE is either "posix" or blank
+                          (disabled by default)],
+            case $withval in
+              [yes | posix )]
+                AC_MSG_RESULT(POSIX)
+                THREADS_LIB=posix
+                ;;
+              [* )]
+                AC_MSG_RESULT(none)
+                ;;
+            esac
+ , AC_MSG_RESULT(none))
+if test "$THREADS_LIB" = "posix"; then
+  AC_CHECK_LIB(pthread, pthread_create, CFLAGS="$CFLAGS -D_REENTRANT" ; THREADLIBS="-lpthread"
+                                       AC_DEFINE(USE_POSIX_THREADS)
+                                       AC_DEFINE(MUTEX_SYNCH)
+               , , -D_REENTRANT -L/usr/lib -L/lib -L/usr/local/lib)
+fi
 
+dnl#
+dnl# X LIBRARIES
+dnl#
 AC_CHECK_LIB(X11, XOpenDisplay, X_LIBS="$X_LIBS -lX11", [
 echo "ERROR:  You need libX11 to build Eterm.  Verify that you have libX11.a or";
 echo "        libX11.so installed and that it is located in the X libraries";
 echo "        directory shown above.  If it is in a different directory, try using";
 echo "        the --x-libraries parameter to configure.";
              AC_MSG_ERROR([Fatal:  libX11 not found.])], $X_LIBS $SUBLIBS)
-
 AC_CHECK_LIB(Xext, XextAddDisplay, X_LIBS="-lXext $X_LIBS", [
 echo "ERROR:  You need libXext to build Eterm.  Verify that you have libXext.a or";
 echo "        libXext.so installed and that it is located in the X libraries";
@@ -214,6 +317,14 @@ echo "        the --x-libraries parameter to configure.";
              AC_MSG_ERROR([Fatal:  libXext not found.])], $X_LIBS $SUBLIBS)
 
 AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT), , $X_LIBS $SUBLIBS)
+
+# check if we need X_LOCALE definition
+AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE), , $X_LIBS $SUBLIBS)
+
+# check X11R6 for XIM
+if test "$XIM" = "TRUE"; then
+  AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM), , $X_LIBS $SUBLIBS)
+fi
 
 if test -z "$PIXMAPSED"; then
 
@@ -325,6 +436,8 @@ AC_CHECK_LIB(Kenny, life_signs, , [
 ])
 fi
 
+AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:${prefix}/share/Eterm/themes:${prefix}/share/Eterm")
+
 CFLAGS=${CFLAGS--O}
 LDFLAGS=${LDFLAGS--O}
 
@@ -338,12 +451,6 @@ AC_SUBST(THREADLIBS)
 AC_SUBST(GRLIBS)
 
 basedir=.
-FEATURE_CMD="$SED -e \"s%@PREFIX@%${prefix}%g\" -e \"s%@DATADIR@%${datadir}%g\" -e \"$PIXMAPSED\" -e \"$MENUSED\" "'${DIST_ROOT}'"/src/feature.h.in > "'${DIST_ROOT}'"/src/feature.h"
-AC_SUBST(FEATURE_CMD)
-
-dnl# common parts of the Makefile
-dnl# MCOMMON=./Make.common
-dnl# AC_SUBST_FILE(MCOMMON)
 
 AM_CONFIG_HEADER(config.h)
 
@@ -352,6 +459,7 @@ bg/Makefile \
 doc/Makefile \
 utils/Makefile \
 libmej/Makefile \
+pix/Makefile \
 src/Makefile \
 src/graphics/Makefile \
 themes/Makefile \
@@ -359,29 +467,24 @@ Eterm.spec \
 )
 
 dnl If we're not building with Imlib support, don't build Esetroot
-if test -n "$PIXMAPSED"; then
+if test -z "$GRLIBS"; then
   sed -e 's/^bin_PROGRAMS.*$//g' doc/Makefile > doc/Makefile.new
   mv doc/Makefile.new doc/Makefile
 fi
 
-echo "creating src/feature.h"
-eval ${FEATURE_CMD}.new
-if cmp -s ${DIST_ROOT}/src/feature.h.new ${DIST_ROOT}/src/feature.h 2>/dev/null ; then
-  echo "feature.h is unchanged"
-  rm -f ${DIST_ROOT}/src/feature.h.new
-else
-  mv ${DIST_ROOT}/src/feature.h.new ${DIST_ROOT}/src/feature.h
-fi
-
 echo "
+$PACKAGE $VERSION
 Configuration:
+--------------
 
   Source code location:       ${srcdir}
   Compiler:	              ${CC} ${CFLAGS}
   Host System Type:           ${host}
   Graphics libraries:         ${GRLIBS}
-  X Windows libs/paths:       ${X_LIBS}
+  X libraries/paths:          ${X_LIBS}
   Install path:		      ${prefix}
 
-  See src/feature.h for further configuration information."
-echo
+  See src/feature.h for further configuration information.
+
+  Now type 'make' to build $PACKAGE $VERSION.
+"

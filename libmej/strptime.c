@@ -5,7 +5,7 @@
  *            -- 2 April 1997                                  *
  ***************************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -29,12 +29,14 @@ static const char cvs_ident[] = "$Id$";
 
 #ifdef IRIX
 
+#include "config.h"
+#include "../src/feature.h"
+
 #include "global.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-#define STRPTIME_C
 #include "strptime.h"
 
 char *

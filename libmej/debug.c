@@ -4,7 +4,7 @@
  *         -- 20 December 1996                           *
  *********************************************************/
 /*
- * This file is original work by Michael Jennings <mej@tcserv.com>.
+ * This file is original work by Michael Jennings <mej@eterm.org>.
  *
  * Copyright (C) 1997, Michael Jennings
  *
@@ -26,6 +26,9 @@
 
 static const char cvs_ident[] = "$Id$";
 
+#include "config.h"
+#include "../src/feature.h"
+
 #include "global.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +39,6 @@ static const char cvs_ident[] = "$Id$";
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#define DEBUG_C
 #include "debug.h"
 
 int
@@ -47,8 +49,7 @@ real_dprintf(const char *format,...)
   int n;
 
   va_start(args, format);
-  n = fprintf(stderr, "[debug] ");
-  n += vfprintf(stderr, format, args);
+  n = vfprintf(stderr, format, args);
   va_end(args);
   fflush(stderr);
   return (n);

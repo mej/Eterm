@@ -44,8 +44,8 @@
 
 static const char cvs_ident[] = "$Id$";
 
+#include "config.h"
 #include "feature.h"
-#include "grkelot.h"
 
 #ifdef GREEK_SUPPORT
 # include "grkelot.h"
@@ -320,7 +320,6 @@ kstate_cxlat(unsigned int c)
   return (c);
 }
 
-# ifdef RXVT
 void
 greek_init(void)
 {
@@ -384,6 +383,5 @@ main(void)
   return 0;
 }
 #  endif
-# endif				/* RXVT */
 
 #endif /* GREEK_SUPPORT */

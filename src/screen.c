@@ -5,20 +5,13 @@
 
 static const char cvs_ident[] = "$Id$";
 
-/* includes */
-#include "main.h"
-#ifdef USE_ACTIVE_TAGS
-# include "activetags.h"
-# include "activeeterm.h"
-#endif
-#ifdef USE_POSIX_THREADS
-# include "threads.h"
-#endif
+#include "config.h"
+#include "feature.h"
 
+/* includes */
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
-
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -29,108 +22,39 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>		/* CARD32 */
 
+#include "../libmej/debug.h"
 #include "command.h"
 #include "debug.h"
+#include "main.h"
 #include "mem.h"
 #include "graphics.h"
 #include "screen.h"
 #include "options.h"
-
-#include <X11/Xatom.h>
-#include <X11/Xmd.h>		/* get the typedef for CARD32 */
-
-#if defined(PIXMAP_SUPPORT) && defined(USE_IMLIB)
-# include "eterm_imlib.h"
-extern ImlibData *imlib_id;
-
-#endif
 #ifdef PIXMAP_SUPPORT
 # include "pixmap.h"
 #endif
 #ifdef PROFILE_SCREEN
 # include "profile.h"
 #endif
-
-/* ------------------------------------------------------------------------- */
-
-#define WRAP_CHAR		(MAX_COLS + 1)
-#define PROP_SIZE       	4096
-#define TABSIZE         	8	/* default tab size */
-
-/* ------------------------------------------------------------------------- */
-
-/* ------------------------------------------------------------------------- *
- *               GENERAL SCREEN AND SELECTION UPDATE ROUTINES                *
- * ------------------------------------------------------------------------- */
-
-#define ZERO_SCROLLBACK do { \
-                          D_SCREEN(("ZERO_SCROLLBACK()\n")); \
-                          if (Options & Opt_homeOnEcho) TermWin.view_start = 0; \
-                        } while (0)
-#define REFRESH_ZERO_SCROLLBACK do { \
-                                  D_SCREEN(("REFRESH_ZERO_SCROLLBACK()\n")); \
-                                  if (Options & Opt_homeOnRefresh) TermWin.view_start = 0; \
-                                } while (0)
-#define CHECK_SELECTION	do { \
-                          if (selection.op) selection_check(); \
-                        } while (0)
-
-/*
- * CLEAR_ROWS : clear <num> rows starting from row <row>
- * CLEAR_CHARS: clear <num> chars starting from pixel position <x,y>
- * ERASE_ROWS : set <num> rows starting from row <row> to the foreground colour
- */
-#define drawBuffer	(TermWin.vt)
-#define CLEAR_ROWS(row, num) do { \
-                               XClearArea(Xdisplay, drawBuffer, Col2Pixel(0), Row2Pixel(row), \
-                                          TermWin.width, Height2Pixel(num), 0); \
-                             } while (0)
-#define CLEAR_CHARS(x, y, num) do { \
-                                 D_SCREEN(("CLEAR_CHARS(%d, %d, %d)\n", x, y, num)); \
-                                 XClearArea(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
-                               } while (0)
-#define FAST_CLEAR_CHARS(x, y, num) do { \
-                                      clear_area(Xdisplay, drawBuffer, x, y, Width2Pixel(num), Height2Pixel(1), 0); \
-                                    } while (0)
-#define ERASE_ROWS(row, num) do { \
-                               XFillRectangle(Xdisplay, drawBuffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), \
-                                              TermWin.width, Height2Pixel(num)); \
-                             } while (0)
-
-/* ------------------------------------------------------------------------- *
- *                             MODULE VARIABLES                              *
- * ------------------------------------------------------------------------- */
+#include "term.h"
+#ifdef USE_POSIX_THREADS
+# include "threads.h"
+#endif
 
 /* This tells what's actually on the screen */
-#ifdef USE_ACTIVE_TAGS
-text_t **drawn_text = NULL;
-rend_t **drawn_rend = NULL;
-extern void tag_scroll(int nlines, int row1, int row2);
-
-#else
 static text_t **drawn_text = NULL;
 static rend_t **drawn_rend = NULL;
-
-#endif
 
 static text_t **buf_text = NULL;
 static rend_t **buf_rend = NULL;
 
 static char *tabs = NULL;	/* a 1 for a location with a tab-stop */
 
-#ifdef USE_ACTIVE_TAGS
-screen_t screen =
-{
-  NULL, NULL, 0, 0, 0, 0, 0, Screen_DefaultFlags
-};
-
-#else
 static screen_t screen =
 {
   NULL, NULL, 0, 0, 0, 0, 0, Screen_DefaultFlags
 };
 
-#endif
 static screen_t swap =
 {
   NULL, NULL, 0, 0, 0, 0, 0, Screen_DefaultFlags
@@ -159,10 +83,10 @@ static rend_t rstyle = DEFAULT_RSTYLE;
 static short rvideo = 0;	/* reverse video */
 int prev_nrow = -1, prev_ncol = -1;	/* moved from scr_reset() to squash seg fault in scroll_text() */
 
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 static short multi_byte = 0;
 static enum {
-  EUCJ, SJIS
+  EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
 } encoding_method = EUCJ;
 static enum {
   SBYTE, WBYTE
@@ -185,7 +109,7 @@ blank_line(text_t * et, rend_t * er, int width, rend_t efs)
   register int i = width;
   rend_t *r = er, fs = efs;
 
-  memset(et, ' ', i);
+  MEMSET(et, ' ', i);
   for (; i--;)
     *r++ = fs;
 }
@@ -404,6 +328,9 @@ scr_reset(void)
 
 
 
+
+
+
   tabs = MALLOC(TermWin.ncol * sizeof(char));
 
   for (i = 0; i < TermWin.ncol; i++)
@@ -462,7 +389,7 @@ scr_poweron(void)
 
   last_col = TermWin.ncol - 1;
 
-  memset(charsets, 'B', sizeof(charsets));
+  MEMSET(charsets, 'B', sizeof(charsets));
   rvideo = 0;
   scr_rendition(0, ~RS_None);
 #if NSCREENS
@@ -580,7 +507,7 @@ scr_change_screen(int scrn)
 
 /* ------------------------------------------------------------------------- */
 /*
- * Change the colour for following text
+ * Change the color for following text
  */
 void
 scr_color(unsigned int color, unsigned int Intensity)
@@ -592,7 +519,7 @@ scr_color(unsigned int color, unsigned int Intensity)
   else if (color == restoreBG)
     color = bgColor;
   else {
-    if (Xdepth <= 2) {		/* Monochrome - ignore colour changes */
+    if (Xdepth <= 2) {		/* Monochrome - ignore color changes */
       switch (Intensity) {
 	case RS_Bold:
 	  color = fgColor;
@@ -659,7 +586,7 @@ scr_rendition(int set, int style)
     rstyle &= ~style;
 
     switch (style) {
-      case ~RS_None:		/* default fg/bg colours */
+      case ~RS_None:		/* default fg/bg colors */
 	rstyle = DEFAULT_RSTYLE;
 	/* FALLTHROUGH */
       case RS_RVid:
@@ -712,10 +639,6 @@ scroll_text(int row1, int row2, int count, int spec)
 
   if (count == 0 || (row1 > row2))
     return 0;
-
-#ifdef USE_ACTIVE_TAGS
-  tag_hide();
-#endif
 
   if (selection.op) {		/* move selected region too */
     selection.beg.row -= count;
@@ -789,9 +712,6 @@ scroll_text(int row1, int row2, int count, int spec)
     count = -count;
   }
   GR_DISPLAY(Gr_scroll(count));
-#ifdef USE_ACTIVE_TAGS
-  tag_scroll(count, row1, row2);
-#endif
 #ifdef PROFILE_SCREEN
   P_SETTIMEVAL(cnt.stop);
   total_time += P_CMPTIMEVALS_USEC(cnt.start, cnt.stop);
@@ -851,14 +771,13 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
   row = screen.row + TermWin.saveLines;
   if (screen.text[row] == NULL) {
     make_screen_mem(screen.text, screen.rend, row);
-  } /* avoid segfault -- added by Sebastien van K */
-
+  }				/* avoid segfault -- added by Sebastien van K */
   beg.row = screen.row;
   beg.col = screen.col;
   stp = screen.text[row];
   srp = screen.rend[row];
 
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   if (lost_multi && screen.col > 0
       && ((srp[screen.col - 1] & RS_multiMask) == RS_multi1)
       && *str != '\n' && *str != '\r' && *str != '\t')
@@ -867,7 +786,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 
   for (i = 0; i < len;) {
     c = str[i++];
-#ifdef KANJI
+#ifdef MULTI_CHARSET
     if (chstat == WBYTE) {
       rstyle |= RS_multiMask;	/* multibyte 2nd byte */
       chstat = SBYTE;
@@ -912,7 +831,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	    screen.col = 0;
 	    continue;
 	  default:
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	    rstyle &= ~RS_multiMask;
 #endif
 	    break;
@@ -1338,7 +1257,7 @@ scr_insdel_chars(int count, int insdel)
 	screen.text[row][TermWin.ncol] = 0;
       break;
   }
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   if ((screen.rend[row][0] & RS_multiMask) == RS_multi2) {
     screen.rend[row][0] &= ~RS_multiMask;
     screen.text[row][0] = ' ';
@@ -1443,7 +1362,7 @@ void
 scr_set_tab(int mode)
 {
   if (mode < 0)
-    memset(tabs, 0, TermWin.ncol * sizeof(char));
+    MEMSET(tabs, 0, TermWin.ncol);
 
   else if (screen.col < TermWin.ncol)
     tabs[screen.col] = (mode ? 1 : 0);
@@ -1541,7 +1460,7 @@ scr_charset_choose(int set)
 void
 scr_charset_set(int set, unsigned int ch)
 {
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   multi_byte = (set < 0);
   set = abs(set);
 #endif
@@ -1550,29 +1469,28 @@ scr_charset_set(int set, unsigned int ch)
 }
 
 /* ------------------------------------------------------------------------- *
- *             JAPANESE CHARACTER SET MANIPULATION FUNCTIONS                 * 
+ *             MULTIPLE-CHARACTER SET MANIPULATION FUNCTIONS                 * 
  * ------------------------------------------------------------------------- */
-#ifdef KANJI
-static void (*kanji_decode) (unsigned char *str, int len) = eucj2jis;
+#ifdef MULTI_CHARSET
 
-#endif
+static void eucj2jis(unsigned char *str, int len);
+static void sjis2jis(unsigned char *str, int len);
+static void big5dummy(unsigned char *str, int len);
 
-void
+static void (*multichar_decode) (unsigned char *str, int len) = eucj2jis;
+
+static void
 eucj2jis(unsigned char *str, int len)
 {
-#ifdef KANJI
   register int i;
 
   for (i = 0; i < len; i++)
     str[i] &= 0x7F;
-#endif
 }
 
-/* ------------------------------------------------------------------------- */
-void
+static void
 sjis2jis(unsigned char *str, int len)
 {
-#ifdef KANJI
   register int i;
   unsigned char *high, *low;
 
@@ -1590,28 +1508,39 @@ sjis2jis(unsigned char *str, int len)
       *low -= 0x1F;
     }
   }
-#endif
 }
+
+static void
+big5dummy(unsigned char *str, int len)
+{
+  str = NULL;
+  len = 0;
+}
+#endif
 
 /* ------------------------------------------------------------------------- */
 void
-set_kanji_encoding(const char *str)
+set_multichar_encoding(const char *str)
 {
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   if (str && *str) {
     if (!strcmp(str, "sjis")) {
       encoding_method = SJIS;
-      kanji_decode = sjis2jis;
-    } else if (!strcmp(str, "eucj")) {
+      multichar_decode = sjis2jis;
+    } else if (!strcmp(str, "eucj") || !strcmp(str, "euckr")
+	       || !strcmp(str, "gb")) {
       encoding_method = EUCJ;
-      kanji_decode = eucj2jis;
+      multichar_decode = eucj2jis;
+    } else if (!strcmp(str, "big5")) {
+      encoding_method = BIG5;
+      multichar_decode = big5dummy;
     }
   }
-#endif /* KANJI */
+#endif /* MULTI_CHARSET */
 }
 
 /* ------------------------------------------------------------------------- *
- *                           GRAPHICS COLOURS                                * 
+ *                           GRAPHICS COLORS                                * 
  * ------------------------------------------------------------------------- */
 
 #ifdef RXVT_GRAPHICS
@@ -1686,20 +1615,6 @@ scr_expose(int x, int y, int width, int height)
 		 &(drawn_rend[i][full_beg.col]),
 		 full_end.col - full_beg.col + 1, DEFAULT_RSTYLE);
 
-/* FIXME: If PIXMAP_BUFFERING will be implemented, I'll have to do something
- * here ;) -vendu
- */
-
-#if defined(PIXMAP_SUPPORT) && defined(PIXMAP_BUFFERING)
-/* supposedly we're exposed - so `clear' the fully exposed clear areas */
-  x = Col2Pixel(full_beg.col);
-  y = Row2Pixel(full_beg.row);
-  width = Width2Pixel(full_end.col - full_beg.col + 1);
-  height = Height2Pixel(full_end.row - full_beg.row + 1);
-  XCopyArea(Xdisplay, TermWin.pixmap, drawBuffer, TermWin.gc,
-	    x, y, width, height, x, y);
-#endif
-
 /* force an update for partially exposed characters */
   if (part_beg.row != full_beg.row) {
     r = &(drawn_rend[part_beg.row][part_beg.col]);
@@ -1723,7 +1638,11 @@ scr_expose(int x, int y, int width, int height)
 /*
  * Refresh the entire screen
  */
+#ifdef __GNUC__
 inline void
+#else
+void
+#endif
 scr_touch(void)
 {
   scr_expose(0, 0, TermWin.width, TermWin.height);
@@ -1760,16 +1679,7 @@ scr_page(int direction, int nlines)
 {
   int start, dirn;
 
-#ifdef USE_ACTIVE_TAGS
-  int retval;
-
-#endif
-
   D_SCREEN(("scr_page(%s, %d) view_start:%d\n", ((direction == UP) ? "UP" : "DN"), nlines, TermWin.view_start));
-
-#ifdef USE_ACTIVE_TAGS
-  tag_hide();
-#endif
 
   dirn = (direction == UP) ? 1 : -1;
   start = TermWin.view_start;
@@ -1780,15 +1690,7 @@ scr_page(int direction, int nlines)
   MIN_IT(TermWin.view_start, TermWin.nscrolled);
 
   GR_DISPLAY(Gr_scroll(0));
-#ifdef USE_ACTIVE_TAGS
-  tag_scroll((retval = TermWin.view_start - start),
-	     tag_min_row(), tag_max_row());
-#endif
-#ifdef USE_ACTIVE_TAGS
-  return retval;
-#else
   return (TermWin.view_start - start);
-#endif
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1815,7 +1717,6 @@ scr_printscreen(int fullhist)
 #ifdef PRINTPIPE
   int i, r, nrows, row_offset;
   text_t *t;
-  char title[256];
   FILE *fd;
 
   if ((fd = popen_printer()) == NULL)
@@ -1956,12 +1857,13 @@ scr_refresh(int type)
   col = screen.col;
   if (screen.flags & Screen_VisibleCursor) {
     screen.rend[row][col] |= RS_Cursor;
-#ifdef KANJI
-    if ((col < ncols - 1) && ((screen.rend[row][col] & RS_multiMask) == RS_multi1)
-	&& ((screen.rend[row][col + 1] & RS_multiMask) == RS_multi2)) {
+#ifdef MULTI_CHARSET
+    srp = &screen.rend[row][col];
+    if ((col < ncols - 1) && ((srp[0] & RS_multiMask) == RS_multi1)
+	&& ((srp[1] & RS_multiMask) == RS_multi2)) {
       screen.rend[row][col + 1] |= RS_Cursor;
-    } else if ((col > 0) && ((screen.rend[row][col] & RS_multiMask) == RS_multi2)
-	       && ((screen.rend[row][col - 1] & RS_multiMask) == RS_multi1)) {
+    } else if ((col > 0) && ((srp[0] & RS_multiMask) == RS_multi2)
+	       && ((srp[-1] & RS_multiMask) == RS_multi1)) {
       screen.rend[row][col - 1] |= RS_Cursor;
     }
 #endif
@@ -1969,10 +1871,10 @@ scr_refresh(int type)
       focus = TermWin.focus;
       if ((i = screen.row - TermWin.view_start) >= 0) {
 	drawn_rend[i][col] = RS_attrMask;
-#ifdef KANJI
-	if ((col < ncols - 1) && ((screen.rend[row][col + 1] & RS_multiMask) == RS_multi2)) {
+#ifdef MULTI_CHARSET
+	if ((col < ncols - 1) && ((srp[1] & RS_multiMask) == RS_multi2)) {
 	  drawn_rend[i][col + 1] = RS_attrMask;
-	} else if ((col > 0) && ((screen.rend[row][col - 1] & RS_multiMask) == RS_multi1)) {
+	} else if ((col > 0) && ((srp[-1] & RS_multiMask) == RS_multi1)) {
 	  drawn_rend[i][col - 1] = RS_attrMask;
 	}
 #endif
@@ -1995,12 +1897,12 @@ scr_refresh(int type)
       rt1 = srp[col];		/* screen rendition */
       rt2 = drp[col];		/* drawn rendition  */
       if ((stp[col] == dtp[col])	/* must match characters to skip */
-	  &&((rt1 == rt2)	/* either rendition the same or  */
-	     ||((stp[col] == ' ')	/* space w/ no bg change */
-		&&(GET_BGATTR(rt1) == GET_BGATTR(rt2))
-		&& !(rt2 & RS_Dirty))))
-#ifdef KANJI
-	/* if first byte is Kanji then compare second bytes */
+	  && ((rt1 == rt2)	/* either rendition the same or  */
+	      || ((stp[col] == ' ')	/* space w/ no bg change */
+		  &&(GET_BGATTR(rt1) == GET_BGATTR(rt2))
+		  && !(rt2 & RS_Dirty)))) {
+#ifdef MULTI_CHARSET
+	/* if first byte is multibyte then compare second bytes */
 	if ((rt1 & RS_multiMask) != RS_multi1)
 	  continue;
 	else if (stp[col + 1] == dtp[col + 1]) {
@@ -2011,6 +1913,7 @@ scr_refresh(int type)
 #else
 	continue;
 #endif
+      }
       lasttext = dtp[col];
       lastrend = drp[col];
       /* redraw one or more characters */
@@ -2027,16 +1930,16 @@ scr_refresh(int type)
  * Find out the longest string we can write out at once
  */
       if (fprop == 0) {		/* Fixed width font */
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	if (((rend & RS_multiMask) == RS_multi1) && (col < ncols - 1)
 	    && ((srp[col + 1]) & RS_multiMask) == RS_multi2) {
 	  if (!wbyte) {
 	    wbyte = 1;
-	    XSetFont(Xdisplay, TermWin.gc, TermWin.kanji->fid);
+	    XSetFont(Xdisplay, TermWin.gc, TermWin.mfont->fid);
 	    draw_string = XDrawString16;
 	    draw_image_string = XDrawImageString16;
 	  }
-	  /* double stepping - we're in Kanji mode */
+	  /* double stepping - we're in Multibyte mode */
 	  for (; ++col < ncols;) {
 	    /* XXX: could check sanity on 2nd byte */
 	    dtp[col] = stp[col];
@@ -2052,13 +1955,12 @@ scr_refresh(int type)
 	    if (len == MAX_COLS)
 	      break;
 	    dtp[col] = stp[col];
-/*                      lastchar = drp[col]; */
 	    drp[col] = srp[col];
 	    buffer[len++] = stp[col];
-	  }			/* for (; ++col < TermWin.ncol;) */
+	  }
 	  col--;
 	  if (buffer[0] & 0x80)
-	    kanji_decode(buffer, len);
+	    multichar_decode(buffer, len);
 	  wlen = len / 2;
 	} else {
 	  if ((rend & RS_multiMask) == RS_multi1) {
@@ -2092,7 +1994,7 @@ scr_refresh(int type)
 	  }			/* for (; ++col < TermWin.ncol - 1;) */
 	  col--;
 	  wlen = len;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	}
 #endif
       }
@@ -2249,7 +2151,7 @@ scr_refresh(int type)
 		       xpixel, ypixel - TermWin.font->ascent,
 		       Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
       }
-      if (gcmask) {		/* restore normal colours */
+      if (gcmask) {		/* restore normal colors */
 	gcvalue.foreground = PixColors[fgColor];
 	gcvalue.background = PixColors[bgColor];
 	XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
@@ -2269,7 +2171,7 @@ scr_refresh(int type)
   col = screen.col;
   if (screen.flags & Screen_VisibleCursor) {
     screen.rend[row][col] &= ~RS_Cursor;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
     /* very low overhead so don't check properly, just wipe it all out */
     if (screen.col < ncols - 1)
       screen.rend[row][col + 1] &= ~RS_Cursor;
@@ -2626,7 +2528,7 @@ selection_make(Time tm)
     col = 0;
     if (screen.text[row][TermWin.ncol] != WRAP_CHAR) {
       if (!(Options & Opt_select_trailing_spaces)) {
-	for (; isspace(*--str););
+	for (str--; *str == ' ' || *str == '\t'; str--);
 	str++;
       }
       *str++ = '\n';
@@ -2645,6 +2547,10 @@ selection_make(Time tm)
   MIN_IT(end_col, TermWin.ncol);
   for (; col < end_col; col++)
     *str++ = *t++;
+  if (!(Options & Opt_select_trailing_spaces)) {
+    for (str--; *str == ' ' || *str == '\t'; str--);
+    str++;
+  }
   if (i)
     *str++ = '\n';
   *str = '\0';
@@ -2704,7 +2610,7 @@ selection_click(int clicks, int x, int y)
 #else
 #  define DELIMIT_TEXT(x) (strchr(CUTCHARS, (x)) != NULL)
 #endif
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 #define DELIMIT_REND(x)	(((x) & RS_multiMask) ? 1 : 0)
 #endif
 
@@ -2715,7 +2621,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
   int row_offset, w1;
   text_t *stp, *stp1, t;
 
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   int w2;
   rend_t *srp, r;
 
@@ -2758,7 +2664,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
   w1 = DELIMIT_TEXT(*stp);
   if (w1 == 2)
     w1 = 0;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   srp = &(screen.rend[beg_row + row_offset][beg_col]);
   w2 = DELIMIT_REND(*srp);
 #endif
@@ -2768,7 +2674,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
       t = *--stp;
       if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && Options & Opt_xterm_select))
 	break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
       r = *--srp;
       if (DELIMIT_REND(r) != w2)
 	break;
@@ -2778,14 +2684,14 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
       if (beg_col == col && beg_col > 0) {
 	if (DELIMIT_TEXT(*stp))	/* space or tab or cutchar */
 	  break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	srp = &(screen.rend[beg_row + row_offset][beg_col - 1]);
 #endif
 	for (; --beg_col > 0;) {
 	  t = *--stp;
 	  if (DELIMIT_TEXT(t))
 	    break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	  r = *--srp;
 	  if (DELIMIT_REND(r) != w2)
 	    break;
@@ -2797,7 +2703,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
       stp = &(screen.text[beg_row + row_offset - 1][last_col + 1]);
       if (*stp == WRAP_CHAR) {
 	t = *(stp - 1);
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	srp = &(screen.rend[beg_row + row_offset - 1][last_col + 1]);
 	r = *(srp - 1);
 	if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(Options & Opt_xterm_select)) && DELIMIT_REND(r) == w2) {
@@ -2823,7 +2729,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
   stp1 = stp = &(screen.text[end_row + row_offset][end_col]);
 # endif
 
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   srp = &(screen.rend[end_row + row_offset][end_col]);
 #endif
   for (;;) {
@@ -2831,7 +2737,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
       t = *++stp;
       if (DELIMIT_TEXT(t) != w1 || (w1 && *stp1 != t && Options & Opt_xterm_select))
 	break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
       r = *++srp;
       if (DELIMIT_REND(r) != w2)
 	break;
@@ -2841,14 +2747,14 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
       if (end_col == col && end_col < last_col) {
 	if (DELIMIT_TEXT(*stp))	/* space or tab or cutchar */
 	  break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	srp = &(screen.rend[end_row + row_offset][end_col + 1]);
 #endif
 	for (; ++end_col < last_col;) {
 	  t = *++stp;
 	  if (DELIMIT_TEXT(t))
 	    break;
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	  r = *++srp;
 	  if (DELIMIT_REND(r) != w2)
 	    break;
@@ -2860,7 +2766,7 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
 	&& (end_row < (TermWin.nrow - 1))) {
       if (*++stp == WRAP_CHAR) {
 	stp = screen.text[end_row + row_offset + 1];
-#ifdef KANJI
+#ifdef MULTI_CHARSET
 	srp = screen.rend[end_row + row_offset + 1];
 	if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(Options & Opt_xterm_select)) && DELIMIT_REND(*srp) == w2) {
 #else
@@ -2934,7 +2840,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
     LEFT, RIGHT
   } closeto = RIGHT;
 
-#ifdef KANJI
+#ifdef MULTI_CHARSET
   int r;
 
 #endif
@@ -3048,7 +2954,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
 	  selection.end.col = TermWin.ncol - 1;
       }
     }
-#ifdef KANJI
+#ifdef MULTI_CHARSET
     if (selection.beg.col > 0) {
       r = selection.beg.row + TermWin.saveLines;
       if (((screen.rend[r][selection.beg.col] & RS_multiMask) == RS_multi2)
@@ -3292,3 +3198,12 @@ debug_colors(void)
 #endif
   fprintf(stderr, "%s\n", name[color]);
 }
+
+#ifdef USE_XIM
+void xim_get_position(XPoint *pos)
+{
+   pos->x = Col2Pixel(screen.col);
+   pos->y = Height2Pixel(screen.row) + TermWin.font->ascent
+            + TermWin.internalBorder;
+}
+#endif
