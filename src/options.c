@@ -1574,7 +1574,6 @@ shell_expand(char *s)
 	      Output = (char *) MALLOC(fsize + 1);
 	      fread(Output, fsize, 1, fp);
 	      Output[fsize] = 0;
-	      D_ENL(("Command returned \"%s\".  Output length is %lu, j = %lu, max - j == %lu\n", Output, fsize, j, max - j));
 	      fclose(fp);
 	      remove(OutFile);
 	      Output = CondenseWhitespace(Output);

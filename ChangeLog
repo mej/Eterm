@@ -2506,3 +2506,9 @@ Tue Sep 28 18:54:16 PDT 1999	Michael Jennings <mej@eterm.org>
 	with too many entries will no longer crash Eterm.
 	
 -------------------------------------------------------------------------------
+Wed Sep 29 15:30:47 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Make auto mode work with the terminal background (ETERM_BG) too.
+	Sorry raster. :-)
+	
+-------------------------------------------------------------------------------

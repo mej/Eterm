@@ -33,7 +33,9 @@
 #ifdef PIXMAP_SUPPORT
 # define background_is_image() (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im)
 # define background_is_trans() (images[image_bg].mode & MODE_TRANS)
-# define background_is_pixmap() (background_is_image() || background_is_trans())
+# define background_is_viewport() (images[image_bg].mode & MODE_VIEWPORT)
+# define background_is_auto() (images[image_bg].mode & MODE_AUTO)
+# define background_is_pixmap() (background_is_image() || background_is_trans() || background_is_viewport() || background_is_auto())
 # define delete_simage(simg) do { \
                                Imlib_free_pixmap(imlib_id, (simg)->pmap->pixmap); \
                                Imlib_destroy_image(imlib_id, (simg)->iml->im); \
