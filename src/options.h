@@ -67,6 +67,8 @@
 # define Opt_scrollbar_floating         (1LU << 22)
 # define Opt_double_buffer              (1LU << 23)
 # define Opt_mbyte_cursor		(1LU << 24)
+# define Opt_proportional               (1LU << 25)
+# define Opt_resize_gravity             (1LU << 26)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_ITRANS                   (1U << 1)

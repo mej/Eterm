@@ -12,11 +12,8 @@
 # directly or indirectly through the use of, or inability to use,
 # this program.  Use at your OWN risk.
 
-# A begin to get things started.
-begin main
-
 # Define the color properties
-  begin color
+begin color
 
 # Foreground, background, cursor, scrollbar, pointer colors
     foreground #aaaaaa
@@ -59,7 +56,7 @@ begin main
 
 # This ends the color section.  Any text after the word "end" is
 # assumed to be a comment and ignored.
-  end color
+end color
 
 # The X11 attributes section.  Should be fairly self-explanatory,
 # but if not, consult the X man page.
@@ -85,7 +82,7 @@ begin main
     font 5 10x20
     font 6 12x24
 #    font bold 7x14
-  end attributes
+end attributes
 
 # The Multichar support options.  Same goes for these fonts as for the normal
 # ones.  The "encoding" attribute can be either "eucj" or "sjis" or "euckr"
@@ -97,7 +94,7 @@ begin main
     font 3 @MFONT3@
     font 4 @MFONT4@
     encoding @MULTICHAR_ENCODING@
-  end multichar
+end multichar
 
 # Define the imageclasses.
   begin imageclasses
@@ -137,7 +134,7 @@ begin main
       border 0 0 0 0
 
 # Th-th-th-th-that's all folks.
-    end image
+  end image
 
     begin image
       type trough
@@ -148,7 +145,7 @@ begin main
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
       geom :scale
       border 2 2 2 3
-    end image
+  end image
     begin image
       type anchor
       mode image allow image auto
@@ -161,7 +158,7 @@ begin main
       file bar_vertical_2.png
       geom :scale
       border 2 2 2 3
-    end image
+  end image
     begin image
       type thumb
       mode image allow image auto
@@ -174,7 +171,7 @@ begin main
       file thumb_2.png
       geom :scale
       border 3 3 3 3
-    end image
+  end image
     begin image
       type up_arrow
       mode image allow image auto
@@ -191,7 +188,7 @@ begin main
       file button_arrow_up_3.png
       geom :scale
       border 2 2 2 2
-    end image
+  end image
     begin image
       type down_arrow
       mode image allow image auto
@@ -208,7 +205,7 @@ begin main
       file button_arrow_down_3.png
       geom :scale
       border 2 2 2 2
-    end image
+  end image
     begin image
       type menu
       mode image allow image auto
@@ -221,7 +218,7 @@ begin main
       file bar_horizontal_2.png
       geom 100x100+0+0:scale
       border 2 3 2 3
-    end image
+  end image
     begin image
       type submenu
       mode image allow image auto
@@ -241,7 +238,7 @@ begin main
       geom 100x100+0+0:scale
       border 3 15 3 3
       padding 3 15 3 3
-    end image
+  end image
     begin image
       type button_bar
       mode image allow image auto
@@ -254,7 +251,7 @@ begin main
       color white #333333
       cmod image 0xc0
       border 2 3 2 2
-    end image
+  end image
     begin image
       type button
       mode image allow image auto
@@ -271,8 +268,8 @@ begin main
       file bar_horizontal_3.png
       geom 100x100+0+0:scale
       border 2 3 2 2
-    end image
-  end
+  end image
+end
 
 %include "menus.cfg"
 
@@ -286,7 +283,7 @@ begin main
     bind ctrl button2 to string "\e[?30t"
     bind ctrl button3 to menu Eterm
     bind ctrl shift button3 to string "\e]6;14\a"
-  end actions
+end actions
 
 # This section must also come after the menus if you want any buttons
 # to launch menus.  (If not, it can go anywhere.)
@@ -304,7 +301,7 @@ begin main
     button Mailbox action menu Mailbox
     rbutton icon help.png action script "spawn(Eterm -e man Eterm)"
     rbutton icon exit.png action script "exit"
-  end button_bar
+end button_bar
 
 # The XIM support options.
 # input_method: set the name of your favorate input method program
@@ -312,7 +309,7 @@ begin main
 #  begin xim
 #    input_method Ami
 #    preedit_type OverTheSpot
-#  end xim
+#end xim
 
 # Boolean variables.  The values can be "1", "on", or "true" for TRUE, or "0",
 # "off", or "false" for FALSE.
@@ -362,7 +359,7 @@ begin main
 # memory to spare, it's a good idea.
 #    double_buffer true
 
-  end toggles
+end toggles
 
   begin keyboard
 
@@ -376,7 +373,7 @@ begin main
 # Greek keyboard mode.  First the word "greek", then its boolean
 # state, then its mode (either "iso" or "ibm").
 #    greek off iso
-  end keyboard
+end keyboard
 
   begin misc
 
@@ -402,6 +399,4 @@ begin main
 # Program to exec (intended for use with themes)
     exec mutt
 
-  end misc
-
-end main
+end misc

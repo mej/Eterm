@@ -331,6 +331,7 @@ extern int pipe_fd;
 extern char initial_dir[PATH_MAX+1];
 extern unsigned long PrivateModes;
 extern int refresh_count, refresh_limit, refresh_type;
+extern pid_t cmd_pid;
 #ifdef USE_XIM
 extern XIC xim_input_context;	/* input context */
 #endif

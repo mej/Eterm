@@ -471,11 +471,12 @@ resize_parent(unsigned int width, unsigned int height)
 {
   XWindowAttributes attr;
 
-  if ((!XGetWindowAttributes(Xdisplay, TermWin.parent, &attr))) {
+  if (!(Options & Opt_resize_gravity) || !XGetWindowAttributes(Xdisplay, TermWin.parent, &attr)) {
     XResizeWindow(Xdisplay, TermWin.parent, width, height);
   } else {
     Window junkwin;
-    int x, y, scr_w, scr_h, dx, dy;
+    int x, y, scr_w, scr_h;
+    int dx = 0, dy = 0;
 
     scr_w = WidthOfScreen(attr.screen);
     scr_h = HeightOfScreen(attr.screen);
@@ -483,14 +484,20 @@ resize_parent(unsigned int width, unsigned int height)
     dy = attr.height - height;
     XTranslateCoordinates(Xdisplay, TermWin.parent, attr.root, 0, 0, &x, &y, &junkwin);
     /* Check position of the center of the window */
-    if (x < (scr_w - attr.width) / 2)          /* left half */
-        dx = 0;
-    else if (x == (scr_w - attr.width) / 2 )   /* exact center */
-        dx /= 2;
-    if (y < (scr_h - attr.height) / 2)         /* top half */
-        dy = 0;
-    else if (y == (scr_h - attr.height) / 2)   /* exact center */
-        dy /= 2;
+    if (x < (scr_w - attr.width) / 2) {
+      /* left half */
+      dx = 0;
+    } else  if (x == (scr_w - attr.width) / 2 ) {
+      /* exact center */
+      dx /= 2;
+    }
+    if (y < (scr_h - attr.height) / 2) {
+      /* top half */
+      dy = 0;
+    } else if (y == (scr_h - attr.height) / 2) {
+      /* exact center */
+      dy /= 2;
+    }
     D_X11(("Calling XMoveResizeWindow(Xdisplay, 0x%08x, %d + %d, %d + %d, %d, %d)\n", TermWin.parent, x, dx, y, dy, width, height));
     XMoveResizeWindow(Xdisplay, TermWin.parent, x + dx, y + dy, width, height);
   }

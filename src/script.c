@@ -47,6 +47,7 @@ static eterm_script_handler_t script_handlers[] =
   { "die",       script_handler_exit },
   { "exec",      script_handler_spawn },
   { "exit",      script_handler_exit },
+  { "kill",      script_handler_kill },
   { "paste",     script_handler_paste },
   { "quit",      script_handler_exit },
   { "save",      script_handler_save },
@@ -187,6 +188,26 @@ script_handler_exit(char **params)
     }
   }
   exit(code);
+}
+
+/* kill():  Send a given signal to Eterm's child process
+ *
+ * Syntax:  kill([ <signal> ])
+ *
+ * <signal> is the numeric signal to send to the process.  If not
+ * specified, SIGTERM is the default.
+ */
+void
+script_handler_kill(char **params)
+{
+  int sig;
+
+  if (params && *params) {
+    sig = atoi(params[0]);
+  } else {
+    sig = SIGTERM;
+  }
+  kill(cmd_pid, sig);
 }
 
 /* paste():  Paste the contents of the specified clipboard or cut buffer

@@ -223,6 +223,7 @@ static const struct {
       OPT_LONG("font2", "font 2", &rs_font[2]),
       OPT_LONG("font3", "font 3", &rs_font[3]),
       OPT_LONG("font4", "font 4", &rs_font[4]),
+      OPT_BLONG("proportional", "toggle proportional font optimizations", &Options, Opt_proportional),
       OPT_LONG("font-fx", "specify font effects for the terminal fonts", &rs_font_effects),
 
 /* =======[ Pixmap options ]======= */
@@ -292,6 +293,7 @@ static const struct {
       OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &Options, Opt_select_trailing_spaces),
       OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &Options, Opt_report_as_keysyms),
       OPT_BLONG("buttonbar", "toggle the display of all buttonbars", &rs_buttonbars, BBAR_FORCE_TOGGLE),
+      OPT_BLONG("resize-gravity", "toggle gravitation to nearest corner on resize", &Options, Opt_resize_gravity),
 
 /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
@@ -1336,10 +1338,16 @@ parse_attributes(char *buff, void *state)
         print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification\n",
                     file_peek_path(), file_peek_line());
       }
-    } else if (num_words(buff) != 3) {
-      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
-		  "attribute font", file_peek_path(), file_peek_line(), NONULL(tmp));
-      return NULL;
+    } else if (!BEG_STRCASECMP(tmp, "prop")) {
+      tmp = get_pword(2, tmp);
+      if (BOOL_OPT_ISTRUE(tmp)) {
+        Options |= Opt_proportional;
+      } else if (BOOL_OPT_ISFALSE(tmp)) {
+        Options &= ~(Opt_proportional);
+      } else {
+        print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n",
+                    file_peek_path(), file_peek_line());
+      }
     } else if (isdigit(*tmp)) {
       n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
       if (n <= 255) {
@@ -1570,6 +1578,13 @@ parse_toggles(char *buff, void *state)
     } else {
       FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
       rs_buttonbars = 1;  /* Reset for future use. */
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "resize_gravity")) {
+    if (bool_val) {
+      Options |= Opt_resize_gravity;
+    } else {
+      Options &= ~(Opt_resize_gravity);
     }
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(), file_peek_line(), buff);
@@ -3360,6 +3375,7 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "    scrollbar_type %s\n", (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
   fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
   fprintf(fp, "    font default %u\n", (unsigned int) font_idx);
+  fprintf(fp, "    font proportional %d\n", ((Options & Opt_proportional) ? 1 : 0));
   for (i = 0; i < font_cnt; i++) {
     if (etfonts[i]) {
       fprintf(fp, "    font %d %s\n", i, etfonts[i]);
@@ -3794,6 +3810,8 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "    select_trailing_spaces %d\n", (Options & Opt_select_trailing_spaces ? 1 : 0));
   fprintf(fp, "    report_as_keysyms %d\n", (Options & Opt_report_as_keysyms ? 1 : 0));
   fprintf(fp, "    itrans %d\n", (image_toggles & IMOPT_ITRANS ? 1 : 0));
+  fprintf(fp, "    buttonbar %d\n", ((buttonbar && bbar_is_visible(buttonbar)) ? 1 : 0));
+  fprintf(fp, "    resize_gravity %d\n", (Options & Opt_resize_gravity ? 1 : 0));
   fprintf(fp, "  end toggles\n\n");
 
   fprintf(fp, "  begin keyboard\n");

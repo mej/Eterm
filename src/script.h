@@ -45,6 +45,7 @@ _XFUNCPROTOBEGIN
 /* Handlers */
 extern void script_handler_copy(char **);
 extern void script_handler_exit(char **);
+extern void script_handler_kill(char **);
 extern void script_handler_paste(char **);
 extern void script_handler_save(char **);
 extern void script_handler_scroll(char **);

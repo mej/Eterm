@@ -191,6 +191,20 @@ Specifies the index of the default (normal) text font.
 Sets the font at the specified index (1-4) to
 .IR font .
 .TP
+.BR \-\-proportional
+Specifies that the font in use is proportional and requests standard
+deviation-based character cell spacing.  Terminals must use
+fixed-width character cells to maintain proper columnal alignment,
+even when proportionally-spaced fonts are in use.  Some
+proportionally-spaced fonts vary greatly between the minimum and
+maximum character widths.  This option chooses a character cell size
+which is up to two standard deviations above the average character
+width but will not exceed the maximum width of the largest glyph.
+Note that characters larger than the chosen cell width will overwrite
+(or be overwritten by) other characters and may tend to leave pixel
+droppings.  This behavior is an expected side-effect of an imperfect
+scenario.  If you object to this behavior, do not use this option.
+.TP
 .BI \-\-font-fx " effects"
 Specifies the effects to apply to the terminal window font.  The value
 of
@@ -291,7 +305,7 @@ program (found in the
 directory) to set your root background image.
 .TP
 .BR \-0 ", " \-\-itrans
-Activate the immutable transparency optimization for transparent Eterm
+Activate the immotile transparency optimization for transparent Eterm
 windows.  Note that this does NOT activate transparency; you must
 still include the
 .BR \-O " or " \-\-trans
@@ -493,6 +507,11 @@ mode.  Do not enable it unless you are executing a program which uses this mode.
 .BR \-\-buttonbar
 Toggle the display of all buttonbars.
 .TP
+.BR \-\-resize-gravity
+If true, Eterm will automatically detect the nearest corner, and
+font-change resizes will cause the Eterm window to gravitate toward
+that corner.
+.TP
 .BI \-\-big-font-key " keysym"
 Specify a keysym to increase the font size.  Default is Shift and the +
 key on the keypad.  Ctrl-> or Meta-> may also work (if you #define one
@@ -601,112 +620,111 @@ rather than a shell.
 
 .SH THEMES
 
-Eterm is built on the philosophy of Freedom of Choice.  Each user should be
-able to choose the environment in which he or she wishes to exist, and the tools
-used should support that.  In accordance with that philosophy, Eterm is
-extremely configurable.  Eterm supports a concept called "themes," which should
-be familiar to users of Enlightenment, icewm, or Microsoft Windows 95/98/NT.
-The general concept of a theme is a collection of resources that change as many
-aspects of a programs look and feel as possible.  For example, an Enlightenment
-theme allows you to customize menus, window borders, desktops, icons, iconbars,
-and everything else about how E looks and feels.
+Eterm is built on the philosophy of Freedom of Choice.  Each user
+should be able to choose the environment in which he or she wishes to
+exist, and the tools used should support that.  In accordance with
+that philosophy, Eterm is extremely configurable.  Eterm supports a
+concept called "themes," which should be familiar to users of
+Enlightenment, icewm, or Microsoft Windows 95/98/NT.  The general
+concept of a theme is a collection of resources that change as many
+aspects of a programs look and feel as possible.  For example, an
+Enlightenment theme allows you to customize menus, window borders,
+desktops, icons, iconbars, and everything else about how E looks and
+feels.
 
-An Eterm theme consists of a primary configuration file, always called "theme.cfg",
-residing in a directory bearing the same name as the theme. This directory must
-be a child of one of the directories specified by CONFIG_SEARCH_PATH in
-src/feature.h. The theme may also contain additional configuration files referenced
-by the primary theme.cfg file, as well as pixmaps, menu files, documentation, etc.,
-which are allowable as extensions to the minimum requirement of an Eterm theme.
+An Eterm theme consists of a primary configuration file, always called
+"theme.cfg", residing in a directory bearing the same name as the
+theme. This directory must be a child of one of the directories
+specified by CONFIG_SEARCH_PATH in src/feature.h. The theme may also
+contain additional configuration files referenced by the primary
+theme.cfg file, as well as pixmaps, menu files, documentation, etc.,
+which are allowable as extensions to the minimum requirement of an
+Eterm theme.
 
 By convention and default, Eterm themes should be stored under
 ~/.Eterm/themes/<theme_name>/ or @THEMEDIR@/<theme_name>.
 
-Eterm now supports the existence of a user configuration file as a suppliment to
-the theme configuration file.  The default name for this file is user.cfg, and it
-follows the exact same syntax as any other configuration file.  It is searched for
-using the same algorithm used for the theme.cfg file, and any settings in the
-user.cfg will override any previous values for those settings defined by the
-theme.  Thus, it is recommended that any user.cfg files not be complete config
-files, but rather only contain those values which the user wishes to override.
+Eterm now supports the existence of a user configuration file as a
+suppliment to the theme configuration file.  The default name for this
+file is user.cfg, and it follows the exact same syntax as any other
+configuration file.  It is searched for using the same algorithm used
+for the theme.cfg file, and any settings in the user.cfg will override
+any previous values for those settings defined by the theme.  Thus, it
+is recommended that any user.cfg files not be complete config files,
+but rather only contain those values which the user wishes to
+explicitly override.
 
-NOTE:  If you have a user.cfg file in the Eterm theme directory or in ~/.Eterm/, it
-will
-.B override
-any previous settings, even if you are running a different theme.  For example, if
-you run the trans theme, but ~/.Eterm/themes/Eterm/user.cfg has a mode line which
-sets the image mode to "image" rather than "trans," you will not get transparency.
-This is why user.cfg files should be kept small and only override settings that
-you know you want to enforce.  If, on the other hand, you were running the trans
-theme and had a user.cfg file in the trans theme (or in ~/.Eterm/themes/trans/),
-that user.cfg would be found before the one in the Eterm theme.
+NOTE:  If you have a user.cfg file in the Eterm theme directory or in
+~/.Eterm/, it will override
+.B any
+previous settings, even if you are running a different theme.  For
+example, if you run the trans theme, but
+~/.Eterm/themes/Eterm/user.cfg has a mode line which sets the image
+mode to "image" rather than "trans," you will not get transparency.
+This is why user.cfg files should be kept small and only override
+settings that you know you want to enforce.  If, on the other hand,
+you were running the trans theme and had a user.cfg file in the trans
+theme (or in ~/.Eterm/themes/trans/), that user.cfg would be found
+before the one in the Eterm theme.
 
-Almost all command line options can be enabled/disabled in the theme's configuration
-file (the default is @THEMEDIR@/Eterm/theme.cfg).  The next section contains details
-on the format and usage of the configuration file.
+Almost all command line options can be enabled/disabled in the theme's
+configuration file (the default is @THEMEDIR@/Eterm/theme.cfg).  The
+next section contains details on the format and usage of the
+configuration file.
 
 .SH CONFIGURATION
 
-Since Eterm @VERSION@ is based on the concept of themes, it is vital that you
-have a thorough understanding of the previous section before taking on this
-one.  The previous section and this one were written by the same person who
-wrote the Eterm code which handles options, config files, and themes, so it's
-probably the most authoritative documentation on the subject you're going to
-find.
+Since Eterm @VERSION@ is based on the concept of themes, it is vital
+that you have a thorough understanding of the previous section before
+taking on this one.  The previous section and this one were written by
+the same person who wrote the Eterm code which handles options, config
+files, and themes, so it's probably the most authoritative
+documentation on the subject you're going to find.
 
-From here on out, I will assume you've read the above text and know how to
-change the default value for the theme.  It is highly recommended that you have
-a copy of the Eterm theme config file that comes with Eterm handy while you
-read this documentation.
+From here on out, I will assume you've read the above text and know
+how to change the default value for the theme.  It is highly
+recommended that you have a copy of the Eterm theme config file that
+comes with Eterm handy while you read this documentation.
 
-Okay, first the general idea.  The theme.cfg file is composed of comments and
-non-comments.  Comments begin with a pound sign and continue to the end of the
-line.  Lines of whitespace are also ignored.  The rest of the file is the config
-stuff, which is divided into sections (called "contexts") and variables (called
-"attributes").  There are several contexts which are listed below in sections.
-Each attribute must be inside a certain context to be valid.  For instance,
-while the "foreground" attribute is perfectly acceptable in the color context,
-it would be rejected if found in, say, the toggles context.  This allows for
-better organization of the config file as well as for multiple contexts to have
-attributes of the same name (like the
+Okay, first the general idea.  The theme.cfg file is composed of
+comments and non-comments.  Comments begin with a pound sign and
+continue to the end of the line.  Lines of whitespace are also
+ignored.  The rest of the file is the config stuff, which is divided
+into sections (called "contexts") and variables (called "attributes").
+There are several contexts which are listed below in sections.  Each
+attribute must be inside a certain context to be valid.  For instance,
+while the "foreground" attribute is perfectly acceptable in the color
+context, it would be rejected if found in, say, the toggles context.
+This allows for better organization of the config file as well as for
+multiple contexts to have attributes of the same name (like the
 .B scrollbar
 attributes in the color and toggles section).
 
-Each context must be enclosed in a begin...end pair that specifies the type of
-section.  The statement "begin toggles" starts the toggles context, and the
-next "end" statement would terminate it.  (You'll notice that some "end"
-statements have the context name after them.  This is for readability only;
-any text after the word "end" is ignored.)
+Each context must be enclosed in a begin...end pair that specifies the
+type of section.  The statement "begin toggles" starts the toggles
+context, and the next "end" statement would terminate it.  (You'll
+notice that some "end" statements have the context name after them.
+This is for readability only; any text after the word "end" is
+ignored.)
 
-The rest of this section will contain a step-by-step analysis of the config
-file, including what can go in each section.  Note that some attributes (and
-even entire contexts) may not be available depending on what support was
-compiled into Eterm by the person who built it.
+The rest of this section will contain a step-by-step analysis of the
+config file, including what can go in each section.  Note that some
+attributes (and even entire contexts) may not be available depending
+on what support was compiled into Eterm by the person who built it.
 .LP
 .TP
 MAGIC NUMBER
 
-The first line of the config file must contain a "magic number" type line
-that lets Eterm verify that it's reading an Eterm config file and not
-something else (like an Enlightenment 0.13 and earlier config file).  The
-line should look like this:
+The first line of the config file must contain a "magic number" type
+line that lets Eterm verify that it's reading an Eterm config file and
+not something else (like an Enlightenment 0.13 and earlier config
+file).  The line should look like this:
 
 <Eterm-VERSION>
 
-where VERSION is the Eterm version for which the config file is intended.
-For example, config files written for Eterm 0.9 should have "<Eterm-0.9>"
-as their first line, followed immediately by a newline.
-.TP
-MAIN CONTEXT
-
-There are very few things that are valid within the "main" context.  In
-fact, the only non-comment lines allowed in the main context are begin's
-and end's for other contexts.  Each context can have any number of
-subcontexts, but only a few actually have any.  Valid subcontexts for main
-are color, attributes, imageclasses, menu, actions, multichar, xim,
-toggles, keyboard, and misc.  They can appear in any order.  The order I
-list them here is simply the order in which they appear in the default themes,
-which was arbitrarily chosen for continuity.  So that you can follow along
-easily, I'll cover them in the same order here.
+where VERSION is the Eterm version for which the config file is
+intended.  For example, config files written for Eterm 0.9 should have
+"<Eterm-0.9>" as their first line, followed immediately by a newline.
 .TP
 COLOR CONTEXT
 
@@ -744,41 +762,6 @@ for the cursor color.
 Use
 .I color
 for the cursor text color.
-.RE
-
-.BI menu " color"
-.RS 5
-Use
-.I color
-for the menu color.
-.RE
-
-.BI unfocused_menu " color"
-.RS 5
-Use
-.I color
-for the unfocused menu color.
-.RE
-
-.BI menu_text " color"
-.RS 5
-Use
-.I color
-for the menu text color.
-.RE
-
-.BI scrollbar " color"
-.RS 5
-Use
-.I color
-for the scrollbar color.
-.RE
-
-.BI unfocused_scrollbar " color"
-.RS 5
-Use
-.I color
-for the scrollbar color if Eterm is unfocused.
 .RE
 
 .BI pointer " color"
@@ -819,8 +802,8 @@ specified by
 .TP
 ATTRIBUTES CONTEXT
 
-This context contains X11 attributes.  Most of these are dependent upon the
-cooperation of the window manager.
+This context contains X11 attributes.  Most of these are dependent
+upon the cooperation of the window manager.
 
 .RS 5
 .BI geometry " geom"
@@ -901,18 +884,83 @@ pixels wide.
 .RS 5
 Set the
 .IR num th
-font (0-4), or the
+font, or the
 .B bold
 font, to
 .IR font .
+.RE
+
+.BI "font default" " num"
+.RS 5
+Specifies that the
+.IR num th
+font should be considered the "default" font.
+.RE
+
+.BI "font proportional" " boolean"
+.RS 5
+Specifies that the font in use is proportional and requests standard
+deviation-based character cell spacing.  Terminals must use
+fixed-width character cells to maintain proper columnal alignment,
+even when proportionally-spaced fonts are in use.  Some
+proportionally-spaced fonts vary greatly between the minimum and
+maximum character widths.  This option chooses a character cell size
+which is up to two standard deviations above the average character
+width but will not exceed the maximum width of the largest glyph.
+Note that characters larger than the chosen cell width will overwrite
+(or be overwritten by) other characters and may tend to leave pixel
+droppings.  This behavior is an expected side-effect of an imperfect
+scenario.  If you object to this behavior, do not use this option.
+.RE
+
+.BI "font fx" " effects"
+.RS 5
+Specifies the effects to apply to the terminal window font.  The value
+of
+.I effects
+is a single string containing a series of corner/color pairs.  These
+pairs define toward which corner a drop shadow of each character
+should be made, and what color that shadow will be.  The corner is
+specified first using the following keywords:
+.BR top_left " or " tl ", "
+.BR top_right " or " tr ", "
+.BR bottom_left " or " bl ", and "
+.BR bottom_right " or " br .
+Each corner specifier is then followed by a color.
+
+There are also several shortcuts for doing common effects.  You can
+get a single-color outline by using the keyword
+.B outline
+followed by a color.  A single-color drop shadow is also available
+using the keyword
+.B shadow
+followed by an optional corner specifier
+.BR "" "(" bottom_right " being the default)"
+and a color.  For a 3-D embossed look, use
+.BI emboss " dark_color"
+.IR light_color .
+The opposite effect, a carved-out look, can be obtained with
+.BI carved " dark_color"
+.IR light_color .
+(Of course, with those last two, the 3-D look will only work if you
+choose the light and dark colors wisely.)
+
+Finally, for no font effects at all, simply specify the keyword
+.BR none .
+
+The default value is
+.B bottom_right black
+which yields a black drop shadow, greatly improving the visibility of
+lightly-colored fonts on top of light spots in a background image.
+Note that font effects are not active in solid color mode.
 .RE
 .RE
 
 .TP
 IMAGECLASSES CONTEXT
 
-This context contains global image attributes.  It also provides the parent
-context for defining images via the "image" context.
+This context contains global image attributes.  It also provides the
+parent context for defining images via the "image" context.
 
 .RS 5
 .BI icon " filename"
@@ -921,16 +969,23 @@ Use
 .I filename
 as the icon image for the Eterm window.
 .I filename
-can be an absolute path, relative to the current theme, or relative to one of
-the directories in the
+can be an absolute path, relative to the current theme, or relative to
+one of the directories in the
 .B path
-attribute listed above.
+attribute listed below.
+.RE
+
+.BI cache " num"
+.RS 5
+Sets the Imlib2 cache size to
+.I num
+bytes.  The default is 0.
 .RE
 
 .BI path " directory_list"
 .RS 5
-Specifies a colon-delimited list of directories relative to which Eterm should
-search for image and menu files.  The syntax for
+Specifies a colon-delimited list of directories relative to which
+Eterm should search for image and menu files.  The syntax for
 .I directory_list
 is precisely the same as that of the
 .B $PATH
@@ -939,29 +994,25 @@ environment variable in UNIX shells.
 
 .BI anim " interval" "" " images ..."
 .RS 5
-Specifies an animation list to be use in cycling the background pixmap.
+Specifies an animation list to be use in cycling the background pixmap.  The
 .I interval
-defines the delay, in seconds, between updates of the background.  This
-should be set to a reasonable value to insure that Eterm doesn't spend all
-its time rendering backgrounds.  All remaining words have the same syntax as the
-.B background
-attribute in a configuration file (two integers followed by the image filename),
-except that the two integers are optional.  If they are specified, remember to
-group them with the filename using quotes.  The following are both valid:
-.RS 5
-anim 10 image1.jpg image2.jpg
-.br
-anim 10 "0 0 image1.jpg" "-1 -1 image2.jpg"
-.RE
+
+defines the delay, in seconds, between updates of the background.
+This should be set to a reasonable value to insure that Eterm doesn't
+spend all its time rendering backgrounds.  All the
+.I images
+specify background images and have the same syntax as the
+.B \-P
+option above, including the optional geometry string.
 .RE
 .RE
 
 .TP
 IMAGE CONTEXT
 
-This context defines all the attributes of a particular image.  There can be
-(and usually are) several image contexts per theme, one for each class of
-image.
+This context defines all the attributes of a particular image.  There
+can be (and usually are) several image contexts per theme, one for
+each class of image.
 
 .RS 5
 .BI type " class"
@@ -972,7 +1023,8 @@ of the image that is going to be defined in that context.  This MUST be the
 first attribute defined in the image context.  Valid classes are:
 .BR background ", " trough ", " anchor ", "
 .BR up_arrow ", " down_arrow ", " left_arrow ", "
-.BR right_arrow ", " menu ", and " submenu "."
+.BR right_arrow ", " menu ", " menuitem ", "
+.BR submenu ", " button ", and " buttonbar .
 Note that the left and right arrows, while valid, don't do anything just
 yet.  All the subsequent attributes up to the next
 .B type
@@ -1009,23 +1061,37 @@ Valid mode names are
 
 .RS 5
 .BR state " { " normal " | " selected " |"
-.BR clicked " } "
+.BR clicked " | " disabled " } "
 .RS 5
 This sets the state of the image you are about to define.  Up until the next
 .B state
 attribute that is encountered (or until you change types), all attributes will
 apply to that particular state of the image.  You should at minimum define the
 .B normal
-state of the image.  It will be used as the default if the attributes for the
-.BR selected " and/or " clicked
-states are not specified.  However, each image state has self-contained options.
-Therefore, if you define multiple states for an image class, you must define ALL
-attributes needed by that state.  The sample themes supplied with Eterm
-demonstrate how to define 1-, 2-, and 3-state images.
+state of the image.  It will be used as the default if the attributes
+for the other states are not specified.  However, each image state has
+self-contained options.  Therefore, if you define multiple states for
+an image class, you must define ALL attributes needed by that state.
+The sample themes supplied with Eterm demonstrate how to define 1-,
+2-, 3-, and 4-state images.
 .RE
 .PP
 The above attributes affect the image class as a whole.  All remaining
 attributes in this context affect only the current state of the image class.
+.RE
+
+.RS 5
+.BI color " fg" " " "bg"
+.RS 5
+Sets the foreground and background colors for this imageclass.  The
+foreground color is used for text, and the background color is used
+for the object itself.  If an invalid color is specified, the default
+value for
+.I fg
+is white, and the default for
+.I bg
+is black.
+.RE
 .RE
 
 .RS 5
@@ -1044,12 +1110,6 @@ must be an absolute path or a path relative to one of the directories in the
 .B path
 attribute.  Note that the image is verified and loaded when this attribute is
 encountered during parsing.
-.RE
-.RE
-
-.RS 5
-.BI  " "
-.RS 5
 .RE
 .RE
 
@@ -1109,7 +1169,8 @@ and Gtk+ pixmap themes.
 .RE
 
 .RS 5
-.BI bevel " left right top bottom"
+.BR bevel " { " up " | " down " } "
+.I left right top bottom
 .RS 5
 Adds a bevel to an image class.  This can be done to any image class using the
 .BR image " or " trans
@@ -1196,7 +1257,7 @@ like "C-x C-c" for the "Exit" menuitem in an Emacs menu.
 .RE
 
 .RS 5
-\fBaction\fR { \fBstring\fR | \fBecho\fR | \fBsubmenu\fR } \fIparam\fI
+\fBaction\fR { \fBstring\fR | \fBecho\fR | \fBsubmenu\fR | \fBscript\fR } \fIparam\fI
 .br
 .B action separator
 .RS 5
@@ -1213,10 +1274,16 @@ of these action types,
 .I param
 will be parsed for escape codes (\\a, C-, and the like) before being sent.
 .B submenu
-specifies a submenu which should be displayed when this item is selected.
+specifies a submenu which should be displayed when this item is
+selected, and
 .I param
 is the title of the submenu to show.  The submenu must have already been
-defined.
+defined.  The
+.B script
+action type executes the Eterm-builtin script contained in
+.IR param .
+See the section below for more details on the builtin Eterm functions
+allowed for this action type.
 .RE
 .RE
 
@@ -1225,13 +1292,13 @@ defined.
 .TP
 ACTION CONTEXT
 
-Actions are key or mouse button bindings which activate certain behaviors.  Any
-action that can be triggered through an escape code can be bound to a
-key or mouse button, with or without modifiers.  You can also bind menus to
-keystrokes or mouse buttons.
+Actions are key or mouse button bindings which activate certain
+behaviors.  Any action that can be triggered through an escape code
+can be bound to a key or mouse button, with or without modifiers.  You
+can also bind menus to keystrokes or mouse buttons.
 
 .RS 5
-\fBbind\fR [ \fImodifiers\fR ] { \fIkeysym\fR | \fIbutton\fR } \fBto\fR { \fBstring\fR | \fBecho\fR | \fBmenu\fR } \fIparam\fR
+\fBbind\fR [ \fImodifiers\fR ] { \fIkeysym\fR | \fIbutton\fR } \fBto\fR { \fBstring\fR | \fBecho\fR | \fBmenu\fR | \fB script \fR } \fIparam\fR
 .RS 5
 Binds a
 .IR keysym " or a mouse " button
@@ -1240,15 +1307,14 @@ to an action.  The action syntax follows the keyword
 and is identical to the syntax used for menus (see above).  There can be any
 number of
 .I modifiers
-but only one
+(so long as the combination is reasonable) but only one
 .IR keysym " or " button "."
 Valid
 .I modifiers
 are
 .BR ctrl ", " shift ", " lock ", "
 .BR mod1 " through " mod5 ", "
-.BR alt " and " meta " (which are equivalent to " mod1 "), and"
-.BR anymod " (which allows any modifier)."
+.BR alt ", " meta ", and " anymod " (which allows any modifier)."
 If none are given, the keypress must not have modifier keys in use or the action
 will not be triggered.  Use
 .B anymod
@@ -1258,19 +1324,72 @@ can be given in text (case-sensitive) or as a hex number.
 .IR button s
 should be specified as
 .BR button1 " through " button5 "."
+Also note that
+.BR alt " and " meta
+will be equivalent to one or more of
+.BR mod1 " through " mod5 ", "
+as well as perhaps each other, based on your modifier settings.  You
+can view these settings using
+.BR "xmodmap -pm" .
+See also the
+.BR alt_mod " and " meta_mod
+options below.
 .RE
 .RE
 
 .RE
 
 .TP
-MULTICHAR CONTEXT
+BUTTON_BAR CONTEXT
 
-Behavior for multi-byte fonts and encodings are defined here.  This context does
-not exist by default.
+The buttonbar is an addition to Eterm 0.9.1 which allows users to have
+a fully-customizeable buttonbar at the top or bottom of each terminal
+window.  Buttons on the buttonbar can be used just like menuitems;
+they can popup menus (like a menubar), or they can activate any other
+action a menuitem can.
 
 .RS 5
-\fBencoding\fR { \fBeucj\fR | \fBsjis\fR | \fBeuckr\fR }
+.BI font " font"
+.RS 5
+Specifies the font in which button labels will be displayed.
+.RE
+
+.BR dock " { " top " | " bottom " | "
+.BR no " } "
+.RS 5
+Specify whether or not to dock the buttonbar, and if so, whether to
+dock it at the top or the bottom of the Eterm window.  Note that only
+.BR top " and " bottom
+are currently enabled.
+.RE
+
+.BI visible " boolean"
+.RS 5
+Toggle whether or not this particular buttonbar will be visible on
+startup.
+.RE
+
+\fBbutton\fR [ \fItext\fR ] [ \fBicon\fR \fIfilename\fR ] \fBaction\fR { \fBstring\fR | \fBecho\fR | \fBmenu\fR | \fB script\fR } \fIparam\fR
+.RS 5
+Binds an action to a button.  The usage of
+.I param
+and the action types work the same here as they do for menuitems.
+Also note that you may specify some
+.I text
+or an
+.B icon
+or both, but you cannot omit both.
+.RE
+.RE
+
+.TP
+MULTICHAR CONTEXT
+
+Behavior for multi-byte fonts and encodings are defined here.  This
+context does not exist by default.
+
+.RS 5
+\fBencoding\fR { \fBeucj\fR | \fBsjis\fR | \fBeuckr\fR | \fBbig5\fR | \fBgb\fR | \fBiso-10646\fR }
 .RS 5
 Specifies the encoding method.  Patches to support other encoding methods are
 encouraged.
@@ -1284,7 +1403,7 @@ encouraged.
 .RS 5
 Set the
 .IR num th
-multichar font (0-4), or the
+multichar font, or the
 .B bold
 multichar font, to
 .IR font .
@@ -1296,8 +1415,7 @@ multichar font, to
 .TP
 XIM CONTEXT
 
-This context controls locale-based behavior.  It, too, does not exist by
-default.
+This context controls locale-based behavior.
 
 .RS 5
 .BI input_method " input_method"
@@ -1365,7 +1483,7 @@ character.
 If true, Eterm will launch as an icon.
 .RE
 
-.BI home_on_echo " boolean"
+.BI home_on_output " boolean"
 .RS 5
 Zoom to the bottom of the scrollback buffer on output.
 .RE
@@ -1375,9 +1493,10 @@ Zoom to the bottom of the scrollback buffer on output.
 Zoom to the bottom of the scrollback buffer on input.
 .RE
 
-.BI home_on_refresh " boolean"
+.BI no_input " boolean"
 .RS 5
-Zoom to the bottom of the scrollback buffer on refresh (Ctrl-L).
+If true, Eterm will not accept any keyboard input and will ask the
+window manager to not allow it to be focused.
 .RE
 
 .BI scrollbar_floating " boolean"
@@ -1405,9 +1524,14 @@ window can not be moved or resized.  You will want to specify a
 with this attribute.
 .RE
 
-.BI backing_store " boolean"
+.BI double_buffer " boolean"
 .RS 5
-If true, Eterm will use a backing store.
+Rather than drawing text directly onto the window, this causes Eterm
+to allocate an additional pixmap the size of the terminal window into
+which the background *and* the text are rendered.  This pixmap is then
+set as the window background.  Double-buffering uses additional memory
+in the X server, but it allows Eterm to ignore expose events so
+redraws are faster.
 .RE
 
 .BI no_cursor " boolean"
@@ -1453,11 +1577,30 @@ This option is intended for use only with programs that support this special Ete
 mode.  Do not enable it unless you are executing a program which uses this mode.
 .RE
 
+.BI itrans " boolean"
+.br
+.BI immotile_trans " boolean"
+.RS 5
+Toggles the immotile transparency optimization for transparent Eterm
+windows.  Note that this does NOT activate transparency; you must
+still activate "trans" mode for the background image.  This option
+should be used on transparent windows which are shaded or tinted and
+which do not move around on the desktop much.  See the
+.B "Mon Mar  6 21:11:13 PST 2000"
+ChangeLog entry for a more detailed explanation.
+.RE
+
 .BI buttonbar " boolean"
 .RS 5
 Toggle the display of all buttonbars.
 .RE
 
+.BI resize_gravity " boolean"
+.RS 5
+If true, Eterm will automatically detect the nearest corner, and
+font-change resizes will cause the Eterm window to gravitate toward
+that corner.
+.RE
 .RE
 
 .TP
@@ -1569,6 +1712,29 @@ Sets the width of the border between the text window and the X window to
 .IR num .
 .RE
 
+.BI line_space " num"
+.RS 5
+Put
+.I num
+pixels' worth of space between each row of the terminal window.
+.RE
+
+.BI finished_title " title"
+.RS 5
+Specifies that
+.I title
+should be displayed in the title bar of a paused Eterm when the child
+process has completed.
+.RE
+
+.BI finished_text " text"
+.RS 5
+Specifies that
+.I text
+should be displayed in the terminal window of a paused Eterm when the
+child process has completed.
+.RE
+
 .BI term_name " name"
 .RS 5
 Use
@@ -1637,7 +1803,7 @@ is the string
 .RE
 
 .TP
-INCLUDES
+PREPROCESSING
 
 Eterm supports the
 .BI %include " file"
@@ -1652,5 +1818,3 @@ Man page re-written for version 0.8 by Shaleh (shaleh@debian.org).
 Eterm Home Page -- http://www.eterm.org/
 .br
 Eterm FAQ -- http://www.eterm.org/FAQ.html
-.br
-Eterm I-Docs -- http://eterm.i-docs.org/

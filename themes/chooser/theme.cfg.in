@@ -12,11 +12,8 @@
 # directly or indirectly through the use of, or inability to use,
 # this program.  Use at your OWN risk.
 
-# A begin to get things started.
-begin main
-
 # Define the color properties
-  begin color
+begin color
 
 # Foreground, background, cursor, scrollbar, pointer colors
     foreground #aaaaaa
@@ -59,11 +56,11 @@ begin main
 
 # This ends the color section.  Any text after the word "end" is
 # assumed to be a comment and ignored.
-  end color
+end color
 
 # The X11 attributes section.  Should be fairly self-explanatory,
 # but if not, consult the X man page.
-  begin attributes
+begin attributes
 
 # Geometry == widthxheight+x_offset+y_offset, offsets from top left
 #             if +, bottom right if -
@@ -85,22 +82,22 @@ begin main
     font 5 10x20
     font 6 12x24
 #    font bold 7x14
-  end attributes
+end attributes
 
 # The Multichar support options.  Same goes for these fonts as for the normal
 # ones.  The "encoding" attribute can be either "eucj" or "sjis" or "euckr"
 # or big5 or gb
-  begin multichar
+begin multichar
     font 0 @MFONT0@
     font 1 @MFONT1@
     font 2 @MFONT2@
     font 3 @MFONT3@
     font 4 @MFONT4@
     encoding @MULTICHAR_ENCODING@
-  end multichar
+end multichar
 
 # Define the imageclasses.
-  begin imageclasses
+begin imageclasses
 
 # You must define this before setting any images that use it.  This is the $PATH-style variable
 # that determines where Eterm looks for image files.
@@ -273,7 +270,7 @@ begin main
       geom 100x100+0+0:scale
       border 2 3 2 2
     end image
-  end
+end
 
 %include "menus.cfg"
 
@@ -282,16 +279,16 @@ begin main
 #
 # Syntax:  bind [ { <modifiers> | anymod } ] { <key> | <keysym> | <button> } to { string | echo | menu } <parameter>
 #
-  begin actions
+begin actions
     bind ctrl button1 to string "\e]5;\a"
     bind ctrl button2 to string "\e[?30t"
     bind ctrl button3 to menu Eterm
     bind ctrl shift button3 to string "\e]6;14\a"
-  end actions
+end actions
 
 # This section must also come after the menus if you want any buttons
 # to launch menus.  (If not, it can go anywhere.)
-  begin button_bar
+begin button_bar
 
 # Specify a font.  The default buttonbar font is the default terminal
 # font as defined in the attributes section above.
@@ -307,7 +304,7 @@ begin main
     button ftp action menu ftp
     rbutton icon help.png action script "spawn(Eterm -e man Eterm)"
     rbutton icon exit.png action script "exit"
-  end button_bar
+end button_bar
 
 # The XIM support options.
 # input_method: set the name of your favorate input method program
@@ -319,7 +316,7 @@ begin main
 
 # Boolean variables.  The values can be "1", "on", or "true" for TRUE, or "0",
 # "off", or "false" for FALSE.
-  begin toggles
+begin toggles
 
 # If true, Eterm will un-iconify itself when it receives a beep (ASCII 0x07)
     map_alert on
@@ -360,9 +357,9 @@ begin main
 # If true, Eterm will run with no window borders.
     borderless false
 
-  end toggles
+end toggles
 
-  begin keyboard
+begin keyboard
 
 # Use the supplied keysym to reduce/enlarge the font
     smallfont_key LessThan
@@ -374,9 +371,9 @@ begin main
 # Greek keyboard mode.  First the word "greek", then its boolean
 # state, then its mode (either "iso" or "ibm").
 #    greek off iso
-  end keyboard
+end keyboard
 
-  begin misc
+begin misc
 
 # The command to which to pipe print requests (printscreen)
 #    print_pipe "lpr"
@@ -400,6 +397,4 @@ begin main
 # Program to exec (intended for use with themes)
 #    exec foo
 
-  end misc
-
-end main
+end misc

@@ -4249,3 +4249,22 @@ Mon Jun 18 16:12:45 2001                        Michael Jennings (mej)
 
 Adding a scaled background; we need at least 1. :)
 ----------------------------------------------------------------------
+Mon Jun 25 17:41:55 2001                        Michael Jennings (mej)
+
+Several changes here, many of which come from the Debian bug list or
+from bug reports on IRC.  First off, I believe I've fixed an install
+issue with the bg/ directory.  I also put an alternative acsc line in
+the terminfo file to see if it fixes anything on Debian.  (RH works
+fine.)  I removed the "main" context from all the theme files...which
+is something I should've done ages ago, but I forgot.
+
+I made a couple things options which were not previously configurable.
+The proportional font thingie which shrank the character cell width is
+now the --proportional option.  The automatic window gravity on resize
+is now the --resize-gravity option.  Both are boolean, and both are
+documented in the man page.
+
+And finally, I added the kill() function to the script language.  At
+this point it can only take signals as numbers, but that's good enough
+for now.
+----------------------------------------------------------------------
