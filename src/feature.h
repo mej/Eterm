@@ -295,7 +295,10 @@ inline void *memmove(void *, const void *, size_t);
 #endif
 
 #if defined(_POSIX_VERSION) && defined(_POSIX_SAVED_IDS) && (_POSIX_SAVED_IDS == 1)
-# define HAVE_SAVED_UIDS 1
+#  ifdef HAVE_SAVED_UIDS
+#    undef HAVE_SAVED_UIDS
+#  endif
+#  define HAVE_SAVED_UIDS 1
 #endif
 
 /* utmp doesn't work on CygWin32 */

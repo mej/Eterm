@@ -5225,3 +5225,7 @@ Chris Schoeneman <crs23@bigfoot.com> pointed out that Eterm didn't get
 keypresses if another app (like synergy) decided to listen for its
 events.  This should correct that behavior.
 ----------------------------------------------------------------------
+Mon Jun 28 12:34:36 2004                        Michael Jennings (mej)
+
+Cleaning up some warnings.
+----------------------------------------------------------------------
