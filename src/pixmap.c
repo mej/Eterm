@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 # include <X11/extensions/shape.h>
 #endif
 
+#include "buttons.h"
 #include "command.h"
 #include "draw.h"
 #include "e.h"
@@ -821,10 +822,9 @@ redraw_image(unsigned char which) {
     scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   case image_button:
-    break;
   case image_bbar:
-    break;
   case image_gbar:
+    bbar_draw(buttonbar, IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   default:
     D_PIXMAP(("Bad value %u\n", which));
@@ -843,6 +843,7 @@ redraw_images_by_mode(unsigned char mode) {
       scr_touch();
     }
     scrollbar_draw(IMAGE_STATE_CURRENT, mode);
+    bbar_draw(buttonbar, IMAGE_STATE_CURRENT, mode);
   }
 }
 #endif  /* PIXMAP_SUPPORT */

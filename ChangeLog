@@ -4577,3 +4577,10 @@ Mon Apr 22 09:20:26 2002                        Michael Jennings (mej)
 Fixed the use of an uninitialized variable pointed out by Azundris
 <hacks@azundris.com>.
 ----------------------------------------------------------------------
+Tue Apr 23 14:23:00 2002                        Michael Jennings (mej)
+
+Redraw the buttonbar properly when moved.  Spotted by Azundris
+<hacks@azundris.com>.
+
+Also fixed the display of underlining with fonts lacking descent.
+----------------------------------------------------------------------

@@ -2050,9 +2050,14 @@ scr_refresh(int type)
       }
 #endif
 
-      if ((rend & RS_Uline) && (descent > 1)) {
-	XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
-        UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+      if (rend & RS_Uline) {
+        if (descent > 1) {
+          XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+          UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+        } else {
+          XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
+          UPDATE_BOX(xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
+        }
       }
       if (is_cursor == 1) {
 #ifndef NO_CURSORCOLOR
