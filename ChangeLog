@@ -4671,3 +4671,7 @@ Wed May 22 16:17:24 2002                        Michael Jennings (mej)
 
 Fixed duplicate freeing of menu background pixmap.
 ----------------------------------------------------------------------
+Wed May 22 16:52:37 2002                        Michael Jennings (mej)
+
+Cleanups of Escreen stuff.  Always use MALLOC/FREE, not malloc/free.
+----------------------------------------------------------------------

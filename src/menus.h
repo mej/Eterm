@@ -147,8 +147,8 @@ extern void menu_display(int, int, menu_t *);
 extern void menu_action(menuitem_t *);
 extern void menu_invoke(int, int, Window, menu_t *, Time);
 extern void menu_invoke_by_title(int, int, Window, char *, Time);
-extern int  menu_tab(void *,char *[],int,char *,size_t,size_t);
-extern int  menu_dial(void *,char *, int, char **,int (*)(void *,char *,size_t,size_t));
+extern int menu_tab(void *, char *[], int, char *, size_t, size_t);
+extern int menu_dialog(void *, char *, int, char **, int (*)(void *, char *, size_t, size_t));
 
 _XFUNCPROTOEND
 

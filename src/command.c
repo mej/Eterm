@@ -2472,7 +2472,7 @@ upd_disp(void *xd, int n, int flags, char *name)
 
     if (name && (!button->text || strcmp(name, button->text))) {
         if (button->text)
-            free(button->text);
+            FREE(button->text);
 
         if (!(button->text = strdup(name))) {
             button->len = 0;
@@ -2509,7 +2509,7 @@ err_msg(void *xd, int err, char *msg)
             }
         }
         if (n >= nsc) {
-            menu_dial(NULL, msg, 0, NULL, NULL);
+            menu_dialog(NULL, msg, 0, NULL, NULL);
         }
     }
     return NS_SUCC;
@@ -2529,9 +2529,9 @@ inp_text(void *xd, int id, char *txt)
 
 /* open a dialog */
 int
-inp_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
+input_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
-    switch (menu_dial(xd, prompt, maxlen, retstr, inp_tab)) {
+    switch (menu_dialog(xd, prompt, maxlen, retstr, inp_tab)) {
       case 0:
           return NS_SUCC;
       case -2:
@@ -2633,7 +2633,7 @@ matrix(int n)
 {
     int x, y, w, f;
     int ys = TermWin.saveLines - TermWin.view_start;
-    text_t *s = malloc(TermWin.ncol);
+    text_t *s = MALLOC(TermWin.ncol);
     text_t *t, *t2;
     rend_t *r, *r2;
 
@@ -2703,7 +2703,7 @@ matrix(int n)
         }
         scr_refresh(FAST_REFRESH);
     }
-    free(s);
+    FREE(s);
 }
 
 
@@ -2768,7 +2768,7 @@ init_command(char **argv)
     ns_register_exe(efuns, exe_prg);
 
     ns_register_txt(efuns, inp_text);
-    ns_register_inp(efuns, inp_dial);
+    ns_register_inp(efuns, input_dialog);
     ns_register_tab(efuns, menu_tab);
 
     ns_register_fun(efuns, waitstate);

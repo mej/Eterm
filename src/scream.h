@@ -137,7 +137,7 @@ typedef struct __ns_efuns {  /* callbacks into the terminal program */
   int   (*err_msg)(void *,int,char *);
   int   (*execute)(void *,char **);
   int   (*inp_text)(void *,int,char *);
-  int   (*inp_dial)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+  int   (*input_dialog)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
   int   (*inp_tab)(void *,char *[],int,char *,size_t,size_t);
   int   (*waitstate)(void *,int);
 } _ns_efuns;
@@ -212,7 +212,7 @@ int ns_rem_disp(_ns_sess *,int);
 int ns_ren_disp(_ns_sess *,int,char *);
 int ns_log_disp(_ns_sess *,int,char *);
 int ns_upd_stat(_ns_sess *);
-int ns_inp_dial(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+int ns_input_dialog(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
 
 
 

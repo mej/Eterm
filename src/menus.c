@@ -1244,7 +1244,7 @@ menu_action(menuitem_t *item)
           script_parse((char *) item->action.script);
           break;
       case MENUITEM_ALERT:
-          menu_dial(NULL, item->action.alert, 0, NULL, NULL);
+          menu_dialog(NULL, item->action.alert, 0, NULL, NULL);
           break;
       default:
           fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
@@ -1294,7 +1294,6 @@ menu_invoke_by_title(int x, int y, Window win, char *title, Time timestamp)
    l   number of characters to compare in current entry
    m   maximum number of characters in entry (size of input buffer)
    <-  error code */
-
 int
 menu_tab(void *xd, char *sc[], int nsc, char *b, size_t l, size_t m)
 {
@@ -1332,9 +1331,8 @@ menu_tab(void *xd, char *sc[], int nsc, char *b, size_t l, size_t m)
    inp_tab  function doing tab-completion, NULL for none
    <-       error code  (0 succ, -1 fail, -2 cancel)
  */
-
 int
-menu_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
+menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
     static unsigned char short_buf[256];
     unsigned char *kbuf = short_buf;
@@ -1357,7 +1355,7 @@ menu_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (voi
         if ((b = strdup("Press \"Return\" to continue...")) == NULL)
             return ret;
     } else {
-        if (((b = malloc(maxlen + 1)) == NULL))
+        if (((b = MALLOC(maxlen + 1)) == NULL))
             return ret;
         if (*retstr) {
             strncpy(b, *retstr, maxlen);
@@ -1445,6 +1443,6 @@ menu_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (voi
 #endif
         menu_delete(m);
     }
-    free(b);
+    FREE(b);
     return ret;
 }
