@@ -2302,3 +2302,10 @@ Thu Aug 19 16:45:36 PDT 1999	Michael Jennings <mej@eterm.org>
 	fonts.
 	
 -------------------------------------------------------------------------------
+Fri Aug 20 13:23:44 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Since Mr. Kletnieks reminded me that I never finished it, I finally
+	implemented support for right-justified menu text. :-)  Now you'll
+	know why some of those menus seemed unnecessarily wide.
+	
+-------------------------------------------------------------------------------

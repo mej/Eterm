@@ -770,6 +770,9 @@ menuitem_select(menu_t * menu, menuitem_t * item)
     render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
   }
   draw_string(menu->swin, menu->gc, MENU_HGAP, item->h - MENU_VGAP, item->text, item->len);
+  if (item->rtext) {
+    draw_string(menu->swin, menu->gc, item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->h - MENU_VGAP, item->rtext, item->rlen);
+  }
 }
 
 void
@@ -787,6 +790,10 @@ menuitem_deselect(menu_t * menu, menuitem_t * item)
       paste_simage(images[image_submenu].norm, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
     }
     draw_string(menu->win, menu->gc, 2 * MENU_HGAP, item->y + item->h - MENU_VGAP, item->text, item->len);
+    if (item->rtext) {
+      draw_string(menu->win, menu->gc, item->x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->y + item->h - MENU_VGAP,
+                  item->rtext, item->rlen);
+    }
   }
 }
 
@@ -827,7 +834,6 @@ menu_draw(menu_t * menu)
   int ascent, descent, direction;
   XCharStruct chars;
   Screen *scr;
-  unsigned short longest = 0;
 
   ASSERT(menu != NULL);
 
@@ -839,6 +845,8 @@ menu_draw(menu_t * menu)
   XChangeGC(Xdisplay, menu->gc, GCForeground, &gcvalue);
 
   if (!menu->w) {
+    unsigned short longest;
+
     len = strlen(menu->title);
     longest = XTextWidth(menu->font, menu->title, len);
     height = menu->fheight + 3 * MENU_VGAP;
@@ -848,9 +856,9 @@ menu_draw(menu_t * menu)
 
       width = XTextWidth(menu->font, item->text, j);
       if (item->rtext) {
-        width += XTextWidth(menu->font, item->rtext, item->rlen) + (2*MENU_HGAP);
+        width += XTextWidth(menu->font, item->rtext, item->rlen) + (2 * MENU_HGAP);
       }
-      longest = (longest>width)?longest:width;
+      longest = (longest > width) ? longest : width;
       height += ((item->type == MENUITEM_SEP) ? (MENU_VGAP) : (menu->fheight)) + MENU_VGAP;
     }
     width = longest + (4 * MENU_HGAP);
@@ -941,6 +949,10 @@ menu_draw(menu_t * menu)
 	  break;
       }
       draw_string(menu->win, menu->gc, str_x, str_y - MENU_VGAP / 2, item->text, item->len);
+      if (item->rtext) {
+        draw_string(menu->win, menu->gc, str_x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 3 * MENU_HGAP, str_y - MENU_VGAP / 2,
+                    item->rtext, item->rlen);
+      }
     }
   }
 }
