@@ -2576,3 +2576,8 @@ Mon Oct 11 16:48:22 PDT 1999	Michael Jennings <mej@eterm.org>
 	end.
 	
 -------------------------------------------------------------------------------
+Mon Oct 11 22:24:12 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Sync after resize in auto mode.
+	
+-------------------------------------------------------------------------------

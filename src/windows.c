@@ -365,10 +365,6 @@ Create_Windows(int argc, char *argv[])
     D_X11(("Geometry values after parsing:  %dx%d%+d%+d\n", width, height, x, y));
   }
 
-  /* parent window - reverse video so we can see placement errors
-   * sub-window placement & size in resize_subwindows()
-   */
-
   Attributes.background_pixel = PixColors[bgColor];
   Attributes.border_pixel = PixColors[bgColor];
   TermWin.parent = XCreateWindow(Xdisplay, Xroot, szHint.x, szHint.y, szHint.width, szHint.height, 0, Xdepth, InputOutput,
@@ -519,6 +515,9 @@ term_resize(int width, int height)
   TermWin.height = TermWin.nrow * TermWin.fheight;
   XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollBar_right) ? (0) : (scrollbar_trough_width())), 0, width, height + 1);
   render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+  if (image_mode_is(image_bg, MODE_AUTO)) {
+    enl_ipc_sync();
+  }
 }
 
 /* Resize due to font change; update size hints and child windows */
