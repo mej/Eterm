@@ -260,6 +260,7 @@ static const struct {
       OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[image_sa]),
       OPT_LONG("menu-pixmap", "menu pixmap [scaling optional]", &rs_pixmaps[image_menu]),
       OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &image_toggles, IMOPT_TRANS),
+      OPT_BOOL('0', "itrans", "use immotile-optimized transparency", &image_toggles, IMOPT_ITRANS),
       OPT_BLONG("viewport-mode", "use viewport mode for the background image", &image_toggles, IMOPT_VIEWPORT),
       OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
       OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
@@ -2206,6 +2207,13 @@ parse_toggles(char *buff, void *state)
       Options |= Opt_report_as_keysyms;
     } else {
       Options &= ~(Opt_report_as_keysyms);
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "itrans ") || !BEG_STRCASECMP(buff, "immotile_trans ")) {
+    if (bool_val) {
+      image_toggles |= IMOPT_ITRANS;
+    } else {
+      image_toggles &= ~IMOPT_ITRANS;
     }
 
   } else {
@@ -4409,6 +4417,7 @@ save_config(char *path)
   fprintf(fp, "    select_line %d\n", (Options & Opt_select_whole_line ? 1 : 0));
   fprintf(fp, "    select_trailing_spaces %d\n", (Options & Opt_select_trailing_spaces ? 1 : 0));
   fprintf(fp, "    report_as_keysyms %d\n", (Options & Opt_report_as_keysyms ? 1 : 0));
+  fprintf(fp, "    itrans %d\n", (image_toggles & IMOPT_ITRANS ? 1 : 0));
   fprintf(fp, "  end toggles\n\n");
 
   fprintf(fp, "  begin keyboard\n");

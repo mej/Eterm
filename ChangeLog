@@ -3290,3 +3290,44 @@ Fri Mar  3 21:05:11 PST 2000	Michael Jennings <mej@eterm.org>
 	too damned long.  Just thought you should know.
 
 -------------------------------------------------------------------------------
+Mon Mar  6 21:11:13 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Added a new option.  -0 (that's a zero) or --itrans will invoke the
+	immotile optimization for transparency, so named because it works best
+	on windows that don't move around much on the desktop.  It works even
+	better for windows that are sticky between desktops.  So if you have
+	logging windows (running tail -f and the like) that are shaded/tinted,
+	you definitely want to have this.  It will even benefit ordinary Eterm
+	windows, provided you don't move them around a lot.  Eterms that do
+	not change desktops may be better off with the other way; Eterms that
+	are not shaded or tinted at all will not behave any differently.
+
+	Here's the technical explanation for those who are interested.  The
+	old (and still the default) behavior is for Eterm to check to see if
+	any color modifiers are applied to the image_bg class, and if so, to
+	make a copy of the *entire* desktop image which is then shaded/tinted
+	appropriately.  It then snapshots a portion of that for the actual
+	background.  This way, if the Eterm window is moved, all the shading
+	and tinting will have already been done, so all it has to do is grab
+	another portion of the desktop and use it.  However, this involves a
+	LOT of calculations (one per pixel of the desktop pixmap) on startup
+	and at every desktop switch.
+
+	The immotile optimization is intended to reverse that logic by
+	optimizing for windows that do not move (hence the term "immotile").
+	It takes the snapshot of the desktop pixmap and applies any shading
+	or tinting *after* taking the portion it needs.  This requires much
+	fewer calculations on startup and when changing desktops, but the
+	entire set of calculations must be repeated whenever the window is
+	moved.  This is fine for small windows or windows that don't move
+	very often, but that's not always the case.  So it is to your
+	advantage to pick one or the other depending on how you use each
+	particular theme or window.
+
+	Two notes.  One, keep in mind that the -0/--itrans option doesn't
+	*activate* transparency; you still need -O/--trans for that.  Two,
+	this does not affect Eterms with no color modifiers applied to the
+	background.  In that case, Eterm still references the existing
+	desktop pixmap to save memory.
+	
+-------------------------------------------------------------------------------

@@ -523,7 +523,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
       D_PIXMAP(("Copying %hux%hu rectangle at %d, %d from %ux%u desktop pixmap 0x%08x onto p.\n", width, height, x, y, pw, ph, desktop_pixmap));
       XCopyArea(Xdisplay, desktop_pixmap, p, gc, x, y, width, height, 0, 0);
     }
-    if (which != image_bg && need_colormod(simg->iml)) {
+    if ((which != image_bg || (image_toggles & IMOPT_ITRANS)) && need_colormod(simg->iml)) {
       colormod_trans(p, simg->iml, gc, width, height);
     }
     if (simg->iml->bevel != NULL) {
@@ -1584,7 +1584,7 @@ get_desktop_pixmap(void)
           D_PIXMAP(("Desktop pixmap has changed.  Updating desktop_pixmap\n"));
           free_desktop_pixmap();
           orig_desktop_pixmap = p;
-          if (need_colormod(images[image_bg].current->iml)) {
+          if (!(image_toggles & IMOPT_ITRANS) && need_colormod(images[image_bg].current->iml)) {
             int px, py;
             unsigned int pw, ph, pb, pd;
             Window w;

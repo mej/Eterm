@@ -79,7 +79,8 @@
 # define Opt_double_buffer              (1LU << 24)
 
 # define IMOPT_TRANS                    (1U << 0)
-# define IMOPT_VIEWPORT                 (1U << 1)
+# define IMOPT_ITRANS                   (1U << 1)
+# define IMOPT_VIEWPORT                 (1U << 2)
 
 #define BOOL_OPT_ISTRUE(s)  (!strcasecmp((s), true_vals[0]) || !strcasecmp((s), true_vals[1]) \
                              || !strcasecmp((s), true_vals[2]) || !strcasecmp((s), true_vals[3]))
