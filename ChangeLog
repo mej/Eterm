@@ -4615,3 +4615,8 @@ Sun Apr 28 10:06:32 2002                        Michael Jennings (mej)
 
 Don't require the new libast just yet....
 ----------------------------------------------------------------------
+Mon Apr 29 10:48:33 2002                        Michael Jennings (mej)
+
+Disable the screen dump escape sequence and implement a save_buff()
+script function instead.
+----------------------------------------------------------------------

@@ -52,6 +52,7 @@ static eterm_script_handler_t script_handlers[] =
   { "paste",     script_handler_paste },
   { "quit",      script_handler_exit },
   { "save",      script_handler_save },
+  { "save_buff", script_handler_save_buff },
   { "scroll",    script_handler_scroll },
   { "search",    script_handler_search },
   { "spawn",     script_handler_spawn },
@@ -287,6 +288,21 @@ script_handler_save(char **params)
     }
   } else {
     save_config(NULL, SAVE_USER_CONFIG);
+  }
+}
+
+/* save_buff():  Dump the scrollback buffer to a file
+ *
+ * Syntax:  save_buff(<filename>)
+ *
+ * Dumps the entire contents of the screen buffer into
+ * the specified file.
+ */
+void
+script_handler_save_buff(char **params)
+{
+  if (params && *params) {
+    scr_dump_to_file(params[0]);
   }
 }
 

@@ -49,6 +49,7 @@ extern void script_handler_exit(char **);
 extern void script_handler_kill(char **);
 extern void script_handler_paste(char **);
 extern void script_handler_save(char **);
+extern void script_handler_save_buff(char **);
 extern void script_handler_scroll(char **);
 extern void script_handler_search(char **);
 extern void script_handler_spawn(char **);

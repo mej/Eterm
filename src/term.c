@@ -2352,11 +2352,13 @@ xterm_seq(int op, const char *str)
 #endif
       break;
     case XTerm_DumpScreen:
+#if 0
       nstr = (char *) strsep(&tnstr, ";");
       if (nstr && *nstr) {
         scr_dump_to_file(nstr);
       }
       break;
+#endif
     case XTerm_logfile:
       nstr = (char *) strsep(&tnstr, ";");
       if (nstr && *nstr && BOOL_OPT_ISTRUE(nstr)) {
