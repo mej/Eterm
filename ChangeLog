@@ -4224,3 +4224,24 @@ my memory isn't cooperating.  So if you contributed one of the
 backgrounds, or know someone who did, please let me know.
 
 ----------------------------------------------------------------------
+Fri Jun 15 18:02:31 2001                        Michael Jennings (mej)
+
+Converted Eterm's ChangeLog to Avalon's format as well.  Double-yay!
+----------------------------------------------------------------------
+Fri Jun 15 23:41:38 2001                        Michael Jennings (mej)
+
+Added a -a/--attribute option for passing config file stuff to the  
+parser on the command line.  Also got the command line option section
+of the man page up to date.  I'll tackle the rest some other time;
+it's late. :-)
+----------------------------------------------------------------------
+Sun Jun 17 11:51:39 2001                        Michael Jennings (mej)
+
+Stupid stupid typo.  Originally reported by Bas van Sisseren
+<bas@dnd.utwente.nl> in Debian Bug #101161.
+----------------------------------------------------------------------
+Mon Jun 18 13:51:07 2001                        Michael Jennings (mej)
+
+Oops.  ChangeLog entries were ending up in the bit-bucket.  Fixed and
+re-synced. :)
+----------------------------------------------------------------------
