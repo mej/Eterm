@@ -357,6 +357,9 @@ menu_handle_motion_notify(event_t * ev)
       current_menu->state |= MENU_STATE_IS_DRAGGING;
     }
     item = find_item_by_coords(current_menu, ev->xbutton.x, ev->xbutton.y);
+    if (!item || item != menuitem_get_current(current_menu)) {
+      menu_reset_submenus(current_menu);
+    }
     menuitem_change_current(item);
   } else {
     /* Motion outside the current menu */
@@ -383,6 +386,8 @@ menu_handle_motion_notify(event_t * ev)
         menu_reset_submenus(current_menu);
       }
       menuitem_change_current(item);
+    } else if (!menu) {
+      menuitem_change_current(NULL);
     }
   }
 

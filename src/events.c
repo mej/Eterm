@@ -484,16 +484,19 @@ handle_focus_out(event_t * ev)
 unsigned char
 handle_configure_notify(event_t * ev)
 {
-  XEvent unused_xevent;
+  XEvent xevent;
 
   D_EVENTS(("handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
-  while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, &unused_xevent));
+  while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, ev)) {
+    D_EVENTS(("New event:  Window 0x%08x, %dx%d at %d, %d\n", ev->xany.window, ev->xconfigure.width,
+              ev->xconfigure.height, ev->xconfigure.x, ev->xconfigure.y));
+  }
   if (ev->xany.window == TermWin.parent) {
-    int x = ev->xconfigurerequest.x, y = ev->xconfigurerequest.y;
-    unsigned int width = ev->xconfigurerequest.width, height = ev->xconfigurerequest.height;
+    int x = ev->xconfigure.x, y = ev->xconfigure.y;
+    unsigned int width = ev->xconfigure.width, height = ev->xconfigure.height;
 
     D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  Internal cache data shows %dx%d at (%hd, %hd).  send_event is %d\n",
               width, height, x, y, szHint.width, szHint.height, TermWin.x, TermWin.y, ev->xconfigure.send_event));
