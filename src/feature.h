@@ -100,10 +100,6 @@
    config files and pixmaps */
 #define PATH_ENV	"ETERMPATH"
 
-/* Disable simulation of bold font using an "overstrike" technique.  This technique
- has been known to cause pixel droppings.  See also FORCE_CLEAR_CHARS. */
-/* #define NO_BOLDOVERSTRIKE */
-
 /* Disable the secondary screen ("\E[?47h" / "\E[?47l") */
 /* #define NO_SECONDARY_SCREEN */
 
@@ -112,7 +108,7 @@
 
 /* This will force clearing of characters before writing new ones on top of
  * them. This is experimental - added in order to try and fix pixel dropping
- * problems some people have had. See also NO_BOLDOVERSTRIKE. */
+ * problems some people have had. */
 /*# define FORCE_CLEAR_CHARS*/
 
 /* The command through which to pipe print-screen requests */

@@ -97,7 +97,8 @@ static char *rs_greek_keyboard = NULL;
 #endif
 
 unsigned long eterm_options = (ETERM_OPTIONS_SCROLLBAR | ETERM_OPTIONS_SELECT_TRAILING_SPACES);
-unsigned long vt_options = (VT_OPTIONS_SECONDARY_SCREEN);
+unsigned long vt_options = (VT_OPTIONS_SECONDARY_SCREEN | VT_OPTIONS_OVERSTRIKE_BOLD | VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND |
+                            VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND | VT_OPTIONS_COLORS_SUPPRESS_BOLD);
 unsigned long image_options = 0;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_exec_args = NULL;     /* Args to exec (-e or --exec) */
@@ -195,7 +196,6 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("color5", "color 5", rs_color[minColor + 5]),
     SPIFOPT_STR_LONG("color6", "color 6", rs_color[minColor + 6]),
     SPIFOPT_STR_LONG("color7", "color 7", rs_color[minColor + 7]),
-#ifndef NO_BRIGHTCOLOR
     SPIFOPT_STR_LONG("color8", "color 8", rs_color[minBright]),
     SPIFOPT_STR_LONG("color9", "color 9", rs_color[minBright + 1]),
     SPIFOPT_STR_LONG("color10", "color 10", rs_color[minBright + 2]),
@@ -204,7 +204,6 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("color13", "color 13", rs_color[minBright + 5]),
     SPIFOPT_STR_LONG("color14", "color 14", rs_color[minBright + 6]),
     SPIFOPT_STR_LONG("color15", "color 15", rs_color[minBright + 7]),
-#endif                          /* NO_BRIGHTCOLOR */
 #ifndef NO_BOLDUNDERLINE
     SPIFOPT_STR_LONG("colorBD", "bold color", rs_color[colorBD]),
     SPIFOPT_STR_LONG("colorUL", "underline color", rs_color[colorUL]),
@@ -288,6 +287,10 @@ spifopt_t option_list[] = {
     SPIFOPT_BOOL_LONG("scrollbar-floating", "display the scrollbar with no trough", eterm_options, ETERM_OPTIONS_SCROLLBAR_FLOATING),
     SPIFOPT_BOOL_LONG("scrollbar-popup", "popup the scrollbar only when focused", eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP),
     SPIFOPT_BOOL('x', "borderless", "force Eterm to have no borders", eterm_options, ETERM_OPTIONS_BORDERLESS),
+    SPIFOPT_BOOL_LONG("overstrike-bold", "simulate bold by overstriking characters", vt_options, VT_OPTIONS_OVERSTRIKE_BOLD),
+    SPIFOPT_BOOL_LONG("bold-brightens-foreground", "\"bold\" attribute brightens foreground color", vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND),
+    SPIFOPT_BOOL_LONG("blink-brightens-background", "\"blink\" attribute brightens background color", vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND),
+    SPIFOPT_BOOL_LONG("colors-suppress-bold", "do not make ANSI colors 0-16 bold", vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
     SPIFOPT_BOOL('m', "map-alert", "uniconify on beep", vt_options, VT_OPTIONS_MAP_ALERT),
@@ -510,20 +513,10 @@ version(void)
 #else
     printf(" -NO_CURSORCOLOR");
 #endif
-#ifdef NO_BRIGHTCOLOR
-    printf(" +NO_BRIGHTCOLOR");
-#else
-    printf(" -NO_BRIGHTCOLOR");
-#endif
 #ifdef NO_BOLDUNDERLINE
     printf(" +NO_BOLDUNDERLINE");
 #else
     printf(" -NO_BOLDUNDERLINE");
-#endif
-#ifdef NO_BOLDOVERSTRIKE
-    printf(" +NO_BOLDOVERSTRIKE");
-#else
-    printf(" -NO_BOLDOVERSTRIKE");
 #endif
 #ifdef NO_BOLDFONT
     printf(" +NO_BOLDFONT");
@@ -1239,6 +1232,35 @@ parse_toggles(char *buff, void *state)
         } else {
             BITFIELD_CLEAR(eterm_options, ETERM_OPTIONS_RESIZE_GRAVITY);
         }
+
+    } else if (!BEG_STRCASECMP(buff, "overstrike_bold ")) {
+        if (bool_val) {
+            BITFIELD_SET(vt_options, VT_OPTIONS_OVERSTRIKE_BOLD);
+        } else {
+            BITFIELD_CLEAR(vt_options, VT_OPTIONS_OVERSTRIKE_BOLD);
+        }
+
+    } else if (!BEG_STRCASECMP(buff, "bold_brightens_foreground ")) {
+        if (bool_val) {
+            BITFIELD_SET(vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND);
+        } else {
+            BITFIELD_CLEAR(vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND);
+        }
+
+    } else if (!BEG_STRCASECMP(buff, "blink_brightens_background ")) {
+        if (bool_val) {
+            BITFIELD_SET(vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND);
+        } else {
+            BITFIELD_CLEAR(vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND);
+        }
+
+    } else if (!BEG_STRCASECMP(buff, "colors_suppress_bold ")) {
+        if (bool_val) {
+            BITFIELD_SET(vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD);
+        } else {
+            BITFIELD_CLEAR(vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD);
+        }
+
     } else {
         print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(),
                     file_peek_line(), buff);
@@ -2483,9 +2505,7 @@ init_defaults(void)
 #ifdef PIXMAP_SUPPORT
     rs_path = NULL;
 #endif
-#ifndef NO_BRIGHTCOLOR
     colorfgbg = DEFAULT_RSTYLE;
-#endif
 
     /* Font stuff. */
     MEMSET(rs_font, 0, sizeof(char *) * NFONTS);

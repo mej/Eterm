@@ -692,14 +692,8 @@ set_window_color(int idx, const char *color)
         i = atoi(color);
         if (i >= 8 && i <= 15) {        /* bright colors */
             i -= 8;
-# ifndef NO_BRIGHTCOLOR
             PixColors[idx] = PixColors[minBright + i];
-# endif
-        }
-# ifndef NO_BRIGHTCOLOR
-        else
-# endif
-        if (i >= 0 && i <= 7) { /* normal colors */
+        } else if (i >= 0 && i <= 7) { /* normal colors */
             PixColors[idx] = PixColors[minColor + i];
         } else {
             print_warning("Color index %d is invalid.\n", i);

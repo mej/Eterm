@@ -60,11 +60,10 @@
 #define ERASE_ROWS(row, num)  do {XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num)); \
                                   if (buffer_pixmap) {XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num), 0);}} while (0)
 #define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
-#ifndef NO_BRIGHTCOLOR
-# define MONO_BOLD(x)	(((x) & RS_Bold) && fore == fgColor)
-#else
-# define MONO_BOLD(x)	((x) & (RS_Bold|RS_Blink))
-#endif
+
+/* Make bold if bold flag is set and either we're drawing the foreground color or we're not suppressing bold.
+   In other words, the foreground color can always be bolded, but other colors can't if bold is suppressed. */
+#define MONO_BOLD(x) (((x) & RS_Bold) && (!BITFIELD_IS_SET(vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD) || fore == fgColor))
 
 /* Screen refresh methods */
 #define NO_REFRESH              0       /* Window not visible at all!        */
@@ -224,9 +223,7 @@ typedef struct {
 } selection_t;
 
 /************ Variables ************/
-#ifndef NO_BRIGHTCOLOR
 extern unsigned int colorfgbg;
-#endif
 extern unsigned char refresh_all;
 #ifdef MULTI_CHARSET
 extern encoding_t encoding_method;

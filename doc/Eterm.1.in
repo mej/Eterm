@@ -509,6 +509,28 @@ If true, Eterm will automatically detect the nearest corner, and
 font-change resizes will cause the Eterm window to gravitate toward
 that corner.
 .TP
+.BR \-\-overstrike-bold
+If true (default), Eterm will simulate a bold font by printing each
+character twice, offsetting the second pass by one pixel.  This makes
+the characters seem thicker without the need for a special font.  You
+may wish to disable this if you use a specific color for bold.
+.TP
+.BR \-\-bold-brightens-foreground
+If true (default), Eterm will use the "bold" ANSI color attribute to
+brighten the foreground color by using the high-intensity colors (8
+through 15) rather than the low-intensity colors (0 through 7).  Note
+that having a specific color selected for bold will override this.
+.TP
+.BR \-\-blink-brightens-background
+If true (default), Eterm will use the "blink" ANSI color attribute to
+brighten the background color by using the high-intensity colors (8
+through 15) rather than the low-intensity colors (0 through 7).
+.TP
+.BR \-\-colors-suppress-bold
+If true (default), any colored text (that is, any text not rendered
+using the default foreground color) will not be given any other
+special treatment for bolding (e.g., bold font or bold overstrike).
+.TP
 .BI \-\-big-font-key " keysym"
 Specify a keysym to increase the font size.  Default is Shift and the +
 key on the keypad.  Ctrl-> or Meta-> may also work (if you #define one
@@ -1681,6 +1703,36 @@ Toggle the display of all buttonbars.
 If true, Eterm will automatically detect the nearest corner, and
 font-change resizes will cause the Eterm window to gravitate toward
 that corner.
+.RE
+
+.BI overstrike_bold " boolean"
+.RS 5
+If true (default), Eterm will simulate a bold font by printing each
+character twice, offsetting the second pass by one pixel.  This makes
+the characters seem thicker without the need for a special font.  You
+may wish to disable this if you use a specific color for bold.
+.RE
+
+.BI bold_brightens_foreground " boolean"
+.RS 5
+If true (default), Eterm will use the "bold" ANSI color attribute to
+brighten the foreground color by using the high-intensity colors (8
+through 15) rather than the low-intensity colors (0 through 7).  Note
+that having a specific color selected for bold will override this.
+.RE
+
+.BI blink_brightens_background " boolean"
+.RS 5
+If true (default), Eterm will use the "blink" ANSI color attribute to
+brighten the background color by using the high-intensity colors (8
+through 15) rather than the low-intensity colors (0 through 7).
+.RE
+
+.BI colors_suppress_bold " boolean"
+.RS 5
+If true (default), any colored text (that is, any text not rendered
+using the default foreground color) will not be given any other
+special treatment for bolding (e.g., bold font or bold overstrike).
 .RE
 .RE
 

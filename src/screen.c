@@ -485,11 +485,20 @@ scr_color(unsigned int color, unsigned int Intensity)
                   break;
             }
         } else {
-#ifndef NO_BRIGHTCOLOR
             if ((rstyle & Intensity) && color >= minColor && color <= maxColor) {
-                color += (minBright - minColor);
+                switch (Intensity) {
+                    case RS_Bold:
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND)) {
+                            color += (minBright - minColor);
+                        }
+                        break;
+                    case RS_Blink:
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND)) {
+                            color += (minBright - minColor);
+                        }
+                        break;
+                }
             }
-#endif
         }
     }
     switch (Intensity) {
@@ -520,7 +529,6 @@ scr_rendition(int set, int style)
               if (rvideo)
                   rstyle &= ~RS_RVid;
               break;
-#ifndef NO_BRIGHTCOLOR
           case RS_Bold:
               color = GET_FGCOLOR(rstyle);
               scr_color((color == fgColor ? GET_FGCOLOR(colorfgbg) : color), RS_Bold);
@@ -529,7 +537,6 @@ scr_rendition(int set, int style)
               color = GET_BGCOLOR(rstyle);
               scr_color((color == bgColor ? GET_BGCOLOR(colorfgbg) : color), RS_Blink);
               break;
-#endif
         }
     } else {
 /* B: Unset style */
@@ -543,7 +550,6 @@ scr_rendition(int set, int style)
               if (rvideo)
                   rstyle |= RS_RVid;
               break;
-#ifndef NO_BRIGHTCOLOR
           case RS_Bold:
               color = GET_FGCOLOR(rstyle);
               if (color >= minBright && color <= maxBright) {
@@ -560,7 +566,6 @@ scr_rendition(int set, int style)
                       scr_color(restoreBG, RS_Blink);
               }
               break;
-#endif
         }
     }
 }
@@ -1942,12 +1947,10 @@ scr_refresh(int type)
                 }
                 DRAW_STRING(draw_string, xpixel, ypixel, buffer, 1);
                 UPDATE_BOX(xpixel, ypixel - ascent, xpixel + Width2Pixel(1), ypixel + Height2Pixel(1));
-#ifndef NO_BOLDOVERSTRIKE
-                if (MONO_BOLD(rend)) {
+                if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_OVERSTRIKE_BOLD) && MONO_BOLD(rend)) {
                     DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, 1);
                     UPDATE_BOX(xpixel + 1, ypixel - ascent, xpixel + 1 + Width2Pixel(1), ypixel + Height2Pixel(1));
                 }
-#endif
             } else {
 #ifdef PIXMAP_SUPPORT
                 if (background_is_pixmap() && (back == bgColor)) {
@@ -2042,12 +2045,10 @@ scr_refresh(int type)
             }
 
             /* do the convoluted bold overstrike */
-#ifndef NO_BOLDOVERSTRIKE
-            if (MONO_BOLD(rend)) {
+            if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_OVERSTRIKE_BOLD) && MONO_BOLD(rend)) {
                 DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, wlen);
                 UPDATE_BOX(xpixel + 1, ypixel - ascent, xpixel + 1 + Width2Pixel(wlen), ypixel + Height2Pixel(1));
             }
-#endif
 
             if (rend & RS_Uline) {
                 if (descent > 1) {
@@ -3340,21 +3341,17 @@ debug_colors(void)
     fprintf(stderr, "): ");
 
     color = GET_FGCOLOR(rstyle);
-#ifndef NO_BRIGHTCOLOR
     if (color >= minBright && color <= maxBright) {
         color -= (minBright - minColor);
         fprintf(stderr, "bright ");
     }
-#endif
     fprintf(stderr, "%s on ", name[color]);
 
     color = GET_BGCOLOR(rstyle);
-#ifndef NO_BRIGHTCOLOR
     if (color >= minBright && color <= maxBright) {
         color -= (minBright - minColor);
         fprintf(stderr, "bright ");
     }
-#endif
     fprintf(stderr, "%s\n", name[color]);
 }
 

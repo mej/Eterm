@@ -60,7 +60,6 @@ unsigned long SavedModes = PrivMode_Default;
 char *def_colorName[] = {
     "rgb:aa/aa/aa", "rgb:0/0/0",        /* fg/bg */
     "rgb:0/0/0",                /* 0: black             (#000000) */
-#ifndef NO_BRIGHTCOLOR
     /* low-intensity colors */
     "rgb:cc/00/00",             /* 1: red     */
     "rgb:00/cc/00",             /* 2: green   */
@@ -71,7 +70,6 @@ char *def_colorName[] = {
     "rgb:aa/aa/aa",             /* 7: white   */
     /* high-intensity colors */
     "rgb:33/33/33",             /* 8: bright black */
-#endif                          /* NO_BRIGHTCOLOR */
     "rgb:ff/00/00",             /* 1/9:  bright red     */
     "rgb:00/ff/00",             /* 2/10: bright green   */
     "rgb:ff/ff/00",             /* 3/11: bright yellow  */
@@ -1689,7 +1687,6 @@ process_sgr_mode(unsigned int nargs, int arg[])
 }
 
 /* find if fg/bg matches any of the normal (low-intensity) colors */
-#ifndef NO_BRIGHTCOLOR
 void
 set_colorfgbg(void)
 {
@@ -1748,7 +1745,6 @@ set_colorfgbg(void)
             colorfgbg = SET_BGCOLOR(colorfgbg, i);
     }
 }
-#endif /* NO_BRIGHTCOLOR */
 
 void
 set_title(const char *str)

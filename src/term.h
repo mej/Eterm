@@ -99,10 +99,6 @@ enum color_list {
     Magenta3Color,
     Cyan3Color,
     maxColor,				/* minColor + 7 */
-# ifdef NO_BRIGHTCOLOR
-    WhiteColor = maxColor,
-    maxBright = maxColor,
-# else
     AntiqueWhiteColor = maxColor,
     minBright,				/* maxColor + 1 */
     Grey25Color = minBright,
@@ -114,7 +110,6 @@ enum color_list {
     CyanColor,
     maxBright,				/* minBright + 7 */
     WhiteColor = maxBright,
-# endif
 # ifndef NO_CURSORCOLOR
     cursorColor,
     cursorColor2,
@@ -186,11 +181,7 @@ extern void process_xterm_seq(void);
 extern void process_window_mode(unsigned int, int []);
 extern void process_terminal_mode(int, int, unsigned int, int []);
 extern void process_sgr_mode(unsigned int, int []);
-#ifndef NO_BRIGHTCOLOR
 extern void set_colorfgbg(void);
-#else
-# define set_colorfgbg() ((void)0)
-#endif /* NO_BRIGHTCOLOR */
 extern void set_title(const char *);
 extern void set_icon_name(const char *);
 extern void append_to_title(const char *);

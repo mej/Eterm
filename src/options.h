@@ -38,6 +38,10 @@
 # define VT_OPTIONS_REPORT_AS_KEYSYMS             (1LU <<  7)
 # define VT_OPTIONS_PROPORTIONAL                  (1LU <<  8)
 # define VT_OPTIONS_SECONDARY_SCREEN              (1LU <<  9)
+# define VT_OPTIONS_OVERSTRIKE_BOLD               (1LU << 10)
+# define VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND     (1LU << 11)
+# define VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND    (1LU << 12)
+# define VT_OPTIONS_COLORS_SUPPRESS_BOLD          (1LU << 13)
 
 # define ETERM_OPTIONS_LOGIN_SHELL                (1LU <<  0)
 # define ETERM_OPTIONS_ICONIC                     (1LU <<  1)

@@ -5102,3 +5102,12 @@ in here. :)
 
 Hopefully I didn't break anything....
 ----------------------------------------------------------------------
+Mon Aug 25 21:08:20 2003                        Michael Jennings (mej)
+
+Patch from David Lloyd <dmlloyd@tds.net>.  Removed the NO_BRIGHTCOLOR
+and NO_BOLDOVERSTRIKE defines.  If you want to do NO_BRIGHTCOLOR, set
+colors 8-16 the same as 0-7. :P  For bold overstrike, it's now an
+option (--overstrike-bold).  There are also options to deactivate the
+"bold" and "blink" attributes' setting of high-intensity colors, and
+to allow non-default foreground colors to be bolded.
+----------------------------------------------------------------------
