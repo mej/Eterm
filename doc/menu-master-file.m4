@@ -349,12 +349,12 @@ end
 begin menu
   title Sort
   SUBMENU_ITEM(`Forward')
-  SUBMENU_ITEM(`Forward')
+  SUBMENU_ITEM(`Reverse')
 end
 
 begin menu
   title Mailbox
-  SUBMENU_ITEM(`Change to Folder')
+  SUBMENU_ITEM(`Change Folder')
   SUBMENU_ITEM(`Sort')
   -
   ECHO_ITEM(`Resync', `$')

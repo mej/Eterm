@@ -4368,3 +4368,7 @@ I forgot to mention that I made a small change to the input routine to
 try and support Cyrillic characters without XIM.  This was requested
 by Konstantin Zemlyak <zart@mail.ru>.
 ----------------------------------------------------------------------
+Mon Aug 27 14:48:17 2001                        Michael Jennings (mej)
+
+Minor typos in the mutt menus.
+----------------------------------------------------------------------
