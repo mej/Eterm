@@ -502,6 +502,9 @@ menu_delete(menu_t *menu)
         FREE(menu->title);
     }
     if (menu->bg) {
+        if (images[image_menu].norm->pmap->pixmap == menu->bg) {
+            images[image_menu].norm->pmap->pixmap = None;
+        }
         LIBAST_X_FREE_PIXMAP(menu->bg);
     }
     if (menu->gc) {

@@ -4667,3 +4667,7 @@ Wed May 22 11:37:19 2002                        Michael Jennings (mej)
 
 Latest Escreen work from Azundris <scream@azundris.com>.
 ----------------------------------------------------------------------
+Wed May 22 16:17:24 2002                        Michael Jennings (mej)
+
+Fixed duplicate freeing of menu background pixmap.
+----------------------------------------------------------------------
