@@ -220,7 +220,7 @@ eterm_bootstrap(int argc, char *argv[])
 
   /* Initialize the scrollbar */
   scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-  scrollbar_mapping(Options & Opt_scrollbar);
+  scrollbar_mapping((Options & Opt_scrollbar) && !((Options & Opt_scrollbar_popup) && !TermWin.focus));
 
   /* Initialize the menu subsystem. */
   menu_init();

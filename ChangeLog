@@ -4293,3 +4293,7 @@ Fri Jul 13 17:07:45 2001                        Michael Jennings (mej)
 This is mostly cosmetic, but fairly important nonetheless.  Saved
 config files should not contain the "main" context.
 ----------------------------------------------------------------------
+Thu Jul 19 12:19:21 2001                        Michael Jennings (mej)
+
+Minor fix to correct popup scrollbar handling on startup.
+----------------------------------------------------------------------
