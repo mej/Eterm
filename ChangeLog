@@ -2335,3 +2335,8 @@ Mon Aug 23 10:33:20 PDT 1999	Michael Jennings <mej@eterm.org>
 	Fixed a bug where Eterm wouldn't start handling events soon enough.
 	
 -------------------------------------------------------------------------------
+Tue Aug 24 12:31:23 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Added more debugging output to pixmap.c to try and locate some bugs.
+	
+-------------------------------------------------------------------------------

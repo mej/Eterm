@@ -431,6 +431,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       if (desktop_pixmap != None && need_colormod()) {
 	pixmap = desktop_pixmap;
 	XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
+        D_PIXMAP(("render_simage():  XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
 	if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
 	  desktop_pixmap = XCreatePixmap(Xdisplay, win, pw, ph, Xdepth);
 	  XCopyArea(Xdisplay, pixmap, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
@@ -465,9 +466,11 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 	} else {
 	  XCopyArea(Xdisplay, desktop_pixmap, simg->pmap->pixmap, gc, x, y, width, height, 0, 0);
 	}
+        D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
 	XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
       }
     } else {
+      D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
       XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
     }
   } else if (((Options & Opt_viewport_mode) || (images[which].mode & MODE_VIEWPORT)) && (images[which].mode & ALLOW_VIEWPORT)) {
@@ -530,6 +533,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       XSetFillStyle(Xdisplay, gc, FillTiled);
       XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
     }
+    D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
     XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
   } else
 # endif
@@ -649,6 +653,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       if (simg->iml->bevel != NULL) {
 	Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
+      D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
       XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
     }
   }
@@ -847,6 +852,8 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
   register unsigned int mr, mg, mb;
   imlib_t *iml = images[image_bg].current->iml;
 
+  D_PIXMAP(("colormod_trans(p == 0x%08x, gc, w == %hu, h == %hu) called.\n", p, w, h));
+
   if (iml->mod) {
     shade = iml->mod->brightness;
   } else {
@@ -904,7 +911,9 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
 		  p, w, h);
     return;
   }
+  D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned 0x%08x.", p, w, h, ximg));
   if (Xdepth <= 8) {
+    D_PIXMAP(("Rendering low-depth image, depth == %d\n", (int) Xdepth));
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
 	v = XGetPixel(ximg, x, y);
@@ -916,6 +925,7 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
       }
     }
   } else {
+    D_PIXMAP(("Rendering high-depth image, depth == %d\n", real_depth));
     /* Determine bitshift and bitmask values */
     switch (real_depth) {
       case 15:
