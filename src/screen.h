@@ -59,7 +59,11 @@
                                                             if (y1 < low_y) low_y = y1; if (y2 > high_y) high_y = y2;}} while (0)
 #define ERASE_ROWS(row, num)  do {XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num)); \
                                   if (buffer_pixmap) {XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TERM_WINDOW_GET_WIDTH(), Height2Pixel(num), 0);}} while (0)
-#define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
+#if 0
+# define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.fontset, TermWin.gc, x, y, str, len)
+#else
+# define DRAW_STRING(Func, x, y, str, len)  Func(Xdisplay, draw_buffer, TermWin.gc, x, y, str, len)
+#endif
 
 /* Make bold if bold flag is set and either we're drawing the foreground color or we're not suppressing bold.
    In other words, the foreground color can always be bolded, but other colors can't if bold is suppressed. */

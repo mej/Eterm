@@ -5279,3 +5279,13 @@ someone can help me out.
 If you know iconv(), please have a look at the FIXME_BLOCK starting at
 line 3509 of src/command.c.
 ----------------------------------------------------------------------
+Mon Dec 20 14:31:33 2004                        Michael Jennings (mej)
+
+Okay, so my first problem was that I didn't pay close enough attention
+to the iconv_open() man page and got the parameter order wrong.  Duh.
+Thanks to Sytse Wielinga <s.b.wielinga@student.utwente.nl> for
+noticing that.
+
+kwo suggested using XmbDrawString(), but that causes font problems I'm
+not ready to diagnose just yet.
+----------------------------------------------------------------------

@@ -3506,7 +3506,7 @@ main_loop(void)
             }
             D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
                       nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
-#if FIXME_BLOCK
+#if !FIXME_BLOCK
             /* 
              * iconv() is not my friend. :-( I've tried various things
              * to make this work (including UCS2, SJIS, EUCJ, and
@@ -3530,17 +3530,17 @@ main_loop(void)
                     char *outbuff, *pinbuff, *poutbuff;
                     wchar_t *wcbuff;
                     mbstate_t mbs;
-                    size_t bufflen, outlen = 0, outbufflen, retval;
+                    size_t bufflen, outlen = 0, retval;
 
                     pinbuff = (char *) str;
                     bufflen = cmdbuf_ptr - str;
-                    outbufflen = outlen = bufflen * 6;
+                    outlen = bufflen * 6;
                     poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
                     errno = 0;
                     D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff, bufflen));
                     print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
-                    outlen = outbufflen - outlen;
+                    outlen = (size_t) (poutbuff - outbuff);
                     if (retval != (size_t) -1) {
                         errno = 0;
                     }

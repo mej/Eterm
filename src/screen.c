@@ -1682,8 +1682,13 @@ scr_refresh(int type)
 
     XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
 
+#if FIXME_BLOCK
+    draw_string = XmbDrawString;
+    draw_image_string = XmbDrawImageString;
+#else
     draw_string = XDrawString;
     draw_image_string = XDrawImageString;
+#endif
 
     BOUND(screen.row, 0, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
     BOUND(screen.col, 0, TERM_WINDOW_GET_REPORTED_COLS() - 1);
@@ -1768,8 +1773,13 @@ scr_refresh(int type)
                     if (!wbyte) {
                         wbyte = 1;
                         XSetFont(Xdisplay, TermWin.gc, TermWin.mfont->fid);
+# if FIXME_BLOCK
+                        draw_string = XmbDrawString;
+                        draw_image_string = XmbDrawImageString;
+# else
                         draw_string = XDrawString16;
                         draw_image_string = XDrawImageString16;
+# endif
                     }
                     /* double stepping - we're in Multibyte mode */
                     for (; ++col < ncols;) {
@@ -1806,8 +1816,13 @@ scr_refresh(int type)
                     if (wbyte) {
                         wbyte = 0;
                         XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
+# if FIXME_BLOCK
+                        draw_string = XmbDrawString;
+                        draw_image_string = XmbDrawImageString;
+# else
                         draw_string = XDrawString;
                         draw_image_string = XDrawImageString;
+# endif
                     }
 #endif
                     /* single stepping - `normal' mode */
