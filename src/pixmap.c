@@ -1091,7 +1091,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         simg->pmap->pixmap = create_trans_pixmap(simg, which, win, 0, 0, width, height);
         if (simg->pmap->pixmap != None) {
-            if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
+            if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
                 copy_buffer_pixmap(MODE_TRANS, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1117,7 +1117,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         if (simg->pmap->pixmap != None) {
             D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-            if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
+            if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
                 copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1228,7 +1228,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                     bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
                 }
                 D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-                if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
+                if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
                     copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                     XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
                 } else {
@@ -1254,7 +1254,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
 
     /* Fall back to solid mode if all else fails. */
     if (!image_mode_is(which, MODE_MASK)) {
-        if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
+        if ((which == image_bg) && (eterm_options & OPT_DOUBLE_BUFFER)) {
             copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
             XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
         } else {
@@ -1296,25 +1296,25 @@ search_path(const char *pathlist, const char *file)
     }
     getcwd(name, PATH_MAX);
     len = strlen(name);
-    D_OPTIONS(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
+    D_eterm_options(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
     if (len < PATH_MAX - 1) {
         strcat(name, "/");
         strncat(name, file, PATH_MAX - len - 1);
     }
-    D_OPTIONS(("Checking for file \"%s\"\n", name));
+    D_eterm_options(("Checking for file \"%s\"\n", name));
     if (!access(name, R_OK)) {
         if (stat(name, &fst)) {
-            D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
+            D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
         } else {
-            D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+            D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
         }
         if (!S_ISDIR(fst.st_mode)) {
             return name;
         } else {
-            D_OPTIONS(("%s is a directory.\n", name));
+            D_eterm_options(("%s is a directory.\n", name));
         }
     } else {
-        D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
+        D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
     }
 
     if ((p = strchr(file, '@')) == NULL)
@@ -1327,20 +1327,20 @@ search_path(const char *pathlist, const char *file)
     /* check if we can find it now */
     strncpy(name, file, len);
     name[len] = '\0';
-    D_OPTIONS(("Checking for file \"%s\"\n", name));
+    D_eterm_options(("Checking for file \"%s\"\n", name));
     if (!access(name, R_OK)) {
         if (stat(name, &fst)) {
-            D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
+            D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
         } else {
-            D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+            D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
         }
         if (!S_ISDIR(fst.st_mode)) {
             return name;
         } else {
-            D_OPTIONS(("%s is a directory.\n", name));
+            D_eterm_options(("%s is a directory.\n", name));
         }
     } else {
-        D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
+        D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
     }
     for (path = pathlist; path != NULL && *path != '\0'; path = p) {
         int n;
@@ -1372,24 +1372,24 @@ search_path(const char *pathlist, const char *file)
                 name[n++] = '/';
             name[n] = '\0';
             strncat(name, file, len);
-            D_OPTIONS(("Checking for file \"%s\"\n", name));
+            D_eterm_options(("Checking for file \"%s\"\n", name));
             if (!access(name, R_OK)) {
                 if (stat(name, &fst)) {
-                    D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
+                    D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
                 } else {
-                    D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+                    D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
                 }
                 if (!S_ISDIR(fst.st_mode)) {
                     return name;
                 } else {
-                    D_OPTIONS(("%s is a directory.\n", name));
+                    D_eterm_options(("%s is a directory.\n", name));
                 }
             } else {
-                D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
+                D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
             }
         }
     }
-    D_OPTIONS(("File \"%s\" not found in path.\n", file));
+    D_eterm_options(("File \"%s\" not found in path.\n", file));
     return ((const char *) NULL);
 }
 

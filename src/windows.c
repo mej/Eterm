@@ -365,7 +365,7 @@ Create_Windows(int argc, char *argv[])
     unsigned int width = 0, height = 0;
     MWMHints mwmhints;
 
-    if (OPTIONS & OPT_BORDERLESS) {
+    if (eterm_options & OPT_BORDERLESS) {
         prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
         if (prop == None) {
             print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
@@ -380,7 +380,7 @@ Create_Windows(int argc, char *argv[])
     }
     Attributes.colormap = cmap;
 
-    szHint.base_width = (2 * TermWin.internalBorder + ((OPTIONS & OPT_SCROLLBAR) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
+    szHint.base_width = (2 * TermWin.internalBorder + ((eterm_options & OPT_SCROLLBAR) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
     szHint.base_height = (2 * TermWin.internalBorder) + bbar_calc_docked_height(BBAR_DOCKED);
 
     flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
@@ -434,8 +434,8 @@ Create_Windows(int argc, char *argv[])
     classHint.res_name = (char *) rs_name;
     classHint.res_class = APL_NAME;
     wmHint.window_group = TermWin.parent;
-    wmHint.input = ((OPTIONS & OPT_NO_INPUT) ? False : True);
-    wmHint.initial_state = (OPTIONS & OPT_ICONIC ? IconicState : NormalState);
+    wmHint.input = ((eterm_options & OPT_NO_INPUT) ? False : True);
+    wmHint.initial_state = (eterm_options & OPT_ICONIC ? IconicState : NormalState);
     wmHint.window_group = TermWin.parent;
     wmHint.flags = (InputHint | StateHint | WindowGroupHint);
 #ifdef PIXMAP_SUPPORT
@@ -457,12 +457,12 @@ Create_Windows(int argc, char *argv[])
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
 
     /* the vt window */
-    TermWin.x = (((OPTIONS & OPT_SCROLLBAR) && !(OPTIONS & OPT_SCROLLBAR_RIGHT)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
+    TermWin.x = (((eterm_options & OPT_SCROLLBAR) && !(eterm_options & OPT_SCROLLBAR_RIGHT)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
     TermWin.y = bbar_calc_docked_height(BBAR_DOCKED_TOP);
     TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
                                CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
     D_X11(("Created terminal window 0x%08x at %dx%d\n", TermWin.vt, TermWin.x, TermWin.y));
-    if (!(background_is_pixmap()) && !(OPTIONS & OPT_BORDERLESS)) {
+    if (!(background_is_pixmap()) && !(eterm_options & OPT_BORDERLESS)) {
         XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
         XClearWindow(Xdisplay, TermWin.vt);
     }
@@ -499,7 +499,7 @@ Create_Windows(int argc, char *argv[])
         TermWin.gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
     }
 
-    if (OPTIONS & OPT_NO_CURSOR) {
+    if (eterm_options & OPT_NO_CURSOR) {
         scr_cursor_visible(0);
     }
 }
@@ -510,7 +510,7 @@ resize_parent(unsigned int width, unsigned int height)
 {
     XWindowAttributes attr;
 
-    if (!(OPTIONS & OPT_RESIZE_GRAVITY) || !XGetWindowAttributes(Xdisplay, TermWin.parent, &attr)) {
+    if (!(eterm_options & OPT_RESIZE_GRAVITY) || !XGetWindowAttributes(Xdisplay, TermWin.parent, &attr)) {
         XResizeWindow(Xdisplay, TermWin.parent, width, height);
     } else {
         Window junkwin;
@@ -592,7 +592,7 @@ term_resize(int width, int height)
     width = TERM_WINDOW_FULL_WIDTH();
     height = TERM_WINDOW_FULL_HEIGHT();
     XMoveResizeWindow(Xdisplay, TermWin.vt,
-                      ((OPTIONS & OPT_SCROLLBAR_RIGHT) ? (0) : ((scrollbar_is_visible())? (scrollbar_trough_width()) : (0))),
+                      ((eterm_options & OPT_SCROLLBAR_RIGHT) ? (0) : ((scrollbar_is_visible())? (scrollbar_trough_width()) : (0))),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), width, height);
     if (width != last_width || height != last_height) {
         render_simage(images[image_bg].current, TermWin.vt, width, height, image_bg, 0);

@@ -118,7 +118,7 @@ eterm_bootstrap(int argc, char *argv[])
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
 
-    if (OPTIONS & OPT_INSTALL) {
+    if (eterm_options & OPT_INSTALL) {
         cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
         XInstallColormap(Xdisplay, cmap);
     } else {
@@ -150,7 +150,7 @@ eterm_bootstrap(int argc, char *argv[])
     if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
+        D_eterm_options(("conf_parse_theme() returned \"%s\"\n", theme_dir));
         tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
@@ -158,7 +158,7 @@ eterm_bootstrap(int argc, char *argv[])
     if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
+        D_eterm_options(("conf_parse_theme() returned \"%s\"\n", user_dir));
         tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
         sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
         putenv(tmp);
@@ -184,7 +184,7 @@ eterm_bootstrap(int argc, char *argv[])
         tmp[len] = '\0';
         FREE(rs_path);
         rs_path = tmp;
-        D_OPTIONS(("New rs_path set to \"%s\"\n", rs_path));
+        D_eterm_options(("New rs_path set to \"%s\"\n", rs_path));
     }
 #endif
     spifopt_parse(argc, argv);
@@ -235,7 +235,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Initialize the scrollbar */
     scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-    scrollbar_mapping((OPTIONS & OPT_SCROLLBAR) && !((OPTIONS & OPT_SCROLLBAR_POPUP) && !TermWin.focus));
+    scrollbar_mapping((eterm_options & OPT_SCROLLBAR) && !((eterm_options & OPT_SCROLLBAR_POPUP) && !TermWin.focus));
 
     /* Initialize the menu subsystem. */
     menu_init();

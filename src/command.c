@@ -1050,7 +1050,7 @@ handle_child_signal(int sig)
             || ((pid == -1) && (errno == ECHILD))
             || ((pid == 0) && ((kill(cmd_pid, 0)) < 0)))) {
         cmd_pid = -1;
-        if (OPTIONS & OPT_PAUSE) {
+        if (eterm_options & OPT_PAUSE) {
             paused = 1;
             return;
         }
@@ -1850,13 +1850,13 @@ xim_send_spot(void)
 static void
 xim_get_area(XRectangle * preedit_rect, XRectangle * status_rect, XRectangle * needed_rect)
 {
-    preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(OPTIONS & OPT_SCROLLBAR_RIGHT) ? (scrollbar_trough_width()) : 0);
+    preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(eterm_options & OPT_SCROLLBAR_RIGHT) ? (scrollbar_trough_width()) : 0);
     preedit_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
-    preedit_rect->width = Width2Pixel(TERM_WINDOW_GET_COLS() + 1) - needed_rect->width + (!(OPTIONS & OPT_SCROLLBAR_RIGHT) ? (scrollbar_trough_width()) : 0);
+    preedit_rect->width = Width2Pixel(TERM_WINDOW_GET_COLS() + 1) - needed_rect->width + (!(eterm_options & OPT_SCROLLBAR_RIGHT) ? (scrollbar_trough_width()) : 0);
     preedit_rect->height = Height2Pixel(1);
 
-    status_rect->x = (scrollbar_is_visible() && !(OPTIONS & OPT_SCROLLBAR_RIGHT)) ? (scrollbar_trough_width()) : 0;
+    status_rect->x = (scrollbar_is_visible() && !(eterm_options & OPT_SCROLLBAR_RIGHT)) ? (scrollbar_trough_width()) : 0;
     status_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
     status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TERM_WINDOW_GET_COLS() + 1);
@@ -2190,7 +2190,7 @@ run_command(char **argv)
         tt_winsize(0);
 
         /* become virtual console, fail silently */
-        if (OPTIONS & OPT_CONSOLE) {
+        if (eterm_options & OPT_CONSOLE) {
             int fd = 1;
 
             privileges(INVOKE);
@@ -2255,7 +2255,7 @@ run_command(char **argv)
                 shell = "/bin/sh";
 
             argv0 = my_basename(shell);
-            if (OPTIONS & OPT_LOGIN_SHELL) {
+            if (eterm_options & OPT_LOGIN_SHELL) {
                 char *p = MALLOC(strlen(argv0) + 2);
 
                 p[0] = '-';
@@ -2270,7 +2270,7 @@ run_command(char **argv)
     }
 #ifdef UTMP_SUPPORT
     privileges(RESTORE);
-    if (OPTIONS & OPT_WRITE_UTMP) {
+    if (eterm_options & OPT_WRITE_UTMP) {
         add_utmp_entry(ttydev, display_name, ptyfd);
     }
     privileges(IGNORE);
@@ -2985,7 +2985,7 @@ init_command(char **argv)
     init_locale();
 
 #ifdef META8_OPTION
-    meta_char = (OPTIONS & OPT_META8 ? 0x80 : 033);
+    meta_char = (eterm_options & OPT_META8 ? 0x80 : 033);
 #endif
 
 #ifdef GREEK_SUPPORT
@@ -3330,7 +3330,7 @@ cmd_getc(void)
                         } else {
                             /* Our file descriptor went bye-bye. */
                             cmd_fd = -1;
-                            if (!paused && (OPTIONS & OPT_PAUSE)) {
+                            if (!paused && (eterm_options & OPT_PAUSE)) {
                                 paused = 1;
                             }
                             break;
@@ -3338,7 +3338,7 @@ cmd_getc(void)
                     } else if (n == 0) {
                         /* EOF */
                         cmd_fd = -1;
-                        if (!paused && (OPTIONS & OPT_PAUSE)) {
+                        if (!paused && (eterm_options & OPT_PAUSE)) {
                             paused = 1;
                         }
                         break;

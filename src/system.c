@@ -47,7 +47,7 @@ wait_for_chld(int system_pid)
 {
     int pid, status = 0, save_errno = errno, code;
 
-    D_OPTIONS(("wait_for_chld(%ld) called.\n", system_pid));
+    D_eterm_options(("wait_for_chld(%ld) called.\n", system_pid));
 
     while (1) {
         do {
@@ -60,14 +60,14 @@ wait_for_chld(int system_pid)
             errno = save_errno;
             break;
         }
-        D_OPTIONS(("%ld exited.\n", pid));
+        D_eterm_options(("%ld exited.\n", pid));
         if (pid == system_pid || system_pid == -1) {
             if (WIFEXITED(status)) {
                 code = WEXITSTATUS(status);
-                D_OPTIONS(("Child process exited with return code %lu\n", code));
+                D_eterm_options(("Child process exited with return code %lu\n", code));
             } else if (WIFSIGNALED(status)) {
                 code = WTERMSIG(status);
-                D_OPTIONS(("Child process was terminated by unhandled signal %lu\n", code));
+                D_eterm_options(("Child process was terminated by unhandled signal %lu\n", code));
             } else {
                 code = 0;
             }
@@ -86,7 +86,7 @@ system_wait(char *command)
 
     pid_t pid;
 
-    D_OPTIONS(("system_wait(%s) called.\n", command));
+    D_eterm_options(("system_wait(%s) called.\n", command));
 
     if (!(pid = fork())) {
         setreuid(my_ruid, my_ruid);
@@ -95,7 +95,7 @@ system_wait(char *command)
         print_error("execl(%s) failed -- %s\n", command, strerror(errno));
         exit(EXIT_FAILURE);
     } else {
-        D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
+        D_eterm_options(("%d:  fork() returned %d\n", getpid(), pid));
         return (wait_for_chld(pid));
     }
     ASSERT_NOTREACHED_RVAL(0);
@@ -107,7 +107,7 @@ system_no_wait(char *command)
 
     pid_t pid;
 
-    D_OPTIONS(("system_no_wait(%s) called.\n", command));
+    D_eterm_options(("system_no_wait(%s) called.\n", command));
 
     if (!(pid = fork())) {
         setreuid(my_ruid, my_ruid);

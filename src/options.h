@@ -21,8 +21,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _OPTIONS_H_
-#define _OPTIONS_H_
+#ifndef _eterm_options_H_
+#define _eterm_options_H_
 
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
@@ -81,7 +81,7 @@
 /************ Structures ************/
 
 /************ Variables ************/
-extern unsigned long OPTIONS, image_toggles;
+extern unsigned long eterm_options, image_toggles;
 extern char *theme_dir, *user_dir;
 extern       char **rs_exec_args;       /* Args to exec (-e or --exec) */
 extern       char  *rs_title;		/* Window title */
@@ -150,4 +150,4 @@ unsigned char save_config(char *, unsigned char);
 
 _XFUNCPROTOEND
 
-#endif	/* _OPTIONS_H_ */
+#endif	/* _eterm_options_H_ */
