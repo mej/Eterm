@@ -10,8 +10,8 @@ Release: 0.%(date '+%Y%m%d')
 License: BSD
 Group: User Interface/X
 Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
-#BuildSuggests: XFree86-devel xorg-x11-devel freetype-devel
-BuildRequires: imlib2-devel
+#BuildSuggests: xorg-x11-devel
+BuildRequires: libast imlib2-devel XFree86-devel freetype-devel
 Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.%{compression}
 Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.%{compression}
 URL: http://www.eterm.org/

@@ -5289,3 +5289,7 @@ noticing that.
 kwo suggested using XmbDrawString(), but that causes font problems I'm
 not ready to diagnose just yet.
 ----------------------------------------------------------------------
+Wed Jan  5 15:17:51 2005                        Michael Jennings (mej)
+
+Spec dependency fixes.
+----------------------------------------------------------------------
