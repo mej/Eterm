@@ -133,7 +133,7 @@ enum {
                                               scr_touch(); scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync(); \
                                           } while (0)
 #define reload_image(iml)                 do {Imlib_Image tmp_im; \
-                                              if ((iml) && (iml->im)) { \
+                                              if ((iml) && ((iml)->im)) { \
                                                 imlib_context_set_image((iml)->im); \
                                                 tmp_im = imlib_load_image_immediately(imlib_image_get_filename()); \
                                                 imlib_free_image_and_decache(); (iml)->im = tmp_im; \

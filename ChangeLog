@@ -4341,3 +4341,7 @@ about it until Martin Tyler <martin@boo.org> reminded me.  This should
 fix the bogus calls to imlib_image_get_filename() etc. when using
 transparency and shading.
 ----------------------------------------------------------------------
+Fri Aug 10 13:55:49 2001                        Michael Jennings (mej)
+
+Minor typo...
+----------------------------------------------------------------------
