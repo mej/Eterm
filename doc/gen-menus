@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Regenerate menus.cfg files for themes from the master file
+#
+# 23 August 2001
+# Michael Jennings <mej@eterm.org>
+#
+# (Consider this code public domain.  I don't care who does what with
+# it.  It's not that significant.)  :-)
+#
+
+PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/sbin:/usr/sbin
+if [ "x$1" = "x-d" ]; then
+  shift
+  DIR=$1
+  shift
+fi
+
+for i in "$@" ; do
+    echo $i
+    DEF=`echo $(basename $i) | tr '[a-z]' '[A-Z]'`
+    m4 -D$DEF ${DIR:-.}/menu-master-file.m4 | perl -ne '/^\s*$/ || print;' > $i/menus.cfg
+    chmod a+r,o-w $i/*.cfg
+done

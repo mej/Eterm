@@ -248,8 +248,8 @@ lookup_key(XEvent * ev)
   len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
   D_TTY(("XLookupString() gave us len %d, keysym 0x%04x, and buffer \"%s\"\n", len, keysym, safe_print_string(kbuf, len)));
 
-  /* If there is no string and it's a Latin2-4 character, replace it with the Latin1 character instead. */
-  if (!len && (keysym >= 0x0100) && (keysym < 0x0400)) {
+  /* If there is no string and it's a Latin2-7 character, replace it with the Latin1 character instead. */
+  if (!len && (keysym >= 0x0100) && (keysym < 0x0900)) {
     len = 1;
     kbuf[0] = (keysym & 0xff);
   }

@@ -45,6 +45,7 @@ static eterm_script_handler_t script_handlers[] =
 {
   { "copy",      script_handler_copy },
   { "die",       script_handler_exit },
+  { "echo",      script_handler_echo },
   { "exec",      script_handler_spawn },
   { "exit",      script_handler_exit },
   { "kill",      script_handler_kill },
@@ -54,6 +55,7 @@ static eterm_script_handler_t script_handlers[] =
   { "scroll",    script_handler_scroll },
   { "search",    script_handler_search },
   { "spawn",     script_handler_spawn },
+  { "string",    script_handler_string },
 
   { "nop", script_handler_nop }
 };
@@ -161,6 +163,22 @@ script_handler_copy(char **params)
     }
   }
   selection_copy(sel);
+}
+
+/* echo():  Send a string to the pty
+ *
+ * Syntax:  echo(<string>)
+ *
+ * <string> is the string of characters to send to the pty.
+ */
+void
+script_handler_echo(char **params)
+{
+  char **tmp;
+
+  for (tmp = params; tmp && *tmp; tmp++) {
+    tt_write(*tmp, strlen(*tmp));
+  }
 }
 
 /* exit():  Exit Eterm with an optional message or return code
@@ -357,6 +375,22 @@ script_handler_spawn(char **params)
     FREE(tmp);
   } else {
     system_no_wait("Eterm");
+  }
+}
+
+/* string():  Send a string to Eterm's escape code handler
+ *
+ * Syntax:  string(<string>)
+ *
+ * <string> is the string of characters to send to the handler.
+ */
+void
+script_handler_string(char **params)
+{
+  char **tmp;
+
+  for (tmp = params; tmp && *tmp; tmp++) {
+    cmd_write(*tmp, strlen(*tmp));
   }
 }
 

@@ -4350,3 +4350,15 @@ Tue Aug 21 12:51:54 2001                        Michael Jennings (mej)
 Updating menus for some themes, and removing some themes that really
 don't demonstrate anything spectacular.  They'll go on the web site.
 ----------------------------------------------------------------------
+Thu Aug 23 14:00:02 2001                        Michael Jennings (mej)
+
+I got tired of having to maintain half a gazillion menus.cfg files
+considering that the vast majority of them are identical or have
+large identical sections.  Thus, I took the m4-based menus.cfg from
+the chooser theme and hacked on it a bunch.  I can now regenerate
+the menu files for all Eterm themes from a single source file using
+the gen-menus script in doc/.
+
+I also removed the comments from the theme.cfg files of all themes
+except "Eterm" itself.
+----------------------------------------------------------------------
