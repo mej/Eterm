@@ -520,6 +520,7 @@ void
 scr_rendition(int set, int style)
 {
   unsigned int color;
+  int old_style = rstyle;
 
   D_SCREEN(("scr_rendition(%d, %d) called.\n", set, style));
   if (set) {
@@ -549,7 +550,7 @@ scr_rendition(int set, int style)
 
     switch (style) {
       case ~RS_None:		/* default fg/bg colors */
-	rstyle = DEFAULT_RSTYLE;
+	rstyle = DEFAULT_RSTYLE | (old_style & RS_fontMask);
 	/* FALLTHROUGH */
       case RS_RVid:
 	if (rvideo)

@@ -3679,3 +3679,10 @@ Mon Jun 12 13:33:39 PDT 2000	Michael Jennings <mej@eterm.org>
 	Fixes from Willem Monsuwe <willem@stack.nl> to his MMX routines.
 	
 -------------------------------------------------------------------------------
+Mon Jun 12 19:18:56 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed an old rxvt bug in the handling of "\e[0m".  I *really* wish I
+	had time to rewrite that damned thing.  Such a piece of crap.  Thanks
+	again to Marius Gedminas <mgedmin@takas.lt> for pointing it out.
+	
+-------------------------------------------------------------------------------
