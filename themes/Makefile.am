@@ -1,10 +1,10 @@
 # $Id$
 
-THEMES = Eterm cEterm chooser emacs irc mutt trans
+THEMES = Eterm auto cEterm chooser emacs irc mutt trans
 
-EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/theme.cfg.in mutt/theme.cfg.in \
-             trans/theme.cfg.in Eterm/Eterm-menu.cfg irc/irc-menu.cfg chooser/chooser-menu.cfg emacs/emacs-menu.cfg \
-             mutt/mutt-menu.cfg trans/trans-menu.cfg cEterm/cEterm-menu.cfg cEterm/theme.cfg.in
+EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/theme.cfg.in mutt/theme.cfg.in trans/theme.cfg.in \
+             Eterm/Eterm-menu.cfg irc/irc-menu.cfg chooser/chooser-menu.cfg emacs/emacs-menu.cfg mutt/mutt-menu.cfg trans/trans-menu.cfg \
+             cEterm/cEterm-menu.cfg cEterm/theme.cfg.in auto/auto-menu.cfg auto/theme.cfg.in
 
 install-data-hook:
 	-@for i in $(THEMES) ; do \

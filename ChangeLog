@@ -2673,3 +2673,12 @@ Thu Oct 28 16:09:26 PDT 1999	Michael Jennings <mej@eterm.org>
 	to fixing one of these days.
 	
 -------------------------------------------------------------------------------
+Thu Oct 28 16:17:21 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Added an "auto" theme.  So now the correct answer to the question,
+	"How do I turn on auto mode in Eterm?" is "Eterm -t auto"
+
+	I also finally got around to fixing (again) the version numbers in the
+	theme files.
+	
+-------------------------------------------------------------------------------
