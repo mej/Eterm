@@ -9,6 +9,6 @@ pixmapdir = $(pkgdatadir)/pix
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pixmapdir)
 	@for i in $(EXTRA_DIST) ; do \
-	  echo $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
-	  $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
+	  echo $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)${pixmapdir} ; \
+	  $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)${pixmapdir} ; \
 	done

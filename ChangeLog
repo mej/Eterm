@@ -2356,3 +2356,8 @@ Fri Aug 27 19:39:26 PDT 1999	Michael Jennings <mej@eterm.org>
 	Fix fix fix.
 	
 -------------------------------------------------------------------------------
+Fri Sep  3 17:05:02 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Eterm passes "make distcheck" now.  Hurray.
+	
+-------------------------------------------------------------------------------
