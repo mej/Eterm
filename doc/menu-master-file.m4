@@ -633,6 +633,9 @@ begin menu
   -
   STRING_ITEM(`Steal Focus', `Ctrl-Button1', `\e]5;\a')
   SCRIPT_ITEM(`New Eterm Window', `spawn(Eterm)')
+  SCRIPT_ITEM(`Search...', `search()')
+  SCRIPT_ITEM(`Run...', `Eterm -e ')
+  -
   STRING_ITEM(`Version', `\e[8n')
   STRING_ITEM(`Status', `\e[9n')
   separator
@@ -672,6 +675,9 @@ ifdef(`VIM', `
   -
 ')
   SCRIPT_ITEM(`New Eterm Window', `spawn(Eterm)')
+  SCRIPT_ITEM(`Search...', `search()')
+  SCRIPT_ITEM(`Run...', `Eterm -e ')
+  -
   STRING_ITEM(`Version', `\e[8n')
   STRING_ITEM(`Status', `\e[9n')
   separator
@@ -683,6 +689,9 @@ end
 begin menu
   title "Eterm Operations"
   SCRIPT_ITEM(`New Eterm Window', `spawn(Eterm)')
+  SCRIPT_ITEM(`Search...', `search()')
+  SCRIPT_ITEM(`Run...', `Eterm -e ')
+  -
   STRING_ITEM(`Version', `\e[8n')
   STRING_ITEM(`Status', `\e[9n')
   separator

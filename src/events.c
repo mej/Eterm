@@ -298,8 +298,14 @@ handle_destroy_notify(event_t *ev)
         XSelectInput(Xdisplay, ipc_win, None);
         ipc_win = None;
         (void) check_image_ipc(1);
+        return 1;
+    } else if (XEVENT_IS_MYWIN(ev, &primary_data)) {
+        /* One of our main windows was deleted.  Exit cleanly. */
+        D_EVENTS((" -> Primary window destroyed.  Terminating.\n"));
+        exit(0);
+        ASSERT_NOTREACHED_RVAL(1);
     }
-    return 1;
+    return 0;
 }
 
 unsigned char

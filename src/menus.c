@@ -1318,16 +1318,18 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
         inp_tab = NULL;
         maxlen = 0;
         retstr = NULL;
-        if ((b = strdup("Press \"Return\" to continue...")) == NULL)
+        if ((b = STRDUP("Press \"Return\" to continue...")) == NULL) {
             return ret;
+        }
     } else {
-        if (((b = MALLOC(maxlen + 1)) == NULL))
+        if (((b = MALLOC(maxlen + 1)) == NULL)) {
             return ret;
-        if (*retstr) {
+        } else if (*retstr) {
             strncpy(b, *retstr, maxlen);
             b[maxlen] = '\0';
-        } else
+        } else {
             b[0] = '\0';
+        }
     }
 
     /* Hide any menu that might've brought up this dialog. */
@@ -1371,10 +1373,23 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
             ungrab_pointer();
 
             do {
-                do {
-                    while (!XPending(Xdisplay));
-                    XNextEvent(Xdisplay, &ev);
-                } while (ev.type != KeyPress);
+                int ret;
+
+                for (;;) {
+                    ret = XNextEvent(Xdisplay, &ev);
+                    D_MENU(("In menu_dialog(%s):  XNextEvent() returned %d with a %s event.\n",
+                             NONULL(prompt), ret, event_type_to_name(ev.type)));
+                    /* Handle all events normally *except* for keypresses; those are handled here. */
+                    if (ev.type == KeyPress) {
+                        break;
+                    } else {
+                        process_x_event(&ev);
+                        if (ev.type == Expose) {
+                            /* Not very efficient, but we're waiting for user input, so screw it. */
+                            scr_refresh(refresh_type);
+                        }
+                    }
+                }
 
                 len = XLookupString(&ev.xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
                 ch = kbuf[0];
@@ -1416,7 +1431,11 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
 
             /* we could just return b, but it might be longer than we need */
             if (retstr) {
-                *retstr = (!maxlen || (f == 2)) ? NULL : strdup(b);
+                if (*retstr) {
+                    /* Free the old string so we don't leak memory. */
+                    FREE(*retstr);
+                }
+                *retstr = (!maxlen || (f == 2)) ? NULL : STRDUP(b);
             }
             ret = (f == 2) ? -2 : 0;
         }

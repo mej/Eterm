@@ -46,18 +46,6 @@ static eterm_script_handler_t script_handlers[] = {
     {"copy", script_handler_copy},
     {"die", script_handler_exit},
     {"echo", script_handler_echo},
-    {"exec", script_handler_spawn},
-    {"exit", script_handler_exit},
-    {"kill", script_handler_kill},
-    {"paste", script_handler_paste},
-    {"quit", script_handler_exit},
-    {"save", script_handler_save},
-    {"save_buff", script_handler_save_buff},
-    {"scroll", script_handler_scroll},
-    {"search", script_handler_search},
-    {"spawn", script_handler_spawn},
-    {"string", script_handler_string},
-    {"dialog", script_handler_dialog},
 #ifdef ESCREEN
     {"es_display", script_handler_es_display},
     {"es_disp", script_handler_es_display},
@@ -69,6 +57,19 @@ static eterm_script_handler_t script_handlers[] = {
     {"es_reset", script_handler_es_reset},
     {"es_rst", script_handler_es_reset},
 #endif
+    {"exec", script_handler_spawn},
+    {"exec_dialog", script_handler_exec_dialog},
+    {"exit", script_handler_exit},
+    {"kill", script_handler_kill},
+    {"msgbox", script_handler_msgbox},
+    {"paste", script_handler_paste},
+    {"quit", script_handler_exit},
+    {"save", script_handler_save},
+    {"save_buff", script_handler_save_buff},
+    {"scroll", script_handler_scroll},
+    {"search", script_handler_search},
+    {"spawn", script_handler_spawn},
+    {"string", script_handler_string},
 
     {"nop", script_handler_nop}
 };
@@ -383,7 +384,14 @@ script_handler_scroll(char **params)
 void
 script_handler_search(char **params)
 {
-    scr_search_scrollback(params ? params[0] : NULL);
+    static char *search = NULL;
+
+    if (params && *params) {
+        search = STRDUP(*params);
+    }
+    if ((menu_dialog(NULL, "Enter Search Term:", TERM_WINDOW_GET_REPORTED_COLS(), &search, NULL)) != -2) {
+        scr_search_scrollback(search);
+    }
 }
 
 /* spawn():  Spawns a child process to execute a sub-command
@@ -422,42 +430,76 @@ script_handler_string(char **params)
     }
 }
 
-/* nop():  Do nothing
+/* exec_dialog():  Execute a program after prompting
  *
- * Syntax:  nop()
+ * Syntax:  exec_dialog(<command>)
  *
- * This function can be used to cancel undesired default behavior.
+ * <command> is the command to be executed.
  */
 void
-script_handler_nop(char **params)
+script_handler_exec_dialog(char **params)
 {
-    USE_VAR(params);
+    char *tmp;
+    int ret;
+
+    if (params && *params) {
+        tmp = join(" ", params);
+    } else {
+        tmp = NULL;
+    }
+    scr_refresh(DEFAULT_REFRESH);
+    ret = menu_dialog(NULL, "Confirm Command (ESC to cancel)", PATH_MAX, &tmp, NULL);
+    if (ret != -2) {
+        system_no_wait(tmp);
+    }
+    if (tmp) {
+        FREE(tmp);
+    }
 }
 
-
-
+/* msgbox():  Present a brief message box and wait for a keypress
+ *
+ * Syntax:  msgbox(<message>)
+ *
+ * <message> is the message to present.
+ */
 void
-script_handler_dialog(char **params)
+script_handler_msgbox(char **params)
 {
     char *tmp;
 
     if (params && *params) {
         tmp = join(" ", params);
+        scr_refresh(DEFAULT_REFRESH);
         menu_dialog(NULL, tmp, 1, NULL, NULL);
-        system_no_wait(tmp);
         FREE(tmp);
-    } else {
-        menu_dialog(NULL, "Press any key to continue...", 1, NULL, NULL);
     }
 }
 
 #ifdef ESCREEN
+/* es_display():  Master command for manipulating Escreen displays
+ *
+ * Syntax:  es_display(<subcommand>[, <subcommand params>])
+ *
+ * <subcommand> is the secondary command, one of the following:
+ *
+ * goto       - Switch to the specified display (e.g., goto 2)
+ * prev       - Switch to previous display
+ * next       - Switch to next display
+ * toggle     - Toggle display
+ * new        - Create a new display with optional name, or "ask" to
+ *              prompt the user for its name
+ * rename     - Change the name of the current/specified display
+ * kill       - Terminate a display
+ * watch      - Toggle monitoring of a display for activity
+ * scrollback - View the scrollback for a display
+ */
 void
 script_handler_es_display(char **params)
 {
     _ns_sess *sess = TermWin.screen;
     char *p, *a;
-    int inx = 1;
+    int index = 1;
     int no = -1;                /* which display? */
 
     if (!params || !*params || !sess) {
@@ -465,10 +507,10 @@ script_handler_es_display(char **params)
     }
 
     p = downcase_str(*params);
-    a = params[inx++];
+    a = params[index++];
     if (a && isdigit(*a)) {
         no = atoi(a);
-        a = params[inx++];
+        a = params[index++];
         D_ESCREEN(("disp #%d\n", no));
     }
 
@@ -522,13 +564,31 @@ script_handler_es_display(char **params)
     }
 }
 
+/* es_region():  Master command for manipulating Escreen regions
+ *
+ * Syntax:  es_region(<subcommand>[, <subcommand params>])
+ *
+ * <subcommand> is the secondary command, one of the following:
+ *
+ * goto       - Switch to the specified region (e.g., goto 2)
+ * prev       - Switch to previous region
+ * next       - Switch to next region
+ * toggle     - Toggle region
+ * new        - Create a new region with optional name, or "ask" to
+ *              prompt the user for its name
+ * rename     - Change the name of the current/specified region
+ * kill       - Terminate a region
+ * only       - Maximize this region to the full display
+ * watch      - Toggle monitoring of a region for activity
+ * scrollback - View the scrollback for a region
+ */
 void
 script_handler_es_region(char **params)
 {
     _ns_sess *sess = TermWin.screen;
     _ns_disp *disp;
     char *p, *a;
-    int inx = 1;
+    int index = 1;
     int no = -1;
 
     if (!params || !*params || !sess) {
@@ -542,10 +602,10 @@ script_handler_es_region(char **params)
     }
 
     p = downcase_str(*params);
-    a = params[inx++];
+    a = params[index++];
     if (a && isdigit(*a)) {
         no = atoi(a);
-        a = params[inx++];
+        a = params[index++];
         D_ESCREEN(("region #%d\n", no));
     }
 
@@ -599,6 +659,12 @@ script_handler_es_region(char **params)
     }
 }
 
+/* es_statement():  Execute an Escreen statement
+ *
+ * Syntax:  es_statement(<statement>)
+ *
+ * <statement> is the Escreen (screen) statement to execute.
+ */
 void
 script_handler_es_statement(char **params)
 {
@@ -613,6 +679,10 @@ script_handler_es_statement(char **params)
     }
 }
 
+/* es_reset():  Reset the Escreen session
+ *
+ * Syntax:  es_reset()
+ */
 void
 script_handler_es_reset(char **params)
 {
@@ -620,6 +690,18 @@ script_handler_es_reset(char **params)
     ns_reset(TermWin.screen, 0);
 }
 #endif
+
+/* nop():  Do nothing
+ *
+ * Syntax:  nop()
+ *
+ * This function can be used to cancel undesired default behavior.
+ */
+void
+script_handler_nop(char **params)
+{
+    USE_VAR(params);
+}
 
 
 

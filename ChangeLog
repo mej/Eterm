@@ -4841,3 +4841,26 @@ Wed Oct  9 00:32:34 2002                        Michael Jennings (mej)
 
 Tidying up a bit.
 ----------------------------------------------------------------------
+Sun Oct 13 00:57:37 2002                        Michael Jennings (mej)
+
+Moved "Escreen" menu to the new Escreen theme so it's no longer
+hard-coded.
+
+Added interactive prompting to search() script routine.
+
+Changed dialog() routine to exec_dialog() and added editing of its
+command line.
+
+Added msgbox() script routine to display a message and wait for a
+keypress.
+
+Fixed a memory leak in the menu_dialog() function.  Also cleaned up
+its event handling.
+
+Added comments to the script routines that were missing them.
+
+Make sure we exit cleanly if our window is destroyed.
+
+Fixed the missing menus in the Escreen theme.  You'll still get an
+error message when it loads, but I'm not that worried about it.
+----------------------------------------------------------------------

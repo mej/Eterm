@@ -2810,8 +2810,10 @@ make_escreen_menu(buttonbar_t *bbar)
 {
     static int been_here = 0;
     button_t *button;
+#if 0
     menu_t *m;
     menuitem_t *i;
+#endif
 
     if (been_here) {            /* the start function may be called more than once */
         return 0;               /* in later versions, but we only want one EScreen menu */
@@ -2819,6 +2821,7 @@ make_escreen_menu(buttonbar_t *bbar)
 
     been_here = 1;
 
+#if 0
     if ((m = menu_create(NS_MENU_TITLE))) {
         char *sc[] = {
             /* display functions */
@@ -2882,6 +2885,7 @@ make_escreen_menu(buttonbar_t *bbar)
         if (!k) {
             menu_init();
         }
+#endif
 
         if ((button = button_create(NS_MENU_TITLE))) {
             bbar_add_rbutton(bbar, button);
@@ -2889,8 +2893,11 @@ make_escreen_menu(buttonbar_t *bbar)
             button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
         }
         return 1;
+
+#if 0
     }
     return 0;
+#endif
 }
 
 /* Set everything up for escreen mode */
