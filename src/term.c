@@ -1792,8 +1792,9 @@ xterm_seq(int op, const char *str)
   if (!str)
     return;
 
+  tnstr = STRDUP(str);
 #ifdef PIXMAP_SUPPORT
-  orig_tnstr = tnstr = STRDUP(str);
+  orig_tnstr = tnstr;
 #endif
 
   switch (op) {

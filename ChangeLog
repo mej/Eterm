@@ -4572,3 +4572,8 @@ Sun Apr 21 14:06:19 2002                        Michael Jennings (mej)
 A patch from Charles Clancy <tclancy@uiuc.edu> to fix shading on
 Solaris.
 ----------------------------------------------------------------------
+Mon Apr 22 09:20:26 2002                        Michael Jennings (mej)
+
+Fixed the use of an uninitialized variable pointed out by Azundris
+<hacks@azundris.com>.
+----------------------------------------------------------------------
