@@ -1762,31 +1762,29 @@ init_locale(void)
   char *locale = NULL;
 
   locale = setlocale(LC_ALL, "");
+  XSetLocaleModifiers("");
   TermWin.fontset = (XFontSet) 0;
-  if (locale == NULL) {
-    print_error("Setting locale failed.\n");
+  if ((locale == NULL) || (!XSupportsLocale())) {
+    print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
+    locale = setlocale(LC_ALL, "C");
+    XSetLocaleModifiers("");
+    REQUIRE(locale);
+    REQUIRE(XSupportsLocale());
   } else {
 #ifdef USE_XIM
-# ifdef MULTI_CHARSET
-    if (strcmp(locale, "C"))
-# endif
-      {
 #ifdef MULTI_CHARSET
-	TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
 #else
-	TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
 #endif
-        if ((TermWin.fontset == (XFontSet) 0) || (xim_real_init() != -1)) {
-          return;
-        }
+    if ((TermWin.fontset == (XFontSet) 0) || (xim_real_init() != -1)) {
+      return;
+    }
 
 # ifdef USE_X11R6_XIM
-        XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
+    XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
 # endif
-      }
 #endif
-    /* Reset locale to NULL since the call to create_fontset() has freed that memory. */
-    locale = NULL;
   }
 }
 #endif	/* USE_XIM || MULTI_CHARSET */

@@ -1561,12 +1561,12 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         ptr[x + 1] = g;
         ptr[x + 2] = b;
 # else
-        r = (ptr[x + 0] * rm) >> 8;
+        r = (ptr[x + 2] * rm) >> 8;
         g = (ptr[x + 1] * gm) >> 8;
-        b = (ptr[x + 2] * bm) >> 8;
-        ptr[x + 0] = r;
+        b = (ptr[x + 0] * bm) >> 8;
+        ptr[x + 2] = r;
         ptr[x + 1] = g;
-        ptr[x + 2] = b;
+        ptr[x + 0] = b;
 # endif
       }
       ptr += bpl;

@@ -98,18 +98,18 @@ main(int argc, char *argv[])
 {
 #ifdef PIXMAP_SUPPORT
   unsigned char scale = 0, center = 0, fit = 0, mirror = 0;
-  char *displayname = NULL;
-  char *fname = NULL;
+  char *displayname = NULL, *fname = NULL, *bgcolor = NULL;
   Imlib_Image im;
   Pixmap p = None, temp_pmap = None, m = None;
   register unsigned char i;
   GC gc;
   XGCValues gcv;
+  XColor xcolor;
   int w, h, x, y;
 
   if (argc < 2) {
-    fprintf(stderr, "%s [-display <display_name>] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
-    fprintf(stderr, "\t Short options are also recognized (-d, -s, -c, -f, and -m)\n");
+    fprintf(stderr, "%s [-display <display_name>] [-bgcolor <color>] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
+    fprintf(stderr, "\t Short options are also recognized (-d, -b, -s, -c, -f, and -m)\n");
     exit(0);
   }
   for (i = 1; i < argc; i++) {
@@ -118,6 +118,8 @@ main(int argc, char *argv[])
     }
     if (argv[i][1] == 'd') {
       displayname = argv[++i];
+    } else if (argv[i][1] == 'b') {
+      bgcolor = argv[++i];
     } else if (argv[i][1] == 's') {
       scale = 1;
     } else if (argv[i][1] == 'c') {
@@ -131,8 +133,8 @@ main(int argc, char *argv[])
       debug = 1;
     } else {
       fprintf(stderr, "%s:  Unrecognized option \'%c\'\n\n", *argv, argv[i][1]);
-      fprintf(stderr, "%s [-display display] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
-      fprintf(stderr, "\t Short options are also recognized (-d, -s, -c, -f, and -m)\n");
+      fprintf(stderr, "%s [-display <display_name>] [-bgcolor <color>] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
+      fprintf(stderr, "\t Short options are also recognized (-d, -b, -s, -c, -f, and -m)\n");
       exit(2);
     }
   }
@@ -145,6 +147,7 @@ main(int argc, char *argv[])
 
   if (debug) {
     fprintf(stderr, "%s:%d:  Display name is \"%s\"\n", __FILE__, __LINE__, displayname ? displayname : "(nil)");
+    fprintf(stderr, "%s:%d:  Background color name is \"%s\"\n", __FILE__, __LINE__, bgcolor ? bgcolor : "(nil)");
     fprintf(stderr, "%s:%d:  Image will be %s\n", __FILE__, __LINE__, scale ? "scaled" : (center ? "centered" : (fit ? "fit" : "tiled")));
     fprintf(stderr, "%s:%d:  Image file is %s\n", __FILE__, __LINE__, fname ? fname : "(nil)");
   }
@@ -203,9 +206,14 @@ main(int argc, char *argv[])
     w = (int) (w * x_ratio);
     h = (int) (h * x_ratio);
   }
+
   p = XCreatePixmap(Xdisplay, Xroot, scr->width, scr->height, Xdepth);
   gcv.foreground = gcv.background = BlackPixel(Xdisplay, screen);
-  gc = XCreateGC(Xdisplay, p, ((center || fit) ? (GCForeground | GCBackground) : 0), &gcv);
+  if (bgcolor && XParseColor(Xdisplay, DefaultColormap(Xdisplay, screen), bgcolor, &xcolor)
+      && XAllocColor(Xdisplay, DefaultColormap(Xdisplay, screen), &xcolor)) {
+    gcv.foreground = gcv.background = xcolor.pixel;
+  }
+  gc = XCreateGC(Xdisplay, p, (GCForeground | GCBackground), &gcv);
   if (scale) {
     XFillRectangle(Xdisplay, p, gc, 0, 0, w, h);
   }

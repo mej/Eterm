@@ -4440,3 +4440,10 @@ Fri Dec 14 15:17:14 2001                        Michael Jennings (mej)
 termcap fix from Fredrik Svensson <fred@ludd.luth.se> and another
 mod to Paul's patch.
 ----------------------------------------------------------------------
+Sat Dec 29 15:39:38 2001                        Michael Jennings (mej)
+
+Fixed a little-endian bug with 24-bit XImages, added a bit to
+init_locale() in an effort to replicate the behavior of the Athena
+widgets, and added a -b option to Esetroot based on a patch from
+Oliwier Ptak <supergrass@gmx.net>.
+----------------------------------------------------------------------
