@@ -2913,3 +2913,11 @@ Fri Dec 10 23:33:16 PST 1999	Michael Jennings <mej@eterm.org>
 	with the background pixmap.  But I'm to tired to look deeper tonight.
 	
 -------------------------------------------------------------------------------
+Mon Dec 13 09:42:44 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Oops.  I intended to test without multi-charset before committing, but
+	I seem to have forgotten to do that.  Lots and lots of people
+	submitted various patches for this, but I didn't use any of them.  But
+	thanks to all for pointing out my error. :-)
+	
+-------------------------------------------------------------------------------

@@ -76,14 +76,18 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
       etfonts = (char **) REALLOC(etfonts, new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) REALLOC(etmfonts, new_size);
-#endif
       D_FONT((" -> Reallocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
+#else
+      D_FONT((" -> Reallocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
+#endif
     } else {
       etfonts = (char **) MALLOC(new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) MALLOC(new_size);
-#endif
       D_FONT((" -> Allocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
+#else
+      D_FONT((" -> Allocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
+#endif
     }
     MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
 #ifdef MULTI_CHARSET
