@@ -1,5 +1,5 @@
 %define ver      @VERSION@
-%define rel      2
+%define rel      4
 %define prefix   @prefix@
 
 Summary: Enlightened terminal emulator
@@ -8,8 +8,8 @@ Version: %{ver}
 Release: %{rel}
 Copyright: BSD
 Group: User Interface/X
-Source0: ftp://ftp.eterm.org/pub/Eterm/Eterm-%{ver}.tar.gz
-Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-%{ver}.tar.gz
+Source0: ftp://ftp.eterm.org/pub/Eterm/Eterm-%{ver}.tar.bz2
+Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-%{ver}.tar.bz2
 URL: http://www.eterm.org/
 BuildRoot: /var/tmp/Eterm-root
 Requires: imlib >= 1.9.6
@@ -34,7 +34,7 @@ Install this package if you want additional backgrounds for Eterm
 %setup -q -n Eterm-%{ver} 1
 
 %build
-./configure --prefix=%{prefix}
+%configure --with-backspace=bs --with-delete=execute
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -61,8 +61,7 @@ make prefix=$RPM_BUILD_ROOT%{prefix} install
   chmod +x .%{prefix}/lib/lib*so* ||:
 )
 
-# Stripped binaries suck for debugging. -- mej
-#strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
+strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
 
 gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
 
@@ -70,7 +69,7 @@ gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
  for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
   mv $i $i.base ; done)
 
-tar -zxvf %{SOURCE1}
+tar --use-compress-program=bzip2 -xvf %{SOURCE1}
 
 make -C bg all
 make -C bg prefix=$RPM_BUILD_ROOT%{prefix} install
@@ -143,6 +142,13 @@ rm -rf $RPM_BUILD_ROOT
 %files backgrounds -f rpm-Eterm-bg-files
 
 %changelog
+* Fri Jan 29 2000 Tim Powers <timp@redhat.com>
+- rebuilt for 6.2 powertools
+- bzipped source to conserve space
+- using percent configure so that libtoolize is run, needed for some of the
+	newer alphas instead of ./configure --prefix=
+- stripping binaries again
+
 * Fri Dec 10 1999 Michael Jennings <mej@eterm.org>
 - Added Tim's spec file to CVS as Eterm.spec.in for 0.9
 

@@ -143,9 +143,6 @@
 
 /* Use Home = "\E[1~" and End = "\E[4~" instead of Home = "\E[7~" and End = "\E[8~" */
 /* #define LINUX_KEYS */
-#ifdef linux
-# define LINUX_KEYS
-#endif
 
 /* Allow the "keysym" attribute in config files for remapping keysyms */
 #define KEYSYM_ATTRIBUTE
