@@ -700,6 +700,7 @@ scrollbar_init(int width, int height)
                       CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
     XDefineCursor(Xdisplay, scrollbar.win, cursor);
     XSelectInput(Xdisplay, scrollbar.win, mask);
+    XStoreName(Xdisplay, scrollbar.win, "Eterm Scrollbar");
     D_SCROLLBAR(("Created scrollbar window 0x%08x\n", scrollbar.win));
 
     /* Now the up arrow window. */
@@ -707,6 +708,7 @@ scrollbar_init(int width, int height)
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(),
                       scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollbar.up_win, mask);
+    XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Up Arrow");
     D_SCROLLBAR(("Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
 
     /* The down arrow window */
@@ -714,6 +716,7 @@ scrollbar_init(int width, int height)
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(),
                       scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollbar.dn_win, mask);
+    XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Down Arrow");
     D_SCROLLBAR(("Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
 
     /* The anchor window */
@@ -722,6 +725,7 @@ scrollbar_init(int width, int height)
                       scrollbar_anchor_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollbar.sa_win, mask);
     XMapWindow(Xdisplay, scrollbar.sa_win);
+    XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Anchor");
     D_SCROLLBAR(("Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));
 
     if (scrollbar_get_type() != SCROLLBAR_XTERM) {
@@ -813,9 +817,10 @@ scrollbar_resize(int width, int height)
     D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
     scrollbar_calc_size(width, height);
     D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, y, %d, %d)\n", scrollbar.win,
-                 ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), scrollbar_trough_width(), scrollbar.win_height));
+                 ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+                 scrollbar_trough_width(), scrollbar_trough_height()));
     XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
-                      bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), scrollbar.win_height);
+                      bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), scrollbar_trough_height());
     scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
     scrollbar_reposition_and_draw(MODE_MASK);
     scrollbar.init = 0;

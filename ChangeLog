@@ -4773,3 +4773,9 @@ Addition to last fix.  Also, we're going to specify error messages
 that *should* be shown and ignore others, not show all but a select
 few.  This helps with the status line issue.
 ----------------------------------------------------------------------
+Sun Jul 14 00:49:34 2002                        Michael Jennings (mej)
+
+Fixed bug pointed out by JC Wong <catalyst@gmx.net> where resizing a
+window which had had transparency toggled on would reveal a black spot
+at the bottom of the scrollbar.
+----------------------------------------------------------------------

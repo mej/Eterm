@@ -1011,6 +1011,8 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         LIBAST_X_FREE_PIXMAP(buffer_pixmap);
         buffer_pixmap = None;
     }
+    /* Reset window shape mask. */
+    shaped_window_apply_mask(win, None);
 #ifdef PIXMAP_SUPPORT
     if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
         char buff[255];
@@ -1213,7 +1215,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                     simg->pmap->pixmap = LIBAST_X_CREATE_PIXMAP(width, height);
                     XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
                     IMLIB_FREE_PIXMAP(pixmap);
-                } else if (simg->pmap->mask != None) {
+                } else {
                     shaped_window_apply_mask(win, simg->pmap->mask);
                 }
                 if (simg->iml->bevel != NULL) {
@@ -2099,8 +2101,7 @@ shaped_window_apply_mask(Drawable d, Pixmap mask)
     static signed char have_shape = -1;
 
     REQUIRE(d != None);
-    REQUIRE(mask != None);
-    D_PIXMAP(("shaped_window_apply_mask(d [0x%08x], mask [0x%08x]) called.\n", d, mask));
+    D_PIXMAP(("Applying mask 0x%08x to drawable 0x%08x\n", mask, d));
 # ifdef HAVE_X_SHAPE_EXT
     if (have_shape == -1) {     /* Don't know yet. */
         int unused;
