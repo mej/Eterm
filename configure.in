@@ -181,7 +181,7 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(atexit _exit unsetenv setutent \
 seteuid memmove putenv strsep setresuid setresgid \
 memmem usleep snprintf strcasestr strcasechr \
-strcasepbrk strrev)
+strcasepbrk strrev nl_langinfo)
 dps_snprintf_oflow()
 AC_CHECK_LIB(m, pow)
 
@@ -593,6 +593,18 @@ AC_ARG_WITH(mousewheel,
             fi], [AC_MSG_RESULT(yes)
                 AC_DEFINE(MOUSEWHEEL)
 ])
+
+AC_MSG_CHECKING(for automatic encoding)
+AC_ARG_ENABLE(auto-encoding,
+[  --enable-auto-encoding  compile with runtime automatic encoding setting],
+             if test "$enableval" = "no"; then
+               AC_MSG_RESULT(no)
+             else
+               AC_MSG_RESULT(yes)
+               AC_DEFINE(AUTO_ENCODING)
+             fi, AC_MSG_RESULT(yes)
+                 AC_DEFINE(AUTO_ENCODING)
+)
 
 MULTICHAR_ENCODING=""
 AC_MSG_CHECKING(for multi-charset support)

@@ -14,6 +14,7 @@ namsh - Sung-Hyun Nam <namsh@kldp.org>
 gbritton - Gerald Britton <gbritton@mit.edu>
 yosh - Manish Singh <yosh@gimp.org>
 sdh - Scott D. Heavner <sdh@po.cwru.edu>
+tzz - Ted Zlatanov <tzz@iglou.com>
 
 ----------------------------------------------------------------------
 Thu Sep  3 17:27:35 CDT 1998                    Michael Jennings (mej)
@@ -4503,4 +4504,17 @@ Sorry....
 Tue Feb 12 00:27:03 2002                        Michael Jennings (mej)
 
 Ahem.  That was dumb.  Let's just undo that, shall we?
+----------------------------------------------------------------------
+Thu Feb 21 03:33:33 2002                            Ted Zlatanov (tzz)
+
+Added crude performance tests.
+----------------------------------------------------------------------
+Thu Feb 21 09:33:00 2002                            Ted Zlatanov (tzz)
+
+Applied patch from Tomohiro KUBOTA <tkubota@riken.go.jp> to use auto
+locale encodings.  This is not too useful right now, but with the next
+Eterm release it will be.  I couldn't test thoroughly since I don't
+have multiple locales on my system, but what I did test looked fine.
+
+I also fixed a CONFIG_BUFF constant missing from options.h
 ----------------------------------------------------------------------

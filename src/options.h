@@ -156,6 +156,9 @@ extern KeySym ks_bigfont;
 extern KeySym ks_smallfont;
 #endif
 
+/* used in options.c but not declared in options.h or anywhere else - fixed until mej gets to it */
+#define CONFIG_BUFF 4096
+
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 

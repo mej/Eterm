@@ -54,6 +54,7 @@ static const char cvs_ident[] = "$Id$";
 #include "system.h"
 #include "term.h"
 #include "windows.h"
+#include "defaultfont.h"
 
 static void *parse_color(char *, void *);
 static void *parse_attributes(char *, void *);
@@ -2751,6 +2752,13 @@ init_defaults(void)
   colorfgbg = DEFAULT_RSTYLE;
 #endif
   MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
+#if AUTO_ENCODING
+#ifdef MULTI_CHARSET
+  eterm_default_font_locale(&etfonts, &etmfonts, &rs_multichar_encoding, &def_font_idx);
+#else
+  eterm_default_font_locale(&etfonts, NULL, NULL, &def_font_idx);
+#endif
+#else
   for (i = 0; i < NFONTS; i++) {
     eterm_font_add(&etfonts, def_fontName[i], i);
 #ifdef MULTI_CHARSET
@@ -2759,6 +2767,7 @@ init_defaults(void)
   }
 #ifdef MULTI_CHARSET
   rs_multichar_encoding = STRDUP(MULTICHAR_ENCODING);
+#endif
 #endif
   TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 

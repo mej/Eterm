@@ -305,6 +305,7 @@
 #undef X_LOCALE
 #undef NO_XLOCALE
 #undef UTMP_SUPPORT
+#undef AUTO_ENCODING
 #undef MULTI_CHARSET
 #undef USE_XIM
 #undef USE_X11R6_XIM

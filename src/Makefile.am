@@ -13,7 +13,9 @@ libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c         
                       options.c options.h pixmap.c pixmap.h profile.h screen.c   \
                       screen.h script.c script.h scrollbar.c scrollbar.h         \
                       startup.c startup.h system.c system.h term.c term.h        \
-                      timer.c timer.h utmp.c windows.c windows.h
+                      timer.c timer.h utmp.c windows.c windows.h defaultfont.c   \
+                      defaultfont.h
+
 EXTRA_libEterm_la_SOURCES = $(MMX_SRCS)
 
 libEterm_la_LDFLAGS = -release $(VERSION)

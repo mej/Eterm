@@ -29,23 +29,7 @@ end color
 begin attributes
     title "%appname() -- Pseudo-transparency Theme"
     name Eterm-transparent
-    font default @DEF_FONT_IDX@
-    font 0 @FONT0@
-    font 1 @FONT1@
-    font 2 @FONT2@
-    font 3 @FONT3@
-    font 4 @FONT4@
-    font 5 10x20
-    font 6 12x24
 end attributes
-begin multichar
-    font 0 @MFONT0@
-    font 1 @MFONT1@
-    font 2 @MFONT2@
-    font 3 @MFONT3@
-    font 4 @MFONT4@
-    encoding @MULTICHAR_ENCODING@
-end multichar
 begin imageclasses
     path "./pix/:~/.Eterm/:~/.Eterm/themes/Eterm/pix:~/.Eterm/pix/:@PKGDATADIR@/pix/"
     begin image
