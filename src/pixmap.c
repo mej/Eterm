@@ -1775,11 +1775,12 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
 	break;
       case 24:
-        /* FIXME:  Is this test needed? */
-	if (1 || (ximg->bits_per_pixel != 32)) {
-	  shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
-	  break;
-	}
+        if (ximg->bits_per_pixel != 32) {
+            shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+        } else {
+            shade_ximage_24(ximg->data, ximg->bytes_per_line, w * 4 / 3, h, rm, gm, bm);
+        }
+        break;
       case 32:
 #ifdef HAVE_MMX
 	shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);

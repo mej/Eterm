@@ -4567,3 +4567,8 @@ Also removed '~' from the CUTCHARS compiled-in default.  (It had
 already been removed from the themes.)  Makes double-click selection
 of URL's easier.  Requested by Laurence J. Lane <ljlane@debian.org>.
 ----------------------------------------------------------------------
+Sun Apr 21 14:06:19 2002                        Michael Jennings (mej)
+
+A patch from Charles Clancy <tclancy@uiuc.edu> to fix shading on
+Solaris.
+----------------------------------------------------------------------
