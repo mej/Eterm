@@ -238,6 +238,20 @@ void ns_register_inp(_ns_efuns *,int (*)(void *,char *,int,char **,int (*)(void 
 void ns_register_tab(_ns_efuns *,int (*)(void *,char *[],int,char *,size_t,size_t));
 void ns_register_fun(_ns_efuns *,int (*)(void *,int));
 
-
+/* from command.c */
+extern int set_scroll_x(void *, int);
+extern int set_scroll_y(void *, int);
+extern int set_scroll_w(void *, int);
+extern int set_scroll_h(void *, int);
+extern int redraw(void *);
+extern int redraw_xywh(void *, int, int, int, int);
+extern int ins_disp(void *, int, char *);
+extern int del_disp(void *, int);
+extern int upd_disp(void *, int, int, char *);
+extern int err_msg(void *, int, char *);
+extern int inp_text(void *, int, char *);
+extern int input_dialog(void *, char *, int, char **, int (*) (void *, char *, size_t, size_t));
+extern int exe_prg(void *, char **);
+extern int escreen_init(char **);
 
 /***************************************************************************/

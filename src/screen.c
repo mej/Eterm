@@ -3369,7 +3369,10 @@ xim_get_position(XPoint * pos)
 void
 parse_screen_status_if_necessary(void)
 {
+#if 0
     static int hc = 0;
+#endif
+
     ns_parse_screen(TermWin.screen, (TermWin.screen_pending > 1), TermWin.ncol, screen.text[TermWin.nrow + TermWin.saveLines - 1]);
     if (TermWin.screen_pending > 1)
         TermWin.screen_pending = 0;

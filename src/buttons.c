@@ -70,7 +70,8 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
     return;
 }
 
-buttonbar_t *bbar_create(void)
+buttonbar_t *
+bbar_create(void)
 {
     buttonbar_t *bbar;
     Cursor cursor;
@@ -314,7 +315,8 @@ bbar_dispatch_event(event_t *ev)
     return (0);
 }
 
-buttonbar_t *find_bbar_by_window(Window win)
+buttonbar_t *
+find_bbar_by_window(Window win)
 {
     buttonbar_t *bbar;
 
@@ -601,7 +603,8 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
     return 1;
 }
 
-button_t *find_button_by_text(buttonbar_t *bbar, char *text)
+button_t *
+find_button_by_text(buttonbar_t *bbar, char *text)
 {
     register button_t *b;
 
@@ -620,7 +623,24 @@ button_t *find_button_by_text(buttonbar_t *bbar, char *text)
     return NULL;
 }
 
-button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y)
+button_t *
+find_button_by_index(buttonbar_t *bbar, long idx)
+{
+    register button_t *b;
+    long i;
+
+    if (idx < 0) {
+        idx = -idx;
+        b = bbar->rbuttons;
+    } else {
+        b = bbar->buttons;
+    }
+    for (i = 0; (b != NULL) && (i < idx); b = b->next, i++);
+    return ((i == idx) ? (b) : (NULL));
+}
+
+button_t *
+find_button_by_coords(buttonbar_t *bbar, int x, int y)
 {
     register button_t *b;
 
@@ -639,7 +659,8 @@ button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y)
     return NULL;
 }
 
-button_t *button_create(char *text)
+button_t *
+button_create(char *text)
 {
     button_t *button;
 
@@ -672,6 +693,24 @@ button_free(button_t *button)
         free_simage(button->icon);
     }
     FREE(button);
+}
+
+unsigned char
+button_set_text(button_t *button, const char *text)
+{
+    ASSERT_RVAL(button != NULL, 0);
+
+    if (button->text) {
+        FREE(button->text);
+    }
+    if (text) {
+        button->text = STRDUP(text);
+        button->len = strlen(text);
+    } else {
+        button->text = STRDUP("");
+        button->len = 0;
+    }
+    return 1;
 }
 
 unsigned char
@@ -807,7 +846,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
                           if (d2)
                               TermWin.screen->curr = d2;	/* pre-adjust curr ptr */
                           else
-                              fprintf(stderr, NS_PREFIX "button_check_action: no display %d in this session : (\n", n);
+                              D_ESCREEN(("no display %d in this session : (\n", n));
                           (void) ns_screen_command(TermWin.screen, button->action.string);
                       }
 

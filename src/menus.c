@@ -1299,6 +1299,7 @@ menu_tab(void *xd, char *sc[], int nsc, char *b, size_t l, size_t m)
 {
     int n, n2 = 0;
 
+    USE_VAR(xd);
     for (n = 0; n < nsc; n++) { /* second tab? cycle. */
         if ((!strcasecmp(b, sc[n])) && (n < nsc - 1) && !strncasecmp(b, sc[n + 1], l)) {
             n2 = n + 1;
@@ -1343,7 +1344,7 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
     XEvent ev;
     KeySym keysym;
     char *b, *old;
-    size_t l;
+    int l;
 
     if (!prompt || !*prompt)
         return ret;
@@ -1378,7 +1379,6 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
         }
 
         if ((i = menuitem_create("..."))) {
-            int h;
             old = i->text;
             i->text = b;
             i->len = strlen(b);

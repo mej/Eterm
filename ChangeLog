@@ -4675,3 +4675,7 @@ Wed May 22 16:52:37 2002                        Michael Jennings (mej)
 
 Cleanups of Escreen stuff.  Always use MALLOC/FREE, not malloc/free.
 ----------------------------------------------------------------------
+Thu May 23 14:12:28 2002                        Michael Jennings (mej)
+
+More cleanups and warning removals.
+----------------------------------------------------------------------

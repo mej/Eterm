@@ -89,7 +89,7 @@ static _ns_hop *ha = NULL;      /* anchor for hop list */
    s     the session to add the hop to
    <-    a matching (existing or newly created) hop structure, or NULL */
 
-_ns_hop *
+static _ns_hop *
 ns_new_hop(int lp, char *fw, int fp, int delay, _ns_sess * s)
 {
     _ns_hop *h = ha;
@@ -159,7 +159,7 @@ ns_new_hop(int lp, char *fw, int fp, int delay, _ns_sess * s)
    sp  session that the hop used to belong to (NULL for none (as if))
    <-  NULL */
 
-_ns_hop *
+static _ns_hop *
 ns_dst_hop(_ns_hop ** ss, _ns_sess * sp)
 {
     if (ss && *ss) {
@@ -167,7 +167,7 @@ ns_dst_hop(_ns_hop ** ss, _ns_sess * sp)
 
 #ifdef NS_DEBUG_MEM
         if (s->refcount <= 0) {
-            fprintf(stderr, NS_PREFIX "ns_dst_hop: leak alert -- trying to double-free hop...\n");
+            D_ESCREEN(("leak alert -- trying to double-free hop...\n"));
             return NULL;
         }
 #endif
@@ -219,7 +219,7 @@ ns_new_efuns(void)
     return s;
 }
 
-_ns_efuns *
+static _ns_efuns *
 ns_ref_efuns(_ns_efuns ** ss)
 {
     if (ss && *ss) {
@@ -247,7 +247,7 @@ ns_dst_efuns(_ns_efuns ** ss)
 
 
 
-_ns_disp *
+static _ns_disp *
 ns_new_disp(void)
 {
     _ns_disp *s = MALLOC(sizeof(_ns_disp));
@@ -259,7 +259,7 @@ ns_new_disp(void)
 
 _ns_sess *ns_dst_sess(_ns_sess **);	/* forward, sorry */
 
-_ns_disp *
+static _ns_disp *
 ns_dst_disp(_ns_disp ** ss)
 {
     if (ss && *ss) {
@@ -279,7 +279,7 @@ ns_dst_disp(_ns_disp ** ss)
     return NULL;
 }
 
-_ns_disp *
+static _ns_disp *
 ns_dst_dsps(_ns_disp ** ss)
 {
     if (ss && *ss) {
@@ -290,13 +290,13 @@ ns_dst_dsps(_ns_disp ** ss)
             ns_dst_disp(&s);
             s = t;
         } while (s);
-        return NULL;
     }
+    return NULL;
 }
 
 
 
-_ns_sess *
+static _ns_sess *
 ns_new_sess(void)
 {
     _ns_sess *s = MALLOC(sizeof(_ns_sess));
@@ -395,7 +395,7 @@ ns_screen_command(_ns_sess * sess, char *cmd)
         }
     } else {
         ret = NS_EFUN_NOT_SET;
-        fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->inp_text not set!\n");
+        D_ESCREEN(("sess->efuns->inp_text not set!\n"));
     }
     return ret;
 }
@@ -511,7 +511,7 @@ ns_input_dialog(_ns_sess * s, char *prompt, int maxlen, char **retstr, int (*inp
         (void) efuns->input_dialog((void *) s, prompt, maxlen, retstr, inp_tab);
     } else {
         ret = NS_EFUN_NOT_SET;
-        fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->input_dialog not set!\n");
+        D_ESCREEN(("sess->efuns->input_dialog not set!\n"));
     }
     return ret;
 }
@@ -625,7 +625,7 @@ ns_desc_string(char *c, char *doc)
     char *p = c;
 
     if (doc)
-        fprintf(stderr, NS_PREFIX "%s: ", doc);
+        D_ESCREEN((" ", doc));
 
     if (!c) {
         fputs("NULL\n", stderr);
@@ -660,12 +660,12 @@ void
 ns_desc_hop(_ns_hop * h, char *doc)
 {
     if (!h && doc) {
-        fprintf(stderr, NS_PREFIX "%s: ns_desc_hop called with broken pointer!\n", doc);
+        D_ESCREEN(("ns_desc_hop called with broken pointer!\n", doc));
         return;
     }
 
     if (doc)
-        fprintf(stderr, NS_PREFIX "%s:\n", doc);
+        D_ESCREEN(("\n", doc));
 
     fprintf(stderr, NS_PREFIX "tunnel from localhost:%d to %s:%d to %s:%d is %s.  (delay %d, %d ref%s)\n",
             h->localport, h->fw, h->fwport,
@@ -684,12 +684,12 @@ void
 ns_desc_sess(_ns_sess * sess, char *doc)
 {
     if (!sess) {
-        fprintf(stderr, NS_PREFIX "%s: ns_desc_sess called with broken pointer!\n", doc);
+        D_ESCREEN(("ns_desc_sess called with broken pointer!\n", doc));
         fflush(stderr);
         return;
     }
     if (sess->where == NS_LCL)
-        fprintf(stderr, NS_PREFIX "%s: (efuns@%p)\t (user %s) local %s", doc, sess->efuns, sess->user, sess->proto);
+        D_ESCREEN(("(efuns@%p)\t (user %s) local %s", doc, sess->efuns, sess->user, sess->proto));
     else {
         fprintf(stderr, NS_PREFIX "%s: (efuns@%p)\t %s://%s%s%s@%s",
                 doc, sess->efuns, sess->proto, sess->user, sess->pass ? ":" : "", sess->pass ? sess->pass : "", sess->host);
@@ -700,10 +700,10 @@ ns_desc_sess(_ns_sess * sess, char *doc)
     if (sess->hop)
         ns_desc_hop(sess->hop, NULL);
     if (sess->sysrc)
-        fprintf(stderr, NS_PREFIX "info: searching for sysrc in %s\n", sess->sysrc);
+        D_ESCREEN(("searching for sysrc in %s\n", sess->sysrc));
     if (sess->home)
-        fprintf(stderr, NS_PREFIX "info: searching for usrrc in %s\n", sess->home);
-    fprintf(stderr, NS_PREFIX "info: escapes set to ^%c-%c\n", sess->escape + 'A' - 1, sess->literal);
+        D_ESCREEN(("searching for usrrc in %s\n", sess->home));
+    D_ESCREEN(("escapes set to ^%c-%c\n", sess->escape + 'A' - 1, sess->literal));
     fflush(stderr);
 }
 
@@ -729,7 +729,7 @@ ns_run(_ns_efuns * efuns, char *cmd)
 
     if (cmd && *cmd) {          /* count args (if any) */
 #ifdef NS_DEBUG
-        fprintf(stderr, NS_PREFIX "ns_run: executing \"%s\"...\n", cmd);
+        D_ESCREEN(("executing \"%s\"...\n", cmd));
 #endif
         do {
             n++;
@@ -970,7 +970,7 @@ ns_attach_by_sess(_ns_sess ** sp, int *err)
     }
 
 #ifdef NS_DEBUG
-    fprintf(stderr, NS_PREFIX "ns_attach_by_sess: screen session-fd is %d, ^%c-%c\n", sess->fd, sess->escape + 'A' - 1, sess->literal);
+    D_ESCREEN(("screen session-fd is %d, ^%c-%c\n", sess->fd, sess->escape + 'A' - 1, sess->literal));
 #endif
 
     return sess;
@@ -1089,12 +1089,12 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                 if ((rx = strchr(r, ' ')))
                                     *rx = '\0';
                                 if (*r != '/')
-                                    fprintf(stderr, NS_PREFIX "URL: path for screen's option -c should be absolute (%s)\n", r);
+                                    D_ESCREEN(("path for screen's option -c should be absolute (%s)\n", r));
                                 if ((rc = strdup(r))) {
                                     if (sess->home)	/* this should never happen */
                                         FREE(sess->home);
 #ifdef NS_DEBUG
-                                    fprintf(stderr, NS_PREFIX "URL: searching for rc in %s\n", rc);
+                                    D_ESCREEN(("searching for rc in %s\n", rc));
 #endif
                                     sess->home = rc;
                                 }
@@ -1210,7 +1210,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
     if (hop && strlen(hop)) {
         sess->hop = ns_parse_hop(sess, hop);
         if (sess->hop && (!strcmp(sess->host, sess->hop->fw) || !strcmp(sess->host, "localhost") || !strcmp(sess->host, "127.0.0.1")))
-            fprintf(stderr, NS_PREFIX "ns_attach_by_URL: routing in circles...\n");
+            D_ESCREEN(("routing in circles...\n"));
     }
 
     *err = NS_SUCC;
@@ -1580,7 +1580,7 @@ ns_inp_tab(void *xd, char *b, size_t l, size_t m)
         return efuns->inp_tab((void *) s, sc, nsc, b, l, m) < 0 ? NS_FAIL : NS_SUCC;
     }
 
-    fprintf(stderr, NS_PREFIX "ns_screen_command: sess->efuns->inp_tab not set!\n");
+    D_ESCREEN(("sess->efuns->inp_tab not set!\n"));
     return NS_EFUN_NOT_SET;
 }
 
@@ -1661,25 +1661,25 @@ ns_parse_screen_cmd(_ns_sess * s, char *p, int whence)
     }
 #define IS_CMD(b) (strncasecmp(p,b,strlen(b))==0)
     if (!p2) {
-        fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\" without an argument...\n", p);
+        D_ESCREEN(("ignoring  \"%s\" without an argument...\n", p));
         /* must return success so it's fowarded to screen in interactive mode.
            that way, the user can read the original reply instead of a fake
            one from us. */
         return NS_SUCC;
     } else if (IS_CMD("defescape"))
-        fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"defescape\", did you mean \"escape\"?\n");
+        D_ESCREEN(("ignoring  \"defescape\", did you mean \"escape\"?\n"));
     else if (IS_CMD("defhstatus") || IS_CMD("hardstatus") || IS_CMD("echo") || IS_CMD("colon") || IS_CMD("wall") ||
 #ifdef NS_PARANOID
              IS_CMD("nethack") ||
 #endif
              IS_CMD("info") || IS_CMD("time") || IS_CMD("title") || IS_CMD("lastmsg") || IS_CMD("msgwait") || IS_CMD("msgminwait")) {
-        fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\", not applicable...\n", p);
+        D_ESCREEN(("ignoring  \"%s\", not applicable...\n", p));
         return NS_NOT_ALLOWED;
     } else if (IS_CMD("escape")) {
         char x = 0, y = 0;
         if ((x = ns_parse_esc(&p2)) && (y = ns_parse_esc(&p2))) {
             if (s->escdef == NS_ESC_CMDLINE) {
-                fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"escape\"; overridden on command-line...\n", x, y);
+                D_ESCREEN(("ignoring  \"escape\"; overridden on command-line...\n", x, y));
                 return NS_NOT_ALLOWED;
             } else {
                 s->escape = x;
@@ -1688,29 +1688,29 @@ ns_parse_screen_cmd(_ns_sess * s, char *p, int whence)
                 return NS_SUCC;
             }
         } else
-            fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"escape\" because of invalid arguments %o %o...\n", x, y);
+            D_ESCREEN(("ignoring  \"escape\" because of invalid arguments %o %o...\n", x, y));
     } else if (IS_CMD("defscrollback")) {
         if (v1 < NS_SCREEN_DEFSBB)
-            fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\" for value < %d...\n", p, NS_SCREEN_DEFSBB);
+            D_ESCREEN(("ignoring  \"%s\" for value < %d...\n", p, NS_SCREEN_DEFSBB));
         else {
             s->dsbb = v1;
             return NS_SUCC;
         }
     } else if (IS_CMD("scrollback")) {
         if (v1 < NS_SCREEN_DEFSBB)
-            fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\" for value < %d...\n", p, NS_SCREEN_DEFSBB);
+            D_ESCREEN(("ignoring  \"%s\" for value < %d...\n", p, NS_SCREEN_DEFSBB));
         else {
             if (!s->curr)
                 s->curr = s->dsps;
             if (!s->curr)
-                fprintf(stderr, NS_PREFIX "screenrc: ignoring  \"%s\", cannot determine current display!?...\n", p);
+                D_ESCREEN(("ignoring  \"%s\", cannot determine current display!?...\n", p));
             else
                 s->curr->sbb = v1;
             return NS_SUCC;
         }
     } else {
 #ifdef NS_DEBUG
-        fprintf(stderr, NS_PREFIX "screenrc: bored now \"%s\"\n", p);
+        D_ESCREEN(("bored now \"%s\"\n", p));
 #endif
         return NS_SUCC;
     }
@@ -1741,9 +1741,9 @@ ns_parse_screen_key(_ns_sess * s, char c)
 
 #ifdef NS_DEBUG
     if (c < 27)
-        fprintf(stderr, NS_PREFIX "screen_key: ^%c-^%c %d\n", s->escape + 'A' - 1, c + 'A' - 1, c);
+        D_ESCREEN(("^%c-^%c %d\n", s->escape + 'A' - 1, c + 'A' - 1, c));
     else
-        fprintf(stderr, NS_PREFIX "screen_key: ^%c-%c %d\n", s->escape + 'A' - 1, c, c);
+        D_ESCREEN(("^%c-%c %d\n", s->escape + 'A' - 1, c, c));
 #endif
 
     switch (c) {
@@ -1949,7 +1949,7 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
        delete-logic here. */
     else if (!strncmp(p, "Window ", strlen("Window ")) && (p2 = strrchr(p, ' ')) && !strcmp(p2, " killed.")) {
 #ifdef NS_DEBUG
-        fprintf(stderr, NS_PREFIX "ns_parse_screen_msg: window kill detected.\n");
+        D_ESCREEN(("window kill detected.\n"));
 #endif
         ret = ns_upd_stat(screen);
         p = NULL;
@@ -1963,7 +1963,7 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         else if (!strcmp("am", p3))
             screen->backend = NS_MODE_SCREAM;
 #  ifdef NS_DEBUG
-        fprintf(stderr, NS_PREFIX "ns_parse_screen_msg: scre%s %d.%2d.%2d %s a/o %s\n", p3, ma, mi, mu, p2, d);
+        D_ESCREEN(("scre%s %d.%2d.%2d %s a/o %s\n", p3, ma, mi, mu, p2, d));
 #  endif
     }
 #endif
@@ -2037,7 +2037,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
         }                       /* p2 now points behind last item */
 
 #ifdef NS_DEBUG
-        fprintf(stderr, NS_PREFIX "parse_screen: screen sends ::%s::\n", p);
+        D_ESCREEN(("screen sends ::%s::\n", p));
 #endif
 
         if (strlen(p) < 2) {    /* special case: display 0 */
@@ -2119,7 +2119,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
 
                 if (!disp) {    /* new display */
                     if (!(disp = disp_fetch_or_make(screen, n)) || !(disp->name = strdup(pd[r].name))) {
-                        fprintf(stderr, NS_PREFIX "parse_screen: out of memory in new_display(%d)\n", n);
+                        D_ESCREEN(("out of memory in new_display(%d)\n", n));
                         ret = NS_FAIL;
                     } else {
                         if (NS_EFUN_EXISTS(efuns, screen, NULL, ins_disp)) {
@@ -2149,7 +2149,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                     _ns_disp *d3 = disp->prvs, *d4;
                     while (d3 && d3 != d2) {
 #ifdef NS_DEBUG
-                        fprintf(stderr, NS_PREFIX "parse_screen: remove expired middle %d \"%s\"...\n", d3->index, d3->name);
+                        D_ESCREEN(("remove expired middle %d \"%s\"...\n", d3->index, d3->name));
 #endif
                         d4 = d3->prvs;
                         if (NS_EFUN_EXISTS(efuns, screen, NULL, del_disp)) {
@@ -2188,7 +2188,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                 _ns_disp *d3 = disp;
                 for (disp = disp->next; disp;) {
 #ifdef NS_DEBUG
-                    fprintf(stderr, NS_PREFIX "parse_screen: remove expired right %d \"%s\"...\n", disp->index, disp->name);
+                    D_ESCREEN(("remove expired right %d \"%s\"...\n", disp->index, disp->name));
 #endif
                     d2 = disp;
                     if (d2->sess->curr == d2)

@@ -2270,77 +2270,77 @@ run_command(char **argv)
     return (ptyfd);
 }
 
-
-
 /***************************************************************************/
-/* callbacks */
-/*************/
-
-
+/* Escreen:  callbacks */
+/***********************/
 
 #ifdef ESCREEN
 int
 set_scroll_x(void *xd, int x)
 {
-    fprintf(stderr, NS_PREFIX "set_scroll_x: %d\n", x);
+    USE_VAR(xd);
+    D_ESCREEN(("%d\n", x));
     return NS_FAIL;
 }
 
 int
 set_scroll_y(void *xd, int y)
 {
-    fprintf(stderr, NS_PREFIX "set_scroll_y: %d\n", y);
+    USE_VAR(xd);
+    D_ESCREEN(("%d\n", y));
     return NS_FAIL;
 }
 
 int
 set_scroll_w(void *xd, int w)
 {
-    fprintf(stderr, NS_PREFIX "set_scroll_w: %d\n", w);
+    USE_VAR(xd);
+    D_ESCREEN(("%d\n", w));
     return NS_FAIL;
 }
 
 int
 set_scroll_h(void *xd, int h)
 {
-    fprintf(stderr, NS_PREFIX "set_scroll_h: %d\n", h);
+    USE_VAR(xd);
+    D_ESCREEN(("%d\n", h));
     return NS_FAIL;
 }
 
 int
 redraw(void *xd)
 {
-    fprintf(stderr, NS_PREFIX "redraw\n");
+    USE_VAR(xd);
+    D_ESCREEN(("redraw\n"));
     return NS_FAIL;
 }
 
 int
 redraw_xywh(void *xd, int x, int y, int w, int h)
 {
-    fprintf(stderr, NS_PREFIX "redraw_xywh: %d,%d %dx%d\n", x, y, w, h);
+    USE_VAR(xd);
+    D_ESCREEN(("%d,%d %dx%d\n", x, y, w, h));
     return NS_FAIL;
 }
 
-
-
-button_t *screen_button_create(char *text, char code)
+static button_t *
+screen_button_create(char *text, char code)
 {
     button_t *b;
     char p[3];
 
-    if (!text || !*text || !(b = button_create(text)))
-        return NULL;
+    REQUIRE_RVAL(text, NULL);
+    REQUIRE_RVAL(*text, NULL);
+    b = button_create(text);
+    REQUIRE_RVAL(b, NULL);
 
     p[0] = NS_SCREEN_ESCAPE;
     p[1] = code;
     p[2] = '\0';
-
     button_set_action(b, ACTION_ECHO, p);
 
     return b;
 }
-
-
 
 /* add a new screen display to button bar.
    if our user's configured a bbar, we'll add to that,
@@ -2351,16 +2351,17 @@ ins_disp(void *xd, int after, char *name)
     buttonbar_t *bbar;
     button_t *button;
 
-    if (!xd || !name || !*name)
-        return NS_FAIL;
+    REQUIRE_RVAL(xd, NS_FAIL);
+    REQUIRE_RVAL(name, NS_FAIL);
+    REQUIRE_RVAL(*name, NS_FAIL);
+
     bbar = *((buttonbar_t **) xd);
 
-    if (!(button = screen_button_create(name, '0' + after + 1)))
+    if (!(button = screen_button_create(name, '0' + after + 1))) {
         return NS_FAIL;
+    }
 
-#ifdef NS_DEBUG
-    fprintf(stderr, NS_PREFIX "ins_disp: %s after %d...\n", name, after);
-#endif
+    D_ESCREEN(("%s after %d...\n", name, after));
 
     if ((bbar = bbar_insert_button(bbar, button, after, FALSE))) {
         *((buttonbar_t **) xd) = bbar;
@@ -2371,25 +2372,25 @@ ins_disp(void *xd, int after, char *name)
     return NS_FAIL;
 }
 
-
-
-
+# if 0
 /* add supa-dupa right buttons for screen-features.
    if our user's configured a bbar, we'll add to that,
    otherwise, we'll create one. */
-int
+static int
 add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
 {
     buttonbar_t *bbar;
     button_t *button;
 
-    if (!xd || !name || !*name)
-        return NS_FAIL;
+    REQUIRE_RVAL(xd, NS_FAIL);
+    REQUIRE_RVAL(name, NS_FAIL);
+    REQUIRE_RVAL(*name, NS_FAIL);
+
     bbar = *xd;
 
-    if (!(button = screen_button_create(name, key)))
+    if (!(button = screen_button_create(name, key))) {
         return NS_FAIL;
-
+    }
     if ((bbar = bbar_insert_button(bbar, button, -1, TRUE))) {
         *xd = bbar;
         return NS_SUCC;
@@ -2398,8 +2399,7 @@ add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
     button_free(button);
     return NS_FAIL;
 }
-
-
+# endif
 
 /* delete n'th button
    n  index of the button (not screen, not data -- the button) */
@@ -2409,37 +2409,41 @@ del_disp(void *xd, int n)
     buttonbar_t *bbar = *((buttonbar_t **) xd);
     button_t *button, *b2;
     int bi = n;
-#ifdef NS_DEBUG_
-    int c;
 
-    for (c = 0, b2 = bbar->buttons; b2; c++, b2 = b2->next)
-        fprintf(stderr, NS_PREFIX "del_disp: %02d: \"%s\"\n", c, b2->text);
+    REQUIRE_RVAL(bbar, NS_FAIL);
+    REQUIRE_RVAL(bbar->buttons, NS_FAIL);
+
+#if DEBUG >= DEBUG_ESCREEN
+    if (DEBUG_LEVEL >= DEBUG_ESCREEN) {
+        int c;
+
+        for (c = 0, b2 = bbar->buttons; b2; c++, b2 = b2->next) {
+            D_ESCREEN(("%02d: \"%s\"\n", c, b2->text));
+        }
+    }
 #endif
 
-    if (!bbar || !(button = bbar->buttons))
-        return NS_FAIL;
-
     b2 = button = bbar->buttons;
-    if (!n) {
+    if (n == 0) {
         bbar->buttons = bbar->buttons->next;
-        if (bbar->current = button)
+        if (bbar->current == button) {
             bbar->current = bbar->buttons;
+        }
     } else {
-        while (n-- > 0) {
+        for (; n > 0; n--) {
             b2 = button;
             if (!(button = button->next)) {
-                fprintf(stderr, NS_PREFIX "del_disp: cannot delete button %d: does not exist...\n", bi);
+                D_ESCREEN(("cannot delete button %d: does not exist...\n", bi));
                 return NS_FAIL;
             }
         }
         b2->next = button->next;
-        if (bbar->current == button)
+        if (bbar->current == button) {
             bbar->current = b2;
+        }
     }
 
-#ifdef NS_DEBUG_
-    fprintf(stderr, NS_PREFIX "del_disp: deleting button %d (%s)...\n", bi, button->text);
-#endif
+    D_ESCREEN(("deleting button %d (%s)...\n", bi, button->text));
 
     button->next = NULL;
     button_free(button);
@@ -2448,8 +2452,6 @@ del_disp(void *xd, int n)
 
     return NS_SUCC;
 }
-
-
 
 /* update the button-representation of a screen-display.
    xd
@@ -2463,46 +2465,39 @@ upd_disp(void *xd, int n, int flags, char *name)
     buttonbar_t *bbar = *((buttonbar_t **) xd);
     button_t *button;
 
-    if (!bbar || !(button = bbar->buttons))
-        return NS_FAIL;
+    REQUIRE_RVAL(bbar, NS_FAIL);
+    REQUIRE_RVAL(bbar->buttons, NS_FAIL);
 
     button = bbar->buttons;
-    while (n-- > 0 && button->next)
-        button = button->next;
+    for (; (n > 0) && (button->next); n--, button = button->next);
 
     if (name && (!button->text || strcmp(name, button->text))) {
-        if (button->text)
-            FREE(button->text);
-
-        if (!(button->text = strdup(name))) {
-            button->len = 0;
-            return NS_OOM;
-        }
-
-        button->len = strlen(name);
+        button_set_text(button, name);
     }
 
-    if (flags >= 0)
+    if (flags >= 0) {
         button->flags = flags;
+    }
 
     bbar_redraw(bbar);
 
     return NS_SUCC;
 }
 
-
-
 /* display a status line the screen program sent us */
 int
 err_msg(void *xd, int err, char *msg)
-{                               /* there are certain things that would make sense if we were displaying
-                                   a status-line; they do not, however, warrant an alert-box, so we drop
-                                   them here. */
-
+{
     char *sc[] = { "Copy mode", "Bell in" };
     int n, nsc = sizeof(sc) / sizeof(char *);
 
-    if (strlen(msg)) {
+    USE_VAR(xd);
+    USE_VAR(err);
+
+    /* there are certain things that would make sense if we were displaying
+       a status-line; they do not, however, warrant an alert-box, so we drop
+       them here. */
+    if (msg && *msg) {
         for (n = 0; n < nsc; n++) {
             if (!strncmp(msg, sc[n], strlen(sc[n]))) {
                 break;
@@ -2515,17 +2510,16 @@ err_msg(void *xd, int err, char *msg)
     return NS_SUCC;
 }
 
-
-
 /* send text to the application (normally "screen") in the terminal */
 int
 inp_text(void *xd, int id, char *txt)
 {
+    USE_VAR(xd);
+    USE_VAR(id);
+
     tt_write(txt, strlen(txt));
     return NS_SUCC;
 }
-
-
 
 /* open a dialog */
 int
@@ -2541,44 +2535,41 @@ input_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (
     }
 }
 
-
-
 /* run a program (normally "screen") inside the terminal */
 int
 exe_prg(void *xd, char **argv)
 {
+    USE_VAR(xd);
     return run_command(argv);
 }
 
-
+/********************* Azundris' toys ***************************/
 
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
 #define CLEAR (1<<16)
-
-void
+static void
 direct_write_screen(int x, int y, char *fg, rend_t bg)
 {
     int ys = TermWin.saveLines - TermWin.view_start;
     text_t *t = screen.text[ys + y];
     rend_t *r = screen.rend[ys + y];
-    if (!fg)
-        return;
+
+    REQUIRE(fg);
+
     while (*fg && (x >= 0) && (x < TermWin.ncol)) {
         t[x] = *(fg++);
         r[x++] = bg & DIRECT_MASK;
     }
 }
 
-
-
-void
+static void
 bosconian(int n)
 {
     int x, y;
     int ys = TermWin.saveLines - TermWin.view_start;
-    while (n--) {
+    for (; n != 0; n--) {
         for (y = 0; y < TermWin.nrow; y++) {
             text_t *t = screen.text[ys + y];
             rend_t *r = screen.rend[ys + y];
@@ -2591,9 +2582,7 @@ bosconian(int n)
     }
 }
 
-
-
-void
+static void
 unbosconian(void)
 {
     int x, y;
@@ -2602,7 +2591,6 @@ unbosconian(void)
     do {
         bg = CLEAR;
         for (y = 0; (bg == CLEAR) && y < TermWin.nrow; y++) {
-            text_t *t = screen.text[ys + y];
             rend_t *r = screen.rend[ys + y];
             for (x = 0; (bg == CLEAR) && x < TermWin.ncol; x++) {
                 if (r[x] != CLEAR) {
@@ -2625,10 +2613,13 @@ unbosconian(void)
         }
     } while (bg != CLEAR);
 }
+#undef DIRECT_MASK
+#undef COLOUR_MASK
+#undef DIRECT_SET_SCREEN
 
-
-
-void
+#define MATRIX_HI CLEAR
+#define MATRIX_LO ((4<<8)|CLEAR)
+static void
 matrix(int n)
 {
     int x, y, w, f;
@@ -2642,11 +2633,9 @@ matrix(int n)
         return;
     }
 
-    memset(s, 0, TermWin.ncol);
-#define MATRIX_HI CLEAR
-#define MATRIX_LO ((4<<8)|CLEAR)
+    MEMSET(s, 0, TermWin.ncol);
 
-    while (n--) {
+    for (; n != 0; n--) {
         for (x = 0; x < TermWin.ncol; x++) {
             if (!(random() & 3)) {
                 if ((y = s[x])) {
@@ -2673,8 +2662,7 @@ matrix(int n)
                   case 1:      /* continue */
                   case 2:
                   case 3:
-                      f = random() & 7;
-                      while (f--) {
+                      for (f = random() & 7; f != 0; f--) {
                           if (y < TermWin.nrow - 1) {
                               t2 = screen.text[ys + y + 1];
                               r2 = screen.rend[ys + y + 1];
@@ -2696,8 +2684,7 @@ matrix(int n)
                       }
                       break;
 
-                  default:     /* hold */
-                      t[x] = random() & 0xff;
+                  default: t[x] = random() & 0xff;    /* hold */
                 }
             }
         }
@@ -2705,16 +2692,20 @@ matrix(int n)
     }
     FREE(s);
 }
-
-
+#undef MATRIX_HI
+#undef MATRIX_LO
 
 /* do whatever for ms milli-seconds */
-int
+static int
 waitstate(void *xd, int ms)
 {
     int y = 1;
-    time_t dur = (time_t) (ms / 1000), fin = dur + time(NULL);
+    time_t dur = (time_t) (ms / 1000);
+#if 0
+    time_t fin = dur + time(NULL);
+#endif
 
+    USE_VAR(xd);
     if (!(random() & 7)) {
         if (!(random() & 3)) {
             matrix(31);
@@ -2734,19 +2725,14 @@ waitstate(void *xd, int ms)
     scr_refresh(FAST_REFRESH);
 
     sleep(dur);
-
     return 0;
 }
+#undef CLEAR
 
-#endif
-
-
-
-/* init_command() */
-void
-init_command(char **argv)
+/* Set everything up for escreen mode */
+int
+escreen_init(char **argv)
 {
-#ifdef ESCREEN
     int ns_err;
     _ns_efuns *efuns;
 
@@ -2772,40 +2758,14 @@ init_command(char **argv)
     ns_register_tab(efuns, menu_tab);
 
     ns_register_fun(efuns, waitstate);
-#endif
 
-    /* Initialize the command connection.  This should be called after
-       the X server connection is established. */
-
-    /* Enable delete window protocol */
-    XSetWMProtocols(Xdisplay, TermWin.parent, &(props[PROP_DELETE_WINDOW]), 1);
-
-    init_locale();
-
-#ifdef META8_OPTION
-    meta_char = (Options & Opt_meta8 ? 0x80 : 033);
-#endif
-
-#ifdef GREEK_SUPPORT
-    greek_init();
-#endif
-
-    Xfd = XConnectionNumber(Xdisplay);
-    D_CMD(("Xfd = %d\n", Xfd));
-    cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-    AT_LEAST((int) num_fds, Xfd + 1);
-    if (pipe_fd >= 0) {
-        AT_LEAST((int) num_fds, pipe_fd + 1);
-    }
-#ifdef ESCREEN
-    cmd_fd = -1;
-
-    if (!TermWin.screen_mode)
-        cmd_fd = run_command(argv);
-    else if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, (void *) &buttonbar))) {
+    if (!TermWin.screen_mode) {
+        return run_command(argv);
+    } else if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, (void *) &buttonbar))) {
         button_t *button;
         menu_t *m;
         menuitem_t *i;
+
         if (rs_delay >= 0) {
             TermWin.screen->delay = rs_delay;	/* more flexible ways later */
         }
@@ -2836,7 +2796,7 @@ init_command(char **argv)
                 for (n = 0; n < menu_list->nummenus; n++) {	/* blend in w/ l&f */
                     if (menu_list->menus[n]->font) {
 #ifdef NS_DEBUG
-                        fprintf(stderr, NS_PREFIX "font: %d: %p\n", n, menu_list->menus[n]->font);
+                        D_ESCREEN(("%d: %p\n", n, menu_list->menus[n]->font));
 #endif
                         m->font = menu_list->menus[n]->font;
                         m->fwidth = menu_list->menus[n]->fwidth;
@@ -2897,13 +2857,53 @@ init_command(char **argv)
         }
 /*      add_screen_ctl_button(&buttonbar,"New",'c'); */
         cmd_fd = TermWin.screen->fd;
+    } else {
+        return -1;
     }
 #  undef ETERM_PREFIX
 #  undef ESCREEN_PREFIX
-    if (cmd_fd < 0) {
-#else
-    if ((cmd_fd = run_command(argv)) < 0) {
+    return cmd_fd;
+}
+
 #endif
+
+/* init_command() */
+void
+init_command(char **argv)
+{
+    int (*command_func)(char **);
+
+    /* Use init function appropriate for how we were compiled. */
+#ifdef ESCREEN
+    command_func = escreen_init;
+#else
+    command_func = run_command;
+#endif
+
+    /* Initialize the command connection.  This should be called after
+       the X server connection is established. */
+
+    /* Enable delete window protocol */
+    XSetWMProtocols(Xdisplay, TermWin.parent, &(props[PROP_DELETE_WINDOW]), 1);
+
+    init_locale();
+
+#ifdef META8_OPTION
+    meta_char = (Options & Opt_meta8 ? 0x80 : 033);
+#endif
+
+#ifdef GREEK_SUPPORT
+    greek_init();
+#endif
+
+    Xfd = XConnectionNumber(Xdisplay);
+    D_CMD(("Xfd = %d\n", Xfd));
+    cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
+    AT_LEAST((int) num_fds, Xfd + 1);
+    if (pipe_fd >= 0) {
+        AT_LEAST((int) num_fds, pipe_fd + 1);
+    }
+    if ((cmd_fd = command_func(argv)) < 0) {
         print_error("aborting\n");
         exit(EXIT_FAILURE);
     }
