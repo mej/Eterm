@@ -3506,7 +3506,7 @@ main_loop(void)
             }
             D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
                       nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
-#if !FIXME_BLOCK
+#if FIXME_BLOCK
             /* 
              * iconv() is not my friend. :-( I've tried various things
              * to make this work (including UCS2, SJIS, EUCJ, and
