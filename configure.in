@@ -364,17 +364,19 @@ AC_ARG_WITH(pablo,
 )
 AC_MSG_CHECKING(for Escreen support)
 AC_ARG_ENABLE(escreen,
-[  --enable-escreen        enable Eterm's built-in screen support], [
-            if test "$enableval" = "yes"; then 
-              AC_CHECK_PROG(FOUND_SCREEN, screen, screen)
-              if test ! -z "$FOUND_SCREEN"; then
-                AC_DEFINE(NS_HAVE_SCREEN,1,[Support the GNU screen text windowing system?])
-              else
-                AC_WARN(*** screen support has been disabled because screen was not found ***)
-              fi
+[  --disable-escreen       disable Eterm's built-in screen support], [
+            if test "$enableval" = "yes"; then
+              FOUND_SCREEN=1
+              AC_DEFINE(NS_HAVE_SCREEN,1,[Support the GNU screen text windowing system?])
+              AC_MSG_RESULT(yes)
             else
               AC_MSG_RESULT(no)
-            fi], AC_MSG_RESULT(no)
+            fi
+          ], [
+            FOUND_SCREEN=1
+            AC_DEFINE(NS_HAVE_SCREEN,1,[Support the GNU screen text windowing system?])
+            AC_MSG_RESULT(yes)
+          ]
 )
 AC_MSG_CHECKING(for Etwin support)
 AC_ARG_ENABLE(etwin,

@@ -2916,6 +2916,7 @@ escreen_init(char **argv)
     int ns_err;
     _ns_efuns *efuns;
     buttonbar_t *bbar;
+    spif_uchar_t old_pause = (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_PAUSE) ? (1) : (0));
 
     if (TermWin.screen_mode == NS_MODE_NONE) {
         return run_command(argv);
@@ -2939,12 +2940,16 @@ escreen_init(char **argv)
         bbar_add(bbar);
     }
 
+    BITFIELD_SET(eterm_options, ETERM_OPTIONS_PAUSE);
     if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar)) == NULL) {
         D_CMD(("ns_attach_by_URL(%s,%s) failed\n", rs_url, rs_hop));
         return -1;
     }
     if (rs_delay >= 0) {
         TermWin.screen->delay = rs_delay;       /* more flexible ways later */
+    }
+    if (!old_pause) {
+        BITFIELD_CLEAR(eterm_options, ETERM_OPTIONS_PAUSE);
     }
 
     make_escreen_menu(bbar);
@@ -3002,7 +3007,8 @@ init_command(char **argv)
     }
     if ((cmd_fd = command_func(argv)) < 0) {
         print_error("Unable to run sub-command.\n");
-        exit(EXIT_FAILURE);
+        paused = 1;
+        rs_finished_text = "Hit a key to exit...";
     }
 }
 

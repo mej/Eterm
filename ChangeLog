@@ -5156,3 +5156,7 @@ Mon Dec 22 15:56:51 2003                        Michael Jennings (mej)
 
 Backported changes to menu generation.
 ----------------------------------------------------------------------
+Wed Jan  7 15:08:24 2004                        Michael Jennings (mej)
+
+Disable build-time check for screen.
+----------------------------------------------------------------------
