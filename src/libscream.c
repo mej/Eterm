@@ -1188,12 +1188,12 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
     if (url && strlen(url)) {
         char *q;
 
-        if (!(d = strdup(url)))
+        if (!(d = STRDUP(url)))
             goto fail;
 
         if ((q = strstr(d, "://"))) {   /* protocol, if any */
             *q = '\0';
-            if (!(sess->proto = strdup(d)))
+            if (!(sess->proto = STRDUP(d)))
                 goto fail;
             q += 3;
         } else
@@ -1206,10 +1206,10 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                 *p = '\0';
                 if ((r = strchr(q, ':'))) {     /* password, if any */
                     *(r++) = '\0';
-                    if (!(sess->pass = strdup(r)))      /* password may be empty string! */
+                    if (!(sess->pass = STRDUP(r)))      /* password may be empty string! */
                         goto fail;
                 }
-                sess->user = strdup(q);
+                sess->user = STRDUP(q);
             }
             q = p + 1;
         }
@@ -1262,7 +1262,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                             sess->disp = 0;
                                     }
                                     if (strlen(y))
-                                        sess->host = strdup(y);
+                                        sess->host = STRDUP(y);
                                 }
                             } else
 #  endif
@@ -1284,7 +1284,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                     *rx = '\0';
                                 if (*r != '/')
                                     D_ESCREEN(("URL: path for screen's option -c should be absolute (%s)\n", r));
-                                if ((rc = strdup(r))) {
+                                if ((rc = STRDUP(r))) {
                                     if (sess->home)     /* this should never happen */
                                         FREE(sess->home);
                                     D_ESCREEN(("URL: searching for rc in %s\n", rc));
@@ -1308,7 +1308,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                     }
                 }
 
-                if (!(sess->rsrc = strdup(p)))
+                if (!(sess->rsrc = STRDUP(p)))
                     goto fail;
             }
         }
@@ -1322,7 +1322,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
             }
         }
 
-        if (strlen(q) && !(sess->host = strdup(q)))     /* host, if any */
+        if (strlen(q) && !(sess->host = STRDUP(q)))     /* host, if any */
             goto fail;
 
         FREE(d);
@@ -1336,7 +1336,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
             D_ESCREEN(("unknown user...\n"));
             goto fail;
         }
-        if (!(sess->user = strdup(pwe->pw_name)))
+        if (!(sess->user = STRDUP(pwe->pw_name)))
             goto fail;
     } else if ((sess->host && strcmp(sess->host, "localhost") && strcmp(sess->host, "127.0.0.1")) || (sess->port > 0)) {
         pwe = NULL;
@@ -1356,7 +1356,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 
 #ifdef NS_HAVE_SCREEN
     if (getenv("SYSSCREENRC")) {        /* $SYSSCREENRC */
-        if (!(sess->sysrc = strdup(getenv("SCREENRC"))))
+        if (!(sess->sysrc = STRDUP(getenv("SCREENRC"))))
             goto fail;
     } else {
         char *loc[] = { "/usr/local/etc/screenrc",      /* official */
@@ -1368,14 +1368,14 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 
         for (n = 0; n < nloc; n++)
             if (!access(loc[n], R_OK)) {
-                if (!(sess->sysrc = strdup(loc[n])))
+                if (!(sess->sysrc = STRDUP(loc[n])))
                     goto fail;
                 n = nloc;
             }
     }
 
     if (getenv("SCREENRC")) {   /* $SCREENRC */
-        sess->home = strdup(getenv("SCREENRC"));
+        sess->home = STRDUP(getenv("SCREENRC"));
     } else if (pwe && !sess->home) {    /* ~/.screenrc */
         if ((sess->home = MALLOC(strlen(pwe->pw_dir) + strlen(NS_SCREEN_RC) + 2)))
             sprintf(sess->home, "%s/%s", pwe->pw_dir, NS_SCREEN_RC);
@@ -1407,7 +1407,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                         sess->disp = atoi(twdisp);
                 }               /* fall back on TWDISPLAY host */
                 if (((!sess->host) || (!strlen(sess->host))) && strlen(twd) && strcmp(twd, "localhost"))
-                    sess->host = strdup(twd);
+                    sess->host = STRDUP(twd);
             }
             /* this is ugly, but does the intuitive thing.
              * if you specifically want to connect a twin to a non-twin
@@ -1443,7 +1443,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 #endif
 
     if (!sess->host) {          /* no host */
-        if (!(sess->host = strdup("localhost")))
+        if (!(sess->host = STRDUP("localhost")))
             goto fail;
         if (sess->port <= 0) {  /* no host/port */
             sess->where = NS_LCL;
@@ -2369,7 +2369,7 @@ ns_screen_command(_ns_sess * sess, char *cmd)
         return NS_FAIL;
 
     if (NS_EFUN_EXISTS(efuns, sess, NULL, inp_text)) {
-        if ((c = strdup(cmd))) {
+        if ((c = STRDUP(cmd))) {
             {
                 char *p = c;    /* replace default escape-char with that */
 
@@ -2672,7 +2672,7 @@ ns_parse_screen_interactive(_ns_sess * sess, char *c)
     if (!c || !*c)
         return NS_FAIL;
 #ifdef NS_PARANOID
-    if (!(s = o = strdup(c)))
+    if (!(s = o = STRDUP(c)))
         return NS_FAIL;
 #else
     s = c;
@@ -2854,7 +2854,7 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         if (screen->name) {
             FREE(screen->name);
         }
-        if ((screen->name = strdup(&p[strlen(NS_SCREEN_SESS_T)]))) {
+        if ((screen->name = STRDUP(&p[strlen(NS_SCREEN_SESS_T)]))) {
             size_t lsn = strlen(screen->name);
 
             if (lsn) {
@@ -2955,7 +2955,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
     if (!force && screen->timestamp)
         return NS_SUCC;
 
-    if ((p = strdup(p))) {
+    if ((p = STRDUP(p))) {
         _ns_parse pd[NS_MAX_DISPS];
 
         p2 = &p[width - 1];
@@ -3067,7 +3067,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                 }
 
                 if (!disp) {    /* new display */
-                    if (!(disp = disp_fetch_or_make(screen, n)) || !(disp->name = strdup(pd[r].name))) {
+                    if (!(disp = disp_fetch_or_make(screen, n)) || !(disp->name = STRDUP(pd[r].name))) {
                         D_ESCREEN(("parse_screen: out of memory in new_display(%d)\n", n));
                         ret = NS_FAIL;
                     } else {
@@ -3084,7 +3084,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                         (disp->flags != fl)) {
                         if (tmp) {
                             FREE(disp->name);
-                            if (!(disp->name = strdup(pd[r].name))) {
+                            if (!(disp->name = STRDUP(pd[r].name))) {
                                 FREE(p);
                                 return NS_FAIL;
                             }

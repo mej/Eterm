@@ -122,8 +122,12 @@ bbar_free(buttonbar_t *bbar)
     if (bbar->next) {
         bbar_free(bbar->next);
     }
-    button_free(bbar->rbuttons);
-    button_free(bbar->buttons);
+    if (bbar->rbuttons) {
+        button_free(bbar->rbuttons);
+    }
+    if (bbar->buttons) {
+        button_free(bbar->buttons);
+    }
 #ifdef MULTI_CHARSET
     if (bbar->fontset) {
         XFreeFontSet(Xdisplay, bbar->fontset);
@@ -510,7 +514,7 @@ bbar_calc_button_positions(buttonbar_t *bbar)
             b->x = x;
             b->y = y;
             button_calc_rel_coords(bbar, b);
-            D_BBAR(("Set button \"%s\" (%8p, width %d) to coordinates %d, %d\n", b->text, b, b->w, x, y));
+            D_BBAR(("Set rbutton \"%s\" (%8p, width %d) to coordinates %d, %d\n", b->text, b, b->w, x, y));
         }
     }
 }
@@ -1087,7 +1091,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
         }
         if (button->len) {
 #ifdef ESCREEN
-            GC gc;              /* evil temporary hack */
+            /* evil temporary hack */
             int f = button->flags & ~NS_SCREAM_BUTTON;
 
             if (f & NS_SCREAM_CURR) {
@@ -1098,12 +1102,14 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
                 f = 0;
             }
 
-            gc = LIBAST_X_CREATE_GC(0, NULL);
-            XCopyGC(Xdisplay, bbar->gc, GCFont, gc);
-            XSetForeground(Xdisplay, gc, PixColors[minBright + f + 2]);
-
-            D_BBAR(("bbar_draw: text \"%s\", colour %d.\n", button->text, f));
+            D_BBAR(("bbar_draw: text \"%s\", color %d.\n", button->text, f));
             if (f) {
+                GC gc;
+
+                gc = LIBAST_X_CREATE_GC(0, NULL);
+                XCopyGC(Xdisplay, bbar->gc, GCFont, gc);
+                XSetForeground(Xdisplay, gc, PixColors[minBright + f + 2]);
+
                 draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
                 LIBAST_X_FREE_GC(gc);
             } else

@@ -2880,6 +2880,7 @@ make_escreen_menu(buttonbar_t *bbar)
 
         if ((button = button_create(NS_MENU_TITLE))) {
             bbar_add_rbutton(bbar, button);
+            bbar_calc_button_sizes(bbar);
             button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
         }
         return 1;
