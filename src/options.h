@@ -27,8 +27,6 @@
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
-#include <libast/config.h>      /* CONFIG_BUFF */
-
 /************ Macros and Definitions ************/
 #define OPT_BOOLEAN                     0x0001
 #define OPT_INTEGER                     0x0002
