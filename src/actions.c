@@ -200,7 +200,7 @@ action_dispatch(event_t *ev, KeySym keysym)
        of the current action.  This means that we'll only run through
        the modifier checks below if we absolutely have to. */
     if ((ev->xany.type == ButtonPress && action_check_button(action->button, ev->xbutton.button))
-        || (ev->xany.type == KeyPress && action_check_keysym(action->keysym, action->keysym))) {
+        || (ev->xany.type == KeyPress && action_check_keysym(action->keysym, keysym))) {
       if (action_check_modifiers(action->mod, ev->xkey.state)) {
         D_ACTIONS(("Match found.\n"));
         /* If we've passed all the above tests, it's a match.  Dispatch the handler. */

@@ -226,20 +226,6 @@
 /* Make it an option */
 #define MAPALERT_OPTION
 
-/********************* Config file parser options *********************/
-
-/* Allow evaluation of expressions like `echo hello` in config files.  The
- * security-paranoid will not want to define this, but I have replaced the 
- * OS system() call with a secure one that I have tested and verified, so
- * child processes run in this way will not run with any privileges, active
- * or attainable.
- */
-#define ALLOW_BACKQUOTE_EXEC
-
-/* This causes Eterm to warn you if a config file it's about to parse was
- * designed for an older version of Eterm. */
-/* #define WARN_OLDER */
-
 /********************* Anti-cl00bie protection (sigh) *********************/
 /* EDITING THIS FILE BELOW THIS LINE IS UNSUPPORTED!  YOU HAVE BEEN WARNED! */
 
