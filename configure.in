@@ -526,7 +526,7 @@ if test $UTMP -eq 1; then
 fi
 AC_MSG_CHECKING(for backspace key configuration)
 AC_ARG_WITH(backspace,
-[  --with-backspace=KEY    force backspace to send KEY (KEY is either \"bs\" for ^H or \"del\" for ^?)], [
+[  --with-backspace=KEY    force backspace to send KEY (KEY is \"bs\" for ^H, \"del\" for ^?, \"auto\" to check stty)], [
             if test "$withval" = "bs"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-H)
               AC_DEFINE(FORCE_BACKSPACE)
@@ -544,7 +544,7 @@ AC_ARG_WITH(backspace,
 AC_MSG_CHECKING(for delete key configuration)
 AC_ARG_WITH(delete,
 [  --with-delete=SETTING   force delete to SETTING (\"server\" to use the X server value always,
-                          \"execute\" to send the old default execute escape sequence,
+                          \"execute\" to send the old default execute escape sequence, \"del\" for ^?,
                           or a quoted string to use a specific string)], [
             if test "$withval" = "server"; then
               AC_MSG_RESULT(X server value)
