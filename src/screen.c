@@ -1632,6 +1632,10 @@ scr_expose(int x, int y, int width, int height)
   if (part_end.col != full_end.col)
     for (i = full_beg.row; i <= full_end.row; i++)
       drawn_rend[i][part_end.col] = RS_Dirty;
+
+#ifdef USE_XIM
+  scr_refresh(SLOW_REFRESH);
+#endif
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1800,7 +1804,6 @@ scr_refresh(int type)
 #ifdef OPTIMIZE_HACKS
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
-
 #endif
 
 #ifdef PROFILE_SCREEN
@@ -2051,18 +2054,12 @@ scr_refresh(int type)
 	    && PixColors[back] != PixColors[colorBD]) {
 	  gcvalue.foreground = PixColors[colorBD];
 	  gcmask |= GCForeground;
-#if 0
-	  rend &= ~RS_Bold;	/* we've taken care of it */
-#endif
 	}
       } else if (rend & RS_Uline) {
 	if (PixColors[fore] != PixColors[colorUL]
 	    && PixColors[back] != PixColors[colorUL]) {
 	  gcvalue.foreground = PixColors[colorUL];
 	  gcmask |= GCForeground;
-#if 0
-	  rend &= ~RS_Uline;	/* we've taken care of it */
-#endif
 	}
       }
 #endif
@@ -2085,9 +2082,6 @@ scr_refresh(int type)
 #ifndef NO_BOLDFONT
       if (!wbyte && MONO_BOLD(rend) && TermWin.boldFont != NULL) {
 	XSetFont(Xdisplay, TermWin.gc, TermWin.boldFont->fid);
-#if 0
-	rend &= ~RS_Bold;	/* we've taken care of it */
-#endif
 	bfont = 1;
       } else if (bfont) {
 	bfont = 0;
