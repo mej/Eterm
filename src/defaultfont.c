@@ -141,10 +141,10 @@ const struct defaultfont defaultfont[] = {
   { ENC_EUCKR,	"euckr",DEF_EUCKR, {NFONT_LIST_EUCKR}, {MFONT_LIST_EUCKR} },
   { ENC_UTF8,	"iso-10646",DEF_10646,{NFONT_LIST_10646},{MFONT_LIST_10646} },
 #endif				/* MULTI_CHARSET */
-  { ENC_ISO8859_7,"noenc",DEF_7,   {NFONT_LIST_7},     {MFONT_LIST_NULL} },
-  { ENC_KOI8R,	"noenc",DEF_KOI8R, {NFONT_LIST_KOI8R}, {MFONT_LIST_NULL} },
-  { ENC_KOI8U,	"noenc",DEF_KOI8U, {NFONT_LIST_KOI8U}, {MFONT_LIST_NULL} },
-  { ENC_DUMMY,	"noenc",DEF_DUMMY, {MFONT_LIST_NULL},  {MFONT_LIST_NULL} }
+  { ENC_ISO8859_7,"none",DEF_7,   {NFONT_LIST_7},     {MFONT_LIST_NULL} },
+  { ENC_KOI8R,	"none",DEF_KOI8R, {NFONT_LIST_KOI8R}, {MFONT_LIST_NULL} },
+  { ENC_KOI8U,	"none",DEF_KOI8U, {NFONT_LIST_KOI8U}, {MFONT_LIST_NULL} },
+  { ENC_DUMMY,	"none",DEF_DUMMY, {MFONT_LIST_NULL},  {MFONT_LIST_NULL} }
 };
 
 /* special common rule for ISO-8859-x */
@@ -262,7 +262,7 @@ eterm_default_font_locale(char ***fonts, char ***mfonts, char **mencoding, int *
  */
 
 #ifdef MULTI_CHARSET
-  *mencoding = STRDUP("noenc");
+  *mencoding = STRDUP("none");
 #endif
   if (encoding >= ENC_ISO8859_1 && encoding <= ENC_ISO8859_LAST) {
     /* fallback for ISO-8859-* encodings */

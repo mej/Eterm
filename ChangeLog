@@ -4546,3 +4546,9 @@ Mon Apr  8 15:29:27 2002                        Michael Jennings (mej)
 Fixed a bug spotted by Laurence J. Lane <ljlane@debian.org> with color
 settings not being properly saved.
 ----------------------------------------------------------------------
+Sun Apr 14 20:55:42 2002                        Michael Jennings (mej)
+
+Changed occurances of "noenc" to the correct keyword, "none."  Thanks
+to Laurence J. Lane <ljlane@debian.org> for pointing this one out
+also.
+----------------------------------------------------------------------
