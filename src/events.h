@@ -100,6 +100,7 @@ extern unsigned char event_win_is_mywin(event_dispatcher_data_t *, Window);
 extern unsigned char event_win_is_parent(event_dispatcher_data_t *, Window);
 extern unsigned char handle_key_press(event_t *);
 extern unsigned char handle_property_notify(event_t *);
+extern unsigned char handle_destroy_notify(event_t *);
 extern unsigned char handle_reparent_notify(event_t *);
 extern unsigned char handle_client_message(event_t *);
 extern unsigned char handle_mapping_notify(event_t *);

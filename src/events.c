@@ -140,6 +140,7 @@ event_init_primary_dispatcher(void)
 
   EVENT_DATA_ADD_HANDLER(primary_data, KeyPress, handle_key_press);
   EVENT_DATA_ADD_HANDLER(primary_data, PropertyNotify, handle_property_notify);
+  EVENT_DATA_ADD_HANDLER(primary_data, DestroyNotify, handle_destroy_notify);
   EVENT_DATA_ADD_HANDLER(primary_data, ClientMessage, handle_client_message);
   EVENT_DATA_ADD_HANDLER(primary_data, MappingNotify, handle_mapping_notify);
   EVENT_DATA_ADD_HANDLER(primary_data, VisibilityNotify, handle_visibility_notify);
@@ -256,6 +257,18 @@ handle_property_notify(event_t * ev)
       }
       redraw_all_images();
     }
+  }
+  return 1;
+}
+
+unsigned char
+handle_destroy_notify(event_t * ev)
+{
+
+  D_EVENTS(("handle_destroy_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+
+  if (ev->xany.window == ipc_win) {
+    ipc_win = None;
   }
   return 1;
 }

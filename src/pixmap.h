@@ -160,7 +160,7 @@ extern const char *get_image_type(unsigned short);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
 extern void reset_simage(simage_t *, unsigned long);
-extern void paste_simage(simage_t *, Window, unsigned short, unsigned short, unsigned short, unsigned short);
+extern void paste_simage(simage_t *, unsigned char, Window, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);
 extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
 #ifdef USE_POSIX_THREADS
@@ -175,7 +175,7 @@ extern void colormod_trans(Pixmap, GC, unsigned short, unsigned short);
 extern Window get_desktop_window(void);
 extern Pixmap get_desktop_pixmap(void);
 #endif
-extern void shaped_window_apply_mask(Window, Pixmap);
+extern void shaped_window_apply_mask(Drawable, Pixmap);
 extern void set_icon_pixmap(char *, XWMHints *);
 #ifdef USE_EFFECTS
 extern int fade_in(ImlibImage *, int);

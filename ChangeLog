@@ -2482,3 +2482,9 @@ Thu Sep 23 15:56:35 PDT 1999	Michael Jennings <mej@eterm.org>
 	however, should work as noted above.
 	
 -------------------------------------------------------------------------------
+Thu Sep 23 17:15:27 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Well, we're to the point of asking E to render the submenu image, but
+	it keeps returning null pixmaps. =]  I'll have to dig deeper.
+	
+-------------------------------------------------------------------------------

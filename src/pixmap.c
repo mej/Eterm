@@ -313,28 +313,113 @@ reset_simage(simage_t * simg, unsigned long mask)
 }
 
 void
-paste_simage(simage_t * simg, Window win, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
 
   ASSERT(simg != NULL);
   REQUIRE(win != None);
 
-  if (simg->iml->border) {
-    Imlib_set_image_border(imlib_id, simg->iml->im, simg->iml->border);
+  D_PIXMAP(("paste_simage(0x%08x, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", (int) simg, get_image_type(which), (int) win, x, y, w, h));
+
+  if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
+    char buff[255], *iclass = NULL, *state = NULL, *reply;
+    Pixmap pmap, mask;
+
+    switch (which) {
+    case image_bg: iclass = "ETERM_BG"; break;
+    case image_up: iclass = "ETERM_ARROW_UP"; break;
+    case image_down: iclass = "ETERM_ARROW_DOWN"; break;
+    case image_left: iclass = "ETERM_ARROW_LEFT"; break;
+    case image_right: iclass = "ETERM_ARROW_RIGHT"; break;
+# ifdef PIXMAP_SCROLLBAR
+    case image_sb: iclass = "ETERM_TROUGH"; break;
+    case image_sa: iclass = "ETERM_ANCHOR"; break;
+# endif
+    case image_menu: iclass = "ETERM_MENU_ITEM"; break;
+    case image_submenu: iclass = "ETERM_MENU_SUBMENU"; break;
+    default: break;
+    }
+    if (simg == images[which].selected) {
+      state = "hilited";
+    } else if (simg == images[which].clicked) {
+      state = "clicked";
+    } else {
+      state = "normal";
+    }
+    D_PIXMAP((" -> iclass == \"%s\", state == \"%s\"\n", NONULL(iclass), NONULL(state)));
+
+    if (iclass) {
+      snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
+      enl_ipc_send(buff);
+      for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+      if (strstr(reply, "not")) {
+        print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
+        if (image_mode_is(which, ALLOW_IMAGE)) {
+          image_set_mode(which, MODE_IMAGE);
+        } else {
+          image_set_mode(which, MODE_SOLID);
+        }
+      } else if (strstr(reply, "Error")) {
+        print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
+        FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
+                      if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
+      } else {
+        snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, w, h);
+        enl_ipc_send(buff);
+        for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+        if (strstr(reply, "Error")) {
+          print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
+          if (image_mode_is(which, ALLOW_IMAGE)) {
+            image_set_mode(which, MODE_IMAGE);
+          } else {
+            image_set_mode(which, MODE_SOLID);
+          }
+        } else {
+          GC gc;
+          XGCValues gcvalues;
+
+          gc = XCreateGC(Xdisplay, win, 0, &gcvalues);
+          pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
+          mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
+          if (pmap) {
+            if (mask) {
+              shaped_window_apply_mask(pmap, mask);
+            }
+            XCopyArea(Xdisplay, pmap, win, gc, 0, 0, w, h, x, y);
+            XFreePixmap(Xdisplay, pmap);
+            XFreePixmap(Xdisplay, mask);
+            XFreeGC(Xdisplay, gc);
+            return;
+          } else {
+            print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
+            if (image_mode_is(which, ALLOW_IMAGE)) {
+              image_set_mode(which, MODE_IMAGE);
+            } else {
+              image_set_mode(which, MODE_SOLID);
+            }
+          }
+        }
+      }
+    }
   }
-  if (simg->iml->mod) {
-    Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
+  if (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE)) {
+    if (simg->iml->border) {
+      Imlib_set_image_border(imlib_id, simg->iml->im, simg->iml->border);
+    }
+    if (simg->iml->mod) {
+      Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
+    }
+    if (simg->iml->rmod) {
+      Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
+    }
+    if (simg->iml->gmod) {
+      Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
+    }
+    if (simg->iml->bmod) {
+      Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
+    }
+    Imlib_paste_image(imlib_id, simg->iml->im, win, x, y, w, h);
   }
-  if (simg->iml->rmod) {
-    Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
-  }
-  if (simg->iml->gmod) {
-    Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
-  }
-  if (simg->iml->bmod) {
-    Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
-  }
-  Imlib_paste_image(imlib_id, simg->iml->im, win, x, y, w, h);
 }
 
 void
@@ -411,7 +496,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   gc = XCreateGC(Xdisplay, win, GCForeground | GCBackground, &gcvalue);
   pixmap = simg->pmap->pixmap;	/* Save this for later */
 
-  if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO) && (which != image_bg)) {
+  if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
     char buff[255], *iclass = NULL, *state = NULL, *reply;
 
     switch (which) {
@@ -1144,14 +1229,14 @@ get_desktop_pixmap(void)
 # endif				/* PIXMAP_OFFSET */
 
 void
-shaped_window_apply_mask(Window win, Pixmap mask)
+shaped_window_apply_mask(Drawable d, Pixmap mask)
 {
 
   static signed char have_shape = -1;
 
-  REQUIRE(win != None && mask != None);
+  REQUIRE(d != None && mask != None);
 
-  D_PIXMAP(("shaped_window_apply_mask(win [0x%08x], mask [0x%08x]) called.\n", win, mask));
+  D_PIXMAP(("shaped_window_apply_mask(d [0x%08x], mask [0x%08x]) called.\n", d, mask));
 
 # ifdef HAVE_X_SHAPE_EXT
   if (have_shape == -1) {	/* Don't know yet. */
@@ -1166,7 +1251,7 @@ shaped_window_apply_mask(Window win, Pixmap mask)
   }
   if (have_shape == 1) {
     D_PIXMAP(("shaped_window_apply_mask():  Shape extension available, applying mask.\n"));
-    XShapeCombineMask(Xdisplay, win, ShapeBounding, 0, 0, mask, ShapeSet);
+    XShapeCombineMask(Xdisplay, d, ShapeBounding, 0, 0, mask, ShapeSet);
   } else if (have_shape == 0) {
     D_PIXMAP(("shaped_window_apply_mask():  Shape extension not available.\n"));
     return;
