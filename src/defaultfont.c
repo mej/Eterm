@@ -188,7 +188,7 @@ eterm_default_font_locale(char ***fonts, char ***mfonts, char **mencoding, int *
      * The current encoding is available via nl_langinfo().
      * Otherwise, it comes from locale name.
      */
-#ifdef HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO) && defined(CODESET)
     encoding_str = nl_langinfo(CODESET);
 #else
     encoding_str = NULL;
