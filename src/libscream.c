@@ -2820,7 +2820,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                 screen->timestamp = 1;
                 D_ESCREEN(("parse_screen: resetting screen...\n"));
             } else {
-                D_ESCREEN(("parse_screen: nothing to do in exception, updating anyways...\n"));
+                D_ESCREEN(("parse_screen: error, we should never get here\n"));
                 ret = ns_upd_stat(screen);
             }
             FREE(p);

@@ -4726,3 +4726,7 @@ Thu Jun 20 18:32:22 2002                        Michael Jennings (mej)
 Fixed the updating of the status bar for Escreen.  Also changed strdup
 to STRDUP for libast.
 ----------------------------------------------------------------------
+Thu Jun 20 18:55:59 2002                        Michael Jennings (mej)
+
+Better fix from Azundris.
+----------------------------------------------------------------------
