@@ -148,6 +148,7 @@ char *rs_cmod_image = NULL;
 char *rs_cmod_red = NULL;
 char *rs_cmod_green = NULL;
 char *rs_cmod_blue = NULL;
+unsigned long rs_cache_size = (unsigned long) -1;
 # ifdef BACKGROUND_CYCLING_SUPPORT
 char *rs_anim_pixmap_list = NULL;
 char **rs_anim_pixmaps = NULL;
@@ -277,6 +278,7 @@ static const struct {
       OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
       OPT_LONG("cmod-blue", "blue-only color modifier (\"brightness contrast gamma\")", &rs_cmod_blue),
       OPT_STR('p', "path", "pixmap file search path", &rs_path),
+      OPT_ILONG("cache", "set Imlib2 image/pixmap cache size", &rs_cache_size),
 # ifdef BACKGROUND_CYCLING_SUPPORT
       OPT_STR('N', "anim", "a delay and list of pixmaps for cycling", &rs_anim_pixmap_list),
 # endif				/* BACKGROUND_CYCLING_SUPPORT */
@@ -2489,6 +2491,13 @@ parse_imageclasses(char *buff, void *state)
     print_warning("Pixmap support was not compiled in, ignoring \"icon\" attribute");
 #endif
 
+  } else if (!BEG_STRCASECMP(buff, "cache")) {
+#ifdef PIXMAP_SUPPORT
+    rs_cache_size = strtoul(PWord(2, buff), (char **) NULL, 0);
+#else
+    print_warning("Pixmap support was not compiled in, ignoring \"cache\" attribute");
+#endif
+
   } else if (!BEG_STRCASECMP(buff, "path ")) {
     RESET_AND_ASSIGN(rs_path, Word(2, buff));
 
@@ -3927,6 +3936,10 @@ post_parse(void)
       iml->bmod->gamma = (int) strtol(PWord(3, rs_cmod_blue), (char **) NULL, 0);
     }
     FREE(rs_cmod_blue);
+  }
+
+  if (rs_cache_size != (unsigned long) -1) {
+    imlib_set_cache_size(rs_cache_size);
   }
 #endif
 
