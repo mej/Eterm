@@ -327,7 +327,12 @@ free_eterm_image(image_t *img)
   if (img->disabled) {
     free_simage(img->disabled);
   }
+#if 0
+  /* FIXME:  There should really be an option to specify whether or not
+     to free the image itself, but since we never MALLOC() an entire
+     image_t, it's not really needed at this point.  And I'm lazy. :-) */
   FREE(img);
+#endif
 }
 
 simage_t *
@@ -366,19 +371,40 @@ reset_simage(simage_t *simg, unsigned long mask)
     FREE(simg->iml->border);
     simg->iml->border = NULL;
   }
+  if ((mask & RESET_IMLIB_BEVEL) && simg->iml->bevel) {
+    FREE(simg->iml->bevel->edges);
+    FREE(simg->iml->bevel);
+    simg->iml->bevel = NULL;
+  }
+  if ((mask & RESET_IMLIB_PAD) && simg->iml->pad) {
+    FREE(simg->iml->pad);
+    simg->iml->pad = NULL;
+  }
   if ((mask & RESET_IMLIB_MOD) && simg->iml->mod) {
     FREE(simg->iml->mod);
     simg->iml->mod = NULL;
   }
   if ((mask & RESET_IMLIB_RMOD) && simg->iml->rmod) {
+    if (simg->iml->rmod->imlib_mod) {
+      imlib_context_set_color_modifier(simg->iml->rmod->imlib_mod);
+      imlib_free_color_modifier();
+    }
     FREE(simg->iml->rmod);
     simg->iml->rmod = NULL;
   }
   if ((mask & RESET_IMLIB_GMOD) && simg->iml->gmod) {
+    if (simg->iml->gmod->imlib_mod) {
+      imlib_context_set_color_modifier(simg->iml->gmod->imlib_mod);
+      imlib_free_color_modifier();
+    }
     FREE(simg->iml->gmod);
     simg->iml->gmod = NULL;
   }
   if ((mask & RESET_IMLIB_BMOD) && simg->iml->bmod) {
+    if (simg->iml->bmod->imlib_mod) {
+      imlib_context_set_color_modifier(simg->iml->bmod->imlib_mod);
+      imlib_free_color_modifier();
+    }
     FREE(simg->iml->bmod);
     simg->iml->bmod = NULL;
   }
@@ -395,6 +421,8 @@ void
 free_simage(simage_t *s)
 {
   reset_simage(s, RESET_ALL_SIMG);
+  FREE(s->iml);
+  FREE(s->pmap);
   FREE(s);
 }
 

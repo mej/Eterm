@@ -302,7 +302,7 @@ scr_reset(void)
     if (tabs)
       FREE(tabs);
   }
-  tabs = MALLOC(TermWin.ncol * sizeof(char));
+  tabs = MALLOC(TermWin.ncol);
 
   for (i = 0; i < TermWin.ncol; i++)
     tabs[i] = (i % TABSIZE == 0) ? 1 : 0;
@@ -2163,7 +2163,7 @@ scr_search_scrollback(char *str)
   for (row = 0; row < rows; row++) {
     if (screen.text[row]) {
       c = screen.text[row];
-      for (s = strstr(c, str); s; s = strstr(++s, str)) {
+      for (s = strstr(c, str); s; s = strstr(s + 1, str)) {
         unsigned long j;
 
         col = (int) s - (int) c;
@@ -3089,13 +3089,13 @@ selection_extend_colrow(int col, int row, int flag, int cont)
       }
     }
 #ifdef MULTI_CHARSET
-    if (selection.beg.col > 0) {
+    if ((selection.beg.col > 0) && (selection.beg.col < TermWin.ncol)) {
       r = selection.beg.row + TermWin.saveLines;
       if (((screen.rend[r][selection.beg.col] & RS_multiMask) == RS_multi2)
 	  && ((screen.rend[r][selection.beg.col - 1] & RS_multiMask) == RS_multi1))
 	selection.beg.col--;
     }
-    if (selection.end.col < TermWin.ncol - 1) {
+    if ((selection.end.col > 0) && (selection.end.col < (TermWin.ncol - 1))) {
       r = selection.end.row + TermWin.saveLines;
       if (((screen.rend[r][selection.end.col] & RS_multiMask) == RS_multi1)
 	  && ((screen.rend[r][selection.end.col + 1] & RS_multiMask) == RS_multi2))

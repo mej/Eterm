@@ -3977,3 +3977,16 @@ Wed Nov 15 14:20:13 PST 2000	Michael Jennings <mej@eterm.org>
 	key will activate Eterm's "steal focus" mechanism.
 	
 -------------------------------------------------------------------------------
+Thu Nov 16 16:40:54 PST 2000	Michael Jennings <mej@eterm.org>
+
+	VA bought some licenses for Insure++, so I've been using it to audit
+	Eterm.  These are just the initial results of the collaboration; there
+	will most likely be more.  So far things are looking pretty good.  I
+	just wish Insure++ had more helpful messages.  I'd really love to be
+	able to track down those reads/writes involving freed pointers that
+	it claims to have found in Imlib2....
+
+	I also had to try and make the build work without MMX.  I did so; I
+	just hope it still works *with* MMX.... =)
+	
+-------------------------------------------------------------------------------

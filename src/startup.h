@@ -134,7 +134,7 @@ extern char *orig_argv0;
 #ifdef PIXMAP_SUPPORT
 extern short bg_needs_update;
 #endif
-extern const char *display_name;
+extern char *display_name;
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

@@ -64,7 +64,7 @@ short bg_needs_update = 1;
 TermWin_t TermWin;
 Display *Xdisplay;		/* display */
 Colormap cmap;
-const char *display_name = NULL;
+char *display_name = NULL;
 unsigned int colorfgbg;
 
 int
@@ -92,8 +92,11 @@ eterm_bootstrap(int argc, char *argv[])
   libast_set_program_version(VERSION);
 
   /* Open display, get options/resources and create the window */
-  if ((display_name = getenv("DISPLAY")) == NULL)
-    display_name = ":0";
+  if (getenv("DISPLAY") == NULL) {
+    display_name = STRDUP(":0");
+  } else {
+    display_name = STRDUP(getenv("DISPLAY"));
+  }
 
   /* This MUST be called before any other Xlib functions */
 

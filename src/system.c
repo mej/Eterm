@@ -98,6 +98,7 @@ system_wait(char *command)
     D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
     return (wait_for_chld(pid));
   }
+  ASSERT_NOTREACHED_RVAL(0);
 }
 
 int

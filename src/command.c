@@ -158,6 +158,7 @@ static char *v_bufend;		/* end of physical buffer */
 static Atom DndProtocol, DndSelection;
 #endif /* OFFIX_DND */
 #ifdef USE_XIM
+XIM xim_input_method = NULL;
 XIC xim_input_context = NULL;	/* input context */
 static XIMStyle xim_input_style = 0;
 # ifndef XSetIMValues
@@ -1121,13 +1122,30 @@ clean_exit(void)
 {
 #if DEBUG >= DEBUG_MEM
   if (DEBUG_LEVEL >= DEBUG_MEM) {
+    unsigned short i;
+
     /* Deallocate all our crap to help find memory leaks */
+    selection_clear();
     scr_release();
+    bbar_free(buttonbar);
     menulist_clear(menu_list);
     font_cache_clear();
     eterm_font_list_clear();
+    FOREACH_IMAGE(free_eterm_image(&(images[idx])););
+    for (i = 0; i < NRS_COLORS; i++) {
+      if (rs_color[i]) {
+        FREE(rs_color[i]);
+      }
+    }
+    conf_free_subsystem();
   }
 #endif
+#ifdef USE_XIM
+  if (xim_input_method) {
+    XCloseIM(xim_input_method);
+  }
+#endif
+  XCloseDisplay(Xdisplay);
 
   privileges(INVOKE);
 
@@ -1744,11 +1762,6 @@ init_locale(void)
   if (locale == NULL) {
     print_error("Setting locale failed.\n");
   } else {
-#ifdef MULTI_CHARSET
-    TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
-#else
-    TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
-#endif
 #ifdef USE_XIM
 # ifdef MULTI_CHARSET
     if (strcmp(locale, "C"))
@@ -1763,6 +1776,13 @@ init_locale(void)
 # endif
       }
 #endif
+#ifdef MULTI_CHARSET
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
+#else
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
+#endif
+    /* Reset locale to NULL since the call to create_fontset() has freed that memory. */
+    locale = NULL;
   }
 }
 #endif	/* USE_XIM || MULTI_CHARSET */
@@ -1829,6 +1849,7 @@ static void
 xim_destroy_cb(XIM xim, XPointer client_data, XPointer call_data)
 {
   xim_input_context = NULL;
+  xim_input_method = NULL;
   XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
   xim = NULL;
   client_data = call_data = (XPointer) 0;
@@ -1851,7 +1872,6 @@ xim_real_init(void)
 {
   char *p, *s, buf[64], tmp[1024];
   char *end, *next_s;
-  XIM xim = NULL;
   XIMStyles *xim_styles = NULL;
   int found;
   XPoint spot;
@@ -1876,7 +1896,7 @@ xim_real_init(void)
       *(end + 1) = '\0';
       if (*s) {
 	snprintf(buf, sizeof(buf), "@im=%s", s);
-	if (((p = XSetLocaleModifiers(buf)) != NULL) && (*p) && ((xim = XOpenIM(Xdisplay, NULL, NULL, NULL)) != NULL)) {
+	if (((p = XSetLocaleModifiers(buf)) != NULL) && (*p) && ((xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL)) != NULL)) {
           break;
         }
       }
@@ -1887,20 +1907,20 @@ xim_real_init(void)
   }
 
   /* try with XMODIFIERS env. var. */
-  if (xim == NULL && getenv("XMODIFIERS") && (p = XSetLocaleModifiers("")) != NULL && *p) {
-    xim = XOpenIM(Xdisplay, NULL, NULL, NULL);
+  if (xim_input_method == NULL && getenv("XMODIFIERS") && (p = XSetLocaleModifiers("")) != NULL && *p) {
+    xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
   }
 
   /* try with no modifiers base */
-  if (xim == NULL && (p = XSetLocaleModifiers("@im=none")) != NULL && *p) {
-    xim = XOpenIM(Xdisplay, NULL, NULL, NULL);
+  if (xim_input_method == NULL && (p = XSetLocaleModifiers("@im=none")) != NULL && *p) {
+    xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
   }
 
-  if (xim == NULL) {
-    xim = XOpenIM(Xdisplay, NULL, NULL, NULL);
+  if (xim_input_method == NULL) {
+    xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
   }
 
-  if (xim == NULL) {
+  if (xim_input_method == NULL) {
     return -1;
   }
 
@@ -1910,15 +1930,15 @@ xim_real_init(void)
 
     destroy_cb.callback = xim_destroy_cb;
     destroy_cb.client_data = NULL;
-    if (XSetIMValues(xim, XNDestroyCallback, &destroy_cb, NULL)) {
+    if (XSetIMValues(xim_input_method, XNDestroyCallback, &destroy_cb, NULL)) {
       print_error("Could not set destroy callback to IM\n");
     }
   }
 #endif
 
-  if ((XGetIMValues(xim, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
+  if ((XGetIMValues(xim_input_method, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
     print_error("input method doesn't support any style\n");
-    XCloseIM(xim);
+    XCloseIM(xim_input_method);
     return -1;
   }
   strncpy(tmp, (rs_preedit_type ? rs_preedit_type : "OverTheSpot,OffTheSpot,Root"), sizeof(tmp) - 1);
@@ -1952,14 +1972,14 @@ xim_real_init(void)
 
   if (found == 0) {
     print_error("input method doesn't support my preedit type\n");
-    XCloseIM(xim);
+    XCloseIM(xim_input_method);
     return -1;
   }
   if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
       && (xim_input_style != (XIMPreeditArea | XIMStatusArea))
       && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
     print_error("This program does not support the preedit type\n");
-    XCloseIM(xim);
+    XCloseIM(xim_input_method);
     return -1;
   }
   if (xim_input_style & XIMPreeditPosition) {
@@ -1975,7 +1995,7 @@ xim_real_init(void)
     preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
     status_attr = XVaCreateNestedList(0, XNArea, &status_rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
   }
-  xim_input_context = XCreateIC(xim, XNInputStyle, xim_input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
+  xim_input_context = XCreateIC(xim_input_method, XNInputStyle, xim_input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
                             preedit_attr ? XNPreeditAttributes : NULL, preedit_attr, status_attr ? XNStatusAttributes : NULL, status_attr, NULL);
   if (preedit_attr) {
     XFree(preedit_attr);
@@ -1985,7 +2005,7 @@ xim_real_init(void)
   }
   if (xim_input_context == NULL) {
     print_error("Failed to create input context\n");
-    XCloseIM(xim);
+    XCloseIM(xim_input_method);
     return -1;
   }
   if (xim_input_style & XIMPreeditArea)
@@ -2055,7 +2075,7 @@ void xim_set_fontset(void)
  * the slave.
  */
 int
-run_command(char *argv[])
+run_command(char **argv)
 {
 
   ttymode_t tio;
@@ -2226,7 +2246,7 @@ run_command(char *argv[])
 
 /* init_command() */
 void
-init_command(char *argv[])
+init_command(char **argv)
 {
 
   /* Initialize the command connection.        This should be called after

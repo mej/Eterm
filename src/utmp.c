@@ -142,16 +142,13 @@ void
 add_utmp_entry(const char *pty, const char *hostname, int fd)
 {
   struct passwd *pwent = getpwuid(my_ruid);
-
 #   ifdef HAVE_UTMPX_H
   struct utmpx utmp;
   struct utmp utmp2;
   MEMSET(&utmp, 0, sizeof(struct utmpx));
-
 #   else
   struct utmp utmp;
   MEMSET(&utmp, 0, sizeof(struct utmp));
-
 #   endif
 
 #   ifdef WITH_DMALLOC

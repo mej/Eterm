@@ -96,6 +96,7 @@ extern long bbar_total_h;
 _XFUNCPROTOBEGIN
 
 extern buttonbar_t *bbar_create(void);
+extern void bbar_free(buttonbar_t *);
 extern void bbar_init(buttonbar_t *, int);
 extern void bbar_event_init_dispatcher(void);
 extern unsigned char bbar_handle_enter_notify(event_t *);
@@ -116,6 +117,7 @@ extern unsigned char bbar_set_font(buttonbar_t *bbar, const char *fontname);
 extern button_t *find_button_by_text(buttonbar_t *bbar, char *text);
 extern button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y);
 extern button_t *button_create(char *text);
+extern void button_free(button_t *);
 extern unsigned char button_set_icon(button_t *button, simage_t *icon);
 extern unsigned char button_set_action(button_t *button, action_type_t type, char *action);
 extern void bbar_select_button(buttonbar_t *bbar, button_t *button);

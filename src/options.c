@@ -1164,7 +1164,7 @@ conf_init_subsystem(void) {
   ctx_idx = 0;
   context = (ctx_t *) MALLOC(sizeof(ctx_t) * ctx_cnt);
   MEMSET(context, 0, sizeof(ctx_t) * ctx_cnt);
-  context[0].name = "null";
+  context[0].name = STRDUP("null");
   context[0].handler = parse_null;
 
   /* Initialize the context state stack and set the current context to "null" */
@@ -1265,6 +1265,29 @@ conf_register_context_state(unsigned char ctx_id) {
   ctx_state[ctx_state_idx].ctx_id = ctx_id;
   ctx_state[ctx_state_idx].state = NULL;
   return (ctx_state_idx);
+}
+
+void
+conf_free_subsystem(void)
+{
+  conf_var_t *v, *tmp;
+  unsigned long i;
+
+  for (v = conf_vars; v;) {
+    tmp = v;
+    v = v->next;
+    conf_free_var(tmp);
+  }
+  for (i = 0; i < builtin_idx; i++) {
+    FREE(builtins[i].name);
+  }
+  for (i = 0; i <= ctx_idx; i++) {
+    FREE(context[i].name);
+  }
+  FREE(ctx_state);
+  FREE(builtins);
+  FREE(fstate);
+  FREE(context);
 }
 
 static conf_var_t *

@@ -109,6 +109,33 @@ bbar_create(void)
 }
 
 void
+bbar_free(buttonbar_t *bbar)
+{
+  button_t *b;
+
+  if (bbar->next) {
+    bbar_free(bbar->next);
+  }
+  button_free(bbar->rbuttons);
+  button_free(bbar->buttons);
+#ifdef MULTI_CHARSET
+  if (bbar->fontset) {
+    XFreeFontSet(Xdisplay, bbar->fontset);
+  }
+#endif
+  if (bbar->font) {
+    free_font(bbar->font);
+  }
+  if (bbar->gc != None) {
+    LIBAST_X_FREE_GC(bbar->gc);
+  }
+  if (bbar->win != None) {
+    XDestroyWindow(Xdisplay, bbar->win);
+  }
+  FREE(bbar);
+}
+
+void
 bbar_init(buttonbar_t *bbar, int width)
 {
   event_register_dispatcher(bbar_dispatch_event, bbar_event_init_dispatcher);
@@ -579,10 +606,28 @@ button_create(char *text)
     button->text = STRDUP(text);
     button->len = strlen(text);
   } else {
-    button->text = "";
+    button->text = STRDUP("");
     button->len = 0;
   }
   return button;
+}
+
+void
+button_free(button_t *button)
+{
+  if (button->next) {
+    button_free(button->next);
+  }
+  if (button->text) {
+    FREE(button->text);
+  }
+  if (button->type == ACTION_STRING || button->type == ACTION_ECHO) {
+    FREE(button->action.string);
+  }
+  if (button->icon) {
+    free_simage(button->icon);
+  }
+  FREE(button);
 }
 
 unsigned char

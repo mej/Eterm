@@ -476,6 +476,7 @@ menu_delete(menu_t *menu)
 
   ASSERT(menu != NULL);
 
+  D_MENU(("Deleting menu \"%s\"\n", menu->title));
   for (i = 0; i < menu->numitems; i++) {
     menuitem_delete(menu->items[i]);
   }
@@ -497,11 +498,11 @@ menu_delete(menu_t *menu)
   if (menu->font) {
     free_font(menu->font);
   }
-  if (menu->win) {
-    XDestroyWindow(Xdisplay, menu->win);
-  }
   if (menu->swin) {
     XDestroyWindow(Xdisplay, menu->swin);
+  }
+  if (menu->win) {
+    XDestroyWindow(Xdisplay, menu->win);
   }
   FREE(menu);
 }
