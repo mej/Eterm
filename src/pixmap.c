@@ -1398,7 +1398,7 @@ shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
   unsigned char *ptr;
   int x, y;
 
-  ptr = data + (w * sizeof(DATA16));
+  ptr = (unsigned char *)data + (w * sizeof(DATA16));
   if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
     /* No saturation */
     for (y = h; --y >= 0; ) {
@@ -1441,7 +1441,7 @@ shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
   unsigned char *ptr;
   int x, y;
 
-  ptr = data + (w * sizeof(DATA16));
+  ptr = (unsigned char *)data + (w * sizeof(DATA16));
   if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
     /* No saturation */
     for (y = h; --y >= 0; ) {
@@ -1484,7 +1484,7 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
   unsigned char *ptr;
   int x, y;
 
-  ptr = data + (w * 4);
+  ptr = (unsigned char *)data + (w * 4);
   if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
     /* No saturation */
     for (y = h; --y >= 0; ) {
@@ -1547,7 +1547,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
   unsigned char *ptr;
   int x, y;
 
-  ptr = data + (w * 3);
+  ptr = (unsigned char *)data + (w * 3);
   if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
     /* No saturation */
     for (y = h; --y >= 0; ) {

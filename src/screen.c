@@ -376,6 +376,7 @@ scr_poweron(void)
   screen.flags = Screen_DefaultFlags;
 
   scr_cursor(SAVE);
+  TermWin.nscrolled = 0;
   scr_reset();
   scr_refresh(SLOW_REFRESH);
 }
@@ -3275,7 +3276,19 @@ mouse_report(XButtonEvent * ev)
 {
   int button_number, key_state;
 
-  button_number = ((ev->button == AnyButton) ? 3 : (ev->button - Button1));
+  switch(ev->button) {
+    case AnyButton: /* Button release */
+      button_number = 3;
+      break;
+    case Button1:   /* Button press */
+    case Button2:
+    case Button3:
+      button_number = ev->button - Button1;
+      break;
+    default:        /* Wheel mouse */
+      button_number = 64 + ev->button - Button3 - 1;
+      break;
+  }
   key_state = ((ev->state & (ShiftMask | ControlMask))
 	       + ((ev->state & Mod1Mask) ? 2 : 0));
   tt_printf((unsigned char *) "\033[M%c%c%c",

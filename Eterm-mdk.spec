@@ -1,7 +1,7 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
-Version: 0.9.1
-Release: 2mdk
+Version: 0.9.2
+Release: 1mdk
 Copyright: BSD
 Group: Terminals
 Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{ver}.tar.bz2

@@ -2020,12 +2020,20 @@ xim_real_init(void)
 void
 xim_set_status_position(void)
 {
-  XRectangle preedit_rect, status_rect, *needed_rect;
+  XRectangle preedit_rect, status_rect, *needed_rect, rect;
   XVaNestedList preedit_attr, status_attr;
+  XPoint spot;
 
   REQUIRE(xim_input_context != NULL);
 
-  if (xim_input_style & XIMPreeditArea) {
+  if (xim_input_style & XIMPreeditPosition) {
+    xim_set_size(&rect);
+    xim_get_position(&spot);
+
+    preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, NULL);
+    XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, NULL);
+    XFree(preedit_attr);
+  } else if (xim_input_style & XIMPreeditArea) {
     /* Getting the necessary width of preedit area */
     status_attr = XVaCreateNestedList(0, XNAreaNeeded, &needed_rect, NULL);
     XGetICValues(xim_input_context, XNStatusAttributes, status_attr, NULL);

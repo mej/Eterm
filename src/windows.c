@@ -572,6 +572,9 @@ term_resize(int width, int height)
     last_width = width;
     last_height = height;
   }
+#ifdef USE_XIM
+  xim_set_status_position();
+#endif
 }
 
 /* Resize due to font change; update size hints and child windows */

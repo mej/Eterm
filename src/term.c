@@ -1332,9 +1332,6 @@ process_window_mode(unsigned int nargs, int args[])
         BOUND(y, szHint.min_height, scr->height);
         BOUND(x, szHint.min_width, scr->width);
 	XResizeWindow(Xdisplay, TermWin.parent, x, y);
-#ifdef USE_XIM
-	xim_set_status_position();
-#endif
 	break;
       case 5:
 	XRaiseWindow(Xdisplay, TermWin.parent);
