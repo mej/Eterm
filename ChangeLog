@@ -2741,3 +2741,18 @@ Mon Nov  8 18:46:52 PST 1999	Michael Jennings <mej@eterm.org>
 	cleaned up, but it's basically there now.
 	
 -------------------------------------------------------------------------------
+Mon Nov  8 20:17:50 PST 1999	Michael Jennings <mej@eterm.org>
+
+	All the settings should save now, so if something doesn't work or I
+	missed something, report it as a bug.
+
+	HOWEVER!  Keep in mind that "Save Settings..." saves to a file called
+	user.cfg in the current theme directory.  This means two things.  One,
+	if you do not have write permissions to the current theme directory
+	($ETERM_THEME_ROOT), it will fail.  Two, if you save settings to the
+	default (Eterm) theme, these settings will override ALL your other
+	themes!  If you save settings to the default theme, you better expect
+	to get those settings everywhere, unless the other themes also contain
+	user.cfg files.
+	
+-------------------------------------------------------------------------------

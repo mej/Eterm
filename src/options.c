@@ -3536,14 +3536,12 @@ save_config(char *path)
     if (simg->pmap->op & OP_TILE) {
       fprintf(fp, ":tiled");
     }
-    if (simg->pmap->op & OP_HSCALE) {
-      fprintf(fp, ":hscaled");
-    }
-    if (simg->pmap->op & OP_VSCALE) {
-      fprintf(fp, ":vscaled");
-    }
-    if (simg->pmap->op & OP_SCALE) {
+    if ((simg->pmap->op & OP_SCALE) || ((simg->pmap->op & OP_HSCALE) && (simg->pmap->op & OP_VSCALE))) {
       fprintf(fp, ":scaled");
+    } else if (simg->pmap->op & OP_HSCALE) {
+      fprintf(fp, ":hscaled");
+    } else if (simg->pmap->op & OP_VSCALE) {
+      fprintf(fp, ":vscaled");
     }
     if (simg->pmap->op & OP_PROPSCALE) {
       fprintf(fp, ":propscaled");
@@ -3552,7 +3550,15 @@ save_config(char *path)
     if (simg->iml->mod) {
       fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
     }
-    /* FIXME:  Other mods */
+    if (simg->iml->rmod) {
+      fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
+    }
+    if (simg->iml->gmod) {
+      fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
+    }
+    if (simg->iml->bmod) {
+      fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
+    }
     if (simg->iml->border) {
       fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
     }
@@ -3562,12 +3568,138 @@ save_config(char *path)
     if (simg->iml->pad) {
       fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
     }
-    /* FIXME:  Other states */
+
+    /* Selected state */
+    if (images[i].selected != images[i].norm) {
+      simg = images[i].selected;
+      fprintf(fp, "      state selected\n");
+      if (simg->iml->im) {
+        fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+      }
+      fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
+      if (simg->pmap->op & OP_TILE) {
+        fprintf(fp, ":tiled");
+      }
+      if ((simg->pmap->op & OP_SCALE) || ((simg->pmap->op & OP_HSCALE) && (simg->pmap->op & OP_VSCALE))) {
+        fprintf(fp, ":scaled");
+      } else if (simg->pmap->op & OP_HSCALE) {
+        fprintf(fp, ":hscaled");
+      } else if (simg->pmap->op & OP_VSCALE) {
+        fprintf(fp, ":vscaled");
+      }
+      if (simg->pmap->op & OP_PROPSCALE) {
+        fprintf(fp, ":propscaled");
+      }
+      fprintf(fp, "\n");
+      if (simg->iml->mod) {
+        fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
+      }
+      if (simg->iml->rmod) {
+        fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
+      }
+      if (simg->iml->gmod) {
+        fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
+      }
+      if (simg->iml->bmod) {
+        fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
+      }
+      if (simg->iml->border) {
+        fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
+      }
+      if (simg->iml->bevel) {
+        fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+      }
+      if (simg->iml->pad) {
+        fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
+      }
+    }
+
+    /* Clicked state */
+    if (images[i].clicked != images[i].norm) {
+      simg = images[i].clicked;
+      fprintf(fp, "      state clicked\n");
+      if (simg->iml->im) {
+        fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+      }
+      fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
+      if (simg->pmap->op & OP_TILE) {
+        fprintf(fp, ":tiled");
+      }
+      if ((simg->pmap->op & OP_SCALE) || ((simg->pmap->op & OP_HSCALE) && (simg->pmap->op & OP_VSCALE))) {
+        fprintf(fp, ":scaled");
+      } else if (simg->pmap->op & OP_HSCALE) {
+        fprintf(fp, ":hscaled");
+      } else if (simg->pmap->op & OP_VSCALE) {
+        fprintf(fp, ":vscaled");
+      }
+      if (simg->pmap->op & OP_PROPSCALE) {
+        fprintf(fp, ":propscaled");
+      }
+      fprintf(fp, "\n");
+      if (simg->iml->mod) {
+        fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
+      }
+      if (simg->iml->rmod) {
+        fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
+      }
+      if (simg->iml->gmod) {
+        fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
+      }
+      if (simg->iml->bmod) {
+        fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
+      }
+      if (simg->iml->border) {
+        fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
+      }
+      if (simg->iml->bevel) {
+        fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+      }
+      if (simg->iml->pad) {
+        fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
+      }
+    }
     fprintf(fp, "    end image\n");
   }
   fprintf(fp, "  end imageclasses\n\n");
 
-  /* FIXME:  Menus */
+  for (i = 0; i < menu_list->nummenus; i++) {
+    menu_t *menu = menu_list->menus[i];
+    unsigned short j;
+
+    fprintf(fp, "  begin menu\n");
+    fprintf(fp, "    title \"%s\"\n", menu->title);
+    if (menu->font) {
+      unsigned long tmp;
+
+      if ((XGetFontProperty(menu->font, XA_FONT_NAME, &tmp)) == True) {
+        fprintf(fp, "    font \"%s\"\n", ((char *) tmp));
+      }
+    }
+    for (j = 0; j < menu->numitems; j++) {
+      menuitem_t *item = menu->items[j];
+
+      if (item->type == MENUITEM_SEP) {
+        fprintf(fp, "    -\n");
+      } else {
+        fprintf(fp, "    begin menuitem\n");
+        fprintf(fp, "      text \"%s\"\n", item->text);
+        if (item->rtext) {
+          fprintf(fp, "      rtext \"%s\"\n", item->rtext);
+        }
+        fprintf(fp, "      action ");
+        if (item->type == MENUITEM_STRING) {
+          fprintf(fp, "string \"%s\"\n", item->action.string);
+        } else if (item->type == MENUITEM_ECHO) {
+          fprintf(fp, "echo \"%s\"\n", item->action.string);
+        } else if (item->type == MENUITEM_SUBMENU) {
+          fprintf(fp, "submenu \"%s\"\n", (item->action.submenu)->title);
+        }
+        fprintf(fp, "    end\n");
+      }
+    }
+    fprintf(fp, "  end menu\n");
+  }
+  fprintf(fp, "\n");
 
   fprintf(fp, "  begin actions\n");
   for (action = action_list; action; action = action->next) {
