@@ -1,17 +1,18 @@
+%define name     @PACKAGE@
 %define ver      @VERSION@
-%define rel      4
+%define rel      1
 %define prefix   @prefix@
 
 Summary: Enlightened terminal emulator
-Name: Eterm
+Name: %{name}
 Version: %{ver}
 Release: %{rel}
 Copyright: BSD
 Group: User Interface/X
-Source0: ftp://ftp.eterm.org/pub/Eterm/Eterm-%{ver}.tar.bz2
-Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-%{ver}.tar.bz2
+Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{ver}.tar.gz
+Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{ver}.tar.gz
 URL: http://www.eterm.org/
-BuildRoot: /var/tmp/Eterm-root
+BuildRoot: /var/tmp/%{name}-root
 Requires: imlib >= 1.9.6
 
 %description
@@ -26,15 +27,15 @@ have the Imlib library installed.
 %package backgrounds
 Summary: Backgrounds for Eterm
 Group: User Interface/X
-Requires: Eterm = %{ver}
+Requires: %{name} = %{ver}
 %description backgrounds
 Install this package if you want additional backgrounds for Eterm
 
 %prep
-%setup -q -n Eterm-%{ver} 1
+%setup -q -n %{name}-%{ver} 1
 
 %build
-%configure --with-backspace=bs --with-delete=execute
+%configure --prefix=%{prefix} --with-backspace=bs --with-delete=execute
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
@@ -42,21 +43,21 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT/etc/X11/wmconfig/
 
-cat > $RPM_BUILD_ROOT/etc/X11/wmconfig/Eterm <<EOF
-Eterm name "Eterm"
-Eterm description "A featureful, themeable X11 terminal emulator."
-Eterm exec "Eterm &"
-Eterm group Utilities/Shells
+cat > $RPM_BUILD_ROOT/etc/X11/wmconfig/%{name} <<EOF
+%{name} name "%{name}"
+%{name} description "A featureful, themeable X11 terminal emulator."
+%{name} exec "%{name} &"
+%{name} group Utilities/Shells
 EOF
 
-chmod 0644 $RPM_BUILD_ROOT/etc/X11/wmconfig/Eterm
+chmod 0644 $RPM_BUILD_ROOT/etc/X11/wmconfig/%{name}
 
-make prefix=$RPM_BUILD_ROOT%{prefix} install
+make DESTDIR=$RPM_BUILD_ROOT install
 
 ( cd $RPM_BUILD_ROOT
-  mv .%{prefix}/bin/Eterm .%{prefix}/bin/Eterm-%{ver}
+  mv .%{prefix}/bin/%{name} .%{prefix}/bin/%{name}-%{ver}
   cd $RPM_BUILD_ROOT%{prefix}/bin
-  ln -sf Eterm-%{ver} Eterm
+  ln -sf %{name}-%{ver} %{name}
   cd $RPM_BUILD_ROOT
   chmod +x .%{prefix}/lib/lib*so* ||:
 )
@@ -65,7 +66,7 @@ strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
 
 gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
 
-(cd $RPM_BUILD_ROOT%{prefix}/share/Eterm/pix/ ; \
+(cd $RPM_BUILD_ROOT%{prefix}/share/%{name}/pix/ ; \
  for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
   mv $i $i.base ; done)
 
@@ -78,9 +79,9 @@ make -C bg prefix=$RPM_BUILD_ROOT%{prefix} install
 echo "%defattr(-,root,root)" > rpm-Eterm-bg-files
 cat > rpm-Eterm-bg-files <<EOF
 %defattr(-,root,root)
-%{prefix}/share/Eterm/pix/tiled-pixmaps.list
-%{prefix}/share/Eterm/pix/scaled-pixmaps.list
-%{prefix}/share/Eterm/pix/pixmaps.list
+%{prefix}/share/%{name}/pix/tiled-pixmaps.list
+%{prefix}/share/%{name}/pix/scaled-pixmaps.list
+%{prefix}/share/%{name}/pix/pixmaps.list
 EOF
 find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
        -not -name 'README*' -not -name 014.jpg \
@@ -88,25 +89,25 @@ find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
         -not -name circuit.jpg -not -name nebula.jpg \
         -not -name fourthday.jpg -not -name gaia.jpg \
         -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
-        | sed "s#^\./bg/[scati]*le#%{prefix}/share/Eterm/pix#g" >> rpm-Eterm-bg-files
+        | sed "s#^\./bg/[scati]*le#%{prefix}/share/%{name}/pix#g" >> rpm-Eterm-bg-files
 
 %post
 /sbin/ldconfig
 for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/Eterm/pix/$i.base %{prefix}/share/Eterm/pix/$i ; done
+  mv -f %{prefix}/share/%{name}/pix/$i.base %{prefix}/share/%{name}/pix/$i ; done
 
 %postun
 /sbin/ldconfig
 for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  rm -f %{prefix}/share/Eterm/pix/$i* ; done
+  rm -f %{prefix}/share/%{name}/pix/$i* ; done
 
 %pre backgrounds
 for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/Eterm/pix/$i %{prefix}/share/Eterm/pix/$i.base ; done
+  mv -f %{prefix}/share/%{name}/pix/$i %{prefix}/share/%{name}/pix/$i.base ; done
 
 %postun backgrounds
 for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/Eterm/pix/$i.base %{prefix}/share/Eterm/pix/$i ; done
+  mv -f %{prefix}/share/%{name}/pix/$i.base %{prefix}/share/%{name}/pix/$i ; done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -115,29 +116,29 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc doc/Eterm_reference.html doc/Eterm.1.html
 %doc COPYING README ChangeLog
-%config(missingok) %{prefix}/share/Eterm/pix/*.list.base
-/etc/X11/wmconfig/Eterm
+%config(missingok) %{prefix}/share/%{name}/pix/*.list.base
+/etc/X11/wmconfig/%{name}
 %{prefix}/bin/*
 %{prefix}/lib/*
 %{prefix}/man/man1/*
-%{prefix}/share/Eterm/themes
-%{prefix}/share/Eterm/pix/014.jpg
-%{prefix}/share/Eterm/pix/40.jpg
-%{prefix}/share/Eterm/pix/blackstone.jpg
-%{prefix}/share/Eterm/pix/backwave.jpg
-%{prefix}/share/Eterm/pix/circuit.jpg
-%{prefix}/share/Eterm/pix/nebula.jpg
-%{prefix}/share/Eterm/pix/fourthday.jpg
-%{prefix}/share/Eterm/pix/gaia.jpg
-%{prefix}/share/Eterm/pix/galleon.jpg
-%{prefix}/share/Eterm/pix/night_of_the_dragon.jpg
-%{prefix}/share/Eterm/pix/bar_horizontal_[123].png
-%{prefix}/share/Eterm/pix/bar_vertical_[123].png
-%{prefix}/share/Eterm/pix/button_arrow_up_[123].png
-%{prefix}/share/Eterm/pix/button_arrow_down_[123].png
-%{prefix}/share/Eterm/pix/menu[123].png
-%dir %{prefix}/share/Eterm
-%dir %{prefix}/share/Eterm/pix
+%{prefix}/share/%{name}/themes
+%{prefix}/share/%{name}/pix/014.jpg
+%{prefix}/share/%{name}/pix/40.jpg
+%{prefix}/share/%{name}/pix/blackstone.jpg
+%{prefix}/share/%{name}/pix/backwave.jpg
+%{prefix}/share/%{name}/pix/circuit.jpg
+%{prefix}/share/%{name}/pix/nebula.jpg
+%{prefix}/share/%{name}/pix/fourthday.jpg
+%{prefix}/share/%{name}/pix/gaia.jpg
+%{prefix}/share/%{name}/pix/galleon.jpg
+%{prefix}/share/%{name}/pix/night_of_the_dragon.jpg
+%{prefix}/share/%{name}/pix/bar_horizontal_[123].png
+%{prefix}/share/%{name}/pix/bar_vertical_[123].png
+%{prefix}/share/%{name}/pix/button_arrow_up_[123].png
+%{prefix}/share/%{name}/pix/button_arrow_down_[123].png
+%{prefix}/share/%{name}/pix/menu[123].png
+%dir %{prefix}/share/%{name}
+%dir %{prefix}/share/%{name}/pix
 
 %files backgrounds -f rpm-Eterm-bg-files
 

@@ -291,15 +291,15 @@ AC_ARG_WITH(imlib,
                 USE_IMLIB=1
 )
 if test $USE_IMLIB -eq 1 ; then
+  AC_CHECK_LIB(m, pow, GRLIBS="-lm", , $SUBLIBS $X_LIBS $GRLIBS)
+  AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl $GRLIBS", , $SUBLIBS $X_LIBS $GRLIBS)
+  AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $SUBLIBS $X_LIBS $GRLIBS)
   AC_CHECK_LIB(Imlib2, imlib_create_image,
-               GRLIBS="-lImlib2"
-               AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="$GRLIBS -lttf", , $SUBLIBS $X_LIBS)
-               AC_CHECK_LIB(dl, dlopen, GRLIBS="$GRLIBS -ldl", , $SUBLIBS $X_LIBS)
-               AC_CHECK_LIB(m, pow, GRLIBS="$GRLIBS -lm", , $SUBLIBS $X_LIBS)
+               GRLIBS="-lImlib2 $GRLIBS"
                AC_DEFINE(PIXMAP_SUPPORT)
                AC_DEFINE(BACKING_STORE)
               ,
-              , $SUBLIBS $X_LIBS)
+              , $SUBLIBS $X_LIBS $GRLIBS)
 
 fi
 

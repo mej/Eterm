@@ -20,4 +20,4 @@ Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 
 INCLUDES = -I. -I$(top_srcdir) -I$(top_srcdir)/libmej -I.. -I$(includedir) -I$(prefix)/include $(X_CFLAGS)
-LDADD = libEterm.la $(top_builddir)/libmej/libmej.la -L$(libdir) -L$(prefix)/lib $(LIBS) $(GRLIBS) $(X_LIBS)
+LDADD = libEterm.la $(top_builddir)/libmej/libmej.la -L$(libdir) -L$(prefix)/lib $(X_LIBS) $(GRLIBS) $(LIBS)

@@ -3524,3 +3524,9 @@ Tue Apr 25 11:45:15 PDT 2000	Michael Jennings <mej@eterm.org>
 	Updated per changes to Imlib2 API.
 	
 -------------------------------------------------------------------------------
+Thu Apr 27 19:54:28 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Made some changes to the build process that should fix things for
+	people without shared library dependencies working.
+	
+-------------------------------------------------------------------------------
