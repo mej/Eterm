@@ -1030,10 +1030,6 @@ handle_child_signal(int sig)
      our immediate child that exited.  We exit gracefully. */
   if (pid == cmd_pid && cmd_pid != -1) {
     if (Options & Opt_pause) {
-      const char *done = " -- Task Finished, ESC to exit";
-
-      append_to_title(done);
-      append_to_icon_name(done);
       paused = 1;
       return;
     }
@@ -2398,6 +2394,12 @@ cmd_getc(void)
   /* characters already read in */
   if (CHARS_READ()) {
     RETURN_CHAR();
+  } else if (paused == 1) {
+    const char *done = " -- Task Finished, ESC to exit";
+
+    append_to_title(done);
+    append_to_icon_name(done);
+    paused++;
   }
   for (;;) {
 

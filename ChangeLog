@@ -3655,3 +3655,10 @@ Thu Jun  1 19:31:18 PDT 2000	Michael Jennings <mej@eterm.org>
 	<kit@rootshell.com>.
 	
 -------------------------------------------------------------------------------
+Thu Jun  1 20:05:49 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Dammit!  I did something really stupid.  For anyone who doesn't know
+	already, calling X from a signal handler is a NO-NO.  The *really*
+	stupid part is that I already KNEW that!  *slaps self*
+	
+-------------------------------------------------------------------------------
