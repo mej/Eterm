@@ -258,10 +258,10 @@ sb_handle_button_press(event_t *ev)
 	  if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
 	    if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)) {
               scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
-	      scr_page(UP, TermWin.nrow - 1);
+	      scr_page(UP, TermWin.nrow - CONTEXT_LINES);
 	    } else if (scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)) {
               scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
-	      scr_page(DN, TermWin.nrow - 1);
+	      scr_page(DN, TermWin.nrow - CONTEXT_LINES);
 	    } else {
 	      scrollbar_set_motion(1);
 	    }
@@ -270,7 +270,7 @@ sb_handle_button_press(event_t *ev)
 
 #ifdef XTERM_SCROLLBAR
 	  if (scrollbar.type == SCROLLBAR_XTERM) {
-            scr_page((ev->xbutton.button == Button1 ? DN : UP), TermWin.nrow - 1);
+            scr_page((ev->xbutton.button == Button1 ? DN : UP), TermWin.nrow - CONTEXT_LINES);
 	  }
 #endif /* XTERM_SCROLLBAR */
 	  break;

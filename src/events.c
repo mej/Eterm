@@ -640,24 +640,65 @@ handle_button_press(event_t *ev)
             }
 	    button_state.last_button_press = 3;
 	    break;
+#ifdef MOUSEWHEEL
+            /* This section activates the following bindings:
+             *
+             * Mousewheel Up               -- Scroll up 1 page
+             * Ctrl + Mousewheel Up        -- Scroll up 5 pages
+             * Shift + Mousewheel Up       -- Scroll up 1 line
+             * Alt + Mousewheel Up         -- Send PgUp to tty
+             * Alt + Ctrl + Mousewheel Up  -- Send 5 PgUp's to tty
+             * Alt + Shift + Mousewheel Up -- Send Up Arrow to tty
+             *
+             * Mousewheel Down               -- Scroll down 1 page
+             * Ctrl + Mousewheel Down        -- Scroll down 5 pages
+             * Shift + Mousewheel Down       -- Scroll down 1 line
+             * Alt + Mousewheel Down         -- Send PgDn to tty
+             * Alt + Ctrl + Mousewheel Down  -- Send 5 PgDn's to tty
+             * Alt + Shift + Mousewheel Down -- Send Down Arrow to tty
+             *
+             * Note that the number of lines which constitute a "page" is equal to the number
+             * of text rows in the terminal window.  The context lines are subtracted out *after*
+             * the conversion is done.  In other words, scrolling 5 pages means scrolling
+             * (5 * LINES_PER_PAGE) - CONTEXT_LINES
+             *    _not_
+             * (LINES_PER_PAGE - CONTEXT_LINES) * 5
+             *
+             * This is also true for the scroll() function in script.c.
+             */
           case Button4:
-	    if ((button_state.last_button_press == 4) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
-	      button_state.clicks++;
-	    } else {
-	      button_state.clicks = 1;
+            if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+              scr_page(UP, (TermWin.nrow * 5) - CONTEXT_LINES);
+            } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+              scr_page(UP, 1);
+            } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+              tt_write("\033[5~", 4);
+            } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+              tt_write("\033[A", 3);
+            } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+              tt_write("\033[5~\033[5~\033[5~\033[5~\033[5~", 20);
+            } else {
+              scr_page(UP, TermWin.nrow - CONTEXT_LINES);
             }
 	    button_state.last_button_press = 4;
-            scr_page(UP, ((ev->xbutton.state & ShiftMask) ? (1) : (TermWin.nrow - CONTEXT_LINES)) * ((button_state.clicks > 1) ? 3 : 1));
             break;
           case Button5:
-	    if ((button_state.last_button_press == 5) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
-	      button_state.clicks++;
-	    } else {
-	      button_state.clicks = 1;
+            if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+              scr_page(DN, (TermWin.nrow * 5) - CONTEXT_LINES);
+            } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+              scr_page(DN, 1);
+            } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+              tt_write("\033[6~", 4);
+            } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+              tt_write("\033[B", 3);
+            } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+              tt_write("\033[6~\033[6~\033[6~\033[6~\033[6~", 20);
+            } else {
+              scr_page(DN, TermWin.nrow - CONTEXT_LINES);
             }
 	    button_state.last_button_press = 5;
-            scr_page(DN, ((ev->xbutton.state & ShiftMask) ? (1) : (TermWin.nrow - CONTEXT_LINES)) * ((button_state.clicks > 1) ? 3 : 1));
             break;
+#endif
           default: break;
 	}
       }

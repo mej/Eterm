@@ -4166,3 +4166,31 @@ Thu May 24 00:14:54 PDT 2001	Michael Jennings <mej@eterm.org>
 	broken in Emacs (*grumble*).  Works in gvim though.
 	
 -------------------------------------------------------------------------------
+Mon Jun 11 17:49:55 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Okay, first off, I removed 3 scaled backgrounds.  See www.kainx.org or
+	my post to enlightenment-devel for details.
+
+	Second, I redid the default bindings for the mouse wheel.  Basically,
+	the wheel alone will scroll by pages.  Ctrl+wheel will scroll by pages
+	in groups of 5.  Shift+wheel will scroll by a single line.  If you
+	hold down the Alt key, the same combinations will work the same way,
+	but instead of scrolling within Eterm, they'll scroll the application
+	in the terminal (by sending PgUp/PgDn and up/down arrows).  This works
+	in less, bash, and any other application which groks those keys.
+
+	I also added a --without-mousewheel option to configure that will turn
+	off the default scrollwheel bindings.  Of course, you can always use
+	action bindings in the config file to bind/rebind these any way you
+	like.
+
+	While I was at it, I found and fixed a bug in the handling of the
+	Alt and Meta keys.
+
+	I added a scroll() function to the script stuff which allows you to
+	bind keys/buttons to scroll up and down.  While I was at it, I added
+	comments to script.c for each function you can use.
+
+	And finally, the config file parser was moved to libast.
+	
+-------------------------------------------------------------------------------

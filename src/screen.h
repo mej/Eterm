@@ -29,11 +29,9 @@
 #define IS_CUT_BUFFER(a)        (((a) >= XA_CUT_BUFFER0) && ((a) <= XA_CUT_BUFFER7))
 
 #define ZERO_SCROLLBACK do { \
-                          D_SCREEN(("ZERO_SCROLLBACK()\n")); \
                           if (Options & Opt_home_on_output) TermWin.view_start = 0; \
                         } while (0)
 #define REFRESH_ZERO_SCROLLBACK do { \
-                                  D_SCREEN(("REFRESH_ZERO_SCROLLBACK()\n")); \
                                   if (Options & Opt_home_on_output) TermWin.view_start = 0; \
                                 } while (0)
 #define CHECK_SELECTION	do { \

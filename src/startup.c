@@ -146,9 +146,6 @@ eterm_bootstrap(int argc, char *argv[])
   props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
   props[PROP_DND_SELECTION] = XInternAtom(Xdisplay, "DndSelection", False);
 
-  /* Initialize the parser */
-  conf_init_subsystem();
-
   if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
     char *tmp;
 

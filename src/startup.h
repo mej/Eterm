@@ -44,38 +44,6 @@
 #define MAX_COLS	250
 #define MAX_ROWS	128
 
-#ifdef MIN
-# undef MIN
-#endif
-#ifdef MAX
-# undef MAX
-#endif
-#ifdef __GNUC__
-# define MIN(a,b)                       __extension__ ({__typeof__(a) aa = (a); __typeof__(b) bb = (b); (aa < bb) ? (aa) : (bb);})
-# define MAX(a,b)                       __extension__ ({__typeof__(a) aa = (a); __typeof__(b) bb = (b); (aa > bb) ? (aa) : (bb);})
-# define LOWER_BOUND(current, other)    __extension__ ({__typeof__(other) o = (other); ((current) < o) ? ((current) = o) : (current);})
-# define AT_LEAST(current, other)       LOWER_BOUND(current, other)
-# define MAX_IT(current, other)         LOWER_BOUND(current, other)
-# define UPPER_BOUND(current, other)    __extension__ ({__typeof__(other) o = (other); ((current) > o) ? ((current) = o) : (current);})
-# define AT_MOST(current, other)        UPPER_BOUND(current, other)
-# define MIN_IT(current, other)         UPPER_BOUND(current, other)
-# define BOUND(val, min, max)           __extension__ ({__typeof__(min) m1 = (min); __typeof__(max) m2 = (max); ((val) < m1) ? ((val) = m1) : (((val) > m2) ? ((val) = m2) : (val));})
-# define CONTAIN(val, min, max)         BOUND(val, min, max)
-# define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
-#else
-# define MIN(a,b)	                (((a) < (b)) ? (a) : (b))
-# define MAX(a,b)                       (((a) > (b)) ? (a) : (b))
-# define LOWER_BOUND(current, other)    (((current) < (other)) ? ((current) = (other)) : (current))
-# define AT_LEAST(current, other)       LOWER_BOUND(current, other)
-# define MAX_IT(current, other)         LOWER_BOUND(current, other)
-# define UPPER_BOUND(current, other)    (((current) > (other)) ? ((current) = (other)) : (current))
-# define AT_MOST(current, other)        UPPER_BOUND(current, other)
-# define MIN_IT(current, other)         UPPER_BOUND(current, other)
-# define BOUND(val, min, max)           (((val) < (min)) ? ((val) = (min)) : (((val) > (max)) ? ((val) = (max)) : (val)))
-# define CONTAIN(val, min, max)         BOUND(val, min, max)
-# define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
-#endif
-
 #define SHADOW	2
 
 /* convert pixel dimensions to row/column values */

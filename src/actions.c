@@ -97,70 +97,116 @@ action_find_match(unsigned short mod, unsigned char button, KeySym keysym)
 }
 
 unsigned char
+action_check_button(unsigned char button, int x_button)
+{
+  /* The event we're looking at is a button press.  Make sure the
+     current action is also, and that it matches.  Continue if not. */
+  D_ACTIONS(("Checking button %d vs x_button %d\n", button, x_button));
+  if (button == BUTTON_NONE) {
+    /* It was a button press, and this action is not a button action. */
+    return FALSE;
+  }
+  if ((button != BUTTON_ANY) && (button != x_button)) {
+    /* It's a specific button, and the two don't match. */
+    return FALSE;
+  }
+  D_ACTIONS(("Button match confirmed.\n"));
+  return TRUE;
+}
+
+unsigned char
+action_check_keysym(KeySym keysym, KeySym x_keysym)
+{
+  /* The event we're looking at is a key press.  Make sure the
+     current action is also, and that it matches.  Continue if not. */
+  D_ACTIONS(("Checking keysym 0x%08x vs x_keysym 0x%08x\n", keysym, x_keysym));
+  if (keysym == None) {
+    return FALSE;
+  } else if (keysym != x_keysym) {
+    return FALSE;
+  }
+  D_ACTIONS(("Keysym match confirmed.\n"));
+  return TRUE;
+}
+
+unsigned char
+action_check_modifiers(unsigned short mod, int x_mod)
+{
+  unsigned int m = (AltMask | MetaMask | NumLockMask);
+
+  /* When we do have to check the modifiers, we do so in this order to eliminate the
+     most popular choices first.  If any test fails, we return FALSE. */
+  D_ACTIONS(("Checking modifier set 0x%08x (" MOD_FMT ") vs. X modifier set 0x%08x (" MOD_FMT ")\n",
+             mod, SHOW_MODS(mod), x_mod, SHOW_X_MODS(x_mod)));
+  if (mod != MOD_ANY) {
+    /* LOGICAL_XOR() returns true if either the first parameter or the second parameter
+       is true, but not both...just like XOR.  If the mask we're looking for is set in
+       mod but not in x_mod, or set in x_mod but not in mod, we don't have a match. */
+    if (LOGICAL_XOR((mod & MOD_CTRL), (x_mod & ControlMask))) {
+      return FALSE;
+    }
+    if (LOGICAL_XOR((mod & MOD_SHIFT), (x_mod & ShiftMask))) {
+      return FALSE;
+    }
+    if (MetaMask != AltMask) {
+      if (LOGICAL_XOR((mod & MOD_ALT), (x_mod & AltMask))) {
+        return FALSE;
+      }
+      if (LOGICAL_XOR((mod & MOD_META), (x_mod & MetaMask))) {
+        return FALSE;
+      }
+    } else {
+      if (LOGICAL_XOR((mod & (MOD_META | MOD_ALT)), (x_mod & (MetaMask | AltMask)))) {
+        return FALSE;
+      }
+    }
+    if (LOGICAL_XOR((mod & MOD_LOCK), (x_mod & LockMask))) {
+      return FALSE;
+    }
+    /* These tests can't use LOGICAL_XOR because the second test has an additional
+       restriction that the Mod?Mask cannot be set in m; i.e., we want to ignore
+       any Mod?Mask assigned to Alt, Meta, or the NumLock On state. */
+    if (((mod & MOD_MOD1) && !(x_mod & Mod1Mask)) || (!(mod & MOD_MOD1) && (x_mod & Mod1Mask) && !(Mod1Mask & m))) {
+      return FALSE;                                                                                                                                 
+    }                                                                                                                                           
+    if (((mod & MOD_MOD2) && !(x_mod & Mod2Mask)) || (!(mod & MOD_MOD2) && (x_mod & Mod2Mask) && !(Mod2Mask & m))) {
+      return FALSE;                                                                                                                                 
+    }                                                                                                                                           
+    if (((mod & MOD_MOD3) && !(x_mod & Mod3Mask)) || (!(mod & MOD_MOD3) && (x_mod & Mod3Mask) && !(Mod3Mask & m))) {
+      return FALSE;                                                                                                                                 
+    }                                                                                                                                           
+    if (((mod & MOD_MOD4) && !(x_mod & Mod4Mask)) || (!(mod & MOD_MOD4) && (x_mod & Mod4Mask) && !(Mod4Mask & m))) {
+      return FALSE;                                                                                                                                 
+    }                                                                                                                                           
+    if (((mod & MOD_MOD5) && !(x_mod & Mod5Mask)) || (!(mod & MOD_MOD5) && (x_mod & Mod5Mask) && !(Mod5Mask & m))) {
+      return FALSE;
+    }
+  }
+  D_ACTIONS(("Modifier match confirmed.\n"));
+  return TRUE;
+}
+
+unsigned char
 action_dispatch(event_t *ev, KeySym keysym)
 {
   action_t *action;
-  unsigned int m = (AltMask | MetaMask | NumLockMask);
 
   ASSERT_RVAL(ev != NULL, 0);
   ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, 0);
-  D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x\n", ev, ev->xbutton.button, keysym, ev->xkey.state));
+  D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n",
+             ev, ev->xbutton.button, keysym, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
   for (action = action_list; action; action = action->next) {
-    D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
     /* The very first thing we do is match the event type to the type
        of the current action.  This means that we'll only run through
        the modifier checks below if we absolutely have to. */
-    if (ev->xany.type == ButtonPress) {
-      /* The event we're looking at is a button press.  Make sure the
-         current action is also, and that it matches.  Continue if not. */
-      if ((action->button == BUTTON_NONE) || ((action->button != BUTTON_ANY) && (action->button != ev->xbutton.button))) {
-        continue;
-      }
-    } else {
-      /* The event we're looking at is a key press.  Make sure the
-         current action is also, and that it matches.  Continue if not. */
-      if (!(action->keysym) || (keysym != action->keysym)) {
-        continue;
+    if ((ev->xany.type == ButtonPress && action_check_button(action->button, ev->xbutton.button))
+        || (ev->xany.type == KeyPress && action_check_keysym(action->keysym, action->keysym))) {
+      if (action_check_modifiers(action->mod, ev->xkey.state)) {
+        D_ACTIONS(("Match found.\n"));
+        /* If we've passed all the above tests, it's a match.  Dispatch the handler. */
+        return ((action->handler)(ev, action));
       }
     }
-    D_ACTIONS(("Button/key passed.\n"));
-    if (action->mod != MOD_ANY) {
-      /* When we do have to check the modifiers, we do so in
-         this order to eliminate the most popular choices first. */
-      if (LOGICAL_XOR((action->mod & MOD_CTRL), (ev->xkey.state & ControlMask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_SHIFT), (ev->xkey.state & ShiftMask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_ALT), (ev->xkey.state & AltMask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_META), (ev->xkey.state & MetaMask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_LOCK), (ev->xkey.state & LockMask))) {
-        continue;
-      }
-      if (((action->mod & MOD_MOD1) && !(ev->xkey.state & Mod1Mask)) || (!(action->mod & MOD_MOD1) && (ev->xkey.state & Mod1Mask) && !(Mod1Mask & m))) {
-        continue;                                                                                                                                 
-      }                                                                                                                                           
-      if (((action->mod & MOD_MOD2) && !(ev->xkey.state & Mod2Mask)) || (!(action->mod & MOD_MOD2) && (ev->xkey.state & Mod2Mask) && !(Mod2Mask & m))) {
-        continue;                                                                                                                                 
-      }                                                                                                                                           
-      if (((action->mod & MOD_MOD3) && !(ev->xkey.state & Mod3Mask)) || (!(action->mod & MOD_MOD3) && (ev->xkey.state & Mod3Mask) && !(Mod3Mask & m))) {
-        continue;                                                                                                                                 
-      }                                                                                                                                           
-      if (((action->mod & MOD_MOD4) && !(ev->xkey.state & Mod4Mask)) || (!(action->mod & MOD_MOD4) && (ev->xkey.state & Mod4Mask) && !(Mod4Mask & m))) {
-        continue;                                                                                                                                 
-      }                                                                                                                                           
-      if (((action->mod & MOD_MOD5) && !(ev->xkey.state & Mod5Mask)) || (!(action->mod & MOD_MOD5) && (ev->xkey.state & Mod5Mask) && !(Mod5Mask & m))) {
-        continue;
-      }
-    }      
-    D_ACTIONS(("Match found.\n"));
-    /* If we've passed all the above tests, it's a match.  Dispatch the handler. */
-    return ((action->handler)(ev, action));
   }
   return (0);
 }

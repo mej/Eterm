@@ -2,7 +2,7 @@
 
 DIRS = tile scale
 EXTRA_DIST =  tile/014.jpg tile/circuit.jpg tile/giger1.jpg tile/40.jpg tile/blackstone.jpg \
-              tile/nebula.jpg scale/fourthday.jpg scale/gaia.jpg scale/galleon.jpg scale/Dragon.jpg \
+              tile/nebula.jpg scale/Dragon.jpg \
               README.backgrounds
 pixmapdir = $(pkgdatadir)/pix
 themedir = $(pkgdatadir)/themes

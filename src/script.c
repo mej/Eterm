@@ -50,6 +50,7 @@ static eterm_script_handler_t script_handlers[] =
   { "paste",     script_handler_paste },
   { "quit",      script_handler_exit },
   { "save",      script_handler_save },
+  { "scroll",    script_handler_scroll },
   { "search",    script_handler_search },
   { "spawn",     script_handler_spawn },
 
@@ -122,6 +123,18 @@ eterm_handle_winop(char *action)
 #endif
 
 /********* HANDLERS **********/
+
+/* copy():  Copy the current selection to the specified clipboard or cut
+ *          buffer
+ *
+ * Syntax:  copy([ <buffer> ])
+ *
+ * <buffer> is either a number 0-7, in which case the selection is copied to
+ * the the cut buffer specified, or one of the words "clipboard," "primary,"
+ * or "secondary" (or any initial substring thereof), in which case the
+ * selection is copied to the specified clipboard.  The default buffer is
+ * the "primary" buffer (XA_PRIMARY in Xlib-speak).
+ */
 void
 script_handler_copy(char **params)
 {
@@ -149,6 +162,15 @@ script_handler_copy(char **params)
   selection_copy(sel);
 }
 
+/* exit():  Exit Eterm with an optional message or return code
+ *
+ * Syntax:  exit([ { <msg> | <code> } ])
+ *
+ * <msg> is an optional exit message.  <code> is a positive or
+ * negative integer return code.  Either one may be specified, but not
+ * both.  If neither is specified, Eterm exits with a return code of 0
+ * and no message.
+ */
 void
 script_handler_exit(char **params)
 {
@@ -167,6 +189,17 @@ script_handler_exit(char **params)
   exit(code);
 }
 
+/* paste():  Paste the contents of the specified clipboard or cut buffer
+ *           into the terminal window
+ *
+ * Syntax:  paste([ <buffer> ])
+ *
+ * <buffer> is either a number 0-7, in which case the contents of the cut
+ * buffer specified are pasted, or one of the words "clipboard," "primary,"
+ * or "secondary" (or any initial substring thereof), in which case the
+ * contents of the specified clipboard are pasted.  The default buffer is
+ * the "primary" buffer (XA_PRIMARY in Xlib-speak).
+ */
 void
 script_handler_paste(char **params)
 {
@@ -194,6 +227,16 @@ script_handler_paste(char **params)
   selection_paste(sel);
 }
 
+/* save():  Save the current theme/user configuration
+ *
+ * Syntax:  save([ { theme | user } ,] [ <filename> ])
+ *
+ * The "user" settings are saved by default, and the default
+ * filename is user.cfg.  So save() by itself will save the
+ * current user settings to user.cfg.  save(theme) will save
+ * the theme settings instead; the default filename in that case
+ * will be theme.cfg.
+ */
 void
 script_handler_save(char **params)
 {
@@ -208,12 +251,80 @@ script_handler_save(char **params)
   }
 }
 
+/* scroll():  Scroll backward or forward in the scrollback buffer
+ *
+ * Syntax:  scroll(N) or scroll(Nl) -- Scroll N lines
+ *          scroll(Np)              -- Scroll N pages/screensful
+ *          scroll(Nb)              -- Scroll N buffers
+ * 
+ * N is a floating point number.  Use a negative number to scroll
+ * up and a positive number to scroll down.  Fractions can be used
+ * also (e.g., to scroll one half page, use scroll(0.5p)).  It is
+ * possible to spell out "lines," "pages," and "buffers" as well,
+ * and the type may be passed as a second parameter if you wish.
+ */
+void
+script_handler_scroll(char **params)
+{
+  char *type;
+  double cnt_float;
+  long count;
+  int direction = DN;
+
+  if (params && *params) {
+    cnt_float = strtod(params[0], &type);
+    if (cnt_float == 0.0) {
+      return;
+    } else if (cnt_float < 0.0) {
+      cnt_float = -cnt_float;
+      direction = UP;
+    }
+    if (!type) {
+      type = params[1];
+    }
+    if (type && *type) {
+      for (; *type && !isalpha(*type); type++);
+      if (str_leading_match("lines", type)) {
+        count = (long) cnt_float;
+      } else if (str_leading_match("pages", type) || str_leading_match("screens", type)) {
+        count = (long) ((cnt_float * TermWin.nrow) - CONTEXT_LINES);
+      } else if (str_leading_match("buffers", type)) {
+        count = (long) (cnt_float * (TermWin.nrow + TermWin.saveLines));
+      } else {
+        print_error("Invalid modifier \"%s\" in scroll()\n", type);
+        return;
+      }
+    } else {
+      count = (long) cnt_float;
+    }
+
+    if (count <= 0) {
+      return;
+    }
+    scr_page(direction, count);
+  }
+}
+
+/* search():  Search the scrollback buffer for a string and highlight
+ *            any occurances of it.
+ *
+ * Syntax:  search([ <str> ])
+ *
+ * <str> is an optional search string to highlight.  If none is given,
+ * search() will clear the previously-highlighted search term.
+ */
 void
 script_handler_search(char **params)
 {
   scr_search_scrollback(params ? params[0] : NULL);
 }
 
+/* spawn():  Spawns a child process to execute a sub-command
+ *
+ * Syntax:  spawn([ <command> ])
+ *
+ * If no command is specified, the default is to execute another Eterm.
+ */
 void
 script_handler_spawn(char **params)
 {
@@ -228,6 +339,12 @@ script_handler_spawn(char **params)
   }
 }
 
+/* nop():  Do nothing
+ *
+ * Syntax:  nop()
+ *
+ * This function can be used to cancel undesired default behavior.
+ */
 void
 script_handler_nop(char **params)
 {

@@ -225,7 +225,7 @@ scr_reset(void)
       D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
       /* we have fewer rows so fix up number of scrolled lines */
-      MIN_IT(screen.row, TermWin.nrow - 1);
+      UPPER_BOUND(screen.row, TermWin.nrow - 1);
 
     } else if (TermWin.nrow > prev_nrow) {
       /* add rows */
@@ -583,7 +583,7 @@ scroll_text(int row1, int row2, int count, int spec)
     return 0;
   if ((count > 0) && (row1 == 0) && (current_screen == PRIMARY)) {
     TermWin.nscrolled += count;
-    MIN_IT(TermWin.nscrolled, TermWin.saveLines);
+    UPPER_BOUND(TermWin.nscrolled, TermWin.saveLines);
   } else if (!spec)
     row1 += TermWin.saveLines;
   row2 += TermWin.saveLines;
@@ -612,7 +612,7 @@ scroll_text(int row1, int row2, int count, int spec)
 
 /* A: scroll up */
 
-    MIN_IT(count, row2 - row1 + 1);
+    UPPER_BOUND(count, row2 - row1 + 1);
 
 /* A1: Copy and blank out lines that will get clobbered by the rotation */
     for (i = 0, j = row1; i < count; i++, j++) {
@@ -708,10 +708,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
       screen.row -= nlines;
     }
   }
-  MIN_IT(screen.col, last_col - 1);
-  MIN_IT(screen.row, TermWin.nrow - 1);
-  /*MAX_IT(screen.row, 0); */
-  MAX_IT(screen.row, -TermWin.nscrolled);
+  UPPER_BOUND(screen.col, last_col - 1);
+  BOUND(screen.row, -TermWin.nscrolled, TermWin.nrow - 1);
 
   row = screen.row + TermWin.saveLines;
   if (screen.text[row] == NULL) {
@@ -755,7 +753,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
             scr_tab(1);
             continue;
           case '\n':
-            MAX_IT(stp[last_col], screen.col);
+            LOWER_BOUND(stp[last_col], screen.col);
             screen.flags &= ~Screen_WrapNext;
             if (screen.row == screen.bscroll) {
               scroll_text(screen.tscroll, screen.bscroll, 1, 0);
@@ -769,7 +767,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
             srp = screen.rend[row];	/* _must_ refresh */
             continue;
           case '\r':
-            MAX_IT(stp[last_col], screen.col);
+            LOWER_BOUND(stp[last_col], screen.col);
             screen.flags &= ~Screen_WrapNext;
             screen.col = 0;
             continue;
@@ -813,7 +811,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	screen.flags &= ~Screen_WrapNext;
     }
   }
-  MAX_IT(stp[last_col], screen.col);
+  LOWER_BOUND(stp[last_col], screen.col);
   if (screen.col == 0) {
     end.col = last_col - 1;
     end.row = screen.row - 1;
@@ -889,14 +887,11 @@ scr_tab(int count)
 void
 scr_gotorc(int row, int col, int relative)
 {
-  D_SCREEN(("scr_gotorc(r:%d,c:%d,%d): from (r:%d,c:%d)\n", row, col, relative, screen.row, screen.col));
-
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
 
   screen.col = ((relative & C_RELATIVE) ? (screen.col + col) : col);
-  MAX_IT(screen.col, 0);
-  MIN_IT(screen.col, TermWin.ncol - 1);
+  BOUND(screen.col, 0, TermWin.ncol - 1);
 
   if (screen.flags & Screen_WrapNext) {
     screen.flags &= ~Screen_WrapNext;
@@ -918,12 +913,11 @@ scr_gotorc(int row, int col, int relative)
   } else {
     if (screen.flags & Screen_Relative) {	/* relative origin mode */
       screen.row = row + screen.tscroll;
-      MIN_IT(screen.row, screen.bscroll);
+      UPPER_BOUND(screen.row, screen.bscroll);
     } else
       screen.row = row;
   }
-  MAX_IT(screen.row, 0);
-  MIN_IT(screen.row, TermWin.nrow - 1);
+  BOUND(screen.row, 0, TermWin.nrow - 1);
 }
 
 /*
@@ -953,8 +947,7 @@ scr_index(int direction)
     blank_screen_mem(screen.text, screen.rend, dirn, rstyle);
   } else
     screen.row += dirn;
-  MAX_IT(screen.row, 0);
-  MIN_IT(screen.row, TermWin.nrow - 1);
+  BOUND(screen.row, 0, TermWin.nrow - 1);
   CHECK_SELECTION;
 }
 
@@ -982,7 +975,7 @@ scr_erase_line(int mode)
       case 0:			/* erase to end of line */
         col = screen.col;
         num = TermWin.ncol - col;
-        MIN_IT(screen.text[row][TermWin.ncol], col);
+        UPPER_BOUND(screen.text[row][TermWin.ncol], col);
         break;
       case 1:			/* erase to beginning of line */
         col = 0;
@@ -1050,7 +1043,7 @@ scr_erase_screen(int mode)
       return;
   }
   if (row >= 0 && row <= TermWin.nrow) {	/* check OOB */
-    MIN_IT(num, (TermWin.nrow - row));
+    UPPER_BOUND(num, (TermWin.nrow - row));
     if (rstyle & RS_RVid || rstyle & RS_Uline)
       ren = -1;
     else {
@@ -1152,7 +1145,7 @@ scr_insdel_chars(int count, int insdel)
     return;
 
   CHECK_SELECTION;
-  MIN_IT(count, (TermWin.ncol - screen.col));
+  UPPER_BOUND(count, (TermWin.ncol - screen.col));
 
   row = screen.row + TermWin.saveLines;
   screen.flags &= ~Screen_WrapNext;
@@ -1164,7 +1157,7 @@ scr_insdel_chars(int count, int insdel)
 	screen.rend[row][col] = screen.rend[row][col - count];
       }
       screen.text[row][TermWin.ncol] += count;
-      MIN_IT(screen.text[row][TermWin.ncol], TermWin.ncol);
+      UPPER_BOUND(screen.text[row][TermWin.ncol], TermWin.ncol);
       /* FALLTHROUGH */
     case ERASE:
       blank_line(&(screen.text[row][screen.col]),
@@ -1203,8 +1196,8 @@ scr_insdel_chars(int count, int insdel)
 void
 scr_scroll_region(int top, int bot)
 {
-  MAX_IT(top, 0);
-  MIN_IT(bot, TermWin.nrow - 1);
+  LOWER_BOUND(top, 0);
+  UPPER_BOUND(bot, TermWin.nrow - 1);
   if (top > bot)
     return;
   screen.tscroll = top;
@@ -1502,8 +1495,7 @@ scr_move_to(int y, int len)
 			/ (len)) - (TermWin.nrow - 1);
   D_SCREEN(("scr_move_to(%d, %d) view_start:%d\n", y, len, TermWin.view_start));
 
-  MAX_IT(TermWin.view_start, 0);
-  MIN_IT(TermWin.view_start, TermWin.nscrolled);
+  BOUND(TermWin.view_start, 0, TermWin.nscrolled);
 
   return (TermWin.view_start - start);
 }
@@ -2224,8 +2216,7 @@ scr_search_scrollback(char *str)
   } else {
     if (lrow != rows) {
       TermWin.view_start = rows - lrow - TermWin.nrow;
-      LOWER_BOUND(TermWin.view_start, 0);
-      UPPER_BOUND(TermWin.view_start, TermWin.nscrolled);
+      BOUND(TermWin.view_start, 0, TermWin.nscrolled);
       D_SCREEN(("New view start is %d\n", TermWin.view_start));
     }
   }
@@ -2562,12 +2553,10 @@ selection_setclr(int set, int startr, int startc, int endr, int endc)
   }
   last_col = TermWin.ncol - 1;
 
-  MIN_IT(endc, last_col);
-  MIN_IT(startr, TermWin.nrow - 1);
-  MAX_IT(startr, -TermWin.nscrolled);
-  MIN_IT(endr, TermWin.nrow - 1);
-  MAX_IT(endr, -TermWin.nscrolled);
-  MAX_IT(startc, 0);
+  LOWER_BOUND(startc, 0);
+  UPPER_BOUND(endc, last_col);
+  BOUND(startr, -TermWin.nscrolled, TermWin.nrow - 1);
+  BOUND(endr, -TermWin.nscrolled, TermWin.nrow - 1);
 
   startr += TermWin.saveLines;
   endr += TermWin.saveLines;
@@ -2627,8 +2616,7 @@ selection_start_colrow(int col, int row)
 		       selection.end.row, selection.end.col);
   }
   selection.op = SELECTION_INIT;
-  MAX_IT(row, 0);
-  MIN_IT(row, TermWin.nrow - 1);
+  BOUND(row, 0, TermWin.nrow - 1);
 
   row -= TermWin.view_start;
   end_col = screen.text[row + TermWin.saveLines][TermWin.ncol];
@@ -2710,7 +2698,7 @@ selection_make(Time tm)
     end_col = selection.end.col + 1;
   } else
     i = 1;
-  MIN_IT(end_col, TermWin.ncol);
+  UPPER_BOUND(end_col, TermWin.ncol);
   for (; col < end_col; col++)
     *str++ = *t++;
   if (!(Options & Opt_select_trailing_spaces)) {
@@ -2971,8 +2959,7 @@ selection_extend(int x, int y, int flag)
  */
   col = Pixel2Col(x);
   row = Pixel2Row(y);
-  MAX_IT(row, 0);
-  MIN_IT(row, TermWin.nrow - 1);
+  BOUND(row, 0, TermWin.nrow - 1);
   if (((selection.clicks % 3) == 1) && !flag && (col == selection.mark.col && (row == selection.mark.row + TermWin.view_start))) {
     /* select nothing */
     selection_setclr(0, selection.beg.row, selection.beg.col,
@@ -3033,8 +3020,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
     return;
   }
   old_col = col;
-  MAX_IT(col, -1);
-  MIN_IT(col, TermWin.ncol);
+  BOUND(col, -1, TermWin.ncol);
   old_beg.col = selection.beg.col;
   old_beg.row = selection.beg.row;
   old_end.col = selection.end.col;

@@ -80,7 +80,4 @@
 
 #  define DEBUG_X			9
 
-#  define DEBUG_PARSE			9999
-#  define D_PARSE(x)			D_NEVER(x)
-
 #endif /* _ETERM_DEBUG_H */
