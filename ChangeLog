@@ -4557,3 +4557,13 @@ Sun Apr 14 22:34:41 2002                        Michael Jennings (mej)
 Fixed a bug spotted by Charles Clancy <tclancy@uiuc.edu> that caused
 color modifiers to mistakenly be applied to the icon pixmap.
 ----------------------------------------------------------------------
+Fri Apr 19 15:35:11 2002                        Michael Jennings (mej)
+
+Use safe_print_string() to decode string defines before printing them
+in --version output.  This fixes Debian bug #143328, submitted by
+Tom Gilbert <tom@linuxbrit.co.uk>.
+
+Also removed '~' from the CUTCHARS compiled-in default.  (It had
+already been removed from the themes.)  Makes double-click selection
+of URL's easier.  Requested by Laurence J. Lane <ljlane@debian.org>.
+----------------------------------------------------------------------

@@ -156,7 +156,7 @@
 /* #define SAVELINES 256 */
 
 /* Set the default separator characters for double-click word selection */
-#define CUTCHARS "\"&'()*,;<=>?@[\\]^`{|}~ \t"
+#define CUTCHARS "\"&'()*,;<=>?@[\\]^`{|} \t"
 
 /* Make it an option */
 #define CUTCHAR_OPTION

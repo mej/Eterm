@@ -1775,7 +1775,8 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
 	break;
       case 24:
-	if (ximg->bits_per_pixel != 32) {
+        /* FIXME:  Is this test needed? */
+	if (1 || (ximg->bits_per_pixel != 32)) {
 	  shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 	  break;
 	}
@@ -2114,7 +2115,6 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   imlib_context_set_anti_alias(1);
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
-  
   imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, w, h);
   if (check_for_enlightenment()) {
     wm_hints->flags |= IconPixmapHint | IconMaskHint;

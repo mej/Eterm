@@ -721,7 +721,7 @@ version(void)
   printf("\n\nCompile-time definitions:\n");
 
 #ifdef PATH_ENV
-  printf(" PATH_ENV=\"%s\"\n", PATH_ENV);
+  printf(" PATH_ENV=\"%s\"\n", safe_print_string(PATH_ENV, sizeof(PATH_ENV) - 1));
 #else
   printf(" -PATH_ENV\n");
 #endif
@@ -731,12 +731,12 @@ version(void)
   printf(" -REFRESH_PERIOD\n");
 #endif
 #ifdef PRINTPIPE
-  printf(" PRINTPIPE=\"%s\"\n", PRINTPIPE);
+  printf(" PRINTPIPE=\"%s\"\n", safe_print_string(PRINTPIPE, sizeof(PRINTPIPE) - 1));
 #else
   printf(" -PRINTPIPE\n");
 #endif
 #ifdef KS_DELETE
-  printf(" KS_DELETE=\"%s\"\n", KS_DELETE);
+  printf(" KS_DELETE=\"%s\"\n", safe_print_string(KS_DELETE, sizeof(KS_DELETE) - 1));
 #else
   printf(" -KS_DELETE\n");
 #endif
@@ -746,7 +746,7 @@ version(void)
   printf(" -SAVELINES\n");
 #endif
 #ifdef CUTCHARS
-  printf(" CUTCHARS=\"%s\"\n", CUTCHARS);
+  printf(" CUTCHARS=\"%s\"\n", safe_print_string(CUTCHARS, sizeof(CUTCHARS) - 1));
 #else
   printf(" -CUTCHARS\n");
 #endif
@@ -776,7 +776,7 @@ version(void)
   printf(" -SCROLLBAR_CONTINUOUS_DELAY\n");
 #endif
 #ifdef ESCZ_ANSWER
-  printf(" ESCZ_ANSWER=\"%s\"\n", ESCZ_ANSWER);
+  printf(" ESCZ_ANSWER=\"%s\"\n", safe_print_string(ESCZ_ANSWER, sizeof(ESCZ_ANSWER) - 1));
 #else
   printf(" -ESCZ_ANSWER\n");
 #endif
