@@ -301,6 +301,10 @@ inline void *memmove(void *, const void *, size_t);
 # define PATH_ENV "ETERMPATH"
 #endif
 
+#if !(HAVE_SAVED_UIDS) && defined(_POSIX_VERSION) && (_POSIX_SAVED_IDS)
+# define HAVE_SAVED_UIDS 1
+#endif
+
 /* utmp doesn't work on CygWin32 */
 #ifdef __CYGWIN32__
 # undef UTMP_SUPPORT

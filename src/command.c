@@ -1428,9 +1428,17 @@ get_tty(void)
    */
   {
     unsigned short i;
+    unsigned long max_fds;
 
-    D_TTY(("Closing file descriptors 0-%d.\n", num_fds));
-    for (i = 0; i < num_fds; i++) {
+    /* get number of available file descriptors */
+#ifdef _POSIX_VERSION
+    max_fds = sysconf(_SC_OPEN_MAX);
+#else
+    max_fds = getdtablesize();
+#endif
+
+    D_TTY(("Closing file descriptors 0-%d.\n", max_fds));
+    for (i = 0; i < max_fds; i++) {
       if (i != fd)
 	close(i);
     }
@@ -2095,6 +2103,7 @@ run_command(char **argv)
   privileges(IGNORE);
 
   ptyfd = get_pty();
+  AT_LEAST(num_fds, ptyfd);
   if (ptyfd < 0)
     return (-1);
 
@@ -2267,13 +2276,6 @@ init_command(char **argv)
 
   init_locale();
 
-  /* get number of available file descriptors */
-#ifdef _POSIX_VERSION
-  num_fds = sysconf(_SC_OPEN_MAX);
-#else
-  num_fds = getdtablesize();
-#endif
-
 #ifdef META8_OPTION
   meta_char = (Options & Opt_meta8 ? 0x80 : 033);
 #endif
@@ -2285,6 +2287,10 @@ init_command(char **argv)
   Xfd = XConnectionNumber(Xdisplay);
   D_CMD(("Xfd = %d\n", Xfd));
   cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
+  AT_LEAST(num_fds, Xfd);
+  if (pipe_fd >= 0) {
+    AT_LEAST(num_fds, pipe_fd);
+  }
 
   if ((cmd_fd = run_command(argv)) < 0) {
     print_error("aborting\n");
@@ -2522,7 +2528,7 @@ cmd_getc(void)
     } else {
       delay = &value;
     }
-    retval = select(num_fds, &readfds, NULL, NULL, delay);
+    retval = select(num_fds + 1, &readfds, NULL, NULL, delay);
 
     /* See if we can read from the application */
     if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
