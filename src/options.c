@@ -3033,6 +3033,7 @@ post_parse(void)
 
     sprintf(buff, "0x%03x", ((100 - rs_shade) << 8) / 100);
     rs_cmod_image = STRDUP(buff);
+    D_PIXMAP(("--shade value of %d converted to cmod value of %s\n", rs_shade, rs_cmod_image));
   }
   if (rs_tint) {
     char buff[10];
@@ -3078,6 +3079,8 @@ post_parse(void)
     if (n > 2) {
       iml->mod->gamma = (int) strtol(get_pword(3, rs_cmod_image), (char **) NULL, 0);
     }
+    D_PIXMAP(("From image cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_image,
+              iml->mod->brightness, iml->mod->contrast, iml->mod->gamma));
     FREE(rs_cmod_image);
   }
   if (rs_cmod_red) {
@@ -3095,7 +3098,10 @@ post_parse(void)
     if (n > 2) {
       iml->rmod->gamma = (int) strtol(get_pword(3, rs_cmod_red), (char **) NULL, 0);
     }
+    D_PIXMAP(("From red cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_red,
+              iml->rmod->brightness, iml->rmod->contrast, iml->rmod->gamma));
     FREE(rs_cmod_red);
+    update_cmod(iml->rmod);
   }
   if (rs_cmod_green) {
     unsigned char n = num_words(rs_cmod_green);
@@ -3112,7 +3118,10 @@ post_parse(void)
     if (n > 2) {
       iml->gmod->gamma = (int) strtol(get_pword(3, rs_cmod_green), (char **) NULL, 0);
     }
+    D_PIXMAP(("From green cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_green,
+              iml->gmod->brightness, iml->gmod->contrast, iml->gmod->gamma));
     FREE(rs_cmod_green);
+    update_cmod(iml->gmod);
   }
   if (rs_cmod_blue) {
     unsigned char n = num_words(rs_cmod_blue);
@@ -3129,7 +3138,14 @@ post_parse(void)
     if (n > 2) {
       iml->bmod->gamma = (int) strtol(get_pword(3, rs_cmod_blue), (char **) NULL, 0);
     }
+    D_PIXMAP(("From blue cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_blue,
+              iml->bmod->brightness, iml->bmod->contrast, iml->bmod->gamma));
     FREE(rs_cmod_blue);
+    update_cmod(iml->bmod);
+  }
+  if (images[image_bg].norm->iml->im) {
+    imlib_context_set_image(images[image_bg].norm->iml->im);
+    update_cmod_tables(images[image_bg].norm->iml);
   }
 
   if (rs_cache_size == (unsigned long) -1) {

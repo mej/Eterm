@@ -1309,9 +1309,11 @@ load_image(const char *file, simage_t *simg)
 void
 update_cmod(colormod_t *cmod)
 {
-
   ASSERT(cmod != NULL);
 
+  /* When a particular R/G/B color modifier is changed, this function must be called
+     to resync the Imlib2 color modifier (imlib_mod) with our new brightness,
+     contrast, and gamma values. */
   if (cmod->imlib_mod) {
     imlib_context_set_color_modifier(cmod->imlib_mod);
     imlib_reset_color_modifier();
@@ -1339,10 +1341,12 @@ update_cmod_tables(imlib_t *iml)
 
   REQUIRE(mod || rmod || gmod || bmod);
 
+  /* When any changes is made to any individual color modifier for an image,
+     this function must be called to update the overall Imlib2 color modifier. */
+  D_PIXMAP(("Updating color modifier tables for %8p\n", iml));
   if (!mod) {
     mod = iml->mod = create_colormod();
     iml->mod->imlib_mod = imlib_create_color_modifier();
-    iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0x100;
     imlib_context_set_color_modifier(mod->imlib_mod);
   } else if (!mod->imlib_mod) {
     mod->imlib_mod = imlib_create_color_modifier();
@@ -1379,14 +1383,15 @@ update_cmod_tables(imlib_t *iml)
   }
 }
 
-# ifdef PIXMAP_OFFSET
-#  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0x100 || (mod)->contrast != 0x100 || (mod)->gamma != 0x100))
+# define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0x100 || (mod)->contrast != 0x100 || (mod)->gamma != 0x100))
 unsigned char
 need_colormod(register imlib_t *iml)
 {
   if (MOD_IS_SET(iml->mod) || MOD_IS_SET(iml->rmod) || MOD_IS_SET(iml->gmod) || MOD_IS_SET(iml->bmod)) {
+    D_PIXMAP(("Color modifier active.\n"));
     return 1;
   } else {
+    D_PIXMAP(("No color modifier active.\n"));
     return 0;
   }
 }
@@ -1605,6 +1610,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
   }
 }
 
+#  ifdef PIXMAP_OFFSET
 void
 colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h)
 {

@@ -4194,3 +4194,9 @@ Mon Jun 11 17:49:55 PDT 2001	Michael Jennings <mej@eterm.org>
 	And finally, the config file parser was moved to libast.
 	
 -------------------------------------------------------------------------------
+Mon Jun 11 22:04:08 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Fixed the --shade and --tint options.  This issue was pointed out by
+	Laurence J. Lane <ljlane@debian.org>.
+	
+-------------------------------------------------------------------------------
