@@ -1316,13 +1316,14 @@ process_xterm_seq(void)
 void
 process_window_mode(unsigned int nargs, int args[])
 {
+
     register unsigned int i;
     int x, y;
     Screen *scr;
     Window dummy_child;
     int dummy_x, dummy_y;
     unsigned int dummy_border, dummy_depth;
-    char buff[1024], *name, *ptmp;
+    char buff[1024], *name;
 
     if (!nargs)
         return;
@@ -1397,30 +1398,12 @@ process_window_mode(unsigned int nargs, int args[])
               break;
           case 20:
               XGetIconName(Xdisplay, TermWin.parent, &name);
-              for (ptmp = name; *ptmp; ptmp++) {
-                  if (ptmp - name > 4096) {
-                      *ptmp = 0;
-                      break;
-                  }
-                  if (*ptmp < 32) {
-                      *ptmp = ' ';
-                  }
-              }
               snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
               break;
           case 21:
               XFetchName(Xdisplay, TermWin.parent, &name);
-              for (ptmp = name; *ptmp; ptmp++) {
-                  if (ptmp - name > 4096) {
-                      *ptmp = 0;
-                      break;
-                  }
-                  if (*ptmp < 32) {
-                      *ptmp = ' ';
-                  }
-              }
               snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
@@ -1738,21 +1721,12 @@ set_title(const char *str)
         str = APL_NAME "-" VERSION;
     }
     if (name == NULL || strcmp(name, str)) {
-        char *pname, *pstr;
-
         if (name != NULL) {
             FREE(name);
         }
-        name = MALLOC(strlen(str));
-
-        for (pname = name, pstr = str; *pstr; pstr++) {
-            if (*pstr >= 32) {
-                *pname++ = *pstr;
-            }
-        }
-        *pname = 0;
-        D_X11(("Setting window title to \"%s\"\n", name));
-        XStoreName(Xdisplay, TermWin.parent, name);
+        D_X11(("Setting window title to \"%s\"\n", str));
+        XStoreName(Xdisplay, TermWin.parent, str);
+        name = STRDUP(str);
     }
 }
 
@@ -1764,21 +1738,12 @@ set_icon_name(const char *str)
     if (!str)
         str = APL_NAME "-" VERSION;
     if (name == NULL || strcmp(name, str)) {
-        char *pname, *pstr;
-
         if (name != NULL) {
             FREE(name);
         }
-        name = MALLOC(strlen(str));
-
-        for (pname = name, pstr = str; *pstr; pstr++) {
-            if (*pstr >= 32) {
-                *pname++ = *pstr;
-            }
-        }
-        *pname = 0;
-        D_X11(("Setting window icon name to \"%s\"\n", name));
-        XSetIconName(Xdisplay, TermWin.parent, name);
+        D_X11(("Setting window icon name to \"%s\"\n", str));
+        XSetIconName(Xdisplay, TermWin.parent, str);
+        name = STRDUP(str);
     }
 }
 
