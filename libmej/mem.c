@@ -96,7 +96,7 @@ memrec_add_var(void *ptr, size_t size)
   if ((memrec.Size = (size_t *) realloc(memrec.Size, sizeof(size_t) * memrec.Count)) == NULL) {
     D_MALLOC(("Unable to reallocate pointer size list -- %s\n", strerror(errno)));
   }
-  D_MALLOC(("Adding variable of size %lu at 0x%08x\n", size, ptr));
+  D_MALLOC(("Adding variable of size %lu at %8p\n", size, ptr));
   memrec.Ptrs[memrec.Count - 1] = ptr;
   memrec.Size[memrec.Count - 1] = size;
 #if 0
@@ -118,11 +118,11 @@ memrec_rem_var(void *ptr)
     memrec_dump();
 #endif
     D_MALLOC(("Attempt to remove a pointer not allocated with Malloc/Realloc:"
-	     "  0x%08x\n", ptr));
+	     "  %8p\n", ptr));
     return;
   }
   memrec.Count--;
-  D_MALLOC(("Removing variable of size %lu at 0x%08x\n", memrec.Size[i], memrec.Ptrs[i]));
+  D_MALLOC(("Removing variable of size %lu at %8p\n", memrec.Size[i], memrec.Ptrs[i]));
   memmove(memrec.Ptrs + i, memrec.Ptrs + i + 1, sizeof(void *) * (memrec.Count - i));
 
   memmove(memrec.Size + i, memrec.Size + i + 1, sizeof(size_t) * (memrec.Count - i));
@@ -148,11 +148,11 @@ memrec_chg_var(void *oldp, void *newp, size_t size)
     memrec_dump();
 #endif
     D_MALLOC(("Attempt to move a pointer not allocated with Malloc/Realloc:"
-	     "  0x%08x\n", oldp));
+	     "  %8p\n", oldp));
     return;
   }
-  D_MALLOC(("Changing variable of %lu bytes at 0x%08x to one "
-	   "of %lu bytes at 0x%08x\n", memrec.Size[i], memrec.Ptrs[i], size, newp));
+  D_MALLOC(("Changing variable of %lu bytes at %8p to one "
+	   "of %lu bytes at %8p\n", memrec.Size[i], memrec.Ptrs[i], size, newp));
   memrec.Ptrs[i] = newp;
   memrec.Size[i] = size;
 #if 0
@@ -178,7 +178,7 @@ memrec_dump(void)
 
   len2 = sizeof(size_t) * memrec.Count;
   for (ptr = (unsigned char *) memrec.Ptrs, j = 0; j < len1; j += 8) {
-    fprintf(stderr, "DUMP ::  %07lu | %08X | %06lu | %07X | ", (unsigned long) 0, (unsigned int) memrec.Ptrs, (unsigned long) (sizeof(void *) * memrec.Count), (unsigned int) j);
+    fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec.Ptrs, (unsigned long) (sizeof(void *) * memrec.Count), (unsigned int) j);
 
     l = ((len1 - j < 8) ? (len1 - j) : (8));
     memset(buff, 0, 9);
@@ -193,7 +193,7 @@ memrec_dump(void)
     fflush(stderr);
   }
   for (ptr = (unsigned char *) memrec.Size, j = 0; j < len2; j += 8) {
-    fprintf(stderr, "DUMP ::  %07lu | %08x | %06lu | %07X | ", (unsigned long) 0, (unsigned int) memrec.Size, sizeof(size_t) * memrec.Count, (unsigned int) j);
+    fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec.Size, sizeof(size_t) * memrec.Count, (unsigned int) j);
     l = ((len2 - j < 8) ? (len2 - j) : (8));
     memset(buff, 0, 9);
     memcpy(buff, ptr + j, l);
@@ -209,7 +209,7 @@ memrec_dump(void)
   for (i = 0; i < memrec.Count; i++) {
     total += memrec.Size[i];
     for (ptr = (unsigned char *) memrec.Ptrs[i], j = 0; j < memrec.Size[i]; j += 8) {
-      fprintf(stderr, "DUMP ::  %07lu | %08x | %06lu | %07X | ", i + 1, (unsigned int) memrec.Ptrs[i], (unsigned long) memrec.Size[i], (unsigned int) j);
+      fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", i + 1, memrec.Ptrs[i], (unsigned long) memrec.Size[i], (unsigned int) j);
       l = ((memrec.Size[i] - j < 8) ? (memrec.Size[i] - j) : (8));
       memset(buff, 0, 9);
       memcpy(buff, ptr + j, l);

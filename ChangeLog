@@ -2624,11 +2624,16 @@ Tue Oct 19 16:34:51 PDT 1999	Michael Jennings <mej@eterm.org>
 	extern int unlockpt(int fd);
 
 -------------------------------------------------------------------------------
-
-Tue Oct 26 16:28:34 PDT 1999
-(Mandrake)
+Tue Oct 26 16:28:34 PDT 1999	Mandrake <mandrake@mandrake.net>
 
 	I hate the default behaviour for tripleclick, and there's an option
 	to turn it off.  however, it isn't documented in the default theme
 	anywhere.  So, I fixed that annoyance and put it in the sample
 	Eterm theme.cfg file (set to the default value, not the OTW)
+	
+-------------------------------------------------------------------------------
+Wed Oct 27 14:11:11 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	64-bit cleanliness changes.
+	
+-------------------------------------------------------------------------------

@@ -372,7 +372,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
   ASSERT(simg != NULL);
   REQUIRE(win != None);
 
-  D_PIXMAP(("paste_simage(0x%08x, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", (int) simg, get_image_type(which), (int) win, x, y, w, h));
+  D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win, x, y, w, h));
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
     char buff[255], *reply;
@@ -507,7 +507,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   ASSERT(simg->iml != NULL);
   ASSERT(simg->pmap != NULL);
 
-  D_PIXMAP(("render_simage():  Rendering simg->iml->im 0x%08x (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width, height, win));
+  D_PIXMAP(("render_simage():  Rendering simg->iml->im %8p (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width, height, win));
   D_PIXMAP(("render_simage():  Image mode is 0x%02x\n", images[which].mode));
 
   if ((which == image_bg) && image_mode_is(image_bg, MODE_VIEWPORT)) {
@@ -750,7 +750,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 		    simg->iml->bmod->gamma, simg->iml->bmod->brightness, simg->iml->bmod->contrast));
 	  Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
 	}
-	D_PIXMAP(("render_simage():  Rendering image simg->iml->im [0x%08x] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
+	D_PIXMAP(("render_simage():  Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
 	Imlib_render(imlib_id, simg->iml->im, xscaled, yscaled);
 	rendered = 1;
       }
@@ -963,7 +963,7 @@ load_image(const char *file, short type)
 	reset_simage(images[type].current, (RESET_IMLIB_IM | RESET_PMAP_PIXMAP | RESET_PMAP_MASK));
 	images[type].current->iml->im = img.im;
       }
-      D_PIXMAP(("load_image() exiting.  images[%s].current->iml->im == 0x%08x\n", get_image_type(type), images[type].current->iml->im));
+      D_PIXMAP(("load_image() exiting.  images[%s].current->iml->im == %8p\n", get_image_type(type), images[type].current->iml->im));
       return 1;
     }
   }
@@ -1072,7 +1072,7 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
 		  p, w, h);
     return;
   }
-  D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned 0x%08x.", p, w, h, ximg));
+  D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.", p, w, h, ximg));
   if (Xdepth <= 8) {
     D_PIXMAP(("Rendering low-depth image, depth == %d\n", (int) Xdepth));
     for (y = 0; y < h; y++) {

@@ -2564,9 +2564,9 @@ main_loop(void)
 	  break;
 	}
       }
-      D_SCREEN(("Adding lines, str == 0x%08x, cmdbuf_ptr == 0x%08x, cmdbuf_endp == 0x%08x\n", str, cmdbuf_ptr,
+      D_SCREEN(("Adding lines, str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n", str, cmdbuf_ptr,
 		cmdbuf_endp));
-      D_SCREEN(("Command buffer base == 0x%08x, length %lu, end at 0x%08x\n", cmdbuf_base, CMD_BUF_SIZE,
+      D_SCREEN(("Command buffer base == %8p, length %lu, end at %8p\n", cmdbuf_base, CMD_BUF_SIZE,
 		cmdbuf_base + CMD_BUF_SIZE - 1));
       scr_add_lines(str, nlines, (cmdbuf_ptr - str));
     } else {

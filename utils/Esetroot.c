@@ -164,15 +164,15 @@ main(int argc, char *argv[])
   if (debug) {
     fprintf(stderr, "%s:%d:  Chose screen %d\n", __FILE__, __LINE__, screen);
     fprintf(stderr, "%s:%d:  Root window is 0x%08x\n", __FILE__, __LINE__, (unsigned int) Xroot);
-    fprintf(stderr, "%s:%d:  Found screen information at 0x%08x\n", __FILE__, __LINE__, (unsigned int) scr);
+    fprintf(stderr, "%s:%d:  Found screen information at %8p\n", __FILE__, __LINE__, scr);
   }
   params.flags = PARAMS_VISUALID;
   params.visualid = (DefaultVisual(Xdisplay, screen))->visualid;
   id = Imlib_init_with_params(Xdisplay, &params);
   im = Imlib_load_image(id, fname);
   if (debug) {
-    fprintf(stderr, "%s:%d:  The Imlib Data is at 0x%08x\n", __FILE__, __LINE__, (unsigned int) id);
-    fprintf(stderr, "%s:%d:  The Imlib Image is at 0x%08x\n", __FILE__, __LINE__, (unsigned int) im);
+    fprintf(stderr, "%s:%d:  The Imlib Data is at %8p\n", __FILE__, __LINE__, id);
+    fprintf(stderr, "%s:%d:  The Imlib Image is at %8p\n", __FILE__, __LINE__, im);
   }
   if (scale) {
     w = scr->width;
@@ -209,7 +209,7 @@ main(int argc, char *argv[])
   if (debug) {
     fprintf(stderr, "%s:%d:  Assigned width and height for rendering as %dx%d\n", __FILE__, __LINE__, w, h);
     fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y, (unsigned int) p);
-    fprintf(stderr, "%s:%d:  Applied Graphics Context 0x%08x to pixmap.\n", __FILE__, __LINE__, (unsigned int) gc);
+    fprintf(stderr, "%s:%d:  Applied Graphics Context %8p to pixmap.\n", __FILE__, __LINE__, gc);
   }
   Imlib_render(id, im, w, h);
   temp_pmap = Imlib_move_image(id, im);

@@ -187,7 +187,7 @@ AC_CHECK_FUNC(unlockpt,
 dnl# Check for the appropriate pty mechanism
 AC_MSG_CHECKING(for pty mechanism)
 PTY_MECH=""
-if test -e /dev/ptc ; then
+if test -c /dev/ptc ; then
   AC_DEFINE(HAVE_DEV_PTC)
   PTY_MECH="AIX $PTY_MECH"
 fi

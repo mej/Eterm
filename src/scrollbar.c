@@ -272,7 +272,7 @@ unsigned char
 sb_handle_configure_notify(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_configure_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_PARENT(ev, &scrollbar_event_data), 0);
 
@@ -284,7 +284,7 @@ unsigned char
 sb_handle_enter_notify(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_enter_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_enter_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -311,7 +311,7 @@ unsigned char
 sb_handle_leave_notify(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_leave_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -338,7 +338,7 @@ unsigned char
 sb_handle_focus_in(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_focus_in(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -349,7 +349,7 @@ unsigned char
 sb_handle_focus_out(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_focus_out(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -362,7 +362,7 @@ sb_handle_expose(event_t * ev)
 
   XEvent unused_xevent;
 
-  D_EVENTS(("sb_handle_expose(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -378,7 +378,7 @@ unsigned char
 sb_handle_button_press(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_button_press(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
@@ -500,7 +500,7 @@ sb_handle_button_release(event_t * ev)
   Window root, child;
   int root_x, root_y, win_x, win_y, mask;
 
-  D_EVENTS(("sb_handle_button_release(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
   button_state.mouse_offset = 0;
@@ -557,7 +557,7 @@ unsigned char
 sb_handle_motion_notify(event_t * ev)
 {
 
-  D_EVENTS(("sb_handle_motion_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("sb_handle_motion_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
   if ((PrivateModes & PrivMode_mouse_report) && !(button_state.bypass_keystate))

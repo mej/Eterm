@@ -212,7 +212,7 @@ handle_key_press(event_t * ev)
 #endif
 
   P_SETTIMEVAL(keypress_start);
-  D_EVENTS(("handle_key_press(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_key_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
   COUNT_EVENT(keypress_cnt);
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   lookup_key(ev);
@@ -227,7 +227,7 @@ handle_property_notify(event_t * ev)
 
   Atom prop;
 
-  D_EVENTS(("handle_property_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_property_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   if (background_is_trans()) {
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
@@ -265,7 +265,7 @@ unsigned char
 handle_destroy_notify(event_t * ev)
 {
 
-  D_EVENTS(("handle_destroy_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_destroy_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   if (ev->xdestroywindow.window == ipc_win) {
     D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
@@ -280,7 +280,7 @@ unsigned char
 handle_client_message(event_t * ev)
 {
 
-  D_EVENTS(("handle_client_message(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_client_message(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
@@ -321,7 +321,7 @@ unsigned char
 handle_mapping_notify(event_t * ev)
 {
 
-  D_EVENTS(("handle_mapping_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_mapping_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   XRefreshKeyboardMapping(&(ev->xmapping));
   return 1;
@@ -331,7 +331,7 @@ unsigned char
 handle_visibility_notify(event_t * ev)
 {
 
-  D_EVENTS(("handle_visibility_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_visibility_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   switch (ev->xvisibility.state) {
@@ -355,7 +355,7 @@ unsigned char
 handle_focus_in(event_t * ev)
 {
 
-  D_EVENTS(("handle_focus_in(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (!TermWin.focus) {
@@ -379,7 +379,7 @@ unsigned char
 handle_focus_out(event_t * ev)
 {
 
-  D_EVENTS(("handle_focus_out(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (TermWin.focus) {
@@ -404,7 +404,7 @@ handle_configure_notify(event_t * ev)
 {
   XEvent unused_xevent;
 
-  D_EVENTS(("handle_configure_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
@@ -420,7 +420,7 @@ unsigned char
 handle_selection_clear(event_t * ev)
 {
 
-  D_EVENTS(("handle_selection_clear(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_selection_clear(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   selection_clear();
   return 1;
@@ -430,7 +430,7 @@ unsigned char
 handle_selection_notify(event_t * ev)
 {
 
-  D_EVENTS(("handle_selection_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_selection_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   selection_paste(ev->xselection.requestor, ev->xselection.property, True);
   return 1;
@@ -440,7 +440,7 @@ unsigned char
 handle_selection_request(event_t * ev)
 {
 
-  D_EVENTS(("handle_selection_request(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_selection_request(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   selection_send(&(ev->xselectionrequest));
   return 1;
@@ -458,7 +458,7 @@ handle_expose(event_t * ev)
 #endif
 
   P_SETTIMEVAL(expose_start);
-  D_EVENTS(("handle_expose(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (ev->xany.window == TermWin.vt) {
@@ -486,7 +486,7 @@ unsigned char
 handle_button_press(event_t * ev)
 {
 
-  D_EVENTS(("handle_button_press(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (Options & Opt_borderless) {
@@ -551,7 +551,7 @@ unsigned char
 handle_button_release(event_t * ev)
 {
 
-  D_EVENTS(("handle_button_release(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   if (button_state.ignore_release == 1) {
     button_state.ignore_release = 0;
@@ -616,7 +616,7 @@ handle_motion_notify(event_t * ev)
   struct timeval motion_start, motion_stop;
 #endif
 
-  D_EVENTS(("handle_motion_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("handle_motion_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   COUNT_EVENT(motion_cnt);
   P_SETTIMEVAL(motion_start);
@@ -654,7 +654,7 @@ process_x_event(event_t * ev)
 #endif
 
   COUNT_EVENT(event_cnt);
-  D_EVENTS(("process_x_event(ev [0x%08x] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
+  D_EVENTS(("process_x_event(ev [%8p] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
   if (primary_data.handlers[ev->type] != NULL) {
     return ((primary_data.handlers[ev->type]) (ev));
   }

@@ -62,7 +62,7 @@ font_cache_add(const char *name, unsigned char type, void *info) {
 
   etfont_t *font;
 
-  D_FONT(("font_cache_add(%s, %d, 0x%08x) called.\n", NONULL(name), type, (int) info));
+  D_FONT(("font_cache_add(%s, %d, %8p) called.\n", NONULL(name), type, info));
 
   font = (etfont_t *) MALLOC(sizeof(etfont_t));
   font->name = StrDup(name);
@@ -90,13 +90,13 @@ font_cache_del(const void *info) {
 
   etfont_t *current, *tmp;
 
-  D_FONT(("font_cache_del(0x%08x) called.\n", (int) info));
+  D_FONT(("font_cache_del(%8p) called.\n", info));
 
   if (font_cache == NULL) {
     return;
   }
   if (((font_cache->type == FONT_TYPE_X) && (font_cache->fontinfo.xfontinfo == (XFontStruct *) info))) {
-    D_FONT((" -> Match found at font_cache (0x%08x).  Font name is \"%s\"\n", (int) font_cache, NONULL(font_cache->name)));
+    D_FONT((" -> Match found at font_cache (%8p).  Font name is \"%s\"\n", font_cache, NONULL(font_cache->name)));
     if (--(font_cache->ref_cnt) == 0) {
       D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
       current = font_cache;
@@ -113,7 +113,7 @@ font_cache_del(const void *info) {
   } else {
     for (current = font_cache; current->next; current = current->next) {
       if (((current->next->type == FONT_TYPE_X) && (current->next->fontinfo.xfontinfo == (XFontStruct *) info))) {
-        D_FONT((" -> Match found at current->next (0x%08x, current == 0x%08x).  Font name is \"%s\"\n", (int) current->next, (int) current, NONULL(current->next->name)));
+        D_FONT((" -> Match found at current->next (%8p, current == %8p).  Font name is \"%s\"\n", current->next, current, NONULL(current->next->name)));
         if (--(current->next->ref_cnt) == 0) {
           D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
           tmp = current->next;
@@ -142,7 +142,7 @@ font_cache_find(const char *name, unsigned char type) {
   D_FONT(("font_cache_find(%s, %d) called.\n", NONULL(name), type));
 
   for (current = font_cache; current; current = current->next) {
-    D_FONT((" -> Checking current (0x%08x), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
+    D_FONT((" -> Checking current (%8p), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
     if ((current->type == type) && !strcasecmp(current->name, name)) {
       D_FONT(("    -> Match!\n"));
       return (current);
@@ -162,7 +162,7 @@ font_cache_find_info(const char *name, unsigned char type) {
   D_FONT(("font_cache_find_info(%s, %d) called.\n", NONULL(name), type));
 
   for (current = font_cache; current; current = current->next) {
-    D_FONT((" -> Checking current (0x%08x), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
+    D_FONT((" -> Checking current (%8p), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
     if ((current->type == type) && !strcasecmp(current->name, name)) {
       D_FONT(("    -> Match!\n"));
       switch (type) {

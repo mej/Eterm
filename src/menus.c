@@ -164,7 +164,7 @@ menu_handle_enter_notify(event_t * ev)
 
   register menu_t *menu;
 
-  D_EVENTS(("menu_handle_enter_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_enter_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -187,7 +187,7 @@ unsigned char
 menu_handle_leave_notify(event_t * ev)
 {
 
-  D_EVENTS(("menu_handle_leave_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -201,7 +201,7 @@ unsigned char
 menu_handle_focus_in(event_t * ev)
 {
 
-  D_EVENTS(("menu_handle_focus_in(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -212,7 +212,7 @@ unsigned char
 menu_handle_focus_out(event_t * ev)
 {
 
-  D_EVENTS(("menu_handle_focus_out(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -225,7 +225,7 @@ menu_handle_expose(event_t * ev)
 
   XEvent unused_xevent;
 
-  D_EVENTS(("menu_handle_expose(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -238,7 +238,7 @@ unsigned char
 menu_handle_button_press(event_t * ev)
 {
 
-  D_EVENTS(("menu_handle_button_press(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -254,7 +254,7 @@ menu_handle_button_release(event_t * ev)
 {
   menuitem_t *item;
 
-  D_EVENTS(("menu_handle_button_release(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
@@ -318,7 +318,7 @@ menu_handle_motion_notify(event_t * ev)
 
   register menuitem_t *item = NULL;
 
-  D_EVENTS(("menu_handle_motion_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
+  D_EVENTS(("menu_handle_motion_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &menu_event_data), 0);
 
