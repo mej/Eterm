@@ -5,7 +5,7 @@
 #                              minus the "DR-" if any.
 #
 # This is a sample Eterm config file.  It should be placed in
-# ~/.Eterm/themes/cEterm/MAIN and modified to suit your needs
+# ~/.Eterm/themes/@THEME@/MAIN and modified to suit your needs
 #
 # As always, the authors guarantee absolutely nothing and take
 # no responsibility for anything that might happen to you, your
@@ -94,7 +94,7 @@ begin main
 
 # You must define this before setting any images that use it.  This is the $PATH-style variable
 # that determines where Eterm looks for image files.
-    path "./pix/:~/.Eterm/:~/.Eterm/themes/Eterm/pix:~/.Eterm/pix/:/usr/local/share/Eterm/pix/"
+    path "./pix/:~/.Eterm/:~/.Eterm/themes/Eterm/pix:~/.Eterm/pix/:@PKGDATADIR@/pix/"
 
 # If you want a different icon than the standard Eterm one, set this.
 #   icon Eterm.xpm

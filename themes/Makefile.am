@@ -1,8 +1,8 @@
 # $Id$
 
-THEMES = Eterm cEterm chooser emacs irc mutt tn3270 trans
+THEMES = Eterm cEterm chooser emacs irc mutt trans
 
-EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/theme.cfg.in mutt/theme.cfg.in tn3270/theme.cfg.in \
+EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/theme.cfg.in mutt/theme.cfg.in \
              trans/theme.cfg.in Eterm/Eterm-menu.cfg irc/irc-menu.cfg chooser/chooser-menu.cfg emacs/emacs-menu.cfg \
              mutt/mutt-menu.cfg trans/trans-menu.cfg cEterm/cEterm-menu.cfg cEterm/theme.cfg.in
 
