@@ -48,6 +48,7 @@ static const char cvs_ident[] = "$Id$";
 #include "actions.h"
 #include "command.h"
 #include "events.h"
+#include "font.h"
 #include "grkelot.h"
 #include "main.h"
 #include "menus.h"
@@ -3311,11 +3312,12 @@ post_parse(void)
   }
 #endif
   for (i = 0; i < NFONTS; i++) {
-    if (!rs_font[i])
-      rs_font[i] = def_fontName[i];
+    if (!rs_font[i]) {
+      rs_font[i] = StrDup(def_fontName[i]);
+    }
 #ifdef MULTI_CHARSET
     if (!rs_mfont[i]) {
-      rs_mfont[i] = def_kfontName[i];
+      rs_mfont[i] = StrDup(def_mfontName[i]);
     }
 #endif
   }

@@ -26,12 +26,20 @@ extern unsigned int debug_level;
 # define ASSERT_RVAL(x, val)  do {if (!(x)) {if (debug_level>=1) {fatal_error("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
                                                             else {print_warning("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
                                              return (val);}} while (0)
+# define ASSERT_NOTREACHED()  do {if (debug_level>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                                 else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                  } while (0)
+# define ASSERT_NOTREACHED_RVAL(val)  do {if (debug_level>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                                         else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                          return (val);} while (0)
 # define ABORT() fatal_error("Aborting at %s:%d.", __FILE__, __LINE__)
 #else
 # define ASSERT(x)  do {if (!(x)) {if (debug_level>=1) {fatal_error("ASSERT failed:  %s", #x);} \
                                                   else {print_warning("ASSERT failed:  %s", #x);}}} while (0)
 # define ASSERT_RVAL(x, val)  do {if (!(x)) {if (debug_level>=1) {fatal_error("ASSERT failed:  %s", #x);} \
                                                             else {print_warning("ASSERT failed:  %s", #x);} return (val);}} while (0)
+# define ASSERT_NOTREACHED()       return
+# define ASSERT_NOTREACHED_RVAL(x) return (x)
 # define ABORT() fatal_error("Aborting.")
 #endif
 
@@ -41,6 +49,7 @@ extern unsigned int debug_level;
 
 #define REQUIRE(x) do {if (!(x)) {if (debug_level>=1) {__DEBUG(); real_dprintf("REQUIRE failed:  %s\n", #x);} return;}} while (0)
 #define REQUIRE_RVAL(x, v) do {if (!(x)) {if (debug_level>=1) {__DEBUG(); real_dprintf("REQUIRE failed:  %s\n", #x);} return (v);}} while (0)
+#define NONULL(x) ((x) ? (x) : ("<null>"))
 
 /* Macros for printing debugging messages */
 # if DEBUG >= 1
@@ -102,6 +111,8 @@ extern unsigned int debug_level;
  
 #  define DEBUG_MENU			3
 #  define D_MENU(x)			DPRINTF3(x)
+#  define DEBUG_FONT			3
+#  define D_FONT(x)			DPRINTF3(x)
 #  define DEBUG_TTYMODE			3
 #  define D_TTYMODE(x)			DPRINTF3(x)
 #  define DEBUG_COLORS			3

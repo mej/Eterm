@@ -284,11 +284,11 @@
 # undef GREEK_SUPPORT
 # undef XTERM_FONT_CHANGE
 # undef DEFINE_XTERM_COLOR
-# define KFONT0 "k14"
-# define KFONT1 "jiskan16"
-# define KFONT2 "jiskan18"
-# define KFONT3 "jiskan24"
-# define KFONT4 "jiskan26"
+# define MFONT0 "k14"
+# define MFONT1 "jiskan16"
+# define MFONT2 "jiskan18"
+# define MFONT3 "jiskan24"
+# define MFONT4 "jiskan26"
 /* sizes matched to multichar fonts */
 # define FONT0 "fixed"
 # define FONT1 "8x16"

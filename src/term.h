@@ -1,4 +1,4 @@
-/*  term.h -- Eterm terminal emulation module header file
+/* term.h -- Eterm terminal emulation module header file
  *
  * This file is original work by Michael Jennings <mej@eterm.org> and
  * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file

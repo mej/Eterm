@@ -41,6 +41,7 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "e.h"
 #include "events.h"
+#include "font.h"
 #include "main.h"
 #include "menus.h"
 #include "options.h"
@@ -63,18 +64,6 @@ XSizeHints szHint =
   {0, 0},			/* Aspect ratio - unused */
   0, 0,				/* base size: width, height */
   NorthWestGravity		/* gravity */
-};
-int font_change_count = 0;
-#ifdef MULTI_CHARSET
-/* Kanji font names, roman fonts sized to match */
-const char *def_kfontName[] =
-{
-  KFONT0, KFONT1, KFONT2, KFONT3, KFONT4
-};
-#endif /* MULTI_CHARSET */
-const char *def_fontName[] =
-{
-  FONT0, FONT1, FONT2, FONT3, FONT4
 };
 Cursor TermWin_cursor;		/* cursor for vt window */
 
@@ -662,51 +651,36 @@ set_window_color(int idx, const char *color)
       i -= 8;
 # ifndef NO_BRIGHTCOLOR
       PixColors[idx] = PixColors[minBright + i];
-      goto Done;
 # endif
     }
+# ifndef NO_BRIGHTCOLOR
+    else
+# endif
     if (i >= 0 && i <= 7) {	/* normal colors */
       PixColors[idx] = PixColors[minColor + i];
-      goto Done;
+    } else {
+      print_warning("Color index %d is invalid.", i);
+      return;
     }
-  }
-  if (XParseColor(Xdisplay, cmap, color, &xcol)) {
+  } else if (XParseColor(Xdisplay, cmap, color, &xcol)) {
     r = xcol.red;
     g = xcol.green;
     b = xcol.blue;
     pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
     xcol.pixel = pixel;
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-      print_warning("Unable to allocate \"%s\" in the color map.\n", color);
+      print_warning("Unable to allocate \"%s\" in the color map.", color);
       return;
     }
+    PixColors[idx] = xcol.pixel;
   } else {
-    print_warning("Unable to resolve \"%s\" as a color name.\n", color);
+    print_warning("Unable to resolve \"%s\" as a color name.", color);
     return;
   }
 
-  /*
-   * FIXME: should free colors here, but no idea how to do it so instead,
-   * so just keep gobbling up the colormap
-   */
-# if 0
-  for (i = BlackColor; i <= WhiteColor; i++)
-    if (PixColors[idx] == PixColors[i])
-      break;
-  if (i > WhiteColor) {
-    /* fprintf (stderr, "XFreeColors: PixColors[%d] = %lu\n", idx, PixColors[idx]); */
-    XFreeColors(Xdisplay, cmap, (PixColors + idx), 1,
-		DisplayPlanes(Xdisplay, Xscreen));
-  }
-# endif
-
-  PixColors[idx] = xcol.pixel;
-
-  /* XSetWindowAttributes attr; */
-  /* Cursor cursor; */
-Done:
-  if (idx == bgColor)
+  if (idx == bgColor) {
     XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
+  }
 
   /* handle colorBD, scrollbar background, etc. */
 
@@ -729,239 +703,3 @@ Done:
 # define set_window_color(idx,color) ((void)0)
 #endif /* XTERM_COLOR_CHANGE */
 
-/* load_font():  Load a new font and return a pointer to it. */
-XFontStruct *
-load_font(const char *fontname)
-{
-
-  XFontStruct *xfont;
-  const char *fallback = "fixed";
-
-  ASSERT_RVAL(fontname != NULL, NULL);
-
-  xfont = XLoadQueryFont(Xdisplay, fontname);
-  if (!xfont) {
-    print_error("Unable to load font \"%s\".  Falling back on \"%s\"\n", fontname, fallback);
-    xfont = XLoadQueryFont(Xdisplay, fallback);
-    if (!xfont) {
-      fatal_error("Unable to load font \"%s\".  Unable to continue.\n", fallback);
-    }
-  }
-  return (xfont);
-}
-
-/* change_font() - Switch to a new font */
-/*
- * init = 1   - initialize
- *
- * fontname == FONT_UP  - switch to bigger font
- * fontname == FONT_DN  - switch to smaller font
- */
-void
-change_font(int init, const char *fontname)
-{
-  const char *const msg = "can't load font \"%s\"";
-  XFontStruct *xfont;
-  static char *newfont[NFONTS];
-#ifndef NO_BOLDFONT
-  static XFontStruct *boldFont = NULL;
-#endif
-  static int fnum = FONT0_IDX;	/* logical font number */
-  int idx = 0;			/* index into rs_font[] */
-
-  if (!init) {
-    switch (fontname[0]) {
-      case '\0':
-	fnum = FONT0_IDX;
-	fontname = NULL;
-	break;
-
-	/* special (internal) prefix for font commands */
-      case FONT_CMD:
-	idx = atoi(fontname + 1);
-	switch (fontname[1]) {
-	  case '+':		/* corresponds to FONT_UP */
-	    fnum += (idx ? idx : 1);
-	    fnum = FNUM_RANGE(fnum);
-	    break;
-
-	  case '-':		/* corresponds to FONT_DN */
-	    fnum += (idx ? idx : -1);
-	    fnum = FNUM_RANGE(fnum);
-	    break;
-
-	  default:
-	    if (fontname[1] != '\0' && !isdigit(fontname[1]))
-	      return;
-	    if (idx < 0 || idx >= (NFONTS))
-	      return;
-	    fnum = IDX2FNUM(idx);
-	    break;
-	}
-	fontname = NULL;
-	break;
-
-      default:
-	if (fontname != NULL) {
-	  /* search for existing fontname */
-	  for (idx = 0; idx < NFONTS; idx++) {
-	    if (!strcmp(rs_font[idx], fontname)) {
-	      fnum = IDX2FNUM(idx);
-	      fontname = NULL;
-	      break;
-	    }
-	  }
-	} else
-	  return;
-	break;
-    }
-    /* re-position around the normal font */
-    idx = FNUM2IDX(fnum);
-
-    if (fontname != NULL) {
-      char *name;
-
-      xfont = XLoadQueryFont(Xdisplay, fontname);
-      if (!xfont)
-	return;
-
-      name = MALLOC(strlen(fontname + 1) * sizeof(char));
-
-      if (name == NULL) {
-	XFreeFont(Xdisplay, xfont);
-	return;
-      }
-      strcpy(name, fontname);
-      if (newfont[idx] != NULL)
-	FREE(newfont[idx]);
-      newfont[idx] = name;
-      rs_font[idx] = newfont[idx];
-    }
-  }
-  if (TermWin.font)
-    XFreeFont(Xdisplay, TermWin.font);
-
-  /* load font or substitute */
-  xfont = XLoadQueryFont(Xdisplay, rs_font[idx]);
-  if (!xfont) {
-    print_error(msg, rs_font[idx]);
-    rs_font[idx] = "fixed";
-    xfont = XLoadQueryFont(Xdisplay, rs_font[idx]);
-    if (!xfont) {
-      print_error(msg, rs_font[idx]);
-      ABORT();
-    }
-  }
-  TermWin.font = xfont;
-
-#ifndef NO_BOLDFONT
-  /* fail silently */
-  if (init && rs_boldFont != NULL)
-    boldFont = XLoadQueryFont(Xdisplay, rs_boldFont);
-#endif
-
-#ifdef MULTI_CHARSET
-  if (TermWin.mfont)
-    XFreeFont(Xdisplay, TermWin.mfont);
-
-  /* load font or substitute */
-  xfont = XLoadQueryFont(Xdisplay, rs_mfont[idx]);
-  if (!xfont) {
-    print_error(msg, rs_mfont[idx]);
-    rs_mfont[idx] = "k14";
-    xfont = XLoadQueryFont(Xdisplay, rs_mfont[idx]);
-    if (!xfont) {
-      print_error(msg, rs_mfont[idx]);
-      ABORT();
-    }
-  }
-  TermWin.mfont = xfont;
-# ifdef USE_XIM
-  if (Input_Context) {
-    if (TermWin.fontset)
-      XFreeFontSet(Xdisplay, TermWin.fontset);
-    TermWin.fontset = create_fontset(rs_font[idx], rs_mfont[idx]);
-    xim_set_fontset();
-  }
-# endif
-#endif /* MULTI_CHARSET */
-
-  /* alter existing GC */
-  if (!init) {
-    XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
-  }
-  /* set the sizes */
-  {
-
-    int cw, fh, fw = 0;
-    unsigned long i;
-
-    fw = TermWin.font->min_bounds.width;
-    fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
-
-    D_X11(("Font information:  Ascent == %hd, Descent == %hd\n", TermWin.font->ascent, TermWin.font->descent));
-    if (TermWin.font->min_bounds.width == TermWin.font->max_bounds.width)
-      TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
-    else
-      TermWin.fprop = 1;	/* Proportional font */
-    if (TermWin.fprop == 1)
-      for (i = TermWin.font->min_char_or_byte2;
-	   i <= TermWin.font->max_char_or_byte2; i++) {
-	cw = TermWin.font->per_char[i].width;
-	MAX_IT(fw, cw);
-      }
-    /* not the first time thru and sizes haven't changed */
-    if (fw == TermWin.fwidth && fh == TermWin.fheight)
-      return;			/* TODO: not return; check MULTI_CHARSET if needed */
-
-    TermWin.fwidth = fw;
-    TermWin.fheight = fh;
-  }
-
-  /* check that size of boldFont is okay */
-#ifndef NO_BOLDFONT
-  TermWin.boldFont = NULL;
-  if (boldFont != NULL) {
-    int i, cw, fh, fw = 0;
-
-    fw = boldFont->min_bounds.width;
-    fh = boldFont->ascent + boldFont->descent + rs_line_space;
-    if (TermWin.fprop == 0) {	/* bold font must also be monospaced */
-      if (fw != boldFont->max_bounds.width)
-	fw = -1;
-    } else {
-      for (i = 0; i < 256; i++) {
-	if (!isprint(i))
-	  continue;
-	cw = boldFont->per_char[i].width;
-	MAX_IT(fw, cw);
-      }
-    }
-
-    if (fw == TermWin.fwidth && fh == TermWin.fheight)
-      TermWin.boldFont = boldFont;
-  }
-#endif /* NO_BOLDFONT */
-
-  set_colorfgbg();
-
-  TermWin.width = TermWin.ncol * TermWin.fwidth;
-  TermWin.height = TermWin.nrow * TermWin.fheight;
-
-  szHint.width_inc = TermWin.fwidth;
-  szHint.height_inc = TermWin.fheight;
-
-  szHint.min_width = szHint.base_width + szHint.width_inc;
-  szHint.min_height = szHint.base_height + szHint.height_inc;
-
-  szHint.width = szHint.base_width + TermWin.width;
-  szHint.height = szHint.base_height + TermWin.height;
-
-  szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
-
-  if (!init) {
-    font_change_count++;
-    resize();
-  }
-  return;
-}

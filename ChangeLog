@@ -2444,6 +2444,12 @@ Mon Sep 20 21:25:46 PDT 1999	Michael Jennings <mej@eterm.org>
 
 	Added support for xterm's property change escape sequence as requested
 	by Greg Badros <gjb@cs.washington.edu>, the originator of the
-	sequence.
+	sequence (and one of the authors of scwm).
+	
+-------------------------------------------------------------------------------
+Tue Sep 21 20:00:50 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Initial work on font caching.  WARNING:  This code is broken and will
+	not compile, but I'm going home anyway.
 	
 -------------------------------------------------------------------------------

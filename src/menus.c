@@ -35,6 +35,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/strings.h"
 #include "command.h"
 #include "events.h"
+#include "font.h"
 #include "main.h"
 #include "menus.h"
 #include "misc.h"
@@ -447,7 +448,7 @@ menu_set_font(menu_t * menu, const char *fontname)
   ASSERT_RVAL(menu != NULL, 0);
   ASSERT_RVAL(fontname != NULL, 0);
 
-  font = load_font(fontname);
+  font = (XFontStruct *) load_font(fontname, "fixed", FONT_TYPE_X);
 #ifdef MULTI_CHARSET
   menu->fontset = create_fontset(fontname, rs_mfont[0]);
 #endif

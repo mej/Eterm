@@ -1,5 +1,5 @@
-/*  term.c -- Eterm terminal emulation module
-
+/* term.c -- Eterm terminal emulation module
+ *
  * This file is original work by Michael Jennings <mej@eterm.org> and
  * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
  * bearing this same message or a similar one, is distributed under
@@ -41,6 +41,7 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "e.h"
 #include "events.h"
+#include "font.h"
 #include "main.h"
 #include "options.h"
 #include "pixmap.h"
