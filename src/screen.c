@@ -3324,7 +3324,11 @@ void xim_get_position(XPoint *pos)
     pos->x += scrollbar_trough_width();
   }
   pos->y = (Height2Pixel(screen.row)
+# ifdef MULTI_CHARSET
 	    + MAX(TermWin.mfont->ascent, TermWin.font->ascent)
+# else
+            + TermWin.font->ascent
+# endif
 	    + TermWin.internalBorder
 	    + bbar_calc_docked_height(BBAR_DOCKED_TOP));
 }

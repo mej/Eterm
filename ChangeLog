@@ -3717,3 +3717,10 @@ Mon Jun 26 16:54:04 PDT 2000	Michael Jennings <mej@eterm.org>
 	licked that BCE issue that was talked about on the mutt-dev list.
 	
 -------------------------------------------------------------------------------
+Wed Jun 28 14:14:53 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Oops!  The font size patch from the other day broke without multibyte
+	font support enabled, which meant the XFree86 3.3.x people were
+	screwed.  Fixed now.
+	
+-------------------------------------------------------------------------------
