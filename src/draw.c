@@ -130,3 +130,112 @@ draw_box(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h)
   XDrawLine(Xdisplay, d, gc_bottom, x, y + h, x + w, y + h);
   XDrawLine(Xdisplay, d, gc_bottom, x + w, y + h, x + w, y);
 }
+
+#define SHADE_PIXEL(pixel, dir, tmp) do {(tmp) = ((((double)pixel)/depth_factor) + ((dir) ? 0.2 : -0.2)) * depth_factor; \
+                                         if ((tmp) > (depth_factor-1)) (tmp) = depth_factor - 1; else if ((tmp) < 0) (tmp) = 0;} while (0)
+#define MOD_PIXEL_HIGH(x, y, up) do {v = XGetPixel(ximg, (x), (y)); r = (int) ((v >> br) & mr); g = (int) ((v >> bg) & mg); b = (int) ((v << bb) & mb); \
+	                             SHADE_PIXEL(r, (up), dv); r = (int) dv; SHADE_PIXEL(g, (up), dv); g = (int) dv; SHADE_PIXEL(b, (up), dv); b = (int) dv; \
+	                             v = ((r & mr) << br) | ((g & mg) << bg) | ((b & mb) >> bb); XPutPixel(ximg, (x), (y), v);} while (0)
+
+void
+bevel_pixmap(Pixmap p, int w, int h, Imlib_Border *bord, unsigned char up)
+{
+  XImage *ximg;
+  register unsigned long v;
+  double dv;
+  short x, y, xbound, ybound;
+  unsigned int r, g, b;
+  int real_depth = 0, depth_factor;
+  register int br, bg, bb;  /* Bitshifts */
+  register unsigned int mr, mg, mb;  /* Bitmasks */
+  GC gc;
+
+  if (!bord)
+    return;
+
+  depth_factor = 1 << Xdepth;
+  if (Xdepth <= 8) {
+    D_PIXMAP(("Depth of %d is not supported.  Punt!\n", Xdepth));
+    return;
+  } else if (Xdepth == 16) {
+
+    XWindowAttributes xattr;
+
+    XGetWindowAttributes(Xdisplay, Xroot, &xattr);
+    if ((xattr.visual->red_mask == 0x7c00) && (xattr.visual->green_mask == 0x3e0) && (xattr.visual->blue_mask == 0x1f)) {
+      real_depth = 15;
+      depth_factor = 1 << 15;
+    }
+  }
+  if (!real_depth) {
+    real_depth = Xdepth;
+  }
+  ximg = XGetImage(Xdisplay, p, 0, 0, w, h, -1, ZPixmap);
+  if (ximg == NULL) {
+    return;
+  }
+  /* Determine bitshift and bitmask values */
+  switch (real_depth) {
+    case 15:
+      br = 7;
+      bg = 2;
+      bb = 3;
+      mr = mg = mb = 0xf8;
+      break;
+    case 16:
+      br = 8;
+      bg = bb = 3;
+      mr = mb = 0xf8;
+      mg = 0xfc;
+      break;
+    case 24:
+    case 32:
+      br = 16;
+      bg = 8;
+      bb = 0;
+      mr = mg = mb = 0xff;
+      break;
+    default:
+      return;
+  }
+
+  /* Left edge */
+  for (y = bord->top; y < h; y++) {
+    xbound = h - y;
+    if (xbound > bord->left)
+      xbound = bord->left;
+    for (x = 0; x < xbound; x++) {
+      MOD_PIXEL_HIGH(x, y, up);
+    }
+  }
+
+  /* Right edge */
+  ybound = h - bord->bottom;
+  for (y = 0; y < ybound; y++) {
+    xbound = bord->right - y;
+    if (xbound < 0)
+      xbound = 0;
+    for (x = xbound; x < bord->right; x++) {
+      MOD_PIXEL_HIGH(x + (w - bord->right), y, !up);
+    }
+  }
+
+  /* Top edge */
+  for (y = 0; y < bord->top; y++) {
+    xbound = w - y;
+    for (x = 0; x < xbound; x++) {
+      MOD_PIXEL_HIGH(x, y, up);
+    }
+  }
+
+  /* Bottom edge */
+  for (y = h - bord->bottom; y < h; y++) {
+    for (x = h - y - 1; x < w; x++) {
+      MOD_PIXEL_HIGH(x, y, !up);
+    }
+  }
+  gc = XCreateGC(Xdisplay, p, 0, NULL);
+  XPutImage(Xdisplay, p, gc, ximg, 0, 0, 0, 0, w, h);
+  XFreeGC(Xdisplay, gc);
+  XDestroyImage(ximg);
+}

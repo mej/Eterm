@@ -41,7 +41,9 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
+#include "draw.h"
 #include "e.h"
+#include "icon.h"
 #include "startup.h"
 #include "menus.h"
 #include "options.h"
@@ -496,7 +498,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     if (simg->iml->bevel != NULL) {
       D_PIXMAP(("Beveling pixmap 0x%08x with edges %d, %d, %d, %d\n", p, simg->iml->bevel->edges->left, simg->iml->bevel->edges->top,
                 simg->iml->bevel->edges->right, simg->iml->bevel->edges->bottom));
-      FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)  /* Need to write this */
+      bevel_pixmap(p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
     }
   }
   XFreeGC(Xdisplay, gc);
@@ -672,10 +674,8 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       Pixmap p;
 
       gc = XCreateGC(Xdisplay, d, 0, NULL);
-      p = create_trans_pixmap(simg, which, d, x, y, w, h);
-      if (simg->iml->bevel != NULL) {
-        FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);)
-      }
+      /* FIXME:  The conditional on the next line works, but it's a hack.  Worth fixing?  :-) */
+      p = create_trans_pixmap(simg, which, ((which == image_st) ? scrollbar.sa_win : d), x, y, w, h);
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
       XFreePixmap(Xdisplay, p);
       XFreeGC(Xdisplay, gc);
@@ -685,7 +685,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       gc = XCreateGC(Xdisplay, d, 0, NULL);
       p = create_viewport_pixmap(simg, d, x, y, w, h);
       if (simg->iml->bevel != NULL) {
-        FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);)
+        bevel_pixmap(p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
       XFreePixmap(Xdisplay, p);
@@ -1082,7 +1082,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           imlib_free_pixmap_and_mask(pixmap);
         }
         if (simg->iml->bevel != NULL) {
-          FIXME_NOP(Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)
+          bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
         }
         D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
         if ((which == image_bg) && (Options & Opt_double_buffer)) {
@@ -1118,7 +1118,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
         XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
         if (simg->iml->bevel != NULL) {
-          FIXME_NOP(Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)
+          bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
         }
         /* FIXME:  For efficiency, just fill the window with the pixmap
            and handle exposes by copying from simg->pmap->pixmap. */
@@ -1711,10 +1711,10 @@ shaped_window_apply_mask(Drawable d, Pixmap mask)
 void
 set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 {
-#ifdef FIXME_BLOCK
   const char *icon_path;
-  Imlib_Image temp_im;
+  Imlib_Image temp_im = (Imlib_Image) NULL;
   XWMHints *wm_hints;
+  int w = 8, h = 8;
 
   if (pwm_hints) {
     wm_hints = pwm_hints;
@@ -1728,7 +1728,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 
     if (icon_path != NULL) {
       XIconSize *icon_sizes;
-      int count, i, w = 8, h = 8;  /* At least 8x8 */
+      int count, i;
 
       temp_im = imlib_load_image(icon_path);
       /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
@@ -1748,38 +1748,31 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       } else {
         w = h = 48;
       }
-      MIN_IT(w, 64);
-      MIN_IT(h, 64);
-      imlib_context_set_image(temp_im);
-      imlib_context_set_drawable(TermWin.parent);
-      imlib_image_set_has_alpha(0);
-      imlib_context_set_anti_alias(1);
-      imlib_context_set_dither(1);
-      imlib_context_set_blend(0);
-      imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, 0, w, h);
-      if (check_for_enlightenment()) {
-        wm_hints->flags |= IconPixmapHint | IconMaskHint;
-      } else {
-        wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
-        shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
-        XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
-        wm_hints->flags |= IconWindowHint;
-      }
-      imlib_free_image_and_decache();
+      BOUND(w, 8, 64);
+      BOUND(h, 8, 64);
     }
+    imlib_context_set_image(temp_im);
   } else {
-    /* Use the default.  It's 48x48, so if the WM doesn't like it, tough cookies.  Pixmap -> ImlibImage -> Render -> Pixmap would be
-       too expensive, IMHO. */
-    Imlib_data_to_pixmap(imlib_id, Eterm_xpm, &wm_hints->icon_pixmap, &wm_hints->icon_mask);
-    if (check_for_enlightenment()) {
-      wm_hints->flags |= IconPixmapHint | IconMaskHint;
-    } else {
-      wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, 48, 48, 0, 0L, 0L);
-      shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
-      XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
-      wm_hints->flags |= IconWindowHint;
-    }
+    w = h = 48;
+    temp_im = imlib_create_image_using_data(48, 48, (DATA32 *) icon_data);
+    imlib_context_set_image(temp_im);
+    imlib_image_set_has_alpha(1);
   }
+  imlib_context_set_drawable(TermWin.parent);
+  imlib_context_set_anti_alias(1);
+  imlib_context_set_dither(1);
+  imlib_context_set_blend(0);
+  imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, 0, w, h);
+  if (check_for_enlightenment()) {
+    wm_hints->flags |= IconPixmapHint | IconMaskHint;
+  } else {
+    wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
+    shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
+    XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
+    wm_hints->flags |= IconWindowHint;
+  }
+  imlib_free_image_and_decache();
+
   wm_hints->icon_x = wm_hints->icon_y = 0;
   wm_hints->flags |= IconPositionHint;
 
@@ -1788,6 +1781,5 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
     XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
     XFree(wm_hints);
   }
-#endif
 }
 #endif /* PIXMAP_SUPPORT */

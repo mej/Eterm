@@ -3499,3 +3499,12 @@ Mon Apr 17 22:25:27 PDT 2000	Michael Jennings <mej@eterm.org>
 	XFree86 4.0. :-)
 	
 -------------------------------------------------------------------------------
+Tue Apr 18 23:55:42 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Added the pixmap beveling support back in so that the glass theme will
+	work again.  Once again, you poor 8 bpp saps are SOL.
+
+	I also added the icon support back in, along with a new built-in icon
+	courtesy of Brian McFee <keebler@sandwich.net>.
+	
+-------------------------------------------------------------------------------

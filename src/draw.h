@@ -26,6 +26,7 @@
 
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
+#include "pixmap.h"
 
 /************ Macros and Definitions ************/
 #define DRAW_ARROW_UP    (1UL << 0)
@@ -50,6 +51,7 @@ extern void draw_shadow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, 
 extern void draw_arrow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type);
 extern void draw_arrow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w, int shadow, unsigned char type);
 extern void draw_box(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h);
+extern void bevel_pixmap(Pixmap p, int w, int h, Imlib_Border *bord, unsigned char up);
 
 _XFUNCPROTOEND
 
