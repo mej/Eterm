@@ -23,6 +23,8 @@ static const char cvs_ident[] = "$Id$";
 #include "config.h"
 #include "feature.h"
 
+#ifdef DISPLAY_IS_IP
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,14 +64,6 @@ static const char cvs_ident[] = "$Id$";
 
 #include "main.h"
 
-/* Put in a dummy routine if this is disabled, inline it if possible */
-#ifndef DISPLAY_IS_IP
-inline const char *
-network_display(const char *display)
-{
-  return (display);
-}
-#else
 /* return a pointer to a static buffer */
 char *
 network_display(const char *display)

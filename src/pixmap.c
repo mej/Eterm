@@ -1314,21 +1314,31 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       Imlib_render(imlib_id, temp_im, w, h);
       wm_hints->icon_pixmap = Imlib_copy_image(imlib_id, temp_im);
       wm_hints->icon_mask = Imlib_copy_mask(imlib_id, temp_im);
-      wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
-      shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
-      XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
-      wm_hints->flags |= IconWindowHint;
+      if (check_for_enlightenment()) {
+        wm_hints->flags |= IconPixmapHint | IconMaskHint;
+      } else {
+        wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, w, h, 0, 0L, 0L);
+        shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
+        XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
+        wm_hints->flags |= IconWindowHint;
+      }
       Imlib_destroy_image(imlib_id, temp_im);
     }
   } else {
     /* Use the default.  It's 48x48, so if the WM doesn't like it, tough cookies.  Pixmap -> ImlibImage -> Render -> Pixmap would be
        too expensive, IMHO. */
     Imlib_data_to_pixmap(imlib_id, Eterm_xpm, &wm_hints->icon_pixmap, &wm_hints->icon_mask);
-    wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, 48, 48, 0, 0L, 0L);
-    shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
-    XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
-    wm_hints->flags |= IconWindowHint;
+    if (check_for_enlightenment()) {
+      wm_hints->flags |= IconPixmapHint | IconMaskHint;
+    } else {
+      wm_hints->icon_window = XCreateSimpleWindow(Xdisplay, TermWin.parent, 0, 0, 48, 48, 0, 0L, 0L);
+      shaped_window_apply_mask(wm_hints->icon_window, wm_hints->icon_mask);
+      XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
+      wm_hints->flags |= IconWindowHint;
+    }
   }
+  wm_hints->icon_x = wm_hints->icon_y = 0;
+  wm_hints->flags |= IconPositionHint;
 
   /* Only set the hints ourselves if we were passed a NULL pointer for pwm_hints */
   if (!pwm_hints) {
