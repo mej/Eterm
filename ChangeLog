@@ -5067,3 +5067,11 @@ too intrusive.
 Added support for Ctrl-t to open a new Escreen "tab" (as with
 Mozilla).
 ----------------------------------------------------------------------
+Sun Aug 17 09:55:43 2003                        Michael Jennings (mej)
+
+Modified and applied a patch from Marc Merlin <marc@merlins.org> to
+auto-generate the pixmap menu entries via the Etbg_update_list
+script.  You can now pass "-m /path/to/menufile" to Etbg_update_list
+to generate the entries in the specified file.  Hopefully I'll make
+this process automated, at least on my end, in the near future.
+----------------------------------------------------------------------
