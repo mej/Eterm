@@ -1,0 +1,10 @@
+Document: eterm-tech
+Title: Eterm Technical Reference
+Author: Michael Jennings 
+Abstract: Technical Reference for Eterm's escape codes, config file format,
+ and other minute details not covered in the man page.
+Section: Apps/Terminals
+
+Format: HTML
+Index: /usr/doc/eterm/Eterm_reference.html
+Files: /usr/doc/eterm/Eterm_reference.html
