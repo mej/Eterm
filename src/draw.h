@@ -33,10 +33,10 @@
 #define DRAW_ARROW_LEFT  (1UL << 2)
 #define DRAW_ARROW_RIGHT (1UL << 3)
 
-#define draw_uparrow_raised(win, g1, g2, x, y, w, s)      draw_arrow(win, g1, g2, x, y, w, s, DRAW_ARROW_UP)
-#define draw_uparrow_clicked(win, g1, g2, x, y, w, s)     draw_arrow(win, g2, g1, x, y, w, s, DRAW_ARROW_UP)
-#define draw_downarrow_raised(win, g1, g2, x, y, w, s)    draw_arrow(win, g1, g2, x, y, w, s, DRAW_ARROW_DOWN)
-#define draw_downarrow_clicked(win, g1, g2, x, y, w, s)   draw_arrow(win, g2, g1, x, y, w, s, DRAW_ARROW_DOWN)
+#define draw_uparrow_raised(d, g1, g2, x, y, w, s)      draw_arrow(d, g1, g2, x, y, w, s, DRAW_ARROW_UP)
+#define draw_uparrow_clicked(d, g1, g2, x, y, w, s)     draw_arrow(d, g2, g1, x, y, w, s, DRAW_ARROW_UP)
+#define draw_downarrow_raised(d, g1, g2, x, y, w, s)    draw_arrow(d, g1, g2, x, y, w, s, DRAW_ARROW_DOWN)
+#define draw_downarrow_clicked(d, g1, g2, x, y, w, s)   draw_arrow(d, g2, g1, x, y, w, s, DRAW_ARROW_DOWN)
 
 /************ Structures ************/
 
@@ -45,9 +45,11 @@
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern void draw_shadow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int shadow);
-extern void draw_arrow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type);
-extern void draw_box(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h);
+extern void draw_shadow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int shadow);
+extern void draw_shadow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w, int h, int shadow);
+extern void draw_arrow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type);
+extern void draw_arrow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w, int shadow, unsigned char type);
+extern void draw_box(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h);
 
 _XFUNCPROTOEND
 

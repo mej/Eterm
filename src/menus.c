@@ -769,12 +769,21 @@ menuitem_select(menu_t * menu)
     render_simage(images[image_submenu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_submenu, 0);
     if (image_mode_is(image_submenu, MODE_AUTO)) {
       enl_ipc_sync();
+    } else if (!image_mode_is(image_submenu, MODE_MASK)) {
+      draw_shadow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
+                              0, 0, item->w - MENU_VGAP, item->h, 2);
+      draw_arrow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
+                             item->w - 3 * MENU_HGAP, (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
     }
 #if 0
     paste_simage(images[image_submenu].selected, image_submenu, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
 #endif
   } else {
-    render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
+    if (image_mode_is(image_menu, MODE_MASK)) {
+      render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
+    } else {
+      draw_shadow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], 0, 0, item->w - MENU_VGAP, item->h, 2);
+    }
     if (image_mode_is(image_menu, MODE_AUTO)) {
       enl_ipc_sync();
     }
@@ -880,6 +889,9 @@ menu_draw(menu_t * menu)
     if (images[image_submenu].selected->iml->pad) {
       width += images[image_submenu].selected->iml->pad->left + images[image_submenu].selected->iml->pad->right;
     }
+    if (!image_mode_is(image_menu, MODE_MASK) || !image_mode_is(image_submenu, MODE_MASK)) {
+      width += 3 * MENU_VGAP;
+    }
     menu->w = width;
     menu->h = height;
   }
@@ -947,6 +959,7 @@ menu_draw(menu_t * menu)
     gc = XCreateGC(Xdisplay, menu->win, GCForeground, &gcvalue);
     XFillRectangle(Xdisplay, pmap->pixmap, gc, 0, 0, menu->w, menu->h);
     XFreeGC(Xdisplay, gc);
+    draw_shadow_from_colors(pmap->pixmap, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], 0, 0, menu->w, menu->h, 2);
   }
   menu->bg = images[image_menu].norm->pmap->pixmap;
   D_MENU(("menu_draw():  Menu background is 0x%08x\n", menu->bg));
@@ -992,7 +1005,12 @@ menu_draw(menu_t * menu)
       }
       switch (item->type) {
 	case MENUITEM_SUBMENU:
-          paste_simage(images[image_submenu].norm, image_submenu, menu->bg, item->x, item->y, item->w - MENU_VGAP, item->h);
+          if (image_mode_is(image_submenu, MODE_MASK)) {
+            paste_simage(images[image_submenu].norm, image_submenu, menu->bg, item->x, item->y, item->w - MENU_VGAP, item->h);
+          } else {
+            draw_arrow_from_colors(menu->bg, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
+                                   item->x + item->w - 3 * MENU_HGAP, item->y + (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
+          }
 	  break;
 #if 0
 	case MENUITEM_STRING:

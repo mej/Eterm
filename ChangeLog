@@ -3066,3 +3066,9 @@ Tue Jan 18 20:16:01 PST 2000	Michael Jennings <mej@eterm.org>
 	the selected state was not defined.
 	
 -------------------------------------------------------------------------------
+Tue Jan 18 21:17:24 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Finally got around to adding a bevel to the edges and solid-color
+	menus.  Also added arrows for submenus.
+	
+-------------------------------------------------------------------------------

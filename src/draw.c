@@ -36,7 +36,7 @@ static const char cvs_ident[] = "$Id$";
 #include "startup.h"
 
 void
-draw_shadow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int shadow)
+draw_shadow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int shadow)
 {
 
   ASSERT(w != 0);
@@ -44,16 +44,31 @@ draw_shadow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int
   LOWER_BOUND(shadow, 1);
 
   for (w += x - 1, h += y - 1; shadow > 0; shadow--, w--, h--) {
-    XDrawLine(Xdisplay, win, gc_top, x, y, w, y);
-    XDrawLine(Xdisplay, win, gc_top, x, y, x, h);
+    XDrawLine(Xdisplay, d, gc_top, x, y, w, y);
+    XDrawLine(Xdisplay, d, gc_top, x, y, x, h);
     x++; y++;
-    XDrawLine(Xdisplay, win, gc_bottom, w, h, w, y);
-    XDrawLine(Xdisplay, win, gc_bottom, w, h, x, h);
+    XDrawLine(Xdisplay, d, gc_bottom, w, h, w, y);
+    XDrawLine(Xdisplay, d, gc_bottom, w, h, x, h);
   }
 }
 
 void
-draw_arrow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type)
+draw_shadow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w, int h, int shadow)
+{
+  static GC gc_top = (GC) 0, gc_bottom = (GC) 0;
+
+  if (gc_top == 0) {
+    gc_top = XCreateGC(Xdisplay, TermWin.parent, 0, NULL);
+    gc_bottom = XCreateGC(Xdisplay, TermWin.parent, 0, NULL);
+  }
+
+  XSetForeground(Xdisplay, gc_top, top);
+  XSetForeground(Xdisplay, gc_bottom, bottom);
+  draw_shadow(d, gc_top, gc_bottom, x, y, w, h, shadow);
+}
+
+void
+draw_arrow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type)
 {
 
   BOUND(shadow, 1, 2);
@@ -61,30 +76,30 @@ draw_arrow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow,
   switch (type) {
     case DRAW_ARROW_UP:
       for (; shadow > 0; shadow--, x++, y++, w--) {
-        XDrawLine(Xdisplay, win, gc_top, x, y + w, x + w / 2, y);
-        XDrawLine(Xdisplay, win, gc_bottom, x + w, y + w, x + w / 2, y);
-        XDrawLine(Xdisplay, win, gc_bottom, x + w, y + w, x, y + w);
+        XDrawLine(Xdisplay, d, gc_top, x, y + w, x + w / 2, y);
+        XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w / 2, y);
+        XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w);
       }
       break;
     case DRAW_ARROW_DOWN:
       for (; shadow > 0; shadow--, x++, y++, w--) {
-        XDrawLine(Xdisplay, win, gc_top, x, y, x + w / 2, y + w);
-        XDrawLine(Xdisplay, win, gc_top, x, y, x + w, y);
-        XDrawLine(Xdisplay, win, gc_bottom, x + w, y, x + w / 2, y + w);
+        XDrawLine(Xdisplay, d, gc_top, x, y, x + w / 2, y + w);
+        XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y);
+        XDrawLine(Xdisplay, d, gc_bottom, x + w, y, x + w / 2, y + w);
       }
       break;
     case DRAW_ARROW_LEFT:
       for (; shadow > 0; shadow--, x++, y++, w--) {
-        XDrawLine(Xdisplay, win, gc_bottom, x + w, y + w, x + w, y);
-        XDrawLine(Xdisplay, win, gc_bottom, x + w, y + w, x, y + w / 2);
-        XDrawLine(Xdisplay, win, gc_top, x, y + w / 2, x + w, y);
+        XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w, y);
+        XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w / 2);
+        XDrawLine(Xdisplay, d, gc_top, x, y + w / 2, x + w, y);
       }
       break;
     case DRAW_ARROW_RIGHT:
       for (; shadow > 0; shadow--, x++, y++, w--) {
-        XDrawLine(Xdisplay, win, gc_top, x, y, x, y + w);
-        XDrawLine(Xdisplay, win, gc_top, x, y, x + w, y + w / 2);
-        XDrawLine(Xdisplay, win, gc_bottom, x, y + w, x + w, y + w / 2);
+        XDrawLine(Xdisplay, d, gc_top, x, y, x, y + w);
+        XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y + w / 2);
+        XDrawLine(Xdisplay, d, gc_bottom, x, y + w, x + w, y + w / 2);
       }
       break;
     default:
@@ -93,10 +108,25 @@ draw_arrow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow,
 }
 
 void
-draw_box(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h)
+draw_arrow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w, int shadow, unsigned char type)
 {
-  XDrawLine(Xdisplay, win, gc_top, x + w, y, x, y);
-  XDrawLine(Xdisplay, win, gc_top, x, y, x, y + h);
-  XDrawLine(Xdisplay, win, gc_bottom, x, y + h, x + w, y + h);
-  XDrawLine(Xdisplay, win, gc_bottom, x + w, y + h, x + w, y);
+  static GC gc_top = (GC) 0, gc_bottom = (GC) 0;
+
+  if (gc_top == 0) {
+    gc_top = XCreateGC(Xdisplay, TermWin.parent, 0, NULL);
+    gc_bottom = XCreateGC(Xdisplay, TermWin.parent, 0, NULL);
+  }
+
+  XSetForeground(Xdisplay, gc_top, top);
+  XSetForeground(Xdisplay, gc_bottom, bottom);
+  draw_arrow(d, gc_top, gc_bottom, x, y, w, shadow, type);
+}
+
+void
+draw_box(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int h)
+{
+  XDrawLine(Xdisplay, d, gc_top, x + w, y, x, y);
+  XDrawLine(Xdisplay, d, gc_top, x, y, x, y + h);
+  XDrawLine(Xdisplay, d, gc_bottom, x, y + h, x + w, y + h);
+  XDrawLine(Xdisplay, d, gc_bottom, x + w, y + h, x + w, y);
 }
