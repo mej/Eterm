@@ -476,6 +476,7 @@ menu_add_item(menu_t * menu, menuitem_t * item)
     menu->numitems = 1;
     menu->items = (menuitem_t **) MALLOC(sizeof(menuitem_t *));
   }
+
   menu->items[menu->numitems - 1] = item;
   return 1;
 
@@ -614,6 +615,7 @@ menuitem_create(char *text)
 
   menuitem = (menuitem_t *) MALLOC(sizeof(menu_t));
   MEMSET(menuitem, 0, sizeof(menu_t));
+
   if (text) {
     menuitem->text = StrDup(text);
     menuitem->len = strlen(text);
@@ -636,6 +638,8 @@ unsigned char
 menuitem_set_action(menuitem_t * item, unsigned char type, char *action)
 {
 
+  unsigned long len;
+
   ASSERT_RVAL(item != NULL, 0);
 
   item->type = type;
@@ -645,7 +649,8 @@ menuitem_set_action(menuitem_t * item, unsigned char type, char *action)
       break;
     case MENUITEM_STRING:
     case MENUITEM_ECHO:
-      item->action.string = StrDup(action);
+      item->action.string = (char *) MALLOC(strlen(action) + 2);
+      strcpy(item->action.string, action);
       parse_escaped_string(item->action.string);
       break;
     default:

@@ -370,14 +370,3 @@ HandleSigSegv(int sig)
 #endif
   exit(EXIT_FAILURE);
 }
-
-inline void *
-fixed_realloc(void *ptr, size_t size)
-{
-
-  if (ptr)
-    return (realloc(ptr, size));
-  else
-    return (malloc(size));
-
-}

@@ -1418,9 +1418,9 @@ shell_expand(char *s)
 {
 
   register char *tmp;
-  register char *new;
   register char *pbuff = s, *tmp1;
   register unsigned long j, k, l = 0;
+  char new[CONFIG_BUFF];
   unsigned char eval_escape = 1, eval_var = 1, eval_exec = 1, eval_func = 1, in_single = 0, in_double = 0;
   unsigned long fsize;
   char *Command, *Output, *EnvVar, *OutFile;
@@ -1430,7 +1430,9 @@ shell_expand(char *s)
   if (!s)
     return ((char *) NULL);
 
+#if 0
   new = (char *) MALLOC(CONFIG_BUFF);
+#endif
 
   for (j = 0; *pbuff && j < CONFIG_BUFF; pbuff++, j++) {
     switch (*pbuff) {
@@ -1675,7 +1677,9 @@ shell_expand(char *s)
   D_PARSE(("shell_expand(%s) returning \"%s\"\n", s, new));
 
   strcpy(s, new);
+#if 0
   FREE(new);
+#endif
   return (s);
 }
 
@@ -2165,7 +2169,7 @@ parse_keyboard(char *buff)
 #ifdef KEYSYM_ATTRIBUTE
 
     int sym, len;
-    char *str = buff + 7;
+    char *str = buff + 7, *s;
 
     sym = (int) strtol(str, (char **) NULL, 0);
     if (sym != (int) 2147483647L) {
@@ -2177,7 +2181,10 @@ parse_keyboard(char *buff)
 		    file_peek_path(), file_peek_line(), sym + 0xff00);
 	return;
       }
-      str = Word(3, buff);
+      s = Word(3, buff);
+      str = (char *) MALLOC(strlen(s) + 2);
+      strcpy(str, s);
+      FREE(s);
       chomp(str);
       len = parse_escaped_string(str);
       if (len > 255)

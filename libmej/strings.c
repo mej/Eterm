@@ -407,7 +407,7 @@ StrDup(register const char *str)
 
   len = strlen(str) + 1;  /* Copy NUL byte also */
   newstr = (char *) MALLOC(len);
-  memcpy(newstr, str, len);
+  strcpy(newstr, str);
   return (newstr);
 }
 

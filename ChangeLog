@@ -2393,3 +2393,12 @@ Tue Sep 14 16:41:08 PDT 1999	Michael Jennings <mej@eterm.org>
 	buffer overflows.
 	
 -------------------------------------------------------------------------------
+Thu Sep 16 16:21:22 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a possible null-byte overflow in the menu code.
+
+	Also, there seems to be a memory leak in XLoadQueryFont() in some
+	versions of XFree86 3.9.x, so I removed the unnecessary "font" lines
+	from the themes for the time being.
+	
+-------------------------------------------------------------------------------
