@@ -86,7 +86,7 @@ typedef struct buttonbar_struct {
 #ifdef MULTI_CHARSET
   XFontSet fontset;
 #endif
-  unsigned short fwidth, fheight, fascent, fdescent;
+  unsigned short fwidth, fheight;
   event_dispatcher_data_t event_data;
   unsigned char image_state;
   button_t *buttons, *rbuttons, *current;

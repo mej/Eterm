@@ -96,7 +96,7 @@ buttonbar_t *bbar_create(void)
 
     bbar->font = load_font(etfonts[def_font_idx], "fixed", FONT_TYPE_X);
     bbar->fwidth = bbar->font->max_bounds.width;
-    bbar->fheight = bbar->font->ascent + bbar->font->descent + rs_line_space;
+    bbar->fheight = bbar->font->ascent + bbar->font->descent;
     bbar->h = 1;
     bbar->w = 1;
     gcvalue.font = bbar->font->fid;
@@ -424,7 +424,8 @@ bbar_calc_height(buttonbar_t *bbar)
     button_t *b;
     Imlib_Border *bbord, *bord;
 
-    D_BBAR(("bbar_calc_height(%8p):  fascent == %d, fdescent == %d, h == %d\n", bbar, bbar->fascent, bbar->fdescent, bbar->h));
+    D_BBAR(("bbar_calc_height(%8p):  font ascent == %d, font descent == %d, h == %d\n",
+            bbar, bbar->font->ascent, bbar->font->descent, bbar->h));
 
     if (image_mode_is(image_bbar, MODE_MASK)) {
         bbord = images[image_bbar].norm->iml->border;
@@ -540,15 +541,13 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
     button->w = 0;
     if (button->len) {
         XTextExtents(bbar->font, button->text, button->len, &direction, &ascent, &descent, &chars);
-        LOWER_BOUND(bbar->fascent, chars.ascent);
-        LOWER_BOUND(bbar->fdescent, chars.descent);
         button->w += chars.width;
     }
     if (bord) {
         button->w += bord->left + bord->right;
     }
     if (button->h == 0) {
-        button->h = bbar->fascent + bbar->fdescent + 1;
+        button->h = bbar->font->ascent + bbar->font->descent + 1;
         if (bord) {
             button->h += bord->top + bord->bottom;
         }
@@ -611,7 +610,7 @@ button_calc_rel_coords(buttonbar_t *bbar, button_t *button)
 
     if (button->len) {
         button->text_x = button->x + ((button->icon_w) ? (button->icon_w + MENU_HGAP) : 0) + ((bord) ? (bord->left) : (0));
-        button->text_y = button->y + button->h - ((bord) ? (bord->bottom) : (0)) - bbar->fdescent;
+        button->text_y = button->y + button->h - ((bord) ? (bord->bottom) : (0)) - bbar->font->descent;
     }
     D_BBAR((" -> Text is at %d, %d and icon is at %d, %d\n", button->text_x, button->text_y, button->icon_x, button->icon_y));
 }
@@ -670,7 +669,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
 
     bbar->font = font;
     bbar->fwidth = font->max_bounds.width;
-    bbar->fheight = font->ascent + font->descent + rs_line_space;
+    bbar->fheight = font->ascent + font->descent;
     XSetFont(Xdisplay, bbar->gc, font->fid);
     bbar_reset_total_height();
     D_BBAR(("Font is \"%s\" (0x%08x).  New dimensions are %d/%d/%d\n", NONULL(fontname), font, bbar->fwidth, bbar->fheight, bbar->h));

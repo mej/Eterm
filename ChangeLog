@@ -4806,3 +4806,8 @@ the way, this fixes that old font-starts-with-a-hyphen bug along with
 some compiler warnings the resulted from a change in the way the
 ASSERT() macro worked.
 ----------------------------------------------------------------------
+Fri Oct  4 22:06:40 2002                        Michael Jennings (mej)
+
+Fixed button label positioning to be based on the font descent, not
+just existing button text.
+----------------------------------------------------------------------
