@@ -866,8 +866,8 @@ basedir=.
 
 AM_CONFIG_HEADER(config.h)
 
-AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile
-          pix/Makefile src/Makefile themes/Makefile Eterm.spec)
+AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile pix/Makefile
+          src/Makefile themes/Makefile Eterm.spec Eterm-mdk.spec)
 
 # Mega evals to make sure all the relative variables get resolved.
 BINDIR=`eval eval eval eval echo ${bindir}`

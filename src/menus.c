@@ -1019,6 +1019,9 @@ menu_draw(menu_t *menu)
     for (i = menu_list->nummenus - 1; i >= 0; i--) {
       menu_t *tmp = menu_list->menus[i];
 
+      if (tmp == menu) {
+        continue;
+      }
       D_MENU((" -> Checking menu \"%s\" to see if it needs to be moved.\n", tmp->title));
       if (tmp->state & MENU_STATE_IS_MAPPED) {
         menu_move(tmp, tmp->x + dx, tmp->y + dy);

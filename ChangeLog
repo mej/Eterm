@@ -4037,3 +4037,14 @@ Tue Jan  2 18:28:57 PST 2001	Michael Jennings <mej@eterm.org>
 	avoid a potential race condition.
 	
 -------------------------------------------------------------------------------
+Wed Jan 10 12:58:31 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Added a spec file for Linux-Mandrake which was contributed (ages ago)
+	by Joakim Bodin <bodin@dreamhosted.com>.  I don't plan on maintaining
+	this, so I hope he does. :-)
+
+	Also applied a menu change which I am hoping will fix an infinite
+	recursion bug in the menu system pointed out on SourceForge by
+	Jonathan S. Keim <jonkeim@princeton.edu>.
+	
+-------------------------------------------------------------------------------
