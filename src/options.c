@@ -1434,7 +1434,7 @@ builtin_exec(char *param)
   D_PARSE(("builtin_exec(%s) called\n", param));
 
   Command = (char *) MALLOC(CONFIG_BUFF);
-  strcat(OutFile, "Eterm-exec-");
+  strcpy(OutFile, "Eterm-exec-");
   fd = libast_temp_file(OutFile, sizeof(OutFile));
   if ((fd < 0) || fchown(fd, my_ruid, my_rgid)) {
     print_error("Unable to create unique temporary file for \"%s\" -- %s\n", param, strerror(errno));

@@ -4067,3 +4067,8 @@ Sat Feb  3 18:25:45 PST 2001	Michael Jennings <mej@eterm.org>
 	fault bug in multi-byte pasting.
 	
 -------------------------------------------------------------------------------
+Thu Feb  8 17:23:13 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Somehow I managed to be think strcpy but type strcat.  Oops.
+	
+-------------------------------------------------------------------------------
