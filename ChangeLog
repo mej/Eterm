@@ -2921,3 +2921,9 @@ Mon Dec 13 09:42:44 PST 1999	Michael Jennings <mej@eterm.org>
 	thanks to all for pointing out my error. :-)
 	
 -------------------------------------------------------------------------------
+Mon Dec 13 10:00:40 PST 1999	Michael Jennings <mej@eterm.org>
+
+	A patch from Sung-Hyun Nam <namsh@lgic.co.kr> for some default Korean
+	fonts.
+	
+-------------------------------------------------------------------------------

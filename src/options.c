@@ -3161,6 +3161,9 @@ init_defaults(void)
     eterm_font_add(&etmfonts, def_mfontName[i], i);
 #endif
   }
+#ifdef MULTI_CHARSET
+  rs_multichar_encoding = StrDup(MULTICHAR_ENCODING);
+#endif
   TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 }
 

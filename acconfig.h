@@ -321,6 +321,7 @@
 #undef FONT3
 #undef FONT4
 #undef DEF_FONT_IDX
+#undef MULTICHAR_ENCODING
 #undef IOTRACE
 #undef HAVE_UTEMPTER
 
