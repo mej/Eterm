@@ -501,7 +501,7 @@ if test "$FOUND_LIBAST" -lt "$LIBAST_MIN"; then
 fi
 if test "$FOUND_LIBAST" -ge "$LIBAST_MIN"; then
   if test ! -z "$LIBAST_CONFIG"; then
-    GRLIBS="-last $GRLIBS"
+    #GRLIBS="-last $GRLIBS"
     AC_DEFINE(HAVE_LIBAST)
     test "$prefix" = "NONE" && prefix="`$LIBAST_CONFIG --prefix`"
     SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"

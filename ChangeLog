@@ -5034,3 +5034,8 @@ Cleaned up all the warnings in libscream.c and Esetroot.c.
 Updated the spec file to depend on imlib2 and the JPEG/PNG loaders.
 I hate to do that, but it seems necessary.
 ----------------------------------------------------------------------
+Wed Apr 23 12:14:00 2003                        Michael Jennings (mej)
+
+Apparently some versions of gcc (or maybe ld?) don't like duplicate
+libraries on the link line.  Fix provided by Mark <somnione@gmx.net>.
+----------------------------------------------------------------------
