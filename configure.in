@@ -143,6 +143,14 @@ export PERL AWK
 
 AC_C_CONST
 AC_C_INLINE
+AC_C_BIGENDIAN
+
+# Keep automake >= 1.6 quiet about "assembler sources seen but no CCAS defined"
+CCAS="$CC"
+AC_SUBST(CCAS)
+CCASFLAGS="$CFLAGS"
+AC_SUBST(CCASFLAGS)
+
 AC_PATH_XTRA
 
 if test ! -z "$X_CFLAGS"; then

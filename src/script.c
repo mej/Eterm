@@ -163,7 +163,7 @@ script_handler_copy(char **params)
         for (i = 0; (buffer_id = params[i]) != NULL; i++) {
             if (*buffer_id) {
                 if (*buffer_id >= '0' && *buffer_id <= '7') {
-                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) (*buffer_id - '0'));
                 } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
                     sel = XA_CLIPBOARD(Xdisplay);
                 } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
@@ -264,7 +264,7 @@ script_handler_paste(char **params)
         for (i = 0; (buffer_id = params[i]) != NULL; i++) {
             if (*buffer_id) {
                 if (*buffer_id >= '0' && *buffer_id <= '7') {
-                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) (*buffer_id - '0'));
                 } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
                     sel = XA_CLIPBOARD(Xdisplay);
                 } else if (!BEG_STRCASECMP(buffer_id, "primary")) {

@@ -4946,3 +4946,9 @@ problem. >:I  I should really read more carefully.
 
 While I was at it, I fixed some bad uses of BEG_STRCASECMP().
 ----------------------------------------------------------------------
+Tue Dec 10 16:50:29 2002                        Michael Jennings (mej)
+
+A few fixes from Andre Pang <ozone@algorithm.com.au>.  One for big-
+endian machines, one for automake >= 1.6, and one for using the cut
+buffers with the copy/paste script functions.
+----------------------------------------------------------------------
