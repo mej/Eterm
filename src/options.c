@@ -1228,8 +1228,7 @@ conf_register_context(char *name, ctx_handler_t handler) {
   }
   context[ctx_idx].name = STRDUP(name);
   context[ctx_idx].handler = handler;
-  D_OPTIONS(("conf_register_context():  Added context \"%s\" with ID %d and handler 0x%08x\n",
-     context[ctx_idx].name, ctx_idx, context[ctx_idx].handler));
+  D_OPTIONS(("Added context \"%s\" with ID %d and handler 0x%08x\n", context[ctx_idx].name, ctx_idx, context[ctx_idx].handler));
   return (ctx_idx);
 }
 

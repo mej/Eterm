@@ -177,7 +177,7 @@ get_modifiers(void)
   }
 }
 
-/* To handle buffer overflows properly, we must malloc a buffer.  libmej_free it when done. */
+/* To handle buffer overflows properly, we must malloc a buffer.  Free it when done. */
 #ifdef USE_XIM
 #  define LK_RET()   do {if (kbuf_alloced) FREE(kbuf); return;} while (0)
 #else

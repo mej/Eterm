@@ -36,9 +36,9 @@ libmej_dprintf(const char *format, ...)
   int n;
 
   va_start(args, format);
-  n = vfprintf(stderr, format, args);
+  n = vfprintf(LIBMEJ_DEBUG_FD, format, args);
   va_end(args);
-  fflush(stderr);
+  fflush(LIBMEJ_DEBUG_FD);
   return (n);
 }
 

@@ -68,7 +68,7 @@ static const char cvs_ident[] = "$Id$";
 # ifdef HAVE_LASTLOG_H
 #  include <lastlog.h>
 # endif
-# if defined(__libmej_freeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 #  include <ttyent.h>
 # endif
 
@@ -83,7 +83,7 @@ static const char cvs_ident[] = "$Id$";
 
 /* don't go off end of ut_id & remember if an entry has been made */
 # ifndef HAVE_UTEMPTER
-#  if defined(USE_SYSV_UTMP) || defined(__libmej_freeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+#  if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
 static char ut_id[5];		/* remember if entry to utmp made */
 #  else
 static int utmp_pos;		/* BSD position of utmp-stamp */
@@ -274,7 +274,7 @@ remove_utmp_entry(void)
 # else /* USE_SYSV_UTMP */
 /* BSD utmp support */
 
-#  if defined(__libmej_freeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 
 /* used to hold the line we are using */
 static char ut_line[32];
@@ -322,7 +322,7 @@ b_login(struct utmp *ut)
   }
 }
 
-#  else /* __libmej_freeBSD__ || NetBSD || BSDI */
+#  else /* __FreeBSD__ || NetBSD || BSDI */
 static int utmp_pos = 0;	/* position of utmp-stamp */
 
 /*----------------------------------------------------------------------*
@@ -380,7 +380,7 @@ write_utmp(struct utmp *putmp)
   return rval;
 }
 
-#  endif /* __libmej_freeBSD__ || NetBSD || BSDI */
+#  endif /* __FreeBSD__ || NetBSD || BSDI */
 
 void
 add_utmp_entry(const char *pty, const char *hostname, int fd)
@@ -400,7 +400,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
     return;
   }
 
-#  if defined(__libmej_freeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
   strncpy(ut_line, pty, 31);
 
   strncpy(utmp.ut_line, pty, UT_LINESIZE);
@@ -409,7 +409,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
   utmp.ut_time = time(NULL);
 
   b_login(&utmp);
-#  else /* __libmej_freeBSD__ || NetBSD || BSDI */
+#  else /* __FreeBSD__ || NetBSD || BSDI */
   strncpy(utmp.ut_line, ut_id, sizeof(utmp.ut_line));
   strncpy(utmp.ut_name, pwent->pw_name, sizeof(utmp.ut_name));
   strncpy(utmp.ut_host, hostname, sizeof(utmp.ut_host));
@@ -428,10 +428,10 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
 void
 remove_utmp_entry(void)
 {
-#  if defined(__libmej_freeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
   logout(ut_line);
   logwtmp(ut_line, "", "");
-#  else /* __libmej_freeBSD__ */
+#  else /* __FreeBSD__ */
   FILE *fd;
 
   privileges(INVOKE);
@@ -445,7 +445,7 @@ remove_utmp_entry(void)
     fclose(fd);
   }
   privileges(REVERT);
-#  endif /* __libmej_freeBSD__ || NetBSD || BSDI */
+#  endif /* __FreeBSD__ || NetBSD || BSDI */
 }
 
 # endif /* USE_SYSV_UTMP */

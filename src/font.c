@@ -62,10 +62,11 @@ static unsigned char get_corner(const char *corner);
 void
 eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
 
-  char **flist = *plist;
+  char **flist;
 
-  D_FONT(("eterm_font_add(\"%s\", %u):  plist == %8p\n", NONULL(fontname), (unsigned int) idx, plist));
+  D_FONT(("Adding \"%s\" at %u (%8p)\n", NONULL(fontname), (unsigned int) idx, plist));
   ASSERT(plist != NULL);
+  flist = *plist;
 
   if (idx >= font_cnt) {
     unsigned char new_size = sizeof(char *) * (idx + 1);
@@ -74,17 +75,17 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
       etfonts = (char **) REALLOC(etfonts, new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) REALLOC(etmfonts, new_size);
-      D_FONT((" -> libmej_reallocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
+      D_FONT((" -> Reallocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
-      D_FONT((" -> libmej_reallocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
+      D_FONT((" -> Reallocated font list:  %u bytes at %8p\n", new_size, etfonts));
 #endif
     } else {
       etfonts = (char **) MALLOC(new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) MALLOC(new_size);
-      D_FONT((" -> Allocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
+      D_FONT((" -> Allocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
-      D_FONT((" -> Allocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
+      D_FONT((" -> Allocating font list:  %u bytes at %8p\n", new_size, etfonts));
 #endif
     }
     MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));

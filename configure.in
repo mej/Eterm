@@ -177,6 +177,7 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
                   AC_DEFINE_UNQUOTED(DEBUG, $withval)
               else
                   echo "no debugging"
+                  AC_DEFINE_UNQUOTED(DEBUG, 0)
               fi, echo "4"
                   AC_DEFINE_UNQUOTED(DEBUG, 4)
 )

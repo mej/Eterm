@@ -2736,7 +2736,7 @@ v_writeBig(int f, char *d, int len)
       }
       if (v_bufend < v_bufptr + len) {
 	/* still won't fit: get more space */
-	/* Don't use Xtlibmej_realloc because an error is not fatal. */
+	/* Don't use XtRealloc because an error is not fatal. */
 	int size = v_bufptr - v_buffer;		/* save across realloc */
 
 	v_buffer = REALLOC(v_buffer, size + len);

@@ -110,49 +110,59 @@
 #endif
 
 /* A quick and dirty macro to say, "Hi!  I got here without crashing!" */
-#define MOO()  do { __DEBUG(); fprintf(LIBMEJ_DEBUG_FD, "Moo.\n"); fflush(LIBMEJ_DEBUG_FD); } while (0)
+#define MOO()  do {__DEBUG(); libmej_dprintf("Moo.\n");} while (0)
 
 /* Assertion/abort macros which are quite a bit more useful than assert() and abort(). */
-#if defined(__FILE__) && defined(__LINE__)
-# ifdef __GNUC__
-#  define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                                   else {print_warning("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);}}} while (0)
-#  define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                                             else {print_warning("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
-                                              return (val);}} while (0)
-#  define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
-                                                  else {print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
-                                   } while (0)
-#  define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
-                                                          else {print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
-                                           return (val);} while (0)
-#  define ABORT() fatal_error("Aborting in %s() at %s:%d.", __FUNCTION__, __FILE__, __LINE__)
+#if DEBUG >= 1
+# if defined(__FILE__) && defined(__LINE__)
+#  ifdef __GNUC__
+#   define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
+                                                    else {print_warning("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);}}} while (0)
+#   define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
+                                                              else {print_warning("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
+                                               return (val);}} while (0)
+#   define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
+                                                   else {print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
+                                    } while (0)
+#   define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
+                                                           else {print_warning("ASSERT failed in %s() at %s:%d:  This code should not be reached.", __FUNCTION__, __FILE__, __LINE__);} \
+                                            return (val);} while (0)
+#   define ABORT() fatal_error("Aborting in %s() at %s:%d.", __FUNCTION__, __FILE__, __LINE__)
+#  else
+#   define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
+                                                    else {print_warning("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);}}} while (0)
+#   define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
+                                                              else {print_warning("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
+                                               return (val);}} while (0)
+#   define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                                   else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                    } while (0)
+#   define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                                           else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
+                                            return (val);} while (0)
+#   define ABORT() fatal_error("Aborting at %s:%d.", __FILE__, __LINE__)
+#  endif
 # else
-#  define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
-                                                   else {print_warning("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);}}} while (0)
-#  define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
-                                                             else {print_warning("ASSERT failed at %s:%d:  %s", __FILE__, __LINE__, #x);} \
-                                              return (val);}} while (0)
-#  define ASSERT_NOTREACHED()  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
-                                                  else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
-                                   } while (0)
-#  define ASSERT_NOTREACHED_RVAL(val)  do {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
-                                                          else {print_warning("ASSERT failed at %s:%d:  This code should not be reached.", __FILE__, __LINE__);} \
-                                           return (val);} while (0)
-#  define ABORT() fatal_error("Aborting at %s:%d.", __FILE__, __LINE__)
+#  define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed:  %s", #x);} \
+                                                   else {print_warning("ASSERT failed:  %s", #x);}}} while (0)
+#  define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed:  %s", #x);} \
+                                                             else {print_warning("ASSERT failed:  %s", #x);} return (val);}} while (0)
+#  define ASSERT_NOTREACHED()           return
+#  define ASSERT_NOTREACHED_RVAL(x)     return (x)
+#  define ABORT()                       fatal_error("Aborting.\n")
 # endif
+# define REQUIRE(x)                     do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libmej_dprintf("REQUIRE failed:  %s\n", #x);} return;}} while (0)
+# define REQUIRE_RVAL(x, v)             do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libmej_dprintf("REQUIRE failed:  %s\n", #x);} return (v);}} while (0)
 #else
-# define ASSERT(x)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed:  %s", #x);} \
-                                                  else {print_warning("ASSERT failed:  %s", #x);}}} while (0)
-# define ASSERT_RVAL(x, val)  do {if (!(x)) {if (DEBUG_LEVEL>=1) {fatal_error("ASSERT failed:  %s", #x);} \
-                                                            else {print_warning("ASSERT failed:  %s", #x);} return (val);}} while (0)
-# define ASSERT_NOTREACHED()       return
-# define ASSERT_NOTREACHED_RVAL(x) return (x)
-# define ABORT() fatal_error("Aborting.\n")
+# define ASSERT(x)                      NOP
+# define ASSERT_RVAL(x, val)            NOP
+# define ASSERT_NOTREACHED()            return
+# define ASSERT_NOTREACHED_RVAL(val)    return (val)
+# define ABORT()                        fatal_error("Aborting.\n")
+# define REQUIRE(x)                     do {if (!(x)) return;} while 0
+# define REQUIRE_RVAL(x, v)             do {if (!(x)) return (v);} while 0
 #endif
 
-#define REQUIRE(x) do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libmej_dprintf("REQUIRE failed:  %s\n", #x);} return;}} while (0)
-#define REQUIRE_RVAL(x, v) do {if (!(x)) {if (DEBUG_LEVEL>=1) {__DEBUG(); libmej_dprintf("REQUIRE failed:  %s\n", #x);} return (v);}} while (0)
 #define NONULL(x) ((x) ? (x) : ("<null>"))
 
 /* Macros for printing debugging messages */
@@ -195,9 +205,13 @@
 
 
 /********************************* MEM GOOP ***********************************/
+#define LIBMEJ_FNAME_LEN  20
+
 typedef struct ptr_struct {
   void *ptr;
   size_t size;
+  char file[LIBMEJ_FNAME_LEN + 1];
+  unsigned long line;
 } ptr_t;
 typedef struct memrec_struct {
   unsigned long cnt;

@@ -3859,3 +3859,19 @@ Fri Sep  1 00:39:41 PDT 2000	Michael Jennings <mej@eterm.org>
 	a pixmap ID would be a good thing.  Sigh.  I need sleep.
 	
 -------------------------------------------------------------------------------
+Fri Sep  1 15:25:28 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Okay, everything seems hunky-dorey now.  If you have memory debugging
+	turned on, exiting Eterm will give a dump of the leftover allocated
+	memory including where it came from and how much there is.  You'll
+	also get a listing of all the remaining Pixmap ID's and GC ID's along
+	with where they were created.
+
+	I also added some macros to the debugging stuff in libmej.h so that
+	if you pass the --without-debugging option to ./configure, it will
+	optimize out all the ASSERT and REQUIRE goop.  This will make it
+	harder to trap bugs before they cause problems, so don't do it if you
+	want to help development, but if speed is critical to you, give it a
+	shot.
+	
+-------------------------------------------------------------------------------

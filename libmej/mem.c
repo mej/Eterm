@@ -30,7 +30,7 @@ static const char cvs_ident[] = "$Id$";
 
 #include "libmej.h"
 
-static void memrec_add_var(memrec_t *, void *, size_t);
+static void memrec_add_var(memrec_t *, const char *, unsigned long, void *, size_t);
 static void memrec_rem_var(memrec_t *, const char *, const char *, unsigned long, void *);
 static void memrec_chg_var(memrec_t *, const char *, const char *, unsigned long, void *, void *, size_t);
 static void memrec_dump_pointers(memrec_t *);
@@ -60,7 +60,7 @@ memrec_init(void)
 }
 
 static void
-memrec_add_var(memrec_t *memrec, void *ptr, size_t size)
+memrec_add_var(memrec_t *memrec, const char *filename, unsigned long line, void *ptr, size_t size)
 {
   register ptr_t *p;
 
@@ -70,9 +70,13 @@ memrec_add_var(memrec_t *memrec, void *ptr, size_t size)
     D_MEM(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
   }
   p = memrec->ptrs + memrec->cnt - 1;
-  D_MEM(("Adding variable of size %lu at %8p.  Storing as pointer #%lu at %8p (from %8p).\n", size, ptr, memrec->cnt, p, memrec->ptrs));
+  D_MEM(("Adding variable (%8p, %lu bytes) from %s:%lu.\n", ptr, size, filename, line));
+  D_MEM(("Storing as pointer #%lu at %8p (from %8p).\n", memrec->cnt, p, memrec->ptrs));
   p->ptr = ptr;
   p->size = size;
+  strncpy(p->file, filename, LIBMEJ_FNAME_LEN);
+  p->file[LIBMEJ_FNAME_LEN] = 0;
+  p->line = line;
 }
 
 static void
@@ -93,7 +97,8 @@ memrec_rem_var(memrec_t *memrec, const char *var, const char *filename, unsigned
     return;
   }
   memrec->cnt--;
-  D_MEM(("Removing variable %s (%8p) of size %lu which is stored at %8p (from %8p)\n", var, ptr, p->size, p, memrec->ptrs));
+  D_MEM(("Removing variable %s (%8p) of size %lu\n", var, ptr, p->size));
+  D_MEM(("Pointer #%lu is stored at %8p (from %8p)\n", i + 1, p, memrec->ptrs));
   memmove(p, p + 1, sizeof(ptr_t) * (memrec->cnt - i));
   memrec->ptrs = (ptr_t *) realloc(memrec->ptrs, sizeof(ptr_t) * memrec->cnt);
 }
@@ -115,9 +120,12 @@ memrec_chg_var(memrec_t *memrec, const char *var, const char *filename, unsigned
     D_MEM(("ERROR:  File %s, line %d attempted to realloc variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, oldp));
     return;
   }
-  D_MEM(("Changing variable %s (%8p, %lu -> %8p, %lu) stored at %8p (from %8p)\n", var, oldp, p->size, newp, size, p, memrec->ptrs));
+  D_MEM(("Changing variable %s (%8p, %lu -> %8p, %lu)\n", var, oldp, p->size, newp, size));
+  D_MEM(("Pointer #%lu stored at %8p (from %8p)\n", i + 1, p, memrec->ptrs));
   p->ptr = newp;
   p->size = size;
+  strncpy(p->file, filename, LIBMEJ_FNAME_LEN);
+  p->line = line;
 }
 
 static void
@@ -129,21 +137,22 @@ memrec_dump_pointers(memrec_t *memrec)
   unsigned char buff[9];
 
   ASSERT(memrec != NULL);
-  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: %lu pointers stored.\n", memrec->cnt);
-  fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  Pointer |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  \n");
-  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: ---------+----------+--------+---------+-------------------------+---------\n");
+  fprintf(LIBMEJ_DEBUG_FD, "PTR:  %lu pointers stored.\n", memrec->cnt);
+  fprintf(LIBMEJ_DEBUG_FD, "PTR:   Pointer |       Filename       |  Line  |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  \n");
+  fprintf(LIBMEJ_DEBUG_FD, "PTR:  ---------+----------------------+--------+----------+--------+---------+-------------------------+---------\n");
   fflush(LIBMEJ_DEBUG_FD);
   len = sizeof(ptr_t) * memrec->cnt;
   memset(buff, 0, sizeof(buff));
 
   /* First, dump the contents of the memrec->ptrs[] array. */
   for (p = memrec->ptrs, j = 0; j < len; j += 8) {
-    fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec->ptrs, (unsigned long) (sizeof(ptr_t) * memrec->cnt), (unsigned int) j);
+    fprintf(LIBMEJ_DEBUG_FD, "PTR:   %07lu | %20s | %6lu | %8p | %06lu | %07x | ", (unsigned long) 0, "", (unsigned long) 0, memrec->ptrs,
+            (unsigned long) (sizeof(ptr_t) * memrec->cnt), (unsigned int) j);
     /* l is the number of characters we're going to output */
     l = ((len - j < 8) ? (len - j) : (8));
     /* Copy l bytes (up to 8) from memrec->ptrs[] (p) to buffer */
-    memset(buff, 0, sizeof(buff));
     memcpy(buff, ((char *) p) + j, l);
+    buff[l] = 0;
     for (k = 0; k < l; k++) {
       fprintf(LIBMEJ_DEBUG_FD, "%02x ", buff[k]);
     }
@@ -162,11 +171,10 @@ memrec_dump_pointers(memrec_t *memrec)
     /* Add this pointer's size to our total */
     total += p->size;
     for (j = 0; j < p->size; j += 8) {
-      fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  %07lu | %8p | %06lu | %07x | ", i + 1, p->ptr, (unsigned long) p->size, (unsigned int) j);
+      fprintf(LIBMEJ_DEBUG_FD, "PTR:   %07lu | %20s | %6lu | %8p | %06lu | %07x | ", i + 1, NONULL(p->file), p->line, p->ptr, (unsigned long) p->size, (unsigned int) j);
       /* l is the number of characters we're going to output */
       l = ((p->size - j < 8) ? (p->size - j) : (8));
       /* Copy l bytes (up to 8) from p->ptr to buffer */
-      memset(buff, 0, sizeof(buff));
       memcpy(buff, ((char *) p->ptr) + j, l);
       buff[l] = 0;
       for (k = 0; k < l; k++) {
@@ -182,7 +190,7 @@ memrec_dump_pointers(memrec_t *memrec)
       fflush(LIBMEJ_DEBUG_FD);
     }
   }
-  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: Total allocated memory: %10lu bytes\n\n", total);
+  fprintf(LIBMEJ_DEBUG_FD, "PTR:  Total allocated memory: %10lu bytes\n", total);
   fflush(LIBMEJ_DEBUG_FD);
 }
 
@@ -190,12 +198,24 @@ static void
 memrec_dump_resources(memrec_t *memrec)
 {
   register ptr_t *p;
-  unsigned long i, j, k, l, total = 0;
+  unsigned long i, total;
   unsigned long len;
-  unsigned char buff[9];
 
   ASSERT(memrec != NULL);
+  len = memrec->cnt;
+  fprintf(LIBMEJ_DEBUG_FD, "RES:  %lu resources stored.\n", memrec->cnt);
+  fprintf(LIBMEJ_DEBUG_FD, "RES:   Index | Resource ID |       Filename       |  Line  |  Size  \n");
+  fprintf(LIBMEJ_DEBUG_FD, "RES:  -------+-------------+----------------------+--------+--------\n");
+  fflush(LIBMEJ_DEBUG_FD);
 
+  for (p = memrec->ptrs, i = 0, total = 0; i < len; i++, p++) {
+    total += p->size;
+    fprintf(LIBMEJ_DEBUG_FD, "RES:   %5lu |  0x%08x | %20s | %6lu | %6lu\n", i, (unsigned) p->ptr, NONULL(p->file), p->line, (unsigned long) p->size);
+    /* Flush after every line in case we crash */
+    fflush(LIBMEJ_DEBUG_FD);
+  }
+  fprintf(LIBMEJ_DEBUG_FD, "RES:  Total size: %lu bytes\n", total);
+  fflush(LIBMEJ_DEBUG_FD);
 }
 
 /******************** MEMORY ALLOCATION INTERFACE ********************/
@@ -211,12 +231,12 @@ libmej_malloc(const char *filename, unsigned long line, size_t size)
   }
 #endif
 
-  D_MEM(("libmej_malloc(%lu) called at %s:%lu\n", size, filename, line));
+  D_MEM(("%lu bytes requested at %s:%lu\n", size, filename, line));
 
   temp = (void *) malloc(size);
   ASSERT_RVAL(temp != NULL, NULL);
   if (DEBUG_LEVEL >= DEBUG_MEM) {
-    memrec_add_var(&malloc_rec, temp, size);
+    memrec_add_var(&malloc_rec, filename, line, temp, size);
   }
   return (temp);
 }
@@ -233,7 +253,7 @@ libmej_realloc(const char *var, const char *filename, unsigned long line, void *
   }
 #endif
 
-  D_MEM(("libmej_realloc(%lu) called for variable %s (%8p) at %s:%lu\n", size, var, ptr, filename, line));
+  D_MEM(("Variable %s (%8p -> %lu) at %s:%lu\n", var, ptr, (unsigned long) size, filename, line));
   if (ptr == NULL) {
     temp = (void *) libmej_malloc(__FILE__, __LINE__, size);
   } else {
@@ -258,11 +278,11 @@ libmej_calloc(const char *filename, unsigned long line, size_t count, size_t siz
   }
 #endif
 
-  D_MEM(("libmej_calloc(%lu, %lu) called at %s:%lu\n", count, size, filename, line));
+  D_MEM(("%lu units of %lu bytes each requested at %s:%lu\n", count, size, filename, line));
   temp = (void *) calloc(count, size);
   ASSERT_RVAL(temp != NULL, NULL);
   if (DEBUG_LEVEL >= DEBUG_MEM) {
-    memrec_add_var(&malloc_rec, temp, size * count);
+    memrec_add_var(&malloc_rec, filename, line, temp, size * count);
   }
   return (temp);
 }
@@ -277,7 +297,7 @@ libmej_free(const char *var, const char *filename, unsigned long line, void *ptr
   }
 #endif
 
-  D_MEM(("libmej_free() called for variable %s (%8p) at %s:%lu\n", var, ptr, filename, line));
+  D_MEM(("Variable %s (%8p) at %s:%lu\n", var, ptr, filename, line));
   if (ptr) {
     if (DEBUG_LEVEL >= DEBUG_MEM) {
       memrec_rem_var(&malloc_rec, var, filename, line, ptr);
@@ -294,7 +314,7 @@ libmej_strdup(const char *var, const char *filename, unsigned long line, const c
   register char *newstr;
   register size_t len;
 
-  D_MEM(("libmej_strdup() called for variable %s (%8p) at %s:%lu\n", var, str, filename, line));
+  D_MEM(("Variable %s (%8p) at %s:%lu\n", var, str, filename, line));
 
   len = strlen(str) + 1;  /* Copy NUL byte also */
   newstr = (char *) libmej_malloc(filename, line, len);
@@ -305,6 +325,7 @@ libmej_strdup(const char *var, const char *filename, unsigned long line, const c
 void
 libmej_dump_mem_tables(void)
 {
+  fprintf(LIBMEJ_DEBUG_FD, "Dumping memory allocation table:\n");
   memrec_dump_pointers(&malloc_rec);
 }
 
@@ -322,7 +343,7 @@ libmej_x_create_pixmap(const char *filename, unsigned long line, Display *d, Dra
   p = XCreatePixmap(d, win, w, h, depth);
   ASSERT_RVAL(p != None, None);
   if (DEBUG_LEVEL >= DEBUG_MEM) {
-    memrec_add_var(&pixmap_rec, (void *) p, w * h * (depth / 8));
+    memrec_add_var(&pixmap_rec, filename, line, (void *) p, w * h * (depth / 8));
   }
   return (p);
 }
@@ -344,6 +365,7 @@ libmej_x_free_pixmap(const char *var, const char *filename, unsigned long line, 
 void
 libmej_dump_pixmap_tables(void)
 {
+  fprintf(LIBMEJ_DEBUG_FD, "Dumping X11 Pixmap allocation table:\n");
   memrec_dump_resources(&pixmap_rec);
 }
 
@@ -361,7 +383,7 @@ libmej_x_create_gc(const char *filename, unsigned long line, Display *d, Drawabl
   gc = XCreateGC(d, win, mask, gcv);
   ASSERT_RVAL(gc != None, None);
   if (DEBUG_LEVEL >= DEBUG_MEM) {
-    memrec_add_var(&gc_rec, (void *) gc, sizeof(XGCValues));
+    memrec_add_var(&gc_rec, filename, line, (void *) gc, sizeof(XGCValues));
   }
   return (gc);
 }
@@ -383,5 +405,6 @@ libmej_x_free_gc(const char *var, const char *filename, unsigned long line, Disp
 void
 libmej_dump_gc_tables(void)
 {
+  fprintf(LIBMEJ_DEBUG_FD, "Dumping X11 GC allocation table:\n");
   memrec_dump_resources(&gc_rec);
 }

@@ -66,9 +66,9 @@ typedef void *Imlib_Color_Modifier;
 # define IMLIB_FREE_PIXMAP(p)     NOP
 #endif
 #define LIBMEJ_X_CREATE_PIXMAP(w, h)  X_CREATE_PIXMAP(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (w), (h), Xdepth)
-#define LIBMEJ_X_FREE_PIXMAP(p)       X_FREE_PIXMAP(Xdisplay, (p))
+#define LIBMEJ_X_FREE_PIXMAP(p)       X_FREE_PIXMAP(Xdisplay, p)
 #define LIBMEJ_X_CREATE_GC(f, gcv)    X_CREATE_GC(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (f), (gcv))
-#define LIBMEJ_X_FREE_GC(gc)          X_FREE_GC(Xdisplay, (gc))
+#define LIBMEJ_X_FREE_GC(gc)          X_FREE_GC(Xdisplay, gc)
 
 #define GEOM_LEN 19
 
