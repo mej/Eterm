@@ -1055,6 +1055,7 @@ get_initial_options(int argc, char *argv[])
     D_OPTIONS(("argv[%d] == \"%s\"\n", i, argv[i]));
 
     if (*opt != '-') {
+      D_OPTIONS(("Non-option detected.\n"));
       continue;
     }
     if (*(opt + 1) == '-') {
@@ -1074,6 +1075,7 @@ get_initial_options(int argc, char *argv[])
       } else if (!BEG_STRCASECMP(opt, "install")) {
 	j = 4;
       } else if (!BEG_STRCASECMP(opt, "exec") && (*(opt+4) != '=')) {
+        i = (unsigned long) argc;
         break;
       } else
 	continue;
@@ -1127,6 +1129,7 @@ get_initial_options(int argc, char *argv[])
       register unsigned short pos;
       unsigned char done = 0;
 
+      D_OPTIONS(("Short option detected.\n"));
       for (pos = 1; opt[pos] && !done; pos++) {
 	if (opt[pos] == 't') {
 	  j = 0;
@@ -1135,9 +1138,11 @@ get_initial_options(int argc, char *argv[])
 	} else if (opt[pos] == 'd') {
 	  j = 2;
 	} else if (opt[pos] == 'e') {
+          i = (unsigned long) argc;
 	  break;
-	} else
+	} else {
 	  continue;
+        }
 
 	if (opt[pos + 1]) {
 	  val_ptr = opt + pos + 1;

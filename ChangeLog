@@ -4584,3 +4584,8 @@ Redraw the buttonbar properly when moved.  Spotted by Azundris
 
 Also fixed the display of underlining with fonts lacking descent.
 ----------------------------------------------------------------------
+Wed Apr 24 16:56:48 2002                        Michael Jennings (mej)
+
+Fixed bug where initial options would get parsed even if they were
+part of a -e/--exec expression.
+----------------------------------------------------------------------
