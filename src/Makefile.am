@@ -14,21 +14,18 @@ libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c         
                       screen.h scrollbar.c scrollbar.h startup.c startup.h       \
                       system.c system.h term.c term.h timer.c timer.h utmp.c     \
                       windows.c windows.h
-libEterm_la_DEPENDENCIES = feature.h $(MMX_OBJS)
 libEterm_la_LDFLAGS = -release $(VERSION)
+if HAVE_MMX
+libEterm_la_DEPENDENCIES = feature.h $(MMX_OBJS)
 libEterm_la_LIBADD = $(MMX_OBJS)
+else
+libEterm_la_DEPENDENCIES = feature.h
+endif
 
 Eterm_SOURCES = main.c
 Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Eterm_LDADD = libEterm.la 
-
-if HAVE_MMX
-$(MMX_OBJS): $(MMX_SRCS)
-else
-$(MMX_OBJS):
-	touch $(MMX_OBJS)
-endif
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
