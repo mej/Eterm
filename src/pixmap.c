@@ -275,6 +275,8 @@ reset_simage(simage_t * simg, unsigned long mask)
 
   ASSERT(simg != NULL);
 
+  D_PIXMAP(("reset_simage(%8p, 0x%08x)\n", simg, mask));
+
   if ((mask & RESET_IMLIB_IM) && simg->iml->im) {
     Imlib_destroy_image(imlib_id, simg->iml->im);
     simg->iml->im = NULL;
@@ -568,24 +570,6 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     if (desktop_pixmap == None) {
       get_desktop_pixmap();
       last_x = last_y = -1;
-      if (desktop_pixmap != None && need_colormod()) {
-	pixmap = desktop_pixmap;
-	XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
-        D_PIXMAP(("render_simage():  XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
-	if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
-	  desktop_pixmap = XCreatePixmap(Xdisplay, win, pw, ph, Xdepth);
-	  XCopyArea(Xdisplay, pixmap, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
-	  colormod_trans(desktop_pixmap, gc, pw, ph);
-	} else {
-	  desktop_pixmap = XCreatePixmap(Xdisplay, win, scr->width, scr->height, Xdepth);
-	  XCopyArea(Xdisplay, pixmap, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
-	  colormod_trans(desktop_pixmap, gc, scr->width, scr->height);
-	}
-	desktop_pixmap_is_mine = 1;
-	pixmap = None;
-      } else {
-	desktop_pixmap_is_mine = 0;
-      }
     }
     if (desktop_pixmap != None) {
       XTranslateCoordinates(Xdisplay, win, desktop_window, 0, 0, &x, &y, &w);
@@ -1235,7 +1219,34 @@ get_desktop_pixmap(void)
         } else {
           D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap has changed.  Updating desktop_pixmap\n"));
           free_desktop_pixmap();
-          return (desktop_pixmap = p);
+          if (need_colormod()) {
+            int px, py;
+            unsigned int pw, ph, pb, pd;
+            Window w;
+            GC gc;
+            XGCValues gcvalue;
+            Screen *scr = ScreenOfDisplay(Xdisplay, Xscreen);
+
+            gcvalue.foreground = gcvalue.background = PixColors[bgColor];
+            gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground, &gcvalue);
+            XGetGeometry(Xdisplay, p, &w, &px, &py, &pw, &ph, &pb, &pd);
+            D_PIXMAP(("get_desktop_pixmap():  XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
+            if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
+              desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.parent, pw, ph, Xdepth);
+              XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
+              colormod_trans(desktop_pixmap, gc, pw, ph);
+            } else {
+              desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, scr->width, scr->height, Xdepth);
+              XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
+              colormod_trans(desktop_pixmap, gc, scr->width, scr->height);
+            }
+            XFreeGC(Xdisplay, gc);
+            desktop_pixmap_is_mine = 1;
+            return (desktop_pixmap);
+          } else {
+            desktop_pixmap_is_mine = 0;
+            return (desktop_pixmap = p);
+          }
         }
       }
     }
@@ -1258,6 +1269,7 @@ get_desktop_pixmap(void)
       color_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, 16, 16, Xdepth);
       XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
       D_PIXMAP(("get_desktop_pixmap():  Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
+      XFreeGC(Xdisplay, gc);
       return (desktop_pixmap = color_pixmap);
     }
   }

@@ -15,5 +15,5 @@ Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 INCLUDES = -I. -I$(top_srcdir) -I$(top_srcdir)/libmej -I.. -I$(includedir) -I$(prefix)/include $(X_CFLAGS)
 LDADD = libEterm.la $(top_builddir)/libmej/libmej.la -L$(libdir) -L$(prefix)/lib $(LIBS) $(GRLIBS) $(X_LIBS)
 
-EXTRA_DIST = actions.h command.h debug.h e.h eterm_utmp.h events.h feature.h font.h grkelot.h grx.h menus.h misc.h options.h \
+EXTRA_DIST = actions.h command.h debug.h e.h eterm_utmp.h events.h feature.h font.h grkelot.h menus.h misc.h options.h \
              pixmap.h profile.h screen.h scrollbar.h startup.h system.h term.h timer.h windows.h Eterm.xpm

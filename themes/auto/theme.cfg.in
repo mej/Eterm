@@ -217,7 +217,7 @@ begin main
     end image
   end
 
-%include "Eterm-menu.cfg"
+%include "auto-menu.cfg"
 
 # This section *must* come after the menu definitions if you want
 # menu actions to work.  C'est la vie. :-)

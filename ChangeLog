@@ -2682,3 +2682,11 @@ Thu Oct 28 16:17:21 PDT 1999	Michael Jennings <mej@eterm.org>
 	theme files.
 	
 -------------------------------------------------------------------------------
+Thu Oct 28 20:11:15 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a couple problems pointed out by Joel Lesher
+	<filgy@blazenet.net> and Rahsheen Porter <strider@cipher.neuplanet.cx>
+	regarding tinted/shaded transparency and a typo in the auto mode
+	theme file.  Doh!
+	
+-------------------------------------------------------------------------------
