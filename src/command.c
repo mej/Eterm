@@ -3520,7 +3520,7 @@ main_loop(void)
                 if (encoding_method != UCS2) {
                     set_multichar_encoding("utf8");
                 }
-                handle = iconv_open("UTF-8", "WCHAR_T");
+                handle = iconv_open("WCHAR_T", "UTF-8");
                 if (handle == SPIF_CAST_C(iconv_t) -1) {
                     print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
@@ -3530,16 +3530,17 @@ main_loop(void)
                     char *outbuff, *pinbuff, *poutbuff;
                     wchar_t *wcbuff;
                     mbstate_t mbs;
-                    size_t bufflen, outlen = 0, retval;
+                    size_t bufflen, outlen = 0, outbufflen, retval;
 
                     pinbuff = (char *) str;
                     bufflen = cmdbuf_ptr - str;
-                    outlen = bufflen * 6;
+                    outbufflen = outlen = bufflen * 6;
                     poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
                     errno = 0;
                     D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff, bufflen));
                     print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
+                    outlen = outbufflen - outlen;
                     if (retval != (size_t) -1) {
                         errno = 0;
                     }
