@@ -32,6 +32,9 @@
 #define CHECK_SELECTION	do { \
                           if (selection.op) selection_check(); \
                         } while (0)
+#define CLEAR_SELECTION (selection.beg.row = selection.beg.col = selection.end.row = selection.end.col = 0)
+#define CLEAR_ALL_SELECTION (selection.beg.row = selection.beg.col = selection.mark.row = selection.mark.col = selection.end.row = selection.end.col = 0)
+
 #define scr_touch()  scr_expose(0, 0, TermWin.width, TermWin.height)
 
 /*
@@ -218,7 +221,6 @@ extern unsigned int colorfgbg;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern void blank_line(text_t *, rend_t *, int, rend_t);
 extern void blank_dline(text_t *, rend_t *, int, rend_t);
 extern void blank_sline(text_t *, rend_t *, int);
 extern void make_screen_mem(text_t **, rend_t **, int);

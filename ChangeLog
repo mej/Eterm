@@ -2792,3 +2792,10 @@ Mon Nov 15 13:20:05 PST 1999	Michael Jennings <mej@eterm.org>
 	raster has given me the cl00bat beating, so it's fixed now. :-]
 	
 -------------------------------------------------------------------------------
+Wed Nov 17 18:34:43 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Some selection changes and escape sequence fixes.  You can now
+	specify multiple color modifier commands in a single escape sequence.
+	You can also remove any existing color modifiers using "clear".
+	
+-------------------------------------------------------------------------------

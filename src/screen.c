@@ -99,7 +99,9 @@ static short lost_multi = 0;
  *                        SCREEN `COMMON' ROUTINES                           *
  * ------------------------------------------------------------------------- */
 /* Fill part/all of a drawn line with blanks. */
-void
+inline void blank_line(text_t *, rend_t *, int, rend_t);
+
+inline void
 blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 {
 /*    int             i = width; */
@@ -631,19 +633,32 @@ scroll_text(int row1, int row2, int count, int spec)
 
   if (count == 0 || (row1 > row2))
     return 0;
-
-  if (selection.op) {		/* move selected region too */
-    selection.beg.row -= count;
-    selection.end.row -= count;
-    selection.mark.row -= count;
-  }
-  CHECK_SELECTION;
   if ((count > 0) && (row1 == 0) && (current_screen == PRIMARY)) {
     TermWin.nscrolled += count;
     MIN_IT(TermWin.nscrolled, TermWin.saveLines);
   } else if (!spec)
     row1 += TermWin.saveLines;
   row2 += TermWin.saveLines;
+
+  if (selection.op && current_screen == selection.screen) {
+    i = selection.beg.row + TermWin.saveLines;
+    j = selection.end.row + TermWin.saveLines;
+    if ((i < row1 && j > row1)
+        || (i < row2 && j > row2)
+        || (i - count < row1 && i >= row1)
+        || (i - count > row2 && i <= row2)
+        || (j - count < row1 && j >= row1)
+        || (j - count > row2 && j <= row2)) {
+      CLEAR_ALL_SELECTION;
+      selection.op = SELECTION_CLEAR;
+    } else if (j >= row1 && j <= row2) {
+      /* move selected region too */
+      selection.beg.row -= count;
+      selection.end.row -= count;
+      selection.mark.row -= count;
+    }
+  }
+  CHECK_SELECTION;
 
   if (count > 0) {
 
@@ -729,6 +744,9 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
   rend_t *srp;
   row_col_t beg, end;
 
+  if (len <= 0)			/* sanity */
+    return;
+
   last_col = TermWin.ncol;
 
   D_SCREEN(("scr_add_lines(*,%d,%d)\n", nlines, len));
@@ -755,9 +773,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
   MIN_IT(screen.col, last_col - 1);
   MIN_IT(screen.row, TermWin.nrow - 1);
   /*MAX_IT(screen.row, 0); */
-  MAX_IT(screen.row, -TermWin.saveLines);
-  if (len <= 0)			/* sanity */
-    return;
+  MAX_IT(screen.row, -TermWin.nscrolled);
 
   row = screen.row + TermWin.saveLines;
   if (screen.text[row] == NULL) {
@@ -807,7 +823,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	      if (screen.text[j] == NULL)
 		make_screen_mem(screen.text, screen.rend, j);
 	      blank_line(screen.text[j], screen.rend[j],
-			 TermWin.ncol, DEFAULT_RSTYLE | (rstyle & RS_RVid ? RS_RVid : 0));
+			 TermWin.ncol, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
 	      screen.text[j][TermWin.ncol] = 0;
 	    } else if (screen.row < (TermWin.nrow - 1)) {
 	      screen.row++;
@@ -838,7 +854,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	   blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
 	   rstyle);    Bug fix from John Ellison - need to reset rstyle */
 	blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
-		   DEFAULT_RSTYLE | (rstyle & RS_RVid ? RS_RVid : 0));
+		   DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
 	screen.text[j][TermWin.ncol] = 0;
       } else if (screen.row < (TermWin.nrow - 1)) {
 	screen.row++;
