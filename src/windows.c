@@ -317,7 +317,7 @@ Create_Windows(int argc, char *argv[])
   MWMHints mwmhints;
 
   if (Options & Opt_borderless) {
-    prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", True);
+    prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
     if (prop == None) {
       print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
       Attributes.override_redirect = TRUE;
@@ -398,6 +398,7 @@ Create_Windows(int argc, char *argv[])
   XSelectInput(Xdisplay, Xroot, PropertyChangeMask);
   XSelectInput(Xdisplay, TermWin.parent, (KeyPressMask | FocusChangeMask | StructureNotifyMask | VisibilityChangeMask | PropertyChangeMask));
   if (mwmhints.flags) {
+    prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", False);
     XChangeProperty(Xdisplay, TermWin.parent, prop, prop, 32, PropModeReplace, (unsigned char *) &mwmhints, PROP_MWM_HINTS_ELEMENTS);
   }
   /* vt cursor: Black-on-White is standard, but this is more popular */

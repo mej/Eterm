@@ -3954,3 +3954,9 @@ Thu Nov  9 20:14:34 PST 2000	Michael Jennings <mej@eterm.org>
 	fixed.  Many thanks for his assistance.
 	
 -------------------------------------------------------------------------------
+Sun Nov 12 12:05:58 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Check for _MOTIF_WM_INFO instead of _MOTIF_WM_HINTS to see if the WM
+	can handle MWM hints.  This is all raster's fault.
+	
+-------------------------------------------------------------------------------
