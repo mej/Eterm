@@ -271,6 +271,12 @@ begin main
 # login information.  Eterm *must* run privileged to do this.
     utmp_logging on
 
+
+# If true, Eterm will select the whole line when you triple click on the
+# window, instead of from that location/word to the end of the line
+# (because that behaviour sucks --Mandrake)
+    select_line false
+
 # If true, Eterm will handle the Meta (Alt) + keypress to set the 8th bit.
 # If false, Eterm will handle the Meta + keypress as an escape prefix. (default)
 #    meta8 false
