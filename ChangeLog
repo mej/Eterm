@@ -3242,3 +3242,21 @@ Fri Feb 18 21:09:29 PST 2000	Michael Jennings <mej@eterm.org>
 	functions to do it. :-)
 	
 -------------------------------------------------------------------------------
+Wed Mar  1 18:37:18 PST 2000	Michael Jennings <mej@eterm.org>
+
+	I'm still not done with the commenting work I've been doing, but I've
+	made some fixes, so I figured it was time to commit what I've done so
+	far.
+
+	I've added support for multi-byte selection/pastes from programs like
+	Netscape, thanks in part to a patch from Yasuyuki Furukawa
+	<yasu@on.cs.keio.ac.jp>.  I've also applied a bugfix for pty
+	allocation on Irix from David Kaelbling <drk@sgi.com>, a display
+	bugfix pointed out by Valdis Kletnieks <Valdis.Kletnieks@vt.edu>, and
+	a fix for a missing menu in the auto theme discovered by someone on
+	IRC.
+
+	I've also added quite a few comments to term.c to help people grok
+	the parsing of escape sequences a little better.
+	
+-------------------------------------------------------------------------------

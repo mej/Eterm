@@ -97,6 +97,13 @@ Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
 unsigned int MetaMask = 0, AltMask = 0, NumLockMask = 0;
 unsigned int modmasks[] = { Mod1Mask, Mod2Mask, Mod3Mask, Mod4Mask, Mod5Mask };
 
+/* This function queries X to see which modifier keys (specifically Alt, Meta, and NumLock,
+   since that's really all we care about) are bound to the 5 modifier masks.  It then sets
+   the variables MetaMask, AltMask, and NumLockMask to the appropriate modifier mask (e.g.,
+   Mod1Mask).  That way, we can use MetaMask in lookup_key() instead of using a specific
+   ModMask.  This function also handles fallbacks, so that if there is no Meta key, the Alt
+   key will be used as Meta, and vice versa.  get_modifiers() is called once on startup and
+   after each MappingNotify event. */
 void
 get_modifiers(void)
 {
@@ -107,6 +114,8 @@ get_modifiers(void)
 
   modmap = XGetModifierMapping(Xdisplay);
   kc = modmap->modifiermap;
+
+  /* For each of the 5 modifier masks... */
   for (i = Mod5MapIndex; i >= Mod1MapIndex; i--) {
     unsigned short j;
     register unsigned short k, l;
@@ -114,12 +123,14 @@ get_modifiers(void)
     k = i * modmap->max_keypermod;
     l = i - Mod1MapIndex;
 
+    /* Find each key bound to it... */
     for (j = 0; j < modmap->max_keypermod; j++, k++) {
       unsigned char match = 0;
 
       if (kc[k] == 0) {
         break;
       }
+      /* Check to see if it's one that we care about. */
       switch (XKeycodeToKeysym(Xdisplay, kc[k], 0)) {
         case XK_Meta_L:
         case XK_Meta_R:
@@ -144,6 +155,7 @@ get_modifiers(void)
     }
   }
   XFreeModifiermap(modmap);
+  /* Fallbacks. */
   if (MetaMask == 0) {
     if (AltMask != 0) {
       D_X11(("Defaulted Meta key to match Alt mask\n"));
@@ -165,7 +177,14 @@ get_modifiers(void)
 #else
 #  define LK_RET()   return
 #endif
-/* Convert the keypress event into a string */
+
+/* This function is called for every keypress event we receive.  Its job is to convert
+   the keypress into its corresponding action.  It is responsible for calling the action
+   bindings routine to see if there is an action binding for that keysym; if there is,
+   this routine will exit.  If not, it continues.  It then uses the keysym to determine
+   the action or escape sequence which should result from the keypress.  Actions are
+   performed and the event discarded.  Escape sequences are generated and sent to the
+   child process. */
 void
 lookup_key(XEvent * ev)
 {
@@ -185,15 +204,13 @@ lookup_key(XEvent * ev)
   static short greek_mode = 0;
 #endif
 
-  /*
-   * use Num_Lock to toggle Keypad on/off.  If Num_Lock is off, allow an
-   * escape sequence to toggle the Keypad.
-   *
-   * Always permit `shift' to override the current setting
-   */
+  /* Quick boolean variables tell us which modifier keys were pressed. */
   shft = (ev->xkey.state & ShiftMask);
   ctrl = (ev->xkey.state & ControlMask);
   meta = (ev->xkey.state & MetaMask);
+
+  /* The num lock key toggles application keypad
+     mode.  Num lock on, app. keypad mode off. */
   if (numlock_state || (ev->xkey.state & NumLockMask)) {
     numlock_state = (ev->xkey.state & NumLockMask);
     PrivMode((!numlock_state), PrivMode_aplKP);
@@ -203,8 +220,9 @@ lookup_key(XEvent * ev)
     Status status_return;
 
     kbuf[0] = '\0';
-    len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf,
-                          sizeof(short_buf), &keysym, &status_return);
+    /* Lookup the string equivalent in terms of the XIM input context. */
+    len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, &status_return);
+    /* Whoops, it's too long.  Allocate a new buffer and repeat the call. */
     if (status_return == XBufferOverflow) {
       kbuf = (unsigned char *) MALLOC(len + 1);
       kbuf_alloced = 1;
@@ -212,16 +230,15 @@ lookup_key(XEvent * ev)
     }
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {
+    /* No XIM input context.  Do it the normal way. */
     len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
     valid_keysym = 1;
   }
 #else /* USE_XIM */
+  /* Translate the key event into its corresponding string according to X.  This also gets us a keysym. */
   len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
 
-  /*
-   * have unmapped Latin[2-4] entries -> Latin1
-   * good for installations  with correct fonts, but without XLOCALE
-   */
+  /* If there is no string and it's a Latin2-4 character, replace it with the Latin1 character instead. */
   if (!len && (keysym >= 0x0100) && (keysym < 0x0400)) {
     len = 1;
     kbuf[0] = (keysym & 0xff);
@@ -229,23 +246,28 @@ lookup_key(XEvent * ev)
 #endif /* USE_XIM */
 
 #ifdef USE_XIM
+  /* Don't do anything without a valid keysym. */
   if (valid_keysym) {
 #endif
 
+  /* Check for a corresponding action binding.  If there is one, we're done with this event. */
   if (action_dispatch(ev, keysym)) {
     LK_RET();
   }
+  /* If we're in pause mode, exit. */
   if (len && keypress_exit) {
       exit(0);
   }
 
+  /* This is a special mode that reports all extended keysyms (above 0xff00) to the application
+     as escape sequences.  Very few applications use it, but it can be a handy thing to have. */
   if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
     len = sprintf((char *) kbuf, "\033[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));
     tt_write(kbuf, len);
     LK_RET();
   }
 #ifdef HOTKEY
-  /* for some backwards compatibility */
+  /* Ctrl-> and Ctrl-< should change font sizes.  (Meta if HOTKEY has been changed to Meta.) */
   if (HOTKEY) {
     if (keysym == ks_bigfont) {
       change_font(0, BIGGER_FONT);
@@ -261,7 +283,7 @@ lookup_key(XEvent * ev)
     /* Shift + F1 - F10 generates F11 - F20 */
     if (keysym >= XK_F1 && keysym <= XK_F10) {
       keysym += (XK_F11 - XK_F1);
-      shft = 0;			/* turn off Shift */
+      shft = 0;
     } else if (!ctrl && !meta && (PrivateModes & PrivMode_ShiftKeys)) {
 
       int lnsppg;		/* Lines per page to scroll */
@@ -273,32 +295,31 @@ lookup_key(XEvent * ev)
 #endif
 
       switch (keysym) {
-	  /* normal XTerm key bindings */
-	case XK_Prior:		/* Shift+Prior = scroll back */
+        case XK_Prior:  /* Shift-PgUp scrolls up a page */
 	  if (TermWin.saveLines) {
 	    scr_page(UP, lnsppg);
 	    LK_RET();
 	  }
 	  break;
 
-	case XK_Next:		/* Shift+Next = scroll forward */
+	case XK_Next:  /* Shift-PgDn scrolls down a page */
 	  if (TermWin.saveLines) {
 	    scr_page(DN, lnsppg);
 	    LK_RET();
 	  }
 	  break;
 
-	case XK_Insert:	/* Shift+Insert = paste mouse selection */
+        case XK_Insert:  /* Shift-Ins pastes the current selection. */
 	  selection_request(ev->xkey.time, ev->xkey.x, ev->xkey.y);
 	  LK_RET();
 	  break;
 
-	case XK_KP_Add:	/* Shift+KP_Add = bigger font */
+        case XK_KP_Add:  /* Shift-Plus on the keypad increases the font size */
 	  change_font(0, BIGGER_FONT);
 	  LK_RET();
 	  break;
 
-	case XK_KP_Subtract:	/* Shift+KP_Subtract = smaller font */
+	case XK_KP_Subtract:  /* Shift-Minus on the keypad decreases the font size */
 	  change_font(0, SMALLER_FONT);
 	  LK_RET();
 	  break;
@@ -306,6 +327,7 @@ lookup_key(XEvent * ev)
     }
   }
 #ifdef UNSHIFTED_SCROLLKEYS
+  /* Allow PgUp/PgDn by themselves to scroll.  Not recommended. */
   else if (!ctrl && !meta) {
     switch (keysym) {
       case XK_Prior:
@@ -326,7 +348,7 @@ lookup_key(XEvent * ev)
 #endif
 
   switch (keysym) {
-    case XK_Print:
+    case XK_Print:  /* Print the screen contents out to the print pipe */
 #if DEBUG >= DEBUG_SELECTION
       if (debug_level >= DEBUG_SELECTION) {
 	debug_selection();
@@ -356,14 +378,16 @@ lookup_key(XEvent * ev)
     TermWin.view_start = 0;
   }
 
-  if (keysym >= 0xFF00 && keysym <= 0xFFFF) {
+  /* Process extended keysyms.  This is where the conversion to escape sequences happens. */
+  if (keysym >= 0xff00 && keysym <= 0xffff) {
 #ifdef KEYSYM_ATTRIBUTE
-    if (!(shft | ctrl) && KeySym_map[keysym - 0xFF00] != NULL) {
+    /* The "keysym" attribute in the config file gets handled here. */
+    if (!(shft | ctrl) && KeySym_map[keysym - 0xff00] != NULL) {
 
       const unsigned char *tmpbuf;
       unsigned int len;
 
-      tmpbuf = (KeySym_map[keysym - 0xFF00]);
+      tmpbuf = (KeySym_map[keysym - 0xff00]);
       len = *tmpbuf++;
 
       /* escape prefix */
@@ -380,6 +404,7 @@ lookup_key(XEvent * ev)
       LK_RET();
     } else
 #endif
+      /* This is a big-ass switch statement that handles all the special keysyms */
       switch (keysym) {
 	case XK_BackSpace:
 	  len = 1;
@@ -392,6 +417,7 @@ lookup_key(XEvent * ev)
 #endif
 	  break;
 
+        /* Tab key is normal unless it's shift-tab. */
 	case XK_Tab:
 	  if (shft) {
 	    len = 3;
@@ -415,20 +441,19 @@ lookup_key(XEvent * ev)
 	  break;
 
 #ifdef XK_KP_Left
-	case XK_KP_Left:	/* \033Ot or standard */
-	case XK_KP_Up:		/* \033Ox or standard */
-	case XK_KP_Right:	/* \033Ov or standard */
-	case XK_KP_Down:	/* \033Ow or standard */
+	case XK_KP_Left:	/* \033Ot or standard cursor key */
+	case XK_KP_Up:		/* \033Ox or standard cursor key */
+	case XK_KP_Right:	/* \033Ov or standard cursor key */
+	case XK_KP_Down:	/* \033Or or standard cursor key */
 	  if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
 	    len = 3;
-	    strcpy(kbuf, "\033OZ");
+	    strcpy(kbuf, "\033OZ");  /* The Z is replaced by t, x, v, or r */
 	    kbuf[2] = ("txvr"[keysym - XK_KP_Left]);
 	    break;
 	  } else {
-	    /* translate to std. cursor key */
 	    keysym = XK_Left + (keysym - XK_KP_Left);
 	  }
-	  /* FALL THROUGH */
+	  /* Continue on with the normal cursor keys... */
 #endif
 	case XK_Left:		/* "\033[D" */
 	case XK_Up:		/* "\033[A" */
@@ -446,6 +471,8 @@ lookup_key(XEvent * ev)
 	    kbuf[2] = ("dacb"[keysym - XK_Left]);
 	  }
 	  break;
+
+          /* Keypad and normal PgUp/PgDn */
 #ifndef UNSHIFTED_SCROLLKEYS
 # ifdef XK_KP_Prior
 	case XK_KP_Prior:
@@ -476,6 +503,8 @@ lookup_key(XEvent * ev)
 	  strcpy(kbuf, "\033[6~");
 	  break;
 #endif /* UNSHIFTED_SCROLLKEYS */
+
+          /* End key */
 #ifdef XK_KP_End
 	case XK_KP_End:
 	  /* allow shift to override */
@@ -495,8 +524,8 @@ lookup_key(XEvent * ev)
 	  strcpy(kbuf, "\033[4~");
 	  break;
 
-#ifdef DXK_Remove		/* support for DEC remove like key */
-	case DXK_Remove:	/* drop */
+#ifdef DXK_Remove
+	case DXK_Remove:
 #endif
 	case XK_Execute:
 	  len = 4;
@@ -684,6 +713,7 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
   }
 #endif
 
+  /* All processed.  If there's still no string, we're done. */
   if (len <= 0) {
     LK_RET();
   }
@@ -724,23 +754,29 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
     fprintf(stderr, "'\n");
   }
 #endif /* DEBUG_CMD */
-  tt_write(kbuf, len);
+  tt_write(kbuf, len);  /* Send the resulting string to the child process */
 
   LK_RET();
 }
 
-/* print pipe */
 #ifdef PRINTPIPE
+/* Open the print pipe. */
 FILE *
 popen_printer(void)
 {
-  FILE *stream = (FILE *) popen(rs_print_pipe, "w");
+  FILE *stream;
 
-  if (stream == NULL)
-    print_error("can't open printer pipe \"%s\" -- %s", rs_print_pipe, strerror(errno));
+  if (((my_ruid != my_euid) || (my_rgid != my_egid)) && (strcmp(rs_print_pipe, PRINTPIPE))) {
+    print_warning("Running setuid/setgid.  Refusing to use custom printpipe.");
+    RESET_AND_ASSIGN(rs_print_pipe, StrDup(PRINTPIPE));
+  }
+  if ((stream = (FILE *) popen(rs_print_pipe, "w")) == NULL) {
+    print_error("Can't open printer pipe \"%s\" -- %s", rs_print_pipe, strerror(errno));
+  }
   return stream;
 }
 
+/* Close the print pipe. */
 int
 pclose_printer(FILE * stream)
 {
@@ -748,7 +784,7 @@ pclose_printer(FILE * stream)
   return pclose(stream);
 }
 
-/* simulate attached vt100 printer */
+/* Print everything until we hit a \e[4i sequence. */
 void
 process_print_pipe(void)
 {
@@ -775,14 +811,18 @@ process_print_pipe(void)
 }
 #endif /* PRINTPIPE */
 
-/* process escape sequences */
+/* This routine processes escape sequences; i.e., when a \033 character is encountered in the
+   input stream, this function is called to process it.  First, we get the next character off
+   the input stream (the one after the ESC) and store it in ch.  Then we proceed based on what
+   ch is.  Some escape sequences are only ESC followed by a single character, so the
+   processing of those ends here.  Others are longer and get passed on to other functions from
+   this one. */
 void
 process_escape_seq(void)
 {
   unsigned char ch = cmd_getc();
 
   switch (ch) {
-      /* case 1:        do_tek_mode (); break; */
     case '#':
       if (cmd_getc() == '8')
 	scr_E();
@@ -838,11 +878,9 @@ process_escape_seq(void)
     case 'M':
       scr_index(DN);
       break;
-      /*case 'N': scr_single_shift (2);   break; */
-      /*case 'O': scr_single_shift (3);   break; */
     case 'Z':
       tt_printf((unsigned char *) ESCZ_ANSWER);
-      break;			/* steal obsolete ESC [ c */
+      break;
     case '[':
       process_csi_seq();
       break;
@@ -861,7 +899,10 @@ process_escape_seq(void)
   }
 }
 
-/* process CSI (code sequence introducer) sequences `ESC[' */
+/* This function handles Code Sequence Introducer (CSI) escape sequences.  At this point,
+   we've read "\e[" from the input stream.  CSI sequences take an arbitrary number of
+   parameters and are used almost exclusively for terminal window navigation and
+   manipulation. */
 void
 process_csi_seq(void)
 {
@@ -875,12 +916,12 @@ process_csi_seq(void)
   arg[1] = 0;
 
   priv = 0;
-  ch = cmd_getc();
+  ch = cmd_getc();  /* Get the next character */
   if (ch >= '<' && ch <= '?') {
-    priv = ch;
+    priv = ch;  /* DEC private mode sequence.  Get next character. */
     ch = cmd_getc();
   }
-  /* read any numerical arguments */
+  /* Read semicolon-delimited numerical arguments, if any. */
   do {
     int n;
 
@@ -892,64 +933,63 @@ process_csi_seq(void)
     if (ch == '\b') {
       scr_backspace();
     } else if (ch == 033) {
-      process_escape_seq();
+      cmd_ungetc();  /* New escape sequence starting in the middle of one.  Punt. */
       return;
     } else if (ch < ' ') {
-      scr_add_lines(&ch, 0, 1);
+      scr_add_lines(&ch, 0, 1);  /* Insert verbatim non-printable character (NPC) */
       return;
     }
     if (ch < '@')
-      ch = cmd_getc();
-  }
-  while (ch >= ' ' && ch < '@');
+      ch = cmd_getc();  /* Separator.  Go to next digit or operation. */
+  } while (ch >= ' ' && ch < '@');
   if (ch == 033) {
-    process_escape_seq();
+    cmd_ungetc();
     return;
   } else if (ch < ' ')
-    return;
+    return;  /* An NPC.  Punt. */
 
   switch (ch) {
 #ifdef PRINTPIPE
-    case 'i':			/* printing */
+    case 'i':
       switch (arg[0]) {
 	case 0:
-	  scr_printscreen(0);
+	  scr_printscreen(0);  /* Print screen "\e[0i" */
 	  break;
 	case 5:
-	  process_print_pipe();
+	  process_print_pipe();  /* Start printing to print pipe "\e[5i" */
 	  break;
       }
       break;
 #endif
     case 'A':
-    case 'e':			/* up <n> */
+    case 'e':  /* Cursor up n lines "\e[<n>A" */
       scr_gotorc((arg[0] ? -arg[0] : -1), 0, RELATIVE);
       break;
-    case 'B':			/* down <n> */
+    case 'B':  /* Cursor down n lines "\e[<n>B" */
       scr_gotorc((arg[0] ? +arg[0] : +1), 0, RELATIVE);
       break;
     case 'C':
-    case 'a':			/* right <n> */
+    case 'a':  /* Cursor right n columns "\e[<n>C" */
       scr_gotorc(0, (arg[0] ? +arg[0] : +1), RELATIVE);
       break;
-    case 'D':			/* left <n> */
+    case 'D':  /* Cursor left n columns "\e[<n>D" */
       scr_gotorc(0, (arg[0] ? -arg[0] : -1), RELATIVE);
       break;
-    case 'E':			/* down <n> & to first column */
+    case 'E':  /* Cursor down n lines and to first column "\e[<n>E" */
       scr_gotorc((arg[0] ? +arg[0] : +1), 0, R_RELATIVE);
       break;
-    case 'F':			/* up <n> & to first column */
+    case 'F':  /* Cursor up n lines and to first column "\e[<n>F" */
       scr_gotorc((arg[0] ? -arg[0] : -1), 0, R_RELATIVE);
       break;
     case 'G':
-    case '`':			/* move to col <n> */
+    case '`':  /* Cursor to column n "\e[<n>G" */
       scr_gotorc(0, (arg[0] ? arg[0] - 1 : +1), R_RELATIVE);
       break;
-    case 'd':			/* move to row <n> */
+    case 'd':  /* Cursor to row n "\e[<n>d" */
       scr_gotorc((arg[0] ? arg[0] - 1 : +1), 0, C_RELATIVE);
       break;
     case 'H':
-    case 'f':			/* position cursor */
+    case 'f':  /* Cursor to row r, column c "\e[<r>;<c>H" */
       switch (nargs) {
 	case 0:
 	  scr_gotorc(0, 0, 0);
@@ -962,16 +1002,16 @@ process_csi_seq(void)
 	  break;
       }
       break;
-    case 'I':
+    case 'I':  /* Tab right n tab stops "\e[<n>I" */
       scr_tab(arg[0] ? +arg[0] : +1);
       break;
-    case 'Z':
+    case 'Z':  /* Tab left n tab stops "\e[<n>Z" */
       scr_tab(arg[0] ? -arg[0] : -1);
       break;
-    case 'J':
+    case 'J':  /* Clear part or all of screen, depending on n "\e[<n>J" */
       scr_erase_screen(arg[0]);
       break;
-    case 'K':
+    case 'K':  /* Clear part or all of line, depending on n "\e[<n>K" */
       scr_erase_line(arg[0]);
       break;
     case '@':

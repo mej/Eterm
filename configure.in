@@ -144,7 +144,7 @@ AC_TYPE_UID_T
 
 dnl# Checks for library functions.
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf)
+AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf X11/Xmu/Atoms.h)
 dps_snprintf_oflow()
 
 dnl# Check for the need for -lutil on BSD systems
@@ -586,7 +586,12 @@ echo "        the --x-libraries parameter to configure.";
 AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT), , $X_LIBS $SUBLIBS)
 
 # check if we need X_LOCALE definition
-AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE), , $X_LIBS $SUBLIBS)
+AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE), $X_LIBS $SUBLIBS)
+
+# For multibyte selection handling
+if test "$MULTICHAR_ENCODING" != "none"; then
+  AC_CHECK_LIB(Xmu, XmuInternAtom, X_LIBS="-lXmu $X_LIBS", , $X_LIBS $SUBLIBS)
+fi
 
 # check X11R6 for XIM
 if test "$XIM" = "TRUE"; then

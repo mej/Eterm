@@ -1134,10 +1134,11 @@ __inline__ int sgi_get_pty(void);
 __inline__ int
 sgi_get_pty(void)
 {
-
   int fd = -1;
 
+  privileges(INVOKE);
   ptydev = ttydev = _getpty(&fd, O_RDWR | O_NDELAY, 0620, 0);
+  privileges(REVERT);
   return (ptydev == NULL ? -1 : fd);
 
 }
@@ -2501,6 +2502,13 @@ cmd_getc(void)
     }
   }
   return (0);
+}
+
+/* Put a character back in the buffer.  Only use this once at a time. */
+void
+cmd_ungetc(void)
+{
+  cmdbuf_ptr--;
 }
 
 /* tt_write(), tt_printf() - output to command */

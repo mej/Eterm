@@ -230,18 +230,19 @@ remove_utmp_entry(void)
   if (!ut_id[0])
     return;			/* entry not made */
 
-  privileges(INVOKE);
   utmpname(UTMP_FILENAME);
   setutent();
-  if (getutid(&utmp) == NULL)
+  strncpy(utmp.ut_id, ut_id, sizeof(utmp.ut_id));
+  utmp.ut_type = USER_PROCESS;
+  if (getutid(&utmp) == NULL) {
     return;
+  }
   utmp.ut_type = DEAD_PROCESS;
   utmp.ut_time = time(NULL);
   pututline(&utmp);
   getutmpx(&utmp, &utmpx);
   update_wtmp(WTMP_FILENAME, &utmpx);
   endutent();
-  privileges(REVERT);
 
 #   else /* HAVE_UTMPX_H */
   struct utmp *putmp;
@@ -250,7 +251,6 @@ remove_utmp_entry(void)
   if (!ut_id[0])
     return;			/* entry not made */
 
-  privileges(INVOKE);
   utmpname(UTMP_FILENAME);
   setutent();
   /*
@@ -269,7 +269,6 @@ remove_utmp_entry(void)
     }
   }
   endutent();
-  privileges(REVERT);
 #   endif /* HAVE_UTMPX_H */
 }
 #  endif /* ifndef HAVE_UTEMPTER */

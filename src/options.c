@@ -3568,7 +3568,6 @@ init_defaults(void)
   rs_name = StrDup(APL_NAME " " VERSION);
   Options = (Opt_scrollbar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
-  display_name = NULL;
   rs_term_name = NULL;
 #ifdef CUTCHAR_OPTION
   rs_cutchars = NULL;
@@ -3650,11 +3649,11 @@ post_parse(void)
 
 #ifdef PRINTPIPE
   if (!rs_print_pipe)
-    rs_print_pipe = PRINTPIPE;
+    rs_print_pipe = StrDup(PRINTPIPE);
 #endif
 #ifdef CUTCHAR_OPTION
   if (!rs_cutchars)
-    rs_cutchars = CUTCHARS;
+    rs_cutchars = StrDup(CUTCHARS);
 #endif
 
 #ifndef NO_BOLDFONT

@@ -24,6 +24,9 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>		/* CARD32 */
+#ifdef HAVE_X11_XMU_ATOMS_H
+# include <X11/Xmu/Atoms.h>
+#endif
 
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
@@ -2383,15 +2386,30 @@ selection_paste(Window win, unsigned prop, int Delete)
   if (prop == None)
     return;
   for (nread = 0, bytes_after = 1; bytes_after > 0;) {
-    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE,
-			    Delete, AnyPropertyType, &actual_type, &actual_fmt,
-			    &nitems, &bytes_after, &data) != Success)) {
+    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, Delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
       XFree(data);
       return;
     }
     nread += nitems;
 
-    PasteIt(data, nitems);
+    if (actual_type == XA_STRING) {
+      PasteIt(data, nitems);
+    } else {
+      int size, i, ret;
+      XTextProperty   xtextp;
+      char **cl;
+
+      xtextp.value = data;
+      xtextp.encoding = actual_type;
+      xtextp.format = actual_fmt;
+      xtextp.nitems = nitems;
+      XmbTextPropertyToTextList(Xdisplay, &xtextp, &cl, &size);
+
+      for (i = 0 ; i < size ; i ++) {
+        PasteIt(cl[i], strlen(cl[i]));
+      }
+      XFreeStringList(cl);
+    }
     XFree(data);
   }
 }
@@ -2415,8 +2433,11 @@ selection_request(Time tm, int x, int y)
     selection_paste(Xroot, XA_CUT_BUFFER0, False);
   } else {
     prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
-    XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt,
-		      tm);
+#ifdef MULTI_CHARSET
+    XConvertSelection(Xdisplay, XA_PRIMARY, XA_COMPOUND_TEXT(Xdisplay), prop, TermWin.vt, tm);
+#else
+    XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
+#endif
   }
 }
 
@@ -3194,10 +3215,25 @@ selection_send(XSelectionRequestEvent * rq)
 		    (unsigned char *) target_list,
 		    (sizeof(target_list) / sizeof(target_list[0])));
     ev.xselection.property = rq->property;
+#ifdef MULTI_CHARSET
+  } else if (rq->target == XA_STRING || rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
+    XTextProperty xtextp;
+    char *l[1];
+
+    *l = selection.text;
+    xtextp.value  = NULL;
+    xtextp.nitems = 0;
+    if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
+      if (xtextp.nitems > 0 && xtextp.value != NULL) {
+        XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value, xtextp.nitems);
+        ev.xselection.property = rq->property;
+      }
+    }
+#else
   } else if (rq->target == XA_STRING) {
-    XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-		    8, PropModeReplace, selection.text, selection.len);
+    XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target, 8, PropModeReplace, selection.text, selection.len);
     ev.xselection.property = rq->property;
+#endif
   }
   XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);
 }

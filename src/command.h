@@ -266,9 +266,9 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 # define SIG_RETURN(x) return
 #endif
 
-#define CHARS_READ() (cmdbuf_ptr < cmdbuf_endp)
-#define CHARS_BUFFERED() (count != CMD_BUF_SIZE)
-#define RETURN_CHAR() do { refreshed = 0; return (*cmdbuf_ptr++); } while (0)
+#define CHARS_READ()      (cmdbuf_ptr < cmdbuf_endp)
+#define CHARS_BUFFERED()  (count != CMD_BUF_SIZE)
+#define RETURN_CHAR()     do { refreshed = 0; return (*cmdbuf_ptr++); } while (0)
 
 #ifdef REFRESH_DELAY
 # define REFRESH_DELAY_USEC (1000000/25)
@@ -364,6 +364,7 @@ extern unsigned int cmd_write(const unsigned char *, unsigned int);
 extern RETSIGTYPE check_pixmap_change(int);
 #endif
 extern unsigned char cmd_getc(void);
+extern void cmd_ungetc(void);
 extern void tt_write(const unsigned char *, unsigned int);
 extern void tt_printf(const unsigned char *, ...);
 extern void main_loop(void);
