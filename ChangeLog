@@ -5056,3 +5056,14 @@ Tue Jun 10 12:19:00 2003                        Michael Jennings (mej)
 Patch from Matt Zimmerman <mdz@debian.org> to correct buffer overflow
 when $ETERMPATH is set too large.
 ----------------------------------------------------------------------
+Tue Jul 29 22:47:18 2003                        Michael Jennings (mej)
+
+Patch from David Lloyd <dmlloyd@tds.net> to support ANSI sequences for
+bright colors.  I haven't tested this, so I hope it works. *grin*
+
+Also, commented out the F1-F10 bindings in the Escreen theme; they're
+too intrusive.
+
+Added support for Ctrl-t to open a new Escreen "tab" (as with
+Mozilla).
+----------------------------------------------------------------------

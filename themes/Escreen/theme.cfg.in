@@ -84,6 +84,7 @@ begin actions
     bind alt Next to script "es_display(next)"
     bind alt space to script "es_display(toggle)"
     bind ctrl Tab to script "es_display(next)"
+    bind ctrl t to script "es_display(new, ask)"
 
     # alt-1..alt-0 -> display(0)..display(9)
     bind alt 0x31 to script "es_display(goto, 0)"
@@ -97,17 +98,18 @@ begin actions
     bind alt 0x39 to script "es_display(goto, 8)"
     bind alt 0x30 to script "es_display(goto, 9)"
 
+    # Commented out; too intrusive -- mej
     # F1..F10 -> display(0)..display(9)
-    bind F1 to script "es_display(goto, 0)"
-    bind F2 to script "es_display(goto, 1)"
-    bind F3 to script "es_display(goto, 2)"
-    bind F4 to script "es_display(goto, 3)"
-    bind F5 to script "es_display(goto, 4)"
-    bind F6 to script "es_display(goto, 5)"
-    bind F7 to script "es_display(goto, 6)"
-    bind F8 to script "es_display(goto, 7)"
-    bind F9 to script "es_display(goto, 8)"
-    bind F10 to script "es_display(goto, 9)"
+    #bind F1 to script "es_display(goto, 0)"
+    #bind F2 to script "es_display(goto, 1)"
+    #bind F3 to script "es_display(goto, 2)"
+    #bind F4 to script "es_display(goto, 3)"
+    #bind F5 to script "es_display(goto, 4)"
+    #bind F6 to script "es_display(goto, 5)"
+    #bind F7 to script "es_display(goto, 6)"
+    #bind F8 to script "es_display(goto, 7)"
+    #bind F9 to script "es_display(goto, 8)"
+    #bind F10 to script "es_display(goto, 9)"
 
     bind alt n to script "es_display(new)"
     bind alt r to script "es_display(rename)"

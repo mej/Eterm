@@ -1621,8 +1621,9 @@ process_sgr_mode(unsigned int nargs, int arg[])
               scr_rendition(0, RS_RVid);
               break;
 
+          /* set fg color */
           case 30:
-          case 31:             /* set fg color */
+          case 31:
           case 32:
           case 33:
           case 34:
@@ -1631,12 +1632,14 @@ process_sgr_mode(unsigned int nargs, int arg[])
           case 37:
               scr_color(minColor + (arg[i] - 30), RS_Bold);
               break;
-          case 39:             /* default fg */
+          /* default fg */
+          case 39:
               scr_color(restoreFG, RS_Bold);
               break;
 
+          /* set bg color */
           case 40:
-          case 41:             /* set bg color */
+          case 41:
           case 42:
           case 43:
           case 44:
@@ -1645,9 +1648,43 @@ process_sgr_mode(unsigned int nargs, int arg[])
           case 47:
               scr_color(minColor + (arg[i] - 40), RS_Blink);
               break;
-          case 49:             /* default bg */
+          /* default bg */
+          case 49:
               scr_color(restoreBG, RS_Blink);
               break;
+
+          /* set fg color - bright */
+          case 90:
+          case 91:
+          case 92:
+          case 93:
+          case 94:
+          case 95:
+          case 96:
+          case 97:
+              scr_color(minBright + (arg[i] - 90), RS_Bold);
+              break;
+          /* default fg */
+          case 99:
+              scr_color(restoreFG, RS_Bold);
+              break;
+
+          /* set bg color - bright */
+          case 100:
+          case 101:
+          case 102:
+          case 103:
+          case 104:
+          case 105:
+          case 106:
+          case 107:
+              scr_color(minBright + (arg[i] - 100), RS_Blink);
+              break;
+          /* default bg */
+          case 109:
+              scr_color(restoreBG, RS_Blink);
+              break;
+
         }
 }
 

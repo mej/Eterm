@@ -486,12 +486,8 @@ scr_color(unsigned int color, unsigned int Intensity)
             }
         } else {
 #ifndef NO_BRIGHTCOLOR
-            if ((rstyle & Intensity) && color >= minColor && color <= maxColor)
+            if ((rstyle & Intensity) && color >= minColor && color <= maxColor) {
                 color += (minBright - minColor);
-            else if (color >= minBright && color <= maxBright) {
-                if (rstyle & Intensity)
-                    return;
-                color -= (minBright - minColor);
             }
 #endif
         }
