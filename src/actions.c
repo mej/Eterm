@@ -46,41 +46,43 @@ static const char cvs_ident[] = "$Id$";
 action_t *action_list = NULL;
 
 unsigned char
-action_handle_string(event_t *ev, action_t *action) {
-
+action_handle_string(event_t *ev, action_t *action)
+{
+  USE_VAR(ev);
   REQUIRE_RVAL(action->param.string != NULL, 0);
   cmd_write((unsigned char *) action->param.string, strlen(action->param.string));
   return 1;
-  ev = NULL;
 }
 
 unsigned char
-action_handle_echo(event_t *ev, action_t *action) {
-
+action_handle_echo(event_t *ev, action_t *action)
+{
+  USE_VAR(ev);
   REQUIRE_RVAL(action->param.string != NULL, 0);
   tt_write((unsigned char *) action->param.string, strlen(action->param.string));
   return 1;
-  ev = NULL;
 }
 
 unsigned char
-action_handle_script(event_t *ev, action_t *action) {
+action_handle_script(event_t *ev, action_t *action)
+{
+  USE_VAR(ev);
   REQUIRE_RVAL(action->param.script != NULL, 0);
   script_parse(action->param.script);
   return 1;
-  ev = NULL;
 }
 
 unsigned char
-action_handle_menu(event_t *ev, action_t *action) {
+action_handle_menu(event_t *ev, action_t *action)
+{
   REQUIRE_RVAL(action->param.menu != NULL, 0);
   menu_invoke(ev->xbutton.x, ev->xbutton.y, TermWin.parent, action->param.menu, ev->xbutton.time);
   return 1;
 }
 
 action_t *
-action_find_match(unsigned short mod, unsigned char button, KeySym keysym) {
-
+action_find_match(unsigned short mod, unsigned char button, KeySym keysym)
+{
   action_t *action;
 
   D_ACTIONS(("mod == 0x%08x, button == %d, keysym == 0x%08x\n", mod, button, keysym));
@@ -95,37 +97,49 @@ action_find_match(unsigned short mod, unsigned char button, KeySym keysym) {
 }
 
 unsigned char
-action_dispatch(event_t *ev, KeySym keysym) {
-
+action_dispatch(event_t *ev, KeySym keysym)
+{
   action_t *action;
   unsigned int m = (AltMask | MetaMask | NumLockMask);
 
-  ASSERT(ev != NULL);
+  ASSERT_RVAL(ev != NULL, 0);
+  ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, 0);
   D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x\n", ev, ev->xbutton.button, keysym, ev->xkey.state));
   for (action = action_list; action; action = action->next) {
     D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
+    /* The very first thing we do is match the event type to the type
+       of the current action.  This means that we'll only run through
+       the modifier checks below if we absolutely have to. */
     if (ev->xany.type == ButtonPress) {
+      /* The event we're looking at is a button press.  Make sure the
+         current action is also, and that it matches.  Continue if not. */
       if ((action->button == BUTTON_NONE) || ((action->button != BUTTON_ANY) && (action->button != ev->xbutton.button))) {
         continue;
       }
-    } else if (action->button != BUTTON_NONE) {
-      continue;
-    }
-    D_ACTIONS(("Button passed.\n"));
-    if (action->mod != MOD_ANY) {
-      if (LOGICAL_XOR((action->mod & MOD_SHIFT), (ev->xkey.state & ShiftMask))) {
+    } else {
+      /* The event we're looking at is a key press.  Make sure the
+         current action is also, and that it matches.  Continue if not. */
+      if (!(action->keysym) || (keysym != action->keysym)) {
         continue;
       }
+    }
+    D_ACTIONS(("Button/key passed.\n"));
+    if (action->mod != MOD_ANY) {
+      /* When we do have to check the modifiers, we do so in
+         this order to eliminate the most popular choices first. */
       if (LOGICAL_XOR((action->mod & MOD_CTRL), (ev->xkey.state & ControlMask))) {
         continue;
       }
-      if (LOGICAL_XOR((action->mod & MOD_LOCK), (ev->xkey.state & LockMask))) {
+      if (LOGICAL_XOR((action->mod & MOD_SHIFT), (ev->xkey.state & ShiftMask))) {
+        continue;
+      }
+      if (LOGICAL_XOR((action->mod & MOD_ALT), (ev->xkey.state & AltMask))) {
         continue;
       }
       if (LOGICAL_XOR((action->mod & MOD_META), (ev->xkey.state & MetaMask))) {
         continue;
       }
-      if (LOGICAL_XOR((action->mod & MOD_ALT), (ev->xkey.state & AltMask))) {
+      if (LOGICAL_XOR((action->mod & MOD_LOCK), (ev->xkey.state & LockMask))) {
         continue;
       }
       if (((action->mod & MOD_MOD1) && !(ev->xkey.state & Mod1Mask)) || (!(action->mod & MOD_MOD1) && (ev->xkey.state & Mod1Mask) && !(Mod1Mask & m))) {
@@ -144,16 +158,11 @@ action_dispatch(event_t *ev, KeySym keysym) {
         continue;
       }
     }      
-    D_ACTIONS(("Modifiers passed.  keysym == 0x%08x, action->keysym == 0x%08x\n", keysym, action->keysym));
-    if ((ev->xany.type == KeyPress) && (action->keysym) && (keysym != action->keysym)) {
-      continue;
-    }
     D_ACTIONS(("Match found.\n"));
     /* If we've passed all the above tests, it's a match.  Dispatch the handler. */
     return ((action->handler)(ev, action));
   }
   return (0);
-
 }
 
 void

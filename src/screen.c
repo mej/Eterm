@@ -2358,35 +2358,34 @@ selection_check(void)
   }
 }
 
-/*
- * Paste a selection direct to the command
- */
+/* Write the selection out to the tty. */
 void
-PasteIt(unsigned char *data, unsigned int nitems)
+selection_write(unsigned char *data, size_t len)
 {
-  int num;
-  unsigned char *p, cr;
+  size_t num;
+  unsigned char *p, *cr = "\r";
 
-  cr = '\r';
-  for (p = data, num = 0; nitems--; p++)
-    if (*p != '\n')
+  D_SELECT(("Writing %lu characters of selection data to tty.\n", len));
+  for (p = data, num = 0; len--; p++) {
+    /* Write out each line, replacing newlines with carriage returns. */
+    if (*p != '\n') {
       num++;
-    else {
+    } else {
       tt_write(data, num);
-      tt_write(&cr, 1);
-      data += (num + 1);
+      tt_write(cr, 1);
+      data += num + 1;
       num = 0;
     }
-  if (num)
+  }
+  /* If there's anything left, write it out too. */
+  if (num) {
     tt_write(data, num);
+  }
 }
 
-/*
- * Respond to a notification that a primary selection has been sent
- * EXT: SelectionNotify
- */
+/* Fetch the selection from the specified property and write it to the tty. */
 void
-selection_paste(Window win, unsigned prop, int delete)
+selection_fetch(Window win, unsigned prop, int delete)
 {
   long nread;
   unsigned long bytes_after, nitems;
@@ -2394,10 +2393,13 @@ selection_paste(Window win, unsigned prop, int delete)
   Atom actual_type;
   int actual_fmt;
 
-  if (prop == None)
+  D_SELECT(("Fetching selection in property %d from window 0x%08x\n", (int) prop, (int) win));
+  if (prop == None) {
     return;
+  }
   for (nread = 0, bytes_after = 1; bytes_after > 0;) {
     if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
+      D_SELECT(("Unable to fetch the value of property %d from window 0x%08x\n", (int) prop, (int) win));
       if (data != NULL) {
         XFree(data);
       }
@@ -2406,12 +2408,14 @@ selection_paste(Window win, unsigned prop, int delete)
     nread += nitems;
 
     if (actual_type == XA_STRING) {
-      PasteIt(data, nitems);
+      /* We can handle strings directly. */
+      selection_write(data, nitems);
     } else {
       int size, i;
       XTextProperty xtextp;
       char **cl = NULL;
 
+      /* It's not a string, so convert it to one (or more). */
       xtextp.value = data;
       xtextp.encoding = actual_type;
       xtextp.format = actual_fmt;
@@ -2421,7 +2425,7 @@ selection_paste(Window win, unsigned prop, int delete)
       if (cl) {
         for (i = 0 ; i < size ; i ++) {
           if (cl[i]) {
-            PasteIt(cl[i], strlen(cl[i]));
+            selection_write(cl[i], strlen(cl[i]));
           }
         }
         XFreeStringList(cl);
@@ -2433,79 +2437,64 @@ selection_paste(Window win, unsigned prop, int delete)
   }
 }
 
-/*
- * Request the current primary selection
- * EXT: button 2 release
- */
+/* Copy a specific string of a given length to the buffer specified. */
 void
-selection_request(Time tm, int x, int y)
+selection_copy_string(Atom selection_atom, Atom prop, char *str, size_t len)
 {
-  Atom prop;
-
-  if (x < 0 || x >= TermWin.width || y < 0 || y >= TermWin.height)
-    return;			/* outside window */
-
-  if (selection.text != NULL) {
-    PasteIt(selection.text, selection.len);	/* internal selection */
-  } else if (XGetSelectionOwner(Xdisplay, XA_PRIMARY) == None) {
-    selection_paste(Xroot, XA_CUT_BUFFER0, False);
-  } else {
-    prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-    if (encoding_method != LATIN1) {
-      XConvertSelection(Xdisplay, XA_PRIMARY, XA_COMPOUND_TEXT(Xdisplay), prop, TermWin.vt, tm);
-    } else {
-      XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
-    }
-#else
-    XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
-#endif
+  if (str == NULL || len == 0) {
+    return;
   }
-}
-
-void
-selection_copy(Atom selection, Atom prop, char *str, size_t len)
-{
-  XSetSelectionOwner(Xdisplay, selection, TermWin.vt, CurrentTime);
-  if (XGetSelectionOwner(Xdisplay, XA_PRIMARY) != TermWin.vt) {
-    print_error("Can't take ownership of primary selection\n");
+  D_SELECT(("Copying selection to selection %d, buffer %d\n", (int) selection_atom, (int) prop));
+  XSetSelectionOwner(Xdisplay, selection_atom, TermWin.vt, CurrentTime);
+  if (XGetSelectionOwner(Xdisplay, selection_atom) != TermWin.vt) {
+    print_error("Can't take ownership of selection\n");
   }
   XChangeProperty(Xdisplay, Xroot, prop, XA_STRING, 8, PropModeReplace, str, len);
 }
 
+/* Copy the currently-selected text to the buffer specified. */
 void
-selection_copy_to_clipboard(void)
+selection_copy(Atom selection_atom, Atom prop)
 {
-  if (selection.text) {
-    selection_copy(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP, selection.text, selection.len);
-  }
+  selection_copy_string(selection_atom, prop, selection.text, selection.len);
 }
 
+/* Paste the specified selection from the specified buffer. */
 void
-selection_paste_from_clipboard(void)
+selection_paste(Atom selection_atom, Atom prop)
 {
-  Atom select, type;
+  static Atom dest_prop = None;
 
-  select = X_CLIPBOARD_SELECTION;
-  if (XGetSelectionOwner(Xdisplay, select) == None) {
-    selection_paste(Xroot, X_CLIPBOARD_PROP, False);
+  if (dest_prop == None) {
+    dest_prop = XInternAtom(Xdisplay, "VT_SELECTION", False);
+  }
+
+  if (selection.text != NULL) {
+    /* If we have a selection of our own, paste it. */
+    D_SELECT(("Pasting my current selection of length %lu\n", selection.len));
+    selection_write(selection.text, selection.len);
+  } else if (XGetSelectionOwner(Xdisplay, selection_atom) == None) {
+    /* If nobody owns the current selection, just try to paste it ourselves. */
+    D_SELECT(("Pasting un-owned current selection %d\n", (int) prop));
+    selection_fetch(Xroot, prop, False);
   } else {
-    type = XInternAtom(Xdisplay, "VT_SELECTION", False);
+    /* If someone owns the current selection, send a request to that client to
+       convert the selection to the appropriate form (usually XA_STRING) and
+       save it for us in the VT_SELECTION property.  We'll then get a SelectionNotify. */
+    D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", selection_atom, dest_prop));
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
     if (encoding_method != LATIN1) {
-      XConvertSelection(Xdisplay, select, XA_COMPOUND_TEXT(Xdisplay), type, TermWin.vt, CurrentTime);
+      XConvertSelection(Xdisplay, selection_atom, XA_COMPOUND_TEXT(Xdisplay), dest_prop, TermWin.vt, CurrentTime);
     } else {
-      XConvertSelection(Xdisplay, select, XA_STRING, type, TermWin.vt, CurrentTime);
+      XConvertSelection(Xdisplay, selection_atom, XA_STRING, dest_prop, TermWin.vt, CurrentTime);
     }
 #else
-    XConvertSelection(Xdisplay, select, XA_STRING, type, TermWin.vt, CurrentTime);
+    XConvertSelection(Xdisplay, selection_atom, XA_STRING, dest_prop, TermWin.vt, CurrentTime);
 #endif
   }
 }
 
-/*
- * Clear the current selection from the screen rendition list
- */
+/* Clear the selected state of all selected text. */
 void
 selection_reset(void)
 {
@@ -2526,24 +2515,20 @@ selection_reset(void)
     }
   }
 }
-/*
- * Clear all selected text
- * EXT:
- */
+/* Delete the current selection. */
 void
 selection_clear(void)
 {
   D_SELECT(("selection_clear()\n"));
 
-  if (selection.text)
+  if (selection.text) {
     FREE(selection.text);
-  selection.text = NULL;
+  }
   selection.len = 0;
   selection_reset();
 }
-/*
- * Set or clear between selected points (inclusive)
- */
+
+/* Set or clear between selected points (inclusive) */
 void
 selection_setclr(int set, int startr, int startc, int endr, int endc)
 {
@@ -2726,7 +2711,7 @@ selection_make(Time tm)
   selection.text = new_selection_text;
   selection.screen = current_screen;
 
-  selection_copy(XA_PRIMARY, XA_CUT_BUFFER0, selection.text, selection.len);
+  selection_copy(XA_PRIMARY, XA_CUT_BUFFER0);
   D_SELECT(("selection.len=%d\n", selection.len));
   return;
   tm = 0;
@@ -3296,33 +3281,6 @@ mouse_report(XButtonEvent * ev)
 	    (32 + button_number + (key_state << 2)),
 	    (32 + Pixel2Col(ev->x) + 1),
 	    (32 + Pixel2Row(ev->y) + 1));
-}
-
-
-void
-mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
-{
-  report = 0;
-  x = 0;
-  y = 0;
-  firstrow = 0;
-  lastrow = 0;
-/* TODO */
-}
-
-void
-debug_PasteIt(unsigned char *data, int nitems)
-{
-  data = NULL;
-  nitems = 0;
-/* TODO */
-}
-
-int
-debug_selection(void)
-{
-/* TODO */
-  return 0;
 }
 
 void

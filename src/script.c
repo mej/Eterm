@@ -43,9 +43,11 @@ static const char cvs_ident[] = "$Id$";
 
 static eterm_script_handler_t script_handlers[] =
 {
+  { "copy",      script_handler_copy },
   { "die",       script_handler_exit },
   { "exec",      script_handler_spawn },
   { "exit",      script_handler_exit },
+  { "paste",     script_handler_paste },
   { "quit",      script_handler_exit },
   { "save",      script_handler_save },
   { "search",    script_handler_search },
@@ -121,6 +123,34 @@ eterm_handle_winop(char *action)
 
 /********* HANDLERS **********/
 void
+script_handler_copy(char **params)
+{
+  unsigned char i;
+  char *buffer_id;
+  Atom sel = XA_PRIMARY, buf = XA_CUT_BUFFER0;
+
+  if (params) {
+    for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+      if (*buffer_id) {
+        if (*buffer_id >= '0' && *buffer_id <= '7') {
+          buf = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+        } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
+          buf = X_CLIPBOARD_PROP;
+          sel = X_CLIPBOARD_SELECTION;
+        } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
+          sel = XA_PRIMARY;
+        } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
+          sel = XA_SECONDARY;
+        } else {
+          print_error("Invalid parameter to copy():  \"%s\"\n", buffer_id);
+        }
+      }
+    }
+  }
+  selection_copy(sel, buf);
+}
+
+void
 script_handler_exit(char **params)
 {
   unsigned char code = 0;
@@ -136,6 +166,34 @@ script_handler_exit(char **params)
     }
   }
   exit(code);
+}
+
+void
+script_handler_paste(char **params)
+{
+  unsigned char i;
+  char *buffer_id;
+  Atom sel = XA_PRIMARY, buf = XA_CUT_BUFFER0;
+
+  if (params) {
+    for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+      if (*buffer_id) {
+        if (*buffer_id >= '0' && *buffer_id <= '7') {
+          buf = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+        } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
+          buf = X_CLIPBOARD_PROP;
+          sel = X_CLIPBOARD_SELECTION;
+        } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
+          sel = XA_PRIMARY;
+        } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
+          sel = XA_SECONDARY;
+        } else {
+          print_error("Invalid parameter to paste():  \"%s\"\n", buffer_id);
+        }
+      }
+    }
+  }
+  selection_paste(sel, buf);
 }
 
 void

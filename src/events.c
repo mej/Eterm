@@ -538,7 +538,7 @@ handle_selection_notify(event_t *ev)
 
   D_EVENTS(("handle_selection_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
-  selection_paste(ev->xselection.requestor, ev->xselection.property, True);
+  selection_fetch(ev->xselection.requestor, ev->xselection.property, True);
   return 1;
 }
 
@@ -708,7 +708,7 @@ handle_button_release(event_t *ev)
 	  break;
 
 	case Button2:
-          selection_request(ev->xbutton.time, ev->xbutton.x, ev->xbutton.y);
+          selection_paste(XA_PRIMARY, XA_CUT_BUFFER0);
 	  break;
         default: break;
       }

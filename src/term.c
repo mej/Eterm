@@ -300,11 +300,11 @@ lookup_key(XEvent * ev)
   switch (keysym) {
     case SunXK_Copy:
     case SunXK_Cut:
-      selection_copy_to_clipboard();
+      selection_copy(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP);
       LK_RET();
       break;
     case SunXK_Paste:
-      selection_paste_from_clipboard();
+      selection_paste(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP);
       LK_RET();
       break;
     case SunXK_Front:
@@ -338,7 +338,7 @@ lookup_key(XEvent * ev)
 	  break;
 
         case XK_Insert:  /* Shift-Ins pastes the current selection. */
-	  selection_request(ev->xkey.time, ev->xkey.x, ev->xkey.y);
+	  selection_paste(XA_PRIMARY, XA_CUT_BUFFER0);
 	  LK_RET();
 	  break;
 
@@ -379,13 +379,13 @@ lookup_key(XEvent * ev)
     case XK_Print:  /* Print the screen contents out to the print pipe */
 #if DEBUG >= DEBUG_SELECTION
       if (DEBUG_LEVEL >= DEBUG_SELECTION) {
-	debug_selection();
-      }
+        scr_dump_to_file("/tmp/Eterm_screen_dump.log");
+      } else
 #endif
 #ifdef PRINTPIPE
-      scr_printscreen(ctrl | shft);
-      LK_RET();
+        scr_printscreen(ctrl | shft);
 #endif
+      LK_RET();
       break;
 
     case XK_Mode_switch:
