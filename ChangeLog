@@ -4326,3 +4326,7 @@ termcap entry into the termcap DB on FreeBSD (and possibly other
 Brannan <pbranna@clemson.edu> to support some additional escape
 sequences for vim.
 ----------------------------------------------------------------------
+Sun Aug  5 10:21:16 2001                        Michael Jennings (mej)
+
+FreeBSD fix, take 2.
+----------------------------------------------------------------------
