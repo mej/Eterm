@@ -1011,9 +1011,11 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         LIBAST_X_FREE_PIXMAP(buffer_pixmap);
         buffer_pixmap = None;
     }
+
+#ifdef PIXMAP_SUPPORT
     /* Reset window shape mask. */
     shaped_window_apply_mask(win, None);
-#ifdef PIXMAP_SUPPORT
+
     if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
         char buff[255];
         const char *iclass, *state;

@@ -27,7 +27,7 @@
 #include <X11/Xatom.h>
 #ifdef PIXMAP_SUPPORT
 # include <Imlib2.h>
-#else
+#elif !defined(DATA64)
 typedef struct {
   int left, top, right, bottom;
 } Imlib_Border;

@@ -1694,8 +1694,8 @@ parse_image(char *buff, void *state)
         FREE(fg);
         FREE(bg);
 
-#ifdef PIXMAP_SUPPORT
     } else if (!BEG_STRCASECMP(buff, "file ")) {
+#ifdef PIXMAP_SUPPORT
         char *filename = get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
@@ -1716,8 +1716,10 @@ parse_image(char *buff, void *state)
             images[idx].mode &= ~(MODE_IMAGE | ALLOW_IMAGE);
             D_PIXMAP(("New image mode is 0x%02x, iml->im is 0x%08x\n", images[idx].mode, images[idx].current->iml->im));
         }
+#endif
 
     } else if (!BEG_STRCASECMP(buff, "geom ")) {
+#ifdef PIXMAP_SUPPORT
         char *geom = get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
@@ -1735,8 +1737,10 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         set_pixmap_scale(geom, images[idx].current->pmap);
+#endif
 
     } else if (!BEG_STRCASECMP(buff, "cmod ") || !BEG_STRCASECMP(buff, "colormod ")) {
+#ifdef PIXMAP_SUPPORT
         char *color = get_pword(2, buff);
         char *mods = get_pword(3, buff);
         unsigned char n;
@@ -3594,10 +3598,12 @@ save_config(char *path, unsigned char save_theme)
                 } else {
                     fprintf(fp, "    button ");
                 }
+#ifdef PIXMAP_SUPPORT
                 if (b->icon && b->icon->iml) {
                     imlib_context_set_image(b->icon->iml->im);
                     fprintf(fp, "icon \"%s\" ", NONULL(imlib_image_get_filename()));
                 }
+#endif
                 fprintf(fp, "action ");
                 if (b->type == ACTION_STRING) {
                     fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));
@@ -3615,10 +3621,12 @@ save_config(char *path, unsigned char save_theme)
                 } else {
                     fprintf(fp, "    rbutton ");
                 }
+#ifdef PIXMAP_SUPPORT
                 if (b->icon && b->icon->iml) {
                     imlib_context_set_image(b->icon->iml->im);
                     fprintf(fp, "icon \"%s\" ", NONULL(imlib_image_get_filename()));
                 }
+#endif
                 fprintf(fp, "action ");
                 if (b->type == ACTION_STRING) {
                     fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));

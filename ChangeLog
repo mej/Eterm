@@ -4864,3 +4864,8 @@ Make sure we exit cleanly if our window is destroyed.
 Fixed the missing menus in the Escreen theme.  You'll still get an
 error message when it loads, but I'm not that worried about it.
 ----------------------------------------------------------------------
+Sun Oct 13 01:27:51 2002                        Michael Jennings (mej)
+
+Make sure it builds without Imlib2 so we don't have a repeat of last
+time.
+----------------------------------------------------------------------
