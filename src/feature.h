@@ -88,6 +88,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 
+# define LIBAST_COMPAT_05_API 1
 # include <libast.h>
 # include "eterm_debug.h"
 

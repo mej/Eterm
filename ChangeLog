@@ -5126,3 +5126,7 @@ Allow save_buff() script function to dump to stderr if no file is
 specified.  Note that script functions CANNOT be triggered by escape
 sequences.
 ----------------------------------------------------------------------
+Fri Nov 28 09:04:49 2003                        Michael Jennings (mej)
+
+Changes for compatibility with newer LibAST.
+----------------------------------------------------------------------

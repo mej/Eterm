@@ -485,7 +485,7 @@ else
     CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
     LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
 fi
-AC_CHECK_LIB(ast, libast_malloc, , FOUND_LIBAST=0, $GRLIBS)
+AC_CHECK_LIB(ast, libast_set_program_name, , FOUND_LIBAST=0, $GRLIBS)
 
 if test "$FOUND_LIBAST" -lt "$LIBAST_MIN"; then
   echo "ERROR:  You need LibAST 0.$LIBAST_MIN or higher to build Eterm.  If you already have it,";
