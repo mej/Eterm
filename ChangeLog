@@ -3821,3 +3821,11 @@ Wed Jul 12 22:35:34 PDT 2000	Michael Jennings <mej@eterm.org>
 	facilitate changing the Imlib2 cache size.
 	
 -------------------------------------------------------------------------------
+Tue Aug 22 21:21:20 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Color modifiers for images now work once again.  Please report any
+	problems you find with them as soon as possible; I want to get 0.9.1
+	out the door in the fairly near future since the TODO list for 0.9.2
+	is already sizeable.
+	
+-------------------------------------------------------------------------------

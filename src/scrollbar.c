@@ -387,8 +387,11 @@ scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes) {
       XSetWindowBackground(Xdisplay, scrollbar.up_win, PixColors[bgColor]);
       XClearWindow(Xdisplay, scrollbar.up_win);
     } else {
+      XSetForeground(Xdisplay, gc_scrollbar, images[image_up].current->bg);
       XFillRectangle(Xdisplay, scrollbar.up_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
     }
+    XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_up].current->bg, ""));
+    XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_up].current->bg, ""));
     if (image_state == IMAGE_STATE_CLICKED) {
       scrollbar_set_uparrow_pressed(1);
       draw_uparrow_clicked(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
@@ -452,8 +455,11 @@ scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes) {
       XSetWindowBackground(Xdisplay, scrollbar.dn_win, PixColors[bgColor]);
       XClearWindow(Xdisplay, scrollbar.dn_win);
     } else {
+      XSetForeground(Xdisplay, gc_scrollbar, images[image_down].current->bg);
       XFillRectangle(Xdisplay, scrollbar.dn_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
     }
+    XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_down].current->bg, ""));
+    XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_down].current->bg, ""));
     if (image_state == IMAGE_STATE_CLICKED) {
       scrollbar_set_downarrow_pressed(1);
       draw_downarrow_clicked(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
@@ -530,6 +536,7 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
     if (scrollbar.type == SCROLLBAR_XTERM) {
       int x = ((Options & Opt_scrollbar_right) ? 1 : 0);
 
+      XSetForeground(Xdisplay, gc_stipple, images[image_sa].current->bg);
       XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, x + 1, 0, scrollbar_anchor_width() - x - 1, scrollbar_anchor_height());
       XClearWindow(Xdisplay, scrollbar.sa_win);
     }
@@ -540,8 +547,11 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
         XSetWindowBackground(Xdisplay, scrollbar.sa_win, PixColors[bgColor]);
         XClearWindow(Xdisplay, scrollbar.sa_win);
       } else {
+        XSetForeground(Xdisplay, gc_scrollbar, images[image_sa].current->bg);
         XFillRectangle(Xdisplay, scrollbar.sa_win, gc_scrollbar, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
       }
+      XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sa].current->bg, ""));
+      XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sa].current->bg, ""));
       if (scrollbar_anchor_is_pressed()) {
         draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
       } else {
@@ -638,7 +648,10 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes) {
       XSetWindowBackground(Xdisplay, scrollbar.win, PixColors[bgColor]);
       XClearWindow(Xdisplay, scrollbar.win);
     } else {
+      XSetForeground(Xdisplay, gc_scrollbar, images[image_sb].current->bg);
       XFillRectangle(Xdisplay, scrollbar.win, gc_scrollbar, 0, 0, scrollbar_trough_width(), scrollbar_trough_height());
+      XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sb].current->bg, ""));
+      XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sb].current->bg, ""));
       draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(), scrollbar_get_shadow());
     }
     return;

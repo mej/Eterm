@@ -142,6 +142,8 @@ enum {
 #define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
 #define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
                                               scr_touch(); scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
+#define reload_image(iml)                 do {Imlib_Image tmp_im; imlib_context_set_image((iml)->im); tmp_im = imlib_load_image_immediately(imlib_image_get_filename()); \
+                                              imlib_free_image_and_decache(); (iml)->im = tmp_im;} while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
@@ -179,13 +181,13 @@ typedef struct {
 } bevel_t;
 typedef struct cmod_struct {
   unsigned short gamma, brightness, contrast;
+  Imlib_Color_Modifier imlib_mod;
 } colormod_t;
 typedef struct {
   Imlib_Image im;
   Imlib_Border *border, *pad;
   bevel_t *bevel;
   colormod_t *mod, *rmod, *gmod, *bmod;
-  Imlib_Color_Modifier imod, cmod;
   short last_w, last_h;
 } imlib_t;
 typedef struct {
@@ -231,6 +233,9 @@ extern void free_eterm_image(image_t *);
 extern simage_t *create_simage(void);
 extern void reset_simage(simage_t *, unsigned long);
 extern void free_simage(simage_t *);
+extern colormod_t *create_colormod(void);
+extern void reset_colormod(colormod_t *);
+extern void free_colormod(colormod_t *);
 extern Pixmap create_trans_pixmap(simage_t *, unsigned char, Drawable, int, int, unsigned short, unsigned short);
 extern Pixmap create_viewport_pixmap(simage_t *, Drawable, int, int, unsigned short, unsigned short);
 extern void paste_simage(simage_t *, unsigned char, Drawable, unsigned short, unsigned short, unsigned short, unsigned short);
@@ -241,6 +246,8 @@ extern void render_simage(simage_t *, Window, unsigned short, unsigned short, un
 #ifdef PIXMAP_SUPPORT
 extern const char *search_path(const char *, const char *, const char *);
 extern unsigned char load_image(const char *, simage_t *);
+extern void update_cmod(colormod_t *);
+extern void update_cmod_tables(imlib_t *);
 extern void free_desktop_pixmap(void);
 # ifdef PIXMAP_OFFSET
 extern unsigned char need_colormod(imlib_t *);

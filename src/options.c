@@ -1173,7 +1173,7 @@ conf_init_subsystem(void) {
   /* Initialize the context list and establish a catch-all "null" context */
   ctx_cnt = 20;
   ctx_idx = 0;
-  context = (ctx_t *) malloc(sizeof(ctx_t) * ctx_cnt);
+  context = (ctx_t *) MALLOC(sizeof(ctx_t) * ctx_cnt);
   MEMSET(context, 0, sizeof(ctx_t) * ctx_cnt);
   context[0].name = "null";
   context[0].handler = parse_null;
@@ -1181,19 +1181,19 @@ conf_init_subsystem(void) {
   /* Initialize the context state stack and set the current context to "null" */
   ctx_state_cnt = 20;
   ctx_state_idx = 0;
-  ctx_state = (ctx_state_t *) malloc(sizeof(ctx_state_t) * ctx_state_cnt);
+  ctx_state = (ctx_state_t *) MALLOC(sizeof(ctx_state_t) * ctx_state_cnt);
   MEMSET(ctx_state, 0, sizeof(ctx_state_t) * ctx_state_cnt);
 
   /* Initialize the file state stack */
   fstate_cnt = 10;
   fstate_idx = 0;
-  fstate = (fstate_t *) malloc(sizeof(fstate_t) * fstate_cnt);
+  fstate = (fstate_t *) MALLOC(sizeof(fstate_t) * fstate_cnt);
   MEMSET(fstate, 0, sizeof(fstate_t) * fstate_cnt);
 
   /* Initialize the builtin function table */
   builtin_cnt = 10;
   builtin_idx = 0;
-  builtins = (eterm_func_t *) malloc(sizeof(eterm_func_t) * builtin_cnt);
+  builtins = (eterm_func_t *) MALLOC(sizeof(eterm_func_t) * builtin_cnt);
   MEMSET(builtins, 0, sizeof(eterm_func_t) * builtin_cnt);
 
   /* Register the omni-present builtin functions */
@@ -1228,9 +1228,9 @@ conf_register_context(char *name, ctx_handler_t handler) {
 
   if (++ctx_idx == ctx_cnt) {
     ctx_cnt *= 2;
-    context = (ctx_t *) realloc(context, sizeof(ctx_t) * ctx_cnt);
+    context = (ctx_t *) REALLOC(context, sizeof(ctx_t) * ctx_cnt);
   }
-  context[ctx_idx].name = strdup(name);
+  context[ctx_idx].name = StrDup(name);
   context[ctx_idx].handler = handler;
   D_OPTIONS(("conf_register_context():  Added context \"%s\" with ID %d and handler 0x%08x\n",
      context[ctx_idx].name, ctx_idx, context[ctx_idx].handler));
@@ -1243,7 +1243,7 @@ conf_register_fstate(FILE *fp, char *path, char *outfile, unsigned long line, un
 
   if (++fstate_idx == fstate_cnt) {
     fstate_cnt *= 2;
-    fstate = (fstate_t *) realloc(fstate, sizeof(fstate_t) * fstate_cnt);
+    fstate = (fstate_t *) REALLOC(fstate, sizeof(fstate_t) * fstate_cnt);
   }
   fstate[fstate_idx].fp = fp;
   fstate[fstate_idx].path = path;
@@ -1257,11 +1257,11 @@ conf_register_fstate(FILE *fp, char *path, char *outfile, unsigned long line, un
 unsigned char
 conf_register_builtin(char *name, eterm_func_ptr_t ptr) {
 
-  builtins[builtin_idx].name = strdup(name);
+  builtins[builtin_idx].name = StrDup(name);
   builtins[builtin_idx].ptr = ptr;
   if (++builtin_idx == builtin_cnt) {
     builtin_cnt *= 2;
-    builtins = (eterm_func_t *) realloc(builtins, sizeof(eterm_func_t) * builtin_cnt);
+    builtins = (eterm_func_t *) REALLOC(builtins, sizeof(eterm_func_t) * builtin_cnt);
   }
   return (builtin_idx - 1);
 }
@@ -1272,7 +1272,7 @@ conf_register_context_state(unsigned char ctx_id) {
 
   if (++ctx_state_idx == ctx_state_cnt) {
     ctx_state_cnt *= 2;
-    ctx_state = (ctx_state_t *) realloc(ctx_state, sizeof(ctx_state_t) * ctx_state_cnt);
+    ctx_state = (ctx_state_t *) REALLOC(ctx_state, sizeof(ctx_state_t) * ctx_state_cnt);
   }
   ctx_state[ctx_state_idx].ctx_id = ctx_id;
   ctx_state[ctx_state_idx].state = NULL;
@@ -2765,8 +2765,10 @@ parse_image(char *buff, void *state)
     n = NumWords(mods);
 
     if (!BEG_STRCASECMP(color, "image ")) {
-      RESET_AND_ASSIGN(iml->mod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-      iml->mod->contrast = iml->mod->gamma = 0xff;
+      if (iml->mod) {
+        free_colormod(iml->mod);
+      }
+      iml->mod = create_colormod();
       iml->mod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
         iml->mod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
@@ -2774,9 +2776,12 @@ parse_image(char *buff, void *state)
       if (n > 2) {
         iml->mod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
+      update_cmod(iml->mod);
     } else if (!BEG_STRCASECMP(color, "red ")) {
-      RESET_AND_ASSIGN(iml->rmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-      iml->rmod->contrast = iml->rmod->gamma = 0xff;
+      if (iml->rmod) {
+        free_colormod(iml->rmod);
+      }
+      iml->rmod = create_colormod();
       iml->rmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
         iml->rmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
@@ -2784,9 +2789,12 @@ parse_image(char *buff, void *state)
       if (n > 2) {
         iml->rmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
+      update_cmod(iml->rmod);
     } else if (!BEG_STRCASECMP(color, "green ")) {
-      RESET_AND_ASSIGN(iml->gmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-      iml->gmod->contrast = iml->gmod->gamma = 0xff;
+      if (iml->gmod) {
+        free_colormod(iml->gmod);
+      }
+      iml->gmod = create_colormod();
       iml->gmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
         iml->gmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
@@ -2794,9 +2802,12 @@ parse_image(char *buff, void *state)
       if (n > 2) {
         iml->gmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
+      update_cmod(iml->gmod);
     } else if (!BEG_STRCASECMP(color, "blue ")) {
-      RESET_AND_ASSIGN(iml->bmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-      iml->bmod->contrast = iml->bmod->gamma = 0xff;
+      if (iml->bmod) {
+        free_colormod(iml->bmod);
+      }
+      iml->bmod = create_colormod();
       iml->bmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
         iml->bmod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
@@ -2804,6 +2815,7 @@ parse_image(char *buff, void *state)
       if (n > 2) {
         iml->bmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
+      update_cmod(iml->bmod);
     } else {
       print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"", file_peek_path(), file_peek_line());
       return NULL;
@@ -3732,23 +3744,32 @@ post_parse(void)
 
   /* Clean up image stuff */
   for (i = 0; i < image_max; i++) {
+    simage_t *simg;
+    imlib_t *iml;
+
     if (images[i].norm) {
+      simg = images[i].norm;
+      iml = simg->iml;
       /* If we have a bevel but no border, use the bevel as a border. */
-      if (images[i].norm->iml->bevel && !(images[i].norm->iml->border)) {
-        images[i].norm->iml->border = images[i].norm->iml->bevel->edges;
+      if (iml->bevel && !(iml->border)) {
+        iml->border = iml->bevel->edges;
+      }
+      if (iml->im) {
+        imlib_context_set_image(iml->im);
+        update_cmod_tables(iml);
       }
       images[i].userdef = 1;
     } else {
-      images[i].norm = (simage_t *) MALLOC(sizeof(simage_t));
-      images[i].norm->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
-      images[i].norm->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
-      images[i].norm->fg = WhitePixel(Xdisplay, Xscreen);
-      images[i].norm->bg = BlackPixel(Xdisplay, Xscreen);
-      MEMSET(images[i].norm->pmap, 0, sizeof(pixmap_t));
-      MEMSET(images[i].norm->iml, 0, sizeof(imlib_t));
+      simg = images[i].norm = (simage_t *) MALLOC(sizeof(simage_t));
+      simg->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
+      simg->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
+      simg->fg = WhitePixel(Xdisplay, Xscreen);
+      simg->bg = BlackPixel(Xdisplay, Xscreen);
+      MEMSET(simg->pmap, 0, sizeof(pixmap_t));
+      MEMSET(simg->iml, 0, sizeof(imlib_t));
       images[i].mode = MODE_IMAGE & ALLOW_IMAGE;
     }
-    images[i].current = images[i].norm;
+    images[i].current = simg;
 #ifdef PIXMAP_SUPPORT
     if (rs_pixmaps[i]) {
       reset_simage(images[i].norm, RESET_ALL_SIMG);
@@ -3759,55 +3780,80 @@ post_parse(void)
     /* Right now, solid mode is the only thing we can do without pixmap support. */
     images[i].mode = MODE_SOLID & ALLOW_SOLID;
 #endif
+
     if (images[i].selected) {
+      simage_t *norm_simg = images[i].norm;
+
+      simg = images[i].selected;
+      iml = simg->iml;
       /* If we have a bevel but no border, use the bevel as a border. */
-      if (images[i].selected->iml->bevel && !(images[i].selected->iml->border)) {
-        images[i].selected->iml->border = images[i].selected->iml->bevel->edges;
+      if (iml->bevel && !(iml->border)) {
+        iml->border = iml->bevel->edges;
       }
       /* If normal has an image but we don't, copy it. */
-      if (!(images[i].selected->iml->im) && (images[i].norm->iml->im)) {
-        images[i].selected->iml->im = images[i].norm->iml->im;
-        *(images[i].selected->pmap) = *(images[i].norm->pmap);
+      if (!(simg->iml->im) && (norm_simg->iml->im)) {
+        simg->iml->im = norm_simg->iml->im;
+        *(simg->pmap) = *(norm_simg->pmap);
       }
-      if (images[i].selected->fg == 0 && images[i].selected->bg == 0) {
-        images[i].selected->fg = images[i].norm->fg;
-        images[i].selected->bg = images[i].norm->bg;
+      if (simg->fg == 0 && simg->bg == 0) {
+        simg->fg = norm_simg->fg;
+        simg->bg = norm_simg->bg;
+      }
+      if (iml->im) {
+        imlib_context_set_image(iml->im);
+        update_cmod_tables(iml);
       }
     } else {
       D_PIXMAP(("No \"selected\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
       images[i].selected = images[i].norm;
     }
     if (images[i].clicked) {
+      simage_t *norm_simg = images[i].norm;
+
+      simg = images[i].clicked;
+      iml = simg->iml;
       /* If we have a bevel but no border, use the bevel as a border. */
-      if (images[i].clicked->iml->bevel && !(images[i].clicked->iml->border)) {
-        images[i].clicked->iml->border = images[i].clicked->iml->bevel->edges;
+      if (iml->bevel && !(iml->border)) {
+        iml->border = iml->bevel->edges;
       }
       /* If normal has an image but we don't, copy it. */
-      if (!(images[i].clicked->iml->im) && (images[i].norm->iml->im)) {
-        images[i].clicked->iml->im = images[i].norm->iml->im;
-        *(images[i].clicked->pmap) = *(images[i].norm->pmap);
+      if (!(simg->iml->im) && (norm_simg->iml->im)) {
+        simg->iml->im = norm_simg->iml->im;
+        *(simg->pmap) = *(norm_simg->pmap);
       }
-      if (images[i].clicked->fg == 0 && images[i].clicked->bg == 0) {
-        images[i].clicked->fg = images[i].norm->fg;
-        images[i].clicked->bg = images[i].norm->bg;
+      if (simg->fg == 0 && simg->bg == 0) {
+        simg->fg = norm_simg->fg;
+        simg->bg = norm_simg->bg;
+      }
+      if (iml->im) {
+        imlib_context_set_image(iml->im);
+        update_cmod_tables(iml);
       }
     } else {
       D_PIXMAP(("No \"clicked\" state for image %s.  Setting fallback to the selected state.\n", get_image_type(i)));
       images[i].clicked = images[i].selected;
     }
     if (images[i].disabled) {
+      simage_t *norm_simg = images[i].norm;
+
+      simg = images[i].disabled;
+      iml = simg->iml;
       /* If we have a bevel but no border, use the bevel as a border. */
-      if (images[i].disabled->iml->bevel && !(images[i].disabled->iml->border)) {
-        images[i].disabled->iml->border = images[i].disabled->iml->bevel->edges;
+      if (iml->bevel && !(iml->border)) {
+        iml->border = iml->bevel->edges;
       }
       /* If normal has an image but we don't, copy it. */
-      if (!(images[i].disabled->iml->im) && (images[i].norm->iml->im)) {
-        images[i].disabled->iml->im = images[i].norm->iml->im;
-        *(images[i].disabled->pmap) = *(images[i].norm->pmap);
+      if (!(simg->iml->im) && (norm_simg->iml->im)) {
+        simg->iml->im = norm_simg->iml->im;
+        *(simg->pmap) = *(norm_simg->pmap);
       }
-      if (images[i].disabled->fg == 0 && images[i].disabled->bg == 0) {
-        images[i].disabled->fg = images[i].norm->fg;
-        images[i].disabled->bg = images[i].norm->bg;
+      if (simg->fg == 0 && simg->bg == 0) {
+        simg->fg = norm_simg->fg;
+        simg->bg = norm_simg->bg;
+      }
+      if (iml->im) {
+        imlib_context_set_image(iml->im);
+        update_cmod_tables(iml);
       }
     } else {
       D_PIXMAP(("No \"disabled\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
@@ -3881,8 +3927,10 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_image);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->mod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-    iml->mod->contrast = iml->mod->gamma = 0xff;
+    if (iml->mod) {
+      free_colormod(iml->mod);
+    }
+    iml->mod = create_colormod();
     iml->mod->brightness = (int) strtol(rs_cmod_image, (char **) NULL, 0);
     if (n > 1) {
       iml->mod->contrast = (int) strtol(PWord(2, rs_cmod_image), (char **) NULL, 0);
@@ -3896,8 +3944,10 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_red);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->rmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-    iml->rmod->contrast = iml->rmod->gamma = 0xff;
+    if (iml->rmod) {
+      free_colormod(iml->rmod);
+    }
+    iml->rmod = create_colormod();
     iml->rmod->brightness = (int) strtol(rs_cmod_red, (char **) NULL, 0);
     if (n > 1) {
       iml->rmod->contrast = (int) strtol(PWord(2, rs_cmod_red), (char **) NULL, 0);
@@ -3911,8 +3961,10 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_green);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->gmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-    iml->gmod->contrast = iml->gmod->gamma = 0xff;
+    if (iml->gmod) {
+      free_colormod(iml->gmod);
+    }
+    iml->gmod = create_colormod();
     iml->gmod->brightness = (int) strtol(rs_cmod_green, (char **) NULL, 0);
     if (n > 1) {
       iml->gmod->contrast = (int) strtol(PWord(2, rs_cmod_green), (char **) NULL, 0);
@@ -3926,8 +3978,10 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_blue);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->bmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
-    iml->bmod->contrast = iml->bmod->gamma = 0xff;
+    if (iml->bmod) {
+      free_colormod(iml->bmod);
+    }
+    iml->bmod = create_colormod();
     iml->bmod->brightness = (int) strtol(rs_cmod_blue, (char **) NULL, 0);
     if (n > 1) {
       iml->bmod->contrast = (int) strtol(PWord(2, rs_cmod_blue), (char **) NULL, 0);

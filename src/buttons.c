@@ -628,7 +628,13 @@ bbar_select_button(buttonbar_t *bbar, button_t *button)
   if (image_mode_is(image_button, MODE_MASK)) {
     paste_simage(images[image_button].selected, image_button, bbar->win, button->x, button->y, button->w, button->h);
   } else {
-    draw_shadow_from_colors(bbar->win, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], button->x, button->y, button->w, button->h, 2);
+    Pixel p1, p2;
+
+    p1 = get_top_shadow_color(images[image_button].selected->bg, "");
+    p2 = get_bottom_shadow_color(images[image_button].selected->bg, "");
+    XSetForeground(Xdisplay, bbar->gc, images[image_button].selected->bg);
+    XFillRectangle(Xdisplay, bbar->win, bbar->gc, button->x, button->y, button->w, button->h);
+    draw_shadow_from_colors(bbar->win, p1, p2, button->x, button->y, button->w, button->h, 2);
   }
   if (image_mode_is(image_button, MODE_AUTO)) {
     enl_ipc_sync();

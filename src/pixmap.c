@@ -59,7 +59,6 @@ extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int g
 extern void shade_ximage_32_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
-static colormod_t cmod_none = { 256, 256, 256 };
 
 Pixmap buffer_pixmap = None;
 #ifdef PIXMAP_OFFSET
@@ -401,6 +400,39 @@ free_simage(simage_t *s)
   FREE(s);
 }
 
+colormod_t *
+create_colormod(void)
+{
+  colormod_t *cmod;
+
+  cmod = (colormod_t *) MALLOC(sizeof(colormod_t));
+  cmod->brightness = cmod->contrast = cmod->gamma = 0x100;
+  cmod->imlib_mod = NULL;
+  return cmod;
+}
+
+void
+reset_colormod(colormod_t *cmod)
+{
+  ASSERT(cmod != NULL);
+  cmod->brightness = cmod->contrast = cmod->gamma = 0x100;
+  if (cmod->imlib_mod) {
+    imlib_context_set_color_modifier(cmod->imlib_mod);
+    imlib_reset_color_modifier();
+  }
+}
+
+void
+free_colormod(colormod_t *cmod)
+{
+  ASSERT(cmod != NULL);
+  if (cmod->imlib_mod) {
+    imlib_context_set_color_modifier(cmod->imlib_mod);
+    imlib_free_color_modifier();
+  }
+  FREE(cmod);
+}
+
 static const char *
 get_iclass_name(unsigned char which)
 {
@@ -549,28 +581,8 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
     } else {
       imlib_image_set_border(&bord_none);
     }
-#ifdef FIXME_BLOCK
-    if (tmp_iml->mod) {
-      Imlib_set_image_modifier(imlib_id, tmp_iml->im, tmp_iml->mod);
-    } else {
-      Imlib_set_image_modifier(imlib_id, tmp_iml->im, &cmod_none);
-    }
-    if (tmp_iml->rmod) {
-      Imlib_set_image_red_modifier(imlib_id, tmp_iml->im, tmp_iml->rmod);
-    } else {
-      Imlib_set_image_red_modifier(imlib_id, tmp_iml->im, &cmod_none);
-    }
-    if (tmp_iml->gmod) {
-      Imlib_set_image_green_modifier(imlib_id, tmp_iml->im, tmp_iml->gmod);
-    } else {
-      Imlib_set_image_green_modifier(imlib_id, tmp_iml->im, &cmod_none);
-    }
-    if (tmp_iml->bmod) {
-      Imlib_set_image_blue_modifier(imlib_id, tmp_iml->im, tmp_iml->bmod);
-    } else {
-      Imlib_set_image_blue_modifier(imlib_id, tmp_iml->im, &cmod_none);
-    }
-#endif
+    imlib_context_set_color_modifier((tmp_iml->mod && tmp_iml->mod->imlib_mod) ? tmp_iml->mod->imlib_mod : NULL);
+
     if ((images[image_bg].current->pmap->w > 0) || (images[image_bg].current->pmap->op & OP_SCALE)) {
       D_PIXMAP(("Scaling image to %dx%d\n", scr->width, scr->height));
       imlib_render_pixmaps_for_whole_image_at_size(&viewport_pixmap, &mask, scr->width, scr->height);
@@ -709,28 +721,8 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     } else {
       imlib_image_set_border(&bord_none);
     }
-#ifdef FIXME_BLOCK
-    if (simg->iml->mod) {
-      Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
-    } else {
-      Imlib_set_image_modifier(imlib_id, simg->iml->im, &cmod_none);
-    }
-    if (simg->iml->rmod) {
-      Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
-    } else {
-      Imlib_set_image_red_modifier(imlib_id, simg->iml->im, &cmod_none);
-    }
-    if (simg->iml->gmod) {
-      Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
-    } else {
-      Imlib_set_image_green_modifier(imlib_id, simg->iml->im, &cmod_none);
-    }
-    if (simg->iml->bmod) {
-      Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
-    } else {
-      Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, &cmod_none);
-    }
-#endif
+    imlib_context_set_color_modifier((simg->iml->mod && simg->iml->mod->imlib_mod) ? simg->iml->mod->imlib_mod : NULL);
+
     if (w == imlib_image_get_width() && h == imlib_image_get_height()) {
       imlib_render_pixmaps_for_whole_image(&pmap, &mask);
     } else {
@@ -1030,36 +1022,8 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       } else {
         imlib_image_set_border(&bord_none);
       }
-#ifdef FIXME_BLOCK
-      if (simg->iml->mod) {
-        D_PIXMAP(("Setting image modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-                  simg->iml->mod->gamma, simg->iml->mod->brightness, simg->iml->mod->contrast));
-        Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
-      } else {
-        Imlib_set_image_modifier(imlib_id, simg->iml->im, &cmod_none);
-      }
-      if (simg->iml->rmod) {
-        D_PIXMAP(("Setting image red modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-                  simg->iml->rmod->gamma, simg->iml->rmod->brightness, simg->iml->rmod->contrast));
-        Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
-      } else {
-        Imlib_set_image_red_modifier(imlib_id, simg->iml->im, &cmod_none);
-      }
-      if (simg->iml->gmod) {
-        D_PIXMAP(("Setting image green modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-                  simg->iml->gmod->gamma, simg->iml->gmod->brightness, simg->iml->gmod->contrast));
-        Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
-      } else {
-        Imlib_set_image_green_modifier(imlib_id, simg->iml->im, &cmod_none);
-      }
-      if (simg->iml->bmod) {
-        D_PIXMAP(("Setting image blue modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-                  simg->iml->bmod->gamma, simg->iml->bmod->brightness, simg->iml->bmod->contrast));
-        Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
-      } else {
-        Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, &cmod_none);
-      }
-#endif
+      imlib_context_set_color_modifier((simg->iml->mod && simg->iml->mod->imlib_mod) ? simg->iml->mod->imlib_mod : NULL);
+
       D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
       imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, xscaled, yscaled);
       rendered = 1;
@@ -1287,7 +1251,7 @@ load_image(const char *file, simage_t *simg)
       f = search_path(getenv(PATH_ENV), file, PIXMAP_EXT);
     }
     if (f != NULL) {
-      im = imlib_load_image(f);
+      im = imlib_load_image_immediately(f);
       if (im == NULL) {
 	print_error("Unable to load image file \"%s\"", file);
 	return 0;
@@ -1303,10 +1267,81 @@ load_image(const char *file, simage_t *simg)
   return 0;
 }
 
+void
+update_cmod(colormod_t *cmod)
+{
+
+  ASSERT(cmod != NULL);
+
+  if (cmod->imlib_mod) {
+    imlib_context_set_color_modifier(cmod->imlib_mod);
+    imlib_reset_color_modifier();
+  } else {
+    cmod->imlib_mod = imlib_create_color_modifier();
+    imlib_context_set_color_modifier(cmod->imlib_mod);
+  }
+  if (cmod->brightness != 0x100) {
+    imlib_modify_color_modifier_brightness((double) (cmod->brightness - 255.0) / 255.0);
+  }
+  if (cmod->contrast != 0x100) {
+    imlib_modify_color_modifier_contrast((double) (cmod->contrast - 255.0) / 255.0);
+  }
+  if (cmod->gamma != 0x100) {
+    imlib_modify_color_modifier_gamma((double) (cmod->gamma - 255.0) / 255.0);
+  }
+  imlib_context_set_color_modifier(NULL);
+}
+
+void
+update_cmod_tables(imlib_t *iml)
+{
+  colormod_t *mod = iml->mod, *rmod = iml->rmod, *gmod = iml->gmod, *bmod = iml->bmod;
+  DATA8 rt[256], gt[256], bt[256];
+
+  REQUIRE(mod || rmod || gmod || bmod);
+
+  if (!mod) {
+    mod = iml->mod = create_colormod();
+    iml->mod->imlib_mod = imlib_create_color_modifier();
+    iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0x100;
+    imlib_context_set_color_modifier(mod->imlib_mod);
+  } else if (!mod->imlib_mod) {
+    mod->imlib_mod = imlib_create_color_modifier();
+    imlib_context_set_color_modifier(mod->imlib_mod);
+  } else {
+    imlib_context_set_color_modifier(mod->imlib_mod);
+    imlib_reset_color_modifier();
+  }
+  imlib_get_color_modifier_tables(rt, gt, bt, NULL);
+
+  if (rmod && rmod->imlib_mod) {
+    imlib_context_set_color_modifier(rmod->imlib_mod);
+    imlib_get_color_modifier_tables(rt, NULL, NULL, NULL);
+  }
+  if (gmod && gmod->imlib_mod) {
+    imlib_context_set_color_modifier(gmod->imlib_mod);
+    imlib_get_color_modifier_tables(NULL, gt, NULL, NULL);
+  }
+  if (bmod && bmod->imlib_mod) {
+    imlib_context_set_color_modifier(bmod->imlib_mod);
+    imlib_get_color_modifier_tables(NULL, NULL, bt, NULL);
+  }
+  imlib_context_set_color_modifier(mod->imlib_mod);
+  imlib_set_color_modifier_tables(rt, gt, bt, NULL);
+
+  if (mod->brightness != 0x100) {
+    imlib_modify_color_modifier_brightness((double) (mod->brightness - 255.0) / 255.0);
+  }
+  if (mod->contrast != 0x100) {
+    imlib_modify_color_modifier_contrast((double) (mod->contrast - 255.0) / 255.0);
+  }
+  if (mod->gamma != 0x100) {
+    imlib_modify_color_modifier_gamma((double) (mod->gamma - 255.0) / 255.0);
+  }
+}
+
 # ifdef PIXMAP_OFFSET
-
 #  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0x100 || (mod)->contrast != 0x100 || (mod)->gamma != 0x100))
-
 unsigned char
 need_colormod(register imlib_t *iml)
 {

@@ -1897,8 +1897,7 @@ xterm_seq(int op, const char *str)
               imlib_t *iml = images[which].current->iml;
 
               if (iml->mod == NULL) {
-                iml->mod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0x100;
+                iml->mod = create_colormod();
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->mod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1907,13 +1906,15 @@ xterm_seq(int op, const char *str)
               } else if (!BEG_STRCASECMP("gamma", mod)) {
                 iml->mod->gamma = (int) strtol(valptr, (char **) NULL, 0);
               }
+              update_cmod(iml->mod);
+              reload_image(iml);
+              update_cmod_tables(iml);
 
             } else if (!strcasecmp(color, "red")) {
               imlib_t *iml = images[which].current->iml;
 
               if (iml->rmod == NULL) {
-                iml->rmod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->rmod->brightness = iml->rmod->contrast = iml->rmod->gamma = 0x100;
+                iml->rmod = create_colormod();
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->rmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1922,13 +1923,15 @@ xterm_seq(int op, const char *str)
               } else if (!BEG_STRCASECMP("gamma", mod)) {
                 iml->rmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
               }
+              update_cmod(iml->rmod);
+              reload_image(iml);
+              update_cmod_tables(iml);
 
             } else if (!strcasecmp(color, "green")) {
               imlib_t *iml = images[which].current->iml;
 
               if (iml->gmod == NULL) {
-                iml->gmod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->gmod->brightness = iml->gmod->contrast = iml->gmod->gamma = 0x100;
+                iml->gmod = create_colormod();
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->gmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1937,13 +1940,15 @@ xterm_seq(int op, const char *str)
               } else if (!BEG_STRCASECMP("gamma", mod)) {
                 iml->gmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
               }
+              update_cmod(iml->gmod);
+              reload_image(iml);
+              update_cmod_tables(iml);
 
             } else if (!strcasecmp(color, "blue")) {
               imlib_t *iml = images[which].current->iml;
 
               if (iml->bmod == NULL) {
-                iml->bmod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->bmod->brightness = iml->bmod->contrast = iml->bmod->gamma = 0x100;
+                iml->bmod = create_colormod();
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->bmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1952,6 +1957,9 @@ xterm_seq(int op, const char *str)
               } else if (!BEG_STRCASECMP("gamma", mod)) {
                 iml->bmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
               }
+              update_cmod(iml->bmod);
+              reload_image(iml);
+              update_cmod_tables(iml);
             }
           }
           if (changed) {
@@ -1991,8 +1999,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->mod == NULL) {
-                iml->mod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->mod->contrast = iml->mod->gamma = 0x100;
+                iml->mod = create_colormod();
               }
               if (iml->mod->brightness != s) {
                 iml->mod->brightness = s;
@@ -2022,8 +2029,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->rmod == NULL) {
-                iml->rmod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->rmod->contrast = iml->rmod->gamma = 0x100;
+                iml->rmod = create_colormod();
               }
               if (iml->rmod->brightness != (int) r) {
                 iml->rmod->brightness = r;
@@ -2043,8 +2049,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->gmod == NULL) {
-                iml->gmod = (colormod_t *) MALLOC(sizeof(colormod_t));
-                iml->gmod->contrast = iml->gmod->gamma = 0x100;
+                iml->gmod = create_colormod();
               }
               if (iml->gmod->brightness != (int) g) {
                 iml->gmod->brightness = g;
@@ -2064,7 +2069,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->bmod == NULL) {
-                iml->bmod = (colormod_t *) MALLOC(sizeof(colormod_t));
+                iml->bmod = create_colormod();
                 iml->bmod->contrast = iml->bmod->gamma = 0x100;
               }
               if (iml->bmod->brightness != (int) b) {
