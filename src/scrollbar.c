@@ -589,7 +589,8 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
       UPPER_BOUND(th, scrollbar_anchor_height() >> 1);
       D_SCROLLBAR(("Thumb width/height has been calculated at %hux%hu.\n", tw, th));
       if ((tw > 0) && (th > 0)) {
-        paste_simage(images[image_st].current, image_st, images[image_sa].current->pmap->pixmap, (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
+        paste_simage(images[image_st].current, image_st, scrollbar.sa_win, images[image_sa].current->pmap->pixmap,
+                     (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
         XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, images[image_sa].current->pmap->pixmap);
         XClearWindow(Xdisplay, scrollbar.sa_win);
       }

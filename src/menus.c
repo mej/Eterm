@@ -1084,7 +1084,7 @@ menu_draw(menu_t *menu)
       switch (item->type) {
 	case MENUITEM_SUBMENU:
           if (image_mode_is(image_submenu, MODE_MASK)) {
-            paste_simage(images[image_submenu].norm, image_submenu, menu->bg, item->x, item->y, item->w - MENU_VGAP, item->h);
+            paste_simage(images[image_submenu].norm, image_submenu, menu->win, menu->bg, item->x, item->y, item->w - MENU_VGAP, item->h);
           } else {
             draw_arrow_from_colors(menu->bg, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
                                    item->x + item->w - 3 * MENU_HGAP, item->y + (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);

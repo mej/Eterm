@@ -359,9 +359,6 @@ begin main
 # If true, Eterm will run with no window borders.
     borderless true
 
-# If true, Eterm will use save-unders.
-    backing_store true
-
   end toggles
 
   begin keyboard

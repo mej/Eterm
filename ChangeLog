@@ -3909,3 +3909,9 @@ Sun Sep 17 17:29:26 PDT 2000	Michael Jennings <mej@eterm.org>
 	Got rid of the useless backing_store option.
 	
 -------------------------------------------------------------------------------
+Sun Sep 17 18:54:26 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed XErrors caused by calling XTranslateCoordinates with a pixmap.
+	This was visible using the glass theme.
+	
+-------------------------------------------------------------------------------

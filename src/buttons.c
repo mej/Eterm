@@ -622,7 +622,7 @@ bbar_select_button(buttonbar_t *bbar, button_t *button)
 {
   bbar->current = button;
   if (image_mode_is(image_button, MODE_MASK)) {
-    paste_simage(images[image_button].selected, image_button, bbar->win, button->x, button->y, button->w, button->h);
+    paste_simage(images[image_button].selected, image_button, bbar->win, bbar->win, button->x, button->y, button->w, button->h);
   } else {
     Pixel p1, p2;
 
@@ -636,7 +636,7 @@ bbar_select_button(buttonbar_t *bbar, button_t *button)
     enl_ipc_sync();
   }
   if (button->icon) {
-    paste_simage(button->icon, image_max, bbar->win, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
+    paste_simage(button->icon, image_max, bbar->win, bbar->win, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
   }
   if (button->len) {
     XSetForeground(Xdisplay, bbar->gc, images[image_bbar].selected->fg);
@@ -657,7 +657,7 @@ bbar_click_button(buttonbar_t *bbar, button_t *button)
 {
   bbar->current = button;
   if (image_mode_is(image_button, MODE_MASK)) {
-    paste_simage(images[image_button].clicked, image_button, bbar->win, button->x, button->y, button->w, button->h);
+    paste_simage(images[image_button].clicked, image_button, bbar->win, bbar->win, button->x, button->y, button->w, button->h);
   } else {
     draw_shadow_from_colors(bbar->win, PixColors[menuBottomShadowColor], PixColors[menuTopShadowColor], button->x, button->y, button->w, button->h, 2);
   }
@@ -665,7 +665,7 @@ bbar_click_button(buttonbar_t *bbar, button_t *button)
     enl_ipc_sync();
   }
   if (button->icon) {
-    paste_simage(button->icon, image_max, bbar->win, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
+    paste_simage(button->icon, image_max, bbar->win, bbar->win, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
   }
   if (button->len) {
     XSetForeground(Xdisplay, bbar->gc, images[image_bbar].clicked->fg);
@@ -801,7 +801,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
   XSetForeground(Xdisplay, bbar->gc, images[image_bbar].current->fg);
   for (button = bbar->buttons; button; button = button->next) {
     if (button->icon) {
-      paste_simage(button->icon, image_max, bbar->bg, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
+      paste_simage(button->icon, image_max, bbar->win, bbar->bg, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
     }
     if (button->len) {
       draw_string(bbar, bbar->bg, bbar->gc, button->text_x, button->text_y, button->text, button->len);
@@ -809,7 +809,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
   }
   for (button = bbar->rbuttons; button; button = button->next) {
     if (button->icon) {
-      paste_simage(button->icon, image_max, bbar->bg, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
+      paste_simage(button->icon, image_max, bbar->win, bbar->bg, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
     }
     if (button->len) {
       draw_string(bbar, bbar->bg, bbar->gc, button->text_x, button->text_y, button->text, button->len);

@@ -198,14 +198,14 @@ extern Window desktop_window;
 
 /************ Function Prototypes ************/
 #ifndef PIXMAP_SUPPORT
-# define free_simage(s)                         NOP
-# define create_simage()                        ((simage_t *) NULL)
-# define load_image(f, s)                       ((unsigned char) 0)
-# define check_image_ipc(w)                     ((unsigned char) 0)
-# define redraw_image(w)                        NOP
-# define redraw_images_by_mode(w)               NOP
-# define paste_simage(s, which, d, x, y, w, h)  NOP
-# define set_icon_pixmap(f, h)                  NOP
+# define free_simage(s)                              NOP
+# define create_simage()                             ((simage_t *) NULL)
+# define load_image(f, s)                            ((unsigned char) 0)
+# define check_image_ipc(w)                          ((unsigned char) 0)
+# define redraw_image(w)                             NOP
+# define redraw_images_by_mode(w)                    NOP
+# define paste_simage(s, which, win, d, x, y, w, h)  NOP
+# define set_icon_pixmap(f, h)                       NOP
 #endif
 
 _XFUNCPROTOBEGIN
@@ -227,7 +227,7 @@ extern void reset_colormod(colormod_t *);
 extern void free_colormod(colormod_t *);
 extern Pixmap create_trans_pixmap(simage_t *, unsigned char, Drawable, int, int, unsigned short, unsigned short);
 extern Pixmap create_viewport_pixmap(simage_t *, Drawable, int, int, unsigned short, unsigned short);
-extern void paste_simage(simage_t *, unsigned char, Drawable, unsigned short, unsigned short, unsigned short, unsigned short);
+extern void paste_simage(simage_t *, unsigned char, Window, Drawable, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);
 extern void redraw_images_by_mode(unsigned char);
 #endif

@@ -638,7 +638,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
 }
 
 void
-paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
   Pixmap pmap = None, mask = None;
   GC gc;
@@ -646,7 +646,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
   ASSERT(simg != NULL);
   REQUIRE(d != None);
 
-  D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) d, x, y, w, h));
+  D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win, (int) d, x, y, w, h));
 
   if (which != image_max) {
     if (image_mode_is(which, MODE_AUTO) && image_mode_is(which, ALLOW_AUTO)) {
@@ -698,8 +698,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       Pixmap p;
 
       gc = LIBMEJ_X_CREATE_GC(0, NULL);
-      /* FIXME:  The conditional on the next line works, but it's a hack.  Worth fixing?  :-) */
-      p = create_trans_pixmap(simg, which, ((which == image_st) ? scrollbar.sa_win : d), x, y, w, h);
+      p = create_trans_pixmap(simg, which, win, x, y, w, h);
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
       LIBMEJ_X_FREE_PIXMAP(p);
       LIBMEJ_X_FREE_GC(gc);
@@ -707,7 +706,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       Pixmap p;
 
       gc = LIBMEJ_X_CREATE_GC(0, NULL);
-      p = create_viewport_pixmap(simg, d, x, y, w, h);
+      p = create_viewport_pixmap(simg, win, x, y, w, h);
       if (simg->iml->bevel != NULL) {
         bevel_pixmap(p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
