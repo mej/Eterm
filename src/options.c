@@ -3821,7 +3821,6 @@ save_config(char *path, unsigned char save_theme)
 
   if (save_theme) {
     for (bbar = buttonbar; bbar; bbar = bbar->next) {
-      unsigned long tmp;
       button_t *b;
 
       fprintf(fp, "begin button_bar\n");
