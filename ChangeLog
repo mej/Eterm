@@ -5194,3 +5194,7 @@ Thu Mar 11 09:07:13 2004                        Michael Jennings (mej)
 
 Fixed window sizing race condition noted by Virgil <virgil@yak.net>.
 ----------------------------------------------------------------------
+Thu Mar 11 11:55:45 2004                        Michael Jennings (mej)
+
+Fix "make distcheck"
+----------------------------------------------------------------------
