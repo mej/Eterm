@@ -309,7 +309,7 @@ static const struct {
       OPT_LONG("colorBD", "bold color", &rs_color[colorBD]),
       OPT_LONG("colorUL", "underline color", &rs_color[colorUL]),
 #endif /* NO_BOLDUNDERLINE */
-      OPT_LONG("menur-color", "menu color", &rs_color[menuColor]),
+      OPT_LONG("menu-color", "menu color", &rs_color[menuColor]),
       OPT_LONG("menu-text-color", "menu text color", &rs_color[menuTextColor]),
       OPT_STR('S', "scrollbar-color", "scrollbar color", &rs_color[scrollColor]),
       OPT_LONG("unfocused-menu-color", "unfocused menu color", &rs_color[unfocusedMenuColor]),

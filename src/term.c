@@ -1734,7 +1734,7 @@ xterm_seq(int op, const char *str)
 	    viewport_pixmap = None;	/* Force the re-read */
 	  }
           if (!strcasecmp(color, "image")) {
-            imlib_t *iml = images[image_bg].current->iml;
+            imlib_t *iml = images[which].current->iml;
 
             if (iml->mod == NULL) {
               iml->mod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
@@ -1749,7 +1749,7 @@ xterm_seq(int op, const char *str)
             }
 
           } else if (!strcasecmp(color, "red")) {
-            imlib_t *iml = images[image_bg].current->iml;
+            imlib_t *iml = images[which].current->iml;
 
             if (iml->rmod == NULL) {
               iml->rmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
@@ -1764,7 +1764,7 @@ xterm_seq(int op, const char *str)
             }
 
           } else if (!strcasecmp(color, "green")) {
-            imlib_t *iml = images[image_bg].current->iml;
+            imlib_t *iml = images[which].current->iml;
 
             if (iml->gmod == NULL) {
               iml->gmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
@@ -1779,7 +1779,7 @@ xterm_seq(int op, const char *str)
             }
 
           } else if (!strcasecmp(color, "blue")) {
-            imlib_t *iml = images[image_bg].current->iml;
+            imlib_t *iml = images[which].current->iml;
 
             if (iml->bmod == NULL) {
               iml->bmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));

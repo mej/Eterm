@@ -2756,3 +2756,9 @@ Mon Nov  8 20:17:50 PST 1999	Michael Jennings <mej@eterm.org>
 	user.cfg files.
 	
 -------------------------------------------------------------------------------
+Thu Nov 11 18:25:07 PST 1999	Michael Jennings <mej@eterm.org>
+
+	The man page should now be up-to-date for Eterm 0.9.  Please check it
+	to make sure. :-)  I also fixed a few minor nits here.
+	
+-------------------------------------------------------------------------------
