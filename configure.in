@@ -106,6 +106,7 @@ AC_LN_S
 AC_PATH_PROG(PERL, perl, /usr/bin/perl, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
 AC_PATH_PROG(AWK, awk, /usr/bin/awk, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
 export PERL AWK
+AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
 
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
@@ -373,6 +374,58 @@ if test -n "$HAVE_MMX"; then
   AC_DEFINE(HAVE_MMX)
 else
   AC_MSG_RESULT(no)
+fi
+
+dnl#
+dnl# LibAST
+dnl#
+AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
+test -z "$LIBAST_CONFIG" && FOUND_LIBAST=0
+
+if test "$FOUND_LIBAST" -eq "1"; then
+  if test ! -z "$LIBAST_CONFIG"; then
+    GRLIBS="-last $GRLIBS"
+    AC_DEFINE(HAVE_LIBAST)
+    AC_PREFIX(libast-config)
+    CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
+    LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
+    SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"
+    for i in $SUPPORT_FLAGS ; do
+      case $i in
+        MMX)
+          AC_DEFINE(LIBAST_MMX_SUPPORT)
+          ;;
+        X11)
+          AC_DEFINE(LIBAST_X11_SUPPORT)
+          ;;
+        Imlib2)
+          AC_DEFINE(LIBAST_IMLIB2_SUPPORT)
+          ;;
+      esac
+    done
+  fi
+else
+  echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
+  echo "        you may have it installed in a strange place, or you may need to run";
+  echo "        /sbin/ldconfig.  If you don't have it, I can download it for you.";
+  echo "        Shall I retrieve and build LibAST now (y/n)?";
+  read ANS
+  if test "x$ANS" = "xy" -o "x$ANS" = "xyes" -o "x$ANS" = "xY" -o "x$ANS" = "xYES"; then
+    if test -d CVS ; then
+      # Download from CVS server
+      cvs -z3 -d :pserver:anonymous@cvs.enlightenment.sourceforge.net:/cvsroot/enlightenment co -d libast eterm/libast
+      (cd libast && ./autogen.sh "$@" && make install && cd .. && rm -rf libast)
+      if test $? -ne 0; then
+        echo 'ERROR:  Unable to auto-get libast, sorry.' 1>&2
+        exit 1
+      fi
+    else
+      # Download tarball
+      :
+    fi
+  else
+    AC_MSG_ERROR(Fatal:  libast not found.)
+  fi
 fi
 
 AC_MSG_CHECKING(for utmp support)
@@ -717,10 +770,10 @@ fi
 AC_SUBST(GDB_CMD_FILE)
 
 CPPFLAGS=`eval eval eval eval eval echo "-I$includedir -I$prefix/include $CPPFLAGS"`
-CPPFLAGS=`echo $CPPFLAGS | tr ' ' '\n' | uniq | tr '\n' ' '`
+CPPFLAGS=`echo $CPPFLAGS | tr ' ' '\n' | uniq | grep -v NONE | tr '\n' ' '`
 CFLAGS=${CFLAGS--O}
 LDFLAGS=`eval eval eval eval eval echo "-L$libdir -L$prefix/lib ${LDFLAGS--O}"`
-LDFLAGS=`echo $LDFLAGS | tr ' ' '\n' | uniq | tr '\n' ' '`
+LDFLAGS=`echo $LDFLAGS | tr ' ' '\n' | uniq | grep -v NONE | tr '\n' ' '`
 LIBS="$GRLIBS $X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 
 AC_SUBST(CC)

@@ -31,9 +31,9 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <limits.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
+#include "../libast/debug.h"
+#include "../libast/mem.h"
+#include "../libast/strings.h"
 #include "debug.h"
 #include "command.h"
 #include "encoding.h"

@@ -5,7 +5,6 @@ bin_SCRIPTS = Etcolors Etwinop Etsearch kEsetroot
 
 Esetroot_SOURCES = Esetroot.c
 Esetroot_LDFLAGS = -rpath $(libdir):$(pkglibdir)
-Esetroot_LDADD = -L$(DIST_ROOT)/libmej
 
 Etbg_SOURCES = Etbg.c
 Ettable_SOURCES = Ettable.c

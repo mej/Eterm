@@ -3966,7 +3966,9 @@ post_parse(void)
     FREE(rs_cmod_blue);
   }
 
-  if (rs_cache_size != (unsigned long) -1) {
+  if (rs_cache_size == (unsigned long) -1) {
+    imlib_set_cache_size(0);
+  } else {
     imlib_set_cache_size(rs_cache_size);
   }
 #endif

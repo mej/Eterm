@@ -333,6 +333,10 @@
 #undef PKGDATADIR
 #undef HAVE_LIBIMLIB2
 #undef HAVE_MMX
+#undef HAVE_LIBAST
+#undef LIBAST_X11_SUPPORT
+#undef LIBAST_IMLIB2_SUPPORT
+#undef LIBAST_MMX_SUPPORT
 
 
 /* Leave that blank line there!!  Autoheader needs it.

@@ -456,7 +456,7 @@ Create_Windows(int argc, char *argv[])
     gcvalue.foreground = PixColors[fgColor];
     gcvalue.background = PixColors[bgColor];
     gcvalue.graphics_exposures = 0;
-    TermWin.gc = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
+    TermWin.gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
   }
 
   if (Options & Opt_no_cursor) {

@@ -124,9 +124,9 @@ menu_init(void)
     return;
   }
   gcvalue.foreground = PixColors[menuTopShadowColor];
-  topShadowGC = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+  topShadowGC = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[menuBottomShadowColor];
-  botShadowGC = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+  botShadowGC = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
 
   event_register_dispatcher(menu_dispatch_event, menu_event_init_dispatcher);
 }
@@ -428,8 +428,8 @@ menulist_clear(menulist_t *list)
     menu_delete(list->menus[i]);
   }
   FREE(list->menus);
-  LIBMEJ_X_FREE_GC(topShadowGC);
-  LIBMEJ_X_FREE_GC(botShadowGC);
+  LIBAST_X_FREE_GC(topShadowGC);
+  LIBAST_X_FREE_GC(botShadowGC);
   FREE(list);
 }
 
@@ -463,7 +463,7 @@ menu_create(char *title)
   menu->swin = XCreateWindow(Xdisplay, menu->win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 			     CWOverrideRedirect | CWSaveUnder | CWBorderPixel | CWColormap, &xattr);
 
-  menu->gc = LIBMEJ_X_CREATE_GC(0, NULL);
+  menu->gc = LIBAST_X_CREATE_GC(0, NULL);
   menuitem_clear_current(menu);
 
   return menu;
@@ -484,10 +484,10 @@ menu_delete(menu_t *menu)
     FREE(menu->title);
   }
   if (menu->bg) {
-    LIBMEJ_X_FREE_PIXMAP(menu->bg);
+    LIBAST_X_FREE_PIXMAP(menu->bg);
   }
   if (menu->gc) {
-    LIBMEJ_X_FREE_GC(menu->gc);
+    LIBAST_X_FREE_GC(menu->gc);
   }
 #ifdef MULTI_CHARSET
   if (menu->fontset) {

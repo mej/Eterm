@@ -54,8 +54,8 @@ draw_shadow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w
   static GC gc_top = (GC) 0, gc_bottom = (GC) 0;
 
   if (gc_top == 0) {
-    gc_top = LIBMEJ_X_CREATE_GC(0, NULL);
-    gc_bottom = LIBMEJ_X_CREATE_GC(0, NULL);
+    gc_top = LIBAST_X_CREATE_GC(0, NULL);
+    gc_bottom = LIBAST_X_CREATE_GC(0, NULL);
   }
 
   XSetForeground(Xdisplay, gc_top, top);
@@ -109,8 +109,8 @@ draw_arrow_from_colors(Drawable d, Pixel top, Pixel bottom, int x, int y, int w,
   static GC gc_top = (GC) 0, gc_bottom = (GC) 0;
 
   if (gc_top == 0) {
-    gc_top = LIBMEJ_X_CREATE_GC(0, NULL);
-    gc_bottom = LIBMEJ_X_CREATE_GC(0, NULL);
+    gc_top = LIBAST_X_CREATE_GC(0, NULL);
+    gc_bottom = LIBAST_X_CREATE_GC(0, NULL);
   }
 
   XSetForeground(Xdisplay, gc_top, top);
@@ -230,8 +230,8 @@ bevel_pixmap(Pixmap p, int w, int h, Imlib_Border *bord, unsigned char up)
       MOD_PIXEL_HIGH(x, y, !up);
     }
   }
-  gc = LIBMEJ_X_CREATE_GC(0, NULL);
+  gc = LIBAST_X_CREATE_GC(0, NULL);
   XPutImage(Xdisplay, p, gc, ximg, 0, 0, 0, 0, w, h);
-  LIBMEJ_X_FREE_GC(gc);
+  LIBAST_X_FREE_GC(gc);
   XDestroyImage(ximg);
 }

@@ -562,10 +562,14 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
     return;
   }
   if (scrollbar_anchor_height() > 1) {
-    render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+    unsigned char thumb;
+    Pixmap pmap;
 
+    thumb = (images[image_st].current->iml) ? 1 : 0;
+    render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, thumb);
+    pmap = images[image_sa].current->pmap->pixmap;
     /* Draw the thumb if there is one. */
-    if (images[image_st].current->iml) {
+    if (thumb) {
       unsigned short tw = 0, th = 0;
       imlib_t *iml = images[image_st].current->iml, *siml = images[image_sa].current->iml;
 
@@ -589,10 +593,12 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
       UPPER_BOUND(th, scrollbar_anchor_height() >> 1);
       D_SCROLLBAR(("Thumb width/height has been calculated at %hux%hu.\n", tw, th));
       if ((tw > 0) && (th > 0)) {
-        paste_simage(images[image_st].current, image_st, scrollbar.sa_win, images[image_sa].current->pmap->pixmap,
+        paste_simage(images[image_st].current, image_st, scrollbar.sa_win, pmap,
                      (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
-        XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, images[image_sa].current->pmap->pixmap);
+        XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, pmap);
         XClearWindow(Xdisplay, scrollbar.sa_win);
+        IMLIB_FREE_PIXMAP(pmap);
+        images[image_sa].current->pmap->pixmap = None;
       }
     }
   }
@@ -886,19 +892,19 @@ scrollbar_drawing_init(void) {
     gcvalue.fill_style = FillOpaqueStippled;
     gcvalue.foreground = PixColors[fgColor];
     gcvalue.background = PixColors[bgColor];
-    gc_stipple = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
+    gc_stipple = LIBAST_X_CREATE_GC(GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
     gcvalue.foreground = PixColors[borderColor];
-    gc_border = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+    gc_border = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
   }
 #endif /* XTERM_SCROLLBAR */
 
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
   gcvalue.foreground = images[image_sb].norm->bg;
-  gc_scrollbar = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+  gc_scrollbar = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[topShadowColor];
-  gc_top = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+  gc_top = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[bottomShadowColor];
-  gc_bottom = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
+  gc_bottom = LIBAST_X_CREATE_GC(GCForeground, &gcvalue);
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 }
 

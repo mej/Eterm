@@ -1,5 +1,5 @@
-Release notes for Eterm 0.9
----------------------------
+Eterm 0.9 README
+----------------
 
 Software Requirements
 ---------------------
@@ -15,9 +15,9 @@ Software Requirements
 
 Documentation
 -------------
-- The FAQ and message forum at http://eterm.i-docs.org/
-- The man page at http://www.eterm.org/
 - Running "Eterm --help" will show you the command line options.
+- "man Eterm"
+- The online FAQ's at and man pages at http://www.eterm.org/docs/
 - The Technical Reference, also at the above web site, if you want more
   technical details about Eterm.
 
@@ -76,6 +76,7 @@ the problem.  Make sure that you compiled Eterm with the "-O0 -g3" compiler
 flags (for gcc, or the equivalent flags for your compiler) if you choose to
 submit a stack trace.
 
-You'll also find people on the EFNet IRC channel #E who might be able to answer
-your questions, but please be sure you've read all the documentation mentioned
-above before asking a question there.
+You'll also find people on the IRC channel #E (now on the OpenProjects
+IRC Network at irc.openprojects.net) who might be able to answer your
+questions, but please be sure you've read all the documentation
+mentioned above before asking a question there.
