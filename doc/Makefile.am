@@ -8,10 +8,10 @@ Eterm.1: $(top_srcdir)/doc/Eterm.1.in
 	$(SED) -e 's%@''VERSION''@%$(VERSION)%g' -e 's%@''DATE''@%$(DATE)%g' -e 's%@THEMEDIR@%$(pkgdatadir)/themes%g' $(top_srcdir)/doc/$@.in > $@
 
 Eterm.1.html: Eterm.1
-	-nroff -man $< | man2html -title Eterm > $@
+	(nroff -man $< | man2html -title Eterm > $@) || :
 
 install-data-hook:
-	-$(TIC) Eterm.ti || (mkinstalldirs $(HOME)/.terminfo && $(TIC) -o$(HOME)/.terminfo Eterm.ti)
+	$(TIC) Eterm.ti || (mkinstalldirs $(HOME)/.terminfo && $(TIC) -o$(HOME)/.terminfo Eterm.ti) || :
 
 EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti Makefile.am Makefile.in
 

@@ -515,7 +515,7 @@ change_font(int init, const char *fontname)
     szHint.width = szHint.base_width + TermWin.width;
     szHint.height = szHint.base_height + TermWin.height;
 
-    szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
+    szHint.flags = PMinSize | PResizeInc | PBaseSize;
   } else {
     parent_resize();
     font_chg++;

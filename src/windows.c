@@ -54,7 +54,7 @@ XWindowAttributes attr;
 XSetWindowAttributes Attributes;
 XSizeHints szHint =
 {
-  PMinSize | PResizeInc | PBaseSize | PWinGravity,
+  PMinSize | PResizeInc | PBaseSize,
   0, 0, 80, 24,			/* x, y, width, height */
   1, 1,				/* Min width, height */
   0, 0,				/* Max width, height - unused */
@@ -358,7 +358,6 @@ Create_Windows(int argc, char *argv[])
   if (flags & XValue) {
     if (flags & XNegative) {
       x += (DisplayWidth(Xdisplay, Xscreen) - (szHint.width + TermWin.internalBorder));
-      szHint.win_gravity = NorthEastGravity;
     }
     szHint.x = x;
     szHint.flags |= USPosition;
@@ -366,8 +365,6 @@ Create_Windows(int argc, char *argv[])
   if (flags & YValue) {
     if (flags & YNegative) {
       y += (DisplayHeight(Xdisplay, Xscreen) - (szHint.height + TermWin.internalBorder));
-      szHint.win_gravity = (szHint.win_gravity == NorthEastGravity ?
-			    SouthEastGravity : SouthWestGravity);
     }
     szHint.y = y;
     szHint.flags |= USPosition;
@@ -543,7 +540,7 @@ update_size_hints(void)
   D_X11(("             Minimum width/height == %lux%lu, width/height == %lux%lu\n",
          szHint.min_width, szHint.min_height, szHint.width, szHint.height));
 
-  szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
+  szHint.flags = PMinSize | PResizeInc | PBaseSize;
   XSetWMNormalHints(Xdisplay, TermWin.parent, &szHint);
 }
 

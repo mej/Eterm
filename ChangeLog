@@ -3810,3 +3810,8 @@ Mon Jul 10 14:28:28 PDT 2000	Michael Jennings <mej@eterm.org>
 	Thanks again to Marius for saving me time by sending patches. :-)
 	
 -------------------------------------------------------------------------------
+Mon Jul 10 20:01:53 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	We no longer care about gravity.  This should help Sawfish users.
+	
+-------------------------------------------------------------------------------
