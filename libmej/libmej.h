@@ -162,8 +162,8 @@
 # define ASSERT_NOTREACHED()            return
 # define ASSERT_NOTREACHED_RVAL(val)    return (val)
 # define ABORT()                        fatal_error("Aborting.\n")
-# define REQUIRE(x)                     do {if (!(x)) return;} while 0
-# define REQUIRE_RVAL(x, v)             do {if (!(x)) return (v);} while 0
+# define REQUIRE(x)                     do {if (!(x)) return;} while (0)
+# define REQUIRE_RVAL(x, v)             do {if (!(x)) return (v);} while (0)
 #endif
 
 #define NONULL(x) ((x) ? (x) : ("<null>"))

@@ -3886,3 +3886,9 @@ Fri Sep  1 21:03:53 PDT 2000	Michael Jennings <mej@eterm.org>
 	leftover malloc'd memory now.  Making progress....
 	
 -------------------------------------------------------------------------------
+Fri Sep 15 14:48:51 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Really stupid typo on my part pointed out by Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------
