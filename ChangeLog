@@ -3188,3 +3188,12 @@ Wed Feb 16 14:58:51 PST 2000	Michael Jennings <mej@eterm.org>
 	Fix the XIM input positioning to work with the buttonbar.
 	
 -------------------------------------------------------------------------------
+Thu Feb 17 15:13:20 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a bug with background colors and proportional fonts.  Also added
+	an escape sequence, \e]30;<filename>\a, to dump the scrollback buffer
+	to a file.  You will not get colors, or bold, or underlining, or any
+	other rendering information.  Just the text.  Linebreaks will appear
+	as they do on the screen.
+	
+-------------------------------------------------------------------------------

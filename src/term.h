@@ -73,6 +73,7 @@
 # define XTerm_EtermSeq     6     /* Eterm proprietary escape sequences */
 # define XTerm_EtermIPC     7     /* Eterm escape code/text IPC interface */
 # define XTerm_Pixmap	   20     /* new bg pixmap */
+# define XTerm_DumpScreen  30     /* Dump contents of scrollback to a file */
 # define XTerm_restoreFG   39     /* change default fg color */
 # define XTerm_restoreBG   49     /* change default bg color */
 

@@ -219,10 +219,7 @@
 #define NO_VT100_ANS
 
 /* Allow changing of the foreground and background colors with "\E]39;color^G" */
-/* #define XTERM_COLOR_CHANGE */
-
-/* Exports TERM=xterm-color instead of just TERM=xterm */
-/* #define DEFINE_XTERM_COLOR */
+#define XTERM_COLOR_CHANGE
 
 /* Disable automatic de-iconify on bell altogether */
 /* #define NO_MAPALERT */

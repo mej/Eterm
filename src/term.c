@@ -2082,16 +2082,23 @@ xterm_seq(int op, const char *str)
       set_window_color(bgColor, str);
 #endif
       break;
+    case XTerm_DumpScreen:
+      nstr = (char *) strsep(&tnstr, ";");
+      if (nstr && *nstr) {
+        scr_dump_to_file(nstr);
+      }
+      break;
     case XTerm_logfile:
+      nstr = (char *) strsep(&tnstr, ";");
+      if (nstr && *nstr && BOOL_OPT_ISTRUE(nstr)) {
+        /* Logging on */
+      } else {
+        /* Logging off */
+      }
       break;
     case XTerm_font:
       change_font(0, str);
       break;
-#ifdef ETERM_COMMAND_MODE
-    case ETerm_command_mode:
-      fprintf(stderr, "ETerm_command_mode\n");
-      break;
-#endif
     default:
       D_CMD(("Unsupported xterm escape sequence operator:  0x%02x\n", op));
       break;

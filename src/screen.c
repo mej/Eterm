@@ -9,16 +9,19 @@ static const char cvs_ident[] = "$Id$";
 #include "feature.h"
 
 /* includes */
+#include <stdio.h>
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
 #include <sys/types.h>
+#include <sys/stat.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#include <errno.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>		/* CARD32 */
 
@@ -2009,7 +2012,7 @@ scr_refresh(int type)
  * Actually do the drawing of the string here
  */
       if (fprop) {
-	if (rvid) {
+	if (back != bgColor) {
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
 	  gcmask |= (GCForeground | GCBackground);
 	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
@@ -2240,6 +2243,43 @@ scr_dump(void)
     fprintf(stderr, "\n");
     fflush(stderr);
   }
+}
+
+/* Dump the entire contents of the scrollback buffer to a file */
+void
+scr_dump_to_file(const char *fname)
+{
+  int outfd;
+  char *buff, *src, *dest;
+  unsigned long row, col, rows, cols;
+
+  REQUIRE(fname != NULL);
+
+  rows = TermWin.nrow + TermWin.saveLines;
+  cols = TermWin.ncol;
+  D_SCREEN(("Dumping to file \"%s\".  %d rows, %d cols\n", fname, rows, cols));
+
+  /* Remove it if it's there.  If this fails, we don't
+     care, because open() will do the right thing. */
+  unlink(fname);
+
+  /* Only open if it's a new file, and open with permissions 0600 */
+  outfd = open(fname, O_CREAT | O_EXCL | O_NDELAY | O_WRONLY, S_IRUSR | S_IWUSR);
+  if (outfd < 0) {
+    D_SCREEN(("Unable to open \"%s\" for writing -- %s\n", fname, strerror(errno)));
+    return;
+  }
+  buff = MALLOC(cols + 1);
+  for (row = 0; row < rows; row++) {
+    if (screen.text[row]) {
+      for (src = screen.text[row], dest = buff, col = 0; col < cols; col++) *dest++ = *src++;
+      *dest++ = '\n';
+      *dest = 0;
+      write(outfd, buff, dest - buff);
+    }
+  }
+  close(outfd);
+  FREE(buff);
 }
 
 
