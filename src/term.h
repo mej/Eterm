@@ -109,12 +109,16 @@ enum color_list {
     cursorColor,
     cursorColor2,
 # endif
-    pointerColor,
-    borderColor,
 # ifndef NO_BOLDUNDERLINE
     colorBD,
     colorUL,
 # endif
+#ifdef ESCREEN
+    ES_COLOR_CURRENT,
+    ES_COLOR_ACTIVE,
+#endif
+    pointerColor,
+    borderColor,
     NRS_COLORS,				/* */
     topShadowColor = NRS_COLORS,
     bottomShadowColor,
@@ -127,7 +131,7 @@ enum color_list {
     TOTAL_COLORS			/* */
 };
 
-# define NSHADOWCOLORS		(TOTAL_COLORS - NRS_COLORS)
+# define EXTRA_COLORS		(TOTAL_COLORS - NRS_COLORS)
 
 #ifdef HOTKEY_CTRL
 # define HOTKEY ctrl
@@ -152,7 +156,7 @@ extern unsigned long PrivateModes;
 extern unsigned long SavedModes;
 extern char *def_colorName[];
 extern char *rs_color[NRS_COLORS];
-extern Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
+extern Pixel PixColors[NRS_COLORS + EXTRA_COLORS];
 extern unsigned int MetaMask, AltMask, NumLockMask;
 extern unsigned int modmasks[];
 

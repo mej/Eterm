@@ -825,6 +825,14 @@ parse_color(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "pointer ")) {
         RESET_AND_ASSIGN(rs_color[pointerColor], get_word(2, buff));
 
+#ifdef ESCREEN
+    } else if (!BEG_STRCASECMP(buff, "es_current ")) {
+        RESET_AND_ASSIGN(rs_color[ES_COLOR_CURRENT], get_word(2, buff));
+
+    } else if (!BEG_STRCASECMP(buff, "es_active ")) {
+        RESET_AND_ASSIGN(rs_color[ES_COLOR_ACTIVE], get_word(2, buff));
+#endif
+
     } else if (!BEG_STRCASECMP(buff, "video ")) {
 
         char *tmp = get_pword(2, buff);

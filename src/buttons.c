@@ -803,21 +803,24 @@ button_set_action(button_t *button, action_type_t type, char *action)
     switch (type) {
       case ACTION_MENU:
           button->action.menu = find_menu_by_title(menu_list, action);
+          return ((button->action.menu == NULL) ? (0) : (1));
           break;
       case ACTION_STRING:
       case ACTION_ECHO:
           button->action.string = (char *) MALLOC(strlen(action) + 2);
           strcpy(button->action.string, action);
           parse_escaped_string(button->action.string);
+          return ((button->action.string == NULL) ? (0) : (1));
           break;
       case ACTION_SCRIPT:
           button->action.script = (char *) MALLOC(strlen(action) + 2);
           strcpy(button->action.script, action);
+          return ((button->action.script == NULL) ? (0) : (1));
           break;
       default:
           break;
     }
-    return 1;
+    return 0;
 }
 
 void
@@ -1095,9 +1098,9 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
             int f = button->flags & ~NS_SCREAM_BUTTON;
 
             if (f & NS_SCREAM_CURR) {
-                f = 1;
+                f = ES_COLOR_CURRENT;
             } else if (f & NS_SCREAM_ACT) {
-                f = 2;
+                f = ES_COLOR_ACTIVE;
             } else {
                 f = 0;
             }
@@ -1108,7 +1111,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
 
                 gc = LIBAST_X_CREATE_GC(0, NULL);
                 XCopyGC(Xdisplay, bbar->gc, GCFont, gc);
-                XSetForeground(Xdisplay, gc, PixColors[minBright + f + 2]);
+                XSetForeground(Xdisplay, gc, PixColors[f]);
 
                 draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
                 LIBAST_X_FREE_GC(gc);

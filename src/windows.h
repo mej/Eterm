@@ -31,7 +31,7 @@
 
 /************ Variables ************/
 extern char *rs_color[NRS_COLORS];
-extern Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
+extern Pixel PixColors[NRS_COLORS + EXTRA_COLORS];
 extern XSetWindowAttributes Attributes;
 extern XWindowAttributes attr;
 extern XSizeHints szHint;

@@ -261,7 +261,7 @@ process_colors(void)
     Pixel pixel;
 
     for (i = 0; i < NRS_COLORS; i++) {
-        if ((Xdepth <= 2) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) - 1)) {
+        if ((Xdepth <= 2) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) (-1))) {
             switch (i) {
               case fgColor:
                   pixel = WhitePixel(Xdisplay, Xscreen);
@@ -277,12 +277,6 @@ process_colors(void)
                   pixel = PixColors[fgColor];
                   break;
 #endif /* NO_CURSORCOLOR */
-              case pointerColor:
-                  pixel = PixColors[fgColor];
-                  break;
-              case borderColor:
-                  pixel = PixColors[bgColor];
-                  break;
 #ifndef NO_BOLDUNDERLINE
               case colorBD:
                   pixel = PixColors[fgColor];
@@ -291,6 +285,20 @@ process_colors(void)
                   pixel = PixColors[fgColor];
                   break;
 #endif
+#ifdef ESCREEN
+              case ES_COLOR_CURRENT:
+                  pixel = PixColors[YellowColor];
+                  break;
+              case ES_COLOR_ACTIVE:
+                  pixel = PixColors[BlueColor];
+                  break;
+#endif
+              case pointerColor:
+                  pixel = PixColors[fgColor];
+                  break;
+              case borderColor:
+                  pixel = PixColors[bgColor];
+                  break;
               default:
                   pixel = PixColors[fgColor];   /* None */
                   break;
@@ -641,7 +649,7 @@ handle_move(int x, int y)
 void
 stored_palette(char op)
 {
-    static Pixel default_colors[NRS_COLORS + NSHADOWCOLORS];
+    static Pixel default_colors[NRS_COLORS + EXTRA_COLORS];
     static unsigned char stored = 0;
     unsigned char i;
 

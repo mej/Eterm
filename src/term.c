@@ -82,13 +82,16 @@ char *def_colorName[] = {
 #ifndef NO_CURSORCOLOR
     NULL, NULL,                 /* cursorColor, cursorColor2 */
 #endif                          /* NO_CURSORCOLOR */
-    NULL, NULL                  /* pointerColor, borderColor */
 #ifndef NO_BOLDUNDERLINE
-        , NULL, NULL            /* colorBD, colorUL */
+    NULL, NULL,                 /* colorBD, colorUL */
 #endif                          /* NO_BOLDUNDERLINE */
+#ifdef ESCREEN
+    NULL, NULL,                 /* ES_COLOR_CURRENT, ES_COLOR_ACTIVE */
+#endif
+    NULL, NULL                  /* pointerColor, borderColor */
 };
 char *rs_color[NRS_COLORS];
-Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
+Pixel PixColors[NRS_COLORS + EXTRA_COLORS];
 unsigned int MetaMask = 0, AltMask = 0, NumLockMask = 0;
 unsigned int modmasks[] = { Mod1Mask, Mod2Mask, Mod3Mask, Mod4Mask, Mod5Mask };
 

@@ -3,6 +3,11 @@
 %include "../Eterm/menus.cfg"
 %include "../Eterm/theme.cfg"
 
+begin color
+    es_current "#ffff00"
+    es_active  "#0000ff"
+end color
+
 begin attributes
     name "%appname() -- Escreen Session"
 end attributes

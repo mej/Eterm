@@ -4875,3 +4875,9 @@ Fixed a double-free in libscream.c.  Also some cleanups to the spec
 file, and I fixed some missing return statements in non-void
 functions.
 ----------------------------------------------------------------------
+Tue Oct 22 23:02:28 2002                        Michael Jennings (mej)
+
+Allow users to customize the Escreen current/active display colors.
+
+Don't display the Escreen button if there's no Escreen menu defined.
+----------------------------------------------------------------------
