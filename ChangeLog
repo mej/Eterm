@@ -3841,3 +3841,8 @@ Wed Aug 30 22:58:18 PDT 2000	Michael Jennings <mej@eterm.org>
 	debugging code, so don't use too high a number with --debug....
 	
 -------------------------------------------------------------------------------
+Thu Aug 31 11:22:30 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Crap.  That was not supposed to be committed.
+	
+-------------------------------------------------------------------------------

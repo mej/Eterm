@@ -1136,7 +1136,11 @@ clean_exit(void)
   remove_utmp_entry();
 #endif
   privileges(REVERT);
-  memrec_dump();
+#if DEBUG >= DEBUG_MEM
+  if (DEBUG_LEVEL >= DEBUG_MEM) {
+    memrec_dump();
+  }
+#endif
   PABLO_STOP_TRACING();
   DPRINTF1(("Cleanup done.  I am outta here!\n"));
 }
