@@ -75,7 +75,7 @@ extern char *RightStr(const char *, unsigned long);
 extern unsigned char Match(const char *, const char *);
 #endif
 extern char *Word(unsigned long, const char *);
-extern char *PWord(unsigned long, char *);
+extern char *PWord(unsigned long, const char *);
 extern unsigned long NumWords(const char *);
 extern char *StripWhitespace(char *);
 extern char *LowerStr(char *);

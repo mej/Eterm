@@ -25,7 +25,9 @@
 # define _PIXMAP_H
 
 #include <X11/Xatom.h>
-#include <Imlib2.h>
+#ifdef PIXMAP_SUPPORT
+# include <Imlib2.h>
+#endif
 
 #include "misc.h"
 

@@ -40,6 +40,12 @@
 #define BIGGER_FONT    "#+"
 #define SMALLER_FONT   "#-"
 
+/* These are subscripts for the arrays in a fontshadow_t */
+#define SHADOW_TOP_LEFT      0
+#define SHADOW_TOP_RIGHT     1
+#define SHADOW_BOTTOM_LEFT   2
+#define SHADOW_BOTTOM_RIGHT  3
+
 #define NEXT_FONT(i)   do { if (font_idx + ((i)?(i):1) >= font_cnt) {font_idx = font_cnt - 1;} else {font_idx += ((i)?(i):1);} \
                             while (!etfonts[font_idx]) {if (font_idx == font_cnt) {font_idx--; break;} font_idx++;} } while (0)
 #define PREV_FONT(i)   do { if (font_idx - ((i)?(i):1) < 0) {font_idx = 0;} else {font_idx -= ((i)?(i):1);} \
@@ -58,11 +64,18 @@ typedef struct cachefont_struct {
   struct cachefont_struct *next;
 } cachefont_t;
 
+typedef struct fontshadow_struct {
+  Pixel color[4];
+  unsigned char shadow[4];
+  unsigned char do_shadow;
+} fontshadow_t;
+
 /************ Variables ************/
 extern unsigned char font_idx, def_font_idx, font_cnt, font_chg;
 extern const char *def_fontName[];
 extern char *rs_font[NFONTS];
 extern char **etfonts, **etmfonts;
+extern fontshadow_t fshadow;
 # ifdef MULTI_CHARSET
 extern const char *def_mfontName[];
 extern char *rs_mfont[NFONTS];
@@ -76,6 +89,9 @@ extern void eterm_font_delete(char **flist, unsigned char idx);
 extern void *load_font(const char *, const char *, unsigned char);
 extern void free_font(const void *);
 extern void change_font(int, const char *);
+extern void set_shadow_color_by_name(unsigned char, const char *);
+extern void set_shadow_color_by_pixel(unsigned char, Pixel);
+extern unsigned char parse_font_fx(const char *line);
 
 _XFUNCPROTOEND
 

@@ -1090,25 +1090,23 @@ handle_crash(int sig)
 void
 install_handlers(void)
 {
-  signal(SIGHUP, handle_exit_signal);
+  /* Ignore SIGHUP */
+  /* signal(SIGHUP, handle_exit_signal); */
 #ifndef __svr4__
-  signal(SIGINT, handle_exit_signal);
+  signal(SIGINT,  handle_exit_signal);
 #endif
-  signal(SIGQUIT, handle_crash);
   signal(SIGTERM, handle_exit_signal);
   signal(SIGCHLD, handle_child_signal);
+  signal(SIGQUIT, handle_crash);
   signal(SIGSEGV, handle_crash);
-  signal(SIGBUS, handle_crash);
+  signal(SIGBUS,  handle_crash);
   signal(SIGABRT, handle_crash);
-  signal(SIGFPE, handle_crash);
-  signal(SIGILL, handle_crash);
-  signal(SIGSYS, handle_crash);
+  signal(SIGFPE,  handle_crash);
+  signal(SIGILL,  handle_crash);
+  signal(SIGSYS,  handle_crash);
 }
 
-/*
- * Exit gracefully, clearing the utmp entry and restoring tty attributes
- * TODO:  Also free up X resources, etc., if possible
- */
+/* Exit gracefully, clearing the utmp entry and restoring tty attributes */
 void
 clean_exit(void)
 {

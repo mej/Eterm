@@ -30,6 +30,7 @@ static const char cvs_ident[] = "$Id$";
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
@@ -53,12 +54,14 @@ const char *def_mfontName[] = {MFONT0, MFONT1, MFONT2, MFONT3, MFONT4};
 #endif
 const char *def_fontName[] = {FONT0, FONT1, FONT2, FONT3, FONT4};
 unsigned char font_chg = 0;
+fontshadow_t fshadow = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, 1 };
 
 static cachefont_t *font_cache = NULL, *cur_font = NULL;
 static void font_cache_add(const char *name, unsigned char type, void *info);
 static void font_cache_del(const void *info);
 static cachefont_t *font_cache_find(const char *name, unsigned char type);
 static void *font_cache_find_info(const char *name, unsigned char type);
+static unsigned char get_corner(const char *corner);
 
 void
 eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
@@ -427,20 +430,45 @@ change_font(int init, const char *fontname)
   fw = TermWin.font->min_bounds.width;
   fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
 
-  D_FONT(("Font information:  Ascent == %hd, Descent == %hd\n", TermWin.font->ascent, TermWin.font->descent));
+  D_FONT(("Font information:  Ascent == %hd, Descent == %hd, width min/max %d/%d\n", TermWin.font->ascent, TermWin.font->descent,
+          TermWin.font->min_bounds.width, TermWin.font->max_bounds.width));
   if (TermWin.font->min_bounds.width == TermWin.font->max_bounds.width)
     TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
   else
     TermWin.fprop = 1;	/* Proportional font */
-  LOWER_BOUND(fw, TermWin.font->max_bounds.width);
 
-  if (TermWin.fprop) {
-    fw = (fw << 1) / 3;
+  if (TermWin.fprop && TermWin.font->per_char && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
+    int cw, n = 0, sum = 0, sumsq = 0, min_w, max_w;
+    unsigned int i;
+    double dev;
+
+    min_w = fw;
+    max_w = TermWin.font->max_bounds.width;
+    for (i = TermWin.font->min_char_or_byte2; i <= TermWin.font->max_char_or_byte2; i++) {
+      cw = TermWin.font->per_char[i].width;
+      if (cw >= min_w && cw <= max_w) {
+        sum += cw;
+        sumsq += (cw * cw);
+        n++;
+      }
+    }
+    if (n) {
+      dev = sqrt((sumsq - (sum * sum) / n) / n);
+      /* Final font width is the average width plus 2 standard
+         deviations, but no larger than the font's max width */
+      fw = ((sum / n) + (((int) dev) << 1));
+      D_FONT(("Proportional font optimizations:  Average width %d, standard deviation %3.2f, new width %d\n", (sum / n), dev, fw));
+      UPPER_BOUND(fw, max_w);
+    } else {
+      LOWER_BOUND(fw, TermWin.font->max_bounds.width);
+    }
+  } else {
+    LOWER_BOUND(fw, TermWin.font->max_bounds.width);
   }
 
   /* not the first time thru and sizes haven't changed */
   if (fw == TermWin.fwidth && fh == TermWin.fheight)
-    return;			/* TODO: not return; check MULTI_CHARSET if needed */
+    return;
 
   TermWin.fwidth = fw;
   TermWin.fheight = fh;
@@ -487,4 +515,139 @@ change_font(int init, const char *fontname)
     font_chg++;
   }
   return;
+}
+
+static unsigned char
+get_corner(const char *corner)
+{
+  if (!BEG_STRCASECMP(corner, "tl ") || !BEG_STRCASECMP(corner, "top_left")) {
+    return SHADOW_TOP_LEFT;
+  } else if (!BEG_STRCASECMP(corner, "tr ") || !BEG_STRCASECMP(corner, "top_right")) {
+    return SHADOW_TOP_RIGHT;
+  } else if (!BEG_STRCASECMP(corner, "bl ") || !BEG_STRCASECMP(corner, "bottom_left")) {
+    return SHADOW_BOTTOM_LEFT;
+  } else if (!BEG_STRCASECMP(corner, "br ") || !BEG_STRCASECMP(corner, "bottom_right")) {
+    return SHADOW_BOTTOM_RIGHT;
+  } else {
+    return 255;
+  }
+}
+
+void
+set_shadow_color_by_name(unsigned char which, const char *color_name)
+{
+  Pixel p;
+
+  ASSERT(which <= 4);
+
+  p = get_color_by_name(color_name, "#000000");
+  fshadow.color[which] = p;
+  fshadow.shadow[which] = fshadow.do_shadow = 1;
+}
+
+void
+set_shadow_color_by_pixel(unsigned char which, Pixel p)
+{
+  ASSERT(which <= 4);
+
+  fshadow.color[which] = p;
+  fshadow.shadow[which] = fshadow.do_shadow = 1;
+}
+
+/* Possible syntax for the font effects line:
+   font fx <topleft_color> <topright_color> <bottomleft_color> <bottomright_color>
+   font fx outline <color>
+   font fx shadow <color>
+   font fx emboss <dark_color> <light_color>
+   font fx carved <dark_color> <light_color>
+   ^^^^^^^
+      |
+       \- This part is not included in the contents of the line variable.
+*/
+unsigned char
+parse_font_fx(const char *line)
+{
+  char *color, *corner;
+  unsigned char which, n;
+  Pixel p;
+
+  ASSERT(line != NULL);
+
+  n = NumWords(line);
+
+  if (!BEG_STRCASECMP(line, "none")) {
+    MEMSET(&fshadow, 0, sizeof(fontshadow_t));
+  } else if (!BEG_STRCASECMP(line, "outline")) {
+    if (n != 2) {
+      return 0;
+    }
+    color = Word(2, line);
+    p = get_color_by_name(color, "black");
+    FREE(color);
+    for (which = 0; which < 4; which++) {
+      set_shadow_color_by_pixel(which, p);
+    }
+  } else if (!BEG_STRCASECMP(line, "shadow")) {
+    if (n == 2) {
+      which = SHADOW_BOTTOM_RIGHT;
+      color = Word(2, line);
+    } else if (n == 3) {
+      color = Word(3, line);
+      corner = PWord(2, line);
+      which = get_corner(corner);
+      if (which >= 4) {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+    set_shadow_color_by_name(which, color);
+    FREE(color);
+  } else if (!BEG_STRCASECMP(line, "emboss")) {
+    if (n != 3) {
+      return 0;
+    }
+    color = Word(2, line);
+    p = get_color_by_name(color, "black");
+    set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
+    FREE(color);
+
+    color = Word(3, line);
+    p = get_color_by_name(color, "white");
+    set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
+    FREE(color);
+  } else if (!BEG_STRCASECMP(line, "carved")) {
+    if (n != 3) {
+      return 0;
+    }
+    color = Word(2, line);
+    p = get_color_by_name(color, "black");
+    set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
+    FREE(color);
+
+    color = Word(3, line);
+    p = get_color_by_name(color, "white");
+    set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
+    FREE(color);
+  } else {
+    unsigned char i;
+
+    for (i = 0; i < 4; i++) {
+      which = get_corner(line);
+      if (which >= 4) {
+        which = i;
+        color = Word(1, line);
+        line = PWord(2, line);
+      } else {
+        color = Word(2, line);
+        line = PWord(3, line);
+      }
+      set_shadow_color_by_name(which, color);
+      FREE(color);
+      if (line == NULL) {
+        break;
+      }
+    }
+  }
+  return 1;
 }

@@ -240,10 +240,10 @@ Word(unsigned long index, const char *str)
 
 /* Return pointer into str to index-th word in str.  "..." counts as 1 word. */
 char *
-PWord(unsigned long index, char *str)
+PWord(unsigned long index, const char *str)
 {
 
-  register char *tmpstr = str;
+  register const char *tmpstr = str;
   register unsigned long j;
 
   if (!str)
@@ -262,7 +262,7 @@ PWord(unsigned long index, char *str)
     return ((char *) NULL);
   } else {
     D_STRINGS(("PWord(%lu, %s) returning \"%s\"\n", index, str, tmpstr));
-    return tmpstr;
+    return (char *) tmpstr;
   }
 }
 

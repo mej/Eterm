@@ -424,76 +424,84 @@ AC_ARG_WITH(end,
 MULTICHAR_ENCODING=""
 AC_MSG_CHECKING(for multi-charset support)
 AC_ARG_ENABLE(multi-charset,
-[  --enable-multi-charset  compile with multi-charset support],
-            if test "$enableval" = "yes" -o "$enableval" = "kanji"; then 
-              AC_MSG_RESULT(kanji)
-              AC_DEFINE(MULTI_CHARSET)
-	      DEF_FONT_IDX=0
-	      MULTICHAR_ENCODING="eucj"
-	      FONT0="fixed"
-              FONT1="8x16"
-              FONT2="9x18"
-              FONT3="12x24"
-              FONT4="13x26"
-	      MFONT0="k14"
-              MFONT1="jiskan16"
-              MFONT2="jiskan18"
-              MFONT3="jiskan24"
-              MFONT4="jiskan26"
-            elif test "$enableval" = "euc-kr" -o "$enableval" = "euckr"; then 
-              AC_MSG_RESULT(euckr)
-              AC_DEFINE(MULTI_CHARSET)
-	      DEF_FONT_IDX=1
-	      MULTICHAR_ENCODING="euckr"
-	      FONT0="7x14"
-	      FONT1="8x16"
-	      FONT2="9x18"
-	      FONT3="10x20"
-	      FONT4="12x24"
-	      MFONT0="-*-gulim-medium-r-normal--14-*-*-*-*-140-ksc5601.1987-0"
-	      MFONT1="-*-gulim-medium-r-normal--16-*-*-*-*-160-ksc5601.1987-0"
-	      MFONT2="-*-gulim-medium-r-normal--18-*-*-*-*-180-ksc5601.1987-0"
-	      MFONT3="-*-gulim-medium-r-normal--20-*-*-*-*-200-ksc5601.1987-0"
-	      MFONT4="-*-gulim-medium-r-normal--24-*-*-*-*-240-ksc5601.1987-0"
-            elif test "$enableval" = "utf-8" -o "$enableval" = "utf8"; then 
-              AC_MSG_RESULT(utf-8)
-              AC_DEFINE(MULTI_CHARSET)
-              DEF_FONT_IDX=2
-	      MULTICHAR_ENCODING="utf8"
-              MFONT0="-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso10646-1"
-              MFONT1="-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1"
-              MFONT2="-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1"
-              MFONT3="-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso10646-1"
-              MFONT4="-misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
-              FONT0="5x7"
-              FONT1="6x10"
-              FONT2="fixed"
-              FONT3="8x13"
-              FONT4="9x15"
-            elif test "$enableval" = "no"; then
-              AC_MSG_RESULT(no)
-              DEF_FONT_IDX=2
-              FONT0="5x7"
-              FONT1="6x10"
-              FONT2="fixed"
-              FONT3="8x13"
-              FONT4="9x15"
+[  --enable-multi-charset  compile with multibyte font support],
+            if test "$enableval" = "no"; then
+              MULTI_CHARSET_TYPE=""
             else
-              AC_ERROR(invalid value for --enable-multi-charset)
-            fi, AC_MSG_RESULT(no)
-                DEF_FONT_IDX=2
-  	        MULTICHAR_ENCODING=none
-                MFONT0=none
-                MFONT1=none
-                MFONT2=none
-                MFONT3=none
-                MFONT4=none
-                FONT0="5x7"
-                FONT1="6x10"
-                FONT2="fixed"
-                FONT3="8x13"
-                FONT4="9x15"
-)
+              MULTI_CHARSET_TYPE="$enableval"
+            fi,
+            if (xlsfonts | grep 10646 >/dev/null 2>&1); then
+              MULTI_CHARSET_TYPE="unicode"
+            else
+              MULTI_CHARSET_TYPE=""
+            fi
+           )
+
+if test "x$MULTI_CHARSET_TYPE" != "x"; then
+  if test "$MULTI_CHARSET_TYPE" = "kanji"; then
+    AC_MSG_RESULT(kanji)
+    AC_DEFINE(MULTI_CHARSET)
+    DEF_FONT_IDX=0
+    MULTICHAR_ENCODING="eucj"
+    FONT0="fixed"
+    FONT1="8x16"
+    FONT2="9x18"
+    FONT3="12x24"
+    FONT4="13x26"
+    MFONT0="k14"
+    MFONT1="jiskan16"
+    MFONT2="jiskan18"
+    MFONT3="jiskan24"
+    MFONT4="jiskan26"
+  elif test "$MULTI_CHARSET_TYPE" = "euc-kr" -o "$MULTI_CHARSET_TYPE" = "euckr"; then 
+    AC_MSG_RESULT(euckr)
+    AC_DEFINE(MULTI_CHARSET)
+    DEF_FONT_IDX=1
+    MULTICHAR_ENCODING="euckr"
+    FONT0="7x14"
+    FONT1="8x16"
+    FONT2="9x18"
+    FONT3="10x20"
+    FONT4="12x24"
+    MFONT0="-*-gulim-medium-r-normal--14-*-*-*-*-140-ksc5601.1987-0"
+    MFONT1="-*-gulim-medium-r-normal--16-*-*-*-*-160-ksc5601.1987-0"
+    MFONT2="-*-gulim-medium-r-normal--18-*-*-*-*-180-ksc5601.1987-0"
+    MFONT3="-*-gulim-medium-r-normal--20-*-*-*-*-200-ksc5601.1987-0"
+    MFONT4="-*-gulim-medium-r-normal--24-*-*-*-*-240-ksc5601.1987-0"
+  elif test "$MULTI_CHARSET_TYPE" = "unicode" -o "$MULTI_CHARSET_TYPE" = "utf-8" -o "$MULTI_CHARSET_TYPE" = "utf8"; then 
+    AC_MSG_RESULT(ISO-10646)
+    AC_DEFINE(MULTI_CHARSET)
+    DEF_FONT_IDX=2
+    MULTICHAR_ENCODING="iso-10646"
+    MFONT0="-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso10646-1"
+    MFONT1="-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1"
+    MFONT2="-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1"
+    MFONT3="-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso10646-1"
+    MFONT4="-misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
+    FONT0="5x7"
+    FONT1="6x10"
+    FONT2="fixed"
+    FONT3="8x13"
+    FONT4="9x15"
+  else
+    MULTI_CHARSET_TYPE=""
+  fi
+fi
+if test "x$MULTI_CHARSET_TYPE" = "x"; then
+  AC_MSG_RESULT(no)
+  DEF_FONT_IDX=2
+  MULTICHAR_ENCODING=none
+  MFONT0=none
+  MFONT1=none
+  MFONT2=none
+  MFONT3=none
+  MFONT4=none
+  FONT0="5x7"
+  FONT1="6x10"
+  FONT2="fixed"
+  FONT3="8x13"
+  FONT4="9x15"
+fi
 
 AC_DEFINE_UNQUOTED(DEF_FONT_IDX, $DEF_FONT_IDX)
 AC_DEFINE_UNQUOTED(FONT0, "$FONT0")

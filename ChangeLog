@@ -3560,3 +3560,45 @@ Thu May  4 00:32:45 PDT 2000	Michael Jennings <mej@eterm.org>
 	to be faster than the old stuff, probably by quite a bit.
 	
 -------------------------------------------------------------------------------
+Fri May 26 20:43:03 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Okay, there are a few changes here.  First off, I made multi-byte font
+	support the default now, as long as you have ISO 10646 fonts.  In
+	order to do this, I made the default encoding type "Latin1" so as not
+	to interfere with 8-bit ISO 8859-1 characters.  This means that if you
+	relied on the default multi-byte encoding method to be SJIS, you'll
+	need to update your theme files.
+
+	I also set it up so that Eterm will ignore SIGHUP, at least until I do
+	something with it (like reloading the theme or something).
+
+	I fixed the proportional font size algorithm.  If there is more than
+	a 3-pixel variance between the minimum and maximum sizes for glyphs in
+	a proportional font, Eterm will set the size to 2 standard deviations
+	above the average width.  This is so that they won't look so spread
+	out and ugly, but it still doesn't look perfect.  Not much I can do on
+	that front...terminals must have fixed-width columns.
+
+	And then there's the biggie.  I put in the ability to configure the
+	now-infamous font effects.  I left a black drop shadow in as the
+	default, but you can now customize it via the --font-fx option or in
+	the config file using "font effects <stuff>" in the attributes
+	context.  You can even use "fx" instead of "effects" for short.
+
+	So what goes in the <stuff> part?  Well, you have several options.
+	To use a single-color outline, say "outline <color>".  Likewise, a
+	single-color drop shadow is "shadow [corner] <color>"; "bottom_right"
+	is the default corner if you don't specify one.  For a 3-D embossed
+	look, "emboss <dark_color> <light_color>".  The opposite, a carved-
+	out look, can be had with "carved <dark_color> <light_color>".  (Of
+	course, with those last two, the 3-D look will only work if you
+	choose the colors wisely.)
+
+	Those are all the shortcuts.  The long way is to specify a series of
+	corner/color pairs, like "tl blue" for top-left blue, or
+	"bottom_right green".  You can abbreviate using "tl," "tr," "bl," or
+	"br," or you can spell out "top_left," "top_right," "bottom_left," or
+	"bottom_right."  If you omit a corner name, the first one defaults to
+	top-left, the second to top-right, and so on as listed above.
+	
+-------------------------------------------------------------------------------

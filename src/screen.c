@@ -36,6 +36,7 @@ static const char cvs_ident[] = "$Id$";
 #include "buttons.h"
 #include "command.h"
 #include "debug.h"
+#include "font.h"
 #include "startup.h"
 #include "screen.h"
 #include "scrollbar.h"
@@ -94,8 +95,8 @@ unsigned char refresh_all = 0;
 #ifdef MULTI_CHARSET
 static short multi_byte = 0;
 static enum {
-  EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
-} encoding_method = EUCJ;
+  EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5, LATIN1
+} encoding_method = LATIN1;
 static enum {
   SBYTE, WBYTE
 } chstat = SBYTE;
@@ -738,51 +739,56 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
   for (i = 0; i < len;) {
     c = str[i++];
 #ifdef MULTI_CHARSET
-    if (chstat == WBYTE) {
+    if ((encoding_method != LATIN1) && (chstat == WBYTE)) {
       rstyle |= RS_multiMask;	/* multibyte 2nd byte */
       chstat = SBYTE;
-      if (encoding_method == EUCJ)
+      if (encoding_method == EUCJ) {
 	c |= 0x80;		/* maybe overkill, but makes it selectable */
-    } else if (chstat == SBYTE)
-      if (multi_byte || (c & 0x80)) {	/* multibyte 1st byte */
+      }
+    } else if (chstat == SBYTE) {
+      if ((encoding_method != LATIN1) && (multi_byte || (c & 0x80))) {	/* multibyte 1st byte */
 	rstyle &= ~RS_multiMask;
 	rstyle |= RS_multi1;
 	chstat = WBYTE;
-	if (encoding_method == EUCJ)
+	if (encoding_method == EUCJ) {
 	  c |= 0x80;		/* maybe overkill, but makes it selectable */
+        }
       } else
 #endif
-	switch (c) {
-	  case 127:
-	    continue;		/* ummmm..... */
-	  case '\t':
-	    scr_tab(1);
-	    continue;
-	  case '\n':
-	    MAX_IT(stp[last_col], screen.col);
-	    screen.flags &= ~Screen_WrapNext;
-	    if (screen.row == screen.bscroll) {
-	      scroll_text(screen.tscroll, screen.bscroll, 1, 0);
-	      j = screen.bscroll + TermWin.saveLines;
+        switch (c) {
+          case 127:
+            continue;		/* ummmm..... */
+          case '\t':
+            scr_tab(1);
+            continue;
+          case '\n':
+            MAX_IT(stp[last_col], screen.col);
+            screen.flags &= ~Screen_WrapNext;
+            if (screen.row == screen.bscroll) {
+              scroll_text(screen.tscroll, screen.bscroll, 1, 0);
+              j = screen.bscroll + TermWin.saveLines;
               blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
-	    } else if (screen.row < (TermWin.nrow - 1)) {
-	      screen.row++;
-	      row = screen.row + TermWin.saveLines;
-	    }
-	    stp = screen.text[row];	/* _must_ refresh */
-	    srp = screen.rend[row];	/* _must_ refresh */
-	    continue;
-	  case '\r':
-	    MAX_IT(stp[last_col], screen.col);
-	    screen.flags &= ~Screen_WrapNext;
-	    screen.col = 0;
-	    continue;
-	  default:
+            } else if (screen.row < (TermWin.nrow - 1)) {
+              screen.row++;
+              row = screen.row + TermWin.saveLines;
+            }
+            stp = screen.text[row];	/* _must_ refresh */
+            srp = screen.rend[row];	/* _must_ refresh */
+            continue;
+          case '\r':
+            MAX_IT(stp[last_col], screen.col);
+            screen.flags &= ~Screen_WrapNext;
+            screen.col = 0;
+            continue;
+          default:
 #ifdef MULTI_CHARSET
-	    rstyle &= ~RS_multiMask;
+            rstyle &= ~RS_multiMask;
 #endif
-	    break;
-	}
+            break;
+        }
+#ifdef MULTI_CHARSET
+    }
+#endif
     if (screen.flags & Screen_WrapNext) {
       stp[last_col] = WRAP_CHAR;
       if (screen.row == screen.bscroll) {
@@ -1381,11 +1387,20 @@ scr_charset_set(int set, unsigned int ch)
 
 #ifdef MULTI_CHARSET
 
+static void latin1(unsigned char *str, int len);
 static void eucj2jis(unsigned char *str, int len);
 static void sjis2jis(unsigned char *str, int len);
 static void big5dummy(unsigned char *str, int len);
 
-static void (*multichar_decode) (unsigned char *str, int len) = eucj2jis;
+static void (*multichar_decode) (unsigned char *str, int len) = latin1;
+
+static void
+latin1(unsigned char *str, int len)
+{
+  return;
+  str = NULL;
+  len = 0;
+}
 
 static void
 eucj2jis(unsigned char *str, int len)
@@ -1431,16 +1446,18 @@ set_multichar_encoding(const char *str)
 {
 #ifdef MULTI_CHARSET
   if (str && *str) {
-    if (!strcmp(str, "sjis")) {
+    if (!strcasecmp(str, "sjis")) {
       encoding_method = SJIS;
       multichar_decode = sjis2jis;
-    } else if (!strcmp(str, "eucj") || !strcmp(str, "euckr")
-	       || !strcmp(str, "gb")) {
+    } else if (!strcasecmp(str, "eucj") || !strcasecmp(str, "euckr") || !strcasecmp(str, "gb")) {
       encoding_method = EUCJ;
       multichar_decode = eucj2jis;
-    } else if (!strcmp(str, "big5")) {
+    } else if (!strcasecmp(str, "big5")) {
       encoding_method = BIG5;
       multichar_decode = big5dummy;
+    } else {
+      encoding_method = LATIN1;
+      multichar_decode = latin1;
     }
   }
 #else
@@ -1734,7 +1751,7 @@ scr_refresh(int type)
 	    drp[col] = srp[col];
 	    buffer[len++] = stp[col];
 	    col++;
-	    if ((col == ncols) || (srp[col] != rend))
+	    if ((col == ncols) || (srp[col] != (unsigned int) rend))
 	      break;
 	    if ((stp[col] == dtp[col])
 		&& (srp[col] == drp[col])
@@ -1779,7 +1796,7 @@ scr_refresh(int type)
 	    dtp[col] = stp[col];
 	    drp[col] = srp[col];
 	    buffer[len++] = stp[col];
-	  }			/* for (; ++col < TermWin.ncol - 1;) */
+	  }
 	  col--;
 	  wlen = len;
 #ifdef MULTI_CHARSET
@@ -1908,44 +1925,101 @@ scr_refresh(int type)
           UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(1), ypixel + Height2Pixel(1));
         }
 #endif
-      } else
+      } else {
 #ifdef PIXMAP_SUPPORT
-      if (background_is_pixmap() && (back == bgColor)) {
-	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
-	DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
-        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(len), ypixel + Height2Pixel(1));
-      } else
+        if (background_is_pixmap() && (back == bgColor)) {
+          if (fshadow.do_shadow) {
+            Pixel tmp;
+            int xx, yy, ww, hh;
+
+            tmp = gcvalue.foreground;
+            xx = xpixel;
+            yy = ypixel - TermWin.font->ascent;
+            ww = Width2Pixel(wlen);
+            hh = Height2Pixel(1);
+            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
+            if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+              yy--;
+              hh++;
+            }
+            if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+              hh++;
+              if (row < nrows - 1) {
+                int ii;
+
+                for (ii = col - len + 1; ii <= col; ii++) {
+                  drawn_text[row + 1][ii] = 0;
+                }
+              }
+            }
+            if (fshadow.shadow[SHADOW_TOP_LEFT]) {
+              XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_TOP_LEFT]);
+              DRAW_STRING(draw_string, xpixel - 1, ypixel - 1, buffer, wlen);
+              if (col) {
+                dtp[col - 1] = 0;
+              }
+            }
+            if (fshadow.shadow[SHADOW_TOP_RIGHT]) {
+              XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_TOP_RIGHT]);
+              DRAW_STRING(draw_string, xpixel + 1, ypixel - 1, buffer, wlen);
+              if (col < ncols - 1) {
+                dtp[col + 1] = 0;
+              }
+            }
+            if (fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
+              XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_BOTTOM_LEFT]);
+              DRAW_STRING(draw_string, xpixel - 1, ypixel + 1, buffer, wlen);
+              if (col) {
+                dtp[col - 1] = 0;
+              }
+            }
+            if (fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+              XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_BOTTOM_RIGHT]);
+              DRAW_STRING(draw_string, xpixel + 1, ypixel + 1, buffer, wlen);
+              if (col < ncols - 1) {
+                dtp[col + 1] = 0;
+              }
+            }
+            XSetForeground(Xdisplay, TermWin.gc, tmp);
+            DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
+            UPDATE_BOX(xx, yy, xx + ww, yy + hh);
+          } else {
+            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
+            DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
+            UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
+          }
+        } else
 #endif
-      {
+          {
 #ifdef FORCE_CLEAR_CHARS
-	CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
+            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
 #endif
-	DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
-        UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(len), ypixel + Height2Pixel(1));
+            DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
+            UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
+          }
       }
 
       /* do the convoluted bold overstrike */
 #ifndef NO_BOLDOVERSTRIKE
       if (MONO_BOLD(rend)) {
 	DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, wlen);
-        UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(len), ypixel + Height2Pixel(1));
+        UPDATE_BOX(xpixel + 1, ypixel - TermWin.font->ascent, xpixel + 1 + Width2Pixel(wlen), ypixel + Height2Pixel(1));
       }
 #endif
 
       if ((rend & RS_Uline) && (TermWin.font->descent > 1)) {
-	XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(len) - 1, ypixel + 1);
-        UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(len) - 1, ypixel + 1);
+	XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+        UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
       }
       if (is_cursor == 1) {
 #ifndef NO_CURSORCOLOR
 	if (PixColors[cursorColor] != PixColors[bgColor]) {
-	  gcvalue.foreground = PixColors[cursorColor];
-	  gcmask |= GCForeground;
-	  XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
+	  XSetForeground(Xdisplay, TermWin.gc, PixColors[cursorColor]);
 	}
 #endif
 	XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
         UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+        XSetForeground(Xdisplay, TermWin.gc, PixColors[fgColor]);
       }
       if (gcmask) {		/* restore normal colors */
 	gcvalue.foreground = PixColors[fgColor];
@@ -1975,10 +2049,41 @@ scr_refresh(int type)
 #endif
   }
   if (buffer_pixmap) {
+    D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y,
+              high_x - low_x + 1, high_y - low_y + 1));
     XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
+    if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
+      XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0,
+                1, TermWin_TotalHeight() - 1, TermWin.internalBorder - 1, 0);
+      XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
+    }
+    if (fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) {
+      XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0,
+                1, TermWin_TotalHeight() - 1, TermWin_TotalWidth() - 2, 0);
+      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
+    }
+    if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+      XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1,
+                TermWin_TotalWidth() - 1, 1, 0, TermWin.internalBorder - 1);
+      XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
+    }
+    if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+      XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin_TotalHeight() - TermWin.internalBorder, 
+                TermWin_TotalWidth() - 1, 1, 0, TermWin_TotalHeight() - TermWin.internalBorder);
+      XClearArea(Xdisplay, TermWin.vt, 0, TermWin_TotalHeight() - TermWin.internalBorder, TermWin_TotalWidth() - 1, 1, False);
+    }
   } else {
-    if (boldlast) {
-      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, 0);
+    if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
+      XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
+    }
+    if ((fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) && TermWin.internalBorder) {
+      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
+    }
+    if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+      XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
+    }
+    if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+      XClearArea(Xdisplay, TermWin.vt, 0, TermWin_TotalHeight() - TermWin.internalBorder, TermWin_TotalWidth() - 1, 1, False);
     }
   }
   if (type == SLOW_REFRESH) {

@@ -94,6 +94,7 @@ static char *rs_pipe_name = NULL;
 static int rs_shade = 0;
 static char *rs_tint = NULL;
 static unsigned long rs_buttonbars = 1;
+static char *rs_font_effects = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -253,6 +254,7 @@ static const struct {
       OPT_LONG("font2", "font 2", &rs_font[2]),
       OPT_LONG("font3", "font 3", &rs_font[3]),
       OPT_LONG("font4", "font 4", &rs_font[4]),
+      OPT_LONG("font-fx", "specify font effects for the terminal fonts", &rs_font_effects),
 
 /* =======[ Pixmap options ]======= */
 #ifdef PIXMAP_SUPPORT
@@ -2020,6 +2022,11 @@ parse_attributes(char *buff, void *state)
     } else if (!BEG_STRCASECMP(tmp, "default ")) {
       def_font_idx = strtoul(PWord(2, tmp), (char **) NULL, 0);
 
+    } else if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
+      if (parse_font_fx(PWord(2, tmp)) != 1) {
+        print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification",
+                    file_peek_path(), file_peek_line());
+      }
     } else {
       tmp = Word(1, tmp);
       print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"",
@@ -3687,6 +3694,12 @@ post_parse(void)
     }
 #endif
   }
+  if (rs_font_effects) {
+    if (parse_font_fx(rs_font_effects) != 1) {
+      print_error("Syntax error in the font effects specified on the command line.");
+    }
+    RESET_AND_ASSIGN(rs_font_effects, NULL);
+  }
 
   /* Clean up image stuff */
   for (i = 0; i < image_max; i++) {
@@ -3713,6 +3726,9 @@ post_parse(void)
       load_image(rs_pixmaps[i], images[i].norm);
       FREE(rs_pixmaps[i]);	/* These are created by StrDup() */
     }
+#else
+    /* Right now, solid mode is the only thing we can do without pixmap support. */
+    images[i].mode = MODE_SOLID & ALLOW_SOLID;
 #endif
     if (images[i].selected) {
       /* If we have a bevel but no border, use the bevel as a border. */
@@ -3962,6 +3978,12 @@ post_parse(void)
     }
   } else {
     rs_anim_delay = 0;
+  }
+#endif
+
+#ifdef MULTI_CHARSET
+  if (rs_multichar_encoding != NULL) {
+    set_multichar_encoding(rs_multichar_encoding);
   }
 #endif
 

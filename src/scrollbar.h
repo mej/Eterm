@@ -26,8 +26,8 @@
 
 #include <X11/Xfuncproto.h>
 #include <ctype.h>
-#include <Imlib2.h>
 #include "events.h"
+#include "pixmap.h"
 
 /************ Macros and Definitions ************/
 /* Scrollbar types we support */
