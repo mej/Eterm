@@ -2212,9 +2212,10 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
     wm_hints->flags |= IconPixmapHint | IconMaskHint;
 #endif
 
-    /* Set the EWMH icon hint for stupid GNOME WM's. */
-    XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_ICON], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) icon_data, sizeof(icon_data));
-
+    /* Set the EWMH icon hint for _NET_WM-compliant GNOME WM's. */
+    XChangeProperty(Xdisplay, TermWin.parent,
+                    props[PROP_EWMH_ICON], XA_CARDINAL, 32, PropModeReplace,
+                    (unsigned char *) icon_data, sizeof(icon_data) / sizeof(CARD32));
     imlib_free_image_and_decache();
 
     /* Only set the hints ourselves if we were passed a NULL pointer for pwm_hints */

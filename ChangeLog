@@ -5229,3 +5229,10 @@ Mon Jun 28 12:34:36 2004                        Michael Jennings (mej)
 
 Cleaning up some warnings.
 ----------------------------------------------------------------------
+Wed Jul 14 16:16:48 2004                        Michael Jennings (mej)
+
+Applied patch from Kim Woelders <kim@woelders.dk> to fix setting of
+_NET_WM_ICON property.
+
+Fixed a couple warnings.
+----------------------------------------------------------------------

@@ -1324,7 +1324,10 @@ process_window_mode(unsigned int nargs, int args[])
     Window dummy_child;
     int dummy_x, dummy_y;
     unsigned int dummy_border, dummy_depth;
-    char buff[1024], *name;
+    char buff[1024];
+#ifdef ENABLE_NAME_REPORTING_ESCAPES
+    char *name;
+#endif
 
     if (!nargs)
         return;

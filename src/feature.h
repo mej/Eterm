@@ -53,6 +53,13 @@
 #  undef HAVE_SYS_IOCTL_H
 # endif
 
+# ifdef __GNUC__
+#  define _GNU_SOURCE
+# else
+#  define _XOPEN_SOURCE 600
+#  define _XOPEN_SOURCE_EXTENDED 1
+# endif
+
 /********************* Debugging stuff *********************/
 /* As Keith Bunge would say, don't crap with the debugging stuff below
  * unless you develop this mess. :^)   -- mej
