@@ -1,10 +1,9 @@
 %define bzip     0
-%define strip    0
 
 Summary: Enlightened terminal emulator
 Name: Eterm
-Version: 0.9.2
-Release: 5
+Version: 0.9.3
+Release: 0.1
 Copyright: BSD
 Group: User Interface/X
 Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
@@ -38,15 +37,15 @@ export CFLAGS
 # macros I use for compatibility with older versions of the macro
 %configure --bindir=%{_bindir} --libdir=%{_libdir} --mandir=%{_mandir} \
            --datadir=%{_datadir} --sysconfdir=%{_sysconfdir} \
-           --enable-multi-charset --enable-escreen --enable-auto-encoding
-make
+           --enable-multi-charset --enable-escreen --enable-auto-encoding %{?acflags}
+%{__make} %{?mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 # If the configure macro is used above (which it is), there
 # is NO reason to use the makeinstall macro here, so don't.
-make DESTDIR=$RPM_BUILD_ROOT install
+%{__make} install DESTDIR=$RPM_BUILD_ROOT %{?mflags_install}
 
 ( cd $RPM_BUILD_ROOT
   mv .%{_bindir}/%{name} .%{_bindir}/%{name}-%{version}
@@ -55,10 +54,6 @@ make DESTDIR=$RPM_BUILD_ROOT install
   cd $RPM_BUILD_ROOT
   chmod +x .%{_libdir}/lib*so* ||:
 )
-
-%if %{strip}
-strip -s $RPM_BUILD_ROOT%{_bindir}/* || :
-%endif
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities
 cat > $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop <<EOF
@@ -87,7 +82,7 @@ test -x /sbin/ldconfig && /sbin/ldconfig
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,root,root)
+%defattr(-, root, root)
 %doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti doc/README.Escreen
 %doc README ReleaseNotes ReleaseNotes.1 ChangeLog
 %config %{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop

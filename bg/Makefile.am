@@ -3,8 +3,7 @@
 DIRS = tile scale
 UPDATE_SCRIPT = @top_srcdir@/utils/Etbg_update_list
 
-EXTRA_DIST =  tile/circuit.jpg tile/giger1.jpg tile/blackstone.jpg tile/nebula.jpg \
-              scale/Neopolis-horizon.jpg README.backgrounds
+EXTRA_DIST =  tile/circuit.jpg scale/Neopolis-horizon.jpg README.backgrounds
 pixmapdir = $(pkgdatadir)/pix
 themedir = $(pkgdatadir)/themes
 
