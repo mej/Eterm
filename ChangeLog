@@ -2324,3 +2324,9 @@ Fri Aug 20 16:05:59 PDT 1999	Michael Jennings <mej@eterm.org>
 	line should no longer generate a parse error. =)
 	
 -------------------------------------------------------------------------------
+Fri Aug 20 17:28:24 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a small bug in icon size handling located by Hubert Verstraete
+	<hubertv@bigfoot.com>.
+	
+-------------------------------------------------------------------------------

@@ -1109,7 +1109,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 
     if (icon_path != NULL) {
       XIconSize *icon_sizes;
-      int count, i, w = 64, h = 64;
+      int count, i, w = 8, h = 8;  /* At least 8x8 */
 
       temp_im = Imlib_load_image(imlib_id, (char *) icon_path);
       /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
@@ -1117,12 +1117,20 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 	for (i = 0; i < count; i++) {
 	  D_PIXMAP(("Got icon sizes:  Width %d to %d +/- %d, Height %d to %d +/- %d\n", icon_sizes[i].min_width, icon_sizes[i].max_width,
 		    icon_sizes[i].width_inc, icon_sizes[i].min_height, icon_sizes[i].max_height, icon_sizes[i].height_inc));
-	  w = MIN(icon_sizes[i].max_width, 64);		/* 64x64 is plenty big */
-	  h = MIN(icon_sizes[i].max_height, 64);
+          if (icon_sizes[i].max_width > 64 || icon_sizes[i].max_height > 64) {
+            continue;
+          }
+          /* Find the largest supported size <= 64 */
+	  w = MAX(icon_sizes[i].max_width, w);
+	  h = MAX(icon_sizes[i].max_height, h);
 	}
 	fflush(stdout);
 	XFree(icon_sizes);
+      } else {
+        w = h = 48;
       }
+      MIN_IT(w, 64);
+      MIN_IT(h, 64);
       Imlib_render(imlib_id, temp_im, w, h);
       wm_hints->icon_pixmap = Imlib_copy_image(imlib_id, temp_im);
       wm_hints->icon_mask = Imlib_copy_mask(imlib_id, temp_im);
