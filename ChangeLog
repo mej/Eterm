@@ -4061,3 +4061,9 @@ Thu Feb  1 19:02:51 PST 2001	Michael Jennings <mej@eterm.org>
 	accounted for.
 	
 -------------------------------------------------------------------------------
+Sat Feb  3 18:25:45 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Applied a patch from Sung-Hyun Nam <namsh@lgic.co.kr> to fix a seg
+	fault bug in multi-byte pasting.
+	
+-------------------------------------------------------------------------------

@@ -2410,7 +2410,7 @@ selection_paste(Window win, unsigned prop, int delete)
     } else {
       int size, i;
       XTextProperty xtextp;
-      char **cl;
+      char **cl = NULL;
 
       xtextp.value = data;
       xtextp.encoding = actual_type;
