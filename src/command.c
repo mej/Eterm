@@ -2103,7 +2103,7 @@ run_command(char **argv)
   privileges(IGNORE);
 
   ptyfd = get_pty();
-  AT_LEAST(num_fds, ptyfd);
+  AT_LEAST(num_fds, ptyfd + 1);
   if (ptyfd < 0)
     return (-1);
 
@@ -2287,9 +2287,9 @@ init_command(char **argv)
   Xfd = XConnectionNumber(Xdisplay);
   D_CMD(("Xfd = %d\n", Xfd));
   cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-  AT_LEAST(num_fds, Xfd);
+  AT_LEAST(num_fds, Xfd + 1);
   if (pipe_fd >= 0) {
-    AT_LEAST(num_fds, pipe_fd);
+    AT_LEAST(num_fds, pipe_fd + 1);
   }
 
   if ((cmd_fd = run_command(argv)) < 0) {
@@ -2528,7 +2528,7 @@ cmd_getc(void)
     } else {
       delay = &value;
     }
-    retval = select(num_fds + 1, &readfds, NULL, NULL, delay);
+    retval = select(num_fds, &readfds, NULL, NULL, delay);
 
     /* See if we can read from the application */
     if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {

@@ -4460,3 +4460,7 @@ Thu Jan  3 12:38:54 2002                        Michael Jennings (mej)
 Fixed the select() call based on info from Paul W Brannan
 <pbranna@clemson.edu>.  Also added check for _POSIX_SAVED_IDS.
 ----------------------------------------------------------------------
+Thu Jan  3 12:42:41 2002                        Michael Jennings (mej)
+
+This is better.
+----------------------------------------------------------------------
