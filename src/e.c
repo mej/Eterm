@@ -46,7 +46,7 @@ static const char cvs_ident[] = "$Id$";
 #include "pixmap.h"
 #include "system.h"
 
-Window ipc_win = None;
+Window ipc_win = None, my_ipc_win = None;
 Atom ipc_atom = None;
 static unsigned char timeout = 0;
 
@@ -117,6 +117,9 @@ enl_ipc_get_win(void)
     enl_ipc_send("set web http://www.eterm.org/");
     enl_ipc_send("set info Eterm Enlightened Terminal Emulator");
   }
+  if (my_ipc_win == None) {
+    my_ipc_win = XCreateSimpleWindow(Xdisplay, Xroot, -2, -2, 1, 1, 0, 0, 0);
+  }
   return (ipc_win);
 }
 
@@ -155,6 +158,7 @@ enl_ipc_send(char *str)
     D_ENL(("enl_ipc_send():  IPC error:  Unable to find/create ENL_MSG atom.\n"));
     return;
   }
+  for (; XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev););  /* Discard any out-of-sync messages */
   ev.xclient.type = ClientMessage;
   ev.xclient.serial = 0;
   ev.xclient.send_event = True;
@@ -163,7 +167,7 @@ enl_ipc_send(char *str)
   ev.xclient.format = 8;
 
   for (i = 0; i < len + 1; i += 12) {
-    sprintf(buff, "%8x", (int) TermWin.parent);
+    sprintf(buff, "%8x", (int) my_ipc_win);
     for (j = 0; j < 12; j++) {
       buff[8 + j] = str[i + j];
       if (!str[i + j]) {
@@ -196,7 +200,7 @@ enl_wait_for_reply(void)
   register unsigned char i;
 
   alarm(3);
-  for (; !XCheckTypedWindowEvent(Xdisplay, TermWin.parent, ClientMessage, &ev) && !timeout;);
+  for (; !XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev) && !timeout;);
   alarm(0);
   if (ev.xany.type != ClientMessage) {
     return (IPC_TIMEOUT);

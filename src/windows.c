@@ -416,22 +416,19 @@ Create_Windows(int argc, char *argv[])
   /* the vt window */
   if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollBar) && !(Options & Opt_scrollBar_right)) ? scrollbar_trough_width() : 0), 0,
+                               szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWBackingStore | CWColormap, &Attributes);
-    if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {
-      XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-      XClearWindow(Xdisplay, TermWin.vt);
-    }
   } else {
     D_X11(("Creating term window with no backing store\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollBar) && !(Options & Opt_scrollBar_right)) ? scrollbar_trough_width() : 0), 0,
+                               szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
-    if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {
-      XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-      XClearWindow(Xdisplay, TermWin.vt);
-    }
   }
-
+  if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {
+    XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
+    XClearWindow(Xdisplay, TermWin.vt);
+  }
   XDefineCursor(Xdisplay, TermWin.vt, TermWin_cursor);
   XSelectInput(Xdisplay, TermWin.vt, (ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button3MotionMask));
 

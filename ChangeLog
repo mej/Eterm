@@ -2782,3 +2782,13 @@ Fri Nov 12 19:37:35 PST 1999	Michael Jennings <mej@eterm.org>
 	operations are a lot smoother and cleaner now.
 	
 -------------------------------------------------------------------------------
+Mon Nov 15 13:20:05 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Two more bugs fixed.  One, Trevor Powell <vulpine@zikzak.net> spotted
+	an issue with left-side scrollbars which is now fixed.  Two...um...
+	ahem.  Fixed the auto mode titlebar thing.  *cough*  Turns out I was
+	doing something stupid with my IPC window (i.e., not having one) that
+	caused E to ignore lots of events on my window.  Oops, sorry folks.
+	raster has given me the cl00bat beating, so it's fixed now. :-]
+	
+-------------------------------------------------------------------------------
