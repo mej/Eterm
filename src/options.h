@@ -200,7 +200,7 @@ extern fstate_t *fstate;
 extern unsigned char fstate_idx;
 extern unsigned long Options, image_toggles;
 extern char *theme_dir, *user_dir;
-extern       char **rs_execArgs;        /* Args to exec (-e or --exec) */
+extern       char **rs_exec_args;       /* Args to exec (-e or --exec) */
 extern       char  *rs_title;		/* Window title */
 extern       char  *rs_iconName;	/* Icon name */
 extern       char  *rs_geometry;	/* Geometry string */

@@ -282,7 +282,7 @@ eterm_bootstrap(int argc, char *argv[])
   putenv("ETERM_VERSION=" VERSION);
 
   D_CMD(("init_command()\n"));
-  init_command(rs_execArgs);
+  init_command(rs_exec_args);
 
   main_loop();
 

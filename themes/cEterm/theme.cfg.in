@@ -68,7 +68,7 @@ begin main
 #             if +, bottom right if -
 #    geometry 132x50+100+100
     title %appname() -- cEterm Theme
-    name %appname()
+#    name %appname()
 #    iconname Eterm
 
 # Set the fonts.  These must be monospace fonts.  The values shown are

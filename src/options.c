@@ -111,7 +111,7 @@ fstate_t *fstate;
 unsigned char fstate_idx;
 unsigned long Options = (Opt_scrollbar), image_toggles = 0;
 char *theme_dir = NULL, *user_dir = NULL;
-char **rs_execArgs = NULL;	/* Args to exec (-e or --exec) */
+char **rs_exec_args = NULL;	/* Args to exec (-e or --exec) */
 char *rs_title = NULL;		/* Window title */
 char *rs_iconName = NULL;	/* Icon name */
 char *rs_geometry = NULL;	/* Geometry string */
@@ -354,7 +354,7 @@ static const struct {
       OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
       OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
       OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
-      OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_execArgs)
+      OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
 };
 
 /* Print usage information */
@@ -871,26 +871,26 @@ get_options(int argc, char *argv[])
 
 	  register unsigned short k, len = argc - i;
 
-	  rs_execArgs = (char **) MALLOC(sizeof(char *) * (argc - i + 1));
+	  rs_exec_args = (char **) MALLOC(sizeof(char *) * (argc - i + 1));
 
 	  for (k = 0; k < len; k++) {
-	    rs_execArgs[k] = STRDUP(argv[k + i]);
-	    D_OPTIONS(("rs_execArgs[%d] == %s\n", k, rs_execArgs[k]));
+	    rs_exec_args[k] = STRDUP(argv[k + i]);
+	    D_OPTIONS(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
 	  }
-	  rs_execArgs[k] = (char *) NULL;
+	  rs_exec_args[k] = (char *) NULL;
 	  return;
 	} else {
 
 	  register unsigned short k;
 
-	  rs_execArgs = (char **) MALLOC(sizeof(char *) * (num_words(val_ptr) + 1));
+	  rs_exec_args = (char **) MALLOC(sizeof(char *) * (num_words(val_ptr) + 1));
 
 	  for (k = 0; val_ptr; k++) {
-	    rs_execArgs[k] = get_word(1, val_ptr);
+	    rs_exec_args[k] = get_word(1, val_ptr);
 	    val_ptr = get_pword(2, val_ptr);
-	    D_OPTIONS(("rs_execArgs[%d] == %s\n", k, rs_execArgs[k]));
+	    D_OPTIONS(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
 	  }
-	  rs_execArgs[k] = (char *) NULL;
+	  rs_exec_args[k] = (char *) NULL;
 	}
       } else if (!strcasecmp(opt, "help")) {
 	usage();
@@ -990,21 +990,21 @@ get_options(int argc, char *argv[])
 	    k = i + 1;
 	  }
 	  D_OPTIONS(("len == %d  k == %d\n", len, k));
-	  rs_execArgs = (char **) MALLOC(sizeof(char *) * len);
+	  rs_exec_args = (char **) MALLOC(sizeof(char *) * len);
 
 	  if (k == i) {
-	    rs_execArgs[0] = STRDUP((char *) (val_ptr));
-	    D_OPTIONS(("rs_execArgs[0] == %s\n", rs_execArgs[0]));
+	    rs_exec_args[0] = STRDUP((char *) (val_ptr));
+	    D_OPTIONS(("rs_exec_args[0] == %s\n", rs_exec_args[0]));
 	    k++;
 	  } else {
-	    rs_execArgs[0] = STRDUP(argv[k - 1]);
-	    D_OPTIONS(("rs_execArgs[0] == %s\n", rs_execArgs[0]));
+	    rs_exec_args[0] = STRDUP(argv[k - 1]);
+	    D_OPTIONS(("rs_exec_args[0] == %s\n", rs_exec_args[0]));
 	  }
 	  for (; k < argc; k++) {
-	    rs_execArgs[k - i] = STRDUP(argv[k]);
-	    D_OPTIONS(("rs_execArgs[%d] == %s\n", k - i, rs_execArgs[k - i]));
+	    rs_exec_args[k - i] = STRDUP(argv[k]);
+	    D_OPTIONS(("rs_exec_args[%d] == %s\n", k - i, rs_exec_args[k - i]));
 	  }
-	  rs_execArgs[len - 1] = (char *) NULL;
+	  rs_exec_args[len - 1] = (char *) NULL;
 	  return;
 	} else if (opt[pos] == 'h') {
 	  usage();
@@ -2427,13 +2427,13 @@ parse_misc(char *buff, void *state)
 
     register unsigned short k, n;
 
-    RESET_AND_ASSIGN(rs_execArgs, (char **) MALLOC(sizeof(char *) * ((n = num_words(get_pword(2, buff))) + 1)));
+    RESET_AND_ASSIGN(rs_exec_args, (char **) MALLOC(sizeof(char *) * ((n = num_words(get_pword(2, buff))) + 1)));
 
     for (k = 0; k < n; k++) {
-      rs_execArgs[k] = get_word(k + 2, buff);
-      D_OPTIONS(("rs_execArgs[%d] == %s\n", k, rs_execArgs[k]));
+      rs_exec_args[k] = get_word(k + 2, buff);
+      D_OPTIONS(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
     }
-    rs_execArgs[n] = (char *) NULL;
+    rs_exec_args[n] = (char *) NULL;
 
   } else if (!BEG_STRCASECMP(buff, "cut_chars ")) {
 #ifdef CUTCHAR_OPTION
@@ -3591,7 +3591,6 @@ init_defaults(void)
   }
 #endif
 
-  rs_name = STRDUP(APL_NAME " " VERSION);
   Options = (Opt_scrollbar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
   rs_term_name = NULL;
@@ -3662,24 +3661,36 @@ post_parse(void)
   }
 
   /* set any defaults not already set */
-  if (!rs_title)
+  if (rs_name == NULL) {
+    if (rs_exec_args != NULL) {
+      rs_name = STRDUP(rs_exec_args[0]);
+    } else {
+      rs_name = STRDUP(APL_NAME " " VERSION);
+    }
+  }
+  if (!rs_title) {
     rs_title = rs_name;
-  if (!rs_iconName)
+  }
+  if (!rs_iconName) {
     rs_iconName = rs_name;
+  }
   if ((TermWin.saveLines = rs_saveLines) < 0) {
     TermWin.saveLines = SAVELINES;
   }
   /* no point having a scrollbar without having any scrollback! */
-  if (!TermWin.saveLines)
+  if (!TermWin.saveLines) {
     Options &= ~Opt_scrollbar;
+  }
 
 #ifdef PRINTPIPE
-  if (!rs_print_pipe)
+  if (!rs_print_pipe) {
     rs_print_pipe = STRDUP(PRINTPIPE);
+  }
 #endif
 #ifdef CUTCHAR_OPTION
-  if (!rs_cutchars)
+  if (!rs_cutchars) {
     rs_cutchars = STRDUP(CUTCHARS);
+  }
 #endif
 
 #ifndef NO_BOLDFONT
@@ -4702,10 +4713,10 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
   fprintf(fp, "    term_name %s\n", getenv("TERM"));
   fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
-  if (save_theme && rs_execArgs) {
+  if (save_theme && rs_exec_args) {
     fprintf(fp, "    exec ");
-    for (i = 0; rs_execArgs[i]; i++) {
-      fprintf(fp, "'%s' ", rs_execArgs[i]);
+    for (i = 0; rs_exec_args[i]; i++) {
+      fprintf(fp, "'%s' ", rs_exec_args[i]);
     }
     fprintf(fp, "\n");
   }

@@ -3960,3 +3960,12 @@ Sun Nov 12 12:05:58 PST 2000	Michael Jennings <mej@eterm.org>
 	can handle MWM hints.  This is all raster's fault.
 	
 -------------------------------------------------------------------------------
+Tue Nov 14 17:17:53 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Since someone wanted it, if no name is given but an exec line (the -e
+	option) is given, the name defaults to the first word in the exec line
+	instead of "Eterm-<version>".  For example, Eterm -e ssh foo would get
+	the title "ssh".  NOTE:  Most Eterm themes already specify a name, so
+	this will not work with those themes.
+	
+-------------------------------------------------------------------------------

@@ -30,6 +30,9 @@ static const char cvs_ident[] = "$Id$";
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#ifdef HAVE_X11_SUNKEYSYM_H
+# include <X11/Sunkeysym.h>
+#endif
 
 #include "actions.h"
 #include "buttons.h"
@@ -290,6 +293,22 @@ lookup_key(XEvent * ev)
       change_font(0, SMALLER_FONT);
       LK_RET();
     }
+  }
+#endif
+
+#ifdef HAVE_X11_SUNKEYSYM_H
+  switch (keysym) {
+    case SunXK_Copy:
+    case SunXK_Cut:
+      break;
+    case SunXK_Paste:
+      selection_request(ev->xkey.time, ev->xkey.x, ev->xkey.y);
+      LK_RET();
+      break;
+    case SunXK_Front:
+      break;
+    default:
+      break;
   }
 #endif
 
