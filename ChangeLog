@@ -3669,3 +3669,8 @@ Fri Jun  9 22:33:29 PDT 2000	Michael Jennings <mej@eterm.org>
 	but thanks to Marius Gedminas <mgedmin@takas.lt> for pointing it out.
 	
 -------------------------------------------------------------------------------
+Sat Jun 10 11:38:36 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Some terminfo fixes, also from Marius Gedminas <mgedmin@takas.lt>.
+	
+-------------------------------------------------------------------------------

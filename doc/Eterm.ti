@@ -105,7 +105,7 @@ Eterm-base|Eterm basic terminal capabilities,
 	kPRV=\e[5$, kNXT=\e[6$,
 # Shift-Delete/Home/End and Ctrl-End.  It's a $ instead of a ~ for
 # Shift-, a ^ for Ctrl-, and @ for Ctrl-Shift-.
-	kDC=\e[3$, kHOM=\e[7$, kEND=\e[8$, kel=\e[8^,
+	kDC=\e[3$, kHOM=\e[7$, kEND=\e[8$, kel=\e[8\^,
 
 # Reset terminal, turn off all attributes
 	rs1=\e>\e[1;3;4;5;6l\e[?7h\e[m\e[r\e[2J\e[H,
@@ -144,7 +144,7 @@ Eterm-mouse|Eterm with X11 mouse reporting,
 	kmous=\e[M,
 
 ###### Add xterm-style color sequences.
-Eterm|Eterm-color|eterm|Eterm with xterm-style color support (X Window System),
+Eterm|Eterm-color|Eterm with xterm-style color support (X Window System),
 	use=Eterm-mouse, colors#8, pairs#64,
 
 # Revert to the original foreground/background pair
