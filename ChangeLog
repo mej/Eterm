@@ -5186,3 +5186,7 @@ Tue Mar  2 10:56:20 2004                        Michael Jennings (mej)
 
 New SRPM.
 ----------------------------------------------------------------------
+Wed Mar  3 15:50:17 2004                        Michael Jennings (mej)
+
+Ported over the autogen.sh changes from LibAST and fixed configure.in.
+----------------------------------------------------------------------

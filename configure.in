@@ -3,6 +3,18 @@ dnl# $Id$
 PATH=$PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/ucb/bin
 export PATH
 
+AC_SUBST(LIBTOOLIZE)
+AC_SUBST(AUTOHEADER)
+AC_SUBST(ACLOCAL)
+AC_SUBST(AUTOMAKE)
+AC_SUBST(AUTOCONF)
+
+SAVE_LIBTOOLIZE="$LIBTOOLIZE"
+SAVE_AUTOHEADER="$AUTOHEADER"
+SAVE_ACLOCAL="$ACLOCAL"
+SAVE_AUTOMAKE="$AUTOMAKE"
+SAVE_AUTOCONF="$AUTOCONF"
+
 AC_INIT(src/feature.h)
 AM_INIT_AUTOMAKE(Eterm, 0.9.3)
 
@@ -10,34 +22,40 @@ dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
 BUILD_DATE="`date`"
-AC_DEFINE_UNQUOTED(BUILD_DATE, "$BUILD_DATE")
+AC_DEFINE_UNQUOTED(BUILD_DATE, "$BUILD_DATE", [The date of the build.])
 AUTHORS="Michael Jennings (mej@eterm.org) "
 AC_SUBST(AUTHORS)
-AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS")
+AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS", [Authors])
+
+LIBTOOLIZE="$SAVE_LIBTOOLIZE"
+AUTOHEADER="$SAVE_AUTOHEADER"
+ACLOCAL="$SAVE_ACLOCAL"
+AUTOMAKE="$SAVE_AUTOMAKE"
+AUTOCONF="$SAVE_AUTOCONF"
 
 dnl# Find RCS Ident info from source files
-AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$''Id:' $srcdir/src/actions.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(BUTTONS_IDENT, "`grep '$''Id:' $srcdir/src/buttons.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(COMMAND_IDENT, "`grep '$''Id:' $srcdir/src/command.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(DRAW_IDENT, "`grep '$''Id:' $srcdir/src/draw.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(E_IDENT, "`grep '$''Id:' $srcdir/src/e.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(EVENTS_IDENT, "`grep '$''Id:' $srcdir/src/events.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(FONT_IDENT, "`grep '$''Id:' $srcdir/src/font.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' $srcdir/src/grkelot.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' $srcdir/src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' $srcdir/src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' $srcdir/src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' $srcdir/src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' $srcdir/src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' $srcdir/src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' $srcdir/src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SCROLLBAR_IDENT, "`grep '$''Id:' $srcdir/src/scrollbar.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(STARTUP_IDENT, "`grep '$''Id:' $srcdir/src/startup.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SYSTEM_IDENT, "`grep '$''Id:' $srcdir/src/system.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(TERM_IDENT, "`grep '$''Id:' $srcdir/src/term.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(TIMER_IDENT, "`grep '$''Id:' $srcdir/src/timer.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(UTMP_IDENT, "`grep '$''Id:' $srcdir/src/utmp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(WINDOWS_IDENT, "`grep '$''Id:' $srcdir/src/windows.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$''Id:' $srcdir/src/actions.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [actions.c RCS ID])
+AC_DEFINE_UNQUOTED(BUTTONS_IDENT, "`grep '$''Id:' $srcdir/src/buttons.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [buttons.c RCS ID])
+AC_DEFINE_UNQUOTED(COMMAND_IDENT, "`grep '$''Id:' $srcdir/src/command.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [command.c RCS ID])
+AC_DEFINE_UNQUOTED(DRAW_IDENT, "`grep '$''Id:' $srcdir/src/draw.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [draw.c RCS ID])
+AC_DEFINE_UNQUOTED(E_IDENT, "`grep '$''Id:' $srcdir/src/e.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [e.c RCS ID])
+AC_DEFINE_UNQUOTED(EVENTS_IDENT, "`grep '$''Id:' $srcdir/src/events.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [events.c RCS ID])
+AC_DEFINE_UNQUOTED(FONT_IDENT, "`grep '$''Id:' $srcdir/src/font.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [font.c RCS ID])
+AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' $srcdir/src/grkelot.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [grkelot.c RCS ID])
+AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' $srcdir/src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [main.c RCS ID])
+AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' $srcdir/src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [menus.c RCS ID])
+AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' $srcdir/src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [misc.c RCS ID])
+AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' $srcdir/src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [netdisp.c RCS ID])
+AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' $srcdir/src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [options.c RCS ID])
+AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' $srcdir/src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [pixmap.c RCS ID])
+AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' $srcdir/src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [screen.c RCS ID])
+AC_DEFINE_UNQUOTED(SCROLLBAR_IDENT, "`grep '$''Id:' $srcdir/src/scrollbar.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [scrollbar.c RCS ID])
+AC_DEFINE_UNQUOTED(STARTUP_IDENT, "`grep '$''Id:' $srcdir/src/startup.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [startup.c RCS ID])
+AC_DEFINE_UNQUOTED(SYSTEM_IDENT, "`grep '$''Id:' $srcdir/src/system.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [system.c RCS ID])
+AC_DEFINE_UNQUOTED(TERM_IDENT, "`grep '$''Id:' $srcdir/src/term.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [term.c RCS ID])
+AC_DEFINE_UNQUOTED(TIMER_IDENT, "`grep '$''Id:' $srcdir/src/timer.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [timer.c RCS ID])
+AC_DEFINE_UNQUOTED(UTMP_IDENT, "`grep '$''Id:' $srcdir/src/utmp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [utmp.c RCS ID])
+AC_DEFINE_UNQUOTED(WINDOWS_IDENT, "`grep '$''Id:' $srcdir/src/windows.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [windows.c RCS ID])
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
 if test ! -z "${CFLAGS}" -o ! -z "${CCOPTS}"; then
@@ -108,10 +126,10 @@ fi
 
 AC_PROG_INSTALL
 
-ASFLAGS="$ASFLAGS -I../"
-AS=$CC
-AC_SUBST(ASFLAGS)
-AC_SUBST(AS)
+CCASFLAGS="$CCASFLAGS -I.. -I."
+CCAS=$CC
+AC_SUBST(CCASFLAGS)
+AC_SUBST(CCAS)
 
 dnl# Check for host system type
 AC_CANONICAL_HOST
@@ -144,12 +162,6 @@ export PERL AWK
 AC_C_CONST
 AC_C_INLINE
 AC_C_BIGENDIAN
-
-# Keep automake >= 1.6 quiet about "assembler sources seen but no CCAS defined"
-CCAS="$CC"
-AC_SUBST(CCAS)
-CCASFLAGS="$CFLAGS"
-AC_SUBST(CCASFLAGS)
 
 AC_PATH_XTRA
 
@@ -211,12 +223,12 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
               fi
               if test "$withval" != "no"; then 
                   echo "$withval"
-                  AC_DEFINE_UNQUOTED(DEBUG, $withval)
+                  AC_DEFINE_UNQUOTED(DEBUG, $withval, [Debugging level to compile in.])
               else
                   echo "no debugging"
-                  AC_DEFINE_UNQUOTED(DEBUG, 0)
+                  AC_DEFINE_UNQUOTED(DEBUG, 0, [Debugging level to compile in.])
               fi], [echo "4"
-                  AC_DEFINE_UNQUOTED(DEBUG, 4)
+                  AC_DEFINE_UNQUOTED(DEBUG, 4, [Debugging level to compile in.])
 ])
 
 AC_CHECK_FUNC(ptsname,
@@ -232,15 +244,15 @@ dnl# Check for the appropriate pty mechanism
 AC_MSG_CHECKING(for pty mechanism)
 PTY_MECH=""
 if test -c /dev/ptc ; then
-  AC_DEFINE(HAVE_DEV_PTC)
+  AC_DEFINE(HAVE_DEV_PTC, , [Define for /dev/ptc support.])
   PTY_MECH="AIX $PTY_MECH"
 fi
 if test -r /dev/ptmx -a ! -z "$HAVE_PTSNAME" -a ! -z "$HAVE_GRANTPT" -a ! -z "$HAVE_UNLOCKPT"; then
-  AC_DEFINE(HAVE_DEV_PTMX)
+  AC_DEFINE(HAVE_DEV_PTMX, , [Define for /dev/ptmx support.])
   PTY_MECH="SVR4 $PTY_MECH"
 fi
 if test -c /dev/ptyp128 ; then
-  AC_DEFINE(HAVE_SCO_PTYS)
+  AC_DEFINE(HAVE_SCO_PTYS, , [Define for SCO-style pty support.])
   PTY_MECH="SCO $PTY_MECH"
 fi
 if test "X$PTY_MECH" = "X"; then
@@ -255,7 +267,7 @@ AC_ARG_WITH(pty-group,
               PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
               if test ! -z "$PTY_GRP_NAME"; then
                 AC_MSG_RESULT($PTY_GRP_NAME)
-                AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME")
+                AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME", [Group name for pty ownership.])
               else
                 AC_MSG_RESULT(unable to determine.  This feature will not be enabled.)
               fi
@@ -263,13 +275,13 @@ AC_ARG_WITH(pty-group,
               AC_MSG_RESULT(none)
             else
               AC_MSG_RESULT($withval)
-              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$withval")
+              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$withval", [Group name for pty ownership.])
             fi
             ], [
             PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
             if test ! -z "$PTY_GRP_NAME"; then
               AC_MSG_RESULT($PTY_GRP_NAME)
-              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME")
+              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME", [Group name for pty ownership.])
             else
               AC_MSG_RESULT(none)
             fi
@@ -297,7 +309,7 @@ if test "x$HAVE_SAVED_UIDS" = "x"; then
         HAVE_SAVED_UIDS=0
     elif test $HAVE_SAVED_UIDS -eq 1; then
         AC_MSG_RESULT(yes)
-        AC_DEFINE(HAVE_SAVED_UIDS)
+        AC_DEFINE(HAVE_SAVED_UIDS, , [Define if the system supports saved UID and GID.])
     else
         AC_MSG_RESULT(no)
     fi
@@ -307,7 +319,7 @@ AC_ARG_ENABLE(strict-icccm,
 [  --enable-strict-icccm   compile with strict ICCCM compliant WM icon support], [
               if test "$enableval" = "yes"; then
                   AC_MSG_RESULT(yes)
-                  AC_DEFINE(STRICT_ICCCM)
+                  AC_DEFINE(STRICT_ICCCM, , [Define if WM cannot handle icon pixmaps.])
               else
                   AC_MSG_RESULT(no)
               fi
@@ -329,7 +341,7 @@ echo "        directory shown above.  If it is in a different directory, try usi
 echo "        the --x-libraries parameter to configure.";
              AC_MSG_ERROR([Fatal:  libXext not found.])])
 
-AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT))
+AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT, , [Define if X shaped window extension is available.]))
 
 dnl#
 dnl# FEATURES
@@ -345,7 +357,7 @@ AC_ARG_WITH(pablo,
               fi
               AC_CHECK_HEADER(IOTrace.h, [
                               AC_CHECK_LIB(PabloTraceExt, initIOTrace, [
-                                           AC_DEFINE(IOTRACE)
+                                           AC_DEFINE(IOTRACE, , [Define for Pablo I/O tracing support.])
                                            LIBS="$LIBS -lPabloTraceExt -lPabloTrace"
                                            echo "Pablo support enabled.  Headers in ${withval}/include.  Libraries in ${withval}/lib."
                                            ], [
@@ -367,14 +379,14 @@ AC_ARG_ENABLE(escreen,
 [  --disable-escreen       disable Eterm's built-in screen support], [
             if test "$enableval" = "yes"; then
               FOUND_SCREEN=1
-              AC_DEFINE(NS_HAVE_SCREEN,1,[Support the GNU screen text windowing system?])
+              AC_DEFINE(NS_HAVE_SCREEN, 1, [Define for support of the screen text windowing system.])
               AC_MSG_RESULT(yes)
             else
               AC_MSG_RESULT(no)
             fi
           ], [
             FOUND_SCREEN=1
-            AC_DEFINE(NS_HAVE_SCREEN,1,[Support the GNU screen text windowing system?])
+            AC_DEFINE(NS_HAVE_SCREEN, 1, [Define for support of the screen text windowing system.])
             AC_MSG_RESULT(yes)
           ]
 )
@@ -386,7 +398,7 @@ AC_ARG_ENABLE(etwin,
               if test "$FOUND_LIBTWIN" -ne "1"; then
                 AC_WARN(*** Twin support has been disabled because libTw was not found ***)
               else
-                AC_DEFINE(NS_HAVE_TWIN,1,[Support the twin text windowing system?])
+                AC_DEFINE(NS_HAVE_TWIN, 1, [Define for support of the twin text windowing system.])
                 LIBS="$LIBS -lTw"
               fi
             else
@@ -395,7 +407,7 @@ AC_ARG_ENABLE(etwin,
 )
 
 if test ! -z "$FOUND_SCREEN" || test ! -z "$FOUND_LIBTWIN"; then
-  AC_DEFINE(ESCREEN)
+  AC_DEFINE(ESCREEN, , [Define for Escreen support.])
 fi
 
 AC_MSG_CHECKING(if profiling macros should be included)
@@ -403,7 +415,7 @@ AC_ARG_ENABLE(profile,
 [  --enable-profile        compile with code profiling macros enabled], [
             if test "$enableval" = "yes"; then 
               AC_MSG_RESULT(yes)
-              AC_DEFINE(ENABLE_PROFILE)
+              AC_DEFINE(ENABLE_PROFILE, , [Define to enable code profiling macros.])
             else
               AC_MSG_RESULT(no)
             fi], AC_MSG_RESULT(no)
@@ -434,9 +446,9 @@ if test $USE_IMLIB -eq 1 ; then
   AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $GRLIBS)
   AC_CHECK_LIB(Imlib2, imlib_create_image, [
                GRLIBS="-lImlib2 $GRLIBS"
-               AC_DEFINE(HAVE_LIBIMLIB2)
-               AC_DEFINE(PIXMAP_SUPPORT)
-               AC_DEFINE(BACKING_STORE)
+               AC_DEFINE(HAVE_LIBIMLIB2, , [Define if Imlib2 is present.])
+               AC_DEFINE(PIXMAP_SUPPORT, , [Define if pixmap support is desired.])
+               AC_DEFINE(BACKING_STORE, , [Define if backing store is desired.])
               ], [
                AC_WARN(*** Pixmap support has been disabled because Imlib2 was not found ***)
                AC_WARN(*** or could not be linked.  Eterm should still work, but it will ***)
@@ -451,11 +463,11 @@ AC_ARG_ENABLE(trans,
 [  --enable-trans          compile with transparency support], [
             if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
-              AC_DEFINE(PIXMAP_OFFSET)
+              AC_DEFINE(PIXMAP_OFFSET, , [Define for pseudo-transparency support.])
             else
               AC_MSG_RESULT(no)
             fi], [AC_MSG_RESULT(yes)
-                AC_DEFINE(PIXMAP_OFFSET)
+                AC_DEFINE(PIXMAP_OFFSET, , [Define for pseudo-transparency support.])
 ])
 
 AC_MSG_CHECKING(for MMX support)
@@ -469,7 +481,7 @@ AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines], [
               ])
 if test "x$HAVE_MMX" = "xyes"; then
   AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_MMX)
+  AC_DEFINE(HAVE_MMX, , [Define for MMX support.])
 else
   AC_MSG_RESULT(no)
 fi
@@ -515,19 +527,19 @@ fi
 if test "$FOUND_LIBAST" -ge "$LIBAST_MIN"; then
   if test ! -z "$LIBAST_CONFIG"; then
     #GRLIBS="-last $GRLIBS"
-    AC_DEFINE(HAVE_LIBAST)
+    AC_DEFINE(HAVE_LIBAST, , [Define if LibAST is present.])
     test "$prefix" = "NONE" && prefix="`$LIBAST_CONFIG --prefix`"
     SUPPORT_FLAGS="`$LIBAST_CONFIG --support`"
     for i in $SUPPORT_FLAGS ; do
       case $i in
         MMX)
-          AC_DEFINE(LIBAST_MMX_SUPPORT)
+          AC_DEFINE(LIBAST_MMX_SUPPORT, 1, [Defined as 1 if LibAST has MMX support.])
           ;;
         X11)
-          AC_DEFINE(LIBAST_X11_SUPPORT)
+          AC_DEFINE(LIBAST_X11_SUPPORT, 1, [Defined as 1 if LibAST has X11 support.])
           ;;
         Imlib2)
-          AC_DEFINE(LIBAST_IMLIB2_SUPPORT)
+          AC_DEFINE(LIBAST_IMLIB2_SUPPORT, 1, [Defined as 1 if LibAST has Imlib2 support.])
           ;;
       esac
     done
@@ -542,12 +554,12 @@ AC_ARG_ENABLE(utmp,
             if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
               UTMP=1
-              AC_DEFINE(UTMP_SUPPORT)
+              AC_DEFINE(UTMP_SUPPORT, , [Define for utmp logging support.])
             else
               AC_MSG_RESULT(no)
               UTMP=0
             fi], [AC_MSG_RESULT(yes)
-                AC_DEFINE(UTMP_SUPPORT)
+                AC_DEFINE(UTMP_SUPPORT, , [Define for utmp logging support.])
                 UTMP=1
 ])
 if test $UTMP -eq 1; then
@@ -558,17 +570,17 @@ AC_ARG_WITH(backspace,
 [  --with-backspace=KEY    force backspace to send KEY (KEY is \"bs\" for ^H, \"del\" for ^?, \"auto\" to check stty)], [
             if test "$withval" = "bs"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-H)
-              AC_DEFINE(FORCE_BACKSPACE)
+              AC_DEFINE(FORCE_BACKSPACE, , [Define to force Backspace to send ^H.])
             elif test "$withval" = "del"; then 
               AC_MSG_RESULT(forcing Backspace to send Ctrl-?)
-              AC_DEFINE(FORCE_DELETE)
+              AC_DEFINE(FORCE_DELETE, , [Define to force Backspace to send ^?.])
             elif test "$withval" = "detect" -o "$withval" = "auto"; then 
               AC_MSG_RESULT(attempt to auto-detect)
             else
               AC_MSG_RESULT(default)
-              AC_DEFINE(FORCE_BACKSPACE)
+              AC_DEFINE(FORCE_BACKSPACE, , [Define to force Backspace to send ^H.])
             fi], [AC_MSG_RESULT(default)
-                AC_DEFINE(FORCE_BACKSPACE)
+                AC_DEFINE(FORCE_BACKSPACE, , [Define to force Backspace to send ^H.])
 ])
 AC_MSG_CHECKING(for delete key configuration)
 AC_ARG_WITH(delete,
@@ -577,18 +589,18 @@ AC_ARG_WITH(delete,
                           or a quoted string to use a specific string)], [
             if test "$withval" = "server"; then
               AC_MSG_RESULT(X server value)
-              AC_DEFINE(NO_DELETE_KEY)
+              AC_DEFINE(NO_DELETE_KEY, , [Define to use the X server value for Delete.])
             elif test "$withval" = "no"; then
               AC_MSG_RESULT(X server value)
-              AC_DEFINE(NO_DELETE_KEY)
+              AC_DEFINE(NO_DELETE_KEY, , [Define to use the X server value for Delete.])
             elif test "$withval" = "execute"; then
               AC_MSG_RESULT(send execute sequence)
             elif test "$withval" = "del"; then
               AC_MSG_RESULT(send Ctrl-?)
-              AC_DEFINE_UNQUOTED(KS_DELETE, "\177")
+              AC_DEFINE_UNQUOTED(KS_DELETE, "\177", [Define to force Delete to send ^?.])
             else
               AC_MSG_RESULT(forcing Delete to send "$withval")
-              AC_DEFINE_UNQUOTED(KS_DELETE, "$withval")
+              AC_DEFINE_UNQUOTED(KS_DELETE, "$withval", [Define for specific Delete escape sequence.])
             fi], AC_MSG_RESULT(default)
 )
 XTERM_HOME="\033\133H"
@@ -598,10 +610,10 @@ AC_ARG_WITH(home,
 [  --with-home=SEQUENCE    specify which sequence to use for the Home key ("xterm", "linux", or "vt102")], [
             if test "$withval" = "xterm"; then 
               AC_MSG_RESULT(emulate xterm)
-              AC_DEFINE_UNQUOTED(KS_HOME, "$XTERM_HOME")
+              AC_DEFINE_UNQUOTED(KS_HOME, "$XTERM_HOME", [Emulate xterm for Home key.])
             elif test "$withval" = "linux"; then 
               AC_MSG_RESULT(emulate linux console/vt220)
-              AC_DEFINE_UNQUOTED(KS_HOME, "$LINUX_HOME")
+              AC_DEFINE_UNQUOTED(KS_HOME, "$LINUX_HOME", [Emulate Linux console for Home key.])
             else
               AC_MSG_RESULT(default vt102)
             fi], AC_MSG_RESULT(default)
@@ -613,10 +625,10 @@ AC_ARG_WITH(end,
 [  --with-end=SEQUENCE     specify which sequence to use for the End key ("xterm", "linux", or "vt102")], [
             if test "$withval" = "xterm"; then 
               AC_MSG_RESULT(emulate xterm)
-              AC_DEFINE_UNQUOTED(KS_END, "$XTERM_END")
+              AC_DEFINE_UNQUOTED(KS_END, "$XTERM_END", [Emulate xterm for End key.])
             elif test "$withval" = "linux"; then 
               AC_MSG_RESULT(emulate linux console/vt220)
-              AC_DEFINE_UNQUOTED(KS_END, "$LINUX_END")
+              AC_DEFINE_UNQUOTED(KS_END, "$LINUX_END", [Emulate Linux console for End key.])
             else
               AC_MSG_RESULT(default vt102)
             fi], AC_MSG_RESULT(default)
@@ -628,9 +640,9 @@ AC_ARG_WITH(mousewheel,
               AC_MSG_RESULT(no)
             else
               AC_MSG_RESULT(yes)
-              AC_DEFINE(MOUSEWHEEL)
+              AC_DEFINE(MOUSEWHEEL, , [Define for built-in mousewheel support.])
             fi], [AC_MSG_RESULT(yes)
-                AC_DEFINE(MOUSEWHEEL)
+                AC_DEFINE(MOUSEWHEEL, , [Define for built-in mousewheel support.])
 ])
 
 AC_MSG_CHECKING(for automatic encoding)
@@ -640,9 +652,9 @@ AC_ARG_ENABLE(auto-encoding,
                AC_MSG_RESULT(no)
              else
                AC_MSG_RESULT(yes)
-               AC_DEFINE(AUTO_ENCODING)
+               AC_DEFINE(AUTO_ENCODING, 1, [Define for automatic character encoding.])
              fi, AC_MSG_RESULT(yes)
-                 AC_DEFINE(AUTO_ENCODING)
+                 AC_DEFINE(AUTO_ENCODING, 1, [Define for automatic character encoding.])
 )
 
 MULTICHAR_ENCODING=""
@@ -666,7 +678,7 @@ AC_ARG_ENABLE(multi-charset,
 if test "x$MULTI_CHARSET_TYPE" != "x"; then
   if test "$MULTI_CHARSET_TYPE" = "kanji"; then
     AC_MSG_RESULT(kanji)
-    AC_DEFINE(MULTI_CHARSET)
+    AC_DEFINE(MULTI_CHARSET, , [Define for multi-byte character set support.])
     DEF_FONT_IDX=0
     MULTICHAR_ENCODING="eucj"
     FONT0="fixed"
@@ -681,7 +693,7 @@ if test "x$MULTI_CHARSET_TYPE" != "x"; then
     MFONT4="jiskan26"
   elif test "$MULTI_CHARSET_TYPE" = "euc-kr" -o "$MULTI_CHARSET_TYPE" = "euckr"; then 
     AC_MSG_RESULT(euckr)
-    AC_DEFINE(MULTI_CHARSET)
+    AC_DEFINE(MULTI_CHARSET, , [Define for multi-byte character set support.])
     DEF_FONT_IDX=1
     MULTICHAR_ENCODING="euckr"
     FONT0="7x14"
@@ -696,7 +708,7 @@ if test "x$MULTI_CHARSET_TYPE" != "x"; then
     MFONT4="-*-gulim-medium-r-normal--24-*-*-*-*-240-ksc5601.1987-0"
   elif test "$MULTI_CHARSET_TYPE" = "unicode" -o "$MULTI_CHARSET_TYPE" = "utf-8" -o "$MULTI_CHARSET_TYPE" = "utf8"; then 
     AC_MSG_RESULT(ISO-10646)
-    AC_DEFINE(MULTI_CHARSET)
+    AC_DEFINE(MULTI_CHARSET, , [Define for multi-byte character set support.])
     DEF_FONT_IDX=2
     MULTICHAR_ENCODING="iso-10646"
     MFONT0="-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso10646-1"
@@ -711,7 +723,7 @@ if test "x$MULTI_CHARSET_TYPE" != "x"; then
     FONT4="9x15"
   elif test "$MULTI_CHARSET_TYPE" = "big5"; then
     AC_MSG_RESULT(big5)
-    AC_DEFINE(MULTI_CHARSET)
+    AC_DEFINE(MULTI_CHARSET, , [Define for multi-byte character set support.])
     DEF_FONT_IDX=0
     MULTICHAR_ENCODING="big5"
     FONT0="8x16"
@@ -744,12 +756,12 @@ if test "x$MULTI_CHARSET_TYPE" = "x"; then
   FONT4="9x15"
 fi
 
-AC_DEFINE_UNQUOTED(DEF_FONT_IDX, $DEF_FONT_IDX)
-AC_DEFINE_UNQUOTED(FONT0, "$FONT0")
-AC_DEFINE_UNQUOTED(FONT1, "$FONT1")
-AC_DEFINE_UNQUOTED(FONT2, "$FONT2")
-AC_DEFINE_UNQUOTED(FONT3, "$FONT3")
-AC_DEFINE_UNQUOTED(FONT4, "$FONT4")
+AC_DEFINE_UNQUOTED(DEF_FONT_IDX, $DEF_FONT_IDX, [Default font index.])
+AC_DEFINE_UNQUOTED(FONT0, "$FONT0", [Font 0])
+AC_DEFINE_UNQUOTED(FONT1, "$FONT1", [Font 1])
+AC_DEFINE_UNQUOTED(FONT2, "$FONT2", [Font 2])
+AC_DEFINE_UNQUOTED(FONT3, "$FONT3", [Font 3])
+AC_DEFINE_UNQUOTED(FONT4, "$FONT4", [Font 4])
 AC_SUBST(DEF_FONT_IDX)
 AC_SUBST(FONT0)
 AC_SUBST(FONT1)
@@ -758,12 +770,12 @@ AC_SUBST(FONT3)
 AC_SUBST(FONT4)
 export FONT0 FONT1 FONT2 FONT3 FONT4 DEF_FONT_IDX
 
-AC_DEFINE_UNQUOTED(MULTICHAR_ENCODING, "$MULTICHAR_ENCODING")
-AC_DEFINE_UNQUOTED(MFONT0, "$MFONT0")
-AC_DEFINE_UNQUOTED(MFONT1, "$MFONT1")
-AC_DEFINE_UNQUOTED(MFONT2, "$MFONT2")
-AC_DEFINE_UNQUOTED(MFONT3, "$MFONT3")
-AC_DEFINE_UNQUOTED(MFONT4, "$MFONT4")
+AC_DEFINE_UNQUOTED(MULTICHAR_ENCODING, "$MULTICHAR_ENCODING", [Multi-byte character encoding style.])
+AC_DEFINE_UNQUOTED(MFONT0, "$MFONT0", [Multibyte Font 0])
+AC_DEFINE_UNQUOTED(MFONT1, "$MFONT1", [Multibyte Font 1])
+AC_DEFINE_UNQUOTED(MFONT2, "$MFONT2", [Multibyte Font 2])
+AC_DEFINE_UNQUOTED(MFONT3, "$MFONT3", [Multibyte Font 3])
+AC_DEFINE_UNQUOTED(MFONT4, "$MFONT4", [Multibyte Font 4])
 AC_SUBST(MULTICHAR_ENCODING)
 AC_SUBST(MFONT0)
 AC_SUBST(MFONT1)
@@ -780,15 +792,15 @@ AC_ARG_ENABLE(xim,
 	      XIM="FALSE"
             else
               AC_MSG_RESULT(yes)
-	      AC_DEFINE(USE_XIM)
+	      AC_DEFINE(USE_XIM, , [Define for X Input Method support.])
 	      XIM="TRUE"
             fi], [AC_MSG_RESULT(yes)
-	        AC_DEFINE(USE_XIM)
+	        AC_DEFINE(USE_XIM, , [Define for X Input Method support.])
 	        XIM="TRUE"
 ])
 
 # check if we need X_LOCALE definition
-AC_CHECK_LIB(X11, _Xsetlocale, AC_DEFINE(X_LOCALE), AC_DEFINE(NO_XLOCALE))
+AC_CHECK_LIB(X11, _Xsetlocale, AC_DEFINE(X_LOCALE, , [X locale.]), AC_DEFINE(NO_XLOCALE, , [No X locale.]))
 
 # For multibyte selection handling
 #if test "$MULTICHAR_ENCODING" != "none"; then
@@ -797,7 +809,7 @@ AC_CHECK_LIB(X11, _Xsetlocale, AC_DEFINE(X_LOCALE), AC_DEFINE(NO_XLOCALE))
 
 # check X11R6 for XIM
 if test "$XIM" = "TRUE"; then
-  AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM))
+  AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM, , [Define if we have X11R6 XIM.]))
 fi
 
 AC_MSG_CHECKING(for Greek keyboard support)
@@ -805,7 +817,7 @@ AC_ARG_ENABLE(greek,
 [  --enable-greek          compile with support for Greek keyboards], [
             if test "$enableval" = "yes"; then 
               AC_MSG_RESULT(yes)
-              AC_DEFINE(GREEK_SUPPORT)
+              AC_DEFINE(GREEK_SUPPORT, , [Define for Greek keyboard support.])
             else
               AC_MSG_RESULT(no)
             fi], AC_MSG_RESULT(no)
@@ -861,7 +873,7 @@ fi
 dnl Stack Tracing toys
 AC_ARG_ENABLE(stack-trace, [  --disable-stack-trace   disable stack trace on abnormal termination], [
   if test "$enableval" = "no"; then
-    AC_DEFINE(NO_STACK_TRACE)
+    AC_DEFINE(NO_STACK_TRACE, , [Define to disable stack trace on abnormal termination.])
     NO_STACK_TRACE=1
   fi
 ])
@@ -869,15 +881,15 @@ AC_ARG_ENABLE(stack-trace, [  --disable-stack-trace   disable stack trace on abn
 if test "$NO_STACK_TRACE" != "1"; then
   AC_PATH_PROG(DBX, dbx, no)
   if test "$DBX" != "no"; then
-    AC_DEFINE_UNQUOTED(DBX, "$DBX")
+    AC_DEFINE_UNQUOTED(DBX, "$DBX", [Define for dbx support.])
   fi
   AC_PATH_PROG(GDB, gdb, no)
   if test "$GDB" != "no"; then
-    AC_DEFINE_UNQUOTED(GDB, "$GDB")
+    AC_DEFINE_UNQUOTED(GDB, "$GDB", [Define for gdb support.])
   fi
   AC_PATH_PROG(PSTACK, pstack, no, $PATH:/usr/proc/bin:/usr/sbin)
   if test "$PSTACK" != "no"; then
-    AC_DEFINE_UNQUOTED(PSTACK, "$PSTACK")
+    AC_DEFINE_UNQUOTED(PSTACK, "$PSTACK", [Define for pstack support.])
   fi
   AC_CHECK_LIB(cl, U_STACK_TRACE, LIBS="$LIBS -lcl")
 fi
@@ -890,7 +902,7 @@ if test "$OS_NAME" = "Linux"; then
   OS_MINOR=`echo $OS_REV | cut -d. -f2`
   if test "$OS_MAJOR" -ge "2" -a "$OS_MINOR" -ge "1"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(NEED_LINUX_HACK)
+    AC_DEFINE(NEED_LINUX_HACK, , [Define if uid hack needed to open X display.])
   else
     AC_MSG_RESULT(no)
   fi
@@ -908,23 +920,23 @@ AC_ARG_WITH(sense-of-humor, [  --without-sense-of-humor   Specify this if you ha
 if test -z "$HUMOR"; then
 AC_CHECK_LIB(Kenny, life_signs, , [
   echo "  Oh my god, they killed Kenny!  You bastards!"
-  AC_DEFINE(HAVE_HUMOR,1,[Does user have a sense of humour?])
+  AC_DEFINE(HAVE_HUMOR, 1, [Defined if user has a sense of humor.])
 ])
 fi
 
 CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "${sysconfdir}/$PACKAGE/themes:/etc/$PACKAGE/themes:${datadir}/$PACKAGE/themes"`
 CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "$CONFIG_SEARCH_PATH:${sysconfdir}/$PACKAGE:/etc/$PACKAGE:${datadir}/$PACKAGE"`
-AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:$CONFIG_SEARCH_PATH")
+AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:$CONFIG_SEARCH_PATH", [Config file/theme search path.])
 # Do replacements on theme files and such.  All variables to be replaced
 # by this routine MUST be exported before the awk script runs.
 if test "X$PKGDATADIR" = "X" ; then
   PKGDATADIR=`eval eval eval eval echo "$datadir/$PACKAGE"`
 fi
 export PKGDATADIR
-AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
+AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR", [Package data directory.])
 if test "$GDB" != "no"; then
   GDB_CMD_FILE="$PKGDATADIR/gdb.scr"
-  AC_DEFINE_UNQUOTED(GDB_CMD_FILE, "$GDB_CMD_FILE")
+  AC_DEFINE_UNQUOTED(GDB_CMD_FILE, "$GDB_CMD_FILE", [gdb command script.])
 else
   GDB_CMD_FILE=""
 fi
