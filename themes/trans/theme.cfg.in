@@ -7,24 +7,6 @@ begin color
     cursor_text #880000
     pointer white
     video normal
-    color  0 0    0    0
-    color  1 0xaa 0    0
-    color  2 0    0210 0
-    color  3 0xaa 0x55 0x22
-    color  4 0    0    0xaa
-    color  5 0xaa 0    0xaa
-    color  6 0    0xaa 0xaa
-    color  7 0xaa 0xaa 0xaa
-    color  8 0x44 0x44 0x44
-    color  9 0xff 0x44 0x44
-    color 10 0x44 0xff 0x44
-    color 11 0xff 0xff 0x44
-    color 12 0x44 0x44 0xff
-    color 13 0xff 0x44 0xff
-    color 14 0x44 0xff 0xff
-    color 15 #ffffff
-    color bd #ffffff
-    color ul #ffffff
 end color
 begin attributes
     title "%appname() -- Pseudo-transparency Theme"

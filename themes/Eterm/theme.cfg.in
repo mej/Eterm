@@ -35,24 +35,24 @@ begin color
 # The colors below are taken from Rasterman's .Xdefaults file.  They are intended to
 # display ANSI art properly when combined with a good ANSI-art font (like vga or
 # Rasterman's nexus font).
-    color  0 0    0    0
-    color  1 0xaa 0    0
-    color  2 0    0210 0
-    color  3 0xaa 0x55 0x22
-    color  4 0    0    0xaa
-    color  5 0xaa 0    0xaa
-    color  6 0    0xaa 0xaa
-    color  7 0xaa 0xaa 0xaa
-    color  8 0x44 0x44 0x44
-    color  9 0xff 0x44 0x44
-    color 10 0x44 0xff 0x44
-    color 11 0xff 0xff 0x44
-    color 12 0x44 0x44 0xff
-    color 13 0xff 0x44 0xff
-    color 14 0x44 0xff 0xff
-    color 15 #ffffff
-    color bd #ffffff
-    color ul #ffffff
+#    color  0 0    0    0
+#    color  1 0xaa 0    0
+#    color  2 0    0210 0
+#    color  3 0xaa 0x55 0x22
+#    color  4 0    0    0xaa
+#    color  5 0xaa 0    0xaa
+#    color  6 0    0xaa 0xaa
+#    color  7 0xaa 0xaa 0xaa
+#    color  8 0x44 0x44 0x44
+#    color  9 0xff 0x44 0x44
+#    color 10 0x44 0xff 0x44
+#    color 11 0xff 0xff 0x44
+#    color 12 0x44 0x44 0xff
+#    color 13 0xff 0x44 0xff
+#    color 14 0x44 0xff 0xff
+#    color 15 #ffffff
+#    color bd #ffffff
+#    color ul #ffffff
 
 # This ends the color section.  Any text after the word "end" is
 # assumed to be a comment and ignored.
@@ -69,6 +69,18 @@ begin attributes
 #    name %appname()
 #    iconname Eterm
 
+# Set the fonts.  These must be monospace fonts.  The values shown are
+# the Eterm defaults.  The "bold" font is the font used if color BD has
+# not been set and Eterm cannot map the foreground color to one of the
+# high-intensity colors (8-15).
+#    font default @DEF_FONT_IDX@
+#    font 0 @FONT0@
+#    font 1 @FONT1@
+#    font 2 @FONT2@
+#    font 3 @FONT3@
+#    font 4 @FONT4@
+#    font 5 10x20
+#    font 6 12x24
 end attributes
 
 # Define the imageclasses.

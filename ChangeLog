@@ -4525,3 +4525,11 @@ fallback value for CONFIG_BUFF so that people using the older libast
 will be able to use 0.9.2.  I'd like to get 0.9.2 out the door soon,
 but libast 0.5 is far from ready. :-)
 ----------------------------------------------------------------------
+Mon Feb 25 23:10:59 2002                        Michael Jennings (mej)
+
+Fixed a warning that got missed before.  Also removed the colour
+scheme that no one liked.  I left it in the Eterm theme, though...just
+commented it out.  I also put back the old font lines and commented
+those out too.  The Eterm theme config file is intended as a teaching
+tool as well as a theme config. :)
+----------------------------------------------------------------------

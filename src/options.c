@@ -2725,7 +2725,9 @@ conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
 void
 init_defaults(void)
 {
+#ifndef AUTO_ENCODING
   unsigned char i;
+#endif
 
 #if DEBUG >= DEBUG_MEM
   if (DEBUG_LEVEL >= DEBUG_MEM) {
