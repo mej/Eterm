@@ -1640,20 +1640,6 @@ scr_expose(int x, int y, int width, int height)
 
 /* ------------------------------------------------------------------------- */
 /*
- * Refresh the entire screen
- */
-#ifdef __GNUC__
-inline void
-#else
-void
-#endif
-scr_touch(void)
-{
-  scr_expose(0, 0, TermWin.width, TermWin.height);
-}
-
-/* ------------------------------------------------------------------------- */
-/*
  * Move the display so that the line represented by scrollbar value Y is at
  * the top of the screen
  */
@@ -2184,8 +2170,6 @@ scr_refresh(int type)
 #if defined(PIXMAP_SUPPORT) && defined(PIXMAP_BUFFERING)
   XClearWindow(Xdisplay, TermWin.vt);
 #endif
-  if (type & SMOOTH_REFRESH)
-    XSync(Xdisplay, False);
   D_SCREEN(("scr_refresh() exiting.\n"));
 
 #ifdef PROFILE_SCREEN

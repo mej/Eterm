@@ -93,17 +93,27 @@ char *def_colorName[] =
 char *rs_color[NRS_COLORS];
 Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
 
+/* To handle buffer overflows properly, we must malloc a buffer.  Free it when done. */
+#ifdef USE_XIM
+#  define LK_RET()   do {if (kbuf_alloced) FREE(kbuf); return;} while (0)
+#else
+#  define LK_RET()   return
+#endif
 /* Convert the keypress event into a string */
 void
 lookup_key(XEvent * ev)
 {
 
   static int numlock_state = 0;
-  static unsigned char kbuf[KBUFSZ];
   int ctrl, meta, shft, len;
   KeySym keysym;
 #ifdef USE_XIM
   int valid_keysym;
+  static unsigned char short_buf[256];
+  unsigned char *kbuf = short_buf;
+  int kbuf_alloced = 0;
+#else
+  static unsigned char kbuf[KBUFSZ];
 #endif
 #if DEBUG >= DEBUG_CMD
   static int debug_key = 1;	/* accessible by a debugger only */
@@ -130,11 +140,16 @@ lookup_key(XEvent * ev)
     Status status_return;
 
     kbuf[0] = '\0';
-    len = XmbLookupString(Input_Context, &ev->xkey, kbuf, sizeof(kbuf),
-			  &keysym, &status_return);
+    len = XmbLookupString(Input_Context, &ev->xkey, (char *)kbuf,
+                          sizeof(short_buf), &keysym, &status_return);
+    if (status_return == XBufferOverflow) {
+      kbuf = (unsigned char *) MALLOC(len + 1);
+      kbuf_alloced = 1;
+      len = XmbLookupString(Input_Context, &ev->xkey, (char *)kbuf, len, &keysym, &status_return);
+    }
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {
-    len = XLookupString(&ev->xkey, kbuf, sizeof(kbuf), &keysym, NULL);
+    len = XLookupString(&ev->xkey, kbuf, sizeof(short_buf), &keysym, NULL);
   }
 #else /* USE_XIM */
   len = XLookupString(&ev->xkey, kbuf, sizeof(kbuf), &keysym, NULL);
@@ -154,7 +169,7 @@ lookup_key(XEvent * ev)
 #endif
 
   if (action_dispatch(ev, keysym)) {
-    return;
+    LK_RET();
   } 
   if (len) {
     if (keypress_exit) {
@@ -167,17 +182,17 @@ lookup_key(XEvent * ev)
   if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
     len = sprintf(kbuf, "\e[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));
     tt_write(kbuf, len);
-    return;
+    LK_RET();
   }
 #ifdef HOTKEY
   /* for some backwards compatibility */
   if (HOTKEY) {
     if (keysym == ks_bigfont) {
       change_font(0, FONT_UP);
-      return;
+      LK_RET();
     } else if (keysym == ks_smallfont) {
       change_font(0, FONT_DN);
-      return;
+      LK_RET();
     }
   }
 #endif
@@ -202,31 +217,31 @@ lookup_key(XEvent * ev)
 	case XK_Prior:		/* Shift+Prior = scroll back */
 	  if (TermWin.saveLines) {
 	    scr_page(UP, lnsppg);
-	    return;
+	    LK_RET();
 	  }
 	  break;
 
 	case XK_Next:		/* Shift+Next = scroll forward */
 	  if (TermWin.saveLines) {
 	    scr_page(DN, lnsppg);
-	    return;
+	    LK_RET();
 	  }
 	  break;
 
 	case XK_Insert:	/* Shift+Insert = paste mouse selection */
 	  selection_request(ev->xkey.time, ev->xkey.x, ev->xkey.y);
-	  return;
+	  LK_RET();
 	  break;
 
 	  /* Eterm extras */
 	case XK_KP_Add:	/* Shift+KP_Add = bigger font */
 	  change_font(0, FONT_UP);
-	  return;
+	  LK_RET();
 	  break;
 
 	case XK_KP_Subtract:	/* Shift+KP_Subtract = smaller font */
 	  change_font(0, FONT_DN);
-	  return;
+	  LK_RET();
 	  break;
       }
     }
@@ -237,14 +252,14 @@ lookup_key(XEvent * ev)
       case XK_Prior:
 	if (TermWin.saveLines) {
 	  scr_page(UP, TermWin.nrow * 4 / 5);
-	  return;
+	  LK_RET();
 	}
 	break;
 
       case XK_Next:
 	if (TermWin.saveLines) {
 	  scr_page(DN, TermWin.nrow * 4 / 5);
-	  return;
+	  LK_RET();
 	}
 	break;
     }
@@ -260,7 +275,7 @@ lookup_key(XEvent * ev)
 #endif
 #ifdef PRINTPIPE
       scr_printscreen(ctrl | shft);
-      return;
+      LK_RET();
 #endif
       break;
 
@@ -272,7 +287,7 @@ lookup_key(XEvent * ev)
 	greek_reset();
       } else
 	xterm_seq(XTerm_title, APL_NAME "-" VERSION);
-      return;
+      LK_RET();
 #endif
       break;
   }
@@ -298,7 +313,7 @@ lookup_key(XEvent * ev)
 	tt_write(&ch, 1);
       }
       tt_write(kbuf, len);
-      return;
+      LK_RET();
     } else
 #endif
       switch (keysym) {
@@ -598,7 +613,7 @@ sprintf(kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 #endif
 
   if (len <= 0)
-    return;			/* not mapped */
+    LK_RET();			/* not mapped */
 
   /*
    * these modifications only affect the static keybuffer
@@ -1150,7 +1165,7 @@ process_window_mode(unsigned int nargs, int args[])
 	XClearWindow(Xdisplay, TermWin.vt);
 	XSync(Xdisplay, False);
 	scr_touch();
-	scr_refresh(SMOOTH_REFRESH);
+	scr_refresh(DEFAULT_REFRESH);
 	break;
       case 8:
 	if (i + 2 >= nargs)
@@ -1795,7 +1810,7 @@ xterm_seq(int op, const char *str)
 	      free_desktop_pixmap();
 	    }
 	    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-	    scr_expose(0, 0, TermWin_TotalWidth(), TermWin_TotalHeight());
+	    scr_touch();
 	  }
 	  break;
 #endif

@@ -32,6 +32,7 @@
 #define CHECK_SELECTION	do { \
                           if (selection.op) selection_check(); \
                         } while (0)
+#define scr_touch()  scr_expose(0, 0, TermWin.width, TermWin.height)
 
 /*
  * CLEAR_ROWS : clear <num> rows starting from row <row>
@@ -254,7 +255,6 @@ extern void set_multichar_encoding(const char *);
 extern int scr_get_fgcolor(void);
 extern int scr_get_bgcolor(void);
 extern void scr_expose(int, int, int, int);
-extern void scr_touch(void);
 extern int scr_move_to(int, int);
 extern int scr_page(int, int);
 extern void scr_bell(void);

@@ -2386,3 +2386,10 @@ Mon Sep 13 12:23:36 PDT 1999	Michael Jennings <mej@eterm.org>
 	without all the crap on the command line. :-)
 	
 -------------------------------------------------------------------------------
+Tue Sep 14 16:41:08 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Worked around a XF86 3.9.16 (perhaps Xinerama) problem.  Also added
+	some XIM changes from Sung-Hyun Nam <namsh@lgic.co.kr> to handle
+	buffer overflows.
+	
+-------------------------------------------------------------------------------

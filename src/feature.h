@@ -188,9 +188,6 @@
 /* Continuous scrolling by pressing the scrollbar arrow buttons */
 #define SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
 
-/* To allow smooth refresh when the terminal window is fully unobscured. */
-/* #define USE_SMOOTH_REFRESH */
-
 /* Delay periods for continuous scrolling */
 /* #define SCROLLBAR_INITIAL_DELAY 40 */
 /* #define SCROLLBAR_CONTINUOUS_DELAY 2 */
@@ -368,9 +365,7 @@ inline void *memmove(void *, const void *, size_t);
 # define NSCREENS       1
 #endif
 
-#ifdef USE_SMOOTH_REFRESH
-# define DEFAULT_REFRESH SMOOTH_REFRESH
-#else
+#ifndef DEFAULT_REFRESH
 # define DEFAULT_REFRESH FAST_REFRESH
 #endif
 

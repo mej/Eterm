@@ -242,7 +242,7 @@ handle_property_notify(event_t * ev)
         free_desktop_pixmap();
       }
       render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_expose(0, 0, TermWin_TotalWidth(), TermWin_TotalHeight());
+      scr_touch();
       scrollbar_show(0);
 
     } else if (ev->xany.window == desktop_window) {
@@ -254,7 +254,7 @@ handle_property_notify(event_t * ev)
         free_desktop_pixmap();
       }
       render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_expose(0, 0, TermWin_TotalWidth(), TermWin_TotalHeight());
+      scr_touch();
       scrollbar_show(0);
     }
   }
@@ -321,16 +321,15 @@ handle_visibility_notify(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   switch (ev->xvisibility.state) {
     case VisibilityUnobscured:
-#ifdef USE_SMOOTH_REFRESH
-      refresh_type = SMOOTH_REFRESH;
-#else
+      D_X11(("handle_visibility_notify():  Window completely visible\n"));
       refresh_type = FAST_REFRESH;
-#endif
       break;
     case VisibilityPartiallyObscured:
+      D_X11(("handle_visibility_notify():  Window partially hidden\n"));
       refresh_type = SLOW_REFRESH;
       break;
     default:
+      D_X11(("handle_visibility_notify():  Window completely hidden\n"));
       refresh_type = NO_REFRESH;
       break;
   }
@@ -349,7 +348,7 @@ handle_focus_in(event_t * ev)
     if (background_is_pixmap() && (images[image_bg].norm != images[image_bg].selected)) {
       images[image_bg].current = images[image_bg].selected;
       render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_expose(0, 0, TermWin_TotalWidth(), TermWin_TotalHeight());
+      scr_touch();
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(Options & Opt_scrollBar);
@@ -374,7 +373,7 @@ handle_focus_out(event_t * ev)
     if (background_is_pixmap() && (images[image_bg].norm != images[image_bg].selected)) {
       images[image_bg].current = images[image_bg].norm;
       render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_expose(0, 0, TermWin_TotalWidth(), TermWin_TotalHeight());
+      scr_touch();
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(0);
@@ -450,6 +449,10 @@ handle_expose(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (ev->xany.window == TermWin.vt) {
+    if (refresh_type == NO_REFRESH) {
+      print_warning("Received Expose event while obscured.  Possible X server bug!");
+      refresh_type = FAST_REFRESH;
+    }
     scr_expose(ev->xexpose.x, ev->xexpose.y, ev->xexpose.width, ev->xexpose.height);
   } else {
 

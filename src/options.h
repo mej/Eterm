@@ -67,7 +67,7 @@
 # define Opt_scrollBar_right		(1LU << 14)
 # define Opt_borderless			(1LU << 15)
 # define Opt_pixmapTrans		(1LU << 16)
-# define Opt_saveUnder			(1LU << 17)
+# define Opt_backing_store		(1LU << 17)
 # define Opt_noCursor			(1LU << 18)
 # define Opt_pause			(1LU << 19)
 # define Opt_homeOnInput		(1LU << 20)

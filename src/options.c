@@ -253,7 +253,7 @@ static char *rs_greek_keyboard = NULL;
 #endif
 #ifdef PIXMAP_SUPPORT
 char *rs_pixmapScale = NULL;
-const char *rs_saveUnder = NULL;
+const char *rs_backing_store = NULL;
 char *rs_icon = NULL;
 char *rs_cmod_image = NULL;
 char *rs_cmod_red = NULL;
@@ -429,9 +429,7 @@ static const struct {
 #ifdef META8_OPTION
       OPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", &rs_meta8, &Options, Opt_meta8),
 #endif
-#ifdef BACKING_STORE
-      OPT_BLONG("save-under", "use backing store", &rs_saveUnder, &Options, Opt_saveUnder),
-#endif
+      OPT_BLONG("backing-store", "use backing store", &rs_backing_store, &Options, Opt_backing_store),
       OPT_BLONG("no-cursor", "disable the text cursor", &rs_noCursor, &Options, Opt_noCursor),
       OPT_BLONG("pause", "pause for a keypress after the child process exits", &rs_pause, &Options, Opt_pause),
       OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &rs_xterm_select, &Options, Opt_xterm_select),
@@ -791,11 +789,6 @@ version(void)
   printf(" +SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
 #else
   printf(" -SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
-#endif
-#ifdef USE_SMOOTH_REFRESH
-  printf(" +USE_SMOOTH_REFRESH");
-#else
-  printf(" -USE_SMOOTH_REFRESH");
 #endif
 #ifdef MENU_SHADOW_IN
   printf(" +MENU_SHADOW_IN");
@@ -2078,18 +2071,14 @@ parse_toggles(char *buff)
       Options &= ~(Opt_borderless);
       rs_borderless = *false_vals;
     }
-  } else if (!BEG_STRCASECMP(buff, "save_under ")) {
-#ifdef BACKING_STORE
+  } else if (!BEG_STRCASECMP(buff, "backing_store ")) {
     if (bool_val) {
-      Options |= Opt_saveUnder;
-      rs_saveUnder = *true_vals;
+      Options |= Opt_backing_store;
+      rs_backing_store = *true_vals;
     } else {
-      Options &= ~(Opt_saveUnder);
-      rs_saveUnder = *false_vals;
+      Options &= ~(Opt_backing_store);
+      rs_backing_store = *false_vals;
     }
-#else
-    print_warning("Support for the save_under attribute was not compiled in, ignoring");
-#endif
 
   } else if (!BEG_STRCASECMP(buff, "no_cursor ")) {
     if (bool_val) {
@@ -3626,7 +3615,7 @@ save_config(char *path)
   fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollBar_right ? 1 : 0));
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
   fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
-  fprintf(fp, "    save_under %d\n", (Options & Opt_saveUnder ? 1 : 0));
+  fprintf(fp, "    backing_store %d\n", (Options & Opt_backing_store ? 1 : 0));
   fprintf(fp, "    no_cursor %d\n", (Options & Opt_noCursor ? 1 : 0));
   fprintf(fp, "    pause %d\n", (Options & Opt_pause ? 1 : 0));
   fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));

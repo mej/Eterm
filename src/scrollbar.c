@@ -203,12 +203,13 @@ scrollbar_init(void)
   Attributes.background_pixel = PixColors[scrollColor];
   Attributes.border_pixel = PixColors[bgColor];
   Attributes.override_redirect = TRUE;
+  Attributes.save_under = TRUE;
   cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
   mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask
       | Button1MotionMask | Button2MotionMask | Button3MotionMask;
 
   scrollBar.win = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-				CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
+				CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
   XDefineCursor(Xdisplay, scrollBar.win, cursor);
   XSelectInput(Xdisplay, scrollBar.win, mask);
 

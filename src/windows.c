@@ -169,7 +169,6 @@ Create_Windows(int argc, char *argv[])
   } else {
     mwmhints.flags = 0;
   }
-  Attributes.save_under = TRUE;
   Attributes.backing_store = WhenMapped;
   Attributes.colormap = cmap;
 
@@ -400,19 +399,15 @@ Create_Windows(int argc, char *argv[])
   cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
 
   /* the vt window */
-
-#ifdef BACKING_STORE
-  if ((!(Options & Opt_borderless)) && (Options & Opt_saveUnder)) {
+  if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
     TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
-			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWBackingStore | CWColormap, &Attributes);
     if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {
       XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
       XClearWindow(Xdisplay, TermWin.vt);
     }
-  } else
-#endif
-  {
+  } else {
     D_X11(("Creating term window with no backing store\n"));
     TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
@@ -610,7 +605,7 @@ resize_window1(unsigned int width, unsigned int height)
              || ((Options & Opt_viewport_mode) || (images[image_bg].mode & MODE_VIEWPORT))) {
     resize_subwindows(width, height);
     scrollbar_show(0);
-    scr_expose(0, 0, width, height);
+    scr_touch();
   }
 }
 
