@@ -2395,8 +2395,8 @@ selection_paste(Window win, unsigned prop, int Delete)
     if (actual_type == XA_STRING) {
       PasteIt(data, nitems);
     } else {
-      int size, i, ret;
-      XTextProperty   xtextp;
+      int size, i;
+      XTextProperty xtextp;
       char **cl;
 
       xtextp.value = data;

@@ -133,7 +133,7 @@ AC_CHECK_HEADERS(fcntl.h termios.h \
 sys/ioctl.h sys/select.h sys/time.h \
 sys/sockio.h sys/byteorder.h \
 utmpx.h unistd.h bsd/signal.h regex.h \
-regexp.h stdarg.h)
+regexp.h stdarg.h X11/Xmu/Atoms.h)
 AC_HEADER_TIME
 
 dnl# Missing typedefs and replacements
@@ -144,7 +144,7 @@ AC_TYPE_UID_T
 
 dnl# Checks for library functions.
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf X11/Xmu/Atoms.h)
+AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf)
 dps_snprintf_oflow()
 
 dnl# Check for the need for -lutil on BSD systems
