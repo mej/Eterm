@@ -383,10 +383,9 @@ lookup_key(XEvent * ev)
   }
 
   /* At this point, all the keystrokes that have special meaning to us have been handled.
-     If we're in pause mode, this is a keystroke we need to ignore.  Just return here. */
+     If we're in pause mode, this is a keystroke asking us to exit.  Otherwise, return here. */
   if (paused) {
-    /* Allow ESC or Ctrl-C to exit. */
-    if ((keysym == XK_Escape) || ((ctrl) && ((keysym == XK_C) || (keysym == XK_c)))) {
+    if (keysym && len) {
       exit(0);
     }
     LK_RET();

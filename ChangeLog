@@ -3743,3 +3743,11 @@ Mon Jul  3 12:17:53 PDT 2000	Michael Jennings <mej@eterm.org>
 	user.cfg wins).
 	
 -------------------------------------------------------------------------------
+Mon Jul  3 12:50:00 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	I think this --pause mechanism will be agreeable to everyone.  You can
+	once again exit with any key (well, any key that has an actual
+	character/string associated with it by X...not Insert, Home, etc.),
+	but keys Eterm uses (like Shift-PgUp) will still work as expected.
+	
+-------------------------------------------------------------------------------
