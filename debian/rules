@@ -51,6 +51,8 @@ install: build
 
 	# Add here commands to install the package into debian/tmp.
 	$(MAKE) install prefix=$(pwd)/debian/tmp/usr
+	install -d $(pwd)/debian/tmp/usr/share/doc/eterm
+	install $(pwd)/ChangeLog $(pwd)/debian/tmp/usr/share/doc/eterm
 
 
 # Build architecture-independent files here.
