@@ -88,6 +88,9 @@ eterm_bootstrap(int argc, char *argv[])
   PABLO_START_TRACING();
   getcwd(initial_dir, PATH_MAX);
 
+  libast_set_program_name(PACKAGE);
+  libast_set_program_version(VERSION);
+
   /* Open display, get options/resources and create the window */
   if ((display_name = getenv("DISPLAY")) == NULL)
     display_name = ":0";

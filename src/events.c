@@ -327,9 +327,12 @@ handle_client_message(event_t *ev)
     unsigned long Size, RemainingBytes;
 
     XGetWindowProperty(Xdisplay, Xroot, DndSelection, 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
-    XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
-    selection_paste(Xroot, XA_CUT_BUFFER0, True);
-    XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
+    if (data != NULL) {
+      XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
+      selection_paste(Xroot, XA_CUT_BUFFER0, True);
+      XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
+      XFree(data);
+    }
     return 1;
   }
 #endif /* OFFIX_DND */

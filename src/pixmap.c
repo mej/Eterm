@@ -1814,6 +1814,7 @@ get_desktop_window(void)
     } else {
       continue;
     }
+    XFree(data);
     if (type != None) {
       D_PIXMAP(("Found desktop as window 0x%08x\n", w));
       if (w != Xroot) {
@@ -1871,6 +1872,7 @@ get_desktop_pixmap(void)
     XGetWindowProperty(Xdisplay, desktop_window, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     if (type == XA_PIXMAP) {
       p = *((Pixmap *) data);
+      XFree(data);
       if (p != None) {
         D_PIXMAP(("  Found pixmap 0x%08x\n", p));
         if (orig_desktop_pixmap == p) {
@@ -1912,6 +1914,8 @@ get_desktop_pixmap(void)
           }
         }
       }
+    } else {
+      XFree(data);
     }
   }
   if (prop2 != None) {
@@ -1924,6 +1928,7 @@ get_desktop_pixmap(void)
 
       free_desktop_pixmap();
       pix = *((Pixel *) data);
+      XFree(data);
       D_PIXMAP(("  Found solid color 0x%08x\n", pix));
       gcvalue.foreground = pix;
       gcvalue.background = pix;
@@ -1934,6 +1939,8 @@ get_desktop_pixmap(void)
       D_PIXMAP(("Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
       LIBAST_X_FREE_GC(gc);
       return (desktop_pixmap = color_pixmap);
+    } else {
+      XFree(data);
     }
   }
   D_PIXMAP(("No suitable attribute found.\n"));

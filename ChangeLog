@@ -3938,3 +3938,11 @@ Tue Oct 31 19:33:09 PST 2000	Michael Jennings <mej@eterm.org>
 	in their names.
 	
 -------------------------------------------------------------------------------
+Thu Nov  9 19:22:18 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed the error message bug I noticed.  There's also a big5 fix from
+	Chung-Yen Chang <candyz@cle.linux.org.tw>, and I got rid of some
+	tiny memory leaks in the X data, the first of which was noticed by
+	zed@linuxpower.org.
+	
+-------------------------------------------------------------------------------

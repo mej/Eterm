@@ -286,7 +286,7 @@ static const struct {
       OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
       OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
       OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
-      OPT_LONG("mencoding", "multichar encoding mode (eucj or sjis or euckr)",
+      OPT_LONG("mencoding", "multichar encoding mode (eucj, sjis, euckr, or big5)",
 	       &rs_multichar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
@@ -3240,7 +3240,8 @@ parse_multichar(char *buff, void *state)
     if (rs_multichar_encoding != NULL) {
       if (BEG_STRCASECMP(rs_multichar_encoding, "eucj")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
-	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")) {
+	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "big5")) {
 	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
 		    file_peek_path(), file_peek_line(), rs_multichar_encoding);
 	return NULL;

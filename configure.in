@@ -577,6 +577,21 @@ if test "x$MULTI_CHARSET_TYPE" != "x"; then
     FONT2="fixed"
     FONT3="8x13"
     FONT4="9x15"
+  elif test "$MULTI_CHARSET_TYPE" = "big5"; then
+    AC_MSG_RESULT(big5)
+    AC_DEFINE(MULTI_CHARSET)
+    DEF_FONT_IDX=0
+    MULTICHAR_ENCODING="big5"
+    FONT0="8x16"
+    FONT1="9x18"
+    FONT2="10x20"
+    FONT3="12x24"
+    FONT4="13x26"
+    MFONT0="-*-ming-medium-r-normal--16-*-*-*-c-*-big5-0"
+    MFONT1="-*-ming-medium-r-normal--18-*-*-*-c-*-big5-0"
+    MFONT2="-*-ming-medium-r-normal--20-*-*-*-c-*-big5-0"
+    MFONT3="-*-ming-medium-r-normal--24-*-*-*-c-*-big5-0"
+    MFONT4="-*-ming-medium-r-normal--26-*-*-*-c-*-big5-0"
   else
     MULTI_CHARSET_TYPE=""
   fi
