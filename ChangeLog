@@ -2427,3 +2427,10 @@ Mon Sep 20 18:32:01 PDT 1999	Michael Jennings <mej@eterm.org>
 	problems.  Let me know if you find any of them. :)
 	
 -------------------------------------------------------------------------------
+Mon Sep 20 20:33:13 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Frikkin'...!  Well, this should fix the text updating problem with
+	transparency, though I swear I don't know why it was crashing before
+	and isn't now....
+	
+-------------------------------------------------------------------------------

@@ -577,6 +577,7 @@ resize_window1(unsigned int width, unsigned int height)
     first_time = 0;
   } else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
     resize_subwindows(width, height);
+    scr_touch();
   }
 }
 
