@@ -4268,3 +4268,11 @@ And finally, I added the kill() function to the script language.  At
 this point it can only take signals as numbers, but that's good enough
 for now.
 ----------------------------------------------------------------------
+Mon Jun 25 17:59:50 2001                        Michael Jennings (mej)
+
+This takes care of Debian bug #101777.  Somebody was bitching that the
+0-15 colors could no longer be used as values for the -f/-b/-c/etc.
+options.  I don't remember that ever being a feature to begin with,
+but it took me all of 5 minutes to make it happen, so I figure what
+the hell.  Here ya go.
+----------------------------------------------------------------------

@@ -191,6 +191,13 @@ get_color_by_name(const char *name, const char *fallback)
     } else {
       name = fallback;
     }
+  } else if (isdigit(*name)) {
+    unsigned long c;
+
+    c = strtoul(name, (char **) NULL, 0);
+    if (c <= 15) {
+      name = rs_color[c + minColor];
+    }
   }
   if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
     print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
