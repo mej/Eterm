@@ -479,7 +479,7 @@ usage(void)
   unsigned short i, col;
 
   printf("Eterm Enlightened Terminal Emulator for X Windows\n");
-  printf("Copyright (c) 1997-1999, Tuomo Venalainen and Michael Jennings\n\n");
+  printf("Copyright (c) 1997-1999, " AUTHORS "\n\n");
   printf("Usage for " APL_NAME " " VERSION ":\n\n");
   printf("%7s %17s %40s\n", "POSIX", "GNU", "Description");
   printf("%8s %10s %41s\n", "=======", "===============================",

@@ -8,6 +8,7 @@ DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
 AUTHORS="Michael Jennings (mej@eterm.org) and Tuomo Venäläinen (vendu@cc.hut.fi) "
 AC_SUBST(AUTHORS)
+AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS")
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
 if test ! -z "${CFLAGS}" -o ! -z "${CCOPTS}"; then

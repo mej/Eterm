@@ -45,20 +45,20 @@ static const char cvs_ident[] = "$Id$";
 #include "pixmap.h"
 #include "timer.h"
 
-static timer_t *timers = NULL;
+static etimer_t *timers = NULL;
 
 timerhdl_t
 timer_add(unsigned long msec, timer_handler_t handler, void *data) {
 
-  static timer_t *timer;
+  static etimer_t *timer;
   struct timeval tv;
   static struct timezone tz;
 
   if (!timers) {
-    timers = (timer_t *) MALLOC(sizeof(timer_t));
+    timers = (etimer_t *) MALLOC(sizeof(etimer_t));
     timer = timers;
   } else {
-    timer->next = (timer_t *) MALLOC(sizeof(timer_t));
+    timer->next = (etimer_t *) MALLOC(sizeof(etimer_t));
     timer = timer->next;
   }
   timer->msec = msec;
@@ -75,8 +75,8 @@ timer_add(unsigned long msec, timer_handler_t handler, void *data) {
 unsigned char
 timer_del(timerhdl_t handle) {
 
-  register timer_t *current;
-  timer_t *temp;
+  register etimer_t *current;
+  etimer_t *temp;
 
   if (timers == handle) {
     timers = handle->next;
@@ -113,7 +113,7 @@ timer_change_delay(timerhdl_t handle, unsigned long msec) {
 void
 timer_check(void) {
 
-  register timer_t *current;
+  register etimer_t *current;
   struct timeval tv;
   static struct timezone tz;
 

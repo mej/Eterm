@@ -39,8 +39,8 @@
 
 /************ Structures ************/
 typedef unsigned char (*timer_handler_t)(void *);
-typedef struct timer_struct timer_t;
-typedef timer_t *timerhdl_t;  /* The timer handles are actually pointers to a timer_t struct, but clients shouldn't use them as such. */
+typedef struct timer_struct etimer_t;
+typedef etimer_t *timerhdl_t;  /* The timer handles are actually pointers to a etimer_t struct, but clients shouldn't use them as such. */
 struct timer_struct {
   unsigned long msec;
   struct timeval time;

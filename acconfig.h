@@ -311,6 +311,7 @@
 #undef NO_XLOCALE
 #undef GREEK_SUPPORT
 #undef CONFIG_SEARCH_PATH
+#undef AUTHORS
 
 
 /* Leave that blank line there!!  Autoheader needs it.

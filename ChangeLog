@@ -2289,3 +2289,9 @@ Wed Aug 18 14:58:08 PDT 1999	Michael Jennings <mej@eterm.org>
 	Also cleaned up the XIM code to fit with the rest of Eterm.
 	
 -------------------------------------------------------------------------------
+Wed Aug 18 18:17:14 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Apparently, FreeBSD has a timer_t already, so I renamed Eterm's.
+	Thanks to Carl Lewis <carl@dpiwe.tas.gov.au> for pointing this out.
+
+-------------------------------------------------------------------------------
