@@ -2209,6 +2209,7 @@ run_command(char **argv)
 	}
       }
 #endif
+      D_CMD(("[%d] execvp(\"%s\", %8p) is next.  I'm outta here!\n", getpid(), NONULL(argv[0]), argv));
       execvp(argv[0], argv);
       print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
     } else {

@@ -107,14 +107,14 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #ifdef HAVE_TERMIOS_H
 # ifdef TCSANOW			/* POSIX */
 #  define GET_TERMIOS(fd,tios)	tcgetattr(fd, tios)
-#  define SET_TERMIOS(fd,tios)	do {cfsetospeed(tios, BAUDRATE); cfsetispeed(tios, BAUDRATE); tcsetattr(fd, TCSANOW, tios); } while (0)
+#  define SET_TERMIOS(fd,tios)	do {cfsetospeed(tios, BAUDRATE); cfsetispeed(tios, BAUDRATE); tcsetattr(fd, TCSANOW, tios);} while (0)
 # else
 #  ifdef TIOCSETA
-#   define GET_TERMIOS(fd,tios)	ioctl (fd, TIOCGETA, tios)
-#   define SET_TERMIOS(fd,tios)	do {tios->c_cflag |= BAUDRATE; ioctl(fd, TIOCSETA, tios); } while (0)
+#   define GET_TERMIOS(fd,tios)	ioctl(fd, TIOCGETA, tios)
+#   define SET_TERMIOS(fd,tios)	do {tios->c_cflag |= BAUDRATE; ioctl(fd, TIOCSETA, tios);} while (0)
 #  else
-#   define GET_TERMIOS(fd,tios)	ioctl (fd, TCGETS, tios)
-#   define SET_TERMIOS(fd,tios)	do {tios->c_cflag |= BAUDRATE; ioctl(fd, TCSETS, tios); } while (0)
+#   define GET_TERMIOS(fd,tios)	ioctl(fd, TCGETS, tios)
+#   define SET_TERMIOS(fd,tios)	do {tios->c_cflag |= BAUDRATE; ioctl(fd, TCSETS, tios);} while (0)
 #  endif
 # endif
 # define SET_TTYMODE(fd,tios)	SET_TERMIOS(fd, tios)

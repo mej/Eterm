@@ -4308,3 +4308,10 @@ Mon Jul 23 11:05:45 2001                        Michael Jennings (mej)
 Well that was dumb.  PNG backgrounds which were tiled rather than
 scaled would end up nuking most of the window.  Fixed now.
 ----------------------------------------------------------------------
+Mon Jul 23 17:59:18 2001                        Michael Jennings (mej)
+
+Fixed the problem where the wrong font would end up in your menus and
+buttonbars if you enable multibyte support but don't have a specific
+encoding in use.  I also corrected a large number of misplaced
+newlines in error messages; I think that was some Perl-fu gone awry.
+----------------------------------------------------------------------

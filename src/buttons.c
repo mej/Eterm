@@ -53,13 +53,13 @@ static inline void
 draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 
-  D_BBAR(("Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
+  D_BBAR(("Writing string \"%s\" (length %lu) using font 0x%08x onto drawable 0x%08x at %d, %d\n", str, len, bbar->font, d, x, y));
   REQUIRE(bbar != NULL);
   REQUIRE(d != None);
   REQUIRE(gc != None);
 
 #ifdef MULTI_CHARSET
-  if (bbar->fontset)
+  if (bbar->fontset && encoding_method != LATIN1)
     XmbDrawString(Xdisplay, d, bbar->fontset, gc, x, y, str, len);
   else
 #endif
@@ -548,7 +548,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
   bbar->fheight = font->ascent + font->descent + rs_line_space;
   XSetFont(Xdisplay, bbar->gc, font->fid);
   bbar_reset_total_height();
-  D_BBAR(("New dimensions are %d/%d/%d\n", bbar->fwidth, bbar->fheight, bbar->h));
+  D_BBAR(("Font is \"%s\" (0x%08x).  New dimensions are %d/%d/%d\n", NONULL(fontname), font, bbar->fwidth, bbar->fheight, bbar->h));
 
   return 1;
 }

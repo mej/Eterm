@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include "misc.h"
 #include "options.h"
 #include "pixmap.h"
+#include "profile.h"
 #include "screen.h"
 #include "script.h"
 #include "term.h"
@@ -101,7 +102,7 @@ draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
   D_MENU(("Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
 
 #ifdef MULTI_CHARSET
-  if (current_menu && current_menu->fontset)
+  if (current_menu && current_menu->fontset && encoding_method != LATIN1)
     XmbDrawString(Xdisplay, d, current_menu->fontset, gc, x, y, str, len);
   else
 #endif
@@ -1167,7 +1168,7 @@ menu_display(int x, int y, menu_t *menu)
   menu->y = y;
   D_MENU(("Displaying menu \"%s\" (window 0x%08x) at root coordinates %d, %d\n", menu->title, menu->win, menu->x, menu->y));
 
-  menu_draw(menu);
+  PROF_FUNC(menu_draw, menu_draw(menu));
   menu->state |= (MENU_STATE_IS_MAPPED);
 
   /* Take control of the pointer so we get all events for it, even those outside the menu window */

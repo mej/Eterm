@@ -1295,8 +1295,8 @@ parse_color(char *buff, void *state)
       FREE(tmp);
     }
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context color", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context color\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return state;
 }
@@ -1374,8 +1374,8 @@ parse_attributes(char *buff, void *state)
     }
 
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context attributes", file_peek_path(), file_peek_line(), (buff ? buff : ""));
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context attributes\n",
+                file_peek_path(), file_peek_line(), (buff ? buff : ""));
   }
   return state;
 }
@@ -1726,8 +1726,8 @@ parse_keyboard(char *buff, void *state)
     } else if (BOOL_OPT_ISFALSE(tmp)) {
       PrivateModes &= ~(PrivMode_aplKP);
     } else {
-      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for \n"
-		  "attribute app_keypad", file_peek_path(), file_peek_line(), tmp);
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_keypad\n",
+                  file_peek_path(), file_peek_line(), tmp);
       return NULL;
     }
 
@@ -1745,14 +1745,14 @@ parse_keyboard(char *buff, void *state)
     } else if (BOOL_OPT_ISFALSE(tmp)) {
       PrivateModes &= ~(PrivMode_aplCUR);
     } else {
-      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for \n"
-		  "attribute app_cursor", file_peek_path(), file_peek_line(), tmp);
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_cursor\n",
+                  file_peek_path(), file_peek_line(), tmp);
       return NULL;
     }
 
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context keyboard", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context keyboard\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return state;
 }
@@ -1820,8 +1820,8 @@ parse_misc(char *buff, void *state)
 #endif
 
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context misc", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context misc\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return state;
 }
@@ -1864,8 +1864,8 @@ parse_imageclasses(char *buff, void *state)
 #endif
 
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context imageclasses", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context imageclasses\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return state;
 }
@@ -2256,8 +2256,8 @@ parse_image(char *buff, void *state)
       images[idx].current->iml->pad = (Imlib_Border *) NULL;
     }
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context image", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context image\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return ((void *) state);
 }
@@ -2345,8 +2345,8 @@ parse_actions(char *buff, void *state)
     }
 
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context action", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context action\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return state;
 }
@@ -2585,8 +2585,8 @@ parse_bbar(char *buff, void *state)
       bbar_add_button(bbar, button);
     }
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid \n"
-		"within context menu", file_peek_path(), file_peek_line(), buff);
+    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n",
+                file_peek_path(), file_peek_line(), buff);
   }
   return ((void *) bbar);
 }
@@ -2629,9 +2629,11 @@ parse_multichar(char *buff, void *state)
 	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "big5")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "gb")
-	  && BEG_STRCASECMP(rs_multichar_encoding, "iso-10646")) {
+	  && BEG_STRCASECMP(rs_multichar_encoding, "iso-10646")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "none")) {
 	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
 		    file_peek_path(), file_peek_line(), rs_multichar_encoding);
+        FREE(rs_multichar_encoding);
 	return NULL;
       }
     } else {
@@ -2644,8 +2646,8 @@ parse_multichar(char *buff, void *state)
     unsigned char n;
 
     if (num_words(buff) != 3) {
-      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
-		  "attribute font", file_peek_path(), file_peek_line(), NONULL(tmp));
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n",
+                  file_peek_path(), file_peek_line(), NONULL(tmp));
       return NULL;
     }
     if (isdigit(*tmp)) {
@@ -2668,8 +2670,10 @@ parse_multichar(char *buff, void *state)
 		file_peek_path(), file_peek_line(), buff);
   }
 #else
-  print_warning("Multichar support was not compiled in, ignoring entire context\n");
-  file_poke_skip(1);
+  if (*buff == CONF_BEGIN_CHAR) {
+    print_warning("Multichar support was not compiled in, ignoring entire context\n");
+    file_poke_skip(1);
+  }
 #endif
   return state;
   buff = NULL;
