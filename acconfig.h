@@ -321,6 +321,7 @@
 #undef FONT3
 #undef FONT4
 #undef DEF_FONT_IDX
+#undef IOTRACE
 
 
 /* Leave that blank line there!!  Autoheader needs it.

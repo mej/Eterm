@@ -1116,6 +1116,7 @@ clean_exit(void)
   cleanutent();
 #endif
   privileges(REVERT);
+  PABLO_STOP_TRACING();
 }
 
 /* Acquire a pseudo-teletype from the system. */

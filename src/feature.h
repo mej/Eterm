@@ -29,11 +29,6 @@
 #ifndef _FEATURE_H_
 # define _FEATURE_H_
 
-# include <stdio.h>
-# include <stdlib.h>
-
-# include "debug.h"
-
 /********************* Miscellaneous OS fixings *********************/
 
 # if defined(hpux) && !defined(_HPUX_SOURCE)
@@ -83,6 +78,21 @@
 
 #define OPTIMIZE_HACKS
 #define USE_EFFECTS
+
+/* For Pablo I/O Trace Library */
+#ifdef IOTRACE
+# include <IOTrace.h>
+# include <PabloTrace.h>
+# define PABLO_START_TRACING()  do {setTraceProcessorNumber(0); setTraceFileName("Eterm-pablo-trace.sddf"); initIOTrace(); \
+                                    enableLifetimeSummaries(); enableTimeWindowSummaries(0.1); enableFileRegionSummaries(8192); \
+                                   } while (0)
+# define PABLO_STOP_TRACING()   do {endIOTrace(); endTracing();} while (0)
+#endif
+
+# include <stdio.h>
+# include <stdlib.h>
+
+# include "debug.h"
 
 /********************* Color, screen, and image stuff *********************/
 

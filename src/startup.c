@@ -92,6 +92,8 @@ eterm_bootstrap(int argc, char *argv[])
   my_rgid = getgid();
   my_egid = getegid();
   privileges(REVERT);
+
+  PABLO_START_TRACING();
   getcwd(initial_dir, PATH_MAX);
 
   init_defaults();

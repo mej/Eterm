@@ -2872,3 +2872,9 @@ Thu Dec  2 22:18:51 PST 1999	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
+Mon Dec  6 14:05:36 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Added support for the Pablo Performance Analysis Toolkit
+	(http://www-pablo.cs.uiuc.edu/Software/Pablo/pablo.htm).
+	
+-------------------------------------------------------------------------------
