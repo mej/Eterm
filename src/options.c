@@ -76,6 +76,7 @@ static void *parse_menuitem(char *, void *);
 static void *parse_bbar(char *, void *);
 static void *parse_xim(char *, void *);
 static void *parse_multichar(char *, void *);
+static void *parse_escreen(char *, void *);
 
 static char *rs_pipe_name = NULL;
 #ifdef PIXMAP_SUPPORT
@@ -2341,6 +2342,31 @@ parse_multichar(char *buff, void *state)
     buff = NULL;
 }
 
+static void *
+parse_escreen(char *buff, void *state)
+{
+#ifdef ESCREEN
+    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+        return NULL;
+    }
+    if (!BEG_STRCASECMP(buff, "url ")) {
+        RESET_AND_ASSIGN(rs_url, get_word(2, buff));
+    } else if (!BEG_STRCASECMP(buff, "firewall ")) {
+        RESET_AND_ASSIGN(rs_hop, get_word(2, buff));
+    } else if (!BEG_STRCASECMP(buff, "delay ")) {
+        rs_delay = strtol(get_pword(2, buff), (char **) NULL, 0);
+    } else {
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context escreen\n",
+                    file_peek_path(), file_peek_line(), buff);
+    }
+#else
+    print_warning("Escreen support was not compiled in, ignoring entire context\n");
+    file_poke_skip(1);
+#endif
+    return state;
+    buff = NULL;
+}
+
 char *
 conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
 {
@@ -2459,6 +2485,7 @@ init_defaults(void)
     conf_register_context("button_bar", parse_bbar);
     conf_register_context("xim", parse_xim);
     conf_register_context("multichar", parse_multichar);
+    conf_register_context("escreen", parse_escreen);
 }
 
 /* Sync up options with our internal data after parsing options and configs */

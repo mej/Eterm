@@ -942,7 +942,7 @@ export BINDIR bindir prefix exec_prefix datadir PACKAGE
 # environment variables, kinda like AC_OUTPUT above.
 changequote(%&, &%)dnl
 %&
-for i in utils/kEsetroot themes/Eterm/theme.cfg themes/auto/theme.cfg themes/chooser/theme.cfg \
+for i in utils/kEsetroot themes/Eterm/theme.cfg themes/auto/theme.cfg themes/Escreen/theme.cfg \
          themes/trans/theme.cfg ; do
   echo creating $i
   $AWK '{if (match($0,/@[A-Za-z0-9_]*@/)) {

@@ -4833,3 +4833,7 @@ used to run on so far.  As a side-effect, the default action is now
 anyways, I might be the only one missing the previous default.  Guess
 I'll change my actionclasses.cfg and hold my peace forever.  : )
 ----------------------------------------------------------------------
+Wed Oct  9 00:05:22 2002                        Michael Jennings (mej)
+
+The beginnings of a dedicated config file section for Escreen stuff.
+----------------------------------------------------------------------
