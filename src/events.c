@@ -160,9 +160,11 @@ event_init_primary_dispatcher(void)
   event_data_add_mywin(&primary_data, TermWin.parent);
   event_data_add_mywin(&primary_data, TermWin.vt);
 
+#ifdef PIXMAP_SUPPORT
   if (desktop_window != None) {
     event_data_add_parent(&primary_data, desktop_window);
   }
+#endif
 }
 
 unsigned char
@@ -227,6 +229,7 @@ handle_property_notify(event_t * ev)
 
   D_EVENTS(("handle_property_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
+#ifdef PIXMAP_OFFSET
   if (background_is_trans()) {
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
@@ -267,12 +270,15 @@ handle_property_notify(event_t * ev)
       }
     }
   }
+#endif
   if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
     prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
     D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
     if ((prop != None) && (ev->xproperty.atom == prop)) {
       if ((enl_ipc_get_win()) != None) {
+#ifdef PIXMAP_SUPPORT
         redraw_images_by_mode(MODE_AUTO);
+#endif
       }
     }
   }
@@ -554,13 +560,15 @@ handle_expose(event_t * ev)
   D_EVENTS(("handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
-  if (ev->xany.window == TermWin.vt) {
-    if (buffer_pixmap == None) {
-      if (refresh_type == NO_REFRESH) {
-        refresh_type = FAST_REFRESH;
-      }
-      scr_expose(ev->xexpose.x, ev->xexpose.y, ev->xexpose.width, ev->xexpose.height);
+  if (ev->xany.window == TermWin.vt
+#ifdef PIXMAP_SUPPORT
+      && buffer_pixmap == None
+#endif
+      ) {
+    if (refresh_type == NO_REFRESH) {
+      refresh_type = FAST_REFRESH;
     }
+    scr_expose(ev->xexpose.x, ev->xexpose.y, ev->xexpose.width, ev->xexpose.height);
   } else {
 
     XEvent unused_xevent;
@@ -568,11 +576,6 @@ handle_expose(event_t * ev)
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
   }
-#if 0
-  if (desktop_window != None) {
-    XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
-  }
-#endif
   PROF_DONE(handle_expose);
   PROF_TIME(handle_expose);
   return 1;

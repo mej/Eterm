@@ -2466,15 +2466,18 @@ parse_imageclasses(char *buff, void *state)
     return NULL;
   }
 
-#ifdef PIXMAP_SUPPORT
   if (!BEG_STRCASECMP(buff, "icon ")) {
+#ifdef PIXMAP_SUPPORT
     RESET_AND_ASSIGN(rs_icon, Word(2, buff));
+#else
+    print_warning("Pixmap support was not compiled in, ignoring \"icon\" attribute");
+#endif
 
   } else if (!BEG_STRCASECMP(buff, "path ")) {
     RESET_AND_ASSIGN(rs_path, Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "anim ")) {
-# ifdef BACKGROUND_CYCLING_SUPPORT
+#ifdef BACKGROUND_CYCLING_SUPPORT
     char *tmp = PWord(2, buff);
 
     if (tmp) {
@@ -2482,18 +2485,14 @@ parse_imageclasses(char *buff, void *state)
     } else {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim", file_peek_path(), file_peek_line());
     }
-# else
+#else
     print_warning("Support for the anim attribute was not compiled in, ignoring");
-# endif
+#endif
 
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
 		"within context imageclasses", file_peek_path(), file_peek_line(), buff);
   }
-#else
-  print_warning("Pixmap support was not compiled in, ignoring entire context");
-  file_poke_skip(1);
-#endif
   return state;
 }
 
@@ -2502,7 +2501,6 @@ parse_image(char *buff, void *state)
 {
   int idx;
 
-#ifdef PIXMAP_SUPPORT
   if (*buff == CONF_BEGIN_CHAR) {
     int *tmp;
 
@@ -2678,6 +2676,7 @@ parse_image(char *buff, void *state)
     FREE(fg);
     FREE(bg);
 
+#ifdef PIXMAP_SUPPORT
   } else if (!BEG_STRCASECMP(buff, "file ")) {
     char *filename = PWord(2, buff);
 
@@ -2780,6 +2779,7 @@ parse_image(char *buff, void *state)
       print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"", file_peek_path(), file_peek_line());
       return NULL;
     }
+#endif
 
   } else if (!BEG_STRCASECMP(buff, "border ")) {
     if (idx < 0) {
@@ -2869,11 +2869,6 @@ parse_image(char *buff, void *state)
 		"within context image", file_peek_path(), file_peek_line(), buff);
   }
   return ((void *) state);
-#else
-  print_warning("Pixmap support was not compiled in, ignoring entire context");
-  file_poke_skip(1);
-  return NULL;
-#endif
 }
 
 static void *
@@ -3712,11 +3707,13 @@ post_parse(void)
       images[i].mode = MODE_IMAGE & ALLOW_IMAGE;
     }
     images[i].current = images[i].norm;
+#ifdef PIXMAP_SUPPORT
     if (rs_pixmaps[i]) {
       reset_simage(images[i].norm, RESET_ALL_SIMG);
       load_image(rs_pixmaps[i], images[i].norm);
       FREE(rs_pixmaps[i]);	/* These are created by StrDup() */
     }
+#endif
     if (images[i].selected) {
       /* If we have a bevel but no border, use the bevel as a border. */
       if (images[i].selected->iml->bevel && !(images[i].selected->iml->border)) {
@@ -3798,6 +3795,7 @@ post_parse(void)
   /* Update buttonbar sizes based on new imageclass info. */
   bbar_resize_all(-1);
 
+#ifdef PIXMAP_SUPPORT
   /* Support the deprecated forms by converting the syntax to the new system */
   if (rs_shade != 0) {
     char buff[10];
@@ -3894,6 +3892,7 @@ post_parse(void)
     }
     FREE(rs_cmod_blue);
   }
+#endif
 
   if (Options & Opt_reverseVideo) {
     char *tmp;
@@ -4144,12 +4143,14 @@ save_config(char *path, unsigned char save_theme)
   if (save_theme) {
     fprintf(fp, "  begin imageclasses\n");
     fprintf(fp, "    path \"%s\"\n", rs_path);
+#ifdef PIXMAP_SUPPORT
     if (rs_icon != NULL) {
       fprintf(fp, "    icon %s\n", rs_icon);
     }
     if (rs_anim_delay) {
       /* FIXME:  Do something here! */
     }
+#endif
     for (i = 0; i < image_max; i++) {
       fprintf(fp, "    begin image\n");
       switch (i) {
@@ -4196,13 +4197,16 @@ save_config(char *path, unsigned char save_theme)
 
       /* Now save each state. */
       simg = images[i].norm;
+#ifdef PIXMAP_SUPPORT
       if (simg->iml->im) {
         imlib_context_set_image(simg->iml->im);
       }
+#endif
       fprintf(fp, "      state normal\n");
       if (simg->fg || simg->bg) {
         fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
       }
+#ifdef PIXMAP_SUPPORT
       if (simg->iml->im) {
         fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
       }
@@ -4233,6 +4237,7 @@ save_config(char *path, unsigned char save_theme)
       if (simg->iml->bmod) {
         fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
       }
+#endif
       if (simg->iml->border) {
         fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
       }
@@ -4246,13 +4251,16 @@ save_config(char *path, unsigned char save_theme)
       /* Selected state */
       if (images[i].selected != images[i].norm) {
         simg = images[i].selected;
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           imlib_context_set_image(simg->iml->im);
         }
+#endif
         fprintf(fp, "      state selected\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
@@ -4283,6 +4291,7 @@ save_config(char *path, unsigned char save_theme)
         if (simg->iml->bmod) {
           fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
         }
+#endif
         if (simg->iml->border) {
           fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
         }
@@ -4297,13 +4306,16 @@ save_config(char *path, unsigned char save_theme)
       /* Clicked state */
       if (images[i].clicked != images[i].norm) {
         simg = images[i].clicked;
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           imlib_context_set_image(simg->iml->im);
         }
+#endif
         fprintf(fp, "      state clicked\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
@@ -4334,6 +4346,7 @@ save_config(char *path, unsigned char save_theme)
         if (simg->iml->bmod) {
           fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
         }
+#endif
         if (simg->iml->border) {
           fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
         }
@@ -4348,13 +4361,16 @@ save_config(char *path, unsigned char save_theme)
       /* Disabled state */
       if (images[i].disabled != images[i].norm) {
         simg = images[i].disabled;
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           imlib_context_set_image(simg->iml->im);
         }
+#endif
         fprintf(fp, "      state disabled\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
+#ifdef PIXMAP_SUPPORT
         if (simg->iml->im) {
           fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
@@ -4385,6 +4401,7 @@ save_config(char *path, unsigned char save_theme)
         if (simg->iml->bmod) {
           fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
         }
+#endif
         if (simg->iml->border) {
           fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
         }

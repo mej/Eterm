@@ -3530,3 +3530,16 @@ Thu Apr 27 19:54:28 PDT 2000	Michael Jennings <mej@eterm.org>
 	people without shared library dependencies working.
 	
 -------------------------------------------------------------------------------
+Tue May  2 16:56:47 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	After getting sick of hearing people whining about the obscure error
+	messages that resulted from trying to build without pixmap support, I
+	hacked it until it at least built without it.  I also added warnings
+	to configure.in so that people would know if that happened.
+
+	It's still not very happy running that way, which is something I need
+	to fix.  But hopefully it will stop the whining.
+
+	Yeah, right. =P
+	
+-------------------------------------------------------------------------------

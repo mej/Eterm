@@ -1013,13 +1013,9 @@ scr_erase_screen(int mode)
   rend_t ren;
   long gcmask;
   XGCValues gcvalue;
-  Drawable draw_buffer;
   Pixmap pmap = None;
-
-  D_SCREEN(("scr_erase_screen(%d) at screen row: %d\n", mode, screen.row));
-  REFRESH_ZERO_SCROLLBACK;
-  RESET_CHSTAT;
-  row_offset = TermWin.saveLines;
+#ifdef PIXMAP_SUPPORT
+  Drawable draw_buffer;
 
   if (buffer_pixmap) {
     draw_buffer = buffer_pixmap;
@@ -1027,6 +1023,13 @@ scr_erase_screen(int mode)
   } else {
     draw_buffer = TermWin.vt;
   }
+#endif
+
+  D_SCREEN(("scr_erase_screen(%d) at screen row: %d\n", mode, screen.row));
+  REFRESH_ZERO_SCROLLBACK;
+  RESET_CHSTAT;
+  row_offset = TermWin.saveLines;
+
 
   switch (mode) {
     case 0:			/* erase to end of screen */
@@ -1590,7 +1593,6 @@ scr_refresh(int type)
   XGCValues gcvalue;		/* Graphics Context values                   */
   char buf[MAX_COLS + 1];
   register char *buffer = buf;
-  Drawable draw_buffer;
   Pixmap pmap = images[image_bg].current->pmap->pixmap;
   int (*draw_string) (), (*draw_image_string) ();
   register int low_x = 99999, low_y = 99999, high_x = 0, high_y = 0;
@@ -1600,6 +1602,15 @@ scr_refresh(int type)
 #ifdef OPTIMIZE_HACKS
   register int nrows = TermWin.nrow;
   register int ncols = TermWin.ncol;
+#endif
+#ifdef PIXMAP_SUPPORT
+  Drawable draw_buffer;
+
+  if (buffer_pixmap) {
+    draw_buffer = buffer_pixmap;
+  } else {
+    draw_buffer = TermWin.vt;
+  }
 #endif
 
   PROF_INIT(scr_refresh);
@@ -1617,12 +1628,6 @@ scr_refresh(int type)
   }
   if (type == NO_REFRESH)
     return;
-
-  if (buffer_pixmap) {
-    draw_buffer = buffer_pixmap;
-  } else {
-    draw_buffer = TermWin.vt;
-  }
 
   row_offset = TermWin.saveLines - TermWin.view_start;
   fprop = TermWin.fprop;

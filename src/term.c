@@ -1815,12 +1815,14 @@ xterm_seq(int op, const char *str)
               } else if (!strcasecmp(color, "blue")) {
                 FREE(iml->bmod);
               }
+# ifdef PIXMAP_OFFSET
               if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
                 free_desktop_pixmap();
               } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
                 XFreePixmap(Xdisplay, viewport_pixmap);
                 viewport_pixmap = None;	/* Force the re-read */
               }
+# endif
               changed = 1;
               continue;
             }
@@ -1829,12 +1831,14 @@ xterm_seq(int op, const char *str)
             }
             D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
             changed = 1;
+# ifdef PIXMAP_OFFSET
             if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
               free_desktop_pixmap();
             } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
               XFreePixmap(Xdisplay, viewport_pixmap);
               viewport_pixmap = None;	/* Force the re-read */
             }
+# endif
             if (!strcasecmp(color, "image")) {
               imlib_t *iml = images[which].current->iml;
 
@@ -2023,6 +2027,7 @@ xterm_seq(int op, const char *str)
           }
 	  break;
 	case 3:
+# ifdef PIXMAP_OFFSET
           get_desktop_window();
           if (desktop_window == None) {
             FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
@@ -2030,6 +2035,7 @@ xterm_seq(int op, const char *str)
           }
           get_desktop_pixmap();
           redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+# endif
 	  break;
 #endif
 	case 10:

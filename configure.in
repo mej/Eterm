@@ -287,6 +287,10 @@ AC_ARG_WITH(imlib,
               AC_MSG_RESULT(no)
               GRLIBS=""
               USE_IMLIB=0
+              AC_WARN(*** Pixmap support has been disabled at your request.  This ***)
+              AC_WARN(*** is generally a bad idea since it really doesn't save    ***)
+              AC_WARN(*** much memory.  And the developers almost never test that ***)
+              AC_WARN(*** configuration.  So I'd reconsider if I were you....     ***)
             fi, AC_MSG_RESULT(yes)
                 USE_IMLIB=1
 )
@@ -299,6 +303,10 @@ if test $USE_IMLIB -eq 1 ; then
                AC_DEFINE(PIXMAP_SUPPORT)
                AC_DEFINE(BACKING_STORE)
               ,
+               AC_WARN(*** Pixmap support has been disabled because Imlib2 was not found ***)
+               AC_WARN(*** or could not be linked.  Eterm should still work, but it will ***)
+               AC_WARN(*** not be very happy.  Check config.log for more detailed        ***)
+               AC_WARN(*** information on why my attempt to link with Imlib2 failed.     ***)
               , $SUBLIBS $X_LIBS $GRLIBS)
 
 fi
@@ -721,6 +729,8 @@ if test -z "$GRLIBS"; then
   sed -e 's/^bin_PROGRAMS.*$//g' doc/Makefile > doc/Makefile.new
   mv doc/Makefile.new doc/Makefile
 fi
+
+test $USE_IMLIB = 0 && GRLIBS="*** WARNING:  Pixmap support disabled! ***"
 
 echo "
 $PACKAGE $VERSION

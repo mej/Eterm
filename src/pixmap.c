@@ -57,10 +57,14 @@ static const char cvs_ident[] = "$Id$";
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
 static colormod_t cmod_none = { 256, 256, 256 };
 
+# ifdef PIXMAP_OFFSET
 Pixmap desktop_pixmap = None, viewport_pixmap = None;
 Pixmap buffer_pixmap = None;
 Window desktop_window = None;
 unsigned char desktop_pixmap_is_mine = 0;
+# endif
+#endif
+
 image_t images[image_max] =
 {
   {None, 0, 0, NULL, NULL, NULL, NULL, NULL},
@@ -79,9 +83,6 @@ image_t images[image_max] =
   {None, 0, 0, NULL, NULL, NULL, NULL, NULL}
 };
 
-#endif
-
-#ifdef PIXMAP_SUPPORT
 static const char *get_iclass_name(unsigned char);
 static void copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height);
 
@@ -119,6 +120,7 @@ image_mode_any(unsigned char mode)
   return ismode;
 }
 
+#ifdef PIXMAP_SUPPORT
 unsigned short
 parse_pixmap_ops(char *str)
 {

@@ -43,7 +43,7 @@ typedef struct {
 # define PROF_INIT(f)     NOP
 # define PROF_DONE(f)     NOP
 # define PROF_TIME(f)     NOP
-# define PROF_FUNC(f, c)  NOP
+# define PROF_FUNC(f, c)  c;
 #endif /* ENABLE_PROFILE */
 
 #endif	/* _PROFILE_H */

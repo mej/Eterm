@@ -17,6 +17,8 @@ static const char cvs_ident[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+
+#ifdef PIXMAP_SUPPORT
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -88,11 +90,12 @@ set_pixmap_property(Pixmap p)
   XSetCloseDownMode(Xdisplay, RetainPermanent);
   XFlush(Xdisplay);
 }
+#endif
 
 int
 main(int argc, char *argv[])
 {
-
+#ifdef PIXMAP_SUPPORT
   unsigned char scale = 0, center = 0, fit = 0;
   char *displayname = NULL;
   char *fname = NULL;
@@ -234,5 +237,8 @@ main(int argc, char *argv[])
     XClearWindow(Xdisplay, Xroot);
     XFlush(Xdisplay);
   }
+#else
+  fprintf(stderr, "Eterm was built without pixmap support, so Esetroot is fairly useless.  Sorry.\n");
+#endif
   return 0;
 }

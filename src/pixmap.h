@@ -31,27 +31,28 @@
 
 /************ Macros and Definitions ************/
 #ifdef PIXMAP_SUPPORT
-# define background_is_image() ((buffer_pixmap) || (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im))
-# define background_is_trans() (images[image_bg].mode & MODE_TRANS)
+# define background_is_image()    ((buffer_pixmap) || (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im))
+# define background_is_trans()    (images[image_bg].mode & MODE_TRANS)
 # define background_is_viewport() (images[image_bg].mode & MODE_VIEWPORT)
-# define background_is_auto() (images[image_bg].mode & MODE_AUTO)
-# define background_is_pixmap() (background_is_image() || background_is_trans() || background_is_viewport() || background_is_auto())
+# define background_is_auto()     (images[image_bg].mode & MODE_AUTO)
+# define background_is_pixmap()   (background_is_image() || (images[image_bg].mode & (MODE_TRANS | MODE_VIEWPORT | MODE_AUTO)))
 # define delete_simage(simg) do { \
                                imlib_free_pixmap_and_mask((simg)->pmap->pixmap); \
                                imlib_context_set_image((simg)->iml->im); \
                                imlib_free_image_and_decache(); \
                                (simg)->pmap->pixmap = None; (simg)->iml->im = NULL; \
                              } while (0)
-# define CONVERT_SHADE(s) (0xff - (((s) * 0xff) / 100))
+# define CONVERT_SHADE(s)      (0xff - (((s) * 0xff) / 100))
 # define CONVERT_TINT_RED(t)   (((t) & 0xff0000) >> 16)
 # define CONVERT_TINT_GREEN(t) (((t) & 0x00ff00) >> 8)
 # define CONVERT_TINT_BLUE(t)  ((t) & 0x0000ff)
 #else
-# define background_is_image()    NOP
-# define background_is_trans()    NOP
-# define background_is_viewport() NOP
-# define background_is_auto()     NOP
-# define get_image_type_string(t) NOP
+# define background_is_image()    (0)
+# define background_is_trans()    (0)
+# define background_is_viewport() (0)
+# define background_is_auto()     (0)
+# define background_is_pixmap()   (0)
+# define get_image_type_string(t) ((char *) "")
 # define delete_simage(simg)      NOP
 #endif
 #define PIXMAP_EXT NULL
@@ -183,10 +184,23 @@ extern Pixmap desktop_pixmap, viewport_pixmap, buffer_pixmap;
 extern Window desktop_window;
 
 /************ Function Prototypes ************/
+#ifndef PIXMAP_SUPPORT
+# define render_simage(s, win, w, h, which, r)  NOP
+# define free_simage(s)                         NOP
+# define create_simage()                        ((simage_t *) NULL)
+# define load_image(f, s)                       ((unsigned char) 0)
+# define check_image_ipc(w)                     ((unsigned char) 0)
+# define redraw_image(w)                        NOP
+# define redraw_images_by_mode(w)               NOP
+# define paste_simage(s, which, d, x, y, w, h)  NOP
+# define set_icon_pixmap(f, h)                  NOP
+#endif
+
 _XFUNCPROTOBEGIN
 
 extern const char *get_image_type(unsigned char);
 extern unsigned char image_mode_any(unsigned char);
+#ifdef PIXMAP_SUPPORT
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
 extern unsigned char check_image_ipc(unsigned char);
@@ -205,15 +219,16 @@ extern void render_simage(simage_t *, Window, unsigned short, unsigned short, un
 extern const char *search_path(const char *, const char *, const char *);
 extern unsigned char load_image(const char *, simage_t *);
 extern void free_desktop_pixmap(void);
-#ifdef PIXMAP_OFFSET
+# ifdef PIXMAP_OFFSET
 extern unsigned char need_colormod(imlib_t *);
 extern void colormod_trans(Pixmap, imlib_t *, GC, unsigned short, unsigned short);
 extern unsigned char update_desktop_info(int *, int *);
 extern Window get_desktop_window(void);
 extern Pixmap get_desktop_pixmap(void);
-#endif
+# endif
 extern void shaped_window_apply_mask(Drawable, Pixmap);
 extern void set_icon_pixmap(char *, XWMHints *);
+#endif
 
 _XFUNCPROTOEND
 

@@ -373,6 +373,7 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
       button->h += bord->top + bord->bottom;
     }
   }
+#ifdef PIXMAP_SUPPORT
   if (button->icon) {
     unsigned short b = 0;
 
@@ -393,6 +394,7 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
     }
     D_BBAR((" -> Final icon dimensions are %hux%hu\n", button->icon_w, button->icon_h));
   }
+#endif
   D_BBAR((" -> Set button to %dx%d at %d, %d and icon to %dx%d\n", button->w, button->h, button->x, button->y, button->icon_w, button->icon_h));
 }
 

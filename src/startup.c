@@ -129,10 +129,12 @@ eterm_bootstrap(int argc, char *argv[])
   } else {
     cmap = Xcmap;
   }
+#ifdef PIXMAP_SUPPORT
   imlib_context_set_display(Xdisplay);
   imlib_context_set_visual(Xvisual);
   imlib_context_set_colormap(cmap);
   imlib_context_set_dither_mask(0);
+#endif
 
   get_modifiers();  /* Set up modifier masks before parsing config files. */
 
