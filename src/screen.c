@@ -41,6 +41,12 @@ static const char cvs_ident[] = "$Id$";
 #include "profile.h"
 #include "term.h"
 
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
+
+static int pb = 0;
+
 /* These arrays store the text and rendering info that were last drawn to the screen. */
 static text_t **drawn_text = NULL;
 static rend_t **drawn_rend = NULL;
@@ -177,8 +183,7 @@ scr_reset(void)
         buf_rend = CALLOC(rend_t *, total_rows);
         drawn_rend = CALLOC(rend_t *, TermWin.nrow);
         swap.rend = CALLOC(rend_t *, TermWin.nrow);
-        D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text,
-                  swap.rend));
+        D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
         for (i = 0; i < TermWin.nrow; i++) {
             j = i + TermWin.saveLines;
@@ -221,8 +226,7 @@ scr_reset(void)
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
             drawn_rend = REALLOC(drawn_rend, TermWin.nrow * sizeof(rend_t *));
             swap.rend = REALLOC(swap.rend, TermWin.nrow * sizeof(rend_t *));
-            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text,
-                      swap.rend));
+            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
             /* we have fewer rows so fix up number of scrolled lines */
             UPPER_BOUND(screen.row, TermWin.nrow - 1);
@@ -238,8 +242,7 @@ scr_reset(void)
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
             drawn_rend = REALLOC(drawn_rend, TermWin.nrow * sizeof(rend_t *));
             swap.rend = REALLOC(swap.rend, TermWin.nrow * sizeof(rend_t *));
-            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text,
-                      swap.rend));
+            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
             k = MIN(TermWin.nscrolled, TermWin.nrow - prev_nrow);
             for (i = prev_total_rows; i < total_rows - k; i++) {
@@ -724,13 +727,13 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
         c = str[i++];
 #ifdef MULTI_CHARSET
         if ((encoding_method != LATIN1) && (chstat == WBYTE)) {
-            rstyle |= RS_multiMask;	/* multibyte 2nd byte */
+            rstyle |= RS_multiMask;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* multibyte 2nd byte */
             chstat = SBYTE;
             if (encoding_method == EUCJ) {
                 c |= 0x80;      /* maybe overkill, but makes it selectable */
             }
         } else if (chstat == SBYTE) {
-            if ((encoding_method != LATIN1) && (multi_byte || (c & 0x80))) {	/* multibyte 1st byte */
+            if ((encoding_method != LATIN1) && (multi_byte || (c & 0x80))) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* multibyte 1st byte */
                 rstyle &= ~RS_multiMask;
                 rstyle |= RS_multi1;
                 chstat = WBYTE;
@@ -756,8 +759,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                           screen.row++;
                           row = screen.row + TermWin.saveLines;
                       }
-                      stp = screen.text[row];	/* _must_ refresh */
-                      srp = screen.rend[row];	/* _must_ refresh */
+                      stp = screen.text[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* _must_ refresh */
+                      srp = screen.rend[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* _must_ refresh */
                       continue;
                   case '\r':
                       LOWER_BOUND(stp[last_col], screen.col);
@@ -785,8 +788,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 screen.row++;
                 row = screen.row + TermWin.saveLines;
             }
-            stp = screen.text[row];	/* _must_ refresh */
-            srp = screen.rend[row];	/* _must_ refresh */
+            stp = screen.text[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* _must_ refresh */
+            srp = screen.rend[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* _must_ refresh */
             screen.col = 0;
             screen.flags &= ~Screen_WrapNext;
         }
@@ -820,7 +823,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 
 #ifdef ESCREEN
     if (TermWin.screen_mode) {
-        if (screen.row >= TermWin.nrow - 1) {	/* last row -> upd-flag */
+        if (screen.row >= TermWin.nrow - 1) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         }
     }
@@ -908,7 +911,7 @@ scr_gotorc(int row, int col, int relative)
                 screen.row += row;
         }
     } else {
-        if (screen.flags & Screen_Relative) {	/* relative origin mode */
+        if (screen.flags & Screen_Relative) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* relative origin mode */
             screen.row = row + screen.tscroll;
             UPPER_BOUND(screen.row, screen.bscroll);
         } else
@@ -916,9 +919,9 @@ scr_gotorc(int row, int col, int relative)
     }
 #ifdef ESCREEN
     if (TermWin.screen_mode) {
-        if (screen.row >= TermWin.nrow - 1) {	/* last row -> upd-flag */
+        if (screen.row >= TermWin.nrow - 1) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
-        } else if (TermWin.screen_pending) {	/* left last -> upd-finis */
+        } else if (TermWin.screen_pending) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* left last -> upd-finis */
             TermWin.screen_pending |= 2;
         }
     }
@@ -1048,7 +1051,7 @@ scr_erase_screen(int mode)
       default:
           return;
     }
-    if (row >= 0 && row <= TermWin.nrow) {	/* check OOB */
+    if (row >= 0 && row <= TermWin.nrow) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* check OOB */
         UPPER_BOUND(num, (TermWin.nrow - row));
         if (rstyle & RS_RVid || rstyle & RS_Uline)
             ren = -1;
@@ -1477,8 +1480,7 @@ scr_expose(int x, int y, int width, int height)
     rect_end.row = Pixel2Row(y + height + TermWin.fheight - 1);
     BOUND(rect_end.row, 0, nr);
 
-    D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, rect_beg.col, rect_beg.row,
-              rect_end.col, rect_end.row));
+    D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, rect_beg.col, rect_beg.row, rect_end.col, rect_end.row));
 
     for (i = rect_beg.row; i <= rect_end.row; i++) {
         MEMSET(&(drawn_text[i][rect_beg.col]), 0, rect_end.col - rect_beg.col + 1);
@@ -1624,6 +1626,7 @@ scr_refresh(int type)
     int (*draw_string) (), (*draw_image_string) ();
     register int low_x = 99999, low_y = 99999, high_x = 0, high_y = 0;
     Drawable draw_buffer;
+
 #ifndef NO_BOLDFONT
     int bfont = 0;              /* we've changed font to bold font           */
 #endif
@@ -1716,9 +1719,9 @@ scr_refresh(int type)
                 /* compare new text with old - if exactly the same then continue */
                 rt1 = srp[col];
                 rt2 = drp[col];
-                if ((stp[col] == dtp[col])	/* must match characters to skip */
-                    &&((rt1 == rt2)	/* either rendition the same or  */
-                       ||((stp[col] == ' ')	/* space w/ no bg change */
+                if ((stp[col] == dtp[col])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* must match characters to skip */
+                    &&((rt1 == rt2)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* either rendition the same or  */
+                       ||((stp[col] == ' ')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* space w/ no bg change */
                           &&(GET_BGATTR(rt1) == GET_BGATTR(rt2))))) {
 #ifdef MULTI_CHARSET
                     /* if first byte is multibyte then compare second bytes */
@@ -1786,8 +1789,8 @@ scr_refresh(int type)
                         /* XXX : maybe do the same thing for RS_multi2 */
                         /* corrupt character - you're outta there */
                         rend &= ~RS_multiMask;
-                        drp[col] = rend;	/* TODO check: may also want */
-                        dtp[col] = ' ';	/* to poke into stp/srp      */
+                        drp[col] = rend;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* TODO check: may also want */
+                        dtp[col] = ' ';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* to poke into stp/srp      */
                         buffer[0] = ' ';
                     }
                     if (wbyte) {
@@ -1829,10 +1832,10 @@ scr_refresh(int type)
                 rvid = !rvid;
             if (rend & RS_Cursor) {
                 if (focus) {
-                    is_cursor = 2;	/* normal cursor */
+                    is_cursor = 2;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* normal cursor */
                     rvid = !rvid;
                 } else {
-                    is_cursor = 1;	/* outline cursor */
+                    is_cursor = 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* outline cursor */
                     rend &= ~RS_Cursor;
                 }
                 srp[col] &= ~RS_Cursor;
@@ -2028,12 +2031,10 @@ scr_refresh(int type)
                             gcmask |= (GCForeground | GCBackground);
                             XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
                             if (font->ascent < ascent) {
-                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel,
-                                               Row2Pixel(row), Width2Pixel(len), ascent - font->ascent);
+                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row), Width2Pixel(len), ascent - font->ascent);
                             }
                             if (font->descent < descent) {
-                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel,
-                                               Row2Pixel(row) + ascent + font->descent, Width2Pixel(len), descent - font->descent);
+                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row) + ascent + font->descent, Width2Pixel(len), descent - font->descent);
                             }
                             SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
                             XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
@@ -2099,22 +2100,18 @@ scr_refresh(int type)
 #endif
     }
     if (buffer_pixmap) {
-        D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y,
-                  high_x - low_x + 1, high_y - low_y + 1));
+        D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y, high_x - low_x + 1, high_y - low_y + 1));
         XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
         if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0,
-                      1, TermWin_TotalHeight() - 1, TermWin.internalBorder - 1, 0);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, TermWin.internalBorder - 1, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
         }
         if (fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0,
-                      1, TermWin_TotalHeight() - 1, TermWin_TotalWidth() - 2, 0);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, TermWin_TotalWidth() - 2, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
         }
         if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1,
-                      TermWin_TotalWidth() - 1, 1, 0, TermWin.internalBorder - 1);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, 0, TermWin.internalBorder - 1);
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
         }
         if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
@@ -2409,9 +2406,7 @@ selection_fetch(Window win, unsigned prop, int delete)
         return;
     }
     for (nread = 0, bytes_after = 1; bytes_after > 0;) {
-        if ((XGetWindowProperty
-             (Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after,
-              &data) != Success)
+        if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)
             || (actual_type == None) || (data == NULL)) {
             D_SELECT(("Unable to fetch the value of property %d from window 0x%08x\n", (int) prop, (int) win));
             if (data != NULL) {
@@ -2420,8 +2415,7 @@ selection_fetch(Window win, unsigned prop, int delete)
             return;
         }
         nread += nitems;
-        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n",
-                  (int) actual_type, actual_fmt, nitems, data, bytes_after));
+        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n", (int) actual_type, actual_fmt, nitems, data, bytes_after));
 
         if (nitems == 0) {
             D_SELECT(("Retrieval of incremental selection complete.\n"));
@@ -2850,7 +2844,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
         }
         if (!(Options & Opt_xterm_select)) {
             if (beg_col == col && beg_col > 0) {
-                if (DELIMIT_TEXT(*stp))	/* space or tab or cutchar */
+                if (DELIMIT_TEXT(*stp))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* space or tab or cutchar */
                     break;
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[beg_row + row_offset][beg_col - 1]);
@@ -2913,7 +2907,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
         }
         if (!(Options & Opt_xterm_select)) {
             if (end_col == col && end_col < last_col) {
-                if (DELIMIT_TEXT(*stp))	/* space or tab or cutchar */
+                if (DELIMIT_TEXT(*stp))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* space or tab or cutchar */
                     break;
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[end_row + row_offset][end_col + 1]);
@@ -3258,8 +3252,7 @@ selection_send(XSelectionRequestEvent * rq)
         target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
         target_list[1] = (Atom32) XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        (8 * sizeof(target_list[0])), PropModeReplace,
-                        (unsigned char *) target_list, (sizeof(target_list) / sizeof(target_list[0])));
+                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list, (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
     } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
@@ -3271,8 +3264,7 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
             if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value,
-                                xtextp.nitems);
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
             }
         }
@@ -3282,6 +3274,30 @@ selection_send(XSelectionRequestEvent * rq)
         ev.xselection.property = rq->property;
     }
     XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);
+}
+
+void                            /* drag report as used by the "twin" program */
+mouse_drag_report(XButtonEvent * ev)
+{
+    int button_number, key_state, x = Pixel2Col(ev->x), y = Pixel2Row(ev->y);
+
+    switch (ev->button) {
+      case AnyButton:          /* Button release */
+          button_number = pb + Button1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* yeah, yeah */
+          break;
+      case Button1:            /* Button press */
+      case Button2:
+      case Button3:
+          pb = button_number = ev->button - Button1;
+          break;
+      default:                 /* Wheel mouse */
+          button_number = 64 + ev->button - Button3 - 1;
+          break;
+    }
+    key_state = ((ev->state & (ShiftMask | ControlMask))
+                 + ((ev->state & Mod1Mask) ? 2 : 0));
+    tt_printf((unsigned char *) "\033[5M%c%c%c%c%c",
+              (32 + button_number + (key_state << 2)), (32 + (x & 0x7f) + 1), (32 + ((x >> 7) & 0x7f) + 1), (32 + (y & 0x7f) + 1), (32 + ((y >> 7) & 0x7f) + 1));
 }
 
 void
@@ -3296,7 +3312,7 @@ mouse_report(XButtonEvent * ev)
       case Button1:            /* Button press */
       case Button2:
       case Button3:
-          button_number = ev->button - Button1;
+          pb = button_number = ev->button - Button1;
           break;
       default:                 /* Wheel mouse */
           button_number = 64 + ev->button - Button3 - 1;
@@ -3304,8 +3320,7 @@ mouse_report(XButtonEvent * ev)
     }
     key_state = ((ev->state & (ShiftMask | ControlMask))
                  + ((ev->state & Mod1Mask) ? 2 : 0));
-    tt_printf((unsigned char *) "\033[M%c%c%c",
-              (32 + button_number + (key_state << 2)), (32 + Pixel2Col(ev->x) + 1), (32 + Pixel2Row(ev->y) + 1));
+    tt_printf((unsigned char *) "\033[M%c%c%c", (32 + button_number + (key_state << 2)), (32 + Pixel2Col(ev->x) + 1), (32 + Pixel2Row(ev->y) + 1));
 }
 
 void
@@ -3366,27 +3381,13 @@ xim_get_position(XPoint * pos)
 #endif
 
 #ifdef ESCREEN
+#  ifdef NS_HAVE_SCREEN
 void
 parse_screen_status_if_necessary(void)
 {
-#if 0
-    static int hc = 0;
-#endif
-
     ns_parse_screen(TermWin.screen, (TermWin.screen_pending > 1), TermWin.ncol, screen.text[TermWin.nrow + TermWin.saveLines - 1]);
     if (TermWin.screen_pending > 1)
         TermWin.screen_pending = 0;
-#if 0
-    {
-        FILE *fh;
-        int c;
-        if ((fh = fopen("Escreen.log", "a"))) {
-            for (c = 0; c < 8; c++)
-                if (strcmp(drawn_text[c], drawn_text[c + 1]))
-                    fprintf(fh, "%2d  \"%s\"\n", c, drawn_text[c]);
-            fclose(fh);
-        }
-    }
-#endif
 }
+#  endif
 #endif

@@ -58,7 +58,7 @@ unsigned char meta_char = 033;  /* Alt-key prefix */
 unsigned long PrivateModes = PrivMode_Default;
 unsigned long SavedModes = PrivMode_Default;
 char *def_colorName[] = {
-    "rgb:aa/aa/aa", "rgb:0/0/0",	/* fg/bg */
+    "rgb:aa/aa/aa", "rgb:0/0/0",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* fg/bg */
     "rgb:0/0/0",                /* 0: black             (#000000) */
 #ifndef NO_BRIGHTCOLOR
     /* low-intensity colors */
@@ -200,6 +200,7 @@ lookup_key(XEvent * ev)
     static int numlock_state = 0;
     int ctrl, meta, shft, len;
     KeySym keysym;
+
 #ifdef USE_XIM
     int valid_keysym = 0;
     static unsigned char short_buf[256];
@@ -244,15 +245,13 @@ lookup_key(XEvent * ev)
     } else {
         /* No XIM input context.  Do it the normal way. */
         len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
-        D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n",
-               len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+        D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
         valid_keysym = 1;
     }
 #else /* USE_XIM */
     /* Translate the key event into its corresponding string according to X.  This also gets us a keysym. */
     len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
-    D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n",
-           len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+    D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
 
     /* If there is no string and it's a Latin2-7 character, replace it with the Latin1 character instead. */
     if (!len && (keysym >= 0x0100) && (keysym < 0x0900)) {
@@ -262,6 +261,7 @@ lookup_key(XEvent * ev)
 #endif /* USE_XIM */
 
 #ifdef ESCREEN
+#  ifdef NS_HAVE_SCREEN
     if (escreen_escape) {
         if (kbuf[0]) {
             escreen_escape = 0;
@@ -273,6 +273,7 @@ lookup_key(XEvent * ev)
         escreen_escape = 1;
         LK_RET();
     }
+#  endif
 #endif
 
 #ifdef USE_XIM
@@ -338,31 +339,31 @@ lookup_key(XEvent * ev)
                 shft = 0;
             } else if (!ctrl && !meta && (PrivateModes & PrivMode_ShiftKeys)) {
                 switch (keysym) {
-                  case XK_Prior:	/* Shift-PgUp scrolls up a page */
+                  case XK_Prior:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* Shift-PgUp scrolls up a page */
                       if (TermWin.saveLines) {
                           scr_page(UP, (TermWin.nrow - CONTEXT_LINES));
                           LK_RET();
                       }
                       break;
 
-                  case XK_Next:	/* Shift-PgDn scrolls down a page */
+                  case XK_Next:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* Shift-PgDn scrolls down a page */
                       if (TermWin.saveLines) {
                           scr_page(DN, (TermWin.nrow - CONTEXT_LINES));
                           LK_RET();
                       }
                       break;
 
-                  case XK_Insert:	/* Shift-Ins pastes the current selection. */
+                  case XK_Insert:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* Shift-Ins pastes the current selection. */
                       selection_paste(XA_PRIMARY);
                       LK_RET();
                       break;
 
-                  case XK_KP_Add:	/* Shift-Plus on the keypad increases the font size */
+                  case XK_KP_Add:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* Shift-Plus on the keypad increases the font size */
                       change_font(0, BIGGER_FONT);
                       LK_RET();
                       break;
 
-                  case XK_KP_Subtract:	/* Shift-Minus on the keypad decreases the font size */
+                  case XK_KP_Subtract:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* Shift-Minus on the keypad decreases the font size */
                       change_font(0, SMALLER_FONT);
                       LK_RET();
                       break;
@@ -495,13 +496,13 @@ lookup_key(XEvent * ev)
                       break;
 
 #ifdef XK_KP_Left
-                  case XK_KP_Left:	/* \033Ot or standard cursor key */
-                  case XK_KP_Up:	/* \033Ox or standard cursor key */
-                  case XK_KP_Right:	/* \033Ov or standard cursor key */
-                  case XK_KP_Down:	/* \033Or or standard cursor key */
+                  case XK_KP_Left:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* \033Ot or standard cursor key */
+                  case XK_KP_Up:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* \033Ox or standard cursor key */
+                  case XK_KP_Right:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* \033Ov or standard cursor key */
+                  case XK_KP_Down:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* \033Or or standard cursor key */
                       if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
                           len = 3;
-                          strcpy(kbuf, "\033OZ");	/* The Z is replaced by t, x, v, or r */
+                          strcpy(kbuf, "\033OZ");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* The Z is replaced by t, x, v, or r */
                           kbuf[2] = ("txvr"[keysym - XK_KP_Left]);
                           break;
                       } else {
@@ -509,16 +510,16 @@ lookup_key(XEvent * ev)
                       }
                       /* Continue on with the normal cursor keys... */
 #endif
-                  case XK_Left:	/* "\033[D" */
+                  case XK_Left:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033[D" */
                   case XK_Up:  /* "\033[A" */
-                  case XK_Right:	/* "\033[C" */
-                  case XK_Down:	/* "\033[B" */
+                  case XK_Right:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* "\033[C" */
+                  case XK_Down:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033[B" */
                       len = 3;
                       strcpy(kbuf, "\033[@");
                       kbuf[2] = ("DACB"[keysym - XK_Left]);
                       if (PrivateModes & PrivMode_aplCUR) {
                           kbuf[1] = 'O';
-                      } else if (shft) {	/* do Shift first */
+                      } else if (shft) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* do Shift first */
                           kbuf[2] = ("dacb"[keysym - XK_Left]);
                       } else if (ctrl) {
                           kbuf[1] = 'O';
@@ -658,31 +659,31 @@ lookup_key(XEvent * ev)
                       break;
 #endif /* XK_KP_Begin */
 
-                  case XK_KP_F1:	/* "\033OP" */
-                  case XK_KP_F2:	/* "\033OQ" */
-                  case XK_KP_F3:	/* "\033OR" */
-                  case XK_KP_F4:	/* "\033OS" */
+                  case XK_KP_F1:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* "\033OP" */
+                  case XK_KP_F2:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* "\033OQ" */
+                  case XK_KP_F3:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* "\033OR" */
+                  case XK_KP_F4:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* "\033OS" */
                       len = 3;
                       strcpy(kbuf, "\033OP");
                       kbuf[2] += (keysym - XK_KP_F1);
                       break;
 
-                  case XK_KP_Multiply:	/* "\033Oj" : "*" */
-                  case XK_KP_Add:	/* "\033Ok" : "+" */
-                  case XK_KP_Separator:	/* "\033Ol" : "," */
-                  case XK_KP_Subtract:	/* "\033Om" : "-" */
-                  case XK_KP_Decimal:	/* "\033On" : "." */
-                  case XK_KP_Divide:	/* "\033Oo" : "/" */
-                  case XK_KP_0:	/* "\033Op" : "0" */
-                  case XK_KP_1:	/* "\033Oq" : "1" */
-                  case XK_KP_2:	/* "\033Or" : "2" */
-                  case XK_KP_3:	/* "\033Os" : "3" */
-                  case XK_KP_4:	/* "\033Ot" : "4" */
-                  case XK_KP_5:	/* "\033Ou" : "5" */
-                  case XK_KP_6:	/* "\033Ov" : "6" */
-                  case XK_KP_7:	/* "\033Ow" : "7" */
-                  case XK_KP_8:	/* "\033Ox" : "8" */
-                  case XK_KP_9:	/* "\033Oy" : "9" */
+                  case XK_KP_Multiply:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* "\033Oj" : "*" */
+                  case XK_KP_Add:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* "\033Ok" : "+" */
+                  case XK_KP_Separator:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* "\033Ol" : "," */
+                  case XK_KP_Subtract:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* "\033Om" : "-" */
+                  case XK_KP_Decimal:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* "\033On" : "." */
+                  case XK_KP_Divide:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* "\033Oo" : "/" */
+                  case XK_KP_0:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Op" : "0" */
+                  case XK_KP_1:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Oq" : "1" */
+                  case XK_KP_2:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Or" : "2" */
+                  case XK_KP_3:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Os" : "3" */
+                  case XK_KP_4:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Ot" : "4" */
+                  case XK_KP_5:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Ou" : "5" */
+                  case XK_KP_6:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Ov" : "6" */
+                  case XK_KP_7:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Ow" : "7" */
+                  case XK_KP_8:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Ox" : "8" */
+                  case XK_KP_9:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* "\033Oy" : "9" */
                       /* allow shift to override */
                       if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
                           len = 3;
@@ -811,8 +812,7 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 
         tt_write(&ch, 1);
     }
-    D_TTY(("After handling:  len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n",
-           len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+    D_TTY(("After handling:  len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
     tt_write(kbuf, len);        /* Send the resulting string to the child process */
 
     LK_RET();
@@ -923,8 +923,8 @@ process_escape_seq(void)
           scr_add_lines((unsigned char *) "\n\r", 1, 2);
           break;
       case 'G':
-          if ((ch = cmd_getc()) == 'Q') {	/* query graphics */
-              tt_printf((unsigned char *) "\033G0\n");	/* no graphics */
+          if ((ch = cmd_getc()) == 'Q') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              /* query graphics */
+              tt_printf((unsigned char *) "\033G0\n");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* no graphics */
           } else {
               do {
                   ch = cmd_getc();
@@ -992,7 +992,7 @@ process_csi_seq(void)
             cmd_ungetc();       /* New escape sequence starting in the middle of one.  Punt. */
             return;
         } else if (ch < ' ') {
-            scr_add_lines(&ch, 0, 1);	/* Insert verbatim non-printable character (NPC) */
+            scr_add_lines(&ch, 0, 1);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* Insert verbatim non-printable character (NPC) */
             return;
         }
         if (ch == '-')          /* HACK: Ignore this sequence, but finish reading */
@@ -1093,7 +1093,7 @@ process_csi_seq(void)
           /* TODO: A different response should be sent depending on the value of
              priv and of arg[0], but what should those reponses be? */
 #ifndef NO_VT100_ANS
-          tt_printf(VT100_ANS);
+          tt_printf((unsigned char *) VT100_ANS);
 #endif
           break;
       case 'd':                /* Cursor to row n "\e[<n>d" */
@@ -1113,10 +1113,10 @@ process_csi_seq(void)
       case 'i':
           switch (arg[0]) {
             case 0:
-                scr_printscreen(0);	/* Print screen "\e[0i" */
+                scr_printscreen(0);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* Print screen "\e[0i" */
                 break;
             case 5:
-                process_print_pipe();	/* Start printing to print pipe "\e[5i" */
+                process_print_pipe();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* Start printing to print pipe "\e[5i" */
                 break;
           }
           break;
@@ -1373,8 +1373,7 @@ process_window_mode(unsigned int nargs, int args[])
               BOUND(y, 1, scr->height / TermWin.fheight);
               BOUND(x, 1, scr->width / TermWin.fwidth);
               XResizeWindow(Xdisplay, TermWin.parent,
-                            Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
-                            Height2Pixel(y) + 2 * TermWin.internalBorder);
+                            Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0), Height2Pixel(y) + 2 * TermWin.internalBorder);
               break;
           case 11:
               break;
@@ -1385,8 +1384,7 @@ process_window_mode(unsigned int nargs, int args[])
               break;
           case 14:
               /* Store current width and height in x and y */
-              XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y),
-                           &dummy_border, &dummy_depth);
+              XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y), &dummy_border, &dummy_depth);
               snprintf(buff, sizeof(buff), "\033[4;%d;%dt", y, x);
               tt_write((unsigned char *) buff, strlen(buff));
               break;
@@ -1536,6 +1534,7 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
                 case 1001:
                     break;      /* X11 mouse highlighting */
 #endif
+
                 case 1010:     /* Scroll to bottom on TTY output */
                     if (Options & Opt_home_on_output)
                         Options &= ~Opt_home_on_output;
@@ -1803,6 +1802,7 @@ xterm_seq(int op, const char *str)
     char *nstr, *tnstr, *valptr;
     unsigned char eterm_seq_op;
     XWMHints *wm_hints;
+
 #ifdef PIXMAP_SUPPORT
     unsigned char changed = 0, scaled = 0, which = 0;
     char *color, *mod, *orig_tnstr;
@@ -1949,7 +1949,7 @@ xterm_seq(int op, const char *str)
                             free_desktop_pixmap();
                         } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
                             LIBAST_X_FREE_PIXMAP(viewport_pixmap);
-                            viewport_pixmap = None;	/* Force the re-read */
+                            viewport_pixmap = None;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* Force the re-read */
                         }
 # endif
                         changed = 1;
@@ -1958,15 +1958,14 @@ xterm_seq(int op, const char *str)
                     if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                         break;
                     }
-                    D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color,
-                           get_image_type(which), valptr));
+                    D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
                     changed = 1;
 # ifdef PIXMAP_OFFSET
                     if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
                         free_desktop_pixmap();
                     } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
                         LIBAST_X_FREE_PIXMAP(viewport_pixmap);
-                        viewport_pixmap = None;	/* Force the re-read */
+                        viewport_pixmap = None;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* Force the re-read */
                     }
 # endif
                     if (!strcasecmp(color, "image")) {
@@ -2307,8 +2306,7 @@ xterm_seq(int op, const char *str)
                     xev.message_type = props[PROP_DESKTOP];
                     xev.format = 32;
                     xev.data.l[0] = rs_desktop;
-                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32, PropModeReplace,
-                                    (unsigned char *) &rs_desktop, 1);
+                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &rs_desktop, 1);
                     XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) & xev);
                 }
                 break;

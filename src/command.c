@@ -141,7 +141,7 @@ static RETSIGTYPE handle_crash(int);
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;
 char initial_dir[PATH_MAX + 1];
-static char *ptydev = NULL, *ttydev = NULL;	/* pty/tty name */
+static char *ptydev = NULL, *ttydev = NULL;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* pty/tty name */
 int cmd_fd = -1;                /* file descriptor connected to the command */
 int pipe_fd = -1;
 pid_t cmd_pid = -1;             /* process id if child */
@@ -150,6 +150,7 @@ unsigned int num_fds = 0;       /* number of file descriptors being used */
 struct stat ttyfd_stat;         /* original status of the tty we will use */
 int refresh_count = 0, refresh_limit = 1, refresh_type = FAST_REFRESH;
 unsigned char cmdbuf_base[CMD_BUF_SIZE], *cmdbuf_ptr, *cmdbuf_endp;
+
 /* Addresses pasting large amounts of data
  * code pinched from xterm
  */
@@ -157,10 +158,12 @@ static char *v_buffer;          /* pointer to physical buffer */
 static char *v_bufstr = NULL;   /* beginning of area to write */
 static char *v_bufptr;          /* end of area to write */
 static char *v_bufend;          /* end of physical buffer */
+
 #ifdef USE_XIM
 XIM xim_input_method = NULL;
 XIC xim_input_context = NULL;   /* input context */
 static XIMStyle xim_input_style = 0;
+
 # ifndef XSetIMValues
 extern char *XSetIMValues(XIM im, ...);
 # endif
@@ -952,10 +955,10 @@ const char *
 get_ctrl_char_name(char c)
 {
     const char *lookup[] = {
-        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",	/*  0-7  */
-        "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",	/*  8-15 */
-        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",	/* 16-23 */
-        "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"	/* 24-31 */
+        "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /*  0-7  */
+        "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /*  8-15 */
+        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* 16-23 */
+        "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              /* 24-31 */
     };
 
     return ((c < ' ') ? (lookup[(int) c]) : (""));
@@ -1416,7 +1419,7 @@ get_tty(void)
 
         privileges(INVOKE);
 # ifndef __CYGWIN32__
-        fchown(fd, my_ruid, gid);	/* fail silently */
+        fchown(fd, my_ruid, gid);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* fail silently */
         fchmod(fd, mode);
 # endif
         privileges(REVERT);
@@ -1673,28 +1676,28 @@ get_ttymode(ttymode_t *tio)
 
     /* get parameters -- gtty */
     if (ioctl(0, TIOCGETP, &(tio->sg)) < 0) {
-        tio->sg.sg_erase = CERASE;	/* ^H */
-        tio->sg.sg_kill = CKILL;	/* ^U */
+        tio->sg.sg_erase = CERASE;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^H */
+        tio->sg.sg_kill = CKILL;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* ^U */
     }
     tio->sg.sg_flags = (CRMOD | ECHO | EVENP | ODDP);
 
     /* get special characters */
     if (ioctl(0, TIOCGETC, &(tio->tc)) < 0) {
-        tio->tc.t_intrc = CINTR;	/* ^C */
-        tio->tc.t_quitc = CQUIT;	/* ^\ */
-        tio->tc.t_startc = CSTART;	/* ^Q */
-        tio->tc.t_stopc = CSTOP;	/* ^S */
+        tio->tc.t_intrc = CINTR;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* ^C */
+        tio->tc.t_quitc = CQUIT;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* ^\ */
+        tio->tc.t_startc = CSTART;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^Q */
+        tio->tc.t_stopc = CSTOP;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* ^S */
         tio->tc.t_eofc = CEOF;  /* ^D */
         tio->tc.t_brkc = -1;
     }
     /* get local special chars */
     if (ioctl(0, TIOCGLTC, &(tio->lc)) < 0) {
-        tio->lc.t_suspc = CSUSP;	/* ^Z */
-        tio->lc.t_dsuspc = CDSUSP;	/* ^Y */
-        tio->lc.t_rprntc = CRPRNT;	/* ^R */
-        tio->lc.t_flushc = CFLUSH;	/* ^O */
-        tio->lc.t_werasc = CWERASE;	/* ^W */
-        tio->lc.t_lnextc = CLNEXT;	/* ^V */
+        tio->lc.t_suspc = CSUSP;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* ^Z */
+        tio->lc.t_dsuspc = CDSUSP;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^Y */
+        tio->lc.t_rprntc = CRPRNT;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^R */
+        tio->lc.t_flushc = CFLUSH;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^O */
+        tio->lc.t_werasc = CWERASE;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* ^W */
+        tio->lc.t_lnextc = CLNEXT;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* ^V */
     }
     /* get line discipline */
     ioctl(0, TIOCGETD, &(tio->line));
@@ -1760,6 +1763,7 @@ create_fontset(const char *font1, const char *font2)
 
 #ifdef USE_XIM
 static int xim_real_init(void);
+
 # ifdef USE_X11R6_XIM
 static void xim_destroy_cb(XIM xim, XPointer client_data, XPointer call_data);
 static void xim_instantiate_cb(Display * display, XPointer client_data, XPointer call_data);
@@ -1843,8 +1847,7 @@ xim_get_area(XRectangle * preedit_rect, XRectangle * status_rect, XRectangle * n
     preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
     preedit_rect->y = Height2Pixel(TermWin.nrow - 1);
 
-    preedit_rect->width =
-        Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
+    preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
     preedit_rect->height = Height2Pixel(1);
 
     status_rect->x = (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) ? (scrollbar_trough_width()) : 0;
@@ -1995,9 +1998,7 @@ xim_real_init(void)
         xim_set_size(&rect);
         xim_get_position(&spot);
         xim_set_color(&fg, &bg);
-        preedit_attr =
-            XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset,
-                                NULL);
+        preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
     } else if (xim_input_style & XIMPreeditArea) {
         xim_set_color(&fg, &bg);
         /* The necessary width of preedit area is unknown until create input context. */
@@ -2270,12 +2271,14 @@ run_command(char **argv)
     return (ptyfd);
 }
 
+
+#ifdef ESCREEN
+
 /***************************************************************************/
 /* Escreen:  callbacks */
 /***********************/
 
-#ifdef ESCREEN
-int
+static int
 set_scroll_x(void *xd, int x)
 {
     USE_VAR(xd);
@@ -2283,7 +2286,7 @@ set_scroll_x(void *xd, int x)
     return NS_FAIL;
 }
 
-int
+static int
 set_scroll_y(void *xd, int y)
 {
     USE_VAR(xd);
@@ -2291,7 +2294,7 @@ set_scroll_y(void *xd, int y)
     return NS_FAIL;
 }
 
-int
+static int
 set_scroll_w(void *xd, int w)
 {
     USE_VAR(xd);
@@ -2299,7 +2302,7 @@ set_scroll_w(void *xd, int w)
     return NS_FAIL;
 }
 
-int
+static int
 set_scroll_h(void *xd, int h)
 {
     USE_VAR(xd);
@@ -2307,7 +2310,7 @@ set_scroll_h(void *xd, int h)
     return NS_FAIL;
 }
 
-int
+static int
 redraw(void *xd)
 {
     USE_VAR(xd);
@@ -2315,7 +2318,7 @@ redraw(void *xd)
     return NS_FAIL;
 }
 
-int
+static int
 redraw_xywh(void *xd, int x, int y, int w, int h)
 {
     USE_VAR(xd);
@@ -2323,8 +2326,7 @@ redraw_xywh(void *xd, int x, int y, int w, int h)
     return NS_FAIL;
 }
 
-static button_t *
-screen_button_create(char *text, char code)
+static button_t *screen_button_create(char *text, char code)
 {
     button_t *b;
     char p[3];
@@ -2344,9 +2346,12 @@ screen_button_create(char *text, char code)
 
 /* add a new screen display to button bar.
    if our user's configured a bbar, we'll add to that,
-   otherwise, we'll create one. */
-int
-ins_disp(void *xd, int after, char *name)
+   otherwise, we'll create one.
+   xd     address of the pointer to the buttonbar in question
+   after  insert after which display?
+   name   the display's name */
+static int
+ins_disp(void *xd, int after, int as, char *name)
 {
     buttonbar_t *bbar;
     button_t *button;
@@ -2357,11 +2362,9 @@ ins_disp(void *xd, int after, char *name)
 
     bbar = *((buttonbar_t **) xd);
 
-    if (!(button = screen_button_create(name, '0' + after + 1))) {
+    if (!(button = screen_button_create(name, '0' + as))) {
         return NS_FAIL;
     }
-
-    D_ESCREEN(("%s after %d...\n", name, after));
 
     if ((bbar = bbar_insert_button(bbar, button, after, FALSE))) {
         *((buttonbar_t **) xd) = bbar;
@@ -2372,7 +2375,8 @@ ins_disp(void *xd, int after, char *name)
     return NS_FAIL;
 }
 
-# if 0
+#if 0
+
 /* add supa-dupa right buttons for screen-features.
    if our user's configured a bbar, we'll add to that,
    otherwise, we'll create one. */
@@ -2388,9 +2392,9 @@ add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
 
     bbar = *xd;
 
-    if (!(button = screen_button_create(name, key))) {
+    if (!(button = screen_button_create(name, key)))
         return NS_FAIL;
-    }
+
     if ((bbar = bbar_insert_button(bbar, button, -1, TRUE))) {
         *xd = bbar;
         return NS_SUCC;
@@ -2399,11 +2403,12 @@ add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
     button_free(button);
     return NS_FAIL;
 }
-# endif
+#endif
 
 /* delete n'th button
-   n  index of the button (not screen, not data -- the button) */
-int
+   xd     address of the pointer to the buttonbar in question
+   n      index of the button (not screen, not data -- the button) */
+static int
 del_disp(void *xd, int n)
 {
     buttonbar_t *bbar = *((buttonbar_t **) xd);
@@ -2412,16 +2417,6 @@ del_disp(void *xd, int n)
 
     REQUIRE_RVAL(bbar, NS_FAIL);
     REQUIRE_RVAL(bbar->buttons, NS_FAIL);
-
-#if DEBUG >= DEBUG_ESCREEN
-    if (DEBUG_LEVEL >= DEBUG_ESCREEN) {
-        int c;
-
-        for (c = 0, b2 = bbar->buttons; b2; c++, b2 = b2->next) {
-            D_ESCREEN(("%02d: \"%s\"\n", c, b2->text));
-        }
-    }
-#endif
 
     b2 = button = bbar->buttons;
     if (n == 0) {
@@ -2443,8 +2438,6 @@ del_disp(void *xd, int n)
         }
     }
 
-    D_ESCREEN(("deleting button %d (%s)...\n", bi, button->text));
-
     button->next = NULL;
     button_free(button);
 
@@ -2454,12 +2447,12 @@ del_disp(void *xd, int n)
 }
 
 /* update the button-representation of a screen-display.
-   xd
+   xd     address of the pointer to the buttonbar in question
    n      the button's index (in the list of buttons)
    flags  the new flags for the display (or -1 to ignore)
    name   the new name for the display (or NULL)
    <-     error code */
-int
+static int
 upd_disp(void *xd, int n, int flags, char *name)
 {
     buttonbar_t *bbar = *((buttonbar_t **) xd);
@@ -2484,20 +2477,49 @@ upd_disp(void *xd, int n, int flags, char *name)
     return NS_SUCC;
 }
 
+/* expire all buttons
+   xd     address of the pointer to the buttonbar in question
+   n      how many buttons do we want to throw out (normally all of them)?
+   <-     error code */
+static int
+expire_buttons(void *xd, int n)
+{
+    buttonbar_t *bbar = *((buttonbar_t **) xd);
+    button_t *b, *p;
+
+    REQUIRE_RVAL(bbar, NS_FAIL);
+    if (n < 1) {
+        return NS_FAIL;
+    }
+
+    if ((b = bbar->buttons)) {
+        for (; n; n--) {
+            p = b;
+            b = b->next;
+        }
+        p->next = NULL;
+        button_free(bbar->buttons);
+        bbar->buttons = b;
+    }
+
+    return NS_SUCC;
+}
+
 /* display a status line the screen program sent us */
-int
+static int
 err_msg(void *xd, int err, char *msg)
 {
-    char *sc[] = { "Copy mode", "Bell in" };
+    char *sc[] = { "Copy mode", "Bell in", "Wuff,  Wuff!!" };
     int n, nsc = sizeof(sc) / sizeof(char *);
-
-    USE_VAR(xd);
-    USE_VAR(err);
 
     /* there are certain things that would make sense if we were displaying
        a status-line; they do not, however, warrant an alert-box, so we drop
        them here. */
-    if (msg && *msg) {
+
+    USE_VAR(xd);
+    USE_VAR(err);
+
+    if (strlen(msg)) {
         for (n = 0; n < nsc; n++) {
             if (!strncmp(msg, sc[n], strlen(sc[n]))) {
                 break;
@@ -2511,7 +2533,7 @@ err_msg(void *xd, int err, char *msg)
 }
 
 /* send text to the application (normally "screen") in the terminal */
-int
+static int
 inp_text(void *xd, int id, char *txt)
 {
     USE_VAR(xd);
@@ -2522,7 +2544,7 @@ inp_text(void *xd, int id, char *txt)
 }
 
 /* open a dialog */
-int
+static int
 input_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
     switch (menu_dialog(xd, prompt, maxlen, retstr, inp_tab)) {
@@ -2536,19 +2558,21 @@ input_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (
 }
 
 /* run a program (normally "screen") inside the terminal */
-int
+static int
 exe_prg(void *xd, char **argv)
 {
     USE_VAR(xd);
     return run_command(argv);
 }
 
-/********************* Azundris' toys ***************************/
+
+/****** Azundris' playthings :-) ******/
 
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
 #define CLEAR (1<<16)
+
 static void
 direct_write_screen(int x, int y, char *fg, rend_t bg)
 {
@@ -2569,10 +2593,12 @@ bosconian(int n)
 {
     int x, y;
     int ys = TermWin.saveLines - TermWin.view_start;
+
     for (; n != 0; n--) {
         for (y = 0; y < TermWin.nrow; y++) {
             text_t *t = screen.text[ys + y];
             rend_t *r = screen.rend[ys + y];
+
             for (x = 0; x < TermWin.ncol; x++) {
                 t[x] = random() & 0xff;
                 r[x] = random() & COLOUR_MASK;
@@ -2588,10 +2614,12 @@ unbosconian(void)
     int x, y;
     int ys = TermWin.saveLines - TermWin.view_start;
     rend_t bg;
+
     do {
         bg = CLEAR;
         for (y = 0; (bg == CLEAR) && y < TermWin.nrow; y++) {
             rend_t *r = screen.rend[ys + y];
+
             for (x = 0; (bg == CLEAR) && x < TermWin.ncol; x++) {
                 if (r[x] != CLEAR) {
                     bg = r[x];
@@ -2602,6 +2630,7 @@ unbosconian(void)
             for (y = 0; y < TermWin.nrow; y++) {
                 text_t *t = screen.text[ys + y];
                 rend_t *r = screen.rend[ys + y];
+
                 for (x = 0; x < TermWin.ncol; x++) {
                     if (r[x] == bg) {
                         r[x] = CLEAR;
@@ -2613,12 +2642,11 @@ unbosconian(void)
         }
     } while (bg != CLEAR);
 }
+
 #undef DIRECT_MASK
 #undef COLOUR_MASK
 #undef DIRECT_SET_SCREEN
 
-#define MATRIX_HI CLEAR
-#define MATRIX_LO ((4<<8)|CLEAR)
 static void
 matrix(int n)
 {
@@ -2634,8 +2662,10 @@ matrix(int n)
     }
 
     MEMSET(s, 0, TermWin.ncol);
+#define MATRIX_HI CLEAR
+#define MATRIX_LO ((4<<8)|CLEAR)
 
-    for (; n != 0; n--) {
+    while (n--) {
         for (x = 0; x < TermWin.ncol; x++) {
             if (!(random() & 3)) {
                 if ((y = s[x])) {
@@ -2684,7 +2714,8 @@ matrix(int n)
                       }
                       break;
 
-                  default: t[x] = random() & 0xff;    /* hold */
+                  default:
+                      t[x] = random() & 0xff;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* hold */
                 }
             }
         }
@@ -2692,6 +2723,7 @@ matrix(int n)
     }
     FREE(s);
 }
+
 #undef MATRIX_HI
 #undef MATRIX_LO
 
@@ -2701,11 +2733,9 @@ waitstate(void *xd, int ms)
 {
     int y = 1;
     time_t dur = (time_t) (ms / 1000);
-#if 0
-    time_t fin = dur + time(NULL);
-#endif
 
     USE_VAR(xd);
+
     if (!(random() & 7)) {
         if (!(random() & 3)) {
             matrix(31);
@@ -2725,8 +2755,10 @@ waitstate(void *xd, int ms)
     scr_refresh(FAST_REFRESH);
 
     sleep(dur);
+
     return 0;
 }
+
 #undef CLEAR
 
 /* Set everything up for escreen mode */
@@ -2745,6 +2777,7 @@ escreen_init(char **argv)
 
     ns_register_red(efuns, redraw);
     ns_register_rda(efuns, redraw_xywh);
+    ns_register_exb(efuns, expire_buttons);
 
     ns_register_ins(efuns, ins_disp);
     ns_register_del(efuns, del_disp);
@@ -2767,7 +2800,7 @@ escreen_init(char **argv)
         menuitem_t *i;
 
         if (rs_delay >= 0) {
-            TermWin.screen->delay = rs_delay;	/* more flexible ways later */
+            TermWin.screen->delay = rs_delay;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* more flexible ways later */
         }
         if ((m = menu_create(NS_MENU_TITLE))) {
             char *sc[] = {
@@ -2793,11 +2826,8 @@ escreen_init(char **argv)
             int n, nsc = sizeof(sc) / sizeof(char *);
 
             if (menu_list) {
-                for (n = 0; n < menu_list->nummenus; n++) {	/* blend in w/ l&f */
+                for (n = 0; n < menu_list->nummenus; n++) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* blend in w/ l&f */
                     if (menu_list->menus[n]->font) {
-#ifdef NS_DEBUG
-                        D_ESCREEN(("%d: %p\n", n, menu_list->menus[n]->font));
-#endif
                         m->font = menu_list->menus[n]->font;
                         m->fwidth = menu_list->menus[n]->fwidth;
                         m->fheight = menu_list->menus[n]->fheight;
@@ -2810,22 +2840,16 @@ escreen_init(char **argv)
             }
 
             for (n = 0; n < (nsc - 1); n += 2) {
-                if (!strcmp(sc[n], "-")) {	/* separator */
+                if (!strcmp(sc[n], "-")) {
+                    /* separator */
                     if ((i = menuitem_create(NULL))) {
                         menu_add_item(m, i);
                         menuitem_set_action(i, MENUITEM_SEP, NULL);
                     }
-                } /* menu entry */
-                else if ((i = menuitem_create(sc[n]))) {
+                } else if ((i = menuitem_create(sc[n]))) {
+                    /* menu entry */
                     menuitem_set_action(i, n && strcmp(sc[n + 1], NS_SCREEN_INIT)
                                         && strcmp(sc[n + 1], NS_SCREEN_PRVS_REG) ? MENUITEM_ECHO : MENUITEM_LITERAL, sc[n + 1]);
-#  ifdef NS_DEBUG
-                    {
-                        char buf[64];
-                        sprintf(buf, NS_PREFIX "escreen_menu: registered %s as", sc[n]);
-                        ns_desc_string(i->action.string, buf);
-                    }
-#  endif
                     menu_add_item(m, i);
                 }
             }
@@ -2846,32 +2870,31 @@ escreen_init(char **argv)
                     button_free(button);
                 } else {
                     int j, k = menu_list ? menu_list->nummenus : 0;
+
                     menu_list = menulist_add_menu(menu_list, m);
-                    for (j = k; j < menu_list->nummenus; j++)
+                    for (j = k; j < menu_list->nummenus; j++) {
                         event_data_add_mywin(&menu_event_data, menu_list->menus[j]->win);
+                    }
                     if (!k)
                         menu_init();
                     button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
                 }
             }
         }
-/*      add_screen_ctl_button(&buttonbar,"New",'c'); */
-        cmd_fd = TermWin.screen->fd;
-    } else {
-        return -1;
+        /* add_screen_ctl_button(&buttonbar,"New",'c'); */
+        return TermWin.screen->fd;
     }
-#  undef ETERM_PREFIX
-#  undef ESCREEN_PREFIX
-    return cmd_fd;
+    return -1;
 }
-
 #endif
+
+
 
 /* init_command() */
 void
 init_command(char **argv)
 {
-    int (*command_func)(char **);
+    int (*command_func) (char **);
 
     /* Use init function appropriate for how we were compiled. */
 #ifdef ESCREEN
@@ -2953,13 +2976,13 @@ cmd_write(const unsigned char *str, unsigned int count)
         /* try and get more space from the end */
         unsigned char *src, *dst;
 
-        dst = (cmdbuf_base + sizeof(cmdbuf_base) - 1);	/* max pointer */
+        dst = (cmdbuf_base + sizeof(cmdbuf_base) - 1);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* max pointer */
 
         if ((cmdbuf_ptr + n) > dst)
-            n = (dst - cmdbuf_ptr);	/* max # chars to insert */
+            n = (dst - cmdbuf_ptr);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* max # chars to insert */
 
         if ((cmdbuf_endp + n) > dst)
-            cmdbuf_endp = (dst - n);	/* truncate end if needed */
+            cmdbuf_endp = (dst - n);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* truncate end if needed */
 
         /* equiv: memmove ((cmdbuf_ptr+n), cmdbuf_ptr, n); */
         src = cmdbuf_endp;
@@ -3064,8 +3087,26 @@ cmd_getc(void)
 #endif
     }
 #ifdef ESCREEN
-    if (TermWin.screen_mode)
-        parse_screen_status_if_necessary();
+    if (TermWin.screen) {
+        switch (TermWin.screen->backend) {
+          case NS_MODE_NONE:
+              break;
+          case NS_MODE_NEGOTIATE:
+#  ifdef NS_HAVE_SCREEN
+          case NS_MODE_SCREEN:
+              parse_screen_status_if_necessary();
+              break;
+#  endif
+#  ifdef NS_HAVE_SCREAM
+          case NS_MODE_SCREAM:
+              break;
+#  endif
+          default:
+              D_ESCREEN(("mode %d not supported...\n", TermWin.screen->backend));
+              TermWin.screen->backend = NS_MODE_NONE;
+              TermWin.screen_mode = NS_MODE_NONE;
+        }
+    }
 #endif
 
     /* characters already read in */
@@ -3075,7 +3116,7 @@ cmd_getc(void)
 
     for (;;) {
         v_doPending();
-        while (XPending(Xdisplay)) {	/* process pending X events */
+        while (XPending(Xdisplay)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* process pending X events */
 
             XEvent ev;
 
@@ -3282,7 +3323,7 @@ main_loop(void)
 #endif
 
     do {
-        while ((ch = cmd_getc()) == 0);	/* wait for something */
+        while ((ch = cmd_getc()) == 0);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* wait for something */
         if (ch >= ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
             /* Read a text string from the input buffer */
             int nlines = 0;
@@ -3321,8 +3362,7 @@ main_loop(void)
                     break;
                 }
             }
-            D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
-                      nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
+            D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n", nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
             scr_add_lines(str, nlines, (cmdbuf_ptr - str));
         } else {
             switch (ch) {
@@ -3397,7 +3437,7 @@ v_writeBig(int f, char *d, int len)
      */
 
     if (len > 0) {
-        if (v_bufend < v_bufptr + len) {	/* we've run out of room */
+        if (v_bufend < v_bufptr + len) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* we've run out of room */
             if (v_bufstr != v_buffer) {
                 /* there is unused space, move everything down */
                 /* possibly overlapping bcopy here */
@@ -3410,7 +3450,7 @@ v_writeBig(int f, char *d, int len)
             if (v_bufend < v_bufptr + len) {
                 /* still won't fit: get more space */
                 /* Don't use XtRealloc because an error is not fatal. */
-                int size = v_bufptr - v_buffer;	/* save across realloc */
+                int size = v_bufptr - v_buffer;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* save across realloc */
 
                 v_buffer = REALLOC(v_buffer, size + len);
                 if (v_buffer) {
@@ -3420,13 +3460,13 @@ v_writeBig(int f, char *d, int len)
                 } else {
                     /* no memory: ignore entire write request */
                     print_error("cannot allocate buffer space\n");
-                    v_buffer = v_bufstr;	/* restore clobbered pointer */
+                    v_buffer = v_bufstr;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* restore clobbered pointer */
                     c = 0;
                 }
             }
         }
-        if (v_bufend >= v_bufptr + len) {	/* new stuff will fit */
-            memcpy(v_bufptr, d, len);	/* bcopy(d, v_bufptr, len); */
+        if (v_bufend >= v_bufptr + len) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              /* new stuff will fit */
+            memcpy(v_bufptr, d, len);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* bcopy(d, v_bufptr, len); */
             v_bufptr += len;
         }
     }
@@ -3452,13 +3492,13 @@ v_writeBig(int f, char *d, int len)
         }
         D_TTY(("Wrote %d characters\n", written));
         v_bufstr += written;
-        if (v_bufstr >= v_bufptr)	/* we wrote it all */
+        if (v_bufstr >= v_bufptr)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* we wrote it all */
             v_bufstr = v_bufptr = v_buffer;
     }
     /*
      * If we have lots of unused memory allocated, return it
      */
-    if (v_bufend - v_bufptr > 1024) {	/* arbitrary hysteresis */
+    if (v_bufend - v_bufptr > 1024) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* arbitrary hysteresis */
         /* save pointers across realloc */
         int start = v_bufstr - v_buffer;
         int size = v_bufptr - v_buffer;
@@ -3471,7 +3511,7 @@ v_writeBig(int f, char *d, int len)
             v_bufend = v_buffer + allocsize;
         } else {
             /* should we print a warning if couldn't return memory? */
-            v_buffer = v_bufstr - start;	/* restore clobbered pointer */
+            v_buffer = v_bufstr - start;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* restore clobbered pointer */
         }
     }
 }

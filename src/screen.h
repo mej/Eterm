@@ -302,6 +302,7 @@ extern void selection_extend_colrow(int, int, int, int);
 extern void selection_rotate(int, int);
 extern void selection_send(XSelectionRequestEvent *);
 extern void mouse_report(XButtonEvent *);
+extern void mouse_drag_report(XButtonEvent *);
 extern void mouse_tracking(int, int, int, int, int);
 extern void debug_colors(void);
 #ifdef MULTI_CHARSET

@@ -42,6 +42,9 @@ static const char cvs_ident[] = "$Id$";
 #include "scrollbar.h"
 #include "term.h"
 #include "windows.h"
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
 
 action_t *action_list = NULL;
 
@@ -60,9 +63,12 @@ action_handle_echo(event_t *ev, action_t *action)
     USE_VAR(ev);
     REQUIRE_RVAL(action->param.string != NULL, 0);
 #ifdef ESCREEN
-    if (TermWin.screen_mode && TermWin.screen)	/* translate escapes */
+    if (TermWin.screen && TermWin.screen->backend) {
+#  ifdef NS_HAVE_SCREEN
+        /* translate escapes */
         ns_parse_screen_interactive(TermWin.screen, action->param.string);
-    else
+#  endif
+    } else
 #endif
         tt_write((unsigned char *) action->param.string, strlen(action->param.string));
     return 1;
@@ -140,8 +146,7 @@ action_check_modifiers(unsigned short mod, int x_mod)
 
     /* When we do have to check the modifiers, we do so in this order to eliminate the
        most popular choices first.  If any test fails, we return FALSE. */
-    D_ACTIONS(("Checking modifier set 0x%08x (" MOD_FMT ") vs. X modifier set 0x%08x (" MOD_FMT ")\n",
-               mod, SHOW_MODS(mod), x_mod, SHOW_X_MODS(x_mod)));
+    D_ACTIONS(("Checking modifier set 0x%08x (" MOD_FMT ") vs. X modifier set 0x%08x (" MOD_FMT ")\n", mod, SHOW_MODS(mod), x_mod, SHOW_X_MODS(x_mod)));
     if (mod != MOD_ANY) {
         /* LOGICAL_XOR() returns true if either the first parameter or the second parameter
            is true, but not both...just like XOR.  If the mask we're looking for is set in
@@ -197,8 +202,7 @@ action_dispatch(event_t *ev, KeySym keysym)
 
     ASSERT_RVAL(ev != NULL, 0);
     ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, 0);
-    D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n",
-               ev, ev->xbutton.button, keysym, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
+    D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n", ev, ev->xbutton.button, keysym, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
     for (action = action_list; action; action = action->next) {
         /* The very first thing we do is match the event type to the type
            of the current action.  This means that we'll only run through

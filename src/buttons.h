@@ -96,6 +96,9 @@ typedef struct buttonbar_struct {
 /************ Variables ************/
 extern buttonbar_t *buttonbar;
 extern long bbar_total_h;
+#ifdef ESCREEN
+extern button_t *drag;
+#endif
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

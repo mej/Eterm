@@ -72,7 +72,7 @@
 #  define DEBUG_ACTIONS			4
 #  define D_ACTIONS(x)			DPRINTF4(x)
 #  define DEBUG_ESCREEN                 4
-#  define D_ESCREEN(x)                  DPRINTF4(x)
+#  define D_ESCREEN(x)			DPRINTF4(x)
 
 #  define DEBUG_PROFILE			5
 #  define D_PROFILE(x)			DPRINTF5(x)

@@ -44,6 +44,7 @@ char **etfonts = NULL;
 unsigned char font_idx = DEF_FONT_IDX, font_cnt = 0;
 int def_font_idx = DEF_FONT_IDX;
 char *rs_font[NFONTS];
+
 #ifdef MULTI_CHARSET
 char *rs_mfont[NFONTS];
 char **etmfonts = NULL;
@@ -229,15 +230,14 @@ font_cache_del(const void *info)
            update the "next" pointer of the font prior to the one we're actually deleting. */
         for (current = font_cache; current->next; current = current->next) {
             if (((current->next->type == FONT_TYPE_X) && (current->next->fontinfo.xfontinfo == (XFontStruct *) info))) {
-                D_FONT((" -> Match found at current->next (%8p, current == %8p).  Font name is \"%s\"\n", current->next, current,
-                        NONULL(current->next->name)));
+                D_FONT((" -> Match found at current->next (%8p, current == %8p).  Font name is \"%s\"\n", current->next, current, NONULL(current->next->name)));
                 if (--(current->next->ref_cnt) == 0) {
                     D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
                     tmp = current->next;
                     current->next = current->next->next;
                     XFreeFont(Xdisplay, (XFontStruct *) info);
                     if (cur_font == tmp) {
-                        cur_font = current;	/* If we're nuking the last entry in the cache, point cur_font to the *new* last entry. */
+                        cur_font = current;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* If we're nuking the last entry in the cache, point cur_font to the *new* last entry. */
                     }
                     FREE(tmp->name);
                     FREE(tmp);
@@ -455,8 +455,7 @@ change_font(int init, const char *fontname)
     short idx = 0, old_idx = font_idx;
     int fh, fw = 0;
 
-    D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx,
-            (unsigned int) font_idx));
+    D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx, (unsigned int) font_idx));
 
     if (init) {
         font_idx = def_font_idx;
@@ -585,8 +584,7 @@ change_font(int init, const char *fontname)
         TermWin.fprop = 1;      /* Proportional font */
 
     /* For proportional fonts with large size variations, do some math-fu to try and help the appearance */
-    if (TermWin.fprop && (Options & Opt_proportional) && TermWin.font->per_char
-        && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
+    if (TermWin.fprop && (Options & Opt_proportional) && TermWin.font->per_char && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
         int cw, n = 0, sum = 0, sumsq = 0, min_w, max_w;
         unsigned int i;
         double dev;
@@ -634,7 +632,7 @@ change_font(int init, const char *fontname)
 
         fw = boldFont->min_bounds.width;
         fh = boldFont->ascent + boldFont->descent + rs_line_space;
-        if (TermWin.fprop == 0) {	/* bold font must also be monospaced */
+        if (TermWin.fprop == 0) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* bold font must also be monospaced */
             if (fw != boldFont->max_bounds.width)
                 fw = -1;
         } else {
@@ -651,8 +649,7 @@ change_font(int init, const char *fontname)
 
     TermWin.width = TermWin.ncol * TermWin.fwidth;
     TermWin.height = TermWin.nrow * TermWin.fheight;
-    D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n", TermWin.fwidth, TermWin.fheight, TermWin.width,
-            TermWin.height));
+    D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n", TermWin.fwidth, TermWin.fheight, TermWin.width, TermWin.height));
 
     /* If we're initializing, *we* do the size hints.  If not, resize the parent window. */
     if (init) {

@@ -46,6 +46,9 @@ static const char cvs_ident[] = "$Id$";
 #include "scrollbar.h"
 #include "term.h"
 #include "windows.h"
+#ifdef ESCREEN
+#  include "screamcfg.h"
+#endif
 
 unsigned char paused = 0;
 event_master_t event_master;
@@ -70,8 +73,7 @@ event_register_dispatcher(event_dispatcher_t func, event_dispatcher_init_t init)
 
     /* Add a secondary event dispatcher */
     event_master.num_dispatchers++;
-    event_master.dispatchers =
-        (event_dispatcher_t *) REALLOC(event_master.dispatchers, sizeof(event_dispatcher_t) * event_master.num_dispatchers);
+    event_master.dispatchers = (event_dispatcher_t *) REALLOC(event_master.dispatchers, sizeof(event_dispatcher_t) * event_master.num_dispatchers);
     event_master.dispatchers[event_master.num_dispatchers - 1] = (event_dispatcher_t) func;
     (init) ();                  /* Initialize the dispatcher's data */
 }
@@ -226,8 +228,7 @@ handle_property_notify(event_t *ev)
 
         if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
             D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n",
-                      ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
-                      (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
+                      ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
             if (ev->xproperty.atom == props[PROP_DESKTOP]) {
                 win = get_desktop_window();
                 if (win == (Window) 1) {
@@ -267,8 +268,7 @@ handle_property_notify(event_t *ev)
     }
 #endif
     if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
-        D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == %d, ev->xproperty.atom == %d\n", (int) props[PROP_ENL_COMMS],
-                  (int) ev->xproperty.atom));
+        D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == %d, ev->xproperty.atom == %d\n", (int) props[PROP_ENL_COMMS], (int) ev->xproperty.atom));
         if ((props[PROP_ENL_COMMS] != None) && (ev->xproperty.atom == props[PROP_ENL_COMMS])) {
             if ((enl_ipc_get_win()) != None) {
 #ifdef PIXMAP_SUPPORT
@@ -333,8 +333,7 @@ handle_client_message(event_t *ev)
         unsigned char *data;
         unsigned long Size, RemainingBytes;
 
-        XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat,
-                           &Size, &RemainingBytes, &data);
+        XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
         if (data != NULL) {
             XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
             selection_paste(Xroot, XA_CUT_BUFFER0, True);
@@ -453,8 +452,7 @@ handle_focus_in(event_t *ev)
         unsigned int unused_mask;
 
         TermWin.focus = 1;
-        XQueryPointer(Xdisplay, TermWin.parent, &unused_root, &child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
-                      &unused_mask);
+        XQueryPointer(Xdisplay, TermWin.parent, &unused_root, &child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
         if (child == TermWin.vt) {
             if (images[image_bg].current != images[image_bg].selected) {
                 images[image_bg].current = images[image_bg].selected;
@@ -517,8 +515,7 @@ handle_configure_notify(event_t *ev)
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, ev)) {
-        D_EVENTS(("New event:  Window 0x%08x, %dx%d at %d, %d\n", ev->xany.window, ev->xconfigure.width,
-                  ev->xconfigure.height, ev->xconfigure.x, ev->xconfigure.y));
+        D_EVENTS(("New event:  Window 0x%08x, %dx%d at %d, %d\n", ev->xany.window, ev->xconfigure.width, ev->xconfigure.height, ev->xconfigure.x, ev->xconfigure.y));
     }
     if (ev->xany.window == TermWin.parent) {
         int x = ev->xconfigure.x, y = ev->xconfigure.y;
@@ -740,6 +737,62 @@ handle_button_release(event_t *ev)
 
     D_EVENTS(("handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
+#ifdef ESCREEN
+    if (!XEVENT_IS_MYWIN(ev, &primary_data) && drag && TermWin.screen && TermWin.screen->backend && TermWin.screen->userdef) {
+        buttonbar_t *bbar = *((buttonbar_t **) (TermWin.screen->userdef));
+        button_t *b;
+        int fm = 0, to = 0;
+
+        if (!bbar || !(b = bbar->buttons)) {
+            return 0;
+        }
+
+        while (b && (b != drag)) {
+            b = b->next;
+            fm++;
+        }
+        if (!b) {
+            /* dragged button is not on the bar with our displays on */
+            return 0;
+        }
+
+        if (bbar->current) {
+            b = bbar->buttons;
+            while (b && (b != bbar->current)) {
+                b = b->next;
+                to++;
+            }
+            if (!b) {
+                /* dragged-to button is not on the bar with our displays */
+                return 0;
+            }
+        }
+
+        if (!bbar->current) {
+            /* tab torn off */
+            char *u = ns_get_url(TermWin.screen, fm);
+
+            if (u) {
+                char *c;
+                size_t l = strlen(orig_argv0) + strlen(u) + 7;
+
+                if ((c = MALLOC(l))) {
+                    snprintf(c, l, "%s%s -U %s", ((orig_argv0[0] == '/') || ((orig_argv0[0] == '.') && (orig_argv0[1] == '/'))) ? "" : "./", orig_argv0, u);
+                    D_ESCREEN(("(experimental) creating other frame using \"%s\"\n", c));
+                    (void) ns_run(TermWin.screen->efuns, c);
+                    FREE(c);
+                }
+                FREE(u);
+            }
+            return 1;
+        } else if (buttonbar->current != drag) {
+            /* tab "moved" */
+            ns_mov_disp(TermWin.screen, fm, to);
+            return 1;
+        }
+    }
+#endif
+
     if (button_state.ignore_release == 1) {
         button_state.ignore_release = 0;
         return 0;
@@ -802,8 +855,11 @@ handle_motion_notify(event_t *ev)
     COUNT_EVENT(motion_cnt);
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
-    if ((PrivateModes & PrivMode_mouse_report) && !(button_state.bypass_keystate))
+
+    if ((PrivateModes & PrivMode_mouse_report) && !(button_state.bypass_keystate)) {
+        mouse_drag_report(&(ev->xbutton));
         return 1;
+    }
 
     if (ev->xany.window == TermWin.vt) {
         if (ev->xbutton.state & (Button1Mask | Button3Mask)) {
@@ -812,8 +868,7 @@ handle_motion_notify(event_t *ev)
             unsigned int unused_mask;
 
             while (XCheckTypedWindowEvent(Xdisplay, TermWin.vt, MotionNotify, ev));
-            XQueryPointer(Xdisplay, TermWin.vt, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x),
-                          &(ev->xbutton.y), &unused_mask);
+            XQueryPointer(Xdisplay, TermWin.vt, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
 #ifdef MOUSE_THRESHOLD
             /* deal with a `jumpy' mouse */
             if ((ev->xmotion.time - button_state.button_press) > MOUSE_THRESHOLD)

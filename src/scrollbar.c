@@ -54,14 +54,16 @@ scrollbar_t scrollbar = {
     0, 0,
     0, 0
 };
+
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
 short scroll_arrow_delay;
 #endif
 static GC gc_scrollbar;
 static short last_top = 0, last_bot = 0;
+
 #ifdef XTERM_SCROLLBAR
 static GC gc_stipple, gc_border;
-static unsigned char xterm_sb_bits[] = { 0xaa, 0x0a, 0x55, 0x05 };	/* 12x2 bitmap */
+static unsigned char xterm_sb_bits[] = { 0xaa, 0x0a, 0x55, 0x05 };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* 12x2 bitmap */
 #endif
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
 static GC gc_top, gc_bottom;
@@ -216,8 +218,7 @@ sb_handle_button_press(event_t *ev)
 #endif /* NO_SCROLLBAR_REPORT */
     {
         D_EVENTS(("ButtonPress event for window 0x%08x at %d, %d\n", ev->xany.window, ev->xbutton.x, ev->xbutton.y));
-        D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win,
-                  scrollbar.win));
+        D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
 
         if (scrollbar_win_is_uparrow(ev->xany.window)) {
             scrollbar_draw_uparrow(IMAGE_STATE_CLICKED, 0);
@@ -242,7 +243,7 @@ sb_handle_button_press(event_t *ev)
             }
             switch (ev->xbutton.button) {
               case Button2:
-                  button_state.mouse_offset = scrollbar_anchor_height() / 2;	/* Align to center */
+                  button_state.mouse_offset = scrollbar_anchor_height() / 2;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* Align to center */
                   if (!scrollbar_win_is_anchor(ev->xany.window)) {
                       scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
                   } else if (scrollbar.type == SCROLLBAR_XTERM) {
@@ -332,8 +333,7 @@ sb_handle_motion_notify(event_t *ev)
         return 1;
 
     D_EVENTS(("MotionNotify event for window 0x%08x\n", ev->xany.window));
-    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win,
-              scrollbar.win));
+    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
 
     if ((scrollbar_win_is_trough(ev->xany.window) || scrollbar_win_is_anchor(ev->xany.window)) && scrollbar_is_moving()) {
         Window unused_root, unused_child;
@@ -341,8 +341,7 @@ sb_handle_motion_notify(event_t *ev)
         unsigned int unused_mask;
 
         while (XCheckTypedWindowEvent(Xdisplay, scrollbar.win, MotionNotify, ev));
-        XQueryPointer(Xdisplay, scrollbar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x),
-                      &(ev->xbutton.y), &unused_mask);
+        XQueryPointer(Xdisplay, scrollbar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
         scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
         refresh_count = refresh_limit = 0;
         scr_refresh(refresh_type);
@@ -558,11 +557,9 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
             XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sa].current->bg, ""));
             XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sa].current->bg, ""));
             if (scrollbar_anchor_is_pressed()) {
-                draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(),
-                            scrollbar_get_shadow());
+                draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
             } else {
-                draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(),
-                            scrollbar_get_shadow());
+                draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
             }
         }
 #endif
@@ -603,8 +600,7 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
             UPPER_BOUND(th, scrollbar_anchor_height() >> 1);
             D_SCROLLBAR(("Thumb width/height has been calculated at %hux%hu.\n", tw, th));
             if ((tw > 0) && (th > 0)) {
-                paste_simage(images[image_st].current, image_st, scrollbar.sa_win, pmap,
-                             (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
+                paste_simage(images[image_st].current, image_st, scrollbar.sa_win, pmap, (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
                 XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, pmap);
                 XClearWindow(Xdisplay, scrollbar.sa_win);
                 IMLIB_FREE_PIXMAP(pmap);
@@ -668,8 +664,7 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes)
             XFillRectangle(Xdisplay, scrollbar.win, gc_scrollbar, 0, 0, scrollbar_trough_width(), scrollbar_trough_height());
             XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sb].current->bg, ""));
             XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sb].current->bg, ""));
-            draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(),
-                        scrollbar_get_shadow());
+            draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(), scrollbar_get_shadow());
         }
         return;
     }
@@ -693,8 +688,7 @@ scrollbar_init(int width, int height)
     Attributes.override_redirect = TRUE;
     Attributes.save_under = TRUE;
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-    mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask
-        | Button1MotionMask | Button2MotionMask | Button3MotionMask;
+    mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask;
     scrollbar_calc_size(width, height);
     scrollbar.anchor_top = scrollbar.scrollarea_start;
     scrollbar.anchor_bottom = scrollbar.scrollarea_end;
@@ -725,8 +719,7 @@ scrollbar_init(int width, int height)
     /* The anchor window */
     scrollbar.sa_win =
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar.anchor_top, scrollbar_anchor_width(),
-                      scrollbar_anchor_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWColormap,
-                      &Attributes);
+                      scrollbar_anchor_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollbar.sa_win, mask);
     XMapWindow(Xdisplay, scrollbar.sa_win);
     D_SCROLLBAR(("Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));
@@ -776,6 +769,11 @@ void
 scrollbar_calc_size(int width, int height)
 {
     D_SCROLLBAR(("scrollbar_calc_size(%d, %d), type == %u\n", width, height, scrollbar_get_type()));
+#ifdef ESCREEN
+    if (TermWin.screen && TermWin.screen->backend != NS_MODE_NONE) {
+        UPPER_BOUND(height, Height2Pixel(TermWin.nrow));
+    }
+#endif
     scrollbar.scrollarea_start = 0;
     scrollbar.scrollarea_end = height;
     scrollbar.up_arrow_loc = 0;
@@ -800,8 +798,7 @@ scrollbar_calc_size(int width, int height)
     scrollbar.height = height - (2 * scrollbar_get_shadow());
     scrollbar.win_width = scrollbar.width + (2 * scrollbar_get_shadow());
     scrollbar.win_height = height;
-    D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollbar.width, scrollbar.height,
-           scrollbar.win_width, scrollbar.win_height));
+    D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollbar.width, scrollbar.height, scrollbar.win_width, scrollbar.win_height));
     D_X11((" -> New scroll area start/end == %hu - %hu, up_arrow_loc == %hu, down_arrow_loc == %hu\n", scrollbar.scrollarea_start,
            scrollbar.scrollarea_end, scrollbar.up_arrow_loc, scrollbar.down_arrow_loc));
 }
@@ -816,8 +813,7 @@ scrollbar_resize(int width, int height)
     D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
     scrollbar_calc_size(width, height);
     D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, y, %d, %d)\n", scrollbar.win,
-                 ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), scrollbar_trough_width(),
-                 scrollbar.win_height));
+                 ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), scrollbar_trough_width(), scrollbar.win_height));
     XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), scrollbar.win_height);
     scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);

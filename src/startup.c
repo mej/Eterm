@@ -76,7 +76,8 @@ eterm_bootstrap(int argc, char *argv[])
 
     int i;
     char *val;
-    static char windowid_string[20], *display_string, *term_string;	/* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+    static char windowid_string[20], *display_string, *term_string;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+
     orig_argv0 = argv[0];
 
     /* Security enhancements -- mej */
@@ -156,8 +157,7 @@ eterm_bootstrap(int argc, char *argv[])
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
     }
-    if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
-                                     (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
+    if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
         D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
@@ -172,7 +172,7 @@ eterm_bootstrap(int argc, char *argv[])
 
         len = strlen(initial_dir);
         if (rs_path) {
-            len += strlen(rs_path) + 1;	/* +1 for the colon */
+            len += strlen(rs_path) + 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* +1 for the colon */
         }
         if (theme_dir) {
             len += strlen(theme_dir) + 1;
@@ -204,15 +204,6 @@ eterm_bootstrap(int argc, char *argv[])
         p = p ? (p + 1) : orig_argv0;
         if (rs_url || !strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX)))
             TermWin.screen_mode = NS_MODE_SCREEN;
-#  ifdef NS_DEBUG
-        if (!strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX)))
-            fputs("You called me \"Escreen\"!\n", stderr);
-        else if (!strncasecmp(ETERM_PREFIX, p, strlen(ETERM_PREFIX)))
-            fputs("You called me \"Eterm\"!\n", stderr);
-        else
-            fputs("Stop calling me funky names!\n", stderr);
-        fprintf(stderr, "Escreen mode is %d (%d rows, URL is \"%s\")\n", TermWin.screen_mode, TermWin.nrow, rs_url);
-#  endif
     }
 #endif
 

@@ -50,6 +50,10 @@ static const char cvs_ident[] = "$Id$";
 static inline void draw_string(buttonbar_t *, Drawable, GC, int, int, char *, size_t);
 
 buttonbar_t *buttonbar = NULL;
+
+#ifdef ESCREEN
+button_t *drag = NULL;
+#endif
 long bbar_total_h = -1;
 
 static inline void
@@ -70,8 +74,7 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
     return;
 }
 
-buttonbar_t *
-bbar_create(void)
+buttonbar_t *bbar_create(void)
 {
     buttonbar_t *bbar;
     Cursor cursor;
@@ -188,8 +191,7 @@ bbar_handle_enter_notify(event_t *ev)
         return 0;
     }
     bbar_draw(bbar, IMAGE_STATE_SELECTED, 0);
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
-                  &unused_mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
     if (b) {
         bbar_select_button(bbar, b);
@@ -231,6 +233,9 @@ bbar_handle_button_press(event_t *ev)
     if (bbar->current) {
         bbar_click_button(bbar, bbar->current);
         button_check_action(bbar, bbar->current, ev->xbutton.button, ev->xbutton.time);
+#ifdef ESCREEN
+        drag = bbar->current;
+#endif
     }
     return 1;
 }
@@ -244,6 +249,10 @@ bbar_handle_button_release(event_t *ev)
     int unused_root_x, unused_root_y;
     unsigned int unused_mask;
 
+#ifdef ESCREEN
+    drag = NULL;
+#endif
+
     D_EVENTS(("bbar_handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
@@ -252,8 +261,7 @@ bbar_handle_button_release(event_t *ev)
         return 0;
     }
 
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
-                  &unused_mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
 
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
     if (b) {
@@ -285,8 +293,7 @@ bbar_handle_motion_notify(event_t *ev)
         return 0;
     }
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, MotionNotify, ev));
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
-                  &mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &mask);
     D_BBAR((" -> Pointer is at %d, %d with mask 0x%08x\n", ev->xbutton.x, ev->xbutton.y, mask));
 
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
@@ -315,8 +322,7 @@ bbar_dispatch_event(event_t *ev)
     return (0);
 }
 
-buttonbar_t *
-find_bbar_by_window(Window win)
+buttonbar_t *find_bbar_by_window(Window win)
 {
     buttonbar_t *bbar;
 
@@ -500,8 +506,7 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
         D_BBAR((" -> Final icon dimensions are %hux%hu\n", button->icon_w, button->icon_h));
     }
 #endif
-    D_BBAR((" -> Set button to %dx%d at %d, %d and icon to %dx%d\n", button->w, button->h, button->x, button->y, button->icon_w,
-            button->icon_h));
+    D_BBAR((" -> Set button to %dx%d at %d, %d and icon to %dx%d\n", button->w, button->h, button->x, button->y, button->icon_w, button->icon_h));
 }
 
 void
@@ -577,8 +582,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
 
     ASSERT_RVAL(fontname != NULL, 0);
 
-    D_BBAR(("bbar_set_font(%8p, \"%s\"):  Current font is %8p, dimensions %d/%d/%d\n", bbar, fontname, bbar->font, bbar->fwidth,
-            bbar->fheight, bbar->h));
+    D_BBAR(("bbar_set_font(%8p, \"%s\"):  Current font is %8p, dimensions %d/%d/%d\n", bbar, fontname, bbar->font, bbar->fwidth, bbar->fheight, bbar->h));
     if (bbar->font) {
         free_font(bbar->font);
     }
@@ -603,8 +607,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
     return 1;
 }
 
-button_t *
-find_button_by_text(buttonbar_t *bbar, char *text)
+button_t *find_button_by_text(buttonbar_t *bbar, char *text)
 {
     register button_t *b;
 
@@ -623,8 +626,7 @@ find_button_by_text(buttonbar_t *bbar, char *text)
     return NULL;
 }
 
-button_t *
-find_button_by_index(buttonbar_t *bbar, long idx)
+button_t *find_button_by_index(buttonbar_t *bbar, long idx)
 {
     register button_t *b;
     long i;
@@ -639,8 +641,7 @@ find_button_by_index(buttonbar_t *bbar, long idx)
     return ((i == idx) ? (b) : (NULL));
 }
 
-button_t *
-find_button_by_coords(buttonbar_t *bbar, int x, int y)
+button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y)
 {
     register button_t *b;
 
@@ -659,8 +660,7 @@ find_button_by_coords(buttonbar_t *bbar, int x, int y)
     return NULL;
 }
 
-button_t *
-button_create(char *text)
+button_t *button_create(char *text)
 {
     button_t *button;
 
@@ -791,8 +791,7 @@ bbar_click_button(buttonbar_t *bbar, button_t *button)
     if (image_mode_is(image_button, MODE_MASK)) {
         paste_simage(images[image_button].clicked, image_button, bbar->win, bbar->win, button->x, button->y, button->w, button->h);
     } else {
-        draw_shadow_from_colors(bbar->win, PixColors[menuBottomShadowColor], PixColors[menuTopShadowColor], button->x, button->y, button->w,
-                                button->h, 2);
+        draw_shadow_from_colors(bbar->win, PixColors[menuBottomShadowColor], PixColors[menuTopShadowColor], button->x, button->y, button->w, button->h, 2);
     }
     if (image_mode_is(image_button, MODE_AUTO)) {
         enl_ipc_sync();
@@ -826,38 +825,48 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
       case ACTION_ECHO:
           if (!press) {
 #ifdef ESCREEN
-              if (TermWin.screen_mode && TermWin.screen) {	/* translate escapes */
-                  if (prvs != 1) {
-                      button_t *b = bbar->buttons;
-                      _ns_disp *d2 = TermWin.screen->dsps;
-                      int n = (button->action.string)[1] - '0';
+              if (TermWin.screen && TermWin.screen->backend) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         /* translate escapes */
+                  button_t *b = bbar->buttons;
+                  _ns_disp *d2 = TermWin.screen->dsps;
+                  int n = (button->action.string)[1] - '0';
 
-                      while (b && !(b->flags & NS_SCREAM_CURR))	/* find active disp */
-                          b = b->next;	/* when trying to change name of non- */
-                      if (b && b != button) {	/* active display, make that disp active */
+                  if (prvs != 1) {
+                      /* find active disp */
+                      for (; b && !(b->flags & NS_SCREAM_CURR); b = b->next);
+
+                      if (b && b != button) {
+                          /* when trying to change name of non- */
+                          /* active display, make that disp active */
                           button->flags |= NS_SCREAM_CURR;
                           b->flags &= ~NS_SCREAM_CURR;
                           bbar_draw(bbar, IMAGE_STATE_CURRENT, MODE_MASK);
                           button->flags &= ~NS_SCREAM_CURR;
                           b->flags |= NS_SCREAM_CURR;
 
-                          while (d2 && d2->index != n)
-                              d2 = d2->next;
-                          if (d2)
-                              TermWin.screen->curr = d2;	/* pre-adjust curr ptr */
-                          else
+                          for (; d2 && d2->index != n; d2 = d2->next);
+                          if (d2) {
+                              /* pre-adjust curr ptr */
+                              TermWin.screen->curr = d2;
+                          } else {
                               D_ESCREEN(("no display %d in this session : (\n", n));
-                          (void) ns_screen_command(TermWin.screen, button->action.string);
+                          }
+                          ns_go2_disp(TermWin.screen, n);
                       }
 
-                      if (prvs == 2)	/* middle button -- kill */
-                          (void) ns_parse_screen_key(TermWin.screen, NS_SCREEN_KILL);
-                      else      /* right button -- rename */
-                          (void) ns_parse_screen_key(TermWin.screen, NS_SCREEN_RENAME);
-                  } else        /* left button -- select */
-                      (void) ns_screen_command(TermWin.screen, button->action.string);
-              } else            /* not in screen-mode, use normal facilities */
+                      if (prvs == 2) {
+                          /* middle button -- kill */
+                          (void) ns_rem_disp(TermWin.screen, n);
+                      } else {
+                          /* right button -- rename */
+                          (void) ns_ren_disp(TermWin.screen, n, NULL);
+                      }
+                  } else {
+                      /* left button -- select */
+                      ns_go2_disp(TermWin.screen, n);
+                  }
+              } else
 #endif
+                  /* not in screen-mode, use normal facilities */
                   tt_write((unsigned char *) button->action.string, strlen(button->action.string));
           }
           break;
@@ -1138,6 +1147,7 @@ buttonbar_t *bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, 
         } else {
             int c = 0;
             button_t *b = bbar->rbuttons;
+
             do {
                 c++;
             } while ((b = b->next));
@@ -1154,11 +1164,12 @@ buttonbar_t *bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, 
             }
         }
     } else {                    /* add to buttons */
-        if (!bbar->buttons || after < 0) {	/* first button */
+        if (!bbar->buttons || after < 0) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* first button */
             button->next = bbar->buttons;
             bbar->buttons = button;
         } else {
             button_t *b = bbar->buttons;
+
             while (after-- > 0 && b->next)
                 b = b->next;
             button->next = b->next;
@@ -1173,6 +1184,7 @@ buttonbar_t *bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, 
     if (!state) {
         if (buttonbar) {
             buttonbar_t *bar = buttonbar;
+
             while (bar->next)
                 bar = bar->next;
             bar->next = bbar;

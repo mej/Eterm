@@ -90,6 +90,7 @@ typedef struct __ns_sess {   /* a whole screen-session with many clients */
   char   *home;              /* user's home dir. so we can find .screenrc */
   char   *sysrc;             /* global screen config */
   void   *userdef;           /* the term-app can store a pointer here */
+  char   *name;              /* session name */
   int     fd;                /* fd for communication */
   char    escape,literal;    /* talking to screen: defaults to ^A, a */
   int     escdef;            /* where was the escape sequence defined? */
@@ -131,13 +132,14 @@ typedef struct __ns_efuns {  /* callbacks into the terminal program */
   int   (*set_scroll_h)(void *,int);
   int   (*redraw)(void *);
   int   (*redraw_xywh)(void *,int,int,int,int);
-  int   (*ins_disp)(void *,int,char *);
+  int   (*expire_buttons)(void *,int);
+  int   (*ins_disp)(void *,int,int,char *);
   int   (*del_disp)(void *,int);
   int   (*upd_disp)(void *,int,int,char *);
   int   (*err_msg)(void *,int,char *);
   int   (*execute)(void *,char **);
   int   (*inp_text)(void *,int,char *);
-  int   (*input_dialog)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+  int   (*inp_dial)(void *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
   int   (*inp_tab)(void *,char *[],int,char *,size_t,size_t);
   int   (*waitstate)(void *,int);
 } _ns_efuns;
@@ -162,18 +164,16 @@ _ns_efuns *ns_new_efuns(void);
 _ns_efuns *ns_dst_efuns(_ns_efuns **);
 _ns_efuns *ns_get_efuns(_ns_sess *,_ns_disp *);
 
-/* debug */
-void ns_desc_string(char *,char *);
-void ns_desc_hop(_ns_hop *,char *);
-void ns_desc_sess(_ns_sess *,char *);
-
-/* convenience */
-_ns_disp *disp_fetch_or_make(_ns_sess *,int);
-
 /* transparent attach/detach */
 _ns_sess *ns_attach_by_sess(_ns_sess **,int *);
 _ns_sess *ns_attach_by_URL(char *,char *,_ns_efuns **,int *,void *);
+int ns_detach(_ns_sess **);
 
+/* convenience */
+int ns_run(_ns_efuns *, char *);
+int ns_get_ssh_port(void);
+int disp_get_real_by_screen(_ns_sess *,int);
+int disp_get_screen_by_real(_ns_sess *,int);
 
 /* send command to screen */
 int ns_screen_command(_ns_sess *, char *);
@@ -202,21 +202,25 @@ int ns_parse_screen(_ns_sess *,int,int,char *);
 
 
 
+/* backend abstraction */
 /* things the term might ask screen/scream to do ***************************/
 int ns_scroll2x(_ns_sess *,int);
 int ns_scroll2y(_ns_sess *,int);
 int ns_go2_disp(_ns_sess *,int);
 int ns_add_disp(_ns_sess *,int,char *);
+int ns_mov_disp(_ns_sess * s,int,int);
 int ns_rsz_disp(_ns_sess *,int,int,int);
 int ns_rem_disp(_ns_sess *,int);
 int ns_ren_disp(_ns_sess *,int,char *);
 int ns_log_disp(_ns_sess *,int,char *);
 int ns_upd_stat(_ns_sess *);
-int ns_input_dialog(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+int ns_inp_dial(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+char *ns_get_url(_ns_sess *,int);
 
 
 
-/* register efuns (callbacks) **********************************************/
+/* frontend abstraction */
+/* things we might ask the terminal to do (register efuns (callbacks)) *****/
 void ns_register_ssx(_ns_efuns *,int (*set_scroll_x)(void *,int));
 void ns_register_ssy(_ns_efuns *,int (*set_scroll_y)(void *,int));
 void ns_register_ssw(_ns_efuns *,int (*set_scroll_w)(void *,int));
@@ -224,8 +228,9 @@ void ns_register_ssh(_ns_efuns *,int (*set_scroll_h)(void *,int));
 
 void ns_register_red(_ns_efuns *,int (*redraw)(void *));
 void ns_register_rda(_ns_efuns *,int (*redraw_xywh)(void *,int,int,int,int));
+void ns_register_exb(_ns_efuns *,int (*expire_buttons)(void *,int));
 
-void ns_register_ins(_ns_efuns *,int (*ins_disp)(void *,int,char *));
+void ns_register_ins(_ns_efuns *,int (*ins_disp)(void *,int,int,char *));
 void ns_register_del(_ns_efuns *,int (*del_disp)(void *,int));
 void ns_register_upd(_ns_efuns *,int (*upd_disp)(void *,int,int,char *));
 
@@ -238,20 +243,6 @@ void ns_register_inp(_ns_efuns *,int (*)(void *,char *,int,char **,int (*)(void 
 void ns_register_tab(_ns_efuns *,int (*)(void *,char *[],int,char *,size_t,size_t));
 void ns_register_fun(_ns_efuns *,int (*)(void *,int));
 
-/* from command.c */
-extern int set_scroll_x(void *, int);
-extern int set_scroll_y(void *, int);
-extern int set_scroll_w(void *, int);
-extern int set_scroll_h(void *, int);
-extern int redraw(void *);
-extern int redraw_xywh(void *, int, int, int, int);
-extern int ins_disp(void *, int, char *);
-extern int del_disp(void *, int);
-extern int upd_disp(void *, int, int, char *);
-extern int err_msg(void *, int, char *);
-extern int inp_text(void *, int, char *);
-extern int input_dialog(void *, char *, int, char **, int (*) (void *, char *, size_t, size_t));
-extern int exe_prg(void *, char **);
-extern int escreen_init(char **);
+
 
 /***************************************************************************/

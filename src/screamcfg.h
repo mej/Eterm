@@ -15,11 +15,8 @@
    undef it, you're on your own. */
 #define NS_PARANOID
 
-/* define NS_DEBUG to get debug-info. no support for those who undef this. */
-#undef NS_DEBUG
-
-/* debug memory stuff. never actually used this. */
-#undef  NS_DEBUG_MEM
+/* compile in support for the GNU "screen" program as a backend */
+#define NS_HAVE_SCREEN       1
 
 #define NS_MAXCMD            512
 
@@ -32,7 +29,7 @@
 #define NS_SCREEN_OPTS       "-xRR"
 #define NS_SCREEN_GREP       "grep escape \"$SCREENRC\" 2>/dev/null || grep escape ~/.screenrc 2>/dev/null || grep escape \"$SYSSCREENRC\" 2>/dev/null || grep escape /etc/screenrc 2>/dev/null || grep escape /usr/local/etc/screenrc 2>/dev/null || echo \"escape ^Aa\"\n"
 #define NS_SCREEM_CALL       "%s 2>/dev/null || %s"
-#define NS_WRAP_CALL         "export TERM=vt100; %s"
+#define NS_WRAP_CALL         "export TERM=vt100; screen -wipe; %s"
 #define NS_SCREEN_RC         ".screenrc"
 
 /* this should never change. the escape-char for an out-of-the-box "screen".
@@ -48,7 +45,9 @@
    else is used in the session, libscream will convert it on the fly. */
 /* DO NOT use \005Lw for your status, it breaks older screens!! */
 #define NS_SCREEN_UPDATE     "\x01w"
-#define NS_SCREEN_INIT       "\x0c\x01Z\x01:hardstatus lastline\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:msgminwait 0\r\x01:msgwait 1\r\x01:nethack off\r" NS_SCREEN_UPDATE
+#define NS_SCREEN_VERSION    "\x01v"
+#define NS_SCREEN_SESSION    "\x01:sessionname\r"
+#define NS_SCREEN_INIT       "\x01:msgminwait 0\r\x01:msgwait 1\r\x01:hardstatus lastline\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:nethack off\r\x0c" NS_SCREEN_UPDATE NS_SCREEN_VERSION NS_SCREEN_SESSION
 #define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22
@@ -59,13 +58,10 @@
 
 #define NS_SCREEN_FLAGS      "*-$!@L&Z"
 
-#define NS_SCREEN_DK_CMD     "unknown command '"
-#define NS_SCREEN_VERSION    "scre%s %d.%d.%d %s %s"
+#define NS_SCREEN_DK_CMD_T   "unknown command '"
+#define NS_SCREEN_SESS_T     "This session is named '"
+#define NS_SCREEN_VERSION_T  "scre%2s %d.%d.%d %16s %32s"
 #define NS_SCREEN_NO_DEBUG   "Sorry, screen was compiled without -DDEBUG option."
-
-/* if >0, force an update every NS_SCREEN_UPD_FREQ seconds.
-   a bit of a last resort. */
-#define NS_SCREEN_UPD_FREQ   0
 
 /* should be 1s */
 #define NS_INIT_DELAY        1
@@ -79,7 +75,7 @@
 #define NS_MENU_TITLE        "Escreen"
 
 /* prefix for debug info */
-#define NS_PREFIX            "libscream::"
+#define NS_PREFIX            "screamClient::"
 
 
 

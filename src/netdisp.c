@@ -78,7 +78,7 @@ network_display(const char *display)
     if (display[0] != ':' && strncmp(display, "unix:", 5))
         return display;         /* nothing to do */
 
-    ifc.ifc_len = sizeof(buffer);	/* Get names of all ifaces */
+    ifc.ifc_len = sizeof(buffer);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* Get names of all ifaces */
     ifc.ifc_buf = buffer;
 
     if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -111,9 +111,7 @@ network_display(const char *display)
                 if (colon == NULL)
                     colon = ":0.0";
 
-                sprintf(ipaddress, "%d.%d.%d.%d%s",
-                        (int) ((addr >> 030) & 0xFF),
-                        (int) ((addr >> 020) & 0xFF), (int) ((addr >> 010) & 0xFF), (int) (addr & 0xFF), colon);
+                sprintf(ipaddress, "%d.%d.%d.%d%s", (int) ((addr >> 030) & 0xFF), (int) ((addr >> 020) & 0xFF), (int) ((addr >> 010) & 0xFF), (int) (addr & 0xFF), colon);
 
                 rval = ipaddress;
                 break;

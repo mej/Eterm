@@ -75,12 +75,14 @@ static void *parse_xim(char *, void *);
 static void *parse_multichar(char *, void *);
 
 static char *rs_pipe_name = NULL;
+
 #ifdef PIXMAP_SUPPORT
 static int rs_shade = 0;
 static char *rs_tint = NULL;
 #endif
 static unsigned long rs_buttonbars = 1;
 static char *rs_font_effects = NULL;
+
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -101,11 +103,13 @@ char *rs_geometry = NULL;       /* Geometry string */
 int rs_desktop = -1;
 char *rs_path = NULL;
 int rs_saveLines = SAVELINES;   /* Lines in the scrollback buffer */
+
 #ifdef USE_XIM
 char *rs_input_method = NULL;
 char *rs_preedit_type = NULL;
 #endif
 char *rs_name = NULL;
+
 #ifndef NO_BOLDFONT
 char *rs_boldFont = NULL;
 #endif
@@ -119,6 +123,7 @@ unsigned long rs_scrollbar_width = 0;
 char *rs_finished_title = NULL;
 char *rs_finished_text = NULL;
 char *rs_term_name = NULL;
+
 #ifdef PIXMAP_SUPPORT
 char *rs_pixmapScale = NULL;
 char *rs_icon = NULL;
@@ -127,6 +132,7 @@ char *rs_cmod_red = NULL;
 char *rs_cmod_green = NULL;
 char *rs_cmod_blue = NULL;
 unsigned long rs_cache_size = (unsigned long) -1;
+
 # ifdef BACKGROUND_CYCLING_SUPPORT
 char *rs_anim_pixmap_list = NULL;
 char **rs_anim_pixmaps = NULL;
@@ -136,6 +142,7 @@ static char *rs_pixmaps[image_max];
 #endif
 char *rs_theme = NULL;
 char *rs_config_file = NULL;
+
 #ifdef ESCREEN
 char *rs_url = NULL;
 char *rs_hop = NULL;
@@ -143,6 +150,7 @@ int rs_delay = -1;
 #endif
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
+
 #ifdef KEYSYM_ATTRIBUTE
 unsigned char *KeySym_map[256]; /* probably mostly empty */
 #endif
@@ -164,8 +172,7 @@ static const struct {
 } optList[] = {
 
     OPT_STR('t', "theme", "select a theme", &rs_theme),
-        OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file),
-        OPT_STR('d', "display", "X server to connect to", &display_name),
+        OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file), OPT_STR('d', "display", "X server to connect to", &display_name),
 #ifdef ESCREEN
         OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
         OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
@@ -185,8 +192,7 @@ static const struct {
         OPT_ILONG("debug", "level of debugging information to show (0-5)", &DEBUG_LEVEL),
 #endif
         OPT_BLONG("install", "install a private colormap", &Options, Opt_install),
-        OPT_BOOL('h', "help", "display usage information", NULL, 0),
-        OPT_BLONG("version", "display version and configuration information", NULL, 0),
+        OPT_BOOL('h', "help", "display usage information", NULL, 0), OPT_BLONG("version", "display version and configuration information", NULL, 0),
 /* =======[ Color options ]======= */
         OPT_BOOL('r', "reverse-video", "reverse video", &Options, Opt_reverse_video),
         OPT_STR('b', "background-color", "background color", &rs_color[bgColor]),
@@ -196,8 +202,7 @@ static const struct {
         OPT_LONG("color2", "color 2", &rs_color[minColor + 2]),
         OPT_LONG("color3", "color 3", &rs_color[minColor + 3]),
         OPT_LONG("color4", "color 4", &rs_color[minColor + 4]),
-        OPT_LONG("color5", "color 5", &rs_color[minColor + 5]),
-        OPT_LONG("color6", "color 6", &rs_color[minColor + 6]), OPT_LONG("color7", "color 7", &rs_color[minColor + 7]),
+        OPT_LONG("color5", "color 5", &rs_color[minColor + 5]), OPT_LONG("color6", "color 6", &rs_color[minColor + 6]), OPT_LONG("color7", "color 7", &rs_color[minColor + 7]),
 #ifndef NO_BRIGHTCOLOR
         OPT_LONG("color8", "color 8", &rs_color[minBright]),
         OPT_LONG("color9", "color 9", &rs_color[minBright + 1]),
@@ -212,8 +217,7 @@ static const struct {
 #endif /* NO_BOLDUNDERLINE */
         OPT_LONG("pointer-color", "mouse pointer color", &rs_color[pointerColor]),
 #ifndef NO_CURSORCOLOR
-        OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]),
-        OPT_LONG("cursor-text-color", "cursor text color", &rs_color[cursorColor2]),
+        OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]), OPT_LONG("cursor-text-color", "cursor text color", &rs_color[cursorColor2]),
 #endif /* NO_CURSORCOLOR */
 /* =======[ X11 options ]======= */
         OPT_STR('g', "geometry", "WxH+X+Y = size and position", &rs_geometry),
@@ -265,8 +269,7 @@ static const struct {
         OPT_LONG("mfont1", "multichar font 1", &rs_mfont[1]),
         OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
         OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
-        OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
-        OPT_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", &rs_multichar_encoding),
+        OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]), OPT_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", &rs_multichar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
         OPT_LONG("input-method", "XIM input method", &rs_input_method), OPT_LONG("preedit-type", "XIM preedit type", &rs_preedit_type),
@@ -302,20 +305,16 @@ static const struct {
         OPT_BLONG("resize-gravity", "toggle gravitation to nearest corner on resize", &Options, Opt_resize_gravity),
 /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-        OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key),
-        OPT_LONG("small-font-key", "keysym for font size decrease", &rs_smallfont_key),
+        OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key), OPT_LONG("small-font-key", "keysym for font size decrease", &rs_smallfont_key),
 #endif
         OPT_ILONG("meta-mod", "modifier to interpret as the Meta key", &rs_meta_mod),
-        OPT_ILONG("alt-mod", "modifier to interpret as the Alt key", &rs_alt_mod),
-        OPT_ILONG("numlock-mod", "modifier to interpret as the NumLock key", &rs_numlock_mod),
+        OPT_ILONG("alt-mod", "modifier to interpret as the Alt key", &rs_alt_mod), OPT_ILONG("numlock-mod", "modifier to interpret as the NumLock key", &rs_numlock_mod),
 #ifdef GREEK_SUPPORT
         OPT_LONG("greek-keyboard", "greek keyboard mapping (iso or ibm)", &rs_greek_keyboard),
 #endif
-        OPT_BLONG("app-keypad", "application keypad mode", &PrivateModes, PrivMode_aplKP),
-        OPT_BLONG("app-cursor", "application cursor key mode", &PrivateModes, PrivMode_aplCUR),
+        OPT_BLONG("app-keypad", "application keypad mode", &PrivateModes, PrivMode_aplKP), OPT_BLONG("app-cursor", "application cursor key mode", &PrivateModes, PrivMode_aplCUR),
 /* =======[ Misc options ]======= */
-        OPT_INT('L', "save-lines", "lines to save in scrollback buffer", &rs_saveLines),
-        OPT_ILONG("min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
+        OPT_INT('L', "save-lines", "lines to save in scrollback buffer", &rs_saveLines), OPT_ILONG("min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
 #ifdef BORDER_WIDTH_OPTION
         OPT_INT('w', "border-width", "term window border width", &(TermWin.internalBorder)),
 #endif
@@ -330,8 +329,7 @@ static const struct {
         OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
         OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
         OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL),
-        OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
-        OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
+        OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console), OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
 };
 
 /* Print usage information */
@@ -402,8 +400,7 @@ version(void)
            "    " PIXMAP_IDENT "\n"
            "    " SCREEN_IDENT "\n"
            "    " SCROLLBAR_IDENT "\n"
-           "    " STARTUP_IDENT "\n"
-           "    " SYSTEM_IDENT "\n" "    " TERM_IDENT "\n" "    " TIMER_IDENT "\n" "    " UTMP_IDENT "\n" "    " WINDOWS_IDENT "\n" "\n");
+           "    " STARTUP_IDENT "\n" "    " SYSTEM_IDENT "\n" "    " TERM_IDENT "\n" "    " TIMER_IDENT "\n" "    " UTMP_IDENT "\n" "    " WINDOWS_IDENT "\n" "\n");
 
     printf("Debugging configuration:  ");
 #ifdef DEBUG
@@ -894,7 +891,7 @@ get_options(int argc, char *argv[])
             } else if (!strcasecmp(opt, "attribute")) {
                 conf_parse_line(NULL, val_ptr);
             } else {            /* It's not --exec */
-                if (optList[j].flag & OPT_BOOLEAN) {	/* Boolean value */
+                if (optList[j].flag & OPT_BOOLEAN) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* Boolean value */
                     D_OPTIONS(("Boolean option detected\n"));
                     if (val_ptr) {
                         if (BOOL_OPT_ISTRUE(val_ptr)) {
@@ -917,7 +914,7 @@ get_options(int argc, char *argv[])
                             *(optList[j].maskvar) |= optList[j].mask;
                         }
                     }
-                } else if (optList[j].flag & OPT_INTEGER) {	/* Integer value */
+                } else if (optList[j].flag & OPT_INTEGER) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* Integer value */
                     D_OPTIONS(("Integer option detected\n"));
                     *((int *) optList[j].pval) = strtol(val_ptr, (char **) NULL, 0);
                 } else {        /* String value */
@@ -965,13 +962,13 @@ get_options(int argc, char *argv[])
                     if ((val_ptr == NULL) || ((*val_ptr == '-') && (optList[j].short_opt != 'F') && (optList[j].short_opt != 'g'))) {
                         print_error("option -%c requires a%s value\n", opt[pos], (optList[j].flag & OPT_INTEGER ? "n integer" : " string"));
                         CHECK_BAD();
-                        if (val_ptr) {	/* If the "arg" was actually an option, don't skip it */
+                        if (val_ptr) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* If the "arg" was actually an option, don't skip it */
                             i--;
                         }
                         continue;
                     }
                 }
-                if (opt[pos] == 'e') {	/* It's an exec */
+                if (opt[pos] == 'e') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* It's an exec */
 
                     register unsigned short k, len;
 
@@ -1006,12 +1003,12 @@ get_options(int argc, char *argv[])
                 } else if (opt[pos] == 'a') {
                     conf_parse_line(NULL, val_ptr);
                 } else {
-                    if (optList[j].flag & OPT_BOOLEAN) {	/* Boolean value */
+                    if (optList[j].flag & OPT_BOOLEAN) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* Boolean value */
                         D_OPTIONS(("Boolean option detected\n"));
                         if (optList[j].maskvar) {
                             *(optList[j].maskvar) |= optList[j].mask;
                         }
-                    } else if (optList[j].flag & OPT_INTEGER) {	/* Integer value */
+                    } else if (optList[j].flag & OPT_INTEGER) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* Integer value */
                         D_OPTIONS(("Integer option detected\n"));
                         *((int *) optList[j].pval) = strtol(val_ptr, (char **) NULL, 0);
                         D_OPTIONS(("Got value %d\n", *((int *) optList[j].pval)));
@@ -1140,7 +1137,7 @@ get_initial_options(int argc, char *argv[])
                 D_OPTIONS(("val_ptr == %s  done == %d\n", val_ptr, done));
                 if ((val_ptr == NULL) || (*val_ptr == '-')) {
                     print_error("option -%c requires a string value\n", opt[pos]);
-                    if (val_ptr) {	/* If the "arg" was actually an option, don't skip it */
+                    if (val_ptr) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* If the "arg" was actually an option, don't skip it */
                         i--;
                     }
                     continue;
@@ -1191,8 +1188,7 @@ parse_color(char *buff, void *state)
         if (!BEG_STRCASECMP(tmp, "reverse")) {
             Options |= Opt_reverse_video;
         } else if (BEG_STRCASECMP(tmp, "normal")) {
-            print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n",
-                        file_peek_path(), file_peek_line(), tmp);
+            print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n", file_peek_path(), file_peek_line(), tmp);
         }
     } else if (!BEG_STRCASECMP(buff, "color ")) {
 
@@ -1201,8 +1197,7 @@ parse_color(char *buff, void *state)
 
         n = num_words(buff);
         if (n < 3) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
-                        "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n" "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
         tmp = get_pword(2, buff);
@@ -1234,15 +1229,13 @@ parse_color(char *buff, void *state)
                     return NULL;
                 } else {
                     tmp = get_word(1, tmp);
-                    print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n",
-                                file_peek_path(), file_peek_line(), NONULL(tmp));
+                    print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n", file_peek_path(), file_peek_line(), NONULL(tmp));
                     FREE(tmp);
                 }
             }
         }
         if (n != 5) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
-                        "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n" "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
         g1 = get_pword(4, buff);
@@ -1292,8 +1285,7 @@ parse_color(char *buff, void *state)
             FREE(tmp);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context color\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context color\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -1332,8 +1324,7 @@ parse_attributes(char *buff, void *state)
 
         if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
             if (parse_font_fx(get_pword(2, tmp)) != 1) {
-                print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification\n",
-                            file_peek_path(), file_peek_line());
+                print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification\n", file_peek_path(), file_peek_line());
             }
         } else if (!BEG_STRCASECMP(tmp, "prop")) {
             tmp = get_pword(2, tmp);
@@ -1342,8 +1333,7 @@ parse_attributes(char *buff, void *state)
             } else if (BOOL_OPT_ISFALSE(tmp)) {
                 Options &= ~(Opt_proportional);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n",
-                            file_peek_path(), file_peek_line());
+                print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n", file_peek_path(), file_peek_line());
             }
         } else if (isdigit(*tmp)) {
             n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
@@ -1369,8 +1359,7 @@ parse_attributes(char *buff, void *state)
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context attributes\n",
-                    file_peek_path(), file_peek_line(), (buff ? buff : ""));
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context attributes\n", file_peek_path(), file_peek_line(), (buff ? buff : ""));
     }
     return state;
 }
@@ -1393,8 +1382,7 @@ parse_toggles(char *buff, void *state)
     } else if (BOOL_OPT_ISFALSE(tmp)) {
         bool_val = 0;
     } else {
-        print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles\n",
-                    file_peek_path(), file_peek_line(), tmp);
+        print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles\n", file_peek_path(), file_peek_line(), tmp);
         return NULL;
     }
 
@@ -1584,8 +1572,7 @@ parse_toggles(char *buff, void *state)
             Options &= ~(Opt_resize_gravity);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(),
-                    file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -1624,8 +1611,7 @@ parse_keyboard(char *buff, void *state)
             if (sym >= 0xff00)
                 sym -= 0xff00;
             if (sym < 0 || sym > 0xff) {
-                print_error("Parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff\n",
-                            file_peek_path(), file_peek_line(), sym + 0xff00);
+                print_error("Parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff\n", file_peek_path(), file_peek_line(), sym + 0xff00);
                 return NULL;
             }
             s = get_word(3, buff);
@@ -1653,8 +1639,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute meta_mod\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute meta_mod\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         rs_meta_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
@@ -1663,8 +1648,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute alt_mod\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute alt_mod\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         rs_alt_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
@@ -1673,8 +1657,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute numlock_mod\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute numlock_mod\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         rs_numlock_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
@@ -1685,8 +1668,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute greek\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute greek\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (BOOL_OPT_ISTRUE(tmp)) {
@@ -1702,8 +1684,7 @@ parse_keyboard(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             /* This space intentionally left no longer blank =^) */
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s\n",
-                        file_peek_path(), file_peek_line(), tmp, buff);
+            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s\n", file_peek_path(), file_peek_line(), tmp, buff);
             return NULL;
         }
 #else
@@ -1715,8 +1696,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (BOOL_OPT_ISTRUE(tmp)) {
@@ -1724,8 +1704,7 @@ parse_keyboard(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             PrivateModes &= ~(PrivMode_aplKP);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_keypad\n",
-                        file_peek_path(), file_peek_line(), tmp);
+            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_keypad\n", file_peek_path(), file_peek_line(), tmp);
             return NULL;
         }
 
@@ -1734,8 +1713,7 @@ parse_keyboard(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (BOOL_OPT_ISTRUE(tmp)) {
@@ -1743,14 +1721,12 @@ parse_keyboard(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             PrivateModes &= ~(PrivMode_aplCUR);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_cursor\n",
-                        file_peek_path(), file_peek_line(), tmp);
+            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_cursor\n", file_peek_path(), file_peek_line(), tmp);
             return NULL;
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context keyboard\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context keyboard\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -1818,8 +1794,7 @@ parse_misc(char *buff, void *state)
 #endif
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context misc\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context misc\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -1855,16 +1830,14 @@ parse_imageclasses(char *buff, void *state)
         if (tmp) {
             rs_anim_pixmap_list = STRDUP(tmp);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim\n", file_peek_path(), file_peek_line());
         }
 #else
         print_warning("Support for the anim attribute was not compiled in, ignoring\n");
 #endif
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context imageclasses\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context imageclasses\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -1938,8 +1911,7 @@ parse_image(char *buff, void *state)
         char *allow_list = get_pword(4, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!mode) {
@@ -1985,8 +1957,7 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"state\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"state\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!strcasecmp(state, "normal")) {
@@ -2028,18 +1999,15 @@ parse_image(char *buff, void *state)
         char *fg = get_word(2, buff), *bg = get_word(3, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!fg || !bg) {
-            print_error("Parse error in file %s, line %lu:  Foreground and background colors must be specified with \"color\"\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Foreground and background colors must be specified with \"color\"\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!BEG_STRCASECMP(fg, "0x")) {
@@ -2060,13 +2028,11 @@ parse_image(char *buff, void *state)
         char *filename = get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!filename) {
@@ -2082,13 +2048,11 @@ parse_image(char *buff, void *state)
         char *geom = get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!geom) {
@@ -2104,13 +2068,11 @@ parse_image(char *buff, void *state)
         imlib_t *iml = images[idx].current->iml;
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!color) {
@@ -2176,21 +2138,18 @@ parse_image(char *buff, void *state)
             }
             update_cmod(iml->bmod);
         } else {
-            print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"\n", file_peek_path(), file_peek_line());
             return NULL;
         }
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "border ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"border\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"border\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (num_words(buff + 7) < 4) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         RESET_AND_ASSIGN(images[idx].current->iml->border, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
@@ -2203,22 +2162,19 @@ parse_image(char *buff, void *state)
         if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
             && (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
             FREE(images[idx].current->iml->border);
-            images[idx].current->iml->border = (Imlib_Border *) NULL;	/* No sense in wasting CPU time and memory if there are no borders */
+            images[idx].current->iml->border = (Imlib_Border *) NULL;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* No sense in wasting CPU time and memory if there are no borders */
         }
     } else if (!BEG_STRCASECMP(buff, "bevel ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (num_words(buff + 6) < 5) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current->iml->bevel != NULL) {
@@ -2247,18 +2203,15 @@ parse_image(char *buff, void *state)
         }
     } else if (!BEG_STRCASECMP(buff, "padding ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (num_words(buff + 8) < 4) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         RESET_AND_ASSIGN(images[idx].current->iml->pad, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
@@ -2274,8 +2227,7 @@ parse_image(char *buff, void *state)
             images[idx].current->iml->pad = (Imlib_Border *) NULL;
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context image\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context image\n", file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) state);
 }
@@ -2364,8 +2316,7 @@ parse_actions(char *buff, void *state)
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context action\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context action\n", file_peek_path(), file_peek_line(), buff);
     }
     return state;
 }
@@ -2389,8 +2340,7 @@ parse_menu(char *buff, void *state)
 
             sprintf(tmp, "Eterm_Menu_%u", menu_list->nummenus);
             menu_set_title(menu, tmp);
-            print_error("Parse error in file %s, line %lu:  Menu context ended without giving a title.  Defaulted to \"%s\".\n",
-                        file_peek_path(), file_peek_line(), tmp);
+            print_error("Parse error in file %s, line %lu:  Menu context ended without giving a title.  Defaulted to \"%s\".\n", file_peek_path(), file_peek_line(), tmp);
         }
         menu_list = menulist_add_menu(menu_list, menu);
         return NULL;
@@ -2419,8 +2369,7 @@ parse_menu(char *buff, void *state)
         menuitem_set_action(item, MENUITEM_SEP, (char *) NULL);
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
-                    file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) menu);
 }
@@ -2441,8 +2390,7 @@ parse_menuitem(char *buff, void *state)
     ASSERT_RVAL(menu != NULL, state);
     if (*buff == CONF_END_CHAR) {
         if (!(curitem->text)) {
-            print_error("Parse error in file %s, line %lu:  Menuitem context ended with no text given.  Discarding this entry.\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Menuitem context ended with no text given.  Discarding this entry.\n", file_peek_path(), file_peek_line());
             FREE(curitem);
         } else {
             menu_add_item(menu, curitem);
@@ -2491,14 +2439,12 @@ parse_menuitem(char *buff, void *state)
             menuitem_set_action(curitem, MENUITEM_SEP, action);
 
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid menu item action \"%s\"\n", file_peek_path(), file_peek_line(),
-                        NONULL(type));
+            print_error("Parse error in file %s, line %lu:  Invalid menu item action \"%s\"\n", file_peek_path(), file_peek_line(), NONULL(type));
         }
         FREE(action);
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
-                    file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) curitem);
 }
@@ -2531,13 +2477,12 @@ parse_bbar(char *buff, void *state)
             print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(), file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             bbar_set_docked(bbar, BBAR_DOCKED_TOP);
-        } else if (!BEG_STRCASECMP(where, "bot")) {	/* "bot" or "bottom" */
+        } else if (!BEG_STRCASECMP(where, "bot")) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* "bot" or "bottom" */
             bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
-        } else if (!BEG_STRCASECMP(where, "no")) {	/* "no" or "none" */
+        } else if (!BEG_STRCASECMP(where, "no")) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* "no" or "none" */
             bbar_set_docked(bbar, BBAR_UNDOCKED);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(),
-                        file_peek_line(), where);
+            print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(), file_peek_line(), where);
         }
 
     } else if (!BEG_STRCASECMP(buff, "visible ")) {
@@ -2548,8 +2493,7 @@ parse_bbar(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             bbar_set_visible(bbar, 0);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context button_bar\n", file_peek_path(),
-                        file_peek_line(), tmp);
+            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context button_bar\n", file_peek_path(), file_peek_line(), tmp);
         }
 
     } else if (!BEG_STRCASECMP(buff, "button ") || !BEG_STRCASECMP(buff, "rbutton ")) {
@@ -2611,8 +2555,7 @@ parse_bbar(char *buff, void *state)
             bbar_add_button(bbar, button);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) bbar);
 }
@@ -2629,8 +2572,7 @@ parse_xim(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "preedit_type ")) {
         RESET_AND_ASSIGN(rs_preedit_type, get_word(2, buff));
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim\n", file_peek_path(), file_peek_line(), buff);
     }
 #else
     print_warning("XIM support was not compiled in, ignoring entire context\n");
@@ -2657,14 +2599,12 @@ parse_multichar(char *buff, void *state)
                 && BEG_STRCASECMP(rs_multichar_encoding, "gb")
                 && BEG_STRCASECMP(rs_multichar_encoding, "iso-10646")
                 && BEG_STRCASECMP(rs_multichar_encoding, "none")) {
-                print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
-                            file_peek_path(), file_peek_line(), rs_multichar_encoding);
+                print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n", file_peek_path(), file_peek_line(), rs_multichar_encoding);
                 FREE(rs_multichar_encoding);
                 return NULL;
             }
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding\n",
-                        file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding\n", file_peek_path(), file_peek_line());
         }
     } else if (!BEG_STRCASECMP(buff, "font ")) {
 
@@ -2672,8 +2612,7 @@ parse_multichar(char *buff, void *state)
         unsigned char n;
 
         if (num_words(buff) != 3) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n",
-                        file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n", file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
         if (isdigit(*tmp)) {
@@ -2690,8 +2629,7 @@ parse_multichar(char *buff, void *state)
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar\n",
-                    file_peek_path(), file_peek_line(), buff);
+        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar\n", file_peek_path(), file_peek_line(), buff);
     }
 #else
     if (*buff == CONF_BEGIN_CHAR) {
@@ -2950,7 +2888,7 @@ post_parse(void)
         if (rs_pixmaps[i]) {
             reset_simage(images[i].norm, RESET_ALL_SIMG);
             load_image(rs_pixmaps[i], images[i].norm);
-            FREE(rs_pixmaps[i]);	/* These are created by STRDUP() */
+            FREE(rs_pixmaps[i]);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* These are created by STRDUP() */
         }
 #else
         /* Right now, solid mode is the only thing we can do without pixmap support. */
@@ -3123,8 +3061,7 @@ post_parse(void)
         if (n > 2) {
             iml->mod->gamma = (int) strtol(get_pword(3, rs_cmod_image), (char **) NULL, 0);
         }
-        D_PIXMAP(("From image cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_image,
-                  iml->mod->brightness, iml->mod->contrast, iml->mod->gamma));
+        D_PIXMAP(("From image cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_image, iml->mod->brightness, iml->mod->contrast, iml->mod->gamma));
         FREE(rs_cmod_image);
     }
     if (rs_cmod_red) {
@@ -3142,8 +3079,7 @@ post_parse(void)
         if (n > 2) {
             iml->rmod->gamma = (int) strtol(get_pword(3, rs_cmod_red), (char **) NULL, 0);
         }
-        D_PIXMAP(("From red cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_red,
-                  iml->rmod->brightness, iml->rmod->contrast, iml->rmod->gamma));
+        D_PIXMAP(("From red cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_red, iml->rmod->brightness, iml->rmod->contrast, iml->rmod->gamma));
         FREE(rs_cmod_red);
         update_cmod(iml->rmod);
     }
@@ -3162,8 +3098,7 @@ post_parse(void)
         if (n > 2) {
             iml->gmod->gamma = (int) strtol(get_pword(3, rs_cmod_green), (char **) NULL, 0);
         }
-        D_PIXMAP(("From green cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_green,
-                  iml->gmod->brightness, iml->gmod->contrast, iml->gmod->gamma));
+        D_PIXMAP(("From green cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_green, iml->gmod->brightness, iml->gmod->contrast, iml->gmod->gamma));
         FREE(rs_cmod_green);
         update_cmod(iml->gmod);
     }
@@ -3182,8 +3117,7 @@ post_parse(void)
         if (n > 2) {
             iml->bmod->gamma = (int) strtol(get_pword(3, rs_cmod_blue), (char **) NULL, 0);
         }
-        D_PIXMAP(("From blue cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_blue,
-                  iml->bmod->brightness, iml->bmod->contrast, iml->bmod->gamma));
+        D_PIXMAP(("From blue cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_blue, iml->bmod->brightness, iml->bmod->contrast, iml->bmod->gamma));
         FREE(rs_cmod_blue);
         update_cmod(iml->bmod);
     }
@@ -3234,11 +3168,11 @@ post_parse(void)
             unsigned long w, h;
             int count;
 
-            count = num_words(rs_anim_pixmap_list) - 1;	/* -1 for the delay */
+            count = num_words(rs_anim_pixmap_list) - 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* -1 for the delay */
             rs_anim_pixmaps = (char **) MALLOC(sizeof(char *) * (count + 1));
 
             for (i = 0; i < count; i++) {
-                temp = get_word(i + 2, rs_anim_pixmap_list);	/* +2 rather than +1 to account for the delay */
+                temp = get_word(i + 2, rs_anim_pixmap_list);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* +2 rather than +1 to account for the delay */
                 if (temp == NULL)
                     break;
                 if (num_words(temp) != 3) {
@@ -3326,8 +3260,7 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (theme_dir ? theme_dir : PKGDATADIR "/themes/Eterm\n"),
-                                path);
+                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (theme_dir ? theme_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
             }
@@ -3356,8 +3289,7 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (user_dir ? user_dir : PKGDATADIR "/themes/Eterm\n"),
-                                path);
+                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (user_dir ? user_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
             }
@@ -3418,8 +3350,7 @@ save_config(char *path, unsigned char save_theme)
             fprintf(fp, "    desktop %d\n", rs_desktop);
         }
     }
-    fprintf(fp, "    scrollbar_type %s\n",
-            (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
+    fprintf(fp, "    scrollbar_type %s\n", (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
     fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
     fprintf(fp, "    font default %u\n", (unsigned int) font_idx);
     fprintf(fp, "    font proportional %d\n", ((Options & Opt_proportional) ? 1 : 0));
@@ -3561,33 +3492,27 @@ save_config(char *path, unsigned char save_theme)
             }
             fprintf(fp, "\n");
             if (simg->iml->mod) {
-                fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast,
-                        simg->iml->mod->gamma);
+                fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
             }
             if (simg->iml->rmod) {
-                fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast,
-                        simg->iml->rmod->gamma);
+                fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
             }
             if (simg->iml->gmod) {
-                fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                        simg->iml->gmod->gamma);
+                fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
             }
             if (simg->iml->bmod) {
-                fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                        simg->iml->bmod->gamma);
+                fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
             }
 #endif
             if (simg->iml->border) {
-                fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                        simg->iml->border->bottom);
+                fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
             }
             if (simg->iml->bevel) {
                 fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
                         simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
             }
             if (simg->iml->pad) {
-                fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
-                        simg->iml->pad->bottom);
+                fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
             }
 
             /* Selected state */
@@ -3622,33 +3547,27 @@ save_config(char *path, unsigned char save_theme)
                 }
                 fprintf(fp, "\n");
                 if (simg->iml->mod) {
-                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast,
-                            simg->iml->mod->gamma);
+                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
                 }
                 if (simg->iml->rmod) {
-                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast,
-                            simg->iml->rmod->gamma);
+                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
                     fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
                             simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
-                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
-                            simg->iml->pad->bottom);
+                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
                 }
             }
 
@@ -3684,33 +3603,27 @@ save_config(char *path, unsigned char save_theme)
                 }
                 fprintf(fp, "\n");
                 if (simg->iml->mod) {
-                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast,
-                            simg->iml->mod->gamma);
+                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
                 }
                 if (simg->iml->rmod) {
-                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast,
-                            simg->iml->rmod->gamma);
+                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
                     fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
                             simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
-                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
-                            simg->iml->pad->bottom);
+                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
                 }
             }
 
@@ -3746,33 +3659,27 @@ save_config(char *path, unsigned char save_theme)
                 }
                 fprintf(fp, "\n");
                 if (simg->iml->mod) {
-                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast,
-                            simg->iml->mod->gamma);
+                    fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
                 }
                 if (simg->iml->rmod) {
-                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast,
-                            simg->iml->rmod->gamma);
+                    fprintf(fp, "      colormod red 0x%02x 0x%02x 0x%02x\n", simg->iml->rmod->brightness, simg->iml->rmod->contrast, simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
                     fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
                             simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
-                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
-                            simg->iml->pad->bottom);
+                    fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
                 }
             }
             fprintf(fp, "    end image\n");
@@ -4008,8 +3915,7 @@ save_config(char *path, unsigned char save_theme)
     }
     for (i = 0; i < 256; i++) {
         if (KeySym_map[i]) {
-            fprintf(fp, "    keysym 0xff%02x \'%s\'\n", i,
-                    safe_print_string((char *) (KeySym_map[i] + 1), (unsigned long) KeySym_map[i][0]));
+            fprintf(fp, "    keysym 0xff%02x \'%s\'\n", i, safe_print_string((char *) (KeySym_map[i] + 1), (unsigned long) KeySym_map[i][0]));
         }
     }
 #ifdef GREEK_SUPPORT

@@ -238,6 +238,7 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #endif
 
 #define VT100_ANS	"\033[?1;2c"	/* vt100 answerback */
+#define LINUX_ANS	"\033[?6;5c"	/* linux answerback */
 #ifndef ESCZ_ANSWER
 # define ESCZ_ANSWER	VT100_ANS	/* obsolete ANSI ESC[c */
 #endif
@@ -359,6 +360,7 @@ extern void init_locale(void);
 #else
 # define init_locale() ((void)0)
 #endif
+extern int escreen_init(char **);
 extern int run_command(char **);
 extern void init_command(char **);
 extern void tt_winsize(int);
