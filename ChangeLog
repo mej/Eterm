@@ -4303,3 +4303,8 @@ Although I have yet to be able to reproduce it, I believe this will
 fix Debian bug #104393.  I don't think the lower parts of that array
 were getting properly zeroed. :(
 ----------------------------------------------------------------------
+Mon Jul 23 11:05:45 2001                        Michael Jennings (mej)
+
+Well that was dumb.  PNG backgrounds which were tiled rather than
+scaled would end up nuking most of the window.  Fixed now.
+----------------------------------------------------------------------

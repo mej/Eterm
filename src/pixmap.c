@@ -1067,9 +1067,6 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
       D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
       imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, xscaled, yscaled);
       rendered = 1;
-      if (simg->pmap->mask != None) {
-        shaped_window_apply_mask(win, simg->pmap->mask);
-      }
       if (simg->pmap->pixmap != None) {
         IMLIB_REGISTER_PIXMAP(simg->pmap->pixmap);
         if (pixmap != None && pixmap != simg->pmap->pixmap) {
@@ -1100,7 +1097,9 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
 	  simg->pmap->pixmap = LIBAST_X_CREATE_PIXMAP(width, height);
 	  XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
 	  IMLIB_FREE_PIXMAP(pixmap);
-	}
+	} else if (simg->pmap->mask != None) {
+          shaped_window_apply_mask(win, simg->pmap->mask);
+        }
         if (simg->iml->bevel != NULL) {
           bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
         }
