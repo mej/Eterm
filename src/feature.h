@@ -36,11 +36,10 @@
 # endif
  */
 
-# if defined(SVR4) && !defined(__svr4__)
-#  define __svr4__
-# endif
-# if !defined(SVR4) && defined(__svr4__)
-#  define SVR4
+# if defined(SVR4) || defined(__SVR4)
+#  ifndef __svr4__
+#   define __svr4__
+#  endif
 # endif
 
 # if defined(sun) && !defined(__sun__)

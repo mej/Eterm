@@ -4054,3 +4054,10 @@ Thu Jan 18 14:56:03 PST 2001	Michael Jennings <mej@eterm.org>
 	properly.  Oops. :-)
 	
 -------------------------------------------------------------------------------
+Thu Feb  1 19:02:51 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Jeff Blank <jfb@mr-happy.com> pointed out that Sun's Workshop Pro
+	compiler defines __SVR4 but not __svr4__ or SVR4.  This has now been
+	accounted for.
+	
+-------------------------------------------------------------------------------
