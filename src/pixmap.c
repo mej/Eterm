@@ -597,6 +597,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           } else {
             XCopyArea(Xdisplay, desktop_pixmap, simg->pmap->pixmap, gc, x, y, width, height, 0, 0);
           }
+          if (which != image_bg && need_colormod(simg->iml)) {
+            colormod_trans(simg->pmap->pixmap, simg->iml, gc, width, height);
+          }
+          if (simg->iml->bevel != NULL) {
+            Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
+          }
           D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
           XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
         }
@@ -970,10 +976,8 @@ load_image(const char *file, short type)
 #  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0xff || (mod)->contrast != 0xff || (mod)->gamma != 0xff))
 
 unsigned char
-need_colormod(void)
+need_colormod(register imlib_t *iml)
 {
-  register imlib_t *iml = images[image_bg].current->iml;
-
   if (MOD_IS_SET(iml->mod) || MOD_IS_SET(iml->rmod) || MOD_IS_SET(iml->gmod) || MOD_IS_SET(iml->bmod)) {
     return 1;
   } else {
@@ -982,7 +986,7 @@ need_colormod(void)
 }
 
 void
-colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
+colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h)
 {
 
   XImage *ximg;
@@ -994,7 +998,6 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
   int real_depth = 0;
   register int br, bg, bb;
   register unsigned int mr, mg, mb;
-  imlib_t *iml = images[image_bg].current->iml;
 
   D_PIXMAP(("colormod_trans(p == 0x%08x, gc, w == %hu, h == %hu) called.\n", p, w, h));
 
@@ -1219,7 +1222,7 @@ get_desktop_pixmap(void)
         } else {
           D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap has changed.  Updating desktop_pixmap\n"));
           free_desktop_pixmap();
-          if (need_colormod()) {
+          if (need_colormod(images[image_bg].current->iml)) {
             int px, py;
             unsigned int pw, ph, pb, pd;
             Window w;
@@ -1234,11 +1237,11 @@ get_desktop_pixmap(void)
             if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
               desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.parent, pw, ph, Xdepth);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
-              colormod_trans(desktop_pixmap, gc, pw, ph);
+              colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, pw, ph);
             } else {
               desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, scr->width, scr->height, Xdepth);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
-              colormod_trans(desktop_pixmap, gc, scr->width, scr->height);
+              colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, scr->width, scr->height);
             }
             XFreeGC(Xdisplay, gc);
             desktop_pixmap_is_mine = 1;

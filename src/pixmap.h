@@ -170,8 +170,8 @@ extern const char *search_path(const char *, const char *, const char *);
 extern unsigned short load_image(const char *, short);
 extern void free_desktop_pixmap(void);
 #ifdef PIXMAP_OFFSET
-extern unsigned char need_colormod(void);
-extern void colormod_trans(Pixmap, GC, unsigned short, unsigned short);
+extern unsigned char need_colormod(imlib_t *);
+extern void colormod_trans(Pixmap, imlib_t *, GC, unsigned short, unsigned short);
 extern Window get_desktop_window(void);
 extern Pixmap get_desktop_pixmap(void);
 #endif

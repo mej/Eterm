@@ -2685,8 +2685,39 @@ Thu Oct 28 16:17:21 PDT 1999	Michael Jennings <mej@eterm.org>
 Thu Oct 28 20:11:15 PDT 1999	Michael Jennings <mej@eterm.org>
 
 	Fixed a couple problems pointed out by Joel Lesher
-	<filgy@blazenet.net> and Rahsheen Porter <strider@cipher.neuplanet.cx>
+	<filgy@blazenet.net> and Rahsheen Porter <strider@neuplanet.cx>
 	regarding tinted/shaded transparency and a typo in the auto mode
 	theme file.  Doh!
+	
+-------------------------------------------------------------------------------
+Fri Oct 29 16:43:19 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	You can now apply additional color modifiers to the various widgets
+	in transparent mode that further modify the background.  So, in other
+	words, you could have a scrollbar anchor that, in the normal state,
+	is darker than the transparent background, and in selected/clicked
+	state, is brighter.  Or any variation on that theme. :-)
+
+	Once you've got this version going, try the following changes to your
+	trans theme's config file:
+
+	    begin image
+	      type anchor
+	      mode trans allow image trans auto
+	      state normal
+	      file bar_vertical_1.png
+              geom :scale
+              border 3 3 2 2
+              cmod image 192
+              bevel up 1 1 1 1
+              state selected
+              file bar_vertical_2.png
+              geom :scale
+              border 3 3 2 2
+              cmod image 320
+              bevel up 1 1 1 1
+            end image
+
+	You'll see what I'm talking about. :-)
 	
 -------------------------------------------------------------------------------

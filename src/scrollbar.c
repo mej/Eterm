@@ -831,7 +831,9 @@ scrollbar_show(short mouseoffset)
     if ((last_top != scrollBar.top) || (scrollBar.bot != last_bot)) {
       XMoveResizeWindow(Xdisplay, scrollBar.sa_win, scrollbar_get_shadow(), scrollBar.top, scrollBar.width, scrollbar_anchor_height());
     }
-    render_simage(images[image_sa].current, scrollBar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+    if (scrollbar_anchor_height() > 1) {
+      render_simage(images[image_sa].current, scrollBar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+    }
   }
 #endif
   last_top = scrollBar.top;
