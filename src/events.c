@@ -484,8 +484,6 @@ handle_focus_out(event_t * ev)
 unsigned char
 handle_configure_notify(event_t * ev)
 {
-  XEvent xevent;
-
   D_EVENTS(("handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);

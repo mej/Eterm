@@ -3553,3 +3553,10 @@ Wed May  3 21:04:37 PDT 2000	Michael Jennings <mej@eterm.org>
 	another menuitem is selected.
 	
 -------------------------------------------------------------------------------
+Thu May  4 00:32:45 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Added new shade/tint routines, including some done in MMX assembly, by
+	Willem Monsuwe <willem@stack.nl>.  Thanks Willem!  These should prove
+	to be faster than the old stuff, probably by quite a bit.
+	
+-------------------------------------------------------------------------------

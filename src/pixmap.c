@@ -53,6 +53,11 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
+/* Assembler routines */
+extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+extern void shade_ximage_32_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+
 #ifdef PIXMAP_SUPPORT
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
 static colormod_t cmod_none = { 256, 256, 256 };
@@ -1302,21 +1307,236 @@ need_colormod(register imlib_t *iml)
   }
 }
 
+/* New optimized routines for tinting XImages written by Willem Monsuwe <willem@stack.nl> */
+
+#ifndef HAVE_MMX
+/* RGB 15 */
+static void
+shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
+{
+  unsigned char *ptr;
+  int x, y;
+
+  ptr = data + (w * sizeof(DATA16));
+  if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    /* No saturation */
+    for (y = h; --y >= 0; ) {
+      for (x = -w; x < 0; x++) {
+        int r, g, b;
+        b = ((DATA16 *)ptr)[x];
+        r = (b & 0x7c00) * rm;
+        g = (b & 0x3e0) * gm;
+        b = (b & 0x1f) * bm;
+        ((DATA16 *)ptr)[x] = ((r >> 8) & 0x7c00)
+          | ((g >> 8) & 0x3e0)
+          | ((b >> 8) & 0x1f);
+      }
+      ptr += bpl;
+    }
+  } else {
+    for (y = h; --y >= 0; ) {
+      for (x = -w; x < 0; x++) {
+        int r, g, b;
+        b = ((DATA16 *)ptr)[x];
+        r = (b & 0x7c00) * rm;
+        g = (b & 0x3e0) * gm;
+        b = (b & 0x1f) * bm;
+        r |= (!(r >> 15) - 1);
+        g |= (!(g >> 10) - 1);
+        b |= (!(b >> 5) - 1);
+        ((DATA16 *)ptr)[x] = ((r >> 8) & 0x7c00)
+          | ((g >> 8) & 0x3e0)
+          | ((b >> 8) & 0x1f);
+      }
+      ptr += bpl;
+    }
+  }
+}
+
+/* RGB 16 */
+static void
+shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
+{
+  unsigned char *ptr;
+  int x, y;
+
+  ptr = data + (w * sizeof(DATA16));
+  if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    /* No saturation */
+    for (y = h; --y >= 0; ) {
+      for (x = -w; x < 0; x++) {
+        int r, g, b;
+        b = ((DATA16 *)ptr)[x];
+        r = (b & 0xf800) * rm;
+        g = (b & 0x7e0) * gm;
+        b = (b & 0x1f) * bm;
+        ((DATA16 *)ptr)[x] = ((r >> 8) & 0xf800)
+          | ((g >> 8) & 0x7e0)
+          | ((b >> 8) & 0x1f);
+      }
+      ptr += bpl;
+    }
+  } else {
+    for (y = h; --y >= 0; ) {
+      for (x = -w; x < 0; x++) {
+        int r, g, b;
+        b = ((DATA16 *)ptr)[x];
+        r = (b & 0xf800) * rm;
+        g = (b & 0x7e0) * gm;
+        b = (b & 0x1f) * bm;
+        r |= (!(r >> 16) - 1);
+        g |= (!(g >> 11) - 1);
+        b |= (!(b >> 5) - 1);
+        ((DATA16 *)ptr)[x] = ((r >> 8) & 0xf800)
+          | ((g >> 8) & 0x7e0)
+          | ((b >> 8) & 0x1f);
+      }
+      ptr += bpl;
+    }
+  }
+}
+
+/* RGB 32 */
+static void
+shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
+{
+  unsigned char *ptr;
+  int x, y;
+
+  ptr = data + (w * 4);
+  if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    /* No saturation */
+    for (y = h; --y >= 0; ) {
+      for (x = -(w * 4); x < 0; x += 4) {
+        int r, g, b;
+# ifdef WORDS_BIGENDIAN
+        r = (ptr[x + 1] * rm) >> 8;
+        g = (ptr[x + 2] * gm) >> 8;
+        b = (ptr[x + 3] * bm) >> 8;
+        ptr[x + 1] = r;
+        ptr[x + 2] = g;
+        ptr[x + 3] = b;
+# else
+        r = (ptr[x + 2] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 0] * bm) >> 8;
+        ptr[x + 2] = r;
+        ptr[x + 1] = g;
+        ptr[x + 0] = b;
+# endif
+      }
+      ptr += bpl;
+    }
+  } else {
+    for (y = h; --y >= 0; ) {
+      for (x = -(w * 4); x < 0; x += 4) {
+        int r, g, b;
+# ifdef WORDS_BIGENDIAN
+        r = (ptr[x + 1] * rm) >> 8;
+        g = (ptr[x + 2] * gm) >> 8;
+        b = (ptr[x + 3] * bm) >> 8;
+# else
+        r = (ptr[x + 2] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 0] * bm) >> 8;
+# endif
+        r |= (!(r >> 8) - 1);
+        g |= (!(g >> 8) - 1);
+        b |= (!(b >> 8) - 1);
+# ifdef WORDS_BIGENDIAN
+        ptr[x + 1] = r;
+        ptr[x + 2] = g;
+        ptr[x + 3] = b;
+# else
+        ptr[x + 2] = r;
+        ptr[x + 1] = g;
+        ptr[x + 0] = b;
+# endif
+      }
+      ptr += bpl;
+    }
+  }
+}
+#endif
+
+/* RGB 24 */
+static void
+shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
+{
+  unsigned char *ptr;
+  int x, y;
+
+  ptr = data + (w * 3);
+  if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    /* No saturation */
+    for (y = h; --y >= 0; ) {
+      for (x = -(w * 3); x < 0; x += 3) {
+        int r, g, b;
+# ifdef WORDS_BIGENDIAN
+        r = (ptr[x + 0] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 2] * bm) >> 8;
+        ptr[x + 0] = r;
+        ptr[x + 1] = g;
+        ptr[x + 2] = b;
+# else
+        r = (ptr[x + 0] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 2] * bm) >> 8;
+        ptr[x + 0] = r;
+        ptr[x + 1] = g;
+        ptr[x + 2] = b;
+# endif
+      }
+      ptr += bpl;
+    }
+  } else {
+    for (y = h; --y >= 0; ) {
+      for (x = -(w * 3); x < 0; x += 3) {
+        int r, g, b;
+# ifdef WORDS_BIGENDIAN
+        r = (ptr[x + 0] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 2] * bm) >> 8;
+# else
+        r = (ptr[x + 2] * rm) >> 8;
+        g = (ptr[x + 1] * gm) >> 8;
+        b = (ptr[x + 0] * bm) >> 8;
+# endif
+        r |= (!(r >> 8) - 1);
+        g |= (!(g >> 8) - 1);
+        b |= (!(b >> 8) - 1);
+# ifdef WORDS_BIGENDIAN
+        ptr[x + 0] = r;
+        ptr[x + 1] = g;
+        ptr[x + 2] = b;
+# else
+        ptr[x + 2] = r;
+        ptr[x + 1] = g;
+        ptr[x + 0] = b;
+# endif
+      }
+      ptr += bpl;
+    }
+  }
+}
+
 void
 colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h)
 {
 
   XImage *ximg;
-  register unsigned long v, i;
-  unsigned long x, y;
+  register unsigned long i;
 #if 0
+  register unsigned long v;
+  unsigned long x, y;
   int r, g, b;
+  register int br, bg, bb;
+  register unsigned int mr, mg, mb;
 #endif
   unsigned short rm, gm, bm, shade;
   Imlib_Color ctab[256];
   int real_depth = 0;
-  register int br, bg, bb;
-  register unsigned int mr, mg, mb;
 
   D_PIXMAP(("colormod_trans(p == 0x%08x, gc, w == %hu, h == %hu) called.\n", p, w, h));
 
@@ -1365,7 +1585,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
     XWindowAttributes xattr;
 
     XGetWindowAttributes(Xdisplay, desktop_window, &xattr);
-    if ((xattr.visual->red_mask == 0x7c00) && (xattr.visual->green_mask == 0x3e0) && (xattr.visual->blue_mask == 0x1f)) {
+    if ((xattr.visual->green_mask == 0x3e0)) {
       real_depth = 15;
     }
   }
@@ -1394,47 +1614,48 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
   } else {
     D_PIXMAP(("Rendering high-depth image, depth == %d\n", real_depth));
+    /* Swap rm and bm for bgr */
+    {
+      XWindowAttributes xattr;
+      XGetWindowAttributes(Xdisplay, desktop_window, &xattr);
+      if (xattr.visual->blue_mask > xattr.visual->red_mask) {
+	unsigned short tmp;
+	tmp = rm;
+	rm = bm;
+	bm = tmp;
+      }
+    }
     /* Determine bitshift and bitmask values */
     switch (real_depth) {
       case 15:
-	br = 7;
-	bg = 2;
-	bb = 3;
-	mr = mg = mb = 0xf8;
+#ifdef HAVE_MMX
+	shade_ximage_15_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#else
+        shade_ximage_15(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#endif
 	break;
       case 16:
-	br = 8;
-	bg = bb = 3;
-	mr = mb = 0xf8;
-	mg = 0xfc;
+#ifdef HAVE_MMX
+	shade_ximage_16_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#else
+	shade_ximage_16(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#endif
 	break;
       case 24:
+	if (ximg->bits_per_pixel != 32) {
+	  shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+	  break;
+	}
       case 32:
-	br = 16;
-	bg = 8;
-	bb = 0;
-	mr = mg = mb = 0xff;
+#ifdef HAVE_MMX
+	shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#else
+	shade_ximage_32(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#endif
 	break;
       default:
 	print_warning("Bit depth of %d is unsupported for tinting/shading.", real_depth);
 	return;
-    }
-
-    for (y = 0; y < h; y++) {
-      for (x = 0; x < w; x++) {
-        register unsigned int rn, gn, bn;
-
-        v = XGetPixel(ximg, x, y);
-        rn = ((((v >> br) & mr) * rm) >> 8);
-        gn = ((((v >> bg) & mg) * gm) >> 8);
-        bn = ((((v << bb) & mb) * bm) >> 8);
-        if (!((rn & ~mr & 0xfff0) || (gn & ~mg & 0xfff0) || (bn & ~mb & 0xfff0))) {
-          v = ((rn & mr) << br) | ((gn & mg) << bg) | ((bn & mb) >> bb);
-        } else {
-          v = WhitePixel(Xdisplay, Xscreen);
-        }
-        XPutPixel(ximg, x, y, v);
-      }
     }
   }
   XPutImage(Xdisplay, p, gc, ximg, 0, 0, 0, 0, w, h);

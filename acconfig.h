@@ -331,6 +331,7 @@
 #undef CONFIG_BUFF
 #undef PKGDATADIR
 #undef HAVE_LIBIMLIB2
+#undef HAVE_MMX
 
 
 /* Leave that blank line there!!  Autoheader needs it.
