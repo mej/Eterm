@@ -15,6 +15,7 @@ Source2: Eterm-48.xpm
 Source3: Eterm-32.xpm
 Source4: Eterm-16.xpm
 URL: http://www.eterm.org/
+Packager: Joakim Bodin <joabo552@student.liu.se>
 BuildRoot: %{_tmppath}/%{name}-root
 Requires: imlib2 => 1.0.0, utempter
 BuildRequires: imlib2-devel, utempter-devel
@@ -147,11 +148,11 @@ for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
 %files backgrounds -f rpm-Eterm-bg-files
 
 %changelog
-* Sat Sep 30 2000 Joakim Bodin <bodin@dreamhosted.com>
+* Sat Sep 30 2000 Joakim Bodin <joabo552@student.liu.se>
 - Put this Eterm 0.9 spec into Eterm 0.9.1 with the only modification being
   that this version requires imlib2 instead of imlib
 
-* Sat Sep 30 2000 Joakim Bodin <bodin@dreamhosted.com
+* Sat Sep 30 2000 Joakim Bodin <joabo552@student.liu.se
 - Mandrake:ized spec file
 - "Borrowed" Eterm.xpm icons from Eterm-0.8.10 mdk package
 - "Borrowed" Menu entry for Eterm from Eterm-0.8.10 mdk package
