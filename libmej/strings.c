@@ -552,7 +552,7 @@ CondenseWhitespace(char *s)
   if ((pbuff >= s) && (isspace(*(pbuff - 1))))
     pbuff--;
   *pbuff = 0;
-  D_STRINGS(("CondenseWhitespace() returning \"%s\"\n", s));
+  D_STRINGS(("CondenseWhitespace() returning \"%s\".\n", s));
   return (REALLOC(s, strlen(s) + 1));
 }
 

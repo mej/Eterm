@@ -2500,3 +2500,9 @@ Tue Sep 28 14:18:44 PDT 1999	Michael Jennings <mej@eterm.org>
 	ago.  Oopsie. =)
 	
 -------------------------------------------------------------------------------
+Tue Sep 28 18:54:16 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	The config parser is now much more bullet-proof.  A pixmaps.list file
+	with too many entries will no longer crash Eterm.
+	
+-------------------------------------------------------------------------------

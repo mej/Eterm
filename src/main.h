@@ -48,6 +48,8 @@
 
 # ifndef min
 #  define min(a,b)	(((a) < (b)) ? (a) : (b))
+# endif
+# ifndef max
 #  define max(a,b)	(((a) > (b)) ? (a) : (b))
 # endif
 # ifndef MIN
@@ -56,9 +58,13 @@
 # ifndef MAX
 #  define MAX(a,b)	(((a) > (b)) ? (a) : (b))
 # endif
-# define MAX_IT(current, other)	do {if ((other) > (current)) (current) = (other);} while (0)
-# define MIN_IT(current, other)	do {if ((other) < (current)) (current) = (other);} while (0)
-# define SWAP_IT(one, two, tmp)	do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
+# define LOWER_BOUND(current, other)    (((current) < (other)) ? ((current) = (other)) : (current))
+# define AT_LEAST(current, other)       LOWER_BOUND(current, other)
+# define MAX_IT(current, other)         LOWER_BOUND(current, other)
+# define UPPER_BOUND(current, other)    (((current) > (other)) ? ((current) = (other)) : (current))
+# define AT_MOST(current, other)        UPPER_BOUND(current, other)
+# define MIN_IT(current, other)         UPPER_BOUND(current, other)
+# define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
 
 /* width of scrollBar, menuBar shadow ... don't change! */
 # define SHADOW	2
