@@ -87,6 +87,9 @@
                                     enableLifetimeSummaries(); enableTimeWindowSummaries(0.1); enableFileRegionSummaries(8192); \
                                    } while (0)
 # define PABLO_STOP_TRACING()   do {endIOTrace(); endTracing();} while (0)
+#else
+# define PABLO_START_TRACING()  ((void) 0)
+# define PABLO_STOP_TRACING()   ((void) 0)
 #endif
 
 # include <stdio.h>
