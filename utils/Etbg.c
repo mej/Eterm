@@ -37,7 +37,8 @@ int
 main(int argc, char **argv)
 {
   int scale = FALSE, trans = FALSE;
-  unsigned int i, pic = 0;
+  unsigned int pic = 0;
+  int i;
 
   for (i = 1; i < argc; i++) {
     if (strcasecmp(argv[i], "-scale") == 0) {

@@ -133,6 +133,14 @@ static const char cvs_ident[] = "$Id$";
 #endif
 #include "windows.h"
 
+#ifdef HAVE_SETRESGID
+int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+#endif
+
+#ifdef HAVE_SETRESUID
+int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+#endif
+
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;
 char initial_dir[PATH_MAX + 1];
@@ -1181,6 +1189,7 @@ sco_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTMX
+inline int svr_get_pty(void);
 inline int
 svr_get_pty(void)
 {
