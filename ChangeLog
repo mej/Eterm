@@ -2852,3 +2852,23 @@ Fri Nov 19 23:05:31 PST 1999	Michael Jennings <mej@eterm.org>
 	:-]
 	
 -------------------------------------------------------------------------------
+Thu Dec  2 22:18:51 PST 1999	Michael Jennings <mej@eterm.org>
+
+	A good number of changes here.  First off, since nobody reported any
+	bugs with the new font stuff, I switched the multibyte fonts over to
+	use it as well.  They do use the same font index, however, in order to
+	keep the sizes matched up.
+
+	I also fixed up the modifier stuff so that Meta and Alt are matched
+	by KeySym rather than assuming Mod1.  I also took care of the action
+	dispatcher so it would keep up with these changes.
+
+	To go along with this, I added 3 new options and config file
+	attributes which allow you to set the modifier that should represent
+	Meta, Alt, and NumLock.  This overrides the automatically-detected
+	X server settings.
+
+	I also applied some fixes to the XIM code from Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------

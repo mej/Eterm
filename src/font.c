@@ -50,6 +50,7 @@ unsigned char font_idx = DEF_FONT_IDX, def_font_idx = DEF_FONT_IDX, font_cnt = 0
 char *rs_font[NFONTS];
 #ifdef MULTI_CHARSET
 char *rs_mfont[NFONTS];
+char **etmfonts = NULL;
 const char *def_mfontName[] = {MFONT0, MFONT1, MFONT2, MFONT3, MFONT4};
 #endif
 const char *def_fontName[] = {FONT0, FONT1, FONT2, FONT3, FONT4};
@@ -309,6 +310,10 @@ change_font(int init, const char *fontname)
     font_idx = def_font_idx;
     ASSERT(etfonts != NULL);
     ASSERT(etfonts[font_idx] != NULL);
+#ifdef MULTI_CHARSET
+    ASSERT(etmfonts != NULL);
+    ASSERT(etmfonts[font_idx] != NULL);
+#endif    
   } else {
     ASSERT(fontname != NULL);
 
@@ -372,19 +377,19 @@ change_font(int init, const char *fontname)
 
 #ifdef MULTI_CHARSET
   if (TermWin.mfont) {
-    if (font_cache_find_info(rs_mfont[idx], FONT_TYPE_X) != TermWin.mfont) {
+    if (font_cache_find_info(etmfonts[font_idx], FONT_TYPE_X) != TermWin.mfont) {
       free_font(TermWin.mfont);
-      TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
+      TermWin.mfont = load_font(etmfonts[font_idx], "k14", FONT_TYPE_X);
     }
   } else {
-    TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
+    TermWin.mfont = load_font(etmfonts[font_idx], "k14", FONT_TYPE_X);
   }
 # ifdef USE_XIM
   if (xim_input_context) {
     if (TermWin.fontset) {
       XFreeFontSet(Xdisplay, TermWin.fontset);
     }
-    TermWin.fontset = create_fontset(etfonts[font_idx], rs_mfont[idx]);
+    TermWin.fontset = create_fontset(etfonts[font_idx], etmfonts[font_idx]);
     xim_set_fontset();
   }
 # endif

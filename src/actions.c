@@ -80,6 +80,7 @@ unsigned char
 action_dispatch(event_t *ev, KeySym keysym) {
 
   action_t *action;
+  unsigned int m = (AltMask | MetaMask | NumLockMask);
 
   ASSERT(ev != NULL);
   for (action = action_list; action; action = action->next) {
@@ -102,19 +103,25 @@ action_dispatch(event_t *ev, KeySym keysym) {
       if (LOGICAL_XOR((action->mod & MOD_LOCK), (ev->xkey.state & LockMask))) {
         continue;
       }
-      if (LOGICAL_XOR((action->mod & MOD_MOD1), (ev->xkey.state & Mod1Mask))) {
+      if (LOGICAL_XOR((action->mod & MOD_META), (ev->xkey.state & MetaMask))) {
         continue;
       }
-      if (LOGICAL_XOR((action->mod & MOD_MOD2), (ev->xkey.state & Mod2Mask))) {
+      if (LOGICAL_XOR((action->mod & MOD_ALT), (ev->xkey.state & AltMask))) {
         continue;
       }
-      if (LOGICAL_XOR((action->mod & MOD_MOD3), (ev->xkey.state & Mod3Mask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_MOD4), (ev->xkey.state & Mod4Mask))) {
-        continue;
-      }
-      if (LOGICAL_XOR((action->mod & MOD_MOD5), (ev->xkey.state & Mod5Mask))) {
+      if (((action->mod & MOD_MOD1) && !(ev->xkey.state & Mod1Mask)) || (!(action->mod & MOD_MOD1) && (ev->xkey.state & Mod1Mask) && !(Mod1Mask & m))) {
+        continue;                                                                                                                                 
+      }                                                                                                                                           
+      if (((action->mod & MOD_MOD2) && !(ev->xkey.state & Mod2Mask)) || (!(action->mod & MOD_MOD2) && (ev->xkey.state & Mod2Mask) && !(Mod2Mask & m))) {
+        continue;                                                                                                                                 
+      }                                                                                                                                           
+      if (((action->mod & MOD_MOD3) && !(ev->xkey.state & Mod3Mask)) || (!(action->mod & MOD_MOD3) && (ev->xkey.state & Mod3Mask) && !(Mod3Mask & m))) {
+        continue;                                                                                                                                 
+      }                                                                                                                                           
+      if (((action->mod & MOD_MOD4) && !(ev->xkey.state & Mod4Mask)) || (!(action->mod & MOD_MOD4) && (ev->xkey.state & Mod4Mask) && !(Mod4Mask & m))) {
+        continue;                                                                                                                                 
+      }                                                                                                                                           
+      if (((action->mod & MOD_MOD5) && !(ev->xkey.state & Mod5Mask)) || (!(action->mod & MOD_MOD5) && (ev->xkey.state & Mod5Mask) && !(Mod5Mask & m))) {
         continue;
       }
     }      

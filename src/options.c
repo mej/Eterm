@@ -235,6 +235,7 @@ static char *rs_pixmaps[image_max];
 char *rs_theme = NULL;
 char *rs_config_file = NULL;
 unsigned int rs_line_space = 0;
+unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
 #ifdef KEYSYM_ATTRIBUTE
 unsigned char *KeySym_map[256];	/* probably mostly empty */
 #endif
@@ -402,6 +403,9 @@ static const struct {
       OPT_LONG("big-font-key", "keysym for font size increase", &rs_bigfont_key),
       OPT_LONG("small-font-key", "keysym for font size decrease", &rs_smallfont_key),
 #endif
+      OPT_ILONG("meta-mod", "modifier to interpret as the Meta key", &rs_meta_mod),
+      OPT_ILONG("alt-mod", "modifier to interpret as the Alt key", &rs_alt_mod),
+      OPT_ILONG("numlock-mod", "modifier to interpret as the NumLock key", &rs_numlock_mod),
 #ifdef GREEK_SUPPORT
       OPT_LONG("greek-keyboard", "greek keyboard mapping (iso or ibm)", &rs_greek_keyboard),
 #endif
@@ -1654,7 +1658,7 @@ parse_color(char *buff)
     n = NumWords(buff);
     if (n < 3) {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
-		  "attribute color", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		  "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
       return;
     }
     tmp = PWord(2, buff);
@@ -1687,14 +1691,14 @@ parse_color(char *buff)
 	} else {
 	  tmp = Word(1, tmp);
 	  print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"",
-		      file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		      file_peek_path(), file_peek_line(), NONULL(tmp));
 	  FREE(tmp);
 	}
       }
     }
     if (n != 5) {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
-		  "attribute color", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		  "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
       return;
     }
     g1 = PWord(4, buff);
@@ -1742,7 +1746,7 @@ parse_color(char *buff)
     } else {
       tmp = Word(1, tmp);
       print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"",
-		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		  file_peek_path(), file_peek_line(), NONULL(tmp));
       FREE(tmp);
     }
   } else {
@@ -1785,7 +1789,7 @@ parse_attributes(char *buff)
 
     if (NumWords(buff) != 3) {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
-		  "attribute font", file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		  "attribute font", file_peek_path(), file_peek_line(), NONULL(tmp));
       return;
     }
     if (isdigit(*tmp)) {
@@ -1809,7 +1813,7 @@ parse_attributes(char *buff)
     } else {
       tmp = Word(1, tmp);
       print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"",
-		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+		  file_peek_path(), file_peek_line(), NONULL(tmp));
       FREE(tmp);
     }
 
@@ -2060,6 +2064,36 @@ parse_keyboard(char *buff)
     print_warning("Support for the keysym attributes was not compiled in, ignoring");
 #endif
 
+  } else if (!BEG_STRCASECMP(buff, "meta_mod ")) {
+    char *tmp = PWord(2, buff);
+
+    if (!tmp) {
+      print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute meta_mod",
+		  file_peek_path(), file_peek_line());
+      return;
+    }
+    rs_meta_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
+    
+  } else if (!BEG_STRCASECMP(buff, "alt_mod ")) {
+    char *tmp = PWord(2, buff);
+
+    if (!tmp) {
+      print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute alt_mod",
+		  file_peek_path(), file_peek_line());
+      return;
+    }
+    rs_alt_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
+    
+  } else if (!BEG_STRCASECMP(buff, "numlock_mod ")) {
+    char *tmp = PWord(2, buff);
+
+    if (!tmp) {
+      print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute numlock_mod",
+		  file_peek_path(), file_peek_line());
+      return;
+    }
+    rs_numlock_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
+    
   } else if (!BEG_STRCASECMP(buff, "greek ")) {
 #ifdef GREEK_SUPPORT
 
@@ -2552,7 +2586,11 @@ parse_actions(char *buff)
         mod |= MOD_SHIFT;
       } else if (!BEG_STRCASECMP(str, "lock")) {
         mod |= MOD_LOCK;
-      } else if (!BEG_STRCASECMP(str, "mod1") || !BEG_STRCASECMP(str, "alt") || !BEG_STRCASECMP(str, "meta")) {
+      } else if (!BEG_STRCASECMP(str, "meta")) {
+        mod |= MOD_META;
+      } else if (!BEG_STRCASECMP(str, "alt")) {
+        mod |= MOD_ALT;
+      } else if (!BEG_STRCASECMP(str, "mod1")) {
         mod |= MOD_MOD1;
       } else if (!BEG_STRCASECMP(str, "mod2")) {
         mod |= MOD_MOD2;
@@ -2754,14 +2792,14 @@ parse_multichar(char *buff)
     unsigned char n;
 
     if (NumWords(buff) != 3) {
-      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font",
-		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
+      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
+		  "attribute font", file_peek_path(), file_peek_line(), NONULL(tmp));
       return;
     }
     if (isdigit(*tmp)) {
       n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
-      if (n <= 4) {
-	RESET_AND_ASSIGN(rs_mfont[n], Word(2, tmp));
+      if (n <= 255) {
+        eterm_font_add(&etmfonts, PWord(2, tmp), n);
       } else {
 	print_error("Parse error in file %s, line %lu:  Invalid font index %d",
 		    file_peek_path(), file_peek_line(), n);
@@ -3187,8 +3225,14 @@ post_parse(void)
       }
     }
 #ifdef MULTI_CHARSET
-    if (!rs_mfont[i]) {
-      rs_mfont[i] = StrDup(def_mfontName[i]);
+    if (rs_mfont[i]) {
+      if (def_font_idx == 0) {
+        eterm_font_add(&etmfonts, rs_mfont[i], i);
+        RESET_AND_ASSIGN(rs_mfont[i], NULL);
+      } else {
+        eterm_font_add(&etmfonts, rs_mfont[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
+        RESET_AND_ASSIGN(rs_mfont[i], NULL);
+      }
     }
 #endif
   }
@@ -3331,6 +3375,16 @@ post_parse(void)
   color_aliases(pointerColor);
   color_aliases(borderColor);
 
+  if (rs_meta_mod) {
+    MetaMask = modmasks[rs_meta_mod - 1];
+  }
+  if (rs_alt_mod) {
+    AltMask = modmasks[rs_alt_mod - 1];
+  }
+  if (rs_numlock_mod) {
+    NumLockMask = modmasks[rs_numlock_mod - 1];
+  }
+
 #ifdef BACKGROUND_CYCLING_SUPPORT
   if (rs_anim_pixmap_list != NULL) {
     rs_anim_delay = strtoul(rs_anim_pixmap_list, (char **) NULL, 0);
@@ -3469,7 +3523,9 @@ save_config(char *path)
   fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
   fprintf(fp, "    font default %u\n", (unsigned int) font_idx);
   for (i = 0; i < font_cnt; i++) {
-    fprintf(fp, "    font %d %s\n", i, etfonts[i]);
+    if (etfonts[i]) {
+      fprintf(fp, "    font %d %s\n", i, etfonts[i]);
+    }
   }
 #ifndef NO_BOLDFONT
   if (rs_boldFont) {
@@ -3715,6 +3771,12 @@ save_config(char *path)
       if (action->mod & MOD_LOCK) {
         fprintf(fp, "lock ");
       }
+      if (action->mod & MOD_META) {
+        fprintf(fp, "meta ");
+      }
+      if (action->mod & MOD_ALT) {
+        fprintf(fp, "alt ");
+      }
       if (action->mod & MOD_MOD1) {
         fprintf(fp, "mod1 ");
       }
@@ -3763,8 +3825,10 @@ save_config(char *path)
   if (rs_multichar_encoding) {
     fprintf(fp, "    encoding %s\n", rs_multichar_encoding);
   }
-  for (i = 0; i < 5; i++) {
-    fprintf(fp, "    font %d %s\n", i, rs_mfont[i]);
+  for (i = 0; i < font_cnt; i++) {
+    if (etmfonts[i]) {
+      fprintf(fp, "    font %d %s\n", i, etmfonts[i]);
+    }
   }
   fprintf(fp, "  end multichar\n\n");
 #endif
@@ -3811,7 +3875,16 @@ save_config(char *path)
   }
   tmp_str = XKeysymToString(ks_bigfont);
   if (tmp_str) {
-    fprintf(fp, "    bigfont_key %s\n", XKeysymToString(ks_bigfont));
+    fprintf(fp, "    bigfont_key %s\n", tmp_str);
+  }
+  if (rs_meta_mod) {
+    fprintf(fp, "    meta_mod %d\n", rs_meta_mod);
+  }
+  if (rs_alt_mod) {
+    fprintf(fp, "    alt_mod %d\n", rs_alt_mod);
+  }
+  if (rs_numlock_mod) {
+    fprintf(fp, "    numlock_mod %d\n", rs_numlock_mod);
   }
   for (i = 0; i < 256; i++) {
     if (KeySym_map[i]) {

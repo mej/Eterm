@@ -64,7 +64,7 @@ typedef struct cachefont_struct {
 extern unsigned char font_idx, def_font_idx, font_cnt;
 extern const char *def_fontName[];
 extern char *rs_font[NFONTS];
-extern char **etfonts;
+extern char **etfonts, **etmfonts;
 # ifdef MULTI_CHARSET
 extern const char *def_mfontName[];
 extern char *rs_mfont[NFONTS];

@@ -160,6 +160,9 @@ static Atom DndProtocol, DndSelection;
 #ifdef USE_XIM
 XIC xim_input_context = NULL;	/* input context */
 static XIMStyle xim_input_style = 0;
+# ifndef XSetIMValues
+extern char *XSetIMValues(XIM im, ...);
+# endif
 #endif
 
 /* Substitutes for missing system functions */
@@ -1693,15 +1696,15 @@ init_locale(void)
 {
   char *locale = NULL;
 
-  locale = setlocale(LC_CTYPE, "");
+  locale = setlocale(LC_ALL, "");
   TermWin.fontset = (XFontSet) -1;
   if (locale == NULL) {
     print_error("Setting locale failed.");
   } else {
 #ifdef MULTI_CHARSET
-    TermWin.fontset = create_fontset(etfonts[0], rs_mfont[0]);
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
 #else
-    TermWin.fontset = create_fontset(etfonts[0], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
+    TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
 #endif
 #ifdef USE_XIM
 # ifdef MULTI_CHARSET
@@ -1971,16 +1974,30 @@ xim_set_status_position(void)
 
 void xim_set_fontset(void)
 {
-  XVaNestedList preedit_attr;
-  XVaNestedList status_attr;
+  XVaNestedList preedit_attr = NULL;
+  XVaNestedList status_attr = NULL;
 
   REQUIRE(xim_input_context != NULL);
 
+  if (xim_input_style & XIMStatusArea) {
+    status_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
+  }
   if (xim_input_style & (XIMPreeditArea | XIMPreeditPosition)) {
     preedit_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
-    status_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
+  }
+
+  if (status_attr && preedit_attr) {
     XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, XNStatusAttributes, status_attr, NULL);
+  } else if (preedit_attr) {
+    XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, NULL);
+  } else if (status_attr) {
+    XSetICValues(xim_input_context, XNStatusAttributes, status_attr, NULL);
+  }
+
+  if (preedit_attr) {
     XFree(preedit_attr);
+  }
+  if (status_attr) {
     XFree(status_attr);
   }
 }

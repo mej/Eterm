@@ -162,10 +162,13 @@ extern unsigned long SavedModes;
 extern char *def_colorName[];
 extern char *rs_color[NRS_COLORS];
 extern Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
+extern unsigned int MetaMask, AltMask, NumLockMask;
+extern unsigned int modmasks[];
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+extern void get_modifiers(void);
 extern void lookup_key(XEvent *);
 #ifdef PRINTPIPE
 extern FILE *popen_printer(void);

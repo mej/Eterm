@@ -449,7 +449,7 @@ menu_set_font(menu_t * menu, const char *fontname)
 
   font = (XFontStruct *) load_font(fontname, "fixed", FONT_TYPE_X);
 #ifdef MULTI_CHARSET
-  menu->fontset = create_fontset(fontname, rs_mfont[0]);
+  menu->fontset = create_fontset(fontname, etmfonts[def_font_idx]);
 #endif
 
   menu->font = font;

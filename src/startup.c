@@ -150,6 +150,8 @@ eterm_bootstrap(int argc, char *argv[])
   }
 #endif
 
+  get_modifiers();  /* Set up modifier masks before parsing config files. */
+
   read_config(THEME_CFG);
   read_config((rs_config_file ? rs_config_file : USER_CFG));
 

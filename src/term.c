@@ -93,6 +93,70 @@ char *def_colorName[] =
 };
 char *rs_color[NRS_COLORS];
 Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];
+unsigned int MetaMask = 0, AltMask = 0, NumLockMask = 0;
+unsigned int modmasks[] = { Mod1Mask, Mod2Mask, Mod3Mask, Mod4Mask, Mod5Mask };
+
+void
+get_modifiers(void)
+{
+
+  unsigned short i;
+  XModifierKeymap *modmap;
+  KeyCode *kc;
+
+  modmap = XGetModifierMapping(Xdisplay);
+  kc = modmap->modifiermap;
+  for (i = Mod5MapIndex; i >= Mod1MapIndex; i--) {
+    unsigned short j;
+    register unsigned short k, l;
+
+    k = i * modmap->max_keypermod;
+    l = i - Mod1MapIndex;
+
+    for (j = 0; j < modmap->max_keypermod; j++, k++) {
+      unsigned char match = 0;
+
+      if (kc[k] == 0) {
+        break;
+      }
+      switch (XKeycodeToKeysym(Xdisplay, kc[k], 0)) {
+        case XK_Meta_L:
+        case XK_Meta_R:
+          D_X11(("get_modifiers() found Meta key as mod %d\n", l + 1));
+          match = MetaMask = modmasks[l];
+          break;
+        case XK_Alt_L:
+        case XK_Alt_R:
+          D_X11(("get_modifiers() found Alt key as mod %d\n", l + 1));
+          match = AltMask = modmasks[l];
+          break;
+        case XK_Num_Lock:
+          D_X11(("get_modifiers() found NumLock key as mod %d\n", l + 1));
+          match = NumLockMask = modmasks[l];
+          break;
+        default:
+          break;
+      }
+      if (match) {
+        break;
+      }
+    }
+  }
+  XFreeModifiermap(modmap);
+  if (MetaMask == 0) {
+    if (AltMask != 0) {
+      D_X11(("get_modifiers() defaulted Meta key to match Alt mask\n"));
+      MetaMask = AltMask;
+    } else {
+      D_X11(("get_modifiers() defaulted Meta key to mod 1\n"));
+      MetaMask = Mod1Mask;
+    }
+  }
+  if (AltMask == 0) {
+    D_X11(("get_modifiers() defaulted Alt key to match Meta mask\n"));
+    AltMask = MetaMask;  /* MetaMask will always be defined at this point. */
+  }
+}
 
 /* To handle buffer overflows properly, we must malloc a buffer.  Free it when done. */
 #ifdef USE_XIM
@@ -131,9 +195,9 @@ lookup_key(XEvent * ev)
    */
   shft = (ev->xkey.state & ShiftMask);
   ctrl = (ev->xkey.state & ControlMask);
-  meta = (ev->xkey.state & Mod1Mask);
-  if (numlock_state || (ev->xkey.state & Mod5Mask)) {
-    numlock_state = (ev->xkey.state & Mod5Mask);	/* numlock toggle */
+  meta = (ev->xkey.state & MetaMask);
+  if (numlock_state || (ev->xkey.state & NumLockMask)) {
+    numlock_state = (ev->xkey.state & NumLockMask);
     PrivMode((!numlock_state), PrivMode_aplKP);
   }
 #ifdef USE_XIM
@@ -646,7 +710,7 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
     char *p;
     int i;
 
-    fprintf(stderr, "key 0x%04X[%d]: `", (unsigned int) keysym, len);
+    fprintf(stderr, "key 0x%04x[%d]: `", (unsigned int) keysym, len);
     for (i = 0, p = (char *) kbuf; i < len; i++, p++)
       fprintf(stderr, (*p >= ' ' && *p < '\177' ? "%c" : "\\%03o"), *p);
     fprintf(stderr, "'\n");
