@@ -43,14 +43,8 @@ static const char cvs_ident[] = "$Id$";
 /* System Headers */
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 #include <ctype.h>
 #include <errno.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
@@ -112,6 +106,8 @@ static const char cvs_ident[] = "$Id$";
 #if defined(linux)
 # include <string.h>		/* For strsep(). -vendu */
 #endif
+/* I don't know why this doesn't seem to grab setresgid -mandrake */
+#include <unistd.h>
 
 /* Eterm-specific Headers */
 #include "command.h"
@@ -1216,6 +1212,7 @@ svr_get_pty(void)
 #define PTYCHAR1 "pqrstuvwxyz"
 #define PTYCHAR2 "0123456789abcdefghijklmnopqrstuvwxyz"
 
+inline int gen_get_pty(void);
 inline int
 gen_get_pty(void)
 {
@@ -1654,6 +1651,7 @@ create_fontset(const char *font1, const char *font2)
     strcat(fontname, font2);
   }
 #else
+  font2 = NULL;
   fontname = MALLOC(strlen(font1) + sizeof(fs_base) + 1);
   if (fontname) {
     strcpy(fontname, font1);

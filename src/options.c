@@ -1284,7 +1284,9 @@ char *
 builtin_version(char *param)
 {
 
-  D_PARSE(("builtin_version(%s) called\n", param));
+  if(param) {
+    D_PARSE(("builtin_version(%s) called\n", param));
+  }
 
   return (StrDup(VERSION));
 }
@@ -1293,7 +1295,9 @@ char *
 builtin_appname(char *param)
 {
 
-  D_PARSE(("builtin_appname(%s) called\n", param));
+  if(param) {
+    D_PARSE(("builtin_appname(%s) called\n", param));
+  }
 
   return (StrDup(APL_NAME "-" VERSION));
 }

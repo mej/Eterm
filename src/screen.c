@@ -103,7 +103,7 @@ void
 blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 {
 /*    int             i = width; */
-  register int i = width;
+  register unsigned int i = width;
   rend_t *r = er, fs = efs;
 
   MEMSET(et, ' ', i);
@@ -1347,7 +1347,7 @@ void
 scr_set_tab(int mode)
 {
   if (mode < 0)
-    MEMSET(tabs, 0, TermWin.ncol);
+    MEMSET(tabs, 0, (unsigned int) TermWin.ncol);
 
   else if (screen.col < TermWin.ncol)
     tabs[screen.col] = (mode ? 1 : 0);
@@ -1520,6 +1520,8 @@ set_multichar_encoding(const char *str)
       multichar_decode = big5dummy;
     }
   }
+#else
+  str = NULL;
 #endif /* MULTI_CHARSET */
 }
 
@@ -1921,7 +1923,7 @@ scr_refresh(int type)
 #endif
 	  /* single stepping - `normal' mode */
 	  for (; ++col < ncols - 1;) {
-	    if (rend != srp[col])
+	    if ((unsigned int)rend != srp[col])
 	      break;
 	    if ((stp[col] == dtp[col]) && (srp[col] == drp[col]))
 	      break;
@@ -3066,17 +3068,26 @@ mouse_report(XButtonEvent * ev)
 }
 
 /* ------------------------------------------------------------------------- */
+
 void
 mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
 {
+	report = 0;
+	x = 0;
+	y = 0;
+	firstrow = 0;
+	lastrow = 0;
 /* TODO */
-}
+}
+
 /* ------------------------------------------------------------------------- *
  *                              DEBUG ROUTINES                               * 
  * ------------------------------------------------------------------------- */
 void
 debug_PasteIt(unsigned char *data, int nitems)
 {
+	data = NULL;
+	nitems = 0;
 /* TODO */
 }
 

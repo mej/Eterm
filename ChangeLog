@@ -2587,3 +2587,11 @@ Tue Oct 12 16:24:20 PDT 1999	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
+Mon Oct 18 19:33:26 PDT 1999    Mandrake <mandrake@mandrake.net>
+
+	Warnings begone!
+	Eterm/src/command.c still has two warnings but I don't know why
+	I didn't get rid fo them.  there are still warnings in
+	Esetroot.c and in Etbg, but I'll fix those later.
+
+-------------------------------------------------------------------------------

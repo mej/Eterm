@@ -331,6 +331,7 @@ void
 eterm_ipc_send(char *str)
 {
 
+	str = NULL;
 }
 
 char *
