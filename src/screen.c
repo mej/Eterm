@@ -275,11 +275,9 @@ scr_reset(void)
       for (i = 0; i < total_rows; i++) {
         if (screen.text[i]) {
           tc = screen.text[i][prev_ncol];
-          screen.text[i] = REALLOC(screen.text[i],
-                                   (TermWin.ncol+1)*sizeof(text_t));
-          screen.rend[i] = REALLOC(screen.rend[i],
-                                   TermWin.ncol*sizeof(rend_t));
-          screen.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
+          screen.text[i] = REALLOC(screen.text[i], (TermWin.ncol + 1) * sizeof(text_t));
+          screen.rend[i] = REALLOC(screen.rend[i], TermWin.ncol * sizeof(rend_t));
+          screen.text[i][TermWin.ncol] = MIN(tc, TermWin.ncol);
           if (TermWin.ncol > prev_ncol)
             blank_line(&(screen.text[i][prev_ncol]),
                        &(screen.rend[i][prev_ncol]),
@@ -287,17 +285,13 @@ scr_reset(void)
         }
       }
       for (i = 0; i < TermWin.nrow; i++) {
-        drawn_text[i] = REALLOC(drawn_text[i],
-                                TermWin.ncol*sizeof(text_t));
-        drawn_rend[i] = REALLOC(drawn_rend[i],
-                                TermWin.ncol*sizeof(rend_t));
+        drawn_text[i] = REALLOC(drawn_text[i], (TermWin.ncol + 1) * sizeof(text_t));
+        drawn_rend[i] = REALLOC(drawn_rend[i], TermWin.ncol * sizeof(rend_t));
         if (swap.text[i]) {
           tc = swap.text[i][prev_ncol];
-          swap.text[i] = REALLOC(swap.text[i],
-                                 (TermWin.ncol+1)*sizeof(text_t));
-          swap.rend[i] = REALLOC(swap.rend[i],
-                                 TermWin.ncol*sizeof(rend_t));
-          swap.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
+          swap.text[i] = REALLOC(swap.text[i], (TermWin.ncol + 1) * sizeof(text_t));
+          swap.rend[i] = REALLOC(swap.rend[i], TermWin.ncol * sizeof(rend_t));
+          swap.text[i][TermWin.ncol] = MIN(tc, TermWin.ncol);
           if (TermWin.ncol > prev_ncol)
             blank_line(&(swap.text[i][prev_ncol]),
                        &(swap.rend[i][prev_ncol]),
@@ -2274,10 +2268,13 @@ selection_reset(void)
   selection.op = SELECTION_CLEAR;
 
   i = (current_screen == PRIMARY) ? 0 : TermWin.saveLines;
-  for (; i < lrow; i++)
-    if (screen.rend[i])		/* not everything may be malloc()d yet */
-      for (j = 0; j < lcol; j++)
+  for (; i < lrow; i++) {
+    if (screen.text[i])	{	/* not everything may be malloc()d yet */
+      for (j = 0; j < lcol; j++) {
 	screen.rend[i][j] &= ~RS_Select;
+      }
+    }
+  }
 }
 /* ------------------------------------------------------------------------- */
 /*

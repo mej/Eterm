@@ -989,7 +989,7 @@ dump_stack_trace(void)
   U_STACK_TRACE();
   return;
 #elif defined(GDB)
-  snprintf(cmd, sizeof(cmd), "/bin/echo backtrace | " GDB " " APL_NAME " %d", getpid());
+  snprintf(cmd, sizeof(cmd), "/bin/echo '\n\nbacktrace' | " GDB " " APL_NAME " %d", getpid());
 #elif defined(PSTACK)
   snprintf(cmd, sizeof(cmd), PSTACK " %d", getpid());
 #elif defined(DBX)
