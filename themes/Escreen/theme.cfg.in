@@ -3,7 +3,7 @@
 %include "../Eterm/theme.cfg"
 
 begin attributes
-    name %appname() -- Escreen Session
+    name "%appname() -- Escreen Session"
 end attributes
 
 begin actions
