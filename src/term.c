@@ -1530,12 +1530,12 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
       
           case 1047:            /* Alternate screen & clear */
             PrivCases(PrivMode_Screen);
-            scr_change_screen(state);
-            if (state) {
-              /* Only clear the screen when switching to the
-                 secondary screen.  Leave the primary intact. */
+            if (!state) {
+              /* Only clear the screen before switching from
+                 secondary to primary. */
               scr_erase_screen(2);
             }
+            scr_change_screen(state);
             break;
           case 1048:            /* Save/restore cursor pos */
             PrivCases(PrivMode_Screen);
@@ -1543,13 +1543,13 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
             break;
           case 1049:            /* Alternate screen & cursor */
             PrivCases(PrivMode_Screen);
-            scr_cursor(state ? SAVE : RESTORE);
-            scr_change_screen(state);
-            if (state) {
-              /* Only clear the screen when switching to the
-                 secondary screen.  Leave the primary intact. */
+            scr_cursor(state ? SAVE : RESTORE); 
+            if (!state) {
+              /* Only clear the screen before switching from
+                 secondary to primary. */
               scr_erase_screen(2);
             }
+            scr_change_screen(state);
             break;
 	}
       break;

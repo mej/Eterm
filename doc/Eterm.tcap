@@ -1,6 +1,6 @@
 Eterm|Eterm-color|Eterm with xterm-style color support (X Window System):\
 	:am:bw:eo:km:mi:ms:xn:xo:\
-	:co#80:it#8:li#24:lm#0:\
+	:co#80:it#8:li#24:lm#0:pa#64:Co#8:AF=\E[3%dm:AB=\E[4%dm:\
 	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:DO=\E[%dB:IC=\E[%d@:\
 	:K1=\E[7~:K2=\EOu:K3=\E[5~:K4=\E[8~:K5=\E[6~:LE=\E[%dD:\
 	:RI=\E[%dC:UP=\E[%dA:ae=^O:al=\E[L:as=^N:bl=^G:cd=\E[J:\
