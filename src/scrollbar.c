@@ -758,6 +758,9 @@ scrollbar_show(short mouseoffset)
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
   }
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
+  else if (image_mode_is(image_sb, (MODE_TRANS | MODE_VIEWPORT))) {
+    render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+  }
   if (scrollBar.type == SCROLLBAR_MOTIF || scrollBar.type == SCROLLBAR_NEXT) {
     if (focus != TermWin.focus) {
       XGCValues gcvalue;

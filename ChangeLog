@@ -2581,3 +2581,9 @@ Mon Oct 11 22:24:12 PDT 1999	Michael Jennings <mej@eterm.org>
 	Sync after resize in auto mode.
 	
 -------------------------------------------------------------------------------
+Tue Oct 12 16:24:20 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a scrollbar refresh bug pointed out by Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------

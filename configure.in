@@ -175,6 +175,15 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
                   AC_DEFINE_UNQUOTED(DEBUG, 4)
 )
 
+AC_CHECK_FUNC(ptsname,
+              HAVE_PTSNAME=yes
+             )
+AC_CHECK_FUNC(grantpt,
+              HAVE_GRANTPT=yes
+             )
+AC_CHECK_FUNC(unlockpt,
+              HAVE_UNLOCKPT=yes
+             )
 dnl# Check for the appropriate pty mechanism
 AC_MSG_CHECKING(for pty mechanism)
 PTY_MECH=""
@@ -182,11 +191,11 @@ if test -e /dev/ptc ; then
   AC_DEFINE(HAVE_DEV_PTC)
   PTY_MECH="AIX $PTY_MECH"
 fi
-if test -e /dev/ptmx ; then
+if test -r /dev/ptmx -a ! -z "$HAVE_PTSNAME" -a ! -z "$HAVE_GRANTPT" -a ! -z "$HAVE_UNLOCKPT"; then
   AC_DEFINE(HAVE_DEV_PTMX)
   PTY_MECH="SVR4 $PTY_MECH"
 fi
-if test -e /dev/ptyp128 ; then
+if test -c /dev/ptyp128 ; then
   AC_DEFINE(HAVE_SCO_PTYS)
   PTY_MECH="SCO $PTY_MECH"
 fi
