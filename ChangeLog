@@ -2280,3 +2280,12 @@ Tue Aug 17 18:06:01 PDT 1999	Michael Jennings <mej@eterm.org>
 	code, but it's now 0.9.  It also includes a timer subsystem.
 	
 -------------------------------------------------------------------------------
+Wed Aug 18 14:58:08 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Cleanups on the automake/libtool stuff in src/.  Thanks to John
+	Ellson <ellson@lucent.com> for getting me interested enough to set
+	about fixing it. :-)
+
+	Also cleaned up the XIM code to fit with the rest of Eterm.
+	
+-------------------------------------------------------------------------------

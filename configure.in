@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE(Eterm, 0.9)
 dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
-AUTHORS="Tuomo Venalainen (vendu@cc.hut.fi) and Michael Jennings (mej@eterm.org)"
+AUTHORS="Michael Jennings (mej@eterm.org) and Tuomo Venäläinen (vendu@cc.hut.fi) "
 AC_SUBST(AUTHORS)
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
