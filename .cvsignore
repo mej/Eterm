@@ -19,3 +19,4 @@ missing
 mkinstalldirs
 install-sh
 Eterm*.tar.gz
+*.sddf
