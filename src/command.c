@@ -51,6 +51,9 @@ static const char cvs_ident[] = "$Id$";
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <limits.h>
 
@@ -106,8 +109,6 @@ static const char cvs_ident[] = "$Id$";
 #if defined(linux)
 # include <string.h>		/* For strsep(). -vendu */
 #endif
-/* I don't know why this doesn't seem to grab setresgid -mandrake */
-#include <unistd.h>
 
 /* Eterm-specific Headers */
 #include "command.h"
@@ -132,14 +133,6 @@ static const char cvs_ident[] = "$Id$";
 # include "eterm_utmp.h"
 #endif
 #include "windows.h"
-
-#ifdef HAVE_SETRESGID
-int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
-#endif
-
-#ifdef HAVE_SETRESUID
-int setresuid(uid_t ruid, uid_t euid, uid_t suid);
-#endif
 
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;

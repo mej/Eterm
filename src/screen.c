@@ -1521,6 +1521,7 @@ set_multichar_encoding(const char *str)
     }
   }
 #else
+  return;
   str = NULL;
 #endif /* MULTI_CHARSET */
 }
@@ -1923,7 +1924,7 @@ scr_refresh(int type)
 #endif
 	  /* single stepping - `normal' mode */
 	  for (; ++col < ncols - 1;) {
-	    if ((unsigned int)rend != srp[col])
+	    if ((unsigned int) rend != srp[col])
 	      break;
 	    if ((stp[col] == dtp[col]) && (srp[col] == drp[col]))
 	      break;
@@ -3072,11 +3073,11 @@ mouse_report(XButtonEvent * ev)
 void
 mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
 {
-	report = 0;
-	x = 0;
-	y = 0;
-	firstrow = 0;
-	lastrow = 0;
+  report = 0;
+  x = 0;
+  y = 0;
+  firstrow = 0;
+  lastrow = 0;
 /* TODO */
 }
 
@@ -3086,8 +3087,8 @@ mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
 void
 debug_PasteIt(unsigned char *data, int nitems)
 {
-	data = NULL;
-	nitems = 0;
+  data = NULL;
+  nitems = 0;
 /* TODO */
 }
 

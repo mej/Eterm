@@ -184,7 +184,7 @@ memrec_dump(void)
     memset(buff, 0, 9);
     memcpy(buff, ptr + j, l);
     for (k = 0; k < l; k++) {
-      fprintf(stderr, "%02.2X ", buff[k]);
+      fprintf(stderr, "%02x ", buff[k]);
     }
     for (; k < 8; k++) {
       fprintf(stderr, "   ");
@@ -198,7 +198,7 @@ memrec_dump(void)
     memset(buff, 0, 9);
     memcpy(buff, ptr + j, l);
     for (k = 0; k < l; k++) {
-      fprintf(stderr, "%02.2X ", buff[k]);
+      fprintf(stderr, "%02x ", buff[k]);
     }
     for (; k < 8; k++) {
       fprintf(stderr, "   ");
@@ -214,7 +214,7 @@ memrec_dump(void)
       memset(buff, 0, 9);
       memcpy(buff, ptr + j, l);
       for (k = 0; k < l; k++) {
-	fprintf(stderr, "%02.2X ", buff[k]);
+	fprintf(stderr, "%02x ", buff[k]);
       }
       for (; k < 8; k++) {
 	fprintf(stderr, "   ");

@@ -2587,25 +2587,40 @@ Tue Oct 12 16:24:20 PDT 1999	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
-Mon Oct 18 19:33:26 PDT 1999    Mandrake <mandrake@mandrake.net>
+Mon Oct 18 19:33:26 PDT 1999	Mandrake <mandrake@mandrake.net>
 
 	Warnings begone!
 	Eterm/src/command.c still has two warnings but I don't know why
-	I didn't get rid fo them.  there are still warnings in
+	I didn't get rid of them.  there are still warnings in
 	Esetroot.c and in Etbg, but I'll fix those later.
 
 -------------------------------------------------------------------------------
-
-Mon Oct 18 23:59:17 PDT 1999    Mandrake <mandrake@mandrake.net>
+Mon Oct 18 23:59:17 PDT 1999	Mandrake <mandrake@mandrake.net>
 
 	More warning bashing in Esetroot.c
 
 -------------------------------------------------------------------------------
-
-Tue Oct 19 00:13:17 PDT 1999    Mandrake <mandrake@mandrake.net>
+Tue Oct 19 00:13:17 PDT 1999	Mandrake <mandrake@mandrake.net>
 
 	Almost all the warnings are gone.  only 3 remain on my system at home.
 	two in command.c (where do I get proper prototypes for grantpt() and
 	unlockpt()?) and one in options.c that is bizarre:
-	options.c:3433: warning: `%x' yields only last 2 digits of year in some
-	locales
+	options.c:3433: warning: `%x' yields only last 2 digits of year in
+	some locales
+	
+-------------------------------------------------------------------------------
+Tue Oct 19 16:34:51 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	This should get rid of all the warnings.  If you're running Linux and
+	get warnings about setresuid, setresgid, grantpt, and unlockpt not
+	having prototypes, feel free to add the following lines to your copy
+	of /usr/include/unistd.h:
+	
+	/* Linux- and HP-UX-only setres?id() calls -- mej */
+	extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+	extern int setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+	/* SVR4 PTY functions */
+	extern int grantpt(int fd);
+	extern int unlockpt(int fd);
+
+-------------------------------------------------------------------------------

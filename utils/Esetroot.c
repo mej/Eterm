@@ -23,6 +23,8 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xos.h>
 #include <Imlib.h>
 
+void set_pixmap_property(Pixmap p);
+
 Display *Xdisplay;
 Screen *scr;
 Window Xroot;
@@ -31,7 +33,6 @@ unsigned char debug = 0;
 
 #define Xdepth	 (DefaultDepth(Xdisplay, screen))
 
-void set_pixmap_property(Pixmap p);
 void
 set_pixmap_property(Pixmap p)
 {
