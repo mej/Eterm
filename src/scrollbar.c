@@ -563,8 +563,9 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
       imlib_t *iml = images[image_st].current->iml, *siml = images[image_sa].current->iml;
 
       if (image_mode_is(image_st, MODE_IMAGE) && iml->im) {
-        tw = iml->im->rgb_width;
-        th = iml->im->rgb_height;
+        imlib_context_set_image(iml->im);
+        tw = imlib_image_get_width();
+        th = imlib_image_get_height();
       } else if (siml->bevel) {
         tw = scrollbar_anchor_width() - (siml->bevel->edges->left + siml->bevel->edges->right);
         th = scrollbar_anchor_width() - (siml->bevel->edges->top + siml->bevel->edges->bottom);

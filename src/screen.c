@@ -10,6 +10,7 @@ static const char cvs_ident[] = "$Id$";
 
 /* includes */
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -21,6 +22,7 @@ static const char cvs_ident[] = "$Id$";
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#include <fcntl.h>
 #include <errno.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>		/* CARD32 */

@@ -3431,3 +3431,50 @@ Wed Apr  5 21:48:39 PDT 2000	Michael Jennings <mej@eterm.org>
 	Hopefully this will make more people happy. :-)
 	
 -------------------------------------------------------------------------------
+Wed Apr 12 21:18:19 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	This is the initial commit with Imlib2 support.  READ THIS CAREFULLY.
+	There is important information in this commit message that will keep
+	you from getting screwed.
+
+	First off, support for Imlib 1.x is GONE.  It is no longer supported
+	as of now.  If you want to continue using it, do NOT install this
+	version.  I tried to support both for awhile, but the code ended up
+	being way too ugly and hackish.  Imlib2 is the future.  And trust me,
+	when you see what we do with this future, you'll be happy for the
+	switch.
+
+	The good news is that most of the basics work.  Transparency still
+	works, and the basic image stuff works.  Most users won't notice any
+	major problems, so long as your Imlib2 is 100% up-to-date.
+
+	However, a few things still don't work:
+
+	1.  Auto mode is a bit broken.  You'll get X errors in XFree86 4.0.
+	Don't use it if you're running XFree 4.
+
+	2.  Color modifiers for images don't work.  At all.
+
+	3.  Transparency shading/tinting will not work in 8bpp or lower.  Life
+	blows sometimes.  Sorry.  Time for a real video card. :-)
+
+	4.  The built-in icon is broken.
+
+	5.  You WILL need to update your theme.cfg files.  The borders on the
+	horizontal and vertical bar images were incorrect when combined with
+	the new anti-aliased scaling.  The horizontal bars should have a right
+	border of 3.  Vertical bars should have a bottom border of 3.  The
+	menu images should have both right *and* bottom borders of 3.  You can
+	either make those changes by hand, or use the --with-theme-update
+	option to autogen.sh.  Your call.
+
+	I think that covers everything I've run into.  I will point out that
+	I don't really take advantage of a lot of the Imlib2 features just
+	yet.  My first priority is to make all the stuff that worked before
+	work again (or at least the important stuff).  Then I'll work on
+	new features.
+
+	So there it is.  If you're not ready for it, don't use it.  But if you
+	are, I hope you like it.
+	
+-------------------------------------------------------------------------------

@@ -278,26 +278,33 @@ AC_ARG_WITH(imlib,
 [  --with-imlib[=DIR]      compile with Imlib support (Imlib residing in DIR/lib) (default)],
             if test "$withval" != "no"; then 
               AC_MSG_RESULT(yes)
-              CFLAGS="$CFLAGS -I${withval}/include -L${withval}/lib"
-              GRLIBS="-lImlib"
-              AC_DEFINE(PIXMAP_SUPPORT)
-              AC_DEFINE(BACKING_STORE)
+              if test "$withval" != "yes"; then
+                CFLAGS="$CFLAGS -I${withval}/include"
+                LDFLAGS="$LDFLAGS -L${withval}/lib"
+              fi
+              USE_IMLIB=1
             else
               AC_MSG_RESULT(no)
               GRLIBS=""
+              USE_IMLIB=0
             fi, AC_MSG_RESULT(yes)
-                GRLIBS="-lImlib"
-                AC_DEFINE(PIXMAP_SUPPORT)
-                AC_DEFINE(BACKING_STORE)
+                USE_IMLIB=1
 )
+if test $USE_IMLIB -eq 1 ; then
+  AC_CHECK_LIB(Imlib2, imlib_create_image,
+               GRLIBS="-lImlib2"
+               AC_CHECK_LIB(dl, dlopen, GRLIBS="$GRLIBS -ldl", , $SUBLIBS $X_LIBS)
+               AC_DEFINE(PIXMAP_SUPPORT)
+               AC_DEFINE(BACKING_STORE)
+              ,
+              , $SUBLIBS $X_LIBS)
+
+fi
+
 AC_MSG_CHECKING(for transparency support)
 AC_ARG_ENABLE(trans,
-[  --enable-trans[=imlib]  compile with transparency support (\"=imlib\" will use Imlib instead of Xlib for transparency)],
-            if test "$enableval" = "imlib"; then 
-              AC_MSG_RESULT(yes, using Imlib)
-              AC_DEFINE(PIXMAP_OFFSET)
-              AC_DEFINE(IMLIB_TRANS)
-            elif test "$enableval" != "no"; then 
+[  --enable-trans          compile with transparency support],
+            if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
               AC_DEFINE(PIXMAP_OFFSET)
             else
@@ -518,7 +525,8 @@ AC_ARG_ENABLE(greek,
 CONFIG_BUFF_SIZE=20480
 AC_MSG_CHECKING(for the buffer size of the config file parser)
 AC_ARG_WITH(config-buffer-size,
-[  --config-buffer-size    specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)],
+[  --with-config-buffer-size
+                         specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)],
             if test "$withval" != "yes" -a "$withval" != "no"; then
               CONFIG_BUFF_SIZE=$withval
             fi)
@@ -527,9 +535,7 @@ AC_DEFINE_UNQUOTED(CONFIG_BUFF, $CONFIG_BUFF_SIZE)
 
 AC_ARG_WITH(terminfo,
 [  --without-terminfo      do not compile the Eterm terminfo file],
-            if test "$withval" = "yes"; then 
-              :
-            else
+            if test "$withval" = "no"; then 
               TIC=true
             fi)
 
@@ -593,61 +599,6 @@ fi
 # check X11R6 for XIM
 if test "$XIM" = "TRUE"; then
   AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM), , $X_LIBS $SUBLIBS)
-fi
-
-if test -z "$PIXMAPSED"; then
-
-  AC_CHECK_PROG(IMLIB_CONFIG, imlib-config, imlib-config, no)
-
-  if test "$IMLIB_CONFIG" != "no"; then
-
-    if test "$prefix" = "NONE"; then
-      AC_MSG_CHECKING(imlib-config for prefix)
-      prefix="`$IMLIB_CONFIG --prefix`"
-      AC_MSG_RESULT($prefix)
-    fi
-
-    AC_MSG_CHECKING(imlib-config for the value of CFLAGS)
-    CFLAGS="$CFLAGS `$IMLIB_CONFIG --cflags`"
-    AC_MSG_RESULT($CFLAGS)
-
-    AC_MSG_CHECKING(imlib-config for the value of GRLIBS)
-    GRLIBS="$GRLIBS `$IMLIB_CONFIG --libs`"
-    AC_MSG_RESULT($GRLIBS)
-
-    SAVE_LIBS="$LIBS"
-    LIBS="$GRLIBS"
-
-    AC_MSG_CHECKING(the sanity of new compile/link flags)
-    AC_TRY_LINK(, , echo "yes", echo "no" ; IMLIB_CONFIG="no" ; 
-                AC_WARN(Compile/link failed.  Reverting to manual method.)
-    )
-
-    LIBS="$SAVE_LIBS"
-
-  fi
-
-  if test "$IMLIB_CONFIG" = "no"; then
-
-    AC_CHECK_LIB(png, png_get_valid, GRLIBS="$GRLIBS -lpng -lz -lm", ,
-                 $SUBLIBS $X_LIBS -lz -lm)
-    AC_CHECK_LIB(jpeg, jpeg_read_scanlines, GRLIBS="$GRLIBS -ljpeg", ,
-                 $SUBLIBS $X_LIBS)
-    AC_CHECK_LIB(tiff, TIFFOpen, GRLIBS="$GRLIBS -ltiff", ,
-                 $SUBLIBS $X_LIBS -lm)
-    AC_CHECK_LIB(gif, DGifOpenFileName, GRLIBS="$GRLIBS -lgif", ,
-                 $SUBLIBS $X_LIBS)
-    AC_CHECK_LIB(ungif, DGifOpenFileName, GRLIBS="$GRLIBS -lungif", ,
-                 $SUBLIBS $X_LIBS)
-    AC_CHECK_LIB(Imlib, Imlib_init, , [
-                 echo "WARNING:  Imlib was not found or did not correctly link.";
-                 echo "          Please check config.log to see what the error was.";
-                 echo "          I will attempt to continue, but things may go wrong.";
-                 AC_MSG_WARN([WARNING:  libImlib not found.  Attempting to continue anyway.])],
-                 $GRLIBS $SUBLIBS $X_LIBS)
-
-  fi
-
 fi
 
 AC_PREFIX(Eterm)

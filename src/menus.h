@@ -25,7 +25,7 @@
 # define _MENUS_H
 
 # include <X11/Xfuncproto.h>
-# include <Imlib.h>
+# include <Imlib2.h>
 # include "events.h"
 # include "pixmap.h"
 

@@ -79,8 +79,6 @@ eterm_bootstrap(int argc, char *argv[])
   int i;
   char *val;
   static char windowid_string[20], *display_string, *term_string;	/* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
-  ImlibInitParams params;
-
   orig_argv0 = argv[0];
 
   /* Security enhancements -- mej */
@@ -90,6 +88,7 @@ eterm_bootstrap(int argc, char *argv[])
   my_rgid = getgid();
   my_egid = getegid();
   privileges(REVERT);
+  install_handlers();
 
   PABLO_START_TRACING();
   getcwd(initial_dir, PATH_MAX);
@@ -127,28 +126,12 @@ eterm_bootstrap(int argc, char *argv[])
   if (Options & Opt_install) {
     cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
     XInstallColormap(Xdisplay, cmap);
-#ifdef PIXMAP_SUPPORT
-    params.cmap = cmap;
-    params.flags = PARAMS_COLORMAP;
-#endif
   } else {
     cmap = Xcmap;
-#ifdef PIXMAP_SUPPORT
-    params.flags = 0;
-#endif
   }
-
-  /* Since we always use Imlib now, let's initialize it here. */
-#ifdef PIXMAP_SUPPORT
-  if (params.flags) {
-    imlib_id = Imlib_init_with_params(Xdisplay, &params);
-  } else {
-    imlib_id = Imlib_init(Xdisplay);
-  }
-  if (!imlib_id) {
-    fatal_error("Unable to initialize Imlib.  Aborting.");
-  }
-#endif
+  imlib_context_set_display(Xdisplay);
+  imlib_context_set_visual(Xvisual);
+  imlib_context_set_colormap(cmap);
 
   get_modifiers();  /* Set up modifier masks before parsing config files. */
 

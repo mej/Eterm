@@ -42,6 +42,17 @@ static const char cvs_ident[] = "$Id$";
 #include "misc.h"
 #include "system.h"
 
+static RETSIGTYPE dummy_handler(int);
+
+static sighandler_t old_handler = (sighandler_t) NULL;
+
+static RETSIGTYPE
+dummy_handler(int sig)
+{
+  signal(SIGCHLD, old_handler);
+  SIG_RETURN(0);
+}
+
 int
 wait_for_chld(int system_pid)
 {
@@ -88,6 +99,7 @@ system_wait(char *command)
 
   D_OPTIONS(("system_wait(%s) called.\n", command));
 
+  old_handler = signal(SIGCHLD, dummy_handler);
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
@@ -108,6 +120,7 @@ system_no_wait(char *command)
 
   D_OPTIONS(("system_no_wait(%s) called.\n", command));
 
+  old_handler = signal(SIGCHLD, dummy_handler);
   if (!(pid = fork())) {
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);

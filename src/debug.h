@@ -33,17 +33,28 @@
 
 extern unsigned int debug_level;
 
-/* Assert macros stolen from my work on Ebar.  If these macros break with your cpp, let me know -- mej@eterm.org */
+/* A NOP.  Does nothing. */
 # define NOP ((void)0)
 
+/* A macro and an #undef to FIXME-ize individual calls or entire code blocks. */
+# define FIXME_NOP(x)
+# undef FIXME_BLOCK
+
+/* The basic debugging output leader. */
 #if defined(__FILE__) && defined(__LINE__)
 # ifdef __GNUC__
 #  define __DEBUG()  fprintf(stderr, "[%lu] %12s | %4d: %s(): ", (unsigned long) time(NULL), __FILE__, __LINE__, __FUNCTION__)
 # else
 #  define __DEBUG()  fprintf(stderr, "[%lu] %12s | %4d: ", (unsigned long) time(NULL), __FILE__, __LINE__)
 # endif
+#else
+# define __DEBUG()   NOP
 #endif
 
+/* A quick and dirty macro to say, "Hi!  I got here without crashing!" */
+# define MOO()  do { __DEBUG(); fprintf(stderr, "Moo.\n"); fflush(stderr); } while (0)
+
+/* Assertion/abort macros which are quite a bit more useful than assert() and abort(). */
 #if defined(__FILE__) && defined(__LINE__)
 # ifdef __GNUC__
 #  define ASSERT(x)  do {if (!(x)) {if (debug_level>=1) {fatal_error("ASSERT failed in %s() at %s:%d:  %s", __FUNCTION__, __FILE__, __LINE__, #x);} \
@@ -80,10 +91,6 @@ extern unsigned int debug_level;
 # define ASSERT_NOTREACHED()       return
 # define ASSERT_NOTREACHED_RVAL(x) return (x)
 # define ABORT() fatal_error("Aborting.")
-#endif
-
-#ifndef __DEBUG
-# define __DEBUG()		NOP
 #endif
 
 #define REQUIRE(x) do {if (!(x)) {if (debug_level>=1) {__DEBUG(); real_dprintf("REQUIRE failed:  %s\n", #x);} return;}} while (0)

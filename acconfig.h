@@ -330,6 +330,7 @@
 #undef KS_END
 #undef CONFIG_BUFF
 #undef PKGDATADIR
+#undef HAVE_LIBIMLIB2
 
 
 /* Leave that blank line there!!  Autoheader needs it.

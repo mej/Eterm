@@ -21,7 +21,7 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xos.h>
-#include <Imlib.h>
+#include <Imlib2.h>
 
 void set_pixmap_property(Pixmap p);
 
@@ -96,9 +96,7 @@ main(int argc, char *argv[])
   unsigned char scale = 0, center = 0, fit = 0;
   char *displayname = NULL;
   char *fname = NULL;
-  ImlibData *id;
-  ImlibImage *im;
-  ImlibInitParams params;
+  Imlib_Image im;
   Pixmap p, temp_pmap;
   register unsigned char i;
   GC gc;
@@ -166,28 +164,22 @@ main(int argc, char *argv[])
     fprintf(stderr, "%s:%d:  Root window is 0x%08x\n", __FILE__, __LINE__, (unsigned int) Xroot);
     fprintf(stderr, "%s:%d:  Found screen information at %8p\n", __FILE__, __LINE__, scr);
   }
-  params.flags = PARAMS_VISUALID;
-  params.visualid = (DefaultVisual(Xdisplay, screen))->visualid;
-  id = Imlib_init_with_params(Xdisplay, &params);
-  if (id == NULL) {
-    fprintf(stderr, "%s:  Unable to initialize Imlib.\n", *argv);
-    exit(1);
-  } else if (debug) {
-    fprintf(stderr, "%s:%d:  The Imlib Data is at %8p\n", __FILE__, __LINE__, id);
-  }
-  im = Imlib_load_image(id, fname);
+  imlib_context_set_display(Xdisplay);
+  imlib_context_set_visual(DefaultVisual(Xdisplay, DefaultScreen(Xdisplay)));
+  im = imlib_load_image(fname);
   if (im == NULL) {
     fprintf(stderr, "%s:  Unable to load image file \"%s\".\n", *argv, fname);
     exit(1);
   } else if (debug) {
     fprintf(stderr, "%s:%d:  The Imlib Image is at %8p\n", __FILE__, __LINE__, im);
   }
+  imlib_context_set_image(im);
   if (scale) {
     w = scr->width;
     h = scr->height;
   } else {
-    w = im->rgb_width;
-    h = im->rgb_height;
+    w = imlib_image_get_width();
+    h = imlib_image_get_height();
   }
   if (fit) {
     double x_ratio, y_ratio;
@@ -219,8 +211,10 @@ main(int argc, char *argv[])
     fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y, (unsigned int) p);
     fprintf(stderr, "%s:%d:  Applied Graphics Context %8p to pixmap.\n", __FILE__, __LINE__, gc);
   }
-  Imlib_render(id, im, w, h);
-  temp_pmap = Imlib_move_image(id, im);
+  imlib_context_set_anti_alias(1);
+  imlib_context_set_dither(1);
+  imlib_context_set_blend(0);
+  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, NULL, 0, w, h);
   if (debug) {
     fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, (unsigned int) temp_pmap);
   }

@@ -132,6 +132,10 @@ static const char cvs_ident[] = "$Id$";
 #endif
 #include "windows.h"
 
+static RETSIGTYPE handle_child_signal(int);
+static RETSIGTYPE handle_exit_signal(int);
+static RETSIGTYPE handle_crash(int);
+
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;
 char initial_dir[PATH_MAX + 1];
@@ -247,11 +251,6 @@ privileges(int mode)
 char *
 sig_to_str(int sig)
 {
-
-  /* NOTE: This can't be done with a switch because of possible conflicting
-   * conflicting signal types. -vendu
-   */
-
 #ifdef SIGHUP
   if (sig == SIGHUP) {
     return ("SIGHUP");
@@ -1012,8 +1011,8 @@ dump_stack_trace(void)
 /*
  * Catch a SIGCHLD signal and exit if the direct child has died
  */
-RETSIGTYPE
-Child_signal(int sig)
+static RETSIGTYPE
+handle_child_signal(int sig)
 {
 
   int pid, save_errno = errno;
@@ -1043,15 +1042,15 @@ Child_signal(int sig)
   }
   errno = save_errno;
 
-  D_CMD(("Child_signal: installing signal handler\n"));
-  signal(SIGCHLD, Child_signal);
+  D_CMD(("handle_child_signal: installing signal handler\n"));
+  signal(SIGCHLD, handle_child_signal);
 
   SIG_RETURN(0);
 }
 
 /* Handles signals usually sent by a user, like HUP, TERM, INT. */
-RETSIGTYPE
-Exit_signal(int sig)
+static RETSIGTYPE
+handle_exit_signal(int sig)
 {
 
   print_error("Received terminal signal %s (%d)", sig_to_str(sig), sig);
@@ -1070,7 +1069,7 @@ Exit_signal(int sig)
 
 /* Handles abnormal termination signals -- mej */
 static RETSIGTYPE
-SegvHandler(int sig)
+handle_crash(int sig)
 {
 
   print_error("Received terminal signal %s (%d)", sig_to_str(sig), sig);
@@ -1086,6 +1085,24 @@ SegvHandler(int sig)
   /* Exit */
   exit(sig);
   SIG_RETURN(0);
+}
+
+void
+install_handlers(void)
+{
+  signal(SIGHUP, handle_exit_signal);
+#ifndef __svr4__
+  signal(SIGINT, handle_exit_signal);
+#endif
+  signal(SIGQUIT, handle_crash);
+  signal(SIGTERM, handle_exit_signal);
+  signal(SIGCHLD, handle_child_signal);
+  signal(SIGSEGV, handle_crash);
+  signal(SIGBUS, handle_crash);
+  signal(SIGABRT, handle_crash);
+  signal(SIGFPE, handle_crash);
+  signal(SIGILL, handle_crash);
+  signal(SIGSYS, handle_crash);
 }
 
 /*
@@ -1116,6 +1133,7 @@ clean_exit(void)
 #endif
   privileges(REVERT);
   PABLO_STOP_TRACING();
+  DPRINTF1(("Cleanup done.  I am outta here!\n"));
 }
 
 /* Acquire a pseudo-teletype from the system. */
@@ -2062,24 +2080,6 @@ run_command(char *argv[])
   }
 #endif
 
-  /* spin off the command interpreter */
-  signal(SIGHUP, Exit_signal);
-#ifndef __svr4__
-  signal(SIGINT, Exit_signal);
-#endif
-  signal(SIGQUIT, SegvHandler);
-  signal(SIGTERM, Exit_signal);
-  signal(SIGCHLD, Child_signal);
-  signal(SIGSEGV, SegvHandler);
-  signal(SIGBUS, SegvHandler);
-  signal(SIGABRT, SegvHandler);
-  signal(SIGFPE, SegvHandler);
-  signal(SIGILL, SegvHandler);
-  signal(SIGSYS, SegvHandler);
-
-  /* need to trap SIGURG for SVR4 (Unixware) rlogin */
-  /* signal (SIGURG, SIG_DFL); */
-
   D_CMD(("Forking\n"));
   cmd_pid = fork();
   D_CMD(("After fork(), cmd_pid == %d\n", cmd_pid));
@@ -2343,7 +2343,8 @@ check_pixmap_change(int sig)
   D_PIXMAP(("now %lu >= %lu (last_update %lu + rs_anim_delay %lu) ?\n", now, last_update + rs_anim_delay, last_update, rs_anim_delay));
   if (now >= last_update + rs_anim_delay || 1) {
     D_PIXMAP(("Time to update pixmap.  now == %lu\n", now));
-    Imlib_destroy_image(imlib_id, images[image_bg].current->iml->im);
+    imlib_context_set_image(images[image_bg].current->iml->im);
+    imlib_free_image_and_decache();
     images[image_bg].current->iml->im = NULL;
     xterm_seq(XTerm_Pixmap, rs_anim_pixmaps[image_idx++]);
     last_update = now;

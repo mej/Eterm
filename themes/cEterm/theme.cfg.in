@@ -147,7 +147,7 @@ begin main
       file bar_vertical_3.png
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
       geom :scale
-      border 2 2 2 2
+      border 2 2 2 3
     end image
     begin image
       type anchor
@@ -156,11 +156,11 @@ begin main
       color black #666666
       file bar_vertical_1.png
       geom :scale
-      border 2 2 2 2
+      border 2 2 2 3
       state selected
       file bar_vertical_2.png
       geom :scale
-      border 2 2 2 2
+      border 2 2 2 3
     end image
     begin image
       type thumb
@@ -216,11 +216,11 @@ begin main
       color black #999999
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 3
       state selected
       file bar_horizontal_2.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 3
     end image
     begin image
       type submenu
@@ -249,11 +249,11 @@ begin main
       color black #999999
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 2
       state disabled
       color white #333333
       cmod image 0xc0
-      border 2 2 2 2
+      border 2 3 2 2
     end image
     begin image
       type button
@@ -262,15 +262,15 @@ begin main
       color black #cccccc
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 2
       state selected
       file bar_horizontal_2.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 2
       state clicked
       file bar_horizontal_3.png
       geom 100x100+0+0:scale
-      border 2 2 2 2
+      border 2 3 2 2
     end image
   end
 

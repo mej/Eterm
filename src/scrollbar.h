@@ -26,7 +26,7 @@
 
 #include <X11/Xfuncproto.h>
 #include <ctype.h>
-#include <Imlib.h>
+#include <Imlib2.h>
 #include "events.h"
 
 /************ Macros and Definitions ************/

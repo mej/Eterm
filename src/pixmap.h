@@ -25,7 +25,7 @@
 # define _PIXMAP_H
 
 #include <X11/Xatom.h>
-#include <Imlib.h>
+#include <Imlib2.h>
 
 #include "misc.h"
 
@@ -37,8 +37,9 @@
 # define background_is_auto() (images[image_bg].mode & MODE_AUTO)
 # define background_is_pixmap() (background_is_image() || background_is_trans() || background_is_viewport() || background_is_auto())
 # define delete_simage(simg) do { \
-                               Imlib_free_pixmap(imlib_id, (simg)->pmap->pixmap); \
-                               Imlib_destroy_image(imlib_id, (simg)->iml->im); \
+                               imlib_free_pixmap_and_mask((simg)->pmap->pixmap); \
+                               imlib_context_set_image((simg)->iml->im); \
+                               imlib_free_image_and_decache(); \
                                (simg)->pmap->pixmap = None; (simg)->iml->im = NULL; \
                              } while (0)
 # define CONVERT_SHADE(s) (0xff - (((s) * 0xff) / 100))
@@ -150,14 +151,18 @@ typedef struct {
   Pixmap mask;
 } pixmap_t;
 typedef struct {
-  ImlibBorder *edges;
+  Imlib_Border *edges;
   unsigned char up;
 } bevel_t;
+typedef struct cmod_struct {
+  unsigned short gamma, brightness, contrast;
+} colormod_t;
 typedef struct {
-  ImlibImage *im;
-  ImlibBorder *border, *pad;
+  Imlib_Image im;
+  Imlib_Border *border, *pad;
   bevel_t *bevel;
-  ImlibColorModifier *mod, *rmod, *gmod, *bmod;
+  colormod_t *mod, *rmod, *gmod, *bmod;
+  Imlib_Color_Modifier imod, cmod;
   short last_w, last_h;
 } imlib_t;
 typedef struct {
@@ -174,7 +179,6 @@ typedef short renderop_t;
 
 /************ Variables ************/
 extern image_t images[image_max];
-extern ImlibData *imlib_id;
 extern Pixmap desktop_pixmap, viewport_pixmap, buffer_pixmap;
 extern Window desktop_window;
 
@@ -210,10 +214,6 @@ extern Pixmap get_desktop_pixmap(void);
 #endif
 extern void shaped_window_apply_mask(Drawable, Pixmap);
 extern void set_icon_pixmap(char *, XWMHints *);
-#ifdef USE_EFFECTS
-extern int fade_in(ImlibImage *, int);
-extern int fade_out(ImlibImage *, int);
-#endif
 
 _XFUNCPROTOEND
 

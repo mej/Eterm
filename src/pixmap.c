@@ -31,13 +31,17 @@ static const char cvs_ident[] = "$Id$";
 #include <sys/stat.h>
 #include <errno.h>
 #include <unistd.h>
-#include <Imlib.h>
+#ifdef HAVE_X_SHAPE_EXT
+# include <X11/X.h>
+# include <X11/Xlib.h>
+# include <X11/Xutil.h>
+# include <X11/extensions/shape.h>
+#endif
 
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "e.h"
-#include "icon.h"
 #include "startup.h"
 #include "menus.h"
 #include "options.h"
@@ -48,14 +52,13 @@ static const char cvs_ident[] = "$Id$";
 #include "windows.h"
 
 #ifdef PIXMAP_SUPPORT
-static ImlibBorder bord_none = { 0, 0, 0, 0 };
-static ImlibColorModifier cmod_none = { 256, 256, 256 };
+static Imlib_Border bord_none = { 0, 0, 0, 0 };
+static colormod_t cmod_none = { 256, 256, 256 };
 
 Pixmap desktop_pixmap = None, viewport_pixmap = None;
 Pixmap buffer_pixmap = None;
 Window desktop_window = None;
 unsigned char desktop_pixmap_is_mine = 0;
-ImlibData *imlib_id = NULL;
 image_t images[image_max] =
 {
   {None, 0, 0, NULL, NULL, NULL, NULL, NULL},
@@ -346,15 +349,13 @@ reset_simage(simage_t * simg, unsigned long mask)
   D_PIXMAP(("reset_simage(%8p, 0x%08x)\n", simg, mask));
 
   if ((mask & RESET_IMLIB_IM) && simg->iml->im) {
-    Imlib_destroy_image(imlib_id, simg->iml->im);
+    imlib_context_set_image(simg->iml->im);
+    imlib_free_image_and_decache();
     simg->iml->im = NULL;
   }
-  if ((mask & RESET_PMAP_PIXMAP) && simg->pmap->pixmap != None) {
-    Imlib_free_pixmap(imlib_id, simg->pmap->pixmap);
+  if (((mask & RESET_PMAP_PIXMAP) && simg->pmap->pixmap != None) || ((mask & RESET_PMAP_MASK) && simg->pmap->mask != None)) {
+    imlib_free_pixmap_and_mask(simg->pmap->pixmap);
     simg->pmap->pixmap = None;
-  }
-  if ((mask & RESET_PMAP_MASK) && simg->pmap->mask != None) {
-    Imlib_free_pixmap(imlib_id, simg->pmap->mask);
     simg->pmap->mask = None;
   }
   if ((mask & RESET_IMLIB_BORDER) && simg->iml->border) {
@@ -495,7 +496,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     if (simg->iml->bevel != NULL) {
       D_PIXMAP(("Beveling pixmap 0x%08x with edges %d, %d, %d, %d\n", p, simg->iml->bevel->edges->left, simg->iml->bevel->edges->top,
                 simg->iml->bevel->edges->right, simg->iml->bevel->edges->bottom));
-      Imlib_bevel_pixmap(imlib_id, p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
+      FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)  /* Need to write this */
     }
   }
   XFreeGC(Xdisplay, gc);
@@ -509,7 +510,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
   Window dummy;
   unsigned int pw, ph, pb, pd;
   int px, py;
-  Pixmap p = None;
+  Pixmap p = None, mask = None;
   GC gc;
   Screen *scr;
 
@@ -528,13 +529,20 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
   if (viewport_pixmap == None) {
     imlib_t *tmp_iml = images[image_bg].current->iml;
 
-    xsize = tmp_iml->im->rgb_width;
-    ysize = tmp_iml->im->rgb_height;
+    imlib_context_set_image(tmp_iml->im);
+    imlib_context_set_drawable(d);
+    imlib_image_set_has_alpha(0);
+    imlib_context_set_anti_alias(1);
+    imlib_context_set_dither(1);
+    imlib_context_set_blend(0);
+    xsize = imlib_image_get_width();
+    ysize = imlib_image_get_height();
     if (tmp_iml->border) {
-      Imlib_set_image_border(imlib_id, tmp_iml->im, tmp_iml->border);
+      imlib_image_set_border(tmp_iml->border);
     } else {
-      Imlib_set_image_border(imlib_id, tmp_iml->im, &bord_none);
+      imlib_image_set_border(&bord_none);
     }
+#ifdef FIXME_BLOCK
     if (tmp_iml->mod) {
       Imlib_set_image_modifier(imlib_id, tmp_iml->im, tmp_iml->mod);
     } else {
@@ -555,14 +563,14 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
     } else {
       Imlib_set_image_blue_modifier(imlib_id, tmp_iml->im, &cmod_none);
     }
+#endif
     if ((images[image_bg].current->pmap->w > 0) || (images[image_bg].current->pmap->op & OP_SCALE)) {
       D_PIXMAP(("Scaling image to %dx%d\n", scr->width, scr->height));
-      Imlib_render(imlib_id, tmp_iml->im, scr->width, scr->height);
+      imlib_render_pixmaps_for_whole_image_at_size(&viewport_pixmap, &mask, 0, scr->width, scr->height);
     } else {
       D_PIXMAP(("Tiling image at %dx%d\n", xsize, ysize));
-      Imlib_render(imlib_id, tmp_iml->im, xsize, ysize);
+      imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask, 0);
     }
-    viewport_pixmap = Imlib_copy_image(imlib_id, tmp_iml->im);
     D_PIXMAP(("Created viewport_pixmap == 0x%08x\n", viewport_pixmap));
   } else {
     XGetGeometry(Xdisplay, viewport_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
@@ -572,7 +580,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
   if (simg->pmap->pixmap != None) {
     XGetGeometry(Xdisplay, simg->pmap->pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
     if (pw != width || ph != height) {
-      Imlib_free_pixmap(imlib_id, simg->pmap->pixmap);
+      imlib_free_pixmap_and_mask(simg->pmap->pixmap);
       simg->pmap->pixmap = None;
     } else {
       p = simg->pmap->pixmap;
@@ -600,6 +608,8 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
 void
 paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
+  Pixmap pmap = None, mask = None;
+  GC gc;
 
   ASSERT(simg != NULL);
   REQUIRE(d != None);
@@ -610,7 +620,6 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     if (image_mode_is(which, MODE_AUTO) && image_mode_is(which, ALLOW_AUTO)) {
       char buff[255], *reply;
       const char *iclass, *state;
-      Pixmap pmap, mask;
 
       check_image_ipc(0);
       if (image_mode_is(which, MODE_AUTO)) {
@@ -632,10 +641,6 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
             image_mode_fallback(which);
             FREE(reply);
           } else {
-            GC gc;
-            XGCValues gcvalues;
-
-            gc = XCreateGC(Xdisplay, d, 0, &gcvalues);
             pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
             mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
             FREE(reply);
@@ -644,6 +649,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
               if (mask) {
                 shaped_window_apply_mask(pmap, mask);
               }
+              gc = XCreateGC(Xdisplay, d, 0, NULL);
               XSetClipMask(Xdisplay, gc, mask);
               XSetClipOrigin(Xdisplay, gc, x, y);
               XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
@@ -661,35 +667,41 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       }
     } else if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
       Pixmap p;
-      GC gc;
 
       gc = XCreateGC(Xdisplay, d, 0, NULL);
       p = create_trans_pixmap(simg, which, d, x, y, w, h);
       if (simg->iml->bevel != NULL) {
-        Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
+        FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);)
       }
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
       XFreePixmap(Xdisplay, p);
+      XFreeGC(Xdisplay, gc);
     } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
       Pixmap p;
-      GC gc;
 
       gc = XCreateGC(Xdisplay, d, 0, NULL);
       p = create_viewport_pixmap(simg, d, x, y, w, h);
       if (simg->iml->bevel != NULL) {
-        Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
+        FIXME_NOP(Imlib_bevel_pixmap(imlib_id, p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);)
       }
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
       XFreePixmap(Xdisplay, p);
+      XFreeGC(Xdisplay, gc);
     }
   }
 
   if ((which == image_max) || (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE))) {
+    imlib_context_set_image(simg->iml->im);
+    imlib_context_set_drawable(d);
+    imlib_context_set_anti_alias(1);
+    imlib_context_set_dither(1);
+    imlib_context_set_blend(0);
     if (simg->iml->border) {
-      Imlib_set_image_border(imlib_id, simg->iml->im, simg->iml->border);
+      imlib_image_set_border(simg->iml->border);
     } else {
-      Imlib_set_image_border(imlib_id, simg->iml->im, &bord_none);
+      imlib_image_set_border(&bord_none);
     }
+#ifdef FIXME_BLOCK
     if (simg->iml->mod) {
       Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
     } else {
@@ -710,7 +722,21 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     } else {
       Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, &cmod_none);
     }
-    Imlib_paste_image(imlib_id, simg->iml->im, (Window) d, x, y, w, h);
+#endif
+    if (w == imlib_image_get_width() && h == imlib_image_get_height()) {
+      imlib_render_pixmaps_for_whole_image(&pmap, &mask, 0);
+    } else {
+      imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, 0, w, h);
+    }
+    ASSERT(pmap != None);
+    gc = XCreateGC(Xdisplay, d, 0, NULL);
+    if (mask) {
+      XSetClipMask(Xdisplay, gc, mask);
+      XSetClipOrigin(Xdisplay, gc, x, y);
+    }
+    XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
+    imlib_free_pixmap_and_mask(pmap);
+    XFreeGC(Xdisplay, gc);
   }
 }
 
@@ -937,8 +963,13 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       int x = simg->pmap->x;
       int y = simg->pmap->y;
 
-      xsize = simg->iml->im->rgb_width;
-      ysize = simg->iml->im->rgb_height;
+      imlib_context_set_image(simg->iml->im);
+      imlib_context_set_drawable(win);
+      imlib_context_set_anti_alias(1);
+      imlib_context_set_dither(1);
+      imlib_context_set_blend(0);
+      xsize = imlib_image_get_width();
+      ysize = imlib_image_get_height();
       D_PIXMAP(("w == %d, h == %d, x == %d, y == %d, xsize == %d, ysize == %d\n", w, h, x, y, xsize, ysize));
 
       if ((simg->pmap->op & OP_PROPSCALE)) {
@@ -976,92 +1007,90 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       ypos = (short) ((height - yscaled) * ((float) y / 100.0));
       D_PIXMAP(("Calculated scaled size as %hux%hu with origin at (%hd, %hd)\n", xscaled, yscaled, xpos, ypos));
 
-      if (simg->iml->last_w != xscaled || simg->iml->last_h != yscaled || 1) {
-
-	simg->iml->last_w = xscaled;
-	simg->iml->last_h = yscaled;
-
-	if (simg->iml->border) {
-	  D_PIXMAP(("Setting image border:  { left [%d], right [%d], top [%d], bottom [%d] }\n",
-		    simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom));
-	  Imlib_set_image_border(imlib_id, simg->iml->im, simg->iml->border);
-	} else {
-	  Imlib_set_image_border(imlib_id, simg->iml->im, &bord_none);
-        }
-	if (simg->iml->mod) {
-	  D_PIXMAP(("Setting image modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-		    simg->iml->mod->gamma, simg->iml->mod->brightness, simg->iml->mod->contrast));
-	  Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
-	} else {
-	  Imlib_set_image_modifier(imlib_id, simg->iml->im, &cmod_none);
-        }
-	if (simg->iml->rmod) {
-	  D_PIXMAP(("Setting image red modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-		    simg->iml->rmod->gamma, simg->iml->rmod->brightness, simg->iml->rmod->contrast));
-	  Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
-	} else {
-	  Imlib_set_image_red_modifier(imlib_id, simg->iml->im, &cmod_none);
-        }
-	if (simg->iml->gmod) {
-	  D_PIXMAP(("Setting image green modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-		    simg->iml->gmod->gamma, simg->iml->gmod->brightness, simg->iml->gmod->contrast));
-	  Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
-	} else {
-	  Imlib_set_image_green_modifier(imlib_id, simg->iml->im, &cmod_none);
-        }
-	if (simg->iml->bmod) {
-	  D_PIXMAP(("Setting image blue modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
-		    simg->iml->bmod->gamma, simg->iml->bmod->brightness, simg->iml->bmod->contrast));
-	  Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
-	} else {
-	  Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, &cmod_none);
-        }
-	D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
-	Imlib_render(imlib_id, simg->iml->im, xscaled, yscaled);
-	rendered = 1;
+      if (simg->iml->border) {
+        D_PIXMAP(("Setting image border:  { left [%d], right [%d], top [%d], bottom [%d] }\n",
+                  simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom));
+        imlib_image_set_border(simg->iml->border);
+      } else {
+        imlib_image_set_border(&bord_none);
       }
-      simg->pmap->pixmap = Imlib_copy_image(imlib_id, simg->iml->im);
-      simg->pmap->mask = Imlib_copy_mask(imlib_id, simg->iml->im);
+#ifdef FIXME_BLOCK
+      if (simg->iml->mod) {
+        D_PIXMAP(("Setting image modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
+                  simg->iml->mod->gamma, simg->iml->mod->brightness, simg->iml->mod->contrast));
+        Imlib_set_image_modifier(imlib_id, simg->iml->im, simg->iml->mod);
+      } else {
+        Imlib_set_image_modifier(imlib_id, simg->iml->im, &cmod_none);
+      }
+      if (simg->iml->rmod) {
+        D_PIXMAP(("Setting image red modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
+                  simg->iml->rmod->gamma, simg->iml->rmod->brightness, simg->iml->rmod->contrast));
+        Imlib_set_image_red_modifier(imlib_id, simg->iml->im, simg->iml->rmod);
+      } else {
+        Imlib_set_image_red_modifier(imlib_id, simg->iml->im, &cmod_none);
+      }
+      if (simg->iml->gmod) {
+        D_PIXMAP(("Setting image green modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
+                  simg->iml->gmod->gamma, simg->iml->gmod->brightness, simg->iml->gmod->contrast));
+        Imlib_set_image_green_modifier(imlib_id, simg->iml->im, simg->iml->gmod);
+      } else {
+        Imlib_set_image_green_modifier(imlib_id, simg->iml->im, &cmod_none);
+      }
+      if (simg->iml->bmod) {
+        D_PIXMAP(("Setting image blue modifier:  { gamma [0x%08x], brightness [0x%08x], contrast [0x%08x] }\n",
+                  simg->iml->bmod->gamma, simg->iml->bmod->brightness, simg->iml->bmod->contrast));
+        Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
+      } else {
+        Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, &cmod_none);
+      }
+#endif
+      D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
+      imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, 0, xscaled, yscaled);
+      rendered = 1;
       if (simg->pmap->mask != None) {
 	shaped_window_apply_mask(win, simg->pmap->mask);
+      }
+      if (simg->pmap->pixmap != None) {
+        if (pixmap != None) {
+          imlib_free_pixmap_and_mask(pixmap);
+        }
+        if (xscaled != width || yscaled != height || xpos != 0 || ypos != 0) {
+          unsigned char single;
+
+          /* This tells us if we have a single, non-tiled image which does not entirely fill the window */
+          single = ((xscaled < width || yscaled < height) && !(simg->pmap->op & OP_TILE)) ? 1 : 0;
+
+          pixmap = simg->pmap->pixmap;
+          simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
+          if (single) {
+            XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
+          }
+          XSetTile(Xdisplay, gc, pixmap);
+          XSetTSOrigin(Xdisplay, gc, xpos, ypos);
+          XSetFillStyle(Xdisplay, gc, FillTiled);
+          if (single) {
+            XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, xscaled, yscaled, xpos, ypos);
+          } else {
+            XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
+          }
+          imlib_free_pixmap_and_mask(pixmap);
+        }
+        if (simg->iml->bevel != NULL) {
+          FIXME_NOP(Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)
+        }
+        D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
+        if ((which == image_bg) && (Options & Opt_double_buffer)) {
+          copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
+          XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
+        } else {
+          /* FIXME:  For efficiency, just fill the window with the pixmap
+             and handle exposes by copying from simg->pmap->pixmap. */
+          XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
+        }
       }
     } else {
       image_set_mode(which, MODE_SOLID);
       reset_simage(simg, RESET_ALL_SIMG);
-    }
-    if (simg->pmap->pixmap != None) {
-      if (pixmap != None) {
-	Imlib_free_pixmap(imlib_id, pixmap);
-      }
-      if (xscaled != width || yscaled != height || xpos != 0 || ypos != 0) {
-	unsigned char single;
-
-	single = ((xscaled < width || yscaled < height) && !(simg->pmap->op & OP_TILE)) ? 1 : 0;
-
-	pixmap = simg->pmap->pixmap;
-	simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
-	if (single)
-	  XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
-	XSetTile(Xdisplay, gc, pixmap);
-	XSetTSOrigin(Xdisplay, gc, xpos, ypos);
-	XSetFillStyle(Xdisplay, gc, FillTiled);
-	if (single) {
-	  XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, xscaled, yscaled, xpos, ypos);
-	} else {
-	  XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
-	}
-	Imlib_free_pixmap(imlib_id, pixmap);
-      }
-      if (simg->iml->bevel != NULL) {
-	Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
-      }
-      D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-      if ((which == image_bg) && (Options & Opt_double_buffer)) {
-        copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
-        XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
-      } else {
-        XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
-      }
     }
   }
 
@@ -1079,8 +1108,10 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
         XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
         if (simg->iml->bevel != NULL) {
-          Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
+          FIXME_NOP(Imlib_bevel_pixmap(imlib_id, simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);)
         }
+        /* FIXME:  For efficiency, just fill the window with the pixmap
+           and handle exposes by copying from simg->pmap->pixmap. */
         XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
       } else {
         XSetWindowBackground(Xdisplay, win, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
@@ -1202,7 +1233,7 @@ unsigned char
 load_image(const char *file, simage_t *simg)
 {
   const char *f;
-  ImlibImage *im;
+  Imlib_Image *im;
   char *geom;
 
   ASSERT_RVAL(file != NULL, 0);
@@ -1223,7 +1254,7 @@ load_image(const char *file, simage_t *simg)
       f = search_path(getenv(PATH_ENV), file, PIXMAP_EXT);
     }
     if (f != NULL) {
-      im = Imlib_load_image(imlib_id, (char *) f);
+      im = imlib_load_image(f);
       if (im == NULL) {
 	print_error("Unable to load image file \"%s\"", file);
 	return 0;
@@ -1260,9 +1291,11 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
   XImage *ximg;
   register unsigned long v, i;
   unsigned long x, y;
+#if 0
   int r, g, b;
+#endif
   unsigned short rm, gm, bm, shade;
-  ImlibColor ctab[256];
+  Imlib_Color ctab[256];
   int real_depth = 0;
   register int br, bg, bb;
   register unsigned int mr, mg, mb;
@@ -1305,10 +1338,9 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
     }
     XQueryColors(Xdisplay, cmap, cols, 1 << Xdepth);
     for (i = 0; i < (unsigned long) (1 << Xdepth); i++) {
-      ctab[i].r = cols[i].red >> 8;
-      ctab[i].g = cols[i].green >> 8;
-      ctab[i].b = cols[i].blue >> 8;
-      ctab[i].pixel = cols[i].pixel;
+      ctab[i].red = cols[i].red >> 8;
+      ctab[i].green = cols[i].green >> 8;
+      ctab[i].blue = cols[i].blue >> 8;
     }
   } else if (Xdepth == 16) {
 
@@ -1329,6 +1361,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
   }
   D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.\n", p, w, h, ximg));
   if (Xdepth <= 8) {
+#ifdef FIXME_BLOCK
     D_PIXMAP(("Rendering low-depth image, depth == %d\n", (int) Xdepth));
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
@@ -1340,6 +1373,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 	XPutPixel(ximg, x, y, v);
       }
     }
+#endif
   } else {
     D_PIXMAP(("Rendering high-depth image, depth == %d\n", real_depth));
     /* Determine bitshift and bitmask values */
@@ -1661,9 +1695,9 @@ shaped_window_apply_mask(Drawable d, Pixmap mask)
 void
 set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 {
-
+#ifdef FIXME_BLOCK
   const char *icon_path;
-  ImlibImage *temp_im;
+  Imlib_Image temp_im;
   XWMHints *wm_hints;
 
   if (pwm_hints) {
@@ -1680,7 +1714,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       XIconSize *icon_sizes;
       int count, i, w = 8, h = 8;  /* At least 8x8 */
 
-      temp_im = Imlib_load_image(imlib_id, (char *) icon_path);
+      temp_im = imlib_load_image(icon_path);
       /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
       if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {
 	for (i = 0; i < count; i++) {
@@ -1700,9 +1734,13 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       }
       MIN_IT(w, 64);
       MIN_IT(h, 64);
-      Imlib_render(imlib_id, temp_im, w, h);
-      wm_hints->icon_pixmap = Imlib_copy_image(imlib_id, temp_im);
-      wm_hints->icon_mask = Imlib_copy_mask(imlib_id, temp_im);
+      imlib_context_set_image(temp_im);
+      imlib_context_set_drawable(TermWin.parent);
+      imlib_image_set_has_alpha(0);
+      imlib_context_set_anti_alias(1);
+      imlib_context_set_dither(1);
+      imlib_context_set_blend(0);
+      imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, 0, w, h);
       if (check_for_enlightenment()) {
         wm_hints->flags |= IconPixmapHint | IconMaskHint;
       } else {
@@ -1711,7 +1749,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
         XSetWindowBackgroundPixmap(Xdisplay, wm_hints->icon_window, wm_hints->icon_pixmap);
         wm_hints->flags |= IconWindowHint;
       }
-      Imlib_destroy_image(imlib_id, temp_im);
+      imlib_free_image_and_decache();
     }
   } else {
     /* Use the default.  It's 48x48, so if the WM doesn't like it, tough cookies.  Pixmap -> ImlibImage -> Render -> Pixmap would be
@@ -1734,32 +1772,6 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
     XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
     XFree(wm_hints);
   }
+#endif
 }
-
-# ifdef USE_EFFECTS
-int
-fade_in(ImlibImage *img, int frames)
-{
-
-  static int i = 0;
-  register int f = frames;
-  ImlibColorModifier mod;
-  double gamma, brightness, contrast;
-
-  Imlib_get_image_modifier(imlib_id, img, &mod);
-
-  if (i < f) {
-    i++;
-    gamma = (double) mod.gamma / i;
-    brightness = (double) mod.brightness / i;
-    contrast = (double) mod.contrast / i;
-    Imlib_set_image_modifier(imlib_id, img, &mod);
-  } else if (i == f) {
-    i = 0;
-  }
-  /* how many frames to go */
-  return (f - i);
-}
-# endif				/* USE_EFFECTS */
-
 #endif /* PIXMAP_SUPPORT */

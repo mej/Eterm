@@ -137,7 +137,6 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
 {
 
   XColor xcol;
-  int r, g, b;
 
   xcol.pixel = norm_color;
   XQueryColor(Xdisplay, cmap, &xcol);
@@ -145,13 +144,9 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
   xcol.red /= 2;
   xcol.green /= 2;
   xcol.blue /= 2;
-  r = xcol.red;
-  g = xcol.green;
-  b = xcol.blue;
-  xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
 
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, r, g, b);
+    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
     xcol.pixel = PixColors[minColor];
   }
   return (xcol.pixel);
@@ -162,11 +157,9 @@ get_top_shadow_color(Pixel norm_color, const char *type)
 {
 
   XColor xcol, white;
-  int r, g, b;
 
 # ifdef PREFER_24BIT
   white.red = white.green = white.blue = r = g = b = ~0;
-  white.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
   XAllocColor(Xdisplay, cmap, &white);
 # else
   white.pixel = WhitePixel(Xdisplay, Xscreen);
@@ -183,13 +176,9 @@ get_top_shadow_color(Pixel norm_color, const char *type)
   xcol.red = MIN(white.red, (xcol.red * 7) / 5);
   xcol.green = MIN(white.green, (xcol.green * 7) / 5);
   xcol.blue = MIN(white.blue, (xcol.blue * 7) / 5);
-  r = xcol.red;
-  g = xcol.green;
-  b = xcol.blue;
-  xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
 
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, r, g, b);
+    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
     xcol.pixel = PixColors[WhiteColor];
   }
   return (xcol.pixel);
@@ -218,17 +207,6 @@ get_color_by_name(const char *name, const char *fallback)
     } else {
       return ((Pixel) -1);
     }
-  }
-  if (Xdepth < 24) {
-    int r, g, b;
-
-    r = xcol.red;
-    g = xcol.green;
-    b = xcol.blue;
-    xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
-    xcol.red = r;
-    xcol.green = g;
-    xcol.blue = b;
   }
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
     print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".",
@@ -259,17 +237,6 @@ get_color_by_pixel(Pixel pixel, Pixel fallback)
       print_warning("Unable to convert pixel value 0x%08x to an XColor structure.", xcol.pixel);
       return ((Pixel) 0);
     }
-  }
-  if (Xdepth < 24) {
-    int r, g, b;
-
-    r = xcol.red;
-    g = xcol.green;
-    b = xcol.blue;
-    xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
-    xcol.red = r;
-    xcol.green = g;
-    xcol.blue = b;
   }
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
     print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.", xcol.pixel, xcol.red, xcol.green, xcol.blue, fallback);
@@ -643,12 +610,9 @@ stored_palette(char op)
 void
 set_window_color(int idx, const char *color)
 {
-
   XColor xcol;
   int i;
-  unsigned int pixel, r, g, b;
 
-  printf("idx == %d, color == \"%s\"\n", idx, NONULL(color));
   D_X11(("idx == %d, color == \"%s\"\n", idx, NONULL(color)));
 
   if (color == NULL || *color == '\0')
@@ -673,11 +637,6 @@ set_window_color(int idx, const char *color)
       return;
     }
   } else if (XParseColor(Xdisplay, cmap, color, &xcol)) {
-    r = xcol.red;
-    g = xcol.green;
-    b = xcol.blue;
-    pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
-    xcol.pixel = pixel;
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
       print_warning("Unable to allocate \"%s\" in the color map.", color);
       return;

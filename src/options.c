@@ -499,11 +499,6 @@ version(void)
 #else
   printf(" -PIXMAP_OFFSET");
 #endif
-#ifdef IMLIB_TRANS
-  printf(" +IMLIB_TRANS");
-#else
-  printf(" -IMLIB_TRANS");
-#endif
 #ifdef BACKGROUND_CYCLING_SUPPORT
   printf(" +BACKGROUND_CYCLING_SUPPORT");
 #else
@@ -2742,7 +2737,7 @@ parse_image(char *buff, void *state)
     n = NumWords(mods);
 
     if (!BEG_STRCASECMP(color, "image ")) {
-      RESET_AND_ASSIGN(iml->mod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      RESET_AND_ASSIGN(iml->mod, (colormod_t *) MALLOC(sizeof(colormod_t)));
       iml->mod->contrast = iml->mod->gamma = 0xff;
       iml->mod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
@@ -2752,7 +2747,7 @@ parse_image(char *buff, void *state)
         iml->mod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
     } else if (!BEG_STRCASECMP(color, "red ")) {
-      RESET_AND_ASSIGN(iml->rmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      RESET_AND_ASSIGN(iml->rmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
       iml->rmod->contrast = iml->rmod->gamma = 0xff;
       iml->rmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
@@ -2762,7 +2757,7 @@ parse_image(char *buff, void *state)
         iml->rmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
     } else if (!BEG_STRCASECMP(color, "green ")) {
-      RESET_AND_ASSIGN(iml->gmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      RESET_AND_ASSIGN(iml->gmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
       iml->gmod->contrast = iml->gmod->gamma = 0xff;
       iml->gmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
@@ -2772,7 +2767,7 @@ parse_image(char *buff, void *state)
         iml->gmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
     } else if (!BEG_STRCASECMP(color, "blue ")) {
-      RESET_AND_ASSIGN(iml->bmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+      RESET_AND_ASSIGN(iml->bmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
       iml->bmod->contrast = iml->bmod->gamma = 0xff;
       iml->bmod->brightness = (int) strtol(mods, (char **) NULL, 0);
       if (n > 1) {
@@ -2795,7 +2790,7 @@ parse_image(char *buff, void *state)
       print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"", file_peek_path(), file_peek_line());
       return NULL;
     }
-    RESET_AND_ASSIGN(images[idx].current->iml->border, (ImlibBorder *) MALLOC(sizeof(ImlibBorder)));
+    RESET_AND_ASSIGN(images[idx].current->iml->border, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
 
     images[idx].current->iml->border->left = (unsigned short) strtoul(PWord(2, buff), (char **) NULL, 0);
     images[idx].current->iml->border->right = (unsigned short) strtoul(PWord(3, buff), (char **) NULL, 0);
@@ -2805,7 +2800,7 @@ parse_image(char *buff, void *state)
     if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
 	&& (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
       FREE(images[idx].current->iml->border);
-      images[idx].current->iml->border = (ImlibBorder *) NULL;	/* No sense in wasting CPU time and memory if there are no borders */
+      images[idx].current->iml->border = (Imlib_Border *) NULL;	/* No sense in wasting CPU time and memory if there are no borders */
     }
   } else if (!BEG_STRCASECMP(buff, "bevel ")) {
     if (idx < 0) {
@@ -2825,7 +2820,7 @@ parse_image(char *buff, void *state)
       FREE(images[idx].current->iml->bevel);
     }
     images[idx].current->iml->bevel = (bevel_t *) MALLOC(sizeof(bevel_t));
-    images[idx].current->iml->bevel->edges = (ImlibBorder *) MALLOC(sizeof(ImlibBorder));
+    images[idx].current->iml->bevel->edges = (Imlib_Border *) MALLOC(sizeof(Imlib_Border));
 
     if (!BEG_STRCASECMP(PWord(2, buff), "down")) {
       images[idx].current->iml->bevel->up = 0;
@@ -2840,7 +2835,7 @@ parse_image(char *buff, void *state)
     if ((images[idx].current->iml->bevel->edges->left == 0) && (images[idx].current->iml->bevel->edges->right == 0)
 	&& (images[idx].current->iml->bevel->edges->top == 0) && (images[idx].current->iml->bevel->edges->bottom == 0)) {
       FREE(images[idx].current->iml->bevel->edges);
-      images[idx].current->iml->bevel->edges = (ImlibBorder *) NULL;
+      images[idx].current->iml->bevel->edges = (Imlib_Border *) NULL;
       FREE(images[idx].current->iml->bevel);
       images[idx].current->iml->bevel = (bevel_t *) NULL;
     }
@@ -2857,7 +2852,7 @@ parse_image(char *buff, void *state)
       print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"", file_peek_path(), file_peek_line());
       return NULL;
     }
-    RESET_AND_ASSIGN(images[idx].current->iml->pad, (ImlibBorder *) MALLOC(sizeof(ImlibBorder)));
+    RESET_AND_ASSIGN(images[idx].current->iml->pad, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
 
     images[idx].current->iml->pad->left = (unsigned short) strtoul(PWord(2, buff), (char **) NULL, 0);
     images[idx].current->iml->pad->right = (unsigned short) strtoul(PWord(3, buff), (char **) NULL, 0);
@@ -2867,7 +2862,7 @@ parse_image(char *buff, void *state)
     if ((images[idx].current->iml->pad->left == 0) && (images[idx].current->iml->pad->right == 0)
 	&& (images[idx].current->iml->pad->top == 0) && (images[idx].current->iml->pad->bottom == 0)) {
       FREE(images[idx].current->iml->pad);
-      images[idx].current->iml->pad = (ImlibBorder *) NULL;
+      images[idx].current->iml->pad = (Imlib_Border *) NULL;
     }
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid "
@@ -3850,7 +3845,7 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_image);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->mod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    RESET_AND_ASSIGN(iml->mod, (colormod_t *) MALLOC(sizeof(colormod_t)));
     iml->mod->contrast = iml->mod->gamma = 0xff;
     iml->mod->brightness = (int) strtol(rs_cmod_image, (char **) NULL, 0);
     if (n > 1) {
@@ -3865,7 +3860,7 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_red);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->rmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    RESET_AND_ASSIGN(iml->rmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
     iml->rmod->contrast = iml->rmod->gamma = 0xff;
     iml->rmod->brightness = (int) strtol(rs_cmod_red, (char **) NULL, 0);
     if (n > 1) {
@@ -3880,7 +3875,7 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_green);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->gmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    RESET_AND_ASSIGN(iml->gmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
     iml->gmod->contrast = iml->gmod->gamma = 0xff;
     iml->gmod->brightness = (int) strtol(rs_cmod_green, (char **) NULL, 0);
     if (n > 1) {
@@ -3895,7 +3890,7 @@ post_parse(void)
     unsigned char n = NumWords(rs_cmod_blue);
     imlib_t *iml = images[image_bg].norm->iml;
 
-    RESET_AND_ASSIGN(iml->bmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
+    RESET_AND_ASSIGN(iml->bmod, (colormod_t *) MALLOC(sizeof(colormod_t)));
     iml->bmod->contrast = iml->bmod->gamma = 0xff;
     iml->bmod->brightness = (int) strtol(rs_cmod_blue, (char **) NULL, 0);
     if (n > 1) {
@@ -4208,12 +4203,15 @@ save_config(char *path, unsigned char save_theme)
 
       /* Now save each state. */
       simg = images[i].norm;
+      if (simg->iml->im) {
+        imlib_context_set_image(simg->iml->im);
+      }
       fprintf(fp, "      state normal\n");
       if (simg->fg || simg->bg) {
         fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
       }
       if (simg->iml->im) {
-        fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+        fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
       }
       fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
       if (simg->pmap->op & OP_TILE) {
@@ -4255,12 +4253,15 @@ save_config(char *path, unsigned char save_theme)
       /* Selected state */
       if (images[i].selected != images[i].norm) {
         simg = images[i].selected;
+        if (simg->iml->im) {
+          imlib_context_set_image(simg->iml->im);
+        }
         fprintf(fp, "      state selected\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
         if (simg->iml->im) {
-          fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+          fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
         fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
         if (simg->pmap->op & OP_TILE) {
@@ -4303,12 +4304,15 @@ save_config(char *path, unsigned char save_theme)
       /* Clicked state */
       if (images[i].clicked != images[i].norm) {
         simg = images[i].clicked;
+        if (simg->iml->im) {
+          imlib_context_set_image(simg->iml->im);
+        }
         fprintf(fp, "      state clicked\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
         if (simg->iml->im) {
-          fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+          fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
         fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
         if (simg->pmap->op & OP_TILE) {
@@ -4351,12 +4355,15 @@ save_config(char *path, unsigned char save_theme)
       /* Disabled state */
       if (images[i].disabled != images[i].norm) {
         simg = images[i].disabled;
+        if (simg->iml->im) {
+          imlib_context_set_image(simg->iml->im);
+        }
         fprintf(fp, "      state disabled\n");
         if (simg->fg || simg->bg) {
           fprintf(fp, "      color 0x%08x 0x%08x\n", (unsigned int) simg->fg, (unsigned int) simg->bg);
         }
         if (simg->iml->im) {
-          fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+          fprintf(fp, "      file %s\n", NONULL(imlib_image_get_filename()));
         }
         fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
         if (simg->pmap->op & OP_TILE) {

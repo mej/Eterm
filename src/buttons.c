@@ -274,7 +274,7 @@ unsigned short
 bbar_calc_height(buttonbar_t *bbar)
 {
   button_t *b;
-  ImlibBorder *bbord = images[image_bbar].norm->iml->border, *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bbord = images[image_bbar].norm->iml->border, *bord = images[image_button].norm->iml->border;
 
   D_BBAR(("bbar_calc_height(%8p):  fascent == %d, fdescent == %d, h == %d\n", bbar, bbar->fascent, bbar->fdescent, bbar->h));
 
@@ -321,7 +321,7 @@ bbar_calc_positions(buttonbar_t *bbar)
 {
   button_t *b;
   unsigned short x, y;
-  ImlibBorder *border = images[image_bbar].norm->iml->border;
+  Imlib_Border *border = images[image_bbar].norm->iml->border;
 
   D_BBAR(("bbar == %8p\n", bbar));
 
@@ -351,7 +351,7 @@ bbar_calc_positions(buttonbar_t *bbar)
 void
 button_calc_size(buttonbar_t *bbar, button_t *button)
 {
-  ImlibBorder *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bord = images[image_button].norm->iml->border;
   int ascent, descent, direction;
   XCharStruct chars;
 
@@ -379,8 +379,9 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
     if (bord) {
       b = button->h - bord->top - bord->bottom;
     }
-    button->icon_w = button->icon->iml->im->rgb_width;
-    button->icon_h = button->icon->iml->im->rgb_height;
+    imlib_context_set_image(button->icon->iml->im);
+    button->icon_w = imlib_image_get_width();
+    button->icon_h = imlib_image_get_height();
     D_BBAR((" -> Initial icon dimensions are %hux%hu\n", button->icon_w, button->icon_h));
     if (button->icon_h > b) {
       button->icon_w = (unsigned short) ((float) button->icon_w / button->icon_h * b);
@@ -398,7 +399,7 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
 void
 button_calc_rel_coords(buttonbar_t *bbar, button_t *button)
 {
-  ImlibBorder *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bord = images[image_button].norm->iml->border;
 
   D_BBAR(("bbar == %8p, button == %8p\n", bbar, button));
 

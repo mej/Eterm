@@ -1072,8 +1072,10 @@ process_csi_seq(void)
 	    unsigned short len;
 
 	    if (background_is_pixmap()) {
-	      char *fname = images[image_bg].current->iml->im->filename;
+	      const char *fname;
 
+              imlib_context_set_image(images[image_bg].current->iml->im);
+              fname = imlib_image_get_filename();
 	      len = strlen(fname) + sizeof(APL_NAME) + sizeof(VERSION) + 5;
 	      tbuff = MALLOC(len);
 	      snprintf(tbuff, len, APL_NAME "-" VERSION ":  %s", fname);
@@ -1757,7 +1759,7 @@ xterm_seq(int op, const char *str)
               FOREACH_IMAGE(if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) { \
                               image_set_mode(idx, MODE_TRANS); \
                               if (images[idx].current->pmap->pixmap != None) { \
-                                Imlib_free_pixmap(imlib_id, images[idx].current->pmap->pixmap);  \
+                                imlib_free_pixmap_and_mask(images[idx].current->pmap->pixmap);  \
                               } \
                               images[idx].current->pmap->pixmap = None; \
                             });
@@ -1774,7 +1776,7 @@ xterm_seq(int op, const char *str)
             FOREACH_IMAGE(if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) { \
                             image_set_mode(idx, MODE_TRANS); \
                             if (images[idx].current->pmap->pixmap != None) { \
-                              Imlib_free_pixmap(imlib_id, images[idx].current->pmap->pixmap);  \
+                              imlib_free_pixmap_and_mask(images[idx].current->pmap->pixmap);  \
                             } \
                             images[idx].current->pmap->pixmap = None; \
                           } else if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} \
@@ -1837,7 +1839,7 @@ xterm_seq(int op, const char *str)
               imlib_t *iml = images[which].current->iml;
 
               if (iml->mod == NULL) {
-                iml->mod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->mod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
@@ -1852,7 +1854,7 @@ xterm_seq(int op, const char *str)
               imlib_t *iml = images[which].current->iml;
 
               if (iml->rmod == NULL) {
-                iml->rmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->rmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->rmod->brightness = iml->rmod->contrast = iml->rmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
@@ -1867,7 +1869,7 @@ xterm_seq(int op, const char *str)
               imlib_t *iml = images[which].current->iml;
 
               if (iml->gmod == NULL) {
-                iml->gmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->gmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->gmod->brightness = iml->gmod->contrast = iml->gmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
@@ -1882,7 +1884,7 @@ xterm_seq(int op, const char *str)
               imlib_t *iml = images[which].current->iml;
 
               if (iml->bmod == NULL) {
-                iml->bmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->bmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->bmod->brightness = iml->bmod->contrast = iml->bmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
@@ -1931,7 +1933,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->mod == NULL) {
-                iml->mod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->mod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->mod->contrast = iml->mod->gamma = 0x100;
               }
               if (iml->mod->brightness != s) {
@@ -1962,7 +1964,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->rmod == NULL) {
-                iml->rmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->rmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->rmod->contrast = iml->rmod->gamma = 0x100;
               }
               if (iml->rmod->brightness != (int) r) {
@@ -1983,7 +1985,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->gmod == NULL) {
-                iml->gmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->gmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->gmod->contrast = iml->gmod->gamma = 0x100;
               }
               if (iml->gmod->brightness != (int) g) {
@@ -2004,7 +2006,7 @@ xterm_seq(int op, const char *str)
               }
             } else {
               if (iml->bmod == NULL) {
-                iml->bmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->bmod = (colormod_t *) MALLOC(sizeof(colormod_t));
                 iml->bmod->contrast = iml->bmod->gamma = 0x100;
               }
               if (iml->bmod->brightness != (int) b) {
