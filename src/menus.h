@@ -71,6 +71,7 @@ typedef struct {
 struct menu_t_struct {
   char *title;
   Window win, swin;
+  Pixmap bg;
   unsigned short x, y, w, h;
   GC gc;
   unsigned char state;

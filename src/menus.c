@@ -142,8 +142,10 @@ menu_event_init_dispatcher(void)
 
   EVENT_DATA_ADD_HANDLER(menu_event_data, EnterNotify, menu_handle_enter_notify);
   EVENT_DATA_ADD_HANDLER(menu_event_data, LeaveNotify, menu_handle_leave_notify);
+#if 0
   EVENT_DATA_ADD_HANDLER(menu_event_data, GraphicsExpose, menu_handle_expose);
   EVENT_DATA_ADD_HANDLER(menu_event_data, Expose, menu_handle_expose);
+#endif
   EVENT_DATA_ADD_HANDLER(menu_event_data, ButtonPress, menu_handle_button_press);
   EVENT_DATA_ADD_HANDLER(menu_event_data, ButtonRelease, menu_handle_button_release);
   EVENT_DATA_ADD_HANDLER(menu_event_data, MotionNotify, menu_handle_motion_notify);
@@ -218,12 +220,12 @@ menu_handle_focus_out(event_t * ev)
   return 0;
 }
 
+#if 0
 unsigned char
 menu_handle_expose(event_t * ev)
 {
 
   XEvent unused_xevent;
-  menu_t *menu;
 
   D_EVENTS(("menu_handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -231,11 +233,9 @@ menu_handle_expose(event_t * ev)
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
-  if ((menu = find_menu_by_window(menu_list, ev->xany.window)) != NULL) {
-    menu_draw(menu);
-  }
   return 1;
 }
+#endif
 
 unsigned char
 menu_handle_button_press(event_t * ev)
@@ -804,7 +804,6 @@ menuitem_deselect(menu_t * menu)
 void
 menu_display_submenu(menu_t * menu, menuitem_t * item)
 {
-
   menu_t *submenu;
 
   ASSERT(menu != NULL);
@@ -812,8 +811,7 @@ menu_display_submenu(menu_t * menu, menuitem_t * item)
   REQUIRE(item->action.submenu != NULL);
 
   submenu = item->action.submenu;
-  D_MENU(("menu_display_submenu():  Displaying submenu \"%s\" (window 0x%08x) of menu \"%s\" (window 0x%08x)\n",
-	  submenu->title, submenu->win, menu->title, menu->win));
+  D_MENU(("menu_display_submenu():  Displaying submenu \"%s\" (window 0x%08x) of menu \"%s\" (window 0x%08x)\n", submenu->title, submenu->win, menu->title, menu->win));
   menu_invoke(item->x + item->w, item->y, menu->win, submenu, CurrentTime);
 
   /* Invoking the submenu makes it current.  Undo that behavior. */
@@ -835,7 +833,7 @@ menu_draw(menu_t * menu)
 #endif
   unsigned short str_x, str_y;
   XGCValues gcvalue;
-  int ascent, descent, direction;
+  int ascent, descent, direction, dx, dy;
   XCharStruct chars;
   Screen *scr;
 
@@ -873,9 +871,9 @@ menu_draw(menu_t * menu)
     menu->h = height;
 
     /* Size and render menu window */
-    D_MENU((" -> width %hu, height %hu\n", menu->w, menu->h));
     XResizeWindow(Xdisplay, menu->win, menu->w, menu->h);
     render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
+    menu->bg = images[image_menu].norm->pmap->pixmap;
     if (image_mode_is(image_menu, MODE_AUTO)) {
       enl_ipc_sync();
     }
@@ -887,13 +885,40 @@ menu_draw(menu_t * menu)
       enl_ipc_sync();
     }
   }
-  if (menu->w + menu->x > scr->width) {
-    menu->x = scr->width - menu->w;
-  }
-  if (menu->h + menu->y > scr->height) {
-    menu->y = scr->height - menu->h;
+
+  /* If the menu will come up offscreen, move all the other menus out of the way. */
+  dx = scr->width - menu->w - menu->x;
+  dy = scr->height - menu->h - menu->y;
+  D_MENU((" -> Menu is %hux%hu at %hu, %hu, dx is %d, dy is %d\n", menu->w, menu->h, menu->x, menu->y, dx, dy));
+  if (dx < 0 || dy < 0) {
+    register short i;
+
+    if (dx >= 0) {
+      dx = 0;
+    } else {
+      menu->x = scr->width - menu->w;
+    }
+    if (dy >= 0) {
+      dy = 0;
+    } else {
+      menu->y = scr->height - menu->h;
+    }
+    D_MENU((" -> New x, y is %hu, %hu\n", menu->x, menu->y));
+    for (i = menu_list->nummenus - 1; i >= 0; i--) {
+      menu_t *tmp = menu_list->menus[i];
+
+      D_MENU((" -> Checking menu \"%s\" to see if it needs to be moved.\n", tmp->title));
+      if (tmp->state & MENU_STATE_IS_MAPPED) {
+        tmp->x += dx;
+        tmp->y += dy;
+        D_MENU(("     -> Yes.  New coordinates for this menu are %hu, %hu.\n", tmp->x, tmp->y));
+        XMoveWindow(Xdisplay, tmp->win, tmp->x, tmp->y);
+      }
+    }
   }
   XMoveWindow(Xdisplay, menu->win, menu->x, menu->y);
+  XUnmapWindow(Xdisplay, menu->swin);
+  XMapWindow(Xdisplay, menu->win);
   XRaiseWindow(Xdisplay, menu->win);
 
   str_x = 2 * MENU_HGAP;
@@ -903,9 +928,9 @@ menu_draw(menu_t * menu)
   str_y = menu->fheight + MENU_VGAP;
   len = strlen(menu->title);
   XTextExtents(menu->font, menu->title, len, &direction, &ascent, &descent, &chars);
-  draw_string(menu->win, menu->gc, center_coords(2 * MENU_HGAP, menu->w - 2 * MENU_HGAP) - (chars.width >> 1),
+  draw_string(menu->bg, menu->gc, center_coords(2 * MENU_HGAP, menu->w - 2 * MENU_HGAP) - (chars.width >> 1),
 	      str_y - chars.descent - MENU_VGAP / 2, menu->title, len);
-  draw_shadow(menu->win, topShadowGC, botShadowGC, str_x, str_y - chars.descent - MENU_VGAP / 2 + 1, menu->w - (4 * MENU_HGAP), MENU_VGAP, 2);
+  draw_shadow(menu->bg, topShadowGC, botShadowGC, str_x, str_y - chars.descent - MENU_VGAP / 2 + 1, menu->w - (4 * MENU_HGAP), MENU_VGAP, 2);
   str_y += MENU_VGAP;
 
   for (i = 0; i < menu->numitems; i++) {
@@ -919,10 +944,10 @@ menu_draw(menu_t * menu)
 	item->y = str_y - 2 * MENU_VGAP;
 	item->w = menu->w - MENU_HGAP;
 	item->h = 2 * MENU_VGAP;
-	D_MENU(("   -> Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
+	D_MENU(("menu_draw():  Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
 		item->w, item->h));
       }
-      draw_shadow(menu->win, botShadowGC, topShadowGC, str_x, str_y - MENU_VGAP - MENU_VGAP / 2, menu->w - 4 * MENU_HGAP, MENU_VGAP, 2);
+      draw_shadow(menu->bg, botShadowGC, topShadowGC, str_x, str_y - MENU_VGAP - MENU_VGAP / 2, menu->w - 4 * MENU_HGAP, MENU_VGAP, 2);
 
     } else {
       str_y += menu->fheight + MENU_VGAP;
@@ -936,35 +961,35 @@ menu_draw(menu_t * menu)
       }
       switch (item->type) {
 	case MENUITEM_SUBMENU:
-          paste_simage(images[image_submenu].norm, image_submenu, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
+          paste_simage(images[image_submenu].norm, image_submenu, menu->bg, item->x, item->y, item->w - MENU_VGAP, item->h);
 	  break;
-	case MENUITEM_STRING:
 #if 0
+	case MENUITEM_STRING:
 	  safeaction = StrDup(item->action.string);
 	  SafeStr(safeaction, strlen(safeaction));
 	  D_MENU(("  Item %hu:  %s (string %s)\n", i, item->text, safeaction));
 	  FREE(safeaction);
-#endif
 	  break;
 	case MENUITEM_ECHO:
-#if 0
 	  safeaction = StrDup(item->action.string);
 	  SafeStr(safeaction, strlen(safeaction));
 	  D_MENU(("  Item %hu:  %s (echo %s)\n", i, item->text, safeaction));
 	  FREE(safeaction);
-#endif
 	  break;
 	default:
 	  fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
 	  break;
+#endif
       }
-      draw_string(menu->win, menu->gc, str_x, str_y - MENU_VGAP / 2, item->text, item->len);
+      draw_string(menu->bg, menu->gc, str_x, str_y - MENU_VGAP / 2, item->text, item->len);
       if (item->rtext) {
-        draw_string(menu->win, menu->gc, str_x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 3 * MENU_HGAP, str_y - MENU_VGAP / 2,
+        draw_string(menu->bg, menu->gc, str_x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 3 * MENU_HGAP, str_y - MENU_VGAP / 2,
                     item->rtext, item->rlen);
       }
     }
   }
+  XSetWindowBackgroundPixmap(Xdisplay, menu->win, menu->bg);
+  XClearWindow(Xdisplay, menu->win);
 }
 
 void
@@ -980,12 +1005,9 @@ menu_display(int x, int y, menu_t * menu)
   menu->x = x;
   menu->y = y;
   D_MENU(("Displaying menu \"%s\" (window 0x%08x) at root coordinates %d, %d\n", menu->title, menu->win, menu->x, menu->y));
-  XMoveWindow(Xdisplay, menu->win, menu->x, menu->y);
-  XUnmapWindow(Xdisplay, menu->swin);
-  XMapWindow(Xdisplay, menu->win);
-  menu->state |= (MENU_STATE_IS_MAPPED);
 
   menu_draw(menu);
+  menu->state |= (MENU_STATE_IS_MAPPED);
 
   /* Take control of the pointer so we get all events for it, even those outside the menu window */
   grab_pointer(menu->win);

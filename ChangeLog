@@ -2958,3 +2958,9 @@ Tue Dec 28 11:44:10 PST 1999	Michael Jennings <mej@eterm.org>
 	now. :-)
 	
 -------------------------------------------------------------------------------
+Wed Dec 29 12:32:19 PST 1999	Michael Jennings <mej@eterm.org>
+
+	I think I've finally got the menu behavior working right.  Menus now
+	move themselves if needed, and exposes are now handled properly.
+	
+-------------------------------------------------------------------------------
