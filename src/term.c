@@ -31,10 +31,6 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <limits.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "actions.h"
 #include "buttons.h"
 #include "command.h"
@@ -181,7 +177,7 @@ get_modifiers(void)
   }
 }
 
-/* To handle buffer overflows properly, we must malloc a buffer.  Free it when done. */
+/* To handle buffer overflows properly, we must malloc a buffer.  libmej_free it when done. */
 #ifdef USE_XIM
 #  define LK_RET()   do {if (kbuf_alloced) FREE(kbuf); return;} while (0)
 #else
@@ -359,7 +355,7 @@ lookup_key(XEvent * ev)
   switch (keysym) {
     case XK_Print:  /* Print the screen contents out to the print pipe */
 #if DEBUG >= DEBUG_SELECTION
-      if (debug_level >= DEBUG_SELECTION) {
+      if (DEBUG_LEVEL >= DEBUG_SELECTION) {
 	debug_selection();
       }
 #endif
@@ -770,11 +766,11 @@ popen_printer(void)
   FILE *stream;
 
   if (((my_ruid != my_euid) || (my_rgid != my_egid)) && (strcmp(rs_print_pipe, PRINTPIPE))) {
-    print_warning("Running setuid/setgid.  Refusing to use custom printpipe.");
-    RESET_AND_ASSIGN(rs_print_pipe, StrDup(PRINTPIPE));
+    print_warning("Running setuid/setgid.  Refusing to use custom printpipe.\n");
+    RESET_AND_ASSIGN(rs_print_pipe, STRDUP(PRINTPIPE));
   }
   if ((stream = (FILE *) popen(rs_print_pipe, "w")) == NULL) {
-    print_error("Can't open printer pipe \"%s\" -- %s", rs_print_pipe, strerror(errno));
+    print_error("Can't open printer pipe \"%s\" -- %s\n", rs_print_pipe, strerror(errno));
   }
   return stream;
 }
@@ -1646,7 +1642,7 @@ set_title(const char *str)
     }
     D_X11(("Setting window title to \"%s\"\n", str));
     XStoreName(Xdisplay, TermWin.parent, str);
-    name = StrDup(str);
+    name = STRDUP(str);
   }
 }
 
@@ -1662,7 +1658,7 @@ set_icon_name(const char *str)
     }
     D_X11(("Setting window icon name to \"%s\"\n", str));
     XSetIconName(Xdisplay, TermWin.parent, str);
-    name = StrDup(str);
+    name = STRDUP(str);
   }
 }
 
@@ -1733,7 +1729,7 @@ xterm_seq(int op, const char *str)
     return;
 
 #ifdef PIXMAP_SUPPORT
-  orig_tnstr = tnstr = StrDup(str);
+  orig_tnstr = tnstr = STRDUP(str);
 #endif
 
   switch (op) {
@@ -2104,22 +2100,22 @@ xterm_seq(int op, const char *str)
 #ifdef XTERM_SCROLLBAR
 	      scrollbar_change_type(SCROLLBAR_XTERM);
 #else
-	      print_error("Support for xterm scrollbars was not compiled in.  Sorry.");
+	      print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
 #endif
 	    } else if (!strcasecmp(nstr, "next")) {
 #ifdef NEXT_SCROLLBAR
 	      scrollbar_change_type(SCROLLBAR_NEXT);
 #else
-	      print_error("Support for NeXT scrollbars was not compiled in.  Sorry.");
+	      print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
 #endif
 	    } else if (!strcasecmp(nstr, "motif")) {
 #ifdef MOTIF_SCROLLBAR
 	      scrollbar_change_type(SCROLLBAR_MOTIF);
 #else
-	      print_error("Support for motif scrollbars was not compiled in.  Sorry.");
+	      print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
 #endif
 	    } else {
-	      print_error("Unrecognized scrollbar type \"%s\".", nstr);
+	      print_error("Unrecognized scrollbar type \"%s\".\n", nstr);
 	    }
 	  }
 	  nstr = (char *) strsep(&tnstr, ";");
@@ -2267,7 +2263,7 @@ xterm_seq(int op, const char *str)
 	  /* Set debugging level */
 	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
-	    debug_level = (unsigned int) strtoul(nstr, (char **) NULL, 0);
+	    DEBUG_LEVEL = (unsigned int) strtoul(nstr, (char **) NULL, 0);
 	  }
 	  break;
 

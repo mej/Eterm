@@ -1,8 +1,3 @@
-/**********************************************************
- * DEBUG.H -- Header file for DEBUG.C                     *
- *         -- Michael Jennings                            *
- *         -- 20 December 1996                            *
- **********************************************************/
 /*
  * Copyright (C) 1997-2000, Michael Jennings
  *
@@ -26,11 +21,61 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIBMEJ_DEBUG_H
-# define _LIBMEJ_DEBUG_H
+static const char cvs_ident[] = "$Id$";
 
-extern int real_dprintf(const char *, ...);
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
-#include "../src/debug.h"
+#include "libmej.h"
 
-#endif /* _LIBMEJ_DEBUG_H */
+int
+libmej_dprintf(const char *format, ...)
+{
+  va_list args;
+  int n;
+
+  va_start(args, format);
+  n = vfprintf(stderr, format, args);
+  va_end(args);
+  fflush(stderr);
+  return (n);
+}
+
+/* Print a non-terminal error message */
+void
+print_error(const char *fmt, ...)
+{
+  va_list arg_ptr;
+
+  va_start(arg_ptr, fmt);
+  fprintf(stderr, PACKAGE ":  Error:  ");
+  vfprintf(stderr, fmt, arg_ptr);
+  va_end(arg_ptr);
+}
+
+/* Print a simple warning */
+void
+print_warning(const char *fmt, ...)
+{
+  va_list arg_ptr;
+
+  va_start(arg_ptr, fmt);
+  fprintf(stderr, PACKAGE ":  Warning:  ");
+  vfprintf(stderr, fmt, arg_ptr);
+  va_end(arg_ptr);
+}
+
+/* Print a fatal error message and terminate */
+void
+fatal_error(const char *fmt, ...)
+{
+  va_list arg_ptr;
+
+  va_start(arg_ptr, fmt);
+  fprintf(stderr, PACKAGE ":  FATAL:  ");
+  vfprintf(stderr, fmt, arg_ptr);
+  va_end(arg_ptr);
+  exit(-1);
+}
+

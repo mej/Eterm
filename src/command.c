@@ -111,10 +111,6 @@ static const char cvs_ident[] = "$Id$";
 /* Eterm-specific Headers */
 #include "command.h"
 #include "startup.h"
-#include "../libmej/debug.h"
-#include "debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "events.h"
 #include "font.h"
 #include "grkelot.h"
@@ -1017,7 +1013,7 @@ dump_stack_trace(void)
   print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
   return;
 #endif
-  signal(SIGALRM, (sighandler_t) hard_exit);
+  signal(SIGALRM, (eterm_sighandler_t) hard_exit);
   alarm(10);
   system(cmd);
 }
@@ -1063,7 +1059,7 @@ static RETSIGTYPE
 handle_exit_signal(int sig)
 {
 
-  print_error("Received terminal signal %s (%d)", sig_to_str(sig), sig);
+  print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
   signal(sig, SIG_DFL);
 
 #ifdef UTMP_SUPPORT
@@ -1082,7 +1078,7 @@ static RETSIGTYPE
 handle_crash(int sig)
 {
 
-  print_error("Received terminal signal %s (%d)", sig_to_str(sig), sig);
+  print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
   signal(sig, SIG_DFL);		/* Let the OS handle recursive seg faults */
 
   /* Lock down security so we don't write any core files as root. */
@@ -1140,6 +1136,7 @@ clean_exit(void)
   remove_utmp_entry();
 #endif
   privileges(REVERT);
+  memrec_dump();
   PABLO_STOP_TRACING();
   DPRINTF1(("Cleanup done.  I am outta here!\n"));
 }
@@ -1307,7 +1304,7 @@ get_pty(void)
     fcntl(fd, F_SETFL, O_NDELAY);
     return (fd);
   } else {
-    print_error("Can't open pseudo-tty -- %s", strerror(errno));
+    print_error("Can't open pseudo-tty -- %s\n", strerror(errno));
     return (-1);
   }
 }
@@ -1343,7 +1340,7 @@ get_tty(void)
     print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
     exit(EXIT_FAILURE);
   } else if ((fd = open(ttydev, O_RDWR)) < 0) {
-    print_error("Can't open slave tty %s -- %s", ttydev, strerror(errno));
+    print_error("Can't open slave tty %s -- %s\n", ttydev, strerror(errno));
     exit(EXIT_FAILURE);
   } else {
     D_TTY(("Opened slave tty %s\n", ttydev));
@@ -1727,7 +1724,7 @@ init_locale(void)
   locale = setlocale(LC_ALL, "");
   TermWin.fontset = (XFontSet) -1;
   if (locale == NULL) {
-    print_error("Setting locale failed.");
+    print_error("Setting locale failed.\n");
   } else {
 #ifdef MULTI_CHARSET
     TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
@@ -1896,13 +1893,13 @@ xim_real_init(void)
     destroy_cb.callback = xim_destroy_cb;
     destroy_cb.client_data = NULL;
     if (XSetIMValues(xim, XNDestroyCallback, &destroy_cb, NULL)) {
-      print_error("Could not set destroy callback to IM");
+      print_error("Could not set destroy callback to IM\n");
     }
   }
 #endif
 
   if ((XGetIMValues(xim, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
-    print_error("input method doesn't support any style");
+    print_error("input method doesn't support any style\n");
     XCloseIM(xim);
     return -1;
   }
@@ -1936,14 +1933,14 @@ xim_real_init(void)
   XFree(xim_styles);
 
   if (found == 0) {
-    print_error("input method doesn't support my preedit type");
+    print_error("input method doesn't support my preedit type\n");
     XCloseIM(xim);
     return -1;
   }
   if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
       && (xim_input_style != (XIMPreeditArea | XIMStatusArea))
       && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
-    print_error("This program does not support the preedit type");
+    print_error("This program does not support the preedit type\n");
     XCloseIM(xim);
     return -1;
   }
@@ -1969,7 +1966,7 @@ xim_real_init(void)
     XFree(status_attr);
   }
   if (xim_input_context == NULL) {
-    print_error("Failed to create input context");
+    print_error("Failed to create input context\n");
     XCloseIM(xim);
     return -1;
   }
@@ -2065,7 +2062,7 @@ run_command(char *argv[])
 # if defined (__sun__)
   on_exit(clean_exit, NULL);	/* non-ANSI exit handler */
 # else
-  print_error("no atexit(), UTMP entries can't be cleaned");
+  print_error("no atexit(), UTMP entries can't be cleaned\n");
 # endif
 #endif
 
@@ -2083,7 +2080,7 @@ run_command(char *argv[])
     SavedModes |= PrivMode_scrollbar;
   }
 #if DEBUG >= DEBUG_TTYMODE && defined(HAVE_TERMIOS_H)
-  if (debug_level >= DEBUG_TTYMODE) {
+  if (DEBUG_LEVEL >= DEBUG_TTYMODE) {
     debug_ttymode(&tio);
   }
 #endif
@@ -2092,7 +2089,7 @@ run_command(char *argv[])
   cmd_pid = fork();
   D_CMD(("After fork(), cmd_pid == %d\n", cmd_pid));
   if (cmd_pid < 0) {
-    print_error("fork(): %s", strerror(errno));
+    print_error("fork(): %s\n", strerror(errno));
     return (-1);
   }
   if (cmd_pid == 0) {
@@ -2166,7 +2163,7 @@ run_command(char *argv[])
     }
     if (argv != NULL) {
 #if DEBUG >= DEBUG_CMD
-      if (debug_level >= DEBUG_CMD) {
+      if (DEBUG_LEVEL >= DEBUG_CMD) {
 	int i;
 
 	for (i = 0; argv[i]; i++) {
@@ -2175,7 +2172,7 @@ run_command(char *argv[])
       }
 #endif
       execvp(argv[0], argv);
-      print_error("execvp() failed, cannot execute \"%s\": %s", argv[0], strerror(errno));
+      print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
     } else {
 
       const char *argv0, *shell;
@@ -2192,7 +2189,7 @@ run_command(char *argv[])
 	argv0 = p;
       }
       execlp(shell, argv0, NULL);
-      print_error("execlp() failed, cannot execute \"%s\": %s", shell, strerror(errno));
+      print_error("execlp() failed, cannot execute \"%s\": %s\n", shell, strerror(errno));
     }
     sleep(3);			/* Sleep to make sure fork() returns in the parent, and so user can read error message */
     exit(EXIT_FAILURE);
@@ -2249,7 +2246,7 @@ init_command(char *argv[])
   cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
 
   if ((cmd_fd = run_command(argv)) < 0) {
-    print_error("aborting");
+    print_error("aborting\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -2621,7 +2618,7 @@ main_loop(void)
 
 	ch = *cmdbuf_ptr++;
 #if DEBUG >= DEBUG_VT
-        if (debug_level >= DEBUG_VT) {
+        if (DEBUG_LEVEL >= DEBUG_VT) {
           if (ch < 32) {
             D_VT(("\'%s\' (%d 0x%02x %03o)\n", get_ctrl_char_name(ch), ch, ch, ch));
           } else {
@@ -2730,7 +2727,7 @@ v_writeBig(int f, char *d, int len)
       }
       if (v_bufend < v_bufptr + len) {
 	/* still won't fit: get more space */
-	/* Don't use XtRealloc because an error is not fatal. */
+	/* Don't use Xtlibmej_realloc because an error is not fatal. */
 	int size = v_bufptr - v_buffer;		/* save across realloc */
 
 	v_buffer = REALLOC(v_buffer, size + len);

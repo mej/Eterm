@@ -28,9 +28,6 @@ static const char cvs_ident[] = "$Id$";
 
 #include <X11/cursorfont.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "command.h"
 #include "draw.h"
 #include "e.h"
@@ -442,7 +439,7 @@ menu_create(char *title)
   }
   menu = (menu_t *) MALLOC(sizeof(menu_t));
   MEMSET(menu, 0, sizeof(menu_t));
-  menu->title = StrDup(title ? title : "");
+  menu->title = STRDUP(title ? title : "");
 
   menu->win = XCreateWindow(Xdisplay, Xroot, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 			    CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
@@ -466,7 +463,7 @@ menu_set_title(menu_t *menu, const char *title)
   REQUIRE_RVAL(title != NULL, 0);
 
   FREE(menu->title);
-  menu->title = StrDup(title);
+  menu->title = STRDUP(title);
   XStoreName(Xdisplay, menu->win, menu->title);
   return 1;
 }
@@ -656,7 +653,7 @@ menuitem_create(char *text)
   MEMSET(menuitem, 0, sizeof(menuitem_t));
 
   if (text) {
-    menuitem->text = StrDup(text);
+    menuitem->text = STRDUP(text);
     menuitem->len = strlen(text);
   }
   return menuitem;
@@ -671,7 +668,7 @@ menuitem_set_text(menuitem_t * item, const char *text)
   if (item->text) {
     FREE(item->text);
   }
-  item->text = StrDup(text);
+  item->text = STRDUP(text);
   item->len = strlen(text);
   return 1;
 }
@@ -717,7 +714,7 @@ menuitem_set_rtext(menuitem_t * item, char *rtext)
   ASSERT_RVAL(item != NULL, 0);
   ASSERT_RVAL(rtext != NULL, 0);
 
-  item->rtext = StrDup(rtext);
+  item->rtext = STRDUP(rtext);
   item->rlen = strlen(rtext);
   return 1;
 }
@@ -1043,14 +1040,14 @@ menu_draw(menu_t * menu)
 	  break;
 #if 0
 	case MENUITEM_STRING:
-	  safeaction = StrDup(item->action.string);
-	  SafeStr(safeaction, strlen(safeaction));
+	  safeaction = STRDUP(item->action.string);
+	  safe_str(safeaction, strlen(safeaction));
 	  D_MENU(("  Item %hu:  %s (string %s)\n", i, item->text, safeaction));
 	  FREE(safeaction);
 	  break;
 	case MENUITEM_ECHO:
-	  safeaction = StrDup(item->action.string);
-	  SafeStr(safeaction, strlen(safeaction));
+	  safeaction = STRDUP(item->action.string);
+	  safe_str(safeaction, strlen(safeaction));
 	  D_MENU(("  Item %hu:  %s (echo %s)\n", i, item->text, safeaction));
 	  FREE(safeaction);
 	  break;

@@ -1,8 +1,3 @@
-/***************************************************************
- * STRINGS.C -- String manipulation routines                   *
- *           -- Michael Jennings                               *
- *           -- 08 January 1997                                *
- ***************************************************************/
 /*
  * Copyright (C) 1997-2000, Michael Jennings
  *
@@ -28,22 +23,11 @@
 
 static const char cvs_ident[] = "$Id$";
 
-#include "config.h"
-#include "../src/feature.h"
-
-#include "global.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#ifndef WITH_DMALLOC
-# include <malloc.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
 #endif
-#include <ctype.h>
-#include "debug.h"
-#include "mem.h"
-#include "strings.h"
+
+#include <libmej.h>
 
 #ifndef HAVE_MEMMEM
 /* Find first occurance of bytestring needle of size needlelen in memory region
@@ -51,7 +35,6 @@ static const char cvs_ident[] = "$Id$";
 void *
 memmem(void *haystack, register size_t haystacklen, void *needle, register size_t needlelen)
 {
-
   register char *hs = (char *) haystack;
   register char *n = (char *) needle;
   register unsigned long i;
@@ -70,7 +53,6 @@ memmem(void *haystack, register size_t haystacklen, void *needle, register size_
 void
 usleep(unsigned long usec)
 {
-
   struct timeval delay;
 
   delay.tv_sec = 0;
@@ -92,9 +74,8 @@ nanosleep(unsigned long nsec) {
 
 /* Return the leftmost cnt characters of str */
 char *
-LeftStr(const char *str, unsigned long cnt)
+left_str(const char *str, unsigned long cnt)
 {
-
   char *tmpstr;
 
   tmpstr = (char *) MALLOC(cnt + 1);
@@ -105,9 +86,8 @@ LeftStr(const char *str, unsigned long cnt)
 
 /* Return cnt characters from str, starting at position index (from 0) */
 char *
-MidStr(const char *str, unsigned long index, unsigned long cnt)
+mid_str(const char *str, unsigned long index, unsigned long cnt)
 {
-
   char *tmpstr;
   const char *pstr = str;
 
@@ -120,9 +100,8 @@ MidStr(const char *str, unsigned long index, unsigned long cnt)
 
 /* Return the rightmost characters of str */
 char *
-RightStr(const char *str, unsigned long cnt)
+right_str(const char *str, unsigned long cnt)
 {
-
   char *tmpstr;
   const char *pstr = str;
 
@@ -136,37 +115,21 @@ RightStr(const char *str, unsigned long cnt)
 /* Returns TRUE if str matches regular expression pattern, FALSE otherwise */
 #if defined(HAVE_REGEX_H) || defined(IRIX)
 unsigned char
-Match(register const char *str, register const char *pattern)
+regexp_match(register const char *str, register const char *pattern)
 {
-
   register regex_t *rexp;
   register int result;
-
-#ifndef IRIX
   char errbuf[256];
 
   rexp = (regex_t *) MALLOC(sizeof(regex_t));
-#endif
 
-#ifdef IRIX
-  if ((rexp = compile((const char *) pattern, (char *) NULL, (char *) NULL)) == NULL) {
-    fprintf(stderr, "Unable to compile regexp %s\n", pattern);
-    return (FALSE);
-  }
-#else
   if ((result = regcomp(rexp, pattern, REG_EXTENDED)) != 0) {
     regerror(result, rexp, errbuf, 256);
     fprintf(stderr, "Unable to compile regexp %s -- %s.\n", pattern, errbuf);
     FREE(rexp);
     return (FALSE);
   }
-#endif
 
-#ifdef IRIX
-  result = step((const char *) str, rexp);
-  FREE(rexp);
-  return (result);
-#else
   if (((result = regexec(rexp, str, (size_t) 0, (regmatch_t *) NULL, 0))
        != 0) && (result != REG_NOMATCH)) {
     regerror(result, rexp, errbuf, 256);
@@ -176,22 +139,22 @@ Match(register const char *str, register const char *pattern)
   }
   FREE(rexp);
   return (!result);
-#endif
 }
 #endif
 
 /* Return malloc'd pointer to index-th word in str.  "..." counts as 1 word. */
-char *
-Word(unsigned long index, const char *str)
-{
+#define IS_DELIM(c)  (delim ? ((c) == delim) : (isspace(c)))
 
+char *
+get_word(unsigned long index, const char *str)
+{
   char *tmpstr;
-  char *delim = DEFAULT_DELIM;
+  char delim = 0;
   register unsigned long i, j, k;
 
   k = strlen(str) + 1;
   if ((tmpstr = (char *) MALLOC(k)) == NULL) {
-    fprintf(stderr, "Word(%lu, %s):  Unable to allocate memory -- %s.\n",
+    fprintf(stderr, "get_word(%lu, %s):  Unable to allocate memory -- %s.\n",
 	    index, str, strerror(errno));
     return ((char *) NULL);
   }
@@ -200,17 +163,17 @@ Word(unsigned long index, const char *str)
     for (; isspace(str[i]); i++);
     switch (str[i]) {
       case '\"':
-	delim = "\"";
+	delim = '\"';
 	i++;
 	break;
       case '\'':
-	delim = "\'";
+	delim = '\'';
 	i++;
 	break;
       default:
-	delim = DEFAULT_DELIM;
+	delim = 0;
     }
-    for (k = 0; str[i] && !strchr(delim, str[i]);) {
+    for (k = 0; str[i] && !IS_DELIM(str[i]);) {
       if (str[i] == '\\') {
 	if (str[i + 1] == '\'' || str[i + 1] == '\"') {
 	  i++;
@@ -229,20 +192,19 @@ Word(unsigned long index, const char *str)
 
   if (j != index) {
     FREE(tmpstr);
-    D_STRINGS(("Word(%lu, %s) returning NULL.\n", index, str));
+    D_STRINGS(("get_word(%lu, %s) returning NULL.\n", index, str));
     return ((char *) NULL);
   } else {
     tmpstr = (char *) REALLOC(tmpstr, strlen(tmpstr) + 1);
-    D_STRINGS(("Word(%lu, %s) returning \"%s\".\n", index, str, tmpstr));
+    D_STRINGS(("get_word(%lu, %s) returning \"%s\".\n", index, str, tmpstr));
     return (tmpstr);
   }
 }
 
 /* Return pointer into str to index-th word in str.  "..." counts as 1 word. */
 char *
-PWord(unsigned long index, const char *str)
+get_pword(unsigned long index, const char *str)
 {
-
   register const char *tmpstr = str;
   register unsigned long j;
 
@@ -258,38 +220,37 @@ PWord(unsigned long index, const char *str)
     tmpstr++;
   }
   if (*tmpstr == '\0') {
-    D_STRINGS(("PWord(%lu, %s) returning NULL.\n", index, str));
+    D_STRINGS(("get_pword(%lu, %s) returning NULL.\n", index, str));
     return ((char *) NULL);
   } else {
-    D_STRINGS(("PWord(%lu, %s) returning \"%s\"\n", index, str, tmpstr));
+    D_STRINGS(("get_pword(%lu, %s) returning \"%s\"\n", index, str, tmpstr));
     return (char *) tmpstr;
   }
 }
 
-/* Returns the number of words in str, for use with Word() and PWord().  "..." counts as 1 word. */
+/* Returns the number of words in str, for use with get_word() and get_pword().  "..." counts as 1 word. */
 unsigned long
-NumWords(const char *str)
+num_words(const char *str)
 {
-
   register unsigned long cnt = 0;
-  char *delim = DEFAULT_DELIM;
+  char delim = 0;
   register unsigned long i;
 
-  for (i = 0; str[i] && strchr(delim, str[i]); i++);
+  for (i = 0; str[i] && IS_DELIM(str[i]); i++);
   for (; str[i]; cnt++) {
     switch (str[i]) {
       case '\"':
-	delim = "\"";
+	delim = '\"';
 	i++;
 	break;
       case '\'':
-	delim = "\'";
+	delim = '\'';
 	i++;
 	break;
       default:
-	delim = DEFAULT_DELIM;
+	delim = 0;
     }
-    for (; str[i] && !strchr(delim, str[i]); i++);
+    for (; str[i] && !IS_DELIM(str[i]); i++);
     switch (str[i]) {
       case '\"':
       case '\'':
@@ -299,14 +260,13 @@ NumWords(const char *str)
     for (; str[i] && isspace(str[i]); i++);
   }
 
-  D_STRINGS(("NumWords() returning %lu\n", cnt));
+  D_STRINGS(("num_words() returning %lu\n", cnt));
   return (cnt);
 }
 
 char *
-StripWhitespace(register char *str)
+strip_whitespace(register char *str)
 {
-
   register unsigned long i, j;
 
   if ((j = strlen(str))) {
@@ -320,35 +280,33 @@ StripWhitespace(register char *str)
 }
 
 char *
-LowerStr(char *str)
+downcase_str(char *str)
 {
-
   register char *tmp;
 
   for (tmp = str; *tmp; tmp++) {
     *tmp = tolower(*tmp);
   }
-  D_STRINGS(("LowerStr() returning %s\n", str));
+  D_STRINGS(("downcase_str() returning %s\n", str));
   return (str);
 }
 
 char *
-UpStr(char *str)
+upcase_str(char *str)
 {
-
   register char *tmp;
 
   for (tmp = str; *tmp; tmp++) {
     *tmp = toupper(*tmp);
   }
-  D_STRINGS(("UpStr() returning %s\n", str));
+  D_STRINGS(("upcase_str() returning %s\n", str));
   return (str);
 }
 
+#ifndef HAVE_STRCASESTR
 char *
-StrCaseStr(char *haystack, register const char *needle)
+strcasestr(char *haystack, register const char *needle)
 {
-
   register char *t;
   register size_t len = strlen(needle);
 
@@ -359,11 +317,12 @@ StrCaseStr(char *haystack, register const char *needle)
   }
   return (NULL);
 }
+#endif
 
+#ifndef HAVE_STRCASECHR
 char *
-StrCaseChr(char *haystack, register char needle)
+strcasechr(char *haystack, register char needle)
 {
-
   register char *t;
 
   for (t = haystack; t && *t; t++) {
@@ -373,47 +332,37 @@ StrCaseChr(char *haystack, register char needle)
   }
   return (NULL);
 }
+#endif
 
+#ifndef HAVE_STRCASEPBRK
 char *
-StrCasePBrk(char *haystack, register char *needle)
+strcasepbrk(char *haystack, register char *needle)
 {
-
   register char *t;
 
   for (t = haystack; t && *t; t++) {
-    if (StrCaseChr(needle, *t)) {
+    if (strcasechr(needle, *t)) {
       return (t);
     }
   }
   return (NULL);
 }
+#endif
 
+#ifndef HAVE_STRREV
 char *
-StrRev(register char *str)
+strrev(register char *str)
 {
-
   register int i, j;
 
   i = strlen(str);
   for (j = 0, i--; i > j; i--, j++) {
-    cswap(str[j], str[i]);
+    SWAP(str[j], str[i]);
   }
   return (str);
 
 }
-
-char *
-StrDup(register const char *str)
-{
-
-  register char *newstr;
-  register unsigned long len;
-
-  len = strlen(str) + 1;  /* Copy NUL byte also */
-  newstr = (char *) MALLOC(len);
-  strcpy(newstr, str);
-  return (newstr);
-}
+#endif
 
 #if !(HAVE_STRSEP)
 char *
@@ -444,7 +393,7 @@ strsep(char **str, register char *sep)
 #endif
 
 char *
-GarbageCollect(char *buff, size_t len)
+garbage_collect(char *buff, size_t len)
 {
 
   register char *tbuff = buff, *pbuff = buff;
@@ -460,7 +409,7 @@ GarbageCollect(char *buff, size_t len)
 }
 
 char *
-FGarbageCollect(char *buff, size_t len)
+file_garbage_collect(char *buff, size_t len)
 {
 
   register char *tbuff = buff, *pbuff = buff;
@@ -529,17 +478,17 @@ FGarbageCollect(char *buff, size_t len)
 
   /* And the final step, garbage collect the buffer to condense all
      those nulls we just put in. */
-  return (GarbageCollect(buff, len));
+  return (garbage_collect(buff, len));
 }
 
 char *
-CondenseWhitespace(char *s)
+condense_whitespace(char *s)
 {
 
   register unsigned char gotspc = 0;
   register char *pbuff = s, *pbuff2 = s;
 
-  D_STRINGS(("CondenseWhitespace(%s) called.\n", s));
+  D_STRINGS(("condense_whitespace(%s) called.\n", s));
   for (; *pbuff2; pbuff2++) {
     if (isspace(*pbuff2)) {
       if (!gotspc) {
@@ -556,12 +505,26 @@ CondenseWhitespace(char *s)
   if ((pbuff >= s) && (isspace(*(pbuff - 1))))
     pbuff--;
   *pbuff = 0;
-  D_STRINGS(("CondenseWhitespace() returning \"%s\".\n", s));
+  D_STRINGS(("condense_whitespace() returning \"%s\".\n", s));
   return (REALLOC(s, strlen(s) + 1));
 }
 
+char *
+safe_str(register char *str, unsigned short len)
+{
+  register unsigned short i;
+
+  for (i = 0; i < len; i++) {
+    if (iscntrl(str[i])) {
+      str[i] = '.';
+    }
+  }
+
+  return (str);
+}
+
 void
-HexDump(void *buff, register size_t count)
+hex_dump(void *buff, register size_t count)
 {
 
   register unsigned long j, k, l;
@@ -581,6 +544,6 @@ HexDump(void *buff, register size_t count)
     for (; k < 8; k++) {
       fprintf(stderr, "   ");
     }
-    fprintf(stderr, "| %-8s\n", SafeStr((char *) buffr, l));
+    fprintf(stderr, "| %-8s\n", safe_str((char *) buffr, l));
   }
 }

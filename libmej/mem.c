@@ -1,9 +1,4 @@
 
-/***************************************************************
- * MEM.C -- Memory allocation handlers                         *
- *       -- Michael Jennings                                   *
- *       -- 07 January 1997                                    *
- ***************************************************************/
 /*
  * Copyright (C) 1997-2000, Michael Jennings
  *
@@ -29,20 +24,11 @@
 
 static const char cvs_ident[] = "$Id$";
 
-#include "config.h"
-#include "../src/feature.h"
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
-#include "global.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-
-#include "debug.h"
-#include "mem.h"
+#include "libmej.h"
 
 /* 
  * These're added for a pretty obvious reason -- they're implemented towards
@@ -56,276 +42,244 @@ static int realloc_count = 0;
 static int free_count = 0;
 #endif
 
-MemRec memrec =
-{0, 0, 0, (void **) NULL, (size_t *) NULL};
-
-char *
-SafeStr(register char *str, unsigned short len)
-{
-  register unsigned short i;
-
-  for (i = 0; i < len; i++) {
-    if (iscntrl(str[i])) {
-      str[i] = '.';
-    }
-  }
-
-  return (str);
-}
+static memrec_t memrec;
 
 void
 memrec_init(void)
 {
-  memrec.Count = 0;
-  D_MALLOC(("Constructing memrec\n"));
-  memrec.Ptrs = (void **) malloc(sizeof(void *));
-
-  memrec.Size = (size_t *) malloc(sizeof(size_t));
+  D_MEM(("Constructing memrec\n"));
+  memrec.ptrs = (ptr_t *) malloc(sizeof(ptr_t));
   memrec.init = 1;
 }
 
 void
 memrec_add_var(void *ptr, size_t size)
 {
-  memrec.Count++;
-  if ((memrec.Ptrs = (void **) realloc(memrec.Ptrs, sizeof(void *) * memrec.Count)) == NULL) {
-    D_MALLOC(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
+  register ptr_t *p;
+
+  memrec.cnt++;
+  if ((memrec.ptrs = (ptr_t *) realloc(memrec.ptrs, sizeof(ptr_t) * memrec.cnt)) == NULL) {
+    D_MEM(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
   }
-  if ((memrec.Size = (size_t *) realloc(memrec.Size, sizeof(size_t) * memrec.Count)) == NULL) {
-    D_MALLOC(("Unable to reallocate pointer size list -- %s\n", strerror(errno)));
-  }
-  D_MALLOC(("Adding variable of size %lu at %8p\n", size, ptr));
-  memrec.Ptrs[memrec.Count - 1] = ptr;
-  memrec.Size[memrec.Count - 1] = size;
+  D_MEM(("Adding variable of size %lu at %8p\n", size, ptr));
+  p = memrec.ptrs + memrec.cnt - 1;
+  p->ptr = ptr;
+  p->size = size;
 }
 
 void
-memrec_rem_var(const char *filename, unsigned long line, void *ptr)
+memrec_rem_var(const char *var, const char *filename, unsigned long line, void *ptr)
 {
+  register ptr_t *p = NULL;
+  register unsigned long i;
 
-  unsigned long i;
-
-  for (i = 0; i < memrec.Count; i++)
-    if (memrec.Ptrs[i] == ptr)
+  for (i = 0; i < memrec.cnt; i++) {
+    if (memrec.ptrs[i].ptr == ptr) {
+      p = memrec.ptrs + i;
       break;
-  if (i == memrec.Count && memrec.Ptrs[i] != ptr) {
-    D_MALLOC(("ERROR:  File %s, line %d attempted to free a pointer not allocated with Malloc/Realloc:  %8p\n", filename, line, ptr));
+    }
+  }
+  if (!p) {
+    D_MEM(("ERROR:  File %s, line %d attempted to free variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, ptr));
     return;
   }
-  memrec.Count--;
-  D_MALLOC(("Removing variable of size %lu at %8p\n", memrec.Size[i], memrec.Ptrs[i]));
-  memmove(memrec.Ptrs + i, memrec.Ptrs + i + 1, sizeof(void *) * (memrec.Count - i));
-
-  memmove(memrec.Size + i, memrec.Size + i + 1, sizeof(size_t) * (memrec.Count - i));
-  memrec.Ptrs = (void **) realloc(memrec.Ptrs, sizeof(void *) * memrec.Count);
-
-  memrec.Size = (size_t *) realloc(memrec.Size, sizeof(size_t) * memrec.Count);
+  memrec.cnt--;
+  D_MEM(("Removing variable of size %lu at %8p\n", p->size, p->ptr));
+  memmove(p, p + 1, sizeof(ptr_t) * (memrec.cnt - i));
+  memrec.ptrs = (ptr_t *) realloc(memrec.ptrs, sizeof(ptr_t) * memrec.cnt);
 }
 
 void
-memrec_chg_var(const char *filename, unsigned long line, void *oldp, void *newp, size_t size)
+memrec_chg_var(const char *var, const char *filename, unsigned long line, void *oldp, void *newp, size_t size)
 {
+  register ptr_t *p = NULL;
+  register unsigned long i;
 
-  unsigned long i;
-
-  for (i = 0; i < memrec.Count; i++)
-    if (memrec.Ptrs[i] == oldp)
+  for (i = 0; i < memrec.cnt; i++) {
+    if (memrec.ptrs[i].ptr == oldp) {
+      p = memrec.ptrs + i;
       break;
-  if (i == memrec.Count && memrec.Ptrs[i] != oldp) {
-    D_MALLOC(("ERROR:  File %s, line %d attempted to realloc a pointer not allocated with Malloc/Realloc:  %8p\n", filename, line, oldp));
+    }
+  }
+  if (i == memrec.cnt) {
+    D_MEM(("ERROR:  File %s, line %d attempted to realloc variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, oldp));
     return;
   }
-  D_MALLOC(("Changing variable of %lu bytes at %8p to one of %lu bytes at %8p\n", memrec.Size[i], memrec.Ptrs[i], size, newp));
-  memrec.Ptrs[i] = newp;
-  memrec.Size[i] = size;
+  D_MEM(("Changing variable of %lu bytes at %8p to one of %lu bytes at %8p\n", p->size, p->ptr, size, newp));
+  p->ptr = newp;
+  p->size = size;
 }
 
 void
 memrec_dump(void)
 {
-
+  register ptr_t *p;
   unsigned long i, j, k, l, total = 0;
-  unsigned long len1, len2;
-  unsigned char *ptr;
+  unsigned long len;
   unsigned char buff[9];
 
-  fprintf(stderr, "DUMP :: %lu pointers stored.\n", memrec.Count);
-  fprintf(stderr, "DUMP ::  Pointer |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  \n");
-  fflush(stderr);
-  fprintf(stderr, "DUMP :: ---------+----------+--------+---------+-------------------------+---------\n");
-  fflush(stderr);
-  len1 = sizeof(void *) * memrec.Count;
+  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: %lu pointers stored.\n", memrec.cnt);
+  fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  Pointer |  Address |  Size  | Offset  | 00 01 02 03 04 05 06 07 |  ASCII  \n");
+  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: ---------+----------+--------+---------+-------------------------+---------\n");
+  fflush(LIBMEJ_DEBUG_FD);
+  len = sizeof(ptr_t) * memrec.cnt;
+  memset(buff, 0, sizeof(buff));
 
-  len2 = sizeof(size_t) * memrec.Count;
-  for (ptr = (unsigned char *) memrec.Ptrs, j = 0; j < len1; j += 8) {
-    fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec.Ptrs, (unsigned long) (sizeof(void *) * memrec.Count), (unsigned int) j);
+  /* First, dump the contents of the memrec.ptrs[] array. */
+  for (p = memrec.ptrs, j = 0; j < len; p++, j += 8) {
+    fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec.ptrs, (unsigned long) (sizeof(ptr_t) * memrec.cnt), (unsigned int) j);
+    /* l is the number of characters we're going to output */
+    l = ((len - j < 8) ? (len - j) : (8));
+    /* Copy l bytes (up to 8) from memrec.ptrs[] (p) to buffer */
+    memcpy(buff, p + j, l);
+    for (k = 0; k < l; k++) {
+      fprintf(LIBMEJ_DEBUG_FD, "%02x ", buff[k]);
+    }
+    /* If we printed less than 8 bytes worth, pad with 3 spaces per byte */
+    for (; k < 8; k++) {
+      fprintf(LIBMEJ_DEBUG_FD, "   ");
+    }
+    /* Finally, print the printable ASCII string for those l bytes */
+    fprintf(LIBMEJ_DEBUG_FD, "| %-8s\n", safe_str((char *) buff, l));
+    /* Flush after every line in case we crash */
+    fflush(LIBMEJ_DEBUG_FD);
+  }
 
-    l = ((len1 - j < 8) ? (len1 - j) : (8));
-    memset(buff, 0, 9);
-    memcpy(buff, ptr + j, l);
-    for (k = 0; k < l; k++) {
-      fprintf(stderr, "%02x ", buff[k]);
-    }
-    for (; k < 8; k++) {
-      fprintf(stderr, "   ");
-    }
-    fprintf(stderr, "| %-8s\n", SafeStr((char *) buff, l));
-    fflush(stderr);
-  }
-  for (ptr = (unsigned char *) memrec.Size, j = 0; j < len2; j += 8) {
-    fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec.Size, sizeof(size_t) * memrec.Count, (unsigned int) j);
-    l = ((len2 - j < 8) ? (len2 - j) : (8));
-    memset(buff, 0, 9);
-    memcpy(buff, ptr + j, l);
-    for (k = 0; k < l; k++) {
-      fprintf(stderr, "%02x ", buff[k]);
-    }
-    for (; k < 8; k++) {
-      fprintf(stderr, "   ");
-    }
-    fprintf(stderr, "| %-8s\n", SafeStr((char *) buff, l));
-    fflush(stderr);
-  }
-  for (i = 0; i < memrec.Count; i++) {
-    total += memrec.Size[i];
-    for (ptr = (unsigned char *) memrec.Ptrs[i], j = 0; j < memrec.Size[i]; j += 8) {
-      fprintf(stderr, "DUMP ::  %07lu | %8p | %06lu | %07x | ", i + 1, memrec.Ptrs[i], (unsigned long) memrec.Size[i], (unsigned int) j);
-      l = ((memrec.Size[i] - j < 8) ? (memrec.Size[i] - j) : (8));
-      memset(buff, 0, 9);
-      memcpy(buff, ptr + j, l);
+  /* Now print out each pointer and its contents. */
+  for (p = memrec.ptrs, i = 0; i < memrec.cnt; p++, i++) {
+    /* Add this pointer's size to our total */
+    total += p->size;
+    for (j = 0; j < p->size; j += 8) {
+      fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  %07lu | %8p | %06lu | %07x | ", i + 1, p->ptr, (unsigned long) p->size, (unsigned int) j);
+      /* l is the number of characters we're going to output */
+      l = ((p->size - j < 8) ? (p->size - j) : (8));
+      /* Copy l bytes (up to 8) from p->ptr to buffer */
+      memcpy(buff, p->ptr + j, l);
       for (k = 0; k < l; k++) {
-	fprintf(stderr, "%02x ", buff[k]);
+	fprintf(LIBMEJ_DEBUG_FD, "%02x ", buff[k]);
       }
+      /* If we printed less than 8 bytes worth, pad with 3 spaces per byte */
       for (; k < 8; k++) {
-	fprintf(stderr, "   ");
+	fprintf(LIBMEJ_DEBUG_FD, "   ");
       }
-      fprintf(stderr, "| %-8s\n", SafeStr((char *) buff, l));
-      fflush(stderr);
+      /* Finally, print the printable ASCII string for those l bytes */
+      fprintf(LIBMEJ_DEBUG_FD, "| %-8s\n", safe_str((char *) buff, l));
+      /* Flush after every line in case we crash */
+      fflush(LIBMEJ_DEBUG_FD);
     }
   }
-  fprintf(stderr, "DUMP :: Total allocated memory: %10lu bytes\n\n", total);
-  fflush(stderr);
+  fprintf(LIBMEJ_DEBUG_FD, "DUMP :: Total allocated memory: %10lu bytes\n\n", total);
+  fflush(LIBMEJ_DEBUG_FD);
 }
 
-/************* Function prototypes ****************/
-
 void *
-Malloc(const char *filename, unsigned long line, size_t size)
+libmej_malloc(const char *filename, unsigned long line, size_t size)
 {
-
   void *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++malloc_count;
   if (!(malloc_count % MALLOC_MOD)) {
-    fprintf(stderr, "Calls to malloc(): %d\n", malloc_count);
+    fprintf(LIBMEJ_DEBUG_FD, "Calls to malloc(): %d\n", malloc_count);
   }
 #endif
 
-  D_MALLOC(("Malloc(%lu) called at %s:%lu\n", size, filename, line));
-  if (!memrec.init) {
-    D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
-    memrec_init();
-  }
+  D_MEM(("libmej_malloc(%lu) called at %s:%lu\n", size, filename, line));
 
   temp = (void *) malloc(size);
-  if (!temp)
-    return NULL;
-  if (debug_level >= DEBUG_MALLOC) {
+  ASSERT_RVAL(temp != NULL, NULL);
+  if (DEBUG_LEVEL >= DEBUG_MEM) {
     memrec_add_var(temp, size);
   }
   return (temp);
 }
 
 void *
-Realloc(const char *var, const char *filename, unsigned long line, void *ptr, size_t size)
+libmej_realloc(const char *var, const char *filename, unsigned long line, void *ptr, size_t size)
 {
-
   void *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++realloc_count;
   if (!(realloc_count % REALLOC_MOD)) {
-    fprintf(stderr, "Calls to realloc(): %d\n", realloc_count);
+    D_MEM(("Calls to realloc(): %d\n", realloc_count));
   }
 #endif
 
-  if (!memrec.init) {
-    D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
-    memrec_init();
-  }
-
-  D_MALLOC(("Realloc(%lu) called for variable %s (%8p) at %s:%lu\n", size, var, ptr, filename, line));
+  D_MEM(("libmej_realloc(%lu) called for variable %s (%8p) at %s:%lu\n", size, var, ptr, filename, line));
   if (ptr == NULL) {
-    temp = (void *) Malloc(__FILE__, __LINE__, size);
+    temp = (void *) libmej_malloc(__FILE__, __LINE__, size);
   } else {
     temp = (void *) realloc(ptr, size);
-    if (debug_level >= DEBUG_MALLOC) {
-      memrec_chg_var(filename, line, ptr, temp, size);
+    ASSERT_RVAL(temp != NULL, ptr);
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+      memrec_chg_var(var, filename, line, ptr, temp, size);
     }
   }
   return (temp);
 }
 
 void *
-Calloc(const char *filename, unsigned long line, size_t count, size_t size)
+libmej_calloc(const char *filename, unsigned long line, size_t count, size_t size)
 {
-
-  char *temp;
+  void *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++calloc_count;
   if (!(calloc_count % CALLOC_MOD)) {
-    fprintf(stderr, "Calls to calloc(): %d\n", calloc_count);
+    fprintf(LIBMEJ_DEBUG_FD, "Calls to calloc(): %d\n", calloc_count);
   }
 #endif
 
-  if (!memrec.init) {
-    D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
-    memrec_init();
-  }
-
-  D_MALLOC(("Calloc(%lu, %lu) called at %s:%lu\n", count, size, filename, line));
-  temp = (char *) calloc(count, size);
-  if (debug_level >= DEBUG_MALLOC) {
+  D_MEM(("libmej_calloc(%lu, %lu) called at %s:%lu\n", count, size, filename, line));
+  temp = (void *) calloc(count, size);
+  ASSERT_RVAL(temp != NULL, NULL);
+  if (DEBUG_LEVEL >= DEBUG_MEM) {
     memrec_add_var(temp, size * count);
   }
   return (temp);
 }
 
 void
-Free(const char *var, const char *filename, unsigned long line, void *ptr)
+libmej_free(const char *var, const char *filename, unsigned long line, void *ptr)
 {
-
 #ifdef MALLOC_CALL_DEBUG
   ++free_count;
   if (!(free_count % FREE_MOD)) {
-    fprintf(stderr, "Calls to free(): %d\n", free_count);
+    fprintf(LIBMEJ_DEBUG_FD, "Calls to free(): %d\n", free_count);
   }
 #endif
 
-  if (!memrec.init) {
-    D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
-    memrec_init();
-  }
-
-  D_MALLOC(("Free() called for variable %s (%8p) at %s:%lu\n", var, ptr, filename, line));
+  D_MEM(("libmej_free() called for variable %s (%8p) at %s:%lu\n", var, ptr, filename, line));
   if (ptr) {
-    if (debug_level >= DEBUG_MALLOC) {
-      memrec_rem_var(filename, line, ptr);
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+      memrec_rem_var(var, filename, line, ptr);
     }
     free(ptr);
   } else {
-    D_MALLOC(("ERROR:  Caught attempt to free NULL pointer\n"));
+    D_MEM(("ERROR:  Caught attempt to free NULL pointer\n"));
   }
 }
 
-void
-HandleSigSegv(int sig)
+char *
+libmej_strdup(const char *var, const char *filename, unsigned long line, const char *str)
 {
+  register char *newstr;
+  register size_t len;
 
-#if DEBUG >= DEBUG_MALLOC
-  fprintf(stderr, "Fatal memory fault (%d)!  Dumping memory table.\n", sig);
+  D_MEM(("libmej_strdup() called for variable %s (%8p) at %s:%lu\n", var, str, filename, line));
+
+  len = strlen(str) + 1;  /* Copy NUL byte also */
+  newstr = (char *) libmej_malloc(filename, line, len);
+  strcpy(newstr, str);
+  return (newstr);
+}
+
+void
+libmej_handle_sigsegv(int sig)
+{
+#if DEBUG >= DEBUG_MEM
+  fprintf(LIBMEJ_DEBUG_FD, "Fatal memory fault (%d)!  Dumping memory table.\n", sig);
   memrec_dump();
 #endif
   exit(EXIT_FAILURE);

@@ -32,10 +32,6 @@ static const char cvs_ident[] = "$Id$";
 #include <limits.h>
 #include <X11/cursorfont.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "buttons.h"
 #include "command.h"
 #include "e.h"
@@ -101,7 +97,7 @@ get_tint_by_color_name(const char *color)
 
   D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", color, wcol.red, wcol.green, wcol.blue));
   if (!XParseColor(Xdisplay, Xcmap, color, &xcol)) {
-    print_error("Unable to parse tint color \"%s\".  Ignoring.", color);
+    print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
     return 0xffffff;
   }
 
@@ -146,7 +142,7 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
   xcol.blue /= 2;
 
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
+    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
     xcol.pixel = PixColors[minColor];
   }
   return (xcol.pixel);
@@ -178,7 +174,7 @@ get_top_shadow_color(Pixel norm_color, const char *type)
   xcol.blue = MIN(white.blue, (xcol.blue * 7) / 5);
 
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
+    print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red, xcol.green, xcol.blue);
     xcol.pixel = PixColors[WhiteColor];
   }
   return (xcol.pixel);
@@ -197,11 +193,11 @@ get_color_by_name(const char *name, const char *fallback)
     }
   }
   if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-    print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".", name, NONULL(fallback));
+    print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
     name = fallback;
     if (name) {
       if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-        print_warning("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.", name);
+        print_warning("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.\n", name);
         return ((Pixel) -1);
       }
     } else {
@@ -209,12 +205,12 @@ get_color_by_name(const char *name, const char *fallback)
     }
   }
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".",
+    print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".\n",
                   name, xcol.pixel, xcol.red, xcol.green, xcol.blue, NONULL(fallback));
     name = fallback;
     if (name) {
       if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", name, xcol.pixel, xcol.red, xcol.green, xcol.blue);
+        print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", name, xcol.pixel, xcol.red, xcol.green, xcol.blue);
         return ((Pixel) -1);
       }
     } else {
@@ -231,18 +227,18 @@ get_color_by_pixel(Pixel pixel, Pixel fallback)
 
   xcol.pixel = pixel;
   if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-    print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.", pixel, fallback);
+    print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.\n", pixel, fallback);
     xcol.pixel = fallback;
     if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-      print_warning("Unable to convert pixel value 0x%08x to an XColor structure.", xcol.pixel);
+      print_warning("Unable to convert pixel value 0x%08x to an XColor structure.\n", xcol.pixel);
       return ((Pixel) 0);
     }
   }
   if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-    print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.", xcol.pixel, xcol.red, xcol.green, xcol.blue, fallback);
+    print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.\n", xcol.pixel, xcol.red, xcol.green, xcol.blue, fallback);
     xcol.pixel = fallback;
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-      print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.", xcol.pixel, xcol.red, xcol.green, xcol.blue);
+      print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.\n", xcol.pixel, xcol.red, xcol.green, xcol.blue);
       return ((Pixel) 0);
     }
   }
@@ -323,7 +319,7 @@ Create_Windows(int argc, char *argv[])
   if (Options & Opt_borderless) {
     prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", True);
     if (prop == None) {
-      print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.");
+      print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
       Attributes.override_redirect = TRUE;
       mwmhints.flags = 0;
     } else {
@@ -663,17 +659,17 @@ set_window_color(int idx, const char *color)
     if (i >= 0 && i <= 7) {	/* normal colors */
       PixColors[idx] = PixColors[minColor + i];
     } else {
-      print_warning("Color index %d is invalid.", i);
+      print_warning("Color index %d is invalid.\n", i);
       return;
     }
   } else if (XParseColor(Xdisplay, cmap, color, &xcol)) {
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-      print_warning("Unable to allocate \"%s\" in the color map.", color);
+      print_warning("Unable to allocate \"%s\" in the color map.\n", color);
       return;
     }
     PixColors[idx] = xcol.pixel;
   } else {
-    print_warning("Unable to resolve \"%s\" as a color name.", color);
+    print_warning("Unable to resolve \"%s\" as a color name.\n", color);
     return;
   }
   redraw_image(image_bg);

@@ -28,9 +28,6 @@ static const char cvs_ident[] = "$Id$";
 
 #include <X11/cursorfont.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "buttons.h"
 #include "command.h"
 #include "draw.h"
@@ -580,7 +577,7 @@ button_create(char *text)
   MEMSET(button, 0, sizeof(button_t));
 
   if (text) {
-    button->text = StrDup(text);
+    button->text = STRDUP(text);
     button->len = strlen(text);
   } else {
     button->text = "";

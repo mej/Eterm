@@ -31,12 +31,7 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <limits.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "startup.h"
-#include "mem.h"
-#include "strings.h"
 #include "actions.h"
 #include "buttons.h"
 #include "command.h"
@@ -783,13 +778,13 @@ xerror_handler(Display * display, XErrorEvent * event)
 
   strcpy(err_string, "");
   XGetErrorText(display, event->error_code, err_string, sizeof(err_string));
-  print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)", request_code_to_name(event->request_code),
+  print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n", request_code_to_name(event->request_code),
 	      (int) event->resourceid, event->request_code, event->minor_code, err_string, event->error_code);
 #if DEBUG > DEBUG_X11
-  if (debug_level >= DEBUG_X11) {
+  if (DEBUG_LEVEL >= DEBUG_X11) {
     dump_stack_trace();
   }
 #endif
-  print_error("Attempting to continue...");
+  print_error("Attempting to continue...\n");
   return 0;
 }

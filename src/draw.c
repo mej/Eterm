@@ -26,10 +26,6 @@ static const char cvs_ident[] = "$Id$";
 #include "config.h"
 #include "feature.h"
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "draw.h"
 #include "misc.h"
 #include "pixmap.h"

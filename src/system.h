@@ -32,7 +32,7 @@
 #  define system(c) system_no_wait((c))
 #endif
 
-typedef RETSIGTYPE (*sighandler_t)(int);
+typedef RETSIGTYPE (*eterm_sighandler_t)(int);
 
 extern int wait_for_chld(int);
 extern int system_wait(char *);

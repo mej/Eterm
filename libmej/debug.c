@@ -1,8 +1,3 @@
-/*********************************************************
- * DEBUG.C -- Standardized debugging output              *
- *         -- Michael Jennings                           *
- *         -- 20 December 1996                           *
- *********************************************************/
 /*
  * Copyright (C) 1997-2000, Michael Jennings
  *
@@ -28,31 +23,14 @@
 
 static const char cvs_ident[] = "$Id$";
 
-#include "config.h"
-#include "../src/feature.h"
-
-#include "global.h"
-#include <stdio.h>
-#include <stdlib.h>
-#ifndef WITH_DMALLOC
-# include <malloc.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
 #endif
-#include <stdarg.h>
-#include <string.h>
-#include <time.h>
-#include <errno.h>
-#include "debug.h"
 
-int
-real_dprintf(const char *format,...)
-{
+#include "libmej.h"
 
-  va_list args;
-  int n;
+/* FIXME:  Change this to an unsigned short once the
+   options parser can handle function pointers. */
+unsigned int libmej_debug_level = 0;
+unsigned long libmej_debug_flags = 0;
 
-  va_start(args, format);
-  n = vfprintf(stderr, format, args);
-  va_end(args);
-  fflush(stderr);
-  return (n);
-}

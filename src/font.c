@@ -32,10 +32,6 @@ static const char cvs_ident[] = "$Id$";
 #include <limits.h>
 #include <math.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "command.h"
 #include "font.h"
 #include "startup.h"
@@ -78,9 +74,9 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
       etfonts = (char **) REALLOC(etfonts, new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) REALLOC(etmfonts, new_size);
-      D_FONT((" -> Reallocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
+      D_FONT((" -> libmej_reallocating fonts lists to a size of %u bytes gives %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
-      D_FONT((" -> Reallocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
+      D_FONT((" -> libmej_reallocating fonts list to a size of %u bytes gives %8p\n", new_size, etfonts));
 #endif
     } else {
       etfonts = (char **) MALLOC(new_size);
@@ -109,7 +105,7 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
       FREE(flist[idx]);
     }
   }
-  flist[idx] = StrDup(fontname);
+  flist[idx] = STRDUP(fontname);
   DUMP_FONTS();
 }
 
@@ -132,7 +128,7 @@ font_cache_add(const char *name, unsigned char type, void *info) {
   D_FONT(("font_cache_add(%s, %d, %8p) called.\n", NONULL(name), type, info));
 
   font = (cachefont_t *) MALLOC(sizeof(cachefont_t));
-  font->name = StrDup(name);
+  font->name = STRDUP(name);
   font->type = type;
   font->ref_cnt = 1;
   switch (type) {
@@ -295,7 +291,7 @@ load_font(const char *name, const char *fallback, unsigned char type)
     if ((xfont = XLoadQueryFont(Xdisplay, name)) == NULL) {
       print_error("Unable to load font \"%s\".  Falling back on \"%s\"\n", name, fallback);
       if ((xfont = XLoadQueryFont(Xdisplay, fallback)) == NULL) {
-        fatal_error("Couldn't load the fallback font either.  Giving up.");
+        fatal_error("Couldn't load the fallback font either.  Giving up.\n");
       } else {
         font_cache_add(fallback, type, (void *) xfont);
       }
@@ -579,7 +575,7 @@ parse_font_fx(const char *line)
 
   ASSERT(line != NULL);
 
-  n = NumWords(line);
+  n = num_words(line);
 
   if (!BEG_STRCASECMP(line, "none")) {
     MEMSET(&fshadow, 0, sizeof(fontshadow_t));
@@ -587,7 +583,7 @@ parse_font_fx(const char *line)
     if (n != 2) {
       return 0;
     }
-    color = Word(2, line);
+    color = get_word(2, line);
     p = get_color_by_name(color, "black");
     FREE(color);
     for (which = 0; which < 4; which++) {
@@ -596,10 +592,10 @@ parse_font_fx(const char *line)
   } else if (!BEG_STRCASECMP(line, "shadow")) {
     if (n == 2) {
       which = SHADOW_BOTTOM_RIGHT;
-      color = Word(2, line);
+      color = get_word(2, line);
     } else if (n == 3) {
-      color = Word(3, line);
-      corner = PWord(2, line);
+      color = get_word(3, line);
+      corner = get_pword(2, line);
       which = get_corner(corner);
       if (which >= 4) {
         return 0;
@@ -613,12 +609,12 @@ parse_font_fx(const char *line)
     if (n != 3) {
       return 0;
     }
-    color = Word(2, line);
+    color = get_word(2, line);
     p = get_color_by_name(color, "black");
     set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
     FREE(color);
 
-    color = Word(3, line);
+    color = get_word(3, line);
     p = get_color_by_name(color, "white");
     set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
     FREE(color);
@@ -626,12 +622,12 @@ parse_font_fx(const char *line)
     if (n != 3) {
       return 0;
     }
-    color = Word(2, line);
+    color = get_word(2, line);
     p = get_color_by_name(color, "black");
     set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
     FREE(color);
 
-    color = Word(3, line);
+    color = get_word(3, line);
     p = get_color_by_name(color, "white");
     set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
     FREE(color);
@@ -642,11 +638,11 @@ parse_font_fx(const char *line)
       which = get_corner(line);
       if (which >= 4) {
         which = i;
-        color = Word(1, line);
-        line = PWord(2, line);
+        color = get_word(1, line);
+        line = get_pword(2, line);
       } else {
-        color = Word(2, line);
-        line = PWord(3, line);
+        color = get_word(2, line);
+        line = get_pword(3, line);
       }
       set_shadow_color_by_name(which, color);
       FREE(color);

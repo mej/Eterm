@@ -33,10 +33,6 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/cursorfont.h>
 #include <signal.h>
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "e.h"
 #include "command.h"
 #include "startup.h"
@@ -140,7 +136,7 @@ enl_ipc_send(char *str)
     if (last_msg != NULL) {
       FREE(last_msg);
     }
-    last_msg = StrDup(str);
+    last_msg = STRDUP(str);
     D_ENL(("Sending \"%s\" to Enlightenment.\n", str));
   }
 
@@ -249,7 +245,7 @@ enl_send_and_wait(char *msg)
 {
 
   char *reply = IPC_TIMEOUT;
-  sighandler_t old_alrm;
+  eterm_sighandler_t old_alrm;
 
   if (ipc_win == None) {
     /* The IPC window is missing.  Wait for it to return or Eterm to be killed. */
@@ -257,7 +253,7 @@ enl_send_and_wait(char *msg)
       sleep(1);
     }
   }
-  old_alrm = (sighandler_t) signal(SIGALRM, (sighandler_t) enl_ipc_timeout);
+  old_alrm = (eterm_sighandler_t) signal(SIGALRM, (eterm_sighandler_t) enl_ipc_timeout);
   for (; reply == IPC_TIMEOUT;) {
     timeout = 0;
     enl_ipc_send(msg);
@@ -290,43 +286,43 @@ eterm_ipc_parse(char *str)
     if (params) {
       tt_write((unsigned char *) params, strlen(params));
     } else {
-      print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
+      print_error("IPC Error:  Invalid syntax in command \"%s\"\n", str);
     }
   } else if (!strcasecmp(str, "parse")) {
     if (params) {
       cmd_write((unsigned char *) params, strlen(params));
     } else {
-      print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
+      print_error("IPC Error:  Invalid syntax in command \"%s\"\n", str);
     }
   } else if (!strcasecmp(str, "enl_send")) {
     if (params) {
       enl_ipc_send(params);
     } else {
-      print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
+      print_error("IPC Error:  Invalid syntax in command \"%s\"\n", str);
     }
   } else if (!strcasecmp(str, "enl_query")) {
     if (params) {
       char *reply, header[512];
 
       reply = enl_send_and_wait(params);
-      snprintf(header, sizeof(header), "Enlightenment IPC Reply to \"%s\":\n\n", params);
+      snprintf(header, sizeof(header), "Enlightenment IPC Reply to \"%s\":\n", params);
       tt_write((unsigned char *) header, strlen(header));
       tt_write((unsigned char *) reply, strlen(reply));
       tt_write((unsigned char *) "\n", 1);
       FREE(reply);
     } else {
-      print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
+      print_error("IPC Error:  Invalid syntax in command \"%s\"\n", str);
     }
   } else if (!strcasecmp(str, "winop")) {
     if (params) {
       eterm_handle_winop(params);
     } else {
-      print_error("IPC Error:  Invalid syntax in command \"%s\"", str);
+      print_error("IPC Error:  Invalid syntax in command \"%s\"\n", str);
     }
   } else if (!strcasecmp(str, "exit")) {
     exit(0);
   } else {
-    print_error("IPC Error:  Unrecognized command \"%s\"", str);
+    print_error("IPC Error:  Unrecognized command \"%s\"\n", str);
   }
 }
 
@@ -373,13 +369,13 @@ eterm_handle_winop(char *action)
     int x, y, n;
     char *xx, *yy;
 
-    n = NumWords(action);
+    n = num_words(action);
     if (n == 3 || n == 4) {
       if (n == 3) {
         win = TermWin.parent;
       }
-      xx = PWord(n - 1, action);
-      yy = PWord(n, action);
+      xx = get_pword(n - 1, action);
+      yy = get_pword(n, action);
       x = (int) strtol(xx, (char **) NULL, 0);
       y = (int) strtol(yy, (char **) NULL, 0);
       XMoveWindow(Xdisplay, win, x, y);
@@ -388,13 +384,13 @@ eterm_handle_winop(char *action)
     int w, h, n;
     char *ww, *hh;
 
-    n = NumWords(action);
+    n = num_words(action);
     if (n == 3 || n == 4) {
       if (n == 3) {
         win = TermWin.parent;
       }
-      ww = PWord(n - 1, action);
-      hh = PWord(n, action);
+      ww = get_pword(n - 1, action);
+      hh = get_pword(n, action);
       w = (int) strtol(ww, (char **) NULL, 0);
       h = (int) strtol(hh, (char **) NULL, 0);
       XResizeWindow(Xdisplay, win, w, h);
@@ -404,6 +400,6 @@ eterm_handle_winop(char *action)
   } else if (!BEG_STRCASECMP(action, "iconify")) {
     XIconifyWindow(Xdisplay, win, Xscreen);
   } else {
-    print_error("IPC Error:  Unrecognized window operation \"%s\"", action);
+    print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
   }
 }

@@ -30,12 +30,8 @@ static const char cvs_ident[] = "$Id$";
 # include <X11/Xmu/Atoms.h>
 #endif
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "buttons.h"
 #include "command.h"
-#include "debug.h"
 #include "font.h"
 #include "startup.h"
 #include "screen.h"
@@ -2157,7 +2153,7 @@ scr_search_scrollback(char *str)
       return;
     }
   } else {
-    last_str = StrDup(str);
+    last_str = STRDUP(str);
   }
   lrow = rows = TermWin.nrow + TermWin.saveLines;
   cols = TermWin.ncol;
@@ -2670,7 +2666,7 @@ selection_make(Time tm)
 
   XSetSelectionOwner(Xdisplay, XA_PRIMARY, TermWin.vt, tm);
   if (XGetSelectionOwner(Xdisplay, XA_PRIMARY) != TermWin.vt)
-    print_error("can't get primary selection");
+    print_error("can't get primary selection\n");
   XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8,
 		  PropModeReplace, selection.text, selection.len);
   D_SELECT(("selection.len=%d\n", selection.len));

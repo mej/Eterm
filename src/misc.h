@@ -37,9 +37,6 @@
 _XFUNCPROTOBEGIN
 
 extern const char *my_basename(const char *str);
-extern void print_error(const char *fmt,...);
-extern void print_warning(const char *fmt,...);
-extern void fatal_error(const char *fmt,...);
 extern unsigned long str_leading_match(register const char *, register const char *);
 extern char *str_trim(char *str);
 extern int parse_escaped_string(char *str);

@@ -128,7 +128,7 @@ dnl# Checks for header files.
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h termios.h \
 sys/ioctl.h sys/select.h sys/time.h \
-sys/sockio.h sys/byteorder.h \
+sys/sockio.h sys/byteorder.h malloc.h \
 utmpx.h unistd.h bsd/signal.h regex.h \
 regexp.h stdarg.h X11/Xmu/Atoms.h)
 AC_HEADER_TIME
@@ -141,7 +141,10 @@ AC_TYPE_UID_T
 
 dnl# Checks for library functions.
 AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf)
+AC_CHECK_FUNCS(atexit _exit unsetenv setutent \
+seteuid memmove putenv strsep setresuid setresgid \
+memmem usleep snprintf strcasestr strcasechr \
+strcasepbrk strrev)
 dps_snprintf_oflow()
 AC_CHECK_LIB(m, pow, LIBS="$LIBS -lm", , $SUBLIBS)
 

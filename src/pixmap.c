@@ -38,9 +38,6 @@ static const char cvs_ident[] = "$Id$";
 # include <X11/extensions/shape.h>
 #endif
 
-#include "../libmej/debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "draw.h"
 #include "e.h"
 #include "icon.h"
@@ -591,7 +588,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
       imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask);
     }
     if (viewport_pixmap == None) {
-      print_error("Delayed image load failure for \"%s\".  Using solid color mode.", imlib_image_get_filename());
+      print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
       image_set_mode(image_bg, MODE_SOLID);
       reset_simage(simg, RESET_ALL_SIMG);
       return None;
@@ -667,7 +664,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
             FREE(reply);
           } else {
             pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
-            mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
+            mask = (Pixmap) strtoul(get_pword(2, reply), (char **) NULL, 0);
             FREE(reply);
             enl_ipc_sync();
             if (pmap) {
@@ -729,7 +726,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, w, h);
     }
     if (pmap == None) {
-      print_error("Delayed image load failure for \"%s\".", NONULL(imlib_image_get_filename()));
+      print_error("Delayed image load failure for \"%s\".\n", NONULL(imlib_image_get_filename()));
       reset_simage(simg, RESET_ALL_SIMG);
       return;
     }
@@ -892,7 +889,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
             Pixmap pmap, mask;
 
             pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
-            mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
+            mask = (Pixmap) strtoul(get_pword(2, reply), (char **) NULL, 0);
             FREE(reply);
             enl_ipc_sync();
             if (pmap) {
@@ -1073,7 +1070,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
         }
       } else {
-        print_error("Delayed image load failure for \"%s\".  Using solid color mode.", imlib_image_get_filename());
+        print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
         image_set_mode(which, MODE_SOLID);
         reset_simage(simg, RESET_ALL_SIMG);
       }
@@ -1253,7 +1250,7 @@ load_image(const char *file, simage_t *simg)
     if (f != NULL) {
       im = imlib_load_image_immediately(f);
       if (im == NULL) {
-	print_error("Unable to load image file \"%s\"", file);
+	print_error("Unable to load image file \"%s\"\n", file);
 	return 0;
       } else {
 	reset_simage(simg, (RESET_IMLIB_IM | RESET_PMAP_PIXMAP | RESET_PMAP_MASK));
@@ -1640,12 +1637,12 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
   }
   ximg = XGetImage(Xdisplay, p, 0, 0, w, h, -1, ZPixmap);
   if (ximg == NULL) {
-    print_warning("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned NULL.", p, w, h);
+    print_warning("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned NULL.\n", p, w, h);
     return;
   }
   D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.\n", p, w, h, ximg));
   if (Xdepth <= 8) {
-#ifdef FIXME_BLOCK
+#if FIXME_BLOCK
     D_PIXMAP(("Rendering low-depth image, depth == %d\n", (int) Xdepth));
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
@@ -1700,7 +1697,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
 	break;
       default:
-	print_warning("Bit depth of %d is unsupported for tinting/shading.", real_depth);
+	print_warning("Bit depth of %d is unsupported for tinting/shading.\n", real_depth);
 	return;
     }
   }
@@ -1743,7 +1740,7 @@ update_desktop_info(int *w, int *h)
     XGetGeometry(Xdisplay, desktop_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
   }
   if ((pw <= 0) || (ph <= 0)) {
-    print_error("Value of desktop pixmap property is invalid.  Please restart your "
+    print_error("Value of desktop pixmap property is invalid.  Please restart your \n"
                 "window manager or use Esetroot to set a new one.");
     desktop_pixmap = None;
     return 0;

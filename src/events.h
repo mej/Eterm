@@ -50,7 +50,7 @@
 # define COUNT_EVENT(x)  NOP
 #endif
 #ifdef PROFILE_X_EVENTS
-# define P_EVENT_TIME(type, start, stop)  real_dprintf(type ":  %ld microseconds\n", P_CMPTIMEVALS_USEC((start), (stop)))
+# define P_EVENT_TIME(type, start, stop)  libmej_dprintf(type ":  %ld microseconds\n", P_CMPTIMEVALS_USEC((start), (stop)))
 #else
 # define P_EVENT_TIME(type, start, stop)  NOP
 #endif

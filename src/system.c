@@ -36,13 +36,11 @@ static const char cvs_ident[] = "$Id$";
 #  include <sys/wait.h>
 #endif
 
-#include "../libmej/debug.h"
-#include "debug.h"
 #include "command.h"
 #include "misc.h"
 #include "system.h"
 
-/*static sighandler_t old_handler = (sighandler_t) NULL;*/
+/*static eterm_sighandler_t old_handler = (eterm_sighandler_t) NULL;*/
 
 int
 wait_for_chld(int system_pid)
@@ -94,7 +92,7 @@ system_wait(char *command)
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-    print_error("execl(%s) failed -- %s", command, strerror(errno));
+    print_error("execl(%s) failed -- %s\n", command, strerror(errno));
     exit(EXIT_FAILURE);
   } else {
     D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
@@ -114,7 +112,7 @@ system_no_wait(char *command)
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-    print_error("execl(%s) failed -- %s", command, strerror(errno));
+    print_error("execl(%s) failed -- %s\n", command, strerror(errno));
     exit(EXIT_FAILURE);
   }
   return (0);

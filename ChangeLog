@@ -3834,3 +3834,10 @@ Tue Aug 22 21:35:50 PDT 2000	Michael Jennings <mej@eterm.org>
 	This should fix the selection problems between Eterm and other apps.
 	
 -------------------------------------------------------------------------------
+Wed Aug 30 22:58:18 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Massive reorganization/rewrite to libmej.  It should now be 100%
+	independent of Eterm.  There still may be some gremlins in the memory
+	debugging code, so don't use too high a number with --debug....
+	
+-------------------------------------------------------------------------------

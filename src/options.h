@@ -102,10 +102,10 @@
 #define BAD_THRESHOLD 3
 #define CHECK_BAD()  do { \
 	               if (++bad_opts >= BAD_THRESHOLD) { \
-			 print_error("Error threshold exceeded, giving up."); \
+			 print_error("Error threshold exceeded, giving up.\n"); \
 			 usage(); \
 		       } else { \
-			 print_error("Attempting to continue, but strange things may happen."); \
+			 print_error("Attempting to continue, but strange things may happen.\n"); \
 		       } \
                      } while(0)
 
@@ -157,9 +157,10 @@
 
 #define file_inc_line()            (fstate[fstate_idx].line++)
 
-#define to_keysym(p,s) do { KeySym sym; \
-                            if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
-                           } while (0)
+#define to_keysym(p,s)             do { KeySym sym; \
+                                     if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
+                                   } while (0)
+#define CHECK_VALID_INDEX(i)       (((i) >= image_bg) && ((i) < image_max))
 
 #define RESET_AND_ASSIGN(var, val)  do {if ((var) != NULL) FREE(var);  (var) = (val);} while (0)
 
@@ -251,7 +252,7 @@ extern KeySym ks_smallfont;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-unsigned long NumWords(const char *str);
+unsigned long num_words(const char *str);
 extern void get_initial_options(int, char **);
 extern void get_options(int, char **);
 extern void conf_init_subsystem(void);

@@ -36,10 +36,6 @@ static const char cvs_ident[] = "$Id$";
 #include <unistd.h>
 #include <errno.h>
 
-#include "../libmej/debug.h"
-#include "debug.h"
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
 #include "command.h"
 #include "startup.h"
 #include "misc.h"
@@ -53,49 +49,6 @@ my_basename(const char *str)
 
   return (base ? base + 1 : str);
 
-}
-
-/* Print a non-terminal error message */
-void
-print_error(const char *fmt,...)
-{
-
-  va_list arg_ptr;
-
-  va_start(arg_ptr, fmt);
-  fprintf(stderr, APL_NAME ":  ");
-  vfprintf(stderr, fmt, arg_ptr);
-  fprintf(stderr, "\n");
-  va_end(arg_ptr);
-}
-
-/* Print a simple warning. */
-void
-print_warning(const char *fmt,...)
-{
-
-  va_list arg_ptr;
-
-  va_start(arg_ptr, fmt);
-  fprintf(stderr, APL_NAME ":  warning:  ");
-  vfprintf(stderr, fmt, arg_ptr);
-  fprintf(stderr, "\n");
-  va_end(arg_ptr);
-}
-
-/* Print a fatal error message and terminate */
-void
-fatal_error(const char *fmt,...)
-{
-
-  va_list arg_ptr;
-
-  va_start(arg_ptr, fmt);
-  fprintf(stderr, APL_NAME ":  FATAL:  ");
-  vfprintf(stderr, fmt, arg_ptr);
-  fprintf(stderr, "\n");
-  va_end(arg_ptr);
-  exit(-1);
 }
 
 /*
@@ -264,9 +217,9 @@ parse_escaped_string(char *str)
   *pnew = 0;
 
 #if DEBUG >= DEBUG_STRINGS
-  if (debug_level >= DEBUG_STRINGS) {
-    D_STRINGS(("New value is:\n\n"));
-    HexDump(str, (size_t) (pnew - str));
+  if (DEBUG_LEVEL >= DEBUG_STRINGS) {
+    D_STRINGS(("New value is:\n"));
+    hex_dump(str, (size_t) (pnew - str));
   }
 #endif
 
@@ -360,7 +313,7 @@ mkdirhier(const char *path)
   struct stat dst;
 
   D_CMD(("path == %s\n", path));
-  str = StrDup(path);  /* We need to modify it. */
+  str = STRDUP(path);  /* We need to modify it. */
   pstr = str;
   if (*pstr == '/') {
     pstr++;

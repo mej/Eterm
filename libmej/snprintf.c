@@ -1,8 +1,11 @@
-#include "config.h"
-#include "../src/feature.h"
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
-#include "global.h"
 #include <errno.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
+#endif
 
 static const char cvs_ident[] = "$Id$";
 
@@ -17,10 +20,6 @@ static const char cvs_ident[] = "$Id$";
  */
 
 #if !defined(HAVE_SNPRINTF) || (HAVE_SNPRINTF_BUG == 1)
-
-#ifdef HAVE_STDARG_H
-#include <stdarg.h>
-#endif
 
 #define VA_LOCAL_DECL va_list ap
 #define VA_START(f) va_start(ap, f)
@@ -452,7 +451,7 @@ dopr_outch(int c)
  * Copyright Holder, but only to the computing community at large
  * as a market that must bear the fee.)
  * 
- * "Freely Available" means that no fee is charged for the item
+ * "libmej_freely Available" means that no fee is charged for the item
  * itself, though there may be fees involved in handling the item.
  * It also means that recipients of the item may redistribute it
  * under the same conditions they received it.
@@ -471,7 +470,7 @@ dopr_outch(int c)
  * following:
  * 
  * a) place your modifications in the Public Domain or otherwise make them
- * Freely Available, such as by posting said modifications to Usenet or
+ * libmej_freely Available, such as by posting said modifications to Usenet or
  * an equivalent medium, or placing the modifications on a major archive
  * site such as uunet.uu.net, or by allowing the Copyright Holder to include
  * your modifications in the Standard Version of the Package.

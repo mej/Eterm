@@ -40,10 +40,6 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xatom.h>
 #include <X11/Xos.h>
 
-#include "../libmej/debug.h"	/* from libmej */
-#include "../libmej/mem.h"
-#include "../libmej/strings.h"
-#include "debug.h"
 #include "startup.h"
 #include "actions.h"
 #include "buttons.h"
@@ -68,7 +64,6 @@ short bg_needs_update = 1;
 TermWin_t TermWin;
 Display *Xdisplay;		/* display */
 Colormap cmap;
-unsigned int debug_level = 0;	/* Level of debugging information to display */
 const char *display_name = NULL;
 unsigned int colorfgbg;
 
@@ -110,7 +105,7 @@ eterm_bootstrap(int argc, char *argv[])
   privileges(REVERT);
 #endif
   if (!Xdisplay) {
-    print_error("can't open display %s", display_name);
+    print_error("can't open display %s\n", display_name);
     exit(EXIT_FAILURE);
   }
   XSetErrorHandler((XErrorHandler) xerror_handler);
@@ -217,7 +212,7 @@ eterm_bootstrap(int argc, char *argv[])
   }
 
 #if DEBUG >= DEBUG_X
-  if (debug_level >= DEBUG_X) {
+  if (DEBUG_LEVEL >= DEBUG_X) {
     XSync(Xdisplay, False);
     XSynchronize(Xdisplay, True);
   }

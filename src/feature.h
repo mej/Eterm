@@ -89,7 +89,8 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# include "debug.h"
+# include <libmej.h>
+# include "eterm_debug.h"
 
 /********************* Color, screen, and image stuff *********************/
 

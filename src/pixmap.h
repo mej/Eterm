@@ -54,7 +54,7 @@ typedef void *Imlib_Color_Modifier;
 # define CONVERT_TINT_RED(t)   (((t) & 0xff0000) >> 16)
 # define CONVERT_TINT_GREEN(t) (((t) & 0x00ff00) >> 8)
 # define CONVERT_TINT_BLUE(t)  ((t) & 0x0000ff)
-# define IMLIB_FREE_PIXMAP(p)  do {D_PIXMAP(("Freeing pixmap:  imlib_free_pixmap_and_mask(0x%08x)\n", (p))); imlib_free_pixmap_and_mask(p);} while (0)
+# define IMLIB_FREE_PIXMAP(p)  do {D_PIXMAP(("libmej_freeing pixmap:  imlib_free_pixmap_and_mask(0x%08x)\n", (p))); imlib_free_pixmap_and_mask(p);} while (0)
 #else
 # define background_is_image()    (0)
 # define background_is_trans()    (0)
@@ -75,8 +75,8 @@ typedef void *Imlib_Color_Modifier;
 # define X_CREATE_PIXMAP(w, h)    (XCreatePixmap(Xdisplay, TermWin.parent, (w), (h), Xdepth))
 # define X_CREATE_GC(flags, gcv)  (XCreateGC(Xdisplay, TermWin.parent, (flags), (gcv)))
 #endif
-#define X_FREE_PIXMAP(p)          do {D_PIXMAP(("Freeing pixmap:  XFreePixmap(Xdisplay, 0x%08x)\n", (p))); XFreePixmap(Xdisplay, (p));} while (0)
-#define X_FREE_GC(gc)             do {D_PIXMAP(("Freeing GC:  XFreeGC(Xdisplay, 0x%08x)\n", (gc))); XFreeGC(Xdisplay, (gc));} while (0)
+#define X_FREE_PIXMAP(p)          do {D_PIXMAP(("libmej_freeing pixmap:  XFreePixmap(Xdisplay, 0x%08x)\n", (p))); XFreePixmap(Xdisplay, (p));} while (0)
+#define X_FREE_GC(gc)             do {D_PIXMAP(("libmej_freeing GC:  XFreeGC(Xdisplay, 0x%08x)\n", (gc))); XFreeGC(Xdisplay, (gc));} while (0)
 #define PIXMAP_EXT NULL
 
 #define GEOM_LEN 19
