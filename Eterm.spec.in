@@ -6,102 +6,181 @@ Summary: Enlightened terminal emulator
 Name: Eterm
 Version: %{ver}
 Release: %{rel}
-Copyright: GPL
-Group: Utilities/Terminal
-Source: ../SOURCES/Eterm-%{ver}.tar.gz
-BuildRoot: /tmp/Eterm-root/
+Copyright: BSD
+Group: User Interface/X
+Source0: ftp://ftp.eterm.org/pub/Eterm/Eterm-%{ver}.tar.gz
+Source1: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-scale-1.tar.gz
+Source2: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-scale-2.tar.gz
+Source3: ftp://ftp.eterm.org/pub/Eterm/Eterm-bg-tile.tar.gz
 URL: http://www.eterm.org/
-Requires: imlib, libjpeg, libtiff, libungif, libpng, zlib, XFree86-libs
-Packager: Todd Nemanich <trnemani@eos.ncsu.edu>
+BuildRoot: /var/tmp/Eterm-root
+Requires: imlib >= 1.9.6
 
-%ifarch i386
 %description
-This is an rpm of Eterm, a highly configurable and asethically pleasing
-terminal emulator.
+Eterm is a color vt102 terminal emulator with enhanced graphical
+capabilities.  Eterm is intended to be a replacement for xterm for
+Enlightenment window manager users, but it can also be used as a
+replacement for xterm by users without Enlightenment.  Eterm supports
+various themes and is very configurable, in keeping with the
+philosophy of Enlightenment. If you install Eterm, you'll also need to
+have the Imlib library installed.
 
-This rpm was optimized for i486 and was built without support
-for libKenny.so.
-(Egads! They killed Kenny! You bastards!)
-%else
-%description
-This is an rpm of Eterm, a highly configurable and asethically pleasing
-terminal emulator. 
-
-This rpm contains no architecture specific optimizations, and
-was built without support for libKenny.so. 
-(Egads! They killed Kenny! You bastards!)
-%endif
-
-%changelog
-* Sun Jun 6 1999 Todd Nemanich <trnemani@eos.ncsu.edu>
-- Updated rpm to incorporate a few fixes for different architectures,
-- specify /usr/local/share/Eterm/themes/* as config files, and 
-- a fix for the share directory problem.
-
-* Tue Apr 27 1999 Todd Nemanich <trnemani@eos.ncsu.edu>
-- Updated to version 8.9. Added a check to make sure /usr/local/lib
-- is in /etc/ld.so.conf because too many people don't know how
-- ld works.
-- Also moving, so new email address for me.
- 
-* Sat Jan 23 1999 Todd Nemanich <tick@speak.rh.ncsu.edu>
-- Updated to version 8.8
-
-* Sat Oct 23 1998 Todd Nemanich <tick@speak.rh.ncsu.edu>
-- Updated to version 0.8.7. A minor change in the Makefiles was made by hand,
-- due to a linkinkg problem. This should not cause problems to people using the
-- source rpm, but the call to configure has been removed.
-
-* Mon Sep 21 1998 Todd Nemanich <tick@speak.rh.ncsu.edu>
-- Bad link in /usr/local/bin corrected. THX to Andy Dustman for pointing this out.
+%package backgrounds
+Summary: Backgrounds for Eterm
+Group: User Interface/X
+Requires: Eterm = %{ver}
+%description backgrounds
+Install this package if you want additional backgrounds for Eterm
 
 %prep
-rm -fr $RPM_BUILD_ROOT $RPM_BUILD_DIR/Eterm-%{ver}
-mkdir $RPM_BUILD_ROOT
-cd $RPM_BUILD_DIR
-tar -xzf $RPM_SOURCE_DIR/Eterm-%{ver}.tar.gz 
+%setup -q -n Eterm-%{ver} 1
 
 %build
-cd $RPM_BUILD_DIR/Eterm-%{ver}
 ./configure --prefix=%{prefix}
-%ifarch i386
-make "CFLAGS=-O3 -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2"
-%else
-make
-%endif
+make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
-cd $RPM_BUILD_DIR/Eterm-%{ver}
+rm -rf $RPM_BUILD_ROOT
+
+mkdir -p $RPM_BUILD_ROOT/etc/X11/wmconfig/
+
+cat > $RPM_BUILD_ROOT/etc/X11/wmconfig/Eterm <<EOF
+Eterm name "Eterm"
+Eterm description "An xterm replacement for Enlightenment users."
+Eterm exec "Eterm &"
+Eterm group Utilities/Shells
+EOF
+
+chmod 0644 $RPM_BUILD_ROOT/etc/X11/wmconfig/Eterm
+
 make prefix=$RPM_BUILD_ROOT%{prefix} install
 
+( cd $RPM_BUILD_ROOT
+  mv .%{prefix}/bin/Eterm .%{prefix}/bin/Eterm-%{ver}
+  cd $RPM_BUILD_ROOT%{prefix}/bin
+  ln -sf Eterm-%{ver} Eterm
+  cd $RPM_BUILD_ROOT
+  chmod +x .%{prefix}/lib/lib*so* ||:
+)
 
+# Stripped binaries suck for debugging. -- mej
+#strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
 
-%postinst
-LDPATH=`grep local /etc/ld.so.conf`
+gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
 
-if [ "$LDPATH" = "" ] ; then
-        NEW='/usr/local/lib'
-        cat /etc/ld.so.conf >ld.tmp
-        echo "$NEW">>new.ld
-        cat ld.tmp new.ld > ld.so.conf
-        mv ld.so.conf /etc/ld.so.conf
-        rm -f new.ld ld.tmp
-fi
+(cd $RPM_BUILD_ROOT%{prefix}/share/Eterm/pix/ ; \
+ for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
+  mv $i $i.base ; done)
 
+tar xvfz %{SOURCE1}
+tar xvfz %{SOURCE2}
+tar xvfz %{SOURCE3}
+
+make -C bg all
+make -C bg prefix=$RPM_BUILD_ROOT%{prefix} install
+
+#get the package listing for Eterm-backgrounds
+echo "%defattr(-,root,root)" > rpm-Eterm-bg-files
+cat > rpm-Eterm-bg-files <<EOF
+%defattr(-,root,root)
+%{prefix}/share/Eterm/pix/tiled-pixmaps.list
+%{prefix}/share/Eterm/pix/scaled-pixmaps.list
+%{prefix}/share/Eterm/pix/pixmaps.list
+EOF
+find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
+       -not -name 'README*' -not -name 014.png \
+        -not -name 40.png -not -name 6.png -not -name backwave.jpg \
+        -not -name circuit.png -not -name nebula.jpg \
+        -not -name fourthday.jpg -not -name gaia.jpg \
+        -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
+        | sed "s#^\./bg/[scati]*le#%{prefix}/share/Eterm/pix#g" >> rpm-Eterm-bg-files
+
+%post
 /sbin/ldconfig
+for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
+  mv -f %{prefix}/share/Eterm/pix/$i.base %{prefix}/share/Eterm/pix/$i ; done
+
+%postun
+/sbin/ldconfig
+for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
+  rm -f %{prefix}/share/Eterm/pix/$i* ; done
+
+%pre backgrounds
+for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
+  mv -f %{prefix}/share/Eterm/pix/$i %{prefix}/share/Eterm/pix/$i.base ; done
+
+%postun backgrounds
+for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
+  mv -f %{prefix}/share/Eterm/pix/$i.base %{prefix}/share/Eterm/pix/$i ; done
 
 %clean
-rm -fr $RPM_BUILD_ROOT $RPM_BUILD_DIR/Eterm-%{ver}
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/README 
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/COPYING 
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/ChangeLog 
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/ReleaseNotes 
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/CVS-README
-%doc $RPM_BUILD_DIR/Eterm-%{ver}/doc/*
-%doc %{prefix}/man
-%config %{prefix}/share/Eterm/themes/
-%{prefix}/bin
-%{prefix}/lib
+%doc doc/Eterm_reference.html doc/Eterm.1.html
+%doc COPYING README ChangeLog
+%config(missingok) %{prefix}/share/Eterm/pix/*.list.base
+/etc/X11/wmconfig/Eterm
+%{prefix}/bin/*
+%{prefix}/lib/*
+%{prefix}/man/man1/*
+%{prefix}/share/Eterm/themes
+%{prefix}/share/Eterm/pix/014.png
+%{prefix}/share/Eterm/pix/40.png
+%{prefix}/share/Eterm/pix/6.png
+%{prefix}/share/Eterm/pix/backwave.jpg
+%{prefix}/share/Eterm/pix/circuit.png
+%{prefix}/share/Eterm/pix/nebula.jpg
+%{prefix}/share/Eterm/pix/fourthday.jpg
+%{prefix}/share/Eterm/pix/gaia.jpg
+%{prefix}/share/Eterm/pix/galleon.jpg
+%{prefix}/share/Eterm/pix/night_of_the_dragon.jpg
+%{prefix}/share/Eterm/pix/bar_horizontal_[123].png
+%{prefix}/share/Eterm/pix/bar_vertical_[123].png
+%{prefix}/share/Eterm/pix/button_arrow_up_[123].png
+%{prefix}/share/Eterm/pix/button_arrow_down_[123].png
+%{prefix}/share/Eterm/pix/menu[123].png
+%dir %{prefix}/share/Eterm
+%dir %{prefix}/share/Eterm/pix
+
+%files backgrounds -f rpm-Eterm-bg-files
+
+%changelog
+* Fri Dec 10 1999 Michael Jennings <mej@eterm.org>
+- Added Tim's spec file to CVS as Eterm.spec.in for 0.9
+
+* Wed Dec 8 1999 Tim Powers <timp@redhat.com>
+- using unified patch for utempter and themes from Michael Jennings
+
+* Tue Dec 7 1999 Tim Powers <timp@redhat.com>
+- added wmconfig entry
+- split up into 2 packages, Eterm proper, and Eterm-backgrounds
+- thanks to ewt, we no longer have to make Eterm suid root, uses utempter
+        instead
+
+* Mon Dec 6 1999 Tim Powers <timp@redhat.com>
+- updated to 0.8.10
+- patched so that Eterm finds pix/themes in the right place
+- new version fixes problems with utmp, conforms to Eterm docs.
+- added RedHat.Eterm_suid which includes instructions on how to run Eterm in
+        order to have it seen by "w" and "who" as a regular user
+
+* Fri Aug 20 1999 Tim Powers <timp@redhat.com>
+- fixed roblem with removing all files when uninstalling Eterm.
+
+* Tue Jul 27 1999 Tim Powers <timp@redhat.com>
+- updated version to 0.8.9
+- cleaned up spec
+- updated patch
+- includes new backgrounds
+- built for 6.1
+
+* Mon Apr 05 1999 Michael Maher <mike@redhat.com>
+- update to 0.8.8
+
+* Fri Oct 23 1998 Jeff Johnson <jbj@redhat.com>
+- update to 0.8.7.
+
+* Fri Oct 08 1998 Michael Maher <mike@redhat.com>
+- built eterm
