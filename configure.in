@@ -272,12 +272,21 @@ AC_ARG_ENABLE(utmp,
 [  --enable-utmp           compile with utmp support],
             if test "$enableval" != "no"; then 
               AC_MSG_RESULT(yes)
+              UTMP=1
               AC_DEFINE(UTMP_SUPPORT)
             else
               AC_MSG_RESULT(no)
+              UTMP=0
             fi, AC_MSG_RESULT(yes)
                 AC_DEFINE(UTMP_SUPPORT)
+                UTMP=1
 )
+if test $UTMP -eq 1; then
+  AC_CHECK_LIB(utempter, addToUtmp,
+               AC_DEFINE(HAVE_UTEMPTER)
+               LIBS="$LIBS -lutempter"
+              )
+fi
 AC_MSG_CHECKING(for backspace key configuration)
 AC_ARG_WITH(backspace,
 [  --with-backspace=KEY    force backspace to send KEY (KEY is either \"bs\" for ^H or \"del\" for ^?)],

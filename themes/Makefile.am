@@ -6,11 +6,14 @@ EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/them
              Eterm/Eterm-menu.cfg irc/irc-menu.cfg chooser/chooser-menu.cfg emacs/emacs-menu.cfg mutt/mutt-menu.cfg trans/trans-menu.cfg \
              cEterm/cEterm-menu.cfg cEterm/theme.cfg.in auto/auto-menu.cfg auto/theme.cfg.in
 
-install-data-hook:
+all: Makefile
 	-@for i in $(THEMES) ; do \
+	  echo "Generating theme config file for the $$i theme." ; \
 	  $(SED) -e 's%@''PREFIX''@%${prefix}%g' -e 's%@''PKGDATADIR''@%${DESTDIR}${pkgdatadir}%g' -e 's%@''THEME''@%'$$i'%g' \
 	    $(srcdir)/$$i/theme.cfg.in > $(srcdir)/$$i/theme.cfg ; \
 	done
+
+install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)/themes
 	-@for i in $(THEMES) ; do \
 	  if test ! -d $(DESTDIR)$(pkgdatadir)/themes/$$i ; then \

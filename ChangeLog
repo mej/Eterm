@@ -2890,3 +2890,10 @@ Mon Dec  6 21:53:23 PST 1999	Michael Jennings <mej@eterm.org>
 	will supercede any config file settings you have; that's life.
 	
 -------------------------------------------------------------------------------
+Tue Dec  7 22:10:19 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Support for RedHat's utempter library and some other fixes.  Thanks to
+	Erik Troan <ewt@redhat.com> and Tim Powers <timp@redhat.com> for their
+	help with this.
+	
+-------------------------------------------------------------------------------

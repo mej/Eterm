@@ -1060,7 +1060,7 @@ Exit_signal(int sig)
 
 #ifdef UTMP_SUPPORT
   privileges(INVOKE);
-  cleanutent();
+  remove_utmp_entry();
   privileges(REVERT);
 #endif
 
@@ -1113,7 +1113,7 @@ clean_exit(void)
 #endif /* __CYGWIN32__ */
 
 #ifdef UTMP_SUPPORT
-  cleanutent();
+  remove_utmp_entry();
 #endif
   privileges(REVERT);
   PABLO_STOP_TRACING();
@@ -2200,8 +2200,9 @@ run_command(char *argv[])
   }
 #ifdef UTMP_SUPPORT
   privileges(RESTORE);
-  if (Options & Opt_utmpLogging)
-    makeutent(ttydev, display_name);	/* stamp /etc/utmp */
+  if (Options & Opt_utmpLogging) {
+    add_utmp_entry(ttydev, display_name, ptyfd);
+  }
   privileges(IGNORE);
 #endif
 

@@ -28,76 +28,79 @@ static const char cvs_ident[] = "$Id$";
 
 #ifdef UTMP_SUPPORT
 
-#include <stdio.h>
-#include <string.h>
+# include <stdio.h>
+# include <string.h>
 /* For some systems (HP-UX in particular), sys/types.h must be included
    before utmp*.h -- mej */
-#include <sys/types.h>
-#include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/stat.h>
 /* Unsupported/broken utmpx.h on HP-UX, AIX, and glibc 2.1 */
-#if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
-#  undef HAVE_UTMPX_H
-#endif
-#ifdef HAVE_UTMPX_H
-# include <utmpx.h>
-# define USE_SYSV_UTMP
-#else
-# include <utmp.h>
-# ifdef HAVE_SETUTENT
+# if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
+#   undef HAVE_UTMPX_H
+# endif
+# ifdef HAVE_UTMPX_H
+#  include <utmpx.h>
 #  define USE_SYSV_UTMP
-# endif
-#endif
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
 # else
-#  include <time.h>
+#  include <utmp.h>
+#  ifdef HAVE_SETUTENT
+#   define USE_SYSV_UTMP
+#  endif
 # endif
-#endif
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#include <pwd.h>
-#include <errno.h>
-#ifdef HAVE_FCNTL_H
-# include <fcntl.h>
-#endif
-#ifdef HAVE_LASTLOG_H
-# include <lastlog.h>
-#endif
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
-# include <ttyent.h>
-#endif
+# ifdef TIME_WITH_SYS_TIME
+#  include <sys/time.h>
+#  include <time.h>
+# else
+#  ifdef HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#  else
+#   include <time.h>
+#  endif
+# endif
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+# include <pwd.h>
+# include <errno.h>
+# ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
+# endif
+# ifdef HAVE_LASTLOG_H
+#  include <lastlog.h>
+# endif
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  include <ttyent.h>
+# endif
 
-#include "eterm_utmp.h"
-#include "debug.h"
-#include "../libmej/debug.h"
-#include "command.h"
-#include "screen.h"
+# include "eterm_utmp.h"
+# include "debug.h"
+# include "../libmej/debug.h"
+# include "command.h"
+# include "screen.h"
 
 /* screen.h includes config.h again, so re-fix these.  Pointed out by Sung-Hyun Nam <namsh@lgic.co.kr> */
-#if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
-#  undef HAVE_UTMPX_H
-#endif
+# if defined(_HPUX_SOURCE) || defined(_AIX) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
+#   undef HAVE_UTMPX_H
+# endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
-#if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+# ifndef HAVE_UTEMPTER
+#  if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
 static char ut_id[5];		/* remember if entry to utmp made */
-#else
+#  else
 static int utmp_pos;		/* BSD position of utmp-stamp */
-#endif
+#  endif
+# endif
 
-#ifdef USE_SYSV_UTMP
+# ifdef USE_SYSV_UTMP
 
 #  ifdef HAVE_UTMPX_H
-#    undef WTMP_FILENAME
-#    define WTMP_FILENAME WTMPX_FILE
-#    define update_wtmp updwtmpx
+#   undef WTMP_FILENAME
+#   define WTMP_FILENAME WTMPX_FILE
+#   define update_wtmp updwtmpx
 #  else				/* HAVE_UTMPX_H */
 
+#   ifndef HAVE_UTEMPTER
 static void
 update_wtmp(char *fname, struct utmp *putmp)
 {
@@ -133,29 +136,29 @@ update_wtmp(char *fname, struct utmp *putmp)
 
   close(fd);
 }
+#   endif /* ifndef HAVE_UTEMPTER */
+#  endif /* HAVE_UTMPX_H */
 
-#  endif			/* HAVE_UTMPX_H */
-
-/* makeutent() - make a utmp entry */
+#  ifndef HAVE_UTEMPTER
 void
-makeutent(const char *pty, const char *hostname)
+add_utmp_entry(const char *pty, const char *hostname, int fd)
 {
   struct passwd *pwent = getpwuid(my_ruid);
 
-#ifdef HAVE_UTMPX_H
+#   ifdef HAVE_UTMPX_H
   struct utmpx utmp;
   struct utmp utmp2;
   MEMSET(&utmp, 0, sizeof(struct utmpx));
 
-#else
+#   else
   struct utmp utmp;
   MEMSET(&utmp, 0, sizeof(struct utmp));
 
-#endif
+#   endif
 
-#ifdef WITH_DMALLOC
+#   ifdef WITH_DMALLOC
   return;
-#endif
+#   endif
 
   if (!strncmp(pty, "/dev/", 5))
     pty += 5;			/* skip /dev/ prefix */
@@ -176,12 +179,12 @@ makeutent(const char *pty, const char *hostname)
   utmp.ut_type = DEAD_PROCESS;
 
   privileges(INVOKE);
-#ifdef HAVE_UTMPX_H
+#   ifdef HAVE_UTMPX_H
   getutmp(&utmp, &utmp2);
   getutid(&utmp2);		/* position to entry in utmp file */
-#else
+#   else
   getutid(&utmp);		/* position to entry in utmp file */
-#endif
+#   endif
 
   /* set up the new entry */
   strncpy(utmp.ut_id, ut_id, sizeof(utmp.ut_id));
@@ -191,35 +194,36 @@ makeutent(const char *pty, const char *hostname)
   strncpy(utmp.ut_host, hostname, sizeof(utmp.ut_host));
   utmp.ut_type = USER_PROCESS;
   utmp.ut_pid = getpid();
-#ifdef HAVE_UTMPX_H
+#   ifdef HAVE_UTMPX_H
   utmp.ut_session = getsid(0);
   utmp.ut_xtime = time(NULL);
   utmp.ut_tv.tv_usec = 0;
-#else
+#   else
   utmp.ut_time = time(NULL);
-#endif
+#   endif
 
   /*
    * write a utmp entry to the utmp file
    */
   utmpname(UTMP_FILENAME);
-#ifdef HAVE_UTMPX_H
+#   ifdef HAVE_UTMPX_H
   getutmp(&utmp, &utmp2);
   pututline(&utmp2);
   pututxline(&utmp);
-#else
+#   else
   pututline(&utmp);
-#endif
+#   endif
   update_wtmp(WTMP_FILENAME, &utmp);
   endutent();			/* close the file */
   privileges(REVERT);
+  return;
+  fd = 0;
 }
 
-/* cleanutent() - remove a utmp entry */
 void
-cleanutent(void)
+remove_utmp_entry(void)
 {
-#ifdef HAVE_UTMPX_H
+#   ifdef HAVE_UTMPX_H
   struct utmp utmp;
   struct utmpx utmpx;
 
@@ -239,7 +243,7 @@ cleanutent(void)
   endutent();
   privileges(REVERT);
 
-#else /* HAVE_UTMPX_H */
+#   else /* HAVE_UTMPX_H */
   struct utmp *putmp;
   pid_t pid = getpid();
 
@@ -266,13 +270,14 @@ cleanutent(void)
   }
   endutent();
   privileges(REVERT);
-#endif /* HAVE_UTMPX_H */
+#   endif /* HAVE_UTMPX_H */
 }
+#  endif /* ifndef HAVE_UTEMPTER */
 
-#else /* USE_SYSV_UTMP */
+# else /* USE_SYSV_UTMP */
 /* BSD utmp support */
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 
 /* used to hold the line we are using */
 static char ut_line[32];
@@ -320,7 +325,7 @@ b_login(struct utmp *ut)
   }
 }
 
-#else /* __FreeBSD__ || NetBSD || BSDI */
+#  else /* __FreeBSD__ || NetBSD || BSDI */
 static int utmp_pos = 0;	/* position of utmp-stamp */
 
 /*----------------------------------------------------------------------*
@@ -378,13 +383,10 @@ write_utmp(struct utmp *putmp)
   return rval;
 }
 
-#endif /* __FreeBSD__ || NetBSD || BSDI */
+#  endif /* __FreeBSD__ || NetBSD || BSDI */
 
-/*
- * make a utmp entry
- */
 void
-makeutent(const char *pty, const char *hostname)
+add_utmp_entry(const char *pty, const char *hostname, int fd)
 {
   struct passwd *pwent = getpwuid(my_ruid);
   struct utmp utmp;
@@ -401,7 +403,7 @@ makeutent(const char *pty, const char *hostname)
     return;
   }
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
   strncpy(ut_line, pty, 31);
 
   strncpy(utmp.ut_line, pty, UT_LINESIZE);
@@ -410,7 +412,7 @@ makeutent(const char *pty, const char *hostname)
   utmp.ut_time = time(NULL);
 
   b_login(&utmp);
-#else /* __FreeBSD__ || NetBSD || BSDI */
+#  else /* __FreeBSD__ || NetBSD || BSDI */
   strncpy(utmp.ut_line, ut_id, sizeof(utmp.ut_line));
   strncpy(utmp.ut_name, pwent->pw_name, sizeof(utmp.ut_name));
   strncpy(utmp.ut_host, hostname, sizeof(utmp.ut_host));
@@ -418,19 +420,21 @@ makeutent(const char *pty, const char *hostname)
 
   if (write_utmp(&utmp) < 0)
     ut_id[0] = '\0';		/* entry not made */
-#endif
+#  endif
+  return;
+  fd = 0;
 }
 
 /*
  * remove a utmp entry
  */
 void
-cleanutent(void)
+remove_utmp_entry(void)
 {
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
   logout(ut_line);
   logwtmp(ut_line, "", "");
-#else /* __FreeBSD__ */
+#  else /* __FreeBSD__ */
   FILE *fd;
 
   privileges(INVOKE);
@@ -444,9 +448,9 @@ cleanutent(void)
     fclose(fd);
   }
   privileges(REVERT);
-#endif /* __FreeBSD__ || NetBSD || BSDI */
+#  endif /* __FreeBSD__ || NetBSD || BSDI */
 }
 
-#endif /* USE_SYSV_UTMP */
+# endif /* USE_SYSV_UTMP */
 
 #endif /* UTMP_SUPPORT */
