@@ -1,4 +1,4 @@
-config.log
+*.log
 config.sub
 config.cache
 config.guess
@@ -18,3 +18,4 @@ config.h.in
 missing
 mkinstalldirs
 install-sh
+Eterm*.tar.gz
