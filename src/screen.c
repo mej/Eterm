@@ -1570,6 +1570,28 @@ scr_printscreen(int fullhist)
 #endif
 }
 
+#ifdef MULTI_CHARSET
+int
+scr_multi1(void)
+{
+  rend_t rend;
+
+  rend = screen.rend[screen.row + TermWin.saveLines][screen.col];
+  return ((rend & RS_multiMask) == RS_multi1);
+}
+
+int
+scr_multi2(void)
+{
+  rend_t rend;
+
+  if (screen.col == 0)
+    return 0;
+  rend = screen.rend[screen.row + TermWin.saveLines][screen.col - 1];
+  return ((rend & RS_multiMask) == RS_multi2);
+}
+#endif /* MULTI_CHARSET */
+
 /*
  * Refresh the screen
  * drawn_text/drawn_rend contain the screen information before the update.

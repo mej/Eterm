@@ -13,28 +13,28 @@ AC_SUBST(AUTHORS)
 AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS")
 
 dnl# Find RCS Ident info from source files
-AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$''Id:' src/actions.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(BUTTONS_IDENT, "`grep '$''Id:' src/buttons.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(COMMAND_IDENT, "`grep '$''Id:' src/command.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(DRAW_IDENT, "`grep '$''Id:' src/draw.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(E_IDENT, "`grep '$''Id:' src/e.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(EVENTS_IDENT, "`grep '$''Id:' src/events.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(FONT_IDENT, "`grep '$''Id:' src/font.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' src/grkelot.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SCROLLBAR_IDENT, "`grep '$''Id:' src/scrollbar.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(STARTUP_IDENT, "`grep '$''Id:' src/startup.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(SYSTEM_IDENT, "`grep '$''Id:' src/system.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(TERM_IDENT, "`grep '$''Id:' src/term.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(TIMER_IDENT, "`grep '$''Id:' src/timer.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(UTMP_IDENT, "`grep '$''Id:' src/utmp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
-AC_DEFINE_UNQUOTED(WINDOWS_IDENT, "`grep '$''Id:' src/windows.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$''Id:' $srcdir/src/actions.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(BUTTONS_IDENT, "`grep '$''Id:' $srcdir/src/buttons.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(COMMAND_IDENT, "`grep '$''Id:' $srcdir/src/command.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(DRAW_IDENT, "`grep '$''Id:' $srcdir/src/draw.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(E_IDENT, "`grep '$''Id:' $srcdir/src/e.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(EVENTS_IDENT, "`grep '$''Id:' $srcdir/src/events.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(FONT_IDENT, "`grep '$''Id:' $srcdir/src/font.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' $srcdir/src/grkelot.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' $srcdir/src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' $srcdir/src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' $srcdir/src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' $srcdir/src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' $srcdir/src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' $srcdir/src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' $srcdir/src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SCROLLBAR_IDENT, "`grep '$''Id:' $srcdir/src/scrollbar.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(STARTUP_IDENT, "`grep '$''Id:' $srcdir/src/startup.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SYSTEM_IDENT, "`grep '$''Id:' $srcdir/src/system.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(TERM_IDENT, "`grep '$''Id:' $srcdir/src/term.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(TIMER_IDENT, "`grep '$''Id:' $srcdir/src/timer.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(UTMP_IDENT, "`grep '$''Id:' $srcdir/src/utmp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(WINDOWS_IDENT, "`grep '$''Id:' $srcdir/src/windows.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
 if test ! -z "${CFLAGS}" -o ! -z "${CCOPTS}"; then
@@ -264,6 +264,34 @@ AC_ARG_WITH(pty-group,
               AC_MSG_RESULT(none)
             fi
 )
+AC_MSG_CHECKING(for saved uids)
+AC_ARG_WITH(saved-uids, [  --with(out)-saved-uids  specify that your OS has (does not have) saved uids, default is to guess],
+            if test "$withval" = "yes"; then
+                AC_MSG_RESULT(user specified yes)
+                HAVE_SAVED_UIDS=1
+            elif test "$withval" = "no"; then
+                AC_MSG_RESULT(user specified no)
+                HAVE_SAVED_UIDS=0
+            fi
+)
+if test "x$HAVE_SAVED_UIDS" = "x"; then
+    case `uname -s` in
+        Linux | linux | GNU*Linux)  HAVE_SAVED_UIDS=1 ;;
+        HP*UX | hp*ux)              HAVE_SAVED_UIDS=1 ;;
+        AIX | aix)                  HAVE_SAVED_UIDS=1 ;;
+        Solaris | SunOS | [Ss]un)   HAVE_SAVED_UIDS=1 ;;
+        *BSD)                       HAVE_SAVED_UIDS=0 ;;
+    esac
+    if test "x$HAVE_SAVED_UIDS" = "x"; then
+        AC_MSG_RESULT(unknown...assuming no support)
+        HAVE_SAVED_UIDS=0
+    elif test $HAVE_SAVED_UIDS -eq 1; then
+        AC_MSG_RESULT(yes)
+        AC_DEFINE(HAVE_SAVED_UIDS)
+    else
+        AC_MSG_RESULT(no)
+    fi
+fi
 
 dnl#
 dnl# X LIBRARIES
@@ -861,15 +889,15 @@ for i in utils/kEsetroot themes/Eterm/theme.cfg themes/auto/theme.cfg themes/cEt
          } else {
            print $0;
          }
-        }' $i.in > $i
+        }' $srcdir/$i.in > $srcdir/$i
 done
 &%
 changequote([, ])dnl
 
 dnl If we're not building with Imlib support, don't build Esetroot
 if test -z "$GRLIBS"; then
-  sed -e 's/^bin_PROGRAMS.*$//g' doc/Makefile > doc/Makefile.new
-  mv doc/Makefile.new doc/Makefile
+  sed -e 's/^bin_PROGRAMS.*$//g' $srcdir/doc/Makefile > $srcdir/doc/Makefile.new
+  mv $srcdir/doc/Makefile.new $srcdir/doc/Makefile
 fi
 
 echo "

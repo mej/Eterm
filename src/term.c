@@ -447,6 +447,12 @@ lookup_key(XEvent * ev)
 #else
 	  kbuf[0] = (((PrivateModes & PrivMode_BackSpace) ? !(shft | ctrl) : (shft | ctrl)) ? '\b' : '\177');
 #endif
+#ifdef MULTI_CHARSET
+	  if ((Options & Opt_mbyte_cursor) && scr_multi2()) {
+	    memmove(kbuf + len, kbuf, len);
+	    len *= 2;
+	  }
+#endif /* MULTI_CHARSET */
 	  break;
 
         /* Tab key is normal unless it's shift-tab. */
@@ -502,6 +508,14 @@ lookup_key(XEvent * ev)
 	    kbuf[1] = 'O';
 	    kbuf[2] = ("dacb"[keysym - XK_Left]);
 	  }
+#ifdef MULTI_CHARSET
+	  if ((Options & Opt_mbyte_cursor)
+	      && ((keysym == XK_Left && scr_multi2())
+		  || (keysym == XK_Right && scr_multi1()))) {
+	    memmove(kbuf + len, kbuf, len);
+	    len *= 2;
+	  }
+#endif /* MULTI_CHARSET */
 	  break;
 
           /* Keypad and normal PgUp/PgDn */
@@ -588,6 +602,13 @@ lookup_key(XEvent * ev)
 	case XK_Delete:
 #ifdef KS_DELETE
 	  len = strlen(strcpy(kbuf, KS_DELETE));
+#ifdef MULTI_CHARSET
+	  if ((Options & Opt_mbyte_cursor) && scr_multi1())
+	  {
+	    memmove(kbuf + len, kbuf, len);
+	    len *= 2;
+	  }
+#endif /* MULTI_CHARSET */
 #endif
 	  break;
 
@@ -1223,7 +1244,7 @@ process_xterm_seq(void)
       if (ch) {
 	if (ch == '\t')
 	  ch = ' ';		/* translate '\t' to space */
-	else if ((ch < ' ') && !(isspace(ch) && arg == XTerm_EtermIPC))
+	else if (ch < ' ')
 	  return;		/* control character - exit */
 
 	if (n < sizeof(string) - 1)
@@ -2322,12 +2343,6 @@ xterm_seq(int op, const char *str)
         redraw_image(image_bg);
       }
 #endif /* PIXMAP_SUPPORT */
-      break;
-
-    case XTerm_EtermIPC:
-      for (; (nstr = (char *) strsep(&tnstr, ";"));) {
-	eterm_ipc_parse(nstr);
-      }
       break;
 
     case XTerm_restoreFG:

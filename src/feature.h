@@ -226,15 +226,6 @@
 /* Make it an option */
 #define MAPALERT_OPTION
 
-/********************* utmp logging support *********************/
-
-/* Added security for systems with saved uids and gids.  If you don't define
- * this, and you're not on HP-UX with _HPUX_SOURCE defined, Eterm processes
- * may seem to be owned by root.  But if you define this and don't have them,
- * the utmp and tty stuff could break.  Do some testing.  DO NOT get this one
- * wrong!  */
-#define HAVE_SAVED_UIDS
-
 /********************* Config file parser options *********************/
 
 /* Allow evaluation of expressions like `echo hello` in config files.  The

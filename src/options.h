@@ -81,6 +81,7 @@
 # define Opt_install                    (1LU << 21)
 # define Opt_scrollbar_floating         (1LU << 22)
 # define Opt_double_buffer              (1LU << 23)
+# define Opt_mbyte_cursor		(1LU << 24)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_ITRANS                   (1U << 1)

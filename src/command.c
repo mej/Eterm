@@ -1138,18 +1138,18 @@ clean_exit(void)
       }
     }
     conf_free_subsystem();
+# ifdef USE_XIM
+    if (xim_input_context) {
+      XUnsetICFocus(xim_input_context);
+      XDestroyIC(xim_input_context);
+    }
+    if (xim_input_method) {
+      XCloseIM(xim_input_method);
+    }
+# endif
+    XCloseDisplay(Xdisplay);
   }
 #endif
-#ifdef USE_XIM
-  if (xim_input_context) {
-    XUnsetICFocus(xim_input_context);
-    XDestroyIC(xim_input_context);
-  }
-  if (xim_input_method) {
-    XCloseIM(xim_input_method);
-  }
-#endif
-  XCloseDisplay(Xdisplay);
 
   privileges(INVOKE);
 

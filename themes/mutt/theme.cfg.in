@@ -90,14 +90,14 @@ begin main
 # The Multichar support options.  Same goes for these fonts as for the normal
 # ones.  The "encoding" attribute can be either "eucj" or "sjis" or "euckr"
 # or big5 or gb
-#  begin multichar
-#    font 0 @MFONT0@
-#    font 1 @MFONT1@
-#    font 2 @MFONT2@
-#    font 3 @MFONT3@
-#    font 4 @MFONT4@
-#    encoding @MULTICHAR_ENCODING@
-#  end multichar
+  begin multichar
+    font 0 @MFONT0@
+    font 1 @MFONT1@
+    font 2 @MFONT2@
+    font 3 @MFONT3@
+    font 4 @MFONT4@
+    encoding @MULTICHAR_ENCODING@
+  end multichar
 
 # Define the imageclasses.
   begin imageclasses

@@ -360,6 +360,7 @@
 #undef TIMER_IDENT
 #undef UTMP_IDENT
 #undef WINDOWS_IDENT
+#undef HAVE_SAVED_UIDS
 
 
 /* Leave that blank line there!!  Autoheader needs it.

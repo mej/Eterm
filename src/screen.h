@@ -25,7 +25,7 @@
 #endif
 
 /************ Macros and Definitions ************/
-#define WRAP_CHAR		(MAX_COLS + 1)
+#define WRAP_CHAR		(0xff)
 #define PROP_SIZE       	4096
 #define TABSIZE         	8	/* default tab size */
 
@@ -307,6 +307,10 @@ extern void mouse_tracking(int, int, int, int, int);
 extern void debug_PasteIt(unsigned char *, int);
 extern int debug_selection(void);
 extern void debug_colors(void);
+#ifdef MULTI_CHARSET
+extern int scr_multi2(void);
+extern int scr_multi1(void);
+#endif /* MULTI_CHARSET */
 
 _XFUNCPROTOEND
 

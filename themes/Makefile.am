@@ -23,6 +23,7 @@ install-data-hook:
 	    $(CHMOD) 755 $(DESTDIR)$(pkgdatadir)/themes/$$i ; \
 	    $(CHMOD) 644 $(DESTDIR)$(pkgdatadir)/themes/$$i/???* ; \
 	    rm -f $(DESTDIR)$(pkgdatadir)/themes/$$i/theme.cfg.in ; \
+	    rm -f $(DESTDIR)$(pkgdatadir)/themes/$$i/theme.cfg.in.orig ; \
 	  else \
 	    echo "ALERT!  Not overwriting $$i theme in $(DESTDIR)$(pkgdatadir)/themes.  You will need to update this theme manually." ; \
 	  fi ; \

@@ -286,8 +286,7 @@ static const struct {
       OPT_LONG("mfont2", "multichar font 2", &rs_mfont[2]),
       OPT_LONG("mfont3", "multichar font 3", &rs_mfont[3]),
       OPT_LONG("mfont4", "multichar font 4", &rs_mfont[4]),
-      OPT_LONG("mencoding", "multichar encoding mode (eucj, sjis, euckr, or big5)",
-	       &rs_multichar_encoding),
+      OPT_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", &rs_multichar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
       OPT_LONG("input-method", "XIM input method", &rs_input_method),
@@ -2252,6 +2251,13 @@ parse_toggles(char *buff, void *state)
       Options &= ~(Opt_report_as_keysyms);
     }
 
+  } else if (!BEG_STRCASECMP(buff, "mbyte_cursor ")) {
+    if (bool_val) {
+      Options |= Opt_mbyte_cursor;
+    } else {
+      Options &= ~(Opt_mbyte_cursor);
+    }
+
   } else if (!BEG_STRCASECMP(buff, "itrans ") || !BEG_STRCASECMP(buff, "immotile_trans ")) {
     if (bool_val) {
       image_toggles |= IMOPT_ITRANS;
@@ -3290,12 +3296,12 @@ parse_multichar(char *buff, void *state)
       if (BEG_STRCASECMP(rs_multichar_encoding, "eucj")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")
-	  && BEG_STRCASECMP(rs_multichar_encoding, "big5")) {
+	  && BEG_STRCASECMP(rs_multichar_encoding, "big5")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "gb")) {
 	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
 		    file_peek_path(), file_peek_line(), rs_multichar_encoding);
 	return NULL;
       }
-      set_multichar_encoding(rs_multichar_encoding);
     } else {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding\n",
 		  file_peek_path(), file_peek_line());
@@ -3324,6 +3330,7 @@ parse_multichar(char *buff, void *state)
 		  file_peek_path(), file_peek_line(), NONULL(tmp));
       FREE(tmp);
     }
+
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar\n",
 		file_peek_path(), file_peek_line(), buff);
@@ -3768,6 +3775,9 @@ post_parse(void)
         RESET_AND_ASSIGN(rs_mfont[i], NULL);
       }
     }
+    if (rs_multichar_encoding != NULL) {
+      set_multichar_encoding(rs_multichar_encoding);
+    }
 #endif
   }
   if (rs_font_effects) {
@@ -4102,12 +4112,6 @@ post_parse(void)
     }
   } else {
     rs_anim_delay = 0;
-  }
-#endif
-
-#ifdef MULTI_CHARSET
-  if (rs_multichar_encoding != NULL) {
-    set_multichar_encoding(rs_multichar_encoding);
   }
 #endif
 

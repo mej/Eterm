@@ -4010,3 +4010,18 @@ Fri Nov 24 18:53:13 PST 2000	Michael Jennings <mej@eterm.org>
 	fixes XIM-related seg faults during clean-up.
 	
 -------------------------------------------------------------------------------
+Fri Dec 29 14:39:09 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Moved the HAVE_SAVED_UIDS define into a configure option so that the
+	FreeBSD folks will have an easier time with it.
+
+	Fixed "make distcheck" which broke at some point.
+
+	That X stuff in clean_exit() should only happen if we're debugging.
+	Nobody but me should have to deal with those random hangs. :-)
+
+	Added a patch for multibyte cursor support from Michael C. Wu
+	<keichii@iteration.net> and Sung-Hyun Nam <namsh@lgic.co.kr>, along
+	with some other FreeBSD-related patches from Mr. Wu.
+	
+-------------------------------------------------------------------------------
