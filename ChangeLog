@@ -2556,3 +2556,9 @@ Thu Oct  7 18:48:31 PDT 1999	Michael Jennings <mej@eterm.org>
 	fixing some small leaks here and there.
 	
 -------------------------------------------------------------------------------
+Fri Oct  8 15:31:49 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	This should fix all the weird menu behavior from time to time (well,
+	I hope it does anyway).
+	
+-------------------------------------------------------------------------------

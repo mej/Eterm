@@ -126,4 +126,9 @@ extern short bg_needs_update;
 #endif
 extern const char *display_name;
 
+/************ Function Prototypes ************/
+_XFUNCPROTOBEGIN
+extern int eterm_bootstrap(int argc, char *argv[]);
+_XFUNCPROTOEND
+
 #endif

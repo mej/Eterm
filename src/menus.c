@@ -51,9 +51,13 @@ menulist_t *menu_list = NULL;
 static GC topShadowGC, botShadowGC;
 static Time button_press_time;
 static menu_t *current_menu;
-static menuitem_t *current_item;
 
-inline void
+static inline void grab_pointer(Window win);
+static inline void ungrab_pointer(void);
+static inline void draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len);
+static inline unsigned short center_coords(register unsigned short c1, register unsigned short c2);
+
+static inline void
 grab_pointer(Window win)
 {
 
@@ -84,7 +88,7 @@ grab_pointer(Window win)
   }
 }
 
-inline void
+static inline void
 ungrab_pointer(void)
 {
 
@@ -92,7 +96,7 @@ ungrab_pointer(void)
   XUngrabPointer(Xdisplay, CurrentTime);
 }
 
-inline void
+static inline void
 draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 
@@ -106,7 +110,7 @@ draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
     XDrawString(Xdisplay, d, gc, x, y, str, len);
 }
 
-inline unsigned short
+static inline unsigned short
 center_coords(register unsigned short c1, register unsigned short c2)
 {
 
@@ -248,6 +252,7 @@ menu_handle_button_press(event_t * ev)
 unsigned char
 menu_handle_button_release(event_t * ev)
 {
+  menuitem_t *item;
 
   D_EVENTS(("menu_handle_button_release(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -263,13 +268,14 @@ menu_handle_button_release(event_t * ev)
 
     if (button_press_time && (ev->xbutton.time - button_press_time > MENU_CLICK_TIME)) {
       /* Take action here based on the current menu item */
-      if (current_item) {
-	if (current_item->type == MENUITEM_SUBMENU) {
-	  menu_display_submenu(current_menu, current_item);
-	  current_item = NULL;
-	} else {
-	  menu_action(current_item);
-	  menuitem_deselect(current_menu, current_item);
+      if (current_menu) {
+        if ((item = menuitem_get_current(current_menu)) != NULL) {
+          if (item->type == MENUITEM_SUBMENU) {
+            menu_display_submenu(current_menu, item);
+          } else {
+            menu_action(item);
+            menuitem_deselect(current_menu);
+          }
 	}
       }
     }
@@ -283,14 +289,15 @@ menu_handle_button_release(event_t * ev)
     D_MENU(("Single click mode, detected click.\n"));
     if ((ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w) && (ev->xbutton.y < current_menu->h)) {
       /* Click inside the menu window.  Activate the current item. */
-      if (current_item) {
-	if (current_item->type == MENUITEM_SUBMENU) {
-	  menu_display_submenu(current_menu, current_item);
-	  current_item = NULL;
-	} else {
-	  menu_action(current_item);
-	  menuitem_deselect(current_menu, current_item);
-	  menu_reset_all(menu_list);
+      if (current_menu) {
+        if ((item = menuitem_get_current(current_menu)) != NULL) {
+          if (item->type == MENUITEM_SUBMENU) {
+            menu_display_submenu(current_menu, item);
+          } else {
+            menu_action(item);
+            menuitem_deselect(current_menu);
+            menu_reset_all(menu_list);
+          }
 	}
       }
     } else {
@@ -319,19 +326,6 @@ menu_handle_motion_notify(event_t * ev)
   if (!current_menu) {
     return 1;
   }
-#if 0
-  if ((current_menu->win != ev->xany.window)
-      && !(current_item && current_item->type == MENUITEM_SUBMENU
-	   && current_item->action.submenu && current_item->action.submenu->win == ev->xany.window)) {
-    register menu_t *menu;
-
-    menu = find_menu_by_window(menu_list, ev->xany.window);
-    if (menu) {
-      menu_reset_tree(current_menu);
-      current_menu = menu;
-    }
-  }
-#endif
 
   if (button_press_time) {
     current_menu->state |= MENU_STATE_IS_DRAGGING;
@@ -348,22 +342,22 @@ menu_handle_motion_notify(event_t * ev)
 
     XTranslateCoordinates(Xdisplay, ev->xany.window, Xroot, ev->xbutton.x, ev->xbutton.y, &dest_x, &dest_y, &child);
     menu = find_menu_by_window(menu_list, child);
-    if (menu) {
+    if (menu && menu != current_menu) {
       D_MENU(("Mouse is actually over window 0x%08x belonging to menu \"%s\"\n", child, menu->title));
+      ungrab_pointer();
+      grab_pointer(menu->win);
+      current_menu->state &= ~(MENU_STATE_IS_FOCUSED);
+      menu->state |= MENU_STATE_IS_FOCUSED;
+      if (!menu_is_child(current_menu, menu)) {
+        menu_reset_tree(current_menu);
+      }
+      current_menu = menu;
       XTranslateCoordinates(Xdisplay, ev->xany.window, child, ev->xbutton.x, ev->xbutton.y, &dest_x, &dest_y, &child);
       item = find_item_by_coords(menu, dest_x, dest_y);
-      if (item && item != current_item) {
-	ungrab_pointer();
-	grab_pointer(menu->win);
-	current_menu->state &= ~(MENU_STATE_IS_FOCUSED);
-	menu->state |= MENU_STATE_IS_FOCUSED;
-	if (!menu_is_child(current_menu, menu)) {
-	  menu_reset_tree(current_menu);
-	}
-	current_menu = menu;
-	menu_reset_submenus(menu);
-	menuitem_change_current(item);
+      if (!item || item != menuitem_get_current(current_menu)) {
+        menu_reset_submenus(current_menu);
       }
+      menuitem_change_current(item);
     }
   }
 
@@ -435,6 +429,7 @@ menu_create(char *title)
 			     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
 
   menu->gc = XCreateGC(Xdisplay, menu->win, GCForeground, &gcvalue);
+  menuitem_clear_current(menu);
 
   return menu;
 }
@@ -552,7 +547,6 @@ find_item_by_coords(menu_t * menu, int x, int y)
   for (i = 0; i < menu->numitems; i++) {
     item = menu->items[i];
     if ((x > item->x) && (y > item->y) && (x < item->x + item->w) && (y < item->y + item->h) && (item->type != MENUITEM_SEP)) {
-      menu->curitem = i;
       return (item);
     }
   }
@@ -577,35 +571,41 @@ find_item_in_menu(menu_t * menu, menuitem_t * item)
 }
 
 void
-menuitem_change_current(menuitem_t * item)
+menuitem_change_current(menuitem_t *item)
 {
+  menuitem_t *current;
 
-  D_MENU(("menuitem_change_current():  Changing current_item from \"%s\" to \"%s\"\n", (current_item ? current_item->text : "(NULL)"),
-	  (item ? item->text : "(NULL)")));
+  ASSERT(current_menu != NULL);
 
-  if (current_item != item) {
-    if (current_item) {
+  current = menuitem_get_current(current_menu);
+  if (current != item) {
+    D_MENU(("menuitem_change_current():  Changing current item in menu \"%s\" from \"%s\" to \"%s\"\n", current_menu->title, (current ? current->text : "(NULL)"), (item ? item->text : "(NULL)")));
+    if (current) {
       /* Reset the current item */
-      menuitem_deselect(current_menu, current_item);
+      menuitem_deselect(current_menu);
       /* If we're changing from one submenu to another and neither is a child of the other, or if we're changing from a submenu to
          no current item at all, reset the tree for the current submenu */
-      if (current_item->type == MENUITEM_SUBMENU && current_item->action.submenu != NULL) {
+      if (current->type == MENUITEM_SUBMENU && current->action.submenu != NULL) {
 	if ((item && item->type == MENUITEM_SUBMENU && item->action.submenu != NULL
-	     && !menu_is_child(current_item->action.submenu, item->action.submenu)
-	     && !menu_is_child(item->action.submenu, current_item->action.submenu))
+	     && !menu_is_child(current->action.submenu, item->action.submenu)
+	     && !menu_is_child(item->action.submenu, current->action.submenu))
 	    || (!item)) {
-	  menu_reset_tree(current_item->action.submenu);
+	  menu_reset_tree(current->action.submenu);
 	}
       }
     }
-    current_item = item;
-    if (current_item) {
-      menuitem_select(current_menu, current_item);
-      if (current_item->type == MENUITEM_SUBMENU) {
+    if (item) {
+      menuitem_set_current(current_menu, find_item_in_menu(current_menu, item));
+      menuitem_select(current_menu);
+      if (item->type == MENUITEM_SUBMENU) {
 	/* Display the submenu */
-	menu_display_submenu(current_menu, current_item);
+	menu_display_submenu(current_menu, item);
       }
+    } else {
+      menuitem_clear_current(current_menu);
     }
+  } else {
+    D_MENU(("menuitem_change_current():  Current item in menu \"%s\" does not require changing.\n", current_menu->title));
   }
 }
 
@@ -678,12 +678,13 @@ menu_reset(menu_t * menu)
   ASSERT(menu != NULL);
 
   D_MENU(("menu_reset() called for menu \"%s\" (window 0x%08x)\n", menu->title, menu->win));
-  menu->state &= ~(MENU_STATE_IS_CURRENT | MENU_STATE_IS_DRAGGING);
-  XUnmapWindow(Xdisplay, menu->swin);
-  if (menu->state & MENU_STATE_IS_MAPPED) {
-    XUnmapWindow(Xdisplay, menu->win);
-    menu->state &= ~(MENU_STATE_IS_MAPPED);
+  if (!(menu->state & MENU_STATE_IS_MAPPED)) {
+    return;
   }
+  menu->state &= ~(MENU_STATE_IS_CURRENT | MENU_STATE_IS_DRAGGING | MENU_STATE_IS_MAPPED);
+  XUnmapWindow(Xdisplay, menu->swin);
+  XUnmapWindow(Xdisplay, menu->win);
+  menuitem_clear_current(menu);
 }
 
 void
@@ -691,7 +692,6 @@ menu_reset_all(menulist_t * list)
 {
 
   register unsigned short i;
-  register menu_t *menu;
 
   ASSERT(list != NULL);
 
@@ -699,18 +699,11 @@ menu_reset_all(menulist_t * list)
     return;
 
   D_MENU(("menu_reset_all() called\n"));
-  if (current_item != NULL) {
-    menuitem_deselect(current_menu, current_item);
-    current_item = NULL;
+  if (menuitem_get_current(current_menu) != NULL) {
+    menuitem_deselect(current_menu);
   }
   for (i = 0; i < list->nummenus; i++) {
-    menu = list->menus[i];
-    menu->state &= ~(MENU_STATE_IS_CURRENT | MENU_STATE_IS_DRAGGING);
-    XUnmapWindow(Xdisplay, menu->swin);
-    if (menu->state & MENU_STATE_IS_MAPPED) {
-      XUnmapWindow(Xdisplay, menu->win);
-      menu->state &= ~(MENU_STATE_IS_MAPPED);
-    }
+    menu_reset(list->menus[i]);
   }
   current_menu = NULL;
 }
@@ -725,18 +718,16 @@ menu_reset_tree(menu_t * menu)
   ASSERT(menu != NULL);
 
   D_MENU(("menu_reset_tree() called for menu \"%s\" (window 0x%08x)\n", menu->title, menu->win));
+  if (!(menu->state & MENU_STATE_IS_MAPPED)) {
+    return;
+  }
   for (i = 0; i < menu->numitems; i++) {
     item = menu->items[i];
     if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
       menu_reset_tree(item->action.submenu);
     }
   }
-  menu->state &= ~(MENU_STATE_IS_CURRENT | MENU_STATE_IS_DRAGGING);
-  XUnmapWindow(Xdisplay, menu->swin);
-  if (menu->state & MENU_STATE_IS_MAPPED) {
-    XUnmapWindow(Xdisplay, menu->win);
-    menu->state &= ~(MENU_STATE_IS_MAPPED);
-  }
+  menu_reset(menu);
 }
 
 void
@@ -758,12 +749,14 @@ menu_reset_submenus(menu_t * menu)
 }
 
 void
-menuitem_select(menu_t * menu, menuitem_t * item)
+menuitem_select(menu_t * menu)
 {
+  menuitem_t *item;
 
   ASSERT(menu != NULL);
-  ASSERT(item != NULL);
 
+  item = menuitem_get_current(menu);
+  REQUIRE(item != NULL);
   D_MENU(("menuitem_select():  Selecting new current item \"%s\" within menu \"%s\" (window 0x%08x, selection window 0x%08x)\n",
 	  item->text, menu->title, menu->win, menu->swin));
   item->state |= MENU_STATE_IS_CURRENT;
@@ -784,24 +777,24 @@ menuitem_select(menu_t * menu, menuitem_t * item)
 }
 
 void
-menuitem_deselect(menu_t * menu, menuitem_t * item)
+menuitem_deselect(menu_t * menu)
 {
+  menuitem_t *item;
 
   ASSERT(menu != NULL);
-  ASSERT(item != NULL);
 
+  item = menuitem_get_current(menu);
+  REQUIRE(item != NULL);
   D_MENU(("menuitem_deselect():  Deselecting item \"%s\"\n", item->text));
   item->state &= ~(MENU_STATE_IS_CURRENT);
   XUnmapWindow(Xdisplay, menu->swin);
-  if (find_item_in_menu(menu, item) != (unsigned short) -1) {
-    if (item->type == MENUITEM_SUBMENU) {
-      paste_simage(images[image_submenu].norm, image_submenu, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
-    }
-    draw_string(menu->win, menu->gc, 2 * MENU_HGAP, item->y + item->h - MENU_VGAP, item->text, item->len);
-    if (item->rtext) {
-      draw_string(menu->win, menu->gc, item->x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->y + item->h - MENU_VGAP,
-                  item->rtext, item->rlen);
-    }
+  if (item->type == MENUITEM_SUBMENU) {
+    paste_simage(images[image_submenu].norm, image_submenu, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
+  }
+  draw_string(menu->win, menu->gc, 2 * MENU_HGAP, item->y + item->h - MENU_VGAP, item->text, item->len);
+  if (item->rtext) {
+    draw_string(menu->win, menu->gc, item->x + item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->y + item->h - MENU_VGAP,
+                item->rtext, item->rlen);
   }
 }
 

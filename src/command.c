@@ -2158,7 +2158,7 @@ run_command(char *argv[])
 	int i;
 
 	for (i = 0; argv[i]; i++) {
-	  DPRINTF1(("argv[%d] = \"%s\"\n", i, argv[i]));
+	  DPRINTF(("argv[%d] = \"%s\"\n", i, argv[i]));
 	}
       }
 #endif

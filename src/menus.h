@@ -46,9 +46,13 @@
 #define MENU_HGAP	4
 #define MENU_VGAP	4
 #define MENU_CLICK_TIME	20
+#define NO_CURRENT_ITEM ((unsigned short) -1)
 
-#define menu_is_pixmapped() ((images[image_menu].current->iml->im) && (images[image_menu].mode & MODE_MASK))
-#define menu_submenu_is_pixmapped() ((images[image_submenu].current->iml->im) && (images[image_submenu].mode & MODE_MASK))
+#define menu_is_pixmapped()          ((images[image_menu].current->iml->im) && (images[image_menu].mode & MODE_MASK))
+#define menu_submenu_is_pixmapped()  ((images[image_submenu].current->iml->im) && (images[image_submenu].mode & MODE_MASK))
+#define menuitem_get_current(m)      (((m)->curitem != NO_CURRENT_ITEM) ? ((m)->items[(m)->curitem]) : (NULL))
+#define menuitem_set_current(m, i)   ((m)->curitem = (i))
+#define menuitem_clear_current(m)    ((m)->curitem = NO_CURRENT_ITEM)
 
 /************ Structures ************/
 typedef struct menu_t_struct menu_t;
@@ -121,8 +125,8 @@ extern void menu_reset(menu_t *);
 extern void menu_reset_all(menulist_t *);
 extern void menu_reset_tree(menu_t *);
 extern void menu_reset_submenus(menu_t *);
-extern void menuitem_select(menu_t *, menuitem_t *);
-extern void menuitem_deselect(menu_t *, menuitem_t *);
+extern void menuitem_select(menu_t *);
+extern void menuitem_deselect(menu_t *);
 extern void menu_display_submenu(menu_t *, menuitem_t *);
 extern void menu_draw(menu_t *);
 extern void menu_display(int, int, menu_t *);

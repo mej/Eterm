@@ -54,7 +54,7 @@ extern unsigned int debug_level;
 /* Macros for printing debugging messages */
 # if DEBUG >= 1
 #  ifndef DPRINTF
-#    define DPRINTF(x)          do { if (debug_level >= 1) {__DEBUG(); real_dprintf x;} } while (0)
+#    define DPRINTF(x)          do { __DEBUG(); real_dprintf x; } while (0)
 #  endif
 #  define DPRINTF1(x)           do { if (debug_level >= 1) {__DEBUG(); real_dprintf x;} } while (0)
 #  define DPRINTF2(x)           do { if (debug_level >= 2) {__DEBUG(); real_dprintf x;} } while (0)
