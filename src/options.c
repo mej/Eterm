@@ -33,6 +33,7 @@ static const char cvs_ident[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
@@ -71,8 +72,15 @@ static void *parse_menuitem(char *, void *);
 static void *parse_bbar(char *, void *);
 static void *parse_xim(char *, void *);
 static void *parse_multichar(char *, void *);
+static conf_var_t *conf_new_var(void);
+static void conf_free_var(conf_var_t *);
+static char *conf_get_var(const char *);
+static void conf_put_var(char *, char *);
 static char *builtin_random(char *);
 static char *builtin_exec(char *);
+static char *builtin_get(char *);
+static char *builtin_put(char *);
+static char *builtin_dirscan(char *);
 static char *builtin_version(char *);
 static char *builtin_appname(char *);
 static void *parse_null(char *, void *);
@@ -81,6 +89,7 @@ static ctx_t *context;
 static ctx_state_t *ctx_state;
 static eterm_func_t *builtins;
 static unsigned char ctx_cnt, ctx_idx, ctx_state_idx, ctx_state_cnt, fstate_cnt, builtin_cnt, builtin_idx;
+static conf_var_t *conf_vars = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -1181,6 +1190,9 @@ conf_init_subsystem(void) {
   conf_register_builtin("version", builtin_version);
   conf_register_builtin("exec", builtin_exec);
   conf_register_builtin("random", builtin_random);
+  conf_register_builtin("get", builtin_get);
+  conf_register_builtin("put", builtin_put);
+  conf_register_builtin("dirscan", builtin_dirscan);
 
   /* For expediency, Eterm registers its contexts here.  If you want to use
      this parser in another program, remove these lines. */
@@ -1256,6 +1268,93 @@ conf_register_context_state(unsigned char ctx_id) {
   return (ctx_state_idx);
 }
 
+static conf_var_t *
+conf_new_var(void)
+{
+  conf_var_t *v;
+
+  v = (conf_var_t *) MALLOC(sizeof(conf_var_t));
+  MEMSET(v, 0, sizeof(conf_var_t));
+  return v;
+}
+
+static void
+conf_free_var(conf_var_t *v)
+{
+  if (v->var) {
+    FREE(v->var);
+  }
+  if (v->value) {
+    FREE(v->value);
+  }
+  FREE(v);
+}
+
+static char *
+conf_get_var(const char *var)
+{
+  conf_var_t *v;
+
+  D_OPTIONS(("var == \"%s\"\n", var));
+  for (v = conf_vars; v; v = v->next) {
+    if (!strcmp(v->var, var)) {
+      D_OPTIONS(("Found it at %8p:  \"%s\" == \"%s\"\n", v, v->var, v->value));
+      return (v->value);
+    }
+  }
+  D_OPTIONS(("Not found.\n"));
+  return NULL;
+}
+
+static void
+conf_put_var(char *var, char *val)
+{
+  conf_var_t *v, *loc = NULL, *tmp;
+
+  ASSERT(var != NULL);
+  D_OPTIONS(("var == \"%s\", val == \"%s\"\n", var, val));
+
+  for (v = conf_vars; v; loc = v, v = v->next) {
+    int n;
+
+    n = strcmp(var, v->var);
+    D_OPTIONS(("Comparing at %8p:  \"%s\" -> \"%s\", n == %d\n", v, v->var, v->value, n));
+    if (n == 0) {
+      FREE(v->value);
+      if (val) {
+        v->value = val;
+        D_OPTIONS(("Variable already defined.  Replacing its value with \"%s\"\n", v->value));
+      } else {
+        D_OPTIONS(("Variable already defined.  Deleting it.\n"));
+        if (loc) {
+          loc->next = v->next;
+        } else {
+          conf_vars = v->next;
+        }
+        conf_free_var(v);
+      }
+      return;
+    } else if (n < 0) {
+      break;
+    }
+  }
+  if (!val) {
+    D_OPTIONS(("Empty value given for non-existant variable \"%s\".  Aborting.\n", var));
+    return;
+  }
+  D_OPTIONS(("Inserting new var/val pair between \"%s\" and \"%s\"\n", ((loc) ? loc->var : "-beginning-"), ((v) ? v->var : "-end-")));
+  tmp = conf_new_var();
+  if (loc == NULL) {
+    tmp->next = conf_vars;
+    conf_vars = tmp;
+  } else {
+    tmp->next = loc->next;
+    loc->next = tmp;
+  }
+  tmp->var = var;
+  tmp->value = val;
+}
+
 static char *
 builtin_random(char *param)
 {
@@ -1318,6 +1417,103 @@ builtin_exec(char *param)
   FREE(Command);
 
   return (Output);
+}
+
+static char *
+builtin_get(char *param)
+{
+  char *s, *f, *v;
+  unsigned short n;
+
+  if (!param || ((n = NumWords(param)) > 2)) {
+    print_error("Parse error in file %s, line %lu:  Invalid syntax for %get().  Syntax is:  %get(variable)", file_peek_path(), file_peek_line());
+    return NULL;
+  }
+
+  D_PARSE(("builtin_get(%s) called\n", param));
+  s = Word(1, param);
+  if (n == 2) {
+    f = Word(2, param);
+  } else {
+    f = NULL;
+  }
+  v = conf_get_var(s);
+  FREE(s);
+  if (v) {
+    FREE(f);
+    return (StrDup(v));
+  } else if (f) {
+    return f;
+  } else {
+    return NULL;
+  }
+}
+
+static char *
+builtin_put(char *param)
+{
+  char *var, *val;
+
+  if (!param || (NumWords(param) != 2)) {
+    print_error("Parse error in file %s, line %lu:  Invalid syntax for %put().  Syntax is:  %put(variable value)", file_peek_path(), file_peek_line());
+    return NULL;
+  }
+
+  D_PARSE(("builtin_put(%s) called\n", param));
+  var = Word(1, param);
+  val = Word(2, param);
+  conf_put_var(var, val);
+  return NULL;
+}
+
+static char *
+builtin_dirscan(char *param)
+{
+  int i;
+  unsigned long n;
+  DIR *dirp;
+  struct dirent *dp;
+  struct stat filestat;
+  char *dir, *buff;
+
+  if (!param || (NumWords(param) != 1)) {
+    print_error("Parse error in file %s, line %lu:  Invalid syntax for %dirscan().  Syntax is:  %dirscan(directory)", file_peek_path(), file_peek_line());
+    return NULL;
+  }
+  D_PARSE(("builtin_dirscan(%s)\n", param));
+  dir = Word(1, param);
+  dirp = opendir(dir);
+  if (!dirp) {
+    return NULL;
+  }
+  buff = (char *) MALLOC(CONFIG_BUFF);
+  *buff = 0;
+  n = CONFIG_BUFF;
+
+  for (i = 0; (dp = readdir(dirp)) != NULL;) {
+    char fullname[PATH_MAX];
+
+    snprintf(fullname, sizeof(fullname), "%s/%s", dir, dp->d_name);
+    if (stat(fullname, &filestat)) {
+      D_PARSE((" -> Couldn't stat() file %s -- %s\n", fullname, strerror(errno)));
+    } else {
+      if (S_ISREG(filestat.st_mode)) {
+        unsigned long len;
+
+        len = strlen(dp->d_name);
+        if (len < n) {
+          strcat(buff, dp->d_name);
+          strcat(buff, " ");
+          n -= len + 1;
+        }
+      }
+    }
+    if (n < 2) {
+      break;
+    }
+  }
+  closedir(dirp);
+  return buff;
 }
 
 static char *
@@ -1475,12 +1671,17 @@ shell_expand(char *s)
 	  Command = shell_expand(Command);
 	  Output = (builtins[k].ptr) (Command);
 	  FREE(Command);
-	  if (Output && *Output) {
-	    l = strlen(Output) - 1;
-	    strncpy(new + j, Output, max - j);
-            cnt2 = max - j - 1;
-	    j += MIN(l, cnt2);
-	    FREE(Output);
+	  if (Output) {
+            if (*Output) {
+              l = strlen(Output) - 1;
+              strncpy(new + j, Output, max - j);
+              cnt2 = max - j - 1;
+              j += MIN(l, cnt2);
+              FREE(Output);
+            } else {
+              FREE(Output);
+              j--;
+            }
 	  } else {
 	    j--;
 	  }

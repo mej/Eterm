@@ -182,6 +182,11 @@ typedef struct eterm_func_struct {
   eterm_func_ptr_t ptr;
 } eterm_func_t;
 
+typedef struct conf_var_struct {
+  char *var, *value;
+  struct conf_var_struct *next;
+} conf_var_t;
+
 /************ Variables ************/
 extern fstate_t *fstate;
 extern unsigned char fstate_idx;

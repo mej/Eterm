@@ -3197,3 +3197,10 @@ Thu Feb 17 15:13:20 PST 2000	Michael Jennings <mej@eterm.org>
 	as they do on the screen.
 	
 -------------------------------------------------------------------------------
+Thu Feb 17 21:38:23 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a bug in the menu code reported by Sung-Hyun Nam
+	<namsh@lgic.co.kr>.  There's also some new stuff here, but I haven't
+	tried testing it at *all*, so I'm not prepared to talk about it.
+	
+-------------------------------------------------------------------------------

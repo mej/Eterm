@@ -310,18 +310,16 @@ menu_handle_button_release(event_t * ev)
 
     /* Single-click mode */
     D_MENU(("Single click mode, detected click.  Button press time is %lu, release time is %lu\n", button_press_time, ev->xbutton.time));
-    if ((ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w) && (ev->xbutton.y < current_menu->h)) {
+    if (current_menu && (ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w) && (ev->xbutton.y < current_menu->h)) {
       /* Click inside the menu window.  Activate the current item. */
-      if (current_menu) {
-        if ((item = menuitem_get_current(current_menu)) != NULL) {
-          if (item->type == MENUITEM_SUBMENU) {
-            menu_display_submenu(current_menu, item);
-          } else {
-            menu_action(item);
-            menuitem_deselect(current_menu);
-            menu_reset_all(menu_list);
-          }
-	}
+      if ((item = menuitem_get_current(current_menu)) != NULL) {
+        if (item->type == MENUITEM_SUBMENU) {
+          menu_display_submenu(current_menu, item);
+        } else {
+          menu_action(item);
+          menuitem_deselect(current_menu);
+          menu_reset_all(menu_list);
+        }
       }
     } else if (!(button_press_time && (ev->xbutton.time - button_press_time < MENU_CLICK_TIME)) || (button_press_x && button_press_y)) {
       /* Single click which lasted too long, or the second click occured outside the menu */
@@ -748,7 +746,7 @@ menu_reset_all(menulist_t * list)
     return;
 
   D_MENU(("menu_reset_all(%8p) called\n", list));
-  if (menuitem_get_current(current_menu) != NULL) {
+  if (current_menu && menuitem_get_current(current_menu) != NULL) {
     menuitem_deselect(current_menu);
   }
   for (i = 0; i < list->nummenus; i++) {
