@@ -1,4 +1,4 @@
-dnl# $Id: configure.in,v 1.59 2002/02/03 20:53:05 mej Exp $
+dnl# $Id: configure.in,v 1.60 2002/02/11 16:17:09 mej Exp $
 
 PATH=$PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/ucb/bin
 export PATH
@@ -140,12 +140,6 @@ AC_LN_S
 AC_PATH_PROG(PERL, perl, perl)
 AC_PROG_AWK
 export PERL AWK
-
-AC_CHECK_SIZEOF(int, 4)
-AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(void *, 4)
-AC_CHECK_SIZEOF(long long, 8)
-AC_C_BIGENDIAN
 
 AC_C_CONST
 AC_C_INLINE
@@ -752,18 +746,6 @@ AC_ARG_ENABLE(greek,
               AC_MSG_RESULT(no)
             fi], AC_MSG_RESULT(no)
 )
-
-CONFIG_BUFF_SIZE=20480
-AC_MSG_CHECKING(for the buffer size of the config file parser)
-AC_ARG_WITH(config-buffer-size,
-[  --with-config-buffer-size
-                         specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)], [
-            if test "$withval" != "yes" -a "$withval" != "no"; then
-              CONFIG_BUFF_SIZE=$withval
-            fi
-])
-AC_MSG_RESULT($CONFIG_BUFF_SIZE bytes)
-AC_DEFINE_UNQUOTED(CONFIG_BUFF, $CONFIG_BUFF_SIZE)
 
 AC_ARG_WITH(terminfo,
 [  --without-terminfo      do not compile the Eterm terminfo file], [
