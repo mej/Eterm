@@ -412,34 +412,50 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   pixmap = simg->pmap->pixmap;	/* Save this for later */
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO) && (which != image_bg)) {
-    char buff[255], *iclass = NULL, *state = NULL;
+    char buff[255], *iclass = NULL, *state = NULL, *reply;
 
     switch (which) {
-    case image_up: iclass = "BUTTON_ARROW_UP"; break;
-    case image_down: iclass = "BUTTON_ARROW_DOWN"; break;
-    case image_left: iclass = "BUTTON_ARROW_LEFT"; break;
-    case image_right: iclass = "BUTTON_ARROW_RIGHT"; break;
+    case image_bg: iclass = "ETERM_BG"; break;
+    case image_up: iclass = "ETERM_ARROW_UP"; break;
+    case image_down: iclass = "ETERM_ARROW_DOWN"; break;
+    case image_left: iclass = "ETERM_ARROW_LEFT"; break;
+    case image_right: iclass = "ETERM_ARROW_RIGHT"; break;
 # ifdef PIXMAP_SCROLLBAR
-    case image_sb: iclass = "BAR_VERTICAL"; state = "clicked"; break;
-    case image_sa: iclass = "BAR_VERTICAL"; ((images[which].current == images[which].selected) ? (state = "hilited") : (state = "clicked")); break;
+    case image_sb: iclass = "ETERM_TROUGH"; break;
+    case image_sa: iclass = "ETERM_ANCHOR"; break;
 # endif
-    case image_menu: iclass = "BAR_HORIZONTAL"; state = "normal"; break;
-    case image_submenu: iclass = "DEFAULT_MENU_SUB"; break;
+    case image_menu: iclass = "ETERM_MENU_ITEM"; break;
+    case image_submenu: iclass = "ETERM_MENU_SUBMENU"; break;
     default: break;
     }
-    if (!state) {
-      if (images[which].current == images[which].selected) {
-        state = "hilited";
-      } else if (images[which].current == images[which].clicked) {
-        state = "clicked";
-      } else {
-        state = "normal";
-      }
+    if (images[which].current == images[which].selected) {
+      state = "hilited";
+    } else if (images[which].current == images[which].clicked) {
+      state = "clicked";
+    } else {
+      state = "normal";
     }
-    if (iclass && state) {
-      snprintf(buff, sizeof(buff), "imageclass %s apply %ld %s", iclass, (long int) win, state);
+    if (iclass) {
+      snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
       enl_ipc_send(buff);
-      return;
+      for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+      if (strstr(reply, "not")) {
+        print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
+        if (image_mode_is(which, ALLOW_IMAGE)) {
+          image_set_mode(which, MODE_IMAGE);
+        } else {
+          image_set_mode(which, MODE_SOLID);
+        }
+      } else if (strstr(reply, "Error")) {
+        print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
+        FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
+                      if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
+      } else {
+        snprintf(buff, sizeof(buff), "imageclass %s apply 0x%x %s", iclass, (int) win, state);
+        enl_ipc_send(buff);
+        for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+        return;
+      }
     }
   }
 

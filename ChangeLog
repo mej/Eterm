@@ -2459,3 +2459,26 @@ Wed Sep 22 15:52:01 PDT 1999	Michael Jennings <mej@eterm.org>
 	problems.
 	
 -------------------------------------------------------------------------------
+Thu Sep 23 15:56:35 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Auto mode lives.  Still a little flaky with the submenu pixmap, but
+	everything else seems to work peachily.  It requires an Enlightenment
+	themes that contains the needed imageclasses, but that's not hard to
+	do.  Here are the classes you need:
+
+	ETERM_BG             Background image
+	ETERM_ARROW_UP       Up arrow
+	ETERM_ARROW_DOWN     Down arrow
+	ETERM_ARROW_LEFT     Left arrow (for future use)
+	ETERM_ARROW_RIGHT    Right arrow (for future use)
+	ETERM_TROUGH         Scrollbar trough
+	ETERM_ANCHOR         Scrollbar anchor
+	ETERM_MENU_BOX       Menu background
+	ETERM_MENU_ITEM      Menu item
+	ETERM_MENU_SUBMENU   Submenu item
+
+	Currently, ETERM_MENU_BOX doesn't work; Eterm uses ETERM_MENU_ITEM
+	instead.  This is a design issue I have to fix. :-)  Everything else,
+	however, should work as noted above.
+	
+-------------------------------------------------------------------------------

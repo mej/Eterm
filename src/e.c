@@ -123,15 +123,18 @@ enl_ipc_send(char *str)
 
   ASSERT(str != NULL);
 
+  D_ENL(("enl_ipc_send():  Sending \"%s\" to Enlightenment.\n", str));
+
   if (ipc_win == None) {
     if ((ipc_win = enl_ipc_get_win()) == None) {
+      D_ENL((" ...or perhaps not, since Enlightenment doesn't seem to be running.  No IPC window, no IPC.  Sorry....\n"));
       return;
     }
   }
   len = strlen(str);
-  ipc_atom = XInternAtom(Xdisplay, "ENL_MSG", True);
+  ipc_atom = XInternAtom(Xdisplay, "ENL_MSG", False);
   if (ipc_atom == None) {
-    D_ENL(("enl_ipc_send():  IPC error:  ENL_MSG atom does not exist.\n"));
+    D_ENL(("enl_ipc_send():  IPC error:  Unable to find/create ENL_MSG atom.\n"));
     return;
   }
   ev.xclient.type = ClientMessage;
@@ -155,6 +158,7 @@ enl_ipc_send(char *str)
     }
     XSendEvent(Xdisplay, ipc_win, False, 0, (XEvent *) & ev);
   }
+  D_ENL(("enl_ipc_send():  Message sent.\n"));
 }
 
 char *
