@@ -1597,23 +1597,37 @@ process_sgr_mode(unsigned int nargs, int arg[])
           case 1:
               scr_rendition(1, RS_Bold);
               break;
+          case 2:
+              scr_rendition(1, RS_Dim);
+              break;
+          case 3:
+              scr_rendition(1, RS_Italic);
+              break;
           case 4:
               scr_rendition(1, RS_Uline);
               break;
           case 5:
               scr_rendition(1, RS_Blink);
               break;
+          case 6:
+              scr_rendition(1, RS_Overscore);
+              break;
           case 7:
               scr_rendition(1, RS_RVid);
               break;
+          case 8:
+              scr_rendition(1, RS_Conceal);
+              break;
           case 22:
               scr_rendition(0, RS_Bold);
+              scr_rendition(0, RS_Dim);
               break;
           case 24:
               scr_rendition(0, RS_Uline);
               break;
           case 25:
               scr_rendition(0, RS_Blink);
+              scr_rendition(0, RS_Overscore);
               break;
           case 27:
               scr_rendition(0, RS_RVid);

@@ -5164,3 +5164,7 @@ Sun Jan 11 17:09:07 2004                        Michael Jennings (mej)
 
 It's too bad you can't just say, "Copyright 1997-2999."
 ----------------------------------------------------------------------
+Mon Jan 19 21:02:30 2004                        Michael Jennings (mej)
+
+Patch from David Lloyd <dmlloyd@tds.net> for overstrike support.
+----------------------------------------------------------------------

@@ -757,7 +757,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                       if (screen.row == screen.bscroll) {
                           scroll_text(screen.tscroll, screen.bscroll, 1, 0);
                           j = screen.bscroll + TermWin.saveLines;
-                          blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
+                          blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline|RS_Overscore));
                       } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
                           screen.row++;
                           row = screen.row + TermWin.saveLines;
@@ -786,7 +786,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 j = screen.bscroll + TermWin.saveLines;
                 /* blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
                    rstyle);    Bug fix from John Ellison - need to reset rstyle */
-                blank_screen_mem(screen.text, screen.rend, j, rstyle & ~RS_Uline);
+                blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline|RS_Overscore));
             } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
                 screen.row++;
                 row = screen.row + TermWin.saveLines;
@@ -1004,9 +1004,9 @@ scr_erase_line(int mode)
           default:
               return;
         }
-        blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num, rstyle & ~RS_Uline);
+        blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num, rstyle & ~(RS_Uline|RS_Overscore));
     } else {
-        blank_screen_mem(screen.text, screen.rend, row, rstyle & ~RS_Uline);
+        blank_screen_mem(screen.text, screen.rend, row, rstyle & ~(RS_Uline|RS_Overscore));
     }
 }
 
@@ -1059,7 +1059,7 @@ scr_erase_screen(int mode)
     }
     if (row >= 0 && row <= TERM_WINDOW_GET_REPORTED_ROWS()) {      /* check OOB */
         UPPER_BOUND(num, (TERM_WINDOW_GET_REPORTED_ROWS() - row));
-        if (rstyle & RS_RVid || rstyle & RS_Uline)
+        if (rstyle & RS_RVid || rstyle & RS_Uline || rstyle & RS_Overscore)
             ren = -1;
         else {
             if (GET_BGCOLOR(rstyle) == bgColor) {
@@ -1076,7 +1076,7 @@ scr_erase_screen(int mode)
             }
         }
         for (; num--; row++) {
-            blank_screen_mem(screen.text, screen.rend, row + row_offset, rstyle & ~(RS_RVid | RS_Uline));
+            blank_screen_mem(screen.text, screen.rend, row + row_offset, rstyle & ~(RS_RVid | RS_Uline | RS_Overscore));
             blank_screen_mem(drawn_text, drawn_rend, row, ren);
         }
     }
@@ -2053,6 +2053,15 @@ scr_refresh(int type)
             if (rend & RS_Uline) {
                 if (descent > 1) {
                     XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+                    UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
+                } else {
+                    XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
+                    UPDATE_BOX(xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
+                }
+            }
+            if (rend & RS_Overscore) {
+                if (ascent > 1) {
+                    XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen) - 1, ypixel - ascent);
                     UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
                 } else {
                     XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
@@ -3338,6 +3347,14 @@ debug_colors(void)
         fprintf(stderr, "blink ");
     if (rstyle & RS_Uline)
         fprintf(stderr, "uline ");
+    if (rstyle & RS_Overscore)
+        fprintf(stderr, "overscore ");
+    if (rstyle & RS_Italic)
+        fprintf(stderr, "italic ");
+    if (rstyle & RS_Dim)
+        fprintf(stderr, "dim ");
+    if (rstyle & RS_Conceal)
+        fprintf(stderr, "conceal ");
     fprintf(stderr, "): ");
 
     color = GET_FGCOLOR(rstyle);

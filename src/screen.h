@@ -115,11 +115,15 @@ enum {
 #define RS_multiMask		(RS_multi0|RS_multi1)	/* multibyte mask */
 #endif
 #define RS_fgMask		0x00001F00u	/* 32 colors */
+#define RS_Overscore		0x00002000u	/* overscore */
+#define RS_Italic		0x00004000u	/* italic */
 #define RS_Bold			0x00008000u	/* bold */
 #define RS_bgMask		0x001F0000u	/* 32 colors */
+#define RS_Dim			0x00200000u	/* dim (apply alpha) */
+#define RS_Conceal		0x00400000u	/* conceal */
 #define RS_Blink		0x00800000u	/* blink */
 
-#define RS_attrMask		(0xFF000000u|RS_Bold|RS_Blink)
+#define RS_attrMask		(0xFF000000u|RS_Overscore|RS_Italic|RS_Bold|RS_Dim|RS_Conceal|RS_Blink)
 
 /* how to build & extract colors and attributes */
 #define GET_FGCOLOR(r)	(((r) & RS_fgMask)>>8)
