@@ -1012,7 +1012,7 @@ bbar_show(buttonbar_t *bbar, unsigned char visible)
 }
 
 void
-bbar_show_all(char visible)
+bbar_show_all(signed char visible)
 {
     buttonbar_t *bbar;
 

@@ -1091,7 +1091,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         simg->pmap->pixmap = create_trans_pixmap(simg, which, win, 0, 0, width, height);
         if (simg->pmap->pixmap != None) {
-            if ((which == image_bg) && (Options & Opt_double_buffer)) {
+            if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
                 copy_buffer_pixmap(MODE_TRANS, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1117,7 +1117,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         }
         if (simg->pmap->pixmap != None) {
             D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-            if ((which == image_bg) && (Options & Opt_double_buffer)) {
+            if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
                 copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                 XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
             } else {
@@ -1228,7 +1228,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                     bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
                 }
                 D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
-                if ((which == image_bg) && (Options & Opt_double_buffer)) {
+                if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
                     copy_buffer_pixmap(MODE_VIEWPORT, (unsigned long) simg->pmap->pixmap, width, height);
                     XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
                 } else {
@@ -1254,7 +1254,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
 
     /* Fall back to solid mode if all else fails. */
     if (!image_mode_is(which, MODE_MASK)) {
-        if ((which == image_bg) && (Options & Opt_double_buffer)) {
+        if ((which == image_bg) && (OPTIONS & OPT_DOUBLE_BUFFER)) {
             copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
             XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
         } else {

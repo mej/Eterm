@@ -290,14 +290,14 @@ lookup_key(XEvent * ev)
         }
         if (len) {
             /* Only home for keypresses with length. */
-            if (Options & Opt_home_on_input) {
+            if (OPTIONS & OPT_HOME_ON_INPUT) {
                 TermWin.view_start = 0;
             }
         }
 
         /* This is a special mode that reports all extended keysyms (above 0xff00) to the application
            as escape sequences.  Very few applications use it, but it can be a handy thing to have. */
-        if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
+        if ((OPTIONS & OPT_REPORT_AS_KEYSYMS) && (keysym >= 0xff00)) {
             len = sprintf((char *) kbuf, "\033[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));
             tt_write(kbuf, len);
             LK_RET();
@@ -468,7 +468,7 @@ lookup_key(XEvent * ev)
                       kbuf[0] = (((PrivateModes & PrivMode_BackSpace) ? !(shft | ctrl) : (shft | ctrl)) ? '\b' : '\177');
 #endif
 #ifdef MULTI_CHARSET
-                      if ((Options & Opt_mbyte_cursor) && scr_multi2()) {
+                      if ((OPTIONS & OPT_MBYTE_CURSOR) && scr_multi2()) {
                           memmove(kbuf + len, kbuf, len);
                           len *= 2;
                       }
@@ -530,7 +530,7 @@ lookup_key(XEvent * ev)
                           kbuf[2] = ("dacb"[keysym - XK_Left]);
                       }
 #ifdef MULTI_CHARSET
-                      if ((Options & Opt_mbyte_cursor)
+                      if ((OPTIONS & OPT_MBYTE_CURSOR)
                           && ((keysym == XK_Left && scr_multi2())
                               || (keysym == XK_Right && scr_multi1()))) {
                           memmove(kbuf + len, kbuf, len);
@@ -624,7 +624,7 @@ lookup_key(XEvent * ev)
 #ifdef KS_DELETE
                       len = strlen(strcpy(kbuf, KS_DELETE));
 #ifdef MULTI_CHARSET
-                      if ((Options & Opt_mbyte_cursor) && scr_multi1()) {
+                      if ((OPTIONS & OPT_MBYTE_CURSOR) && scr_multi1()) {
                           memmove(kbuf + len, kbuf, len);
                           len *= 2;
                       }
@@ -1541,16 +1541,16 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 #endif
 
                 case 1010:     /* Scroll to bottom on TTY output */
-                    if (Options & Opt_home_on_output)
-                        Options &= ~Opt_home_on_output;
+                    if (OPTIONS & OPT_HOME_ON_OUTPUT)
+                        OPTIONS &= ~OPT_HOME_ON_OUTPUT;
                     else
-                        Options |= Opt_home_on_output;
+                        OPTIONS |= OPT_HOME_ON_OUTPUT;
                     break;
                 case 1012:     /* Scroll to bottom on TTY input */
-                    if (Options & Opt_home_on_input)
-                        Options &= ~Opt_home_on_input;
+                    if (OPTIONS & OPT_HOME_ON_INPUT)
+                        OPTIONS &= ~OPT_HOME_ON_INPUT;
                     else
-                        Options |= Opt_home_on_input;
+                        OPTIONS |= OPT_HOME_ON_INPUT;
                     break;
 
                 case 1047:     /* Alternate screen & clear */
@@ -2249,18 +2249,18 @@ xterm_seq(int op, const char *str)
                 break;
             case 11:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_right);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_SCROLLBAR_RIGHT);
                 scr_touch();
                 parent_resize();
                 break;
             case 12:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_floating);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_SCROLLBAR_FLOATING);
                 scrollbar_reposition_and_always_draw();
                 break;
             case 13:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_popup);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_SCROLLBAR_POPUP);
                 break;
             case 14:
                 nstr = (char *) strsep(&tnstr, ";");
@@ -2277,21 +2277,21 @@ xterm_seq(int op, const char *str)
                 break;
             case 20:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_visual_bell);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_VISUAL_BELL);
                 break;
 #ifdef MAPALERT_OPTION
             case 21:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_map_alert);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_MAP_ALERT);
                 break;
 #endif
             case 22:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_xterm_select);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_XTERM_SELECT);
                 break;
             case 23:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_select_whole_line);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_SELECT_WHOLE_LINE);
                 break;
             case 24:
                 nstr = (char *) strsep(&tnstr, ";");
@@ -2302,18 +2302,18 @@ xterm_seq(int op, const char *str)
                 break;
             case 25:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_select_trailing_spaces);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_SELECT_TRAILING_SPACES);
                 break;
             case 26:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_report_as_keysyms);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_REPORT_AS_KEYSYMS);
                 break;
             case 27:
                 nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, Options, Opt_no_input);
+                OPT_SET_OR_TOGGLE(nstr, OPTIONS, OPT_NO_INPUT);
                 wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
                 wm_hints->flags |= InputHint;
-                wm_hints->input = ((Options & Opt_no_input) ? False : True);
+                wm_hints->input = ((OPTIONS & OPT_NO_INPUT) ? False : True);
                 XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
                 XFree(wm_hints);
                 break;

@@ -136,7 +136,7 @@ extern void bbar_deselect_button(buttonbar_t *bbar, button_t *button);
 extern void bbar_click_button(buttonbar_t *bbar, button_t *button);
 extern void button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Time t);
 extern unsigned char bbar_show(buttonbar_t *bbar, unsigned char visible);
-extern void bbar_show_all(char visible);
+extern void bbar_show_all(signed char visible);
 extern void bbar_resize(buttonbar_t *bbar, int w);
 extern void bbar_resize_all(int width);
 extern void bbar_dock(buttonbar_t *bbar, unsigned char dock);

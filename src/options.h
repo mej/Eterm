@@ -28,34 +28,34 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 /************ Macros and Definitions ************/
-# define Opt_console                    (1LU <<  0)
-# define Opt_login_shell                (1LU <<  1)
-# define Opt_iconic                     (1LU <<  2)
-# define Opt_visual_bell                (1LU <<  3)
-# define Opt_map_alert                  (1LU <<  4)
-# define Opt_reverse_video              (1LU <<  5)
-# define Opt_write_utmp                 (1LU <<  6)
-# define Opt_scrollbar                  (1LU <<  7)
-# define Opt_meta8                      (1LU <<  8)
-# define Opt_home_on_output             (1LU <<  9)
-# define Opt_scrollbar_right            (1LU << 10)
-# define Opt_borderless                 (1LU << 11)
-# define Opt_no_input                   (1LU << 12)
-# define Opt_no_cursor                  (1LU << 13)
-# define Opt_pause                      (1LU << 14)
-# define Opt_home_on_input              (1LU << 15)
-# define Opt_report_as_keysyms          (1LU << 16)
-# define Opt_xterm_select               (1LU << 17)
-# define Opt_select_whole_line          (1LU << 18)
-# define Opt_scrollbar_popup            (1LU << 19)
-# define Opt_select_trailing_spaces     (1LU << 20)
-# define Opt_install                    (1LU << 21)
-# define Opt_scrollbar_floating         (1LU << 22)
-# define Opt_double_buffer              (1LU << 23)
-# define Opt_mbyte_cursor		(1LU << 24)
-# define Opt_proportional               (1LU << 25)
-# define Opt_resize_gravity             (1LU << 26)
-# define Opt_secondary_screen           (1LU << 27)
+# define OPT_CONSOLE                    (1LU <<  0)
+# define OPT_LOGIN_SHELL                (1LU <<  1)
+# define OPT_ICONIC                     (1LU <<  2)
+# define OPT_VISUAL_BELL                (1LU <<  3)
+# define OPT_MAP_ALERT                  (1LU <<  4)
+# define OPT_REVERSE_VIDEO              (1LU <<  5)
+# define OPT_WRITE_UTMP                 (1LU <<  6)
+# define OPT_SCROLLBAR                  (1LU <<  7)
+# define OPT_META8                      (1LU <<  8)
+# define OPT_HOME_ON_OUTPUT             (1LU <<  9)
+# define OPT_SCROLLBAR_RIGHT            (1LU << 10)
+# define OPT_BORDERLESS                 (1LU << 11)
+# define OPT_NO_INPUT                   (1LU << 12)
+# define OPT_NO_CURSOR                  (1LU << 13)
+# define OPT_PAUSE                      (1LU << 14)
+# define OPT_HOME_ON_INPUT              (1LU << 15)
+# define OPT_REPORT_AS_KEYSYMS          (1LU << 16)
+# define OPT_XTERM_SELECT               (1LU << 17)
+# define OPT_SELECT_WHOLE_LINE          (1LU << 18)
+# define OPT_SCROLLBAR_POPUP            (1LU << 19)
+# define OPT_SELECT_TRAILING_SPACES     (1LU << 20)
+# define OPT_INSTALL                    (1LU << 21)
+# define OPT_SCROLLBAR_FLOATING         (1LU << 22)
+# define OPT_DOUBLE_BUFFER              (1LU << 23)
+# define OPT_MBYTE_CURSOR               (1LU << 24)
+# define OPT_PROPORTIONAL               (1LU << 25)
+# define OPT_RESIZE_GRAVITY             (1LU << 26)
+# define OPT_SECONDARY_SCREEN           (1LU << 27)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_ITRANS                   (1U << 1)
@@ -71,7 +71,7 @@
 #define PARSE_TRY_NO_THEME              ((unsigned char) 0x04)
 #define PARSE_TRY_ALL                   ((unsigned char) 0x07)
 
-#define to_keysym(p,s)             do { KeySym sym; \
+#define TO_KEYSYM(p,s)             do { KeySym sym; \
                                      if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
                                    } while (0)
 #define CHECK_VALID_INDEX(i)       (((i) >= image_bg) && ((i) < image_max))
@@ -81,7 +81,7 @@
 /************ Structures ************/
 
 /************ Variables ************/
-extern unsigned long Options, image_toggles;
+extern unsigned long OPTIONS, image_toggles;
 extern char *theme_dir, *user_dir;
 extern       char **rs_exec_args;       /* Args to exec (-e or --exec) */
 extern       char  *rs_title;		/* Window title */

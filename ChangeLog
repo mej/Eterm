@@ -5080,3 +5080,8 @@ Wed Aug 20 10:19:50 2003                        Michael Jennings (mej)
 When saving settings, make sure to save the font effects too.  Spotted
 by ptiJo <ptiJo@noos.fr>.
 ----------------------------------------------------------------------
+Thu Aug 21 23:18:23 2003                        Michael Jennings (mej)
+
+A few cosmetic changes to the source code, and a fix for Debian Bug
+#176274 reported by Gerhard Tonn <GerhardTonn@gammatau.de>.
+----------------------------------------------------------------------

@@ -383,7 +383,7 @@ scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes)
     }
     if (!image_mode_is(image_up, MODE_MASK)) {
         /* Solid mode.  Redraw every time since it's cheap. */
-        if (Options & Opt_scrollbar_floating) {
+        if (OPTIONS & OPT_SCROLLBAR_FLOATING) {
             XSetWindowBackground(Xdisplay, scrollbar.up_win, PixColors[bgColor]);
             XClearWindow(Xdisplay, scrollbar.up_win);
         } else {
@@ -453,7 +453,7 @@ scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes)
     }
     if (!image_mode_is(image_down, MODE_MASK)) {
         /* Solid mode.  Redraw every time since it's cheap. */
-        if (Options & Opt_scrollbar_floating) {
+        if (OPTIONS & OPT_SCROLLBAR_FLOATING) {
             XSetWindowBackground(Xdisplay, scrollbar.dn_win, PixColors[bgColor]);
             XClearWindow(Xdisplay, scrollbar.dn_win);
         } else {
@@ -538,7 +538,7 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
         /* Solid mode.  Redraw every time since it's cheap. */
 #ifdef XTERM_SCROLLBAR
         if (scrollbar.type == SCROLLBAR_XTERM) {
-            int x = ((Options & Opt_scrollbar_right) ? 1 : 0);
+            int x = ((OPTIONS & OPT_SCROLLBAR_RIGHT) ? 1 : 0);
 
             XSetForeground(Xdisplay, gc_stipple, images[image_sa].current->bg);
             XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, x + 1, 0, scrollbar_anchor_width() - x - 1, scrollbar_anchor_height());
@@ -547,7 +547,7 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
 #endif /* XTERM_SCROLLBAR */
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
         if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
-            if (Options & Opt_scrollbar_floating) {
+            if (OPTIONS & OPT_SCROLLBAR_FLOATING) {
                 XSetWindowBackground(Xdisplay, scrollbar.sa_win, PixColors[bgColor]);
                 XClearWindow(Xdisplay, scrollbar.sa_win);
             } else {
@@ -656,7 +656,7 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes)
     }
     if (!image_mode_is(image_sb, MODE_MASK)) {
         /* Solid mode.  Redraw every time since it's cheap. */
-        if ((Options & Opt_scrollbar_floating) || (scrollbar.type == SCROLLBAR_XTERM)) {
+        if ((OPTIONS & OPT_SCROLLBAR_FLOATING) || (scrollbar.type == SCROLLBAR_XTERM)) {
             XSetWindowBackground(Xdisplay, scrollbar.win, PixColors[bgColor]);
             XClearWindow(Xdisplay, scrollbar.win);
         } else {
@@ -695,7 +695,7 @@ scrollbar_init(int width, int height)
 
     /* Create the scrollbar trough window.  It will be the parent to the other windows. */
     scrollbar.win =
-        XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+        XCreateWindow(Xdisplay, TermWin.parent, ((OPTIONS & OPT_SCROLLBAR_RIGHT) ? (width - scrollbar_trough_width()) : (0)),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), height, 0, Xdepth, InputOutput, CopyFromParent,
                       CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
     XDefineCursor(Xdisplay, scrollbar.win, cursor);
@@ -817,9 +817,9 @@ scrollbar_resize(int width, int height)
     D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
     scrollbar_calc_size(width, height);
     D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, y, %d, %d)\n", scrollbar.win,
-                 ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+                 ((OPTIONS & OPT_SCROLLBAR_RIGHT) ? (width - scrollbar_trough_width()) : (0)),
                  scrollbar_trough_width(), scrollbar_trough_height()));
-    XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+    XMoveResizeWindow(Xdisplay, scrollbar.win, ((OPTIONS & OPT_SCROLLBAR_RIGHT) ? (width - scrollbar_trough_width()) : (0)),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), scrollbar_trough_height());
     scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
     scrollbar_reposition_and_draw(MODE_MASK);

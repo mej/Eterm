@@ -588,7 +588,7 @@ change_font(int init, const char *fontname)
         TermWin.fprop = 1;      /* Proportional font */
 
     /* For proportional fonts with large size variations, do some math-fu to try and help the appearance */
-    if (TermWin.fprop && (Options & Opt_proportional) && TermWin.font->per_char && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
+    if (TermWin.fprop && (OPTIONS & OPT_PROPORTIONAL) && TermWin.font->per_char && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
         int cw, n = 0, sum = 0, sumsq = 0, min_w, max_w;
         unsigned int i;
         double dev;

@@ -96,7 +96,7 @@ static char *rs_multichar_encoding = NULL;
 static char *rs_greek_keyboard = NULL;
 #endif
 
-unsigned long Options = (Opt_scrollbar | Opt_select_trailing_spaces | Opt_secondary_screen), image_toggles = 0;
+unsigned long OPTIONS = (OPT_SCROLLBAR | OPT_SELECT_TRAILING_SPACES | OPT_SECONDARY_SCREEN), image_toggles = 0;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_exec_args = NULL;     /* Args to exec (-e or --exec) */
 char *rs_title = NULL;          /* Window title */
@@ -158,7 +158,7 @@ KeySym ks_bigfont = XK_greater;
 KeySym ks_smallfont = XK_less;
 #endif
 
-/* Options structure */
+/* OPTIONS structure */
 spifopt_t option_list[] = {
     SPIFOPT_STR_PP('t', "theme", "select a theme", rs_theme),
     SPIFOPT_STR_PP('X', "config-file", "choose an alternate config file", rs_config_file),
@@ -176,13 +176,13 @@ spifopt_t option_list[] = {
 #else
     SPIFOPT_INT_LONG_PP("debug", "level of debugging information to show (0-5)", DEBUG_LEVEL),
 #endif
-    SPIFOPT_BOOL_LONG_PP("install", "install a private colormap", Options, Opt_install),
+    SPIFOPT_BOOL_LONG_PP("install", "install a private colormap", OPTIONS, OPT_INSTALL),
 
     SPIFOPT_ABST_PP('h', "help", "display usage information", usage),
     SPIFOPT_ABST_LONG_PP("version", "display version and configuration information", version),
 
 /* =======[ Color options ]======= */
-    SPIFOPT_BOOL('r', "reverse-video", "reverse video", Options, Opt_reverse_video),
+    SPIFOPT_BOOL('r', "reverse-video", "reverse video", OPTIONS, OPT_REVERSE_VIDEO),
     SPIFOPT_STR('b', "background-color", "background color", rs_color[bgColor]),
     SPIFOPT_STR('f', "foreground-color", "foreground color", rs_color[fgColor]),
     SPIFOPT_STR_LONG("color0", "color 0", rs_color[minColor]),
@@ -215,7 +215,7 @@ spifopt_t option_list[] = {
 
     /* =======[ X11 options ]======= */
     SPIFOPT_STR('g', "geometry", "WxH+X+Y = size and position", rs_geometry),
-    SPIFOPT_BOOL('i', "iconic", "start iconified", Options, Opt_iconic),
+    SPIFOPT_BOOL('i', "iconic", "start iconified", OPTIONS, OPT_ICONIC),
     SPIFOPT_STR('n', "name", "client instance, icon, and title strings", rs_name),
     SPIFOPT_STR('T', "title", "title string", rs_title),
     SPIFOPT_STR_LONG("icon-name", "icon name", rs_iconName),
@@ -232,7 +232,7 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("font2", "font 2", rs_font[2]),
     SPIFOPT_STR_LONG("font3", "font 3", rs_font[3]),
     SPIFOPT_STR_LONG("font4", "font 4", rs_font[4]),
-    SPIFOPT_BOOL_LONG("proportional", "toggle proportional font optimizations", Options, Opt_proportional),
+    SPIFOPT_BOOL_LONG("proportional", "toggle proportional font optimizations", OPTIONS, OPT_PROPORTIONAL),
     SPIFOPT_STR_LONG("font-fx", "specify font effects for the terminal fonts", rs_font_effects),
 
     /* =======[ Pixmap options ]======= */
@@ -275,35 +275,35 @@ spifopt_t option_list[] = {
 #endif
 
     /* =======[ Toggles ]======= */
-    SPIFOPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", Options, Opt_login_shell),
-    SPIFOPT_BOOL('s', "scrollbar", "display scrollbar", Options, Opt_scrollbar),
-    SPIFOPT_BOOL('u', "utmp-logging", "make a utmp entry", Options, Opt_write_utmp),
-    SPIFOPT_BOOL('v', "visual-bell", "visual bell", Options, Opt_visual_bell),
-    SPIFOPT_BOOL('H', "home-on-output", "jump to bottom on output", Options, Opt_home_on_output),
-    SPIFOPT_BOOL_LONG("home-on-input", "jump to bottom on input", Options, Opt_home_on_input),
-    SPIFOPT_BOOL('q', "no-input", "configure for output only", Options, Opt_no_input),
-    SPIFOPT_BOOL_LONG("scrollbar-right", "display the scrollbar on the right", Options, Opt_scrollbar_right),
-    SPIFOPT_BOOL_LONG("scrollbar-floating", "display the scrollbar with no trough", Options, Opt_scrollbar_floating),
-    SPIFOPT_BOOL_LONG("scrollbar-popup", "popup the scrollbar only when focused", Options, Opt_scrollbar_popup),
-    SPIFOPT_BOOL('x', "borderless", "force Eterm to have no borders", Options, Opt_borderless),
+    SPIFOPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", OPTIONS, OPT_LOGIN_SHELL),
+    SPIFOPT_BOOL('s', "scrollbar", "display scrollbar", OPTIONS, OPT_SCROLLBAR),
+    SPIFOPT_BOOL('u', "utmp-logging", "make a utmp entry", OPTIONS, OPT_WRITE_UTMP),
+    SPIFOPT_BOOL('v', "visual-bell", "visual bell", OPTIONS, OPT_VISUAL_BELL),
+    SPIFOPT_BOOL('H', "home-on-output", "jump to bottom on output", OPTIONS, OPT_HOME_ON_OUTPUT),
+    SPIFOPT_BOOL_LONG("home-on-input", "jump to bottom on input", OPTIONS, OPT_HOME_ON_INPUT),
+    SPIFOPT_BOOL('q', "no-input", "configure for output only", OPTIONS, OPT_NO_INPUT),
+    SPIFOPT_BOOL_LONG("scrollbar-right", "display the scrollbar on the right", OPTIONS, OPT_SCROLLBAR_RIGHT),
+    SPIFOPT_BOOL_LONG("scrollbar-floating", "display the scrollbar with no trough", OPTIONS, OPT_SCROLLBAR_FLOATING),
+    SPIFOPT_BOOL_LONG("scrollbar-popup", "popup the scrollbar only when focused", OPTIONS, OPT_SCROLLBAR_POPUP),
+    SPIFOPT_BOOL('x', "borderless", "force Eterm to have no borders", OPTIONS, OPT_BORDERLESS),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
-    SPIFOPT_BOOL('m', "map-alert", "uniconify on beep", Options, Opt_map_alert),
+    SPIFOPT_BOOL('m', "map-alert", "uniconify on beep", OPTIONS, OPT_MAP_ALERT),
 # endif
 #endif
 #ifdef META8_OPTION
-    SPIFOPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", Options, Opt_meta8),
+    SPIFOPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", OPTIONS, OPT_META8),
 #endif
-    SPIFOPT_BOOL_LONG("double-buffer", "reduce exposes using double-buffering (and more memory)", Options, Opt_double_buffer),
-    SPIFOPT_BOOL_LONG("no-cursor", "disable the text cursor", Options, Opt_no_cursor),
-    SPIFOPT_BOOL_LONG("pause", "pause after the child process exits", Options, Opt_pause),
-    SPIFOPT_BOOL_LONG("xterm-select", "duplicate xterm's selection behavior", Options, Opt_xterm_select),
-    SPIFOPT_BOOL_LONG("select-line", "triple-click selects whole line", Options, Opt_select_whole_line),
-    SPIFOPT_BOOL_LONG("select-trailing-spaces", "do not skip trailing spaces when selecting", Options, Opt_select_trailing_spaces),
-    SPIFOPT_BOOL_LONG("report-as-keysyms", "report special keys as keysyms", Options, Opt_report_as_keysyms),
+    SPIFOPT_BOOL_LONG("double-buffer", "reduce exposes using double-buffering (and more memory)", OPTIONS, OPT_DOUBLE_BUFFER),
+    SPIFOPT_BOOL_LONG("no-cursor", "disable the text cursor", OPTIONS, OPT_NO_CURSOR),
+    SPIFOPT_BOOL_LONG("pause", "pause after the child process exits", OPTIONS, OPT_PAUSE),
+    SPIFOPT_BOOL_LONG("xterm-select", "duplicate xterm's selection behavior", OPTIONS, OPT_XTERM_SELECT),
+    SPIFOPT_BOOL_LONG("select-line", "triple-click selects whole line", OPTIONS, OPT_SELECT_WHOLE_LINE),
+    SPIFOPT_BOOL_LONG("select-trailing-spaces", "do not skip trailing spaces when selecting", OPTIONS, OPT_SELECT_TRAILING_SPACES),
+    SPIFOPT_BOOL_LONG("report-as-keysyms", "report special keys as keysyms", OPTIONS, OPT_REPORT_AS_KEYSYMS),
     SPIFOPT_BOOL_LONG("buttonbar", "toggle the display of all buttonbars", rs_buttonbars, BBAR_FORCE_TOGGLE),
-    SPIFOPT_BOOL_LONG("resize-gravity", "toggle gravitation to nearest corner on resize", Options, Opt_resize_gravity),
-    SPIFOPT_BOOL_LONG("secondary-screen", "toggle use of secondary screen", Options, Opt_secondary_screen),
+    SPIFOPT_BOOL_LONG("resize-gravity", "toggle gravitation to nearest corner on resize", OPTIONS, OPT_RESIZE_GRAVITY),
+    SPIFOPT_BOOL_LONG("secondary-screen", "toggle use of secondary screen", OPTIONS, OPT_SECONDARY_SCREEN),
 
 /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
@@ -341,7 +341,7 @@ spifopt_t option_list[] = {
     SPIFOPT_INT('z', "delay", "initial delay in seconds", rs_delay),
 #endif
     SPIFOPT_ABST('a', "attribute", "parse an attribute in the specified context", handle_attribute),
-    SPIFOPT_BOOL('C', "console", "grab console messages", Options, Opt_console),
+    SPIFOPT_BOOL('C', "console", "grab console messages", OPTIONS, OPT_CONSOLE),
     SPIFOPT_ARGS('e', "exec", "execute a command rather than a shell", rs_exec_args)
 };
 
@@ -353,7 +353,7 @@ usage(void)
     printf("Eterm Enlightened Terminal Emulator for the X Window System\n");
     printf("Copyright (c) 1997-2003, " AUTHORS "\n\n");
 
-    printf("Option types:\n");
+    printf("OPTION types:\n");
     printf("  (bool) -- Boolean option ('1', 'on', 'yes', or 'true' to activate, '0', 'off', 'no', or 'false' to deactivate)\n");
     printf("  (int)  -- Integer option (any signed number of reasonable value, usually in decimal/octal/hex)\n");
     printf("  (str)  -- String option (be sure to quote strings if needed to avoid shell expansion)\n");
@@ -845,7 +845,7 @@ parse_color(char *buff, void *state)
         char *tmp = get_pword(2, buff);
 
         if (!BEG_STRCASECMP(tmp, "reverse")) {
-            Options |= Opt_reverse_video;
+            OPTIONS |= OPT_REVERSE_VIDEO;
         } else if (BEG_STRCASECMP(tmp, "normal")) {
             print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n",
                         file_peek_path(), file_peek_line(), tmp);
@@ -994,9 +994,9 @@ parse_attributes(char *buff, void *state)
         } else if (!BEG_STRCASECMP(tmp, "prop")) {
             tmp = get_pword(2, tmp);
             if (BOOL_OPT_ISTRUE(tmp)) {
-                Options |= Opt_proportional;
+                OPTIONS |= OPT_PROPORTIONAL;
             } else if (BOOL_OPT_ISFALSE(tmp)) {
-                Options &= ~(Opt_proportional);
+                OPTIONS &= ~(OPT_PROPORTIONAL);
             } else {
                 print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n",
                             file_peek_path(), file_peek_line());
@@ -1057,9 +1057,9 @@ parse_toggles(char *buff, void *state)
     if (!BEG_STRCASECMP(buff, "map_alert ")) {
 #if !defined(NO_MAPALERT) && defined(MAPALERT_OPTION)
         if (bool_val) {
-            Options |= Opt_map_alert;
+            OPTIONS |= OPT_MAP_ALERT;
         } else {
-            Options &= ~(Opt_map_alert);
+            OPTIONS &= ~(OPT_MAP_ALERT);
         }
 #else
         print_warning("Support for the map_alert attribute was not compiled in, ignoring\n");
@@ -1067,29 +1067,29 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "visual_bell ")) {
         if (bool_val) {
-            Options |= Opt_visual_bell;
+            OPTIONS |= OPT_VISUAL_BELL;
         } else {
-            Options &= ~(Opt_visual_bell);
+            OPTIONS &= ~(OPT_VISUAL_BELL);
         }
     } else if (!BEG_STRCASECMP(buff, "login_shell ")) {
         if (bool_val) {
-            Options |= Opt_login_shell;
+            OPTIONS |= OPT_LOGIN_SHELL;
         } else {
-            Options &= ~(Opt_login_shell);
+            OPTIONS &= ~(OPT_LOGIN_SHELL);
         }
     } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
         if (bool_val) {
-            Options |= Opt_scrollbar;
+            OPTIONS |= OPT_SCROLLBAR;
         } else {
-            Options &= ~(Opt_scrollbar);
+            OPTIONS &= ~(OPT_SCROLLBAR);
         }
 
     } else if (!BEG_STRCASECMP(buff, "utmp_logging ")) {
 #ifdef UTMP_SUPPORT
         if (bool_val) {
-            Options |= Opt_write_utmp;
+            OPTIONS |= OPT_WRITE_UTMP;
         } else {
-            Options &= ~(Opt_write_utmp);
+            OPTIONS &= ~(OPT_WRITE_UTMP);
         }
 #else
         print_warning("Support for the utmp_logging attribute was not compiled in, ignoring\n");
@@ -1098,9 +1098,9 @@ parse_toggles(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "meta8 ")) {
 #ifdef META8_OPTION
         if (bool_val) {
-            Options |= Opt_meta8;
+            OPTIONS |= OPT_META8;
         } else {
-            Options &= ~(Opt_meta8);
+            OPTIONS &= ~(OPT_META8);
         }
 #else
         print_warning("Support for the meta8 attribute was not compiled in, ignoring\n");
@@ -1108,111 +1108,111 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "iconic ")) {
         if (bool_val) {
-            Options |= Opt_iconic;
+            OPTIONS |= OPT_ICONIC;
         } else {
-            Options &= ~(Opt_iconic);
+            OPTIONS &= ~(OPT_ICONIC);
         }
 
     } else if (!BEG_STRCASECMP(buff, "home_on_output ")) {
         if (bool_val) {
-            Options |= Opt_home_on_output;
+            OPTIONS |= OPT_HOME_ON_OUTPUT;
         } else {
-            Options &= ~(Opt_home_on_output);
+            OPTIONS &= ~(OPT_HOME_ON_OUTPUT);
         }
 
     } else if (!BEG_STRCASECMP(buff, "home_on_input ")) {
         if (bool_val) {
-            Options |= Opt_home_on_input;
+            OPTIONS |= OPT_HOME_ON_INPUT;
         } else {
-            Options &= ~(Opt_home_on_input);
+            OPTIONS &= ~(OPT_HOME_ON_INPUT);
         }
 
     } else if (!BEG_STRCASECMP(buff, "no_input ")) {
         if (bool_val) {
-            Options |= Opt_no_input;
+            OPTIONS |= OPT_NO_INPUT;
         } else {
-            Options &= ~(Opt_no_input);
+            OPTIONS &= ~(OPT_NO_INPUT);
         }
 
     } else if (!BEG_STRCASECMP(buff, "scrollbar_floating ")) {
         if (bool_val) {
-            Options |= Opt_scrollbar_floating;
+            OPTIONS |= OPT_SCROLLBAR_FLOATING;
         } else {
-            Options &= ~(Opt_scrollbar_floating);
+            OPTIONS &= ~(OPT_SCROLLBAR_FLOATING);
         }
 
     } else if (!BEG_STRCASECMP(buff, "scrollbar_right ")) {
         if (bool_val) {
-            Options |= Opt_scrollbar_right;
+            OPTIONS |= OPT_SCROLLBAR_RIGHT;
         } else {
-            Options &= ~(Opt_scrollbar_right);
+            OPTIONS &= ~(OPT_SCROLLBAR_RIGHT);
         }
     } else if (!BEG_STRCASECMP(buff, "scrollbar_popup ")) {
         if (bool_val) {
-            Options |= Opt_scrollbar_popup;
+            OPTIONS |= OPT_SCROLLBAR_POPUP;
         } else {
-            Options &= ~(Opt_scrollbar_popup);
+            OPTIONS &= ~(OPT_SCROLLBAR_POPUP);
         }
     } else if (!BEG_STRCASECMP(buff, "borderless ")) {
         if (bool_val) {
-            Options |= Opt_borderless;
+            OPTIONS |= OPT_BORDERLESS;
         } else {
-            Options &= ~(Opt_borderless);
+            OPTIONS &= ~(OPT_BORDERLESS);
         }
     } else if (!BEG_STRCASECMP(buff, "double_buffer ")) {
         if (bool_val) {
-            Options |= Opt_double_buffer;
+            OPTIONS |= OPT_DOUBLE_BUFFER;
         } else {
-            Options &= ~(Opt_double_buffer);
+            OPTIONS &= ~(OPT_DOUBLE_BUFFER);
         }
 
     } else if (!BEG_STRCASECMP(buff, "no_cursor ")) {
         if (bool_val) {
-            Options |= Opt_no_cursor;
+            OPTIONS |= OPT_NO_CURSOR;
         } else {
-            Options &= ~(Opt_no_cursor);
+            OPTIONS &= ~(OPT_NO_CURSOR);
         }
 
     } else if (!BEG_STRCASECMP(buff, "pause ")) {
         if (bool_val) {
-            Options |= Opt_pause;
+            OPTIONS |= OPT_PAUSE;
         } else {
-            Options &= ~(Opt_pause);
+            OPTIONS &= ~(OPT_PAUSE);
         }
 
     } else if (!BEG_STRCASECMP(buff, "xterm_select ")) {
         if (bool_val) {
-            Options |= Opt_xterm_select;
+            OPTIONS |= OPT_XTERM_SELECT;
         } else {
-            Options &= ~(Opt_xterm_select);
+            OPTIONS &= ~(OPT_XTERM_SELECT);
         }
 
     } else if (!BEG_STRCASECMP(buff, "select_line ")) {
         if (bool_val) {
-            Options |= Opt_select_whole_line;
+            OPTIONS |= OPT_SELECT_WHOLE_LINE;
         } else {
-            Options &= ~(Opt_select_whole_line);
+            OPTIONS &= ~(OPT_SELECT_WHOLE_LINE);
         }
 
     } else if (!BEG_STRCASECMP(buff, "select_trailing_spaces ")) {
         if (bool_val) {
-            Options |= Opt_select_trailing_spaces;
+            OPTIONS |= OPT_SELECT_TRAILING_SPACES;
         } else {
-            Options &= ~(Opt_select_trailing_spaces);
+            OPTIONS &= ~(OPT_SELECT_TRAILING_SPACES);
         }
 
     } else if (!BEG_STRCASECMP(buff, "report_as_keysyms ")) {
         if (bool_val) {
-            Options |= Opt_report_as_keysyms;
+            OPTIONS |= OPT_REPORT_AS_KEYSYMS;
         } else {
-            Options &= ~(Opt_report_as_keysyms);
+            OPTIONS &= ~(OPT_REPORT_AS_KEYSYMS);
         }
 
     } else if (!BEG_STRCASECMP(buff, "mbyte_cursor ")) {
         if (bool_val) {
-            Options |= Opt_mbyte_cursor;
+            OPTIONS |= OPT_MBYTE_CURSOR;
         } else {
-            Options &= ~(Opt_mbyte_cursor);
+            OPTIONS &= ~(OPT_MBYTE_CURSOR);
         }
 
     } else if (!BEG_STRCASECMP(buff, "itrans ") || !BEG_STRCASECMP(buff, "immotile_trans ")) {
@@ -1233,9 +1233,9 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "resize_gravity")) {
         if (bool_val) {
-            Options |= Opt_resize_gravity;
+            OPTIONS |= OPT_RESIZE_GRAVITY;
         } else {
-            Options &= ~(Opt_resize_gravity);
+            OPTIONS &= ~(OPT_RESIZE_GRAVITY);
         }
     } else {
         print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(),
@@ -1253,7 +1253,7 @@ parse_keyboard(char *buff, void *state)
     if (!BEG_STRCASECMP(buff, "smallfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
         RESET_AND_ASSIGN(rs_smallfont_key, get_word(2, buff));
-        to_keysym(&ks_smallfont, rs_smallfont_key);
+        TO_KEYSYM(&ks_smallfont, rs_smallfont_key);
 #else
         print_warning("Support for the smallfont_key attribute was not compiled in, ignoring\n");
 #endif
@@ -1261,7 +1261,7 @@ parse_keyboard(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "bigfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
         RESET_AND_ASSIGN(rs_bigfont_key, get_word(2, buff));
-        to_keysym(&ks_bigfont, rs_bigfont_key);
+        TO_KEYSYM(&ks_bigfont, rs_bigfont_key);
 #else
         print_warning("Support for the bigfont_key attribute was not compiled in, ignoring\n");
 #endif
@@ -2581,7 +2581,7 @@ post_parse(void)
     }
     /* no point having a scrollbar without having any scrollback! */
     if (!TermWin.saveLines) {
-        Options &= ~Opt_scrollbar;
+        OPTIONS &= ~OPT_SCROLLBAR;
     }
 #ifdef PRINTPIPE
     if (!rs_print_pipe) {
@@ -2941,7 +2941,7 @@ post_parse(void)
     }
 #endif
 
-    if (Options & Opt_reverse_video) {
+    if (OPTIONS & OPT_REVERSE_VIDEO) {
         char *tmp;
 
         /* swap foreground/background colors */
@@ -3164,7 +3164,7 @@ save_config(char *path, unsigned char save_theme)
             (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
     fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
     fprintf(fp, "    font default %u\n", (unsigned int) font_idx);
-    fprintf(fp, "    font proportional %d\n", ((Options & Opt_proportional) ? 1 : 0));
+    fprintf(fp, "    font proportional %d\n", ((OPTIONS & OPT_PROPORTIONAL) ? 1 : 0));
     for (i = 0; i < font_cnt; i++) {
         if (etfonts[i]) {
             fprintf(fp, "    font %d %s\n", i, etfonts[i]);
@@ -3732,30 +3732,30 @@ save_config(char *path, unsigned char save_theme)
     }
 
     fprintf(fp, "begin toggles\n");
-    fprintf(fp, "    map_alert %d\n", (Options & Opt_map_alert ? 1 : 0));
-    fprintf(fp, "    visual_bell %d\n", (Options & Opt_visual_bell ? 1 : 0));
-    fprintf(fp, "    login_shell %d\n", (Options & Opt_login_shell ? 1 : 0));
-    fprintf(fp, "    scrollbar %d\n", (Options & Opt_scrollbar ? 1 : 0));
-    fprintf(fp, "    utmp_logging %d\n", (Options & Opt_write_utmp ? 1 : 0));
-    fprintf(fp, "    meta8 %d\n", (Options & Opt_meta8 ? 1 : 0));
-    fprintf(fp, "    iconic %d\n", (Options & Opt_iconic ? 1 : 0));
-    fprintf(fp, "    home_on_output %d\n", (Options & Opt_home_on_output ? 1 : 0));
-    fprintf(fp, "    home_on_input %d\n", (Options & Opt_home_on_input ? 1 : 0));
-    fprintf(fp, "    no_input %d\n", (Options & Opt_no_input ? 1 : 0));
-    fprintf(fp, "    scrollbar_floating %d\n", (Options & Opt_scrollbar_floating ? 1 : 0));
-    fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollbar_right ? 1 : 0));
-    fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
-    fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
-    fprintf(fp, "    double_buffer %d\n", (Options & Opt_double_buffer ? 1 : 0));
-    fprintf(fp, "    no_cursor %d\n", (Options & Opt_no_cursor ? 1 : 0));
-    fprintf(fp, "    pause %d\n", (Options & Opt_pause ? 1 : 0));
-    fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));
-    fprintf(fp, "    select_line %d\n", (Options & Opt_select_whole_line ? 1 : 0));
-    fprintf(fp, "    select_trailing_spaces %d\n", (Options & Opt_select_trailing_spaces ? 1 : 0));
-    fprintf(fp, "    report_as_keysyms %d\n", (Options & Opt_report_as_keysyms ? 1 : 0));
+    fprintf(fp, "    map_alert %d\n", (OPTIONS & OPT_MAP_ALERT ? 1 : 0));
+    fprintf(fp, "    visual_bell %d\n", (OPTIONS & OPT_VISUAL_BELL ? 1 : 0));
+    fprintf(fp, "    login_shell %d\n", (OPTIONS & OPT_LOGIN_SHELL ? 1 : 0));
+    fprintf(fp, "    scrollbar %d\n", (OPTIONS & OPT_SCROLLBAR ? 1 : 0));
+    fprintf(fp, "    utmp_logging %d\n", (OPTIONS & OPT_WRITE_UTMP ? 1 : 0));
+    fprintf(fp, "    meta8 %d\n", (OPTIONS & OPT_META8 ? 1 : 0));
+    fprintf(fp, "    iconic %d\n", (OPTIONS & OPT_ICONIC ? 1 : 0));
+    fprintf(fp, "    home_on_output %d\n", (OPTIONS & OPT_HOME_ON_OUTPUT ? 1 : 0));
+    fprintf(fp, "    home_on_input %d\n", (OPTIONS & OPT_HOME_ON_INPUT ? 1 : 0));
+    fprintf(fp, "    no_input %d\n", (OPTIONS & OPT_NO_INPUT ? 1 : 0));
+    fprintf(fp, "    scrollbar_floating %d\n", (OPTIONS & OPT_SCROLLBAR_FLOATING ? 1 : 0));
+    fprintf(fp, "    scrollbar_right %d\n", (OPTIONS & OPT_SCROLLBAR_RIGHT ? 1 : 0));
+    fprintf(fp, "    scrollbar_popup %d\n", (OPTIONS & OPT_SCROLLBAR_POPUP ? 1 : 0));
+    fprintf(fp, "    borderless %d\n", (OPTIONS & OPT_BORDERLESS ? 1 : 0));
+    fprintf(fp, "    double_buffer %d\n", (OPTIONS & OPT_DOUBLE_BUFFER ? 1 : 0));
+    fprintf(fp, "    no_cursor %d\n", (OPTIONS & OPT_NO_CURSOR ? 1 : 0));
+    fprintf(fp, "    pause %d\n", (OPTIONS & OPT_PAUSE ? 1 : 0));
+    fprintf(fp, "    xterm_select %d\n", (OPTIONS & OPT_XTERM_SELECT ? 1 : 0));
+    fprintf(fp, "    select_line %d\n", (OPTIONS & OPT_SELECT_WHOLE_LINE ? 1 : 0));
+    fprintf(fp, "    select_trailing_spaces %d\n", (OPTIONS & OPT_SELECT_TRAILING_SPACES ? 1 : 0));
+    fprintf(fp, "    report_as_keysyms %d\n", (OPTIONS & OPT_REPORT_AS_KEYSYMS ? 1 : 0));
     fprintf(fp, "    itrans %d\n", (image_toggles & IMOPT_ITRANS ? 1 : 0));
     fprintf(fp, "    buttonbar %d\n", ((buttonbar && bbar_is_visible(buttonbar)) ? 1 : 0));
-    fprintf(fp, "    resize_gravity %d\n", (Options & Opt_resize_gravity ? 1 : 0));
+    fprintf(fp, "    resize_gravity %d\n", (OPTIONS & OPT_RESIZE_GRAVITY ? 1 : 0));
     fprintf(fp, "end toggles\n\n");
 
     fprintf(fp, "begin keyboard\n");

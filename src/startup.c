@@ -118,7 +118,7 @@ eterm_bootstrap(int argc, char *argv[])
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
 
-    if (Options & Opt_install) {
+    if (OPTIONS & OPT_INSTALL) {
         cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
         XInstallColormap(Xdisplay, cmap);
     } else {
@@ -235,7 +235,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Initialize the scrollbar */
     scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-    scrollbar_mapping((Options & Opt_scrollbar) && !((Options & Opt_scrollbar_popup) && !TermWin.focus));
+    scrollbar_mapping((OPTIONS & OPT_SCROLLBAR) && !((OPTIONS & OPT_SCROLLBAR_POPUP) && !TermWin.focus));
 
     /* Initialize the menu subsystem. */
     menu_init();
