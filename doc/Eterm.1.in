@@ -613,7 +613,14 @@ setuid root to do this.
 .BI \-e " command" ", \-\-exec " command
 Execute
 .I command
-rather than a shell.
+rather than a shell. Forces Eterm mode.
+.TP
+.BI \-U " URL" ", \-\-url " URL
+Pick up a "screen" session at
+.I URL
+rather than a local one. URLs look like so (screen://user@host.dom/options),
+with all parts optional, defaulting to current user at localhost,
+respectively. Forces Escreen mode, overrides \-\-exec.
 
 .SH THEMES
 

@@ -305,6 +305,9 @@ extern void debug_colors(void);
 extern int scr_multi2(void);
 extern int scr_multi1(void);
 #endif /* MULTI_CHARSET */
+#ifdef ESCREEN
+extern void parse_screen_status_if_necessary(void);
+#endif
 
 _XFUNCPROTOEND
 

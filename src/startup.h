@@ -31,6 +31,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "misc.h"
+#ifdef ESCREEN
+#include "scream.h"
+#endif
 
 /************ Macros and Definitions ************/
 #ifndef EXIT_SUCCESS		/* missing from <stdlib.h> */
@@ -106,6 +109,11 @@ typedef struct {
 #endif
 #ifdef MULTI_CHARSET
   XFontStruct	* mfont;	/* multibyte font structure */
+#endif
+#ifdef ESCREEN
+  _ns_sess      *screen;
+  short          screen_pending;
+  short          screen_mode;
 #endif
 } TermWin_t;
 

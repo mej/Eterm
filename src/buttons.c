@@ -67,8 +67,7 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
     return;
 }
 
-buttonbar_t *
-bbar_create(void)
+buttonbar_t *bbar_create(void)
 {
     buttonbar_t *bbar;
     Cursor cursor;
@@ -185,7 +184,8 @@ bbar_handle_enter_notify(event_t *ev)
         return 0;
     }
     bbar_draw(bbar, IMAGE_STATE_SELECTED, 0);
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
+                  &unused_mask);
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
     if (b) {
         bbar_select_button(bbar, b);
@@ -248,7 +248,8 @@ bbar_handle_button_release(event_t *ev)
         return 0;
     }
 
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
+                  &unused_mask);
 
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
     if (b) {
@@ -280,7 +281,8 @@ bbar_handle_motion_notify(event_t *ev)
         return 0;
     }
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, MotionNotify, ev));
-    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &mask);
+    XQueryPointer(Xdisplay, bbar->win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y),
+                  &mask);
     D_BBAR((" -> Pointer is at %d, %d with mask 0x%08x\n", ev->xbutton.x, ev->xbutton.y, mask));
 
     b = find_button_by_coords(bbar, ev->xbutton.x, ev->xbutton.y);
@@ -309,8 +311,7 @@ bbar_dispatch_event(event_t *ev)
     return (0);
 }
 
-buttonbar_t *
-find_bbar_by_window(Window win)
+buttonbar_t *find_bbar_by_window(Window win)
 {
     buttonbar_t *bbar;
 
@@ -494,7 +495,8 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
         D_BBAR((" -> Final icon dimensions are %hux%hu\n", button->icon_w, button->icon_h));
     }
 #endif
-    D_BBAR((" -> Set button to %dx%d at %d, %d and icon to %dx%d\n", button->w, button->h, button->x, button->y, button->icon_w, button->icon_h));
+    D_BBAR((" -> Set button to %dx%d at %d, %d and icon to %dx%d\n", button->w, button->h, button->x, button->y, button->icon_w,
+            button->icon_h));
 }
 
 void
@@ -542,7 +544,7 @@ bbar_add_button(buttonbar_t *bbar, button_t *button)
 
     D_BBAR(("bbar_add_button(%8p, %8p):  Adding button \"%s\".\n", bbar, button, button->text));
 
-    if (bbar->buttons) { 
+    if (bbar->buttons) {
         for (b = bbar->buttons; b->next; b = b->next);
         b->next = button;
     } else {
@@ -570,7 +572,8 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
 
     ASSERT_RVAL(fontname != NULL, 0);
 
-    D_BBAR(("bbar_set_font(%8p, \"%s\"):  Current font is %8p, dimensions %d/%d/%d\n", bbar, fontname, bbar->font, bbar->fwidth, bbar->fheight, bbar->h));
+    D_BBAR(("bbar_set_font(%8p, \"%s\"):  Current font is %8p, dimensions %d/%d/%d\n", bbar, fontname, bbar->font, bbar->fwidth,
+            bbar->fheight, bbar->h));
     if (bbar->font) {
         free_font(bbar->font);
     }
@@ -595,8 +598,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
     return 1;
 }
 
-button_t *
-find_button_by_text(buttonbar_t *bbar, char *text)
+button_t *find_button_by_text(buttonbar_t *bbar, char *text)
 {
     register button_t *b;
 
@@ -615,8 +617,7 @@ find_button_by_text(buttonbar_t *bbar, char *text)
     return NULL;
 }
 
-button_t *
-find_button_by_coords(buttonbar_t *bbar, int x, int y)
+button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y)
 {
     register button_t *b;
 
@@ -635,8 +636,7 @@ find_button_by_coords(buttonbar_t *bbar, int x, int y)
     return NULL;
 }
 
-button_t *
-button_create(char *text)
+button_t *button_create(char *text)
 {
     button_t *button;
 
@@ -688,21 +688,21 @@ button_set_action(button_t *button, action_type_t type, char *action)
 
     button->type = type;
     switch (type) {
-    case ACTION_MENU:
-        button->action.menu = find_menu_by_title(menu_list, action);
-        break;
-    case ACTION_STRING:
-    case ACTION_ECHO:
-        button->action.string = (char *) MALLOC(strlen(action) + 2);
-        strcpy(button->action.string, action);
-        parse_escaped_string(button->action.string);
-        break;
-    case ACTION_SCRIPT:
-        button->action.script = (char *) MALLOC(strlen(action) + 2);
-        strcpy(button->action.script, action);
-        break;
-    default:
-        break;
+      case ACTION_MENU:
+          button->action.menu = find_menu_by_title(menu_list, action);
+          break;
+      case ACTION_STRING:
+      case ACTION_ECHO:
+          button->action.string = (char *) MALLOC(strlen(action) + 2);
+          strcpy(button->action.string, action);
+          parse_escaped_string(button->action.string);
+          break;
+      case ACTION_SCRIPT:
+          button->action.script = (char *) MALLOC(strlen(action) + 2);
+          strcpy(button->action.script, action);
+          break;
+      default:
+          break;
     }
     return 1;
 }
@@ -749,7 +749,8 @@ bbar_click_button(buttonbar_t *bbar, button_t *button)
     if (image_mode_is(image_button, MODE_MASK)) {
         paste_simage(images[image_button].clicked, image_button, bbar->win, bbar->win, button->x, button->y, button->w, button->h);
     } else {
-        draw_shadow_from_colors(bbar->win, PixColors[menuBottomShadowColor], PixColors[menuTopShadowColor], button->x, button->y, button->w, button->h, 2);
+        draw_shadow_from_colors(bbar->win, PixColors[menuBottomShadowColor], PixColors[menuTopShadowColor], button->x, button->y, button->w,
+                                button->h, 2);
     }
     if (image_mode_is(image_button, MODE_AUTO)) {
         enl_ipc_sync();
@@ -768,28 +769,28 @@ void
 button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Time t)
 {
     switch (button->type) {
-    case ACTION_MENU:
-        if (press) {
-            menu_invoke(button->x, button->y + button->h, bbar->win, button->action.menu, t);
-        }
-        break;
-    case ACTION_STRING:
-        if (!press) {
-            cmd_write((unsigned char *) button->action.string, strlen(button->action.string));
-        }
-        break;
-    case ACTION_ECHO:
-        if (!press) {
-            tt_write((unsigned char *) button->action.string, strlen(button->action.string));
-        }
-        break;
-    case ACTION_SCRIPT:
-        if (!press) {
-            script_parse((char *) button->action.script);
-        }
-        break;
-    default:
-        break;
+      case ACTION_MENU:
+          if (press) {
+              menu_invoke(button->x, button->y + button->h, bbar->win, button->action.menu, t);
+          }
+          break;
+      case ACTION_STRING:
+          if (!press) {
+              cmd_write((unsigned char *) button->action.string, strlen(button->action.string));
+          }
+          break;
+      case ACTION_ECHO:
+          if (!press) {
+              tt_write((unsigned char *) button->action.string, strlen(button->action.string));
+          }
+          break;
+      case ACTION_SCRIPT:
+          if (!press) {
+              script_parse((char *) button->action.script);
+          }
+          break;
+      default:
+          break;
     }
 }
 
@@ -898,7 +899,19 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
             paste_simage(button->icon, image_max, bbar->win, bbar->bg, button->icon_x, button->icon_y, button->icon_w, button->icon_h);
         }
         if (button->len) {
-            draw_string(bbar, bbar->bg, bbar->gc, button->text_x, button->text_y, button->text, button->len);
+#ifdef ESCREEN
+            GC gc;              /* evil temporary hack */
+            XGCValues gcvalue;
+
+            gcvalue.foreground = PixColors[button->flags + 2];
+            gcvalue.font = bbar->font->fid;
+
+            if (button->flags && (gc = LIBAST_X_CREATE_GC(GCForeground | GCFont, &gcvalue))) {
+                draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
+                XFreeGC(Xdisplay, gc);
+            } else
+#endif
+                draw_string(bbar, bbar->bg, bbar->gc, button->text_x, button->text_y, button->text, button->len);
         }
     }
     for (button = bbar->rbuttons; button; button = button->next) {
@@ -965,8 +978,7 @@ bbar_calc_positions(void)
             bbar->y = top_y;
             top_y += bbar->h;
         }
-        D_BBAR(("Set coordinates for buttonbar %8p (window 0x%08x) to %lu, %lu\n",
-                bbar, bbar->win, bbar->x, bbar->y));
+        D_BBAR(("Set coordinates for buttonbar %8p (window 0x%08x) to %lu, %lu\n", bbar, bbar->win, bbar->x, bbar->y));
         if (TermWin.parent != None) {
             XReparentWindow(Xdisplay, bbar->win, TermWin.parent, bbar->x, bbar->y);
             XMoveResizeWindow(Xdisplay, bbar->win, bbar->x, bbar->y, bbar->w, bbar->h);

@@ -41,24 +41,23 @@ static const char cvs_ident[] = "$Id$";
 #include "startup.h"
 #include "system.h"
 
-static eterm_script_handler_t script_handlers[] =
-{
-  { "copy",      script_handler_copy },
-  { "die",       script_handler_exit },
-  { "echo",      script_handler_echo },
-  { "exec",      script_handler_spawn },
-  { "exit",      script_handler_exit },
-  { "kill",      script_handler_kill },
-  { "paste",     script_handler_paste },
-  { "quit",      script_handler_exit },
-  { "save",      script_handler_save },
-  { "save_buff", script_handler_save_buff },
-  { "scroll",    script_handler_scroll },
-  { "search",    script_handler_search },
-  { "spawn",     script_handler_spawn },
-  { "string",    script_handler_string },
+static eterm_script_handler_t script_handlers[] = {
+    {"copy", script_handler_copy},
+    {"die", script_handler_exit},
+    {"echo", script_handler_echo},
+    {"exec", script_handler_spawn},
+    {"exit", script_handler_exit},
+    {"kill", script_handler_kill},
+    {"paste", script_handler_paste},
+    {"quit", script_handler_exit},
+    {"save", script_handler_save},
+    {"save_buff", script_handler_save_buff},
+    {"scroll", script_handler_scroll},
+    {"search", script_handler_search},
+    {"spawn", script_handler_spawn},
+    {"string", script_handler_string},
 
-  { "nop", script_handler_nop }
+    {"nop", script_handler_nop}
 };
 static size_t handler_count = sizeof(script_handlers) / sizeof(eterm_script_handler_t);
 
@@ -66,63 +65,63 @@ static size_t handler_count = sizeof(script_handlers) / sizeof(eterm_script_hand
 void
 eterm_handle_winop(char *action)
 {
-  char *winid;
-  Window win = 0;
+    char *winid;
+    Window win = 0;
 
-  ASSERT(action != NULL);
+    ASSERT(action != NULL);
 
-  winid = strchr(action, ' ');
-  if (winid) {
-    win = (Window) strtoul(winid + 1, (char **) NULL, 0);
-  }
-  if (win == 0) {		/* If no window ID was given, or if the strtoul() call failed */
-    win = TermWin.parent;
-  }
-  if (!BEG_STRCASECMP(action, "raise")) {
-    XRaiseWindow(Xdisplay, win);
-  } else if (!BEG_STRCASECMP(action, "lower")) {
-    XLowerWindow(Xdisplay, win);
-  } else if (!BEG_STRCASECMP(action, "map")) {
-    XMapWindow(Xdisplay, win);
-  } else if (!BEG_STRCASECMP(action, "unmap")) {
-    XUnmapWindow(Xdisplay, win);
-  } else if (!BEG_STRCASECMP(action, "move")) {
-    int x, y, n;
-    char *xx, *yy;
-
-    n = num_words(action);
-    if (n == 3 || n == 4) {
-      if (n == 3) {
-        win = TermWin.parent;
-      }
-      xx = get_pword(n - 1, action);
-      yy = get_pword(n, action);
-      x = (int) strtol(xx, (char **) NULL, 0);
-      y = (int) strtol(yy, (char **) NULL, 0);
-      XMoveWindow(Xdisplay, win, x, y);
+    winid = strchr(action, ' ');
+    if (winid) {
+        win = (Window) strtoul(winid + 1, (char **) NULL, 0);
     }
-  } else if (!BEG_STRCASECMP(action, "resize")) {
-    int w, h, n;
-    char *ww, *hh;
-
-    n = num_words(action);
-    if (n == 3 || n == 4) {
-      if (n == 3) {
+    if (win == 0) {             /* If no window ID was given, or if the strtoul() call failed */
         win = TermWin.parent;
-      }
-      ww = get_pword(n - 1, action);
-      hh = get_pword(n, action);
-      w = (int) strtol(ww, (char **) NULL, 0);
-      h = (int) strtol(hh, (char **) NULL, 0);
-      XResizeWindow(Xdisplay, win, w, h);
     }
-  } else if (!BEG_STRCASECMP(action, "kill")) {
-    XKillClient(Xdisplay, win);
-  } else if (!BEG_STRCASECMP(action, "iconify")) {
-    XIconifyWindow(Xdisplay, win, Xscreen);
-  } else {
-    print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
-  }
+    if (!BEG_STRCASECMP(action, "raise")) {
+        XRaiseWindow(Xdisplay, win);
+    } else if (!BEG_STRCASECMP(action, "lower")) {
+        XLowerWindow(Xdisplay, win);
+    } else if (!BEG_STRCASECMP(action, "map")) {
+        XMapWindow(Xdisplay, win);
+    } else if (!BEG_STRCASECMP(action, "unmap")) {
+        XUnmapWindow(Xdisplay, win);
+    } else if (!BEG_STRCASECMP(action, "move")) {
+        int x, y, n;
+        char *xx, *yy;
+
+        n = num_words(action);
+        if (n == 3 || n == 4) {
+            if (n == 3) {
+                win = TermWin.parent;
+            }
+            xx = get_pword(n - 1, action);
+            yy = get_pword(n, action);
+            x = (int) strtol(xx, (char **) NULL, 0);
+            y = (int) strtol(yy, (char **) NULL, 0);
+            XMoveWindow(Xdisplay, win, x, y);
+        }
+    } else if (!BEG_STRCASECMP(action, "resize")) {
+        int w, h, n;
+        char *ww, *hh;
+
+        n = num_words(action);
+        if (n == 3 || n == 4) {
+            if (n == 3) {
+                win = TermWin.parent;
+            }
+            ww = get_pword(n - 1, action);
+            hh = get_pword(n, action);
+            w = (int) strtol(ww, (char **) NULL, 0);
+            h = (int) strtol(hh, (char **) NULL, 0);
+            XResizeWindow(Xdisplay, win, w, h);
+        }
+    } else if (!BEG_STRCASECMP(action, "kill")) {
+        XKillClient(Xdisplay, win);
+    } else if (!BEG_STRCASECMP(action, "iconify")) {
+        XIconifyWindow(Xdisplay, win, Xscreen);
+    } else {
+        print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
+    }
 }
 #endif
 
@@ -142,28 +141,28 @@ eterm_handle_winop(char *action)
 void
 script_handler_copy(char **params)
 {
-  unsigned char i;
-  char *buffer_id;
-  Atom sel = XA_PRIMARY;
+    unsigned char i;
+    char *buffer_id;
+    Atom sel = XA_PRIMARY;
 
-  if (params) {
-    for (i = 0; (buffer_id = params[i]) != NULL; i++) {
-      if (*buffer_id) {
-        if (*buffer_id >= '0' && *buffer_id <= '7') {
-          sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
-        } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
-          sel = XA_CLIPBOARD(Xdisplay);
-        } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
-          sel = XA_PRIMARY;
-        } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
-          sel = XA_SECONDARY;
-        } else {
-          print_error("Invalid parameter to copy():  \"%s\"\n", buffer_id);
+    if (params) {
+        for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+            if (*buffer_id) {
+                if (*buffer_id >= '0' && *buffer_id <= '7') {
+                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+                } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
+                    sel = XA_CLIPBOARD(Xdisplay);
+                } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
+                    sel = XA_PRIMARY;
+                } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
+                    sel = XA_SECONDARY;
+                } else {
+                    print_error("Invalid parameter to copy():  \"%s\"\n", buffer_id);
+                }
+            }
         }
-      }
     }
-  }
-  selection_copy(sel);
+    selection_copy(sel);
 }
 
 /* echo():  Send a string to the pty
@@ -175,11 +174,11 @@ script_handler_copy(char **params)
 void
 script_handler_echo(char **params)
 {
-  char **tmp;
+    char **tmp;
 
-  for (tmp = params; tmp && *tmp; tmp++) {
-    tt_write(*tmp, strlen(*tmp));
-  }
+    for (tmp = params; tmp && *tmp; tmp++) {
+        tt_write(*tmp, strlen(*tmp));
+    }
 }
 
 /* exit():  Exit Eterm with an optional message or return code
@@ -194,19 +193,19 @@ script_handler_echo(char **params)
 void
 script_handler_exit(char **params)
 {
-  unsigned char code = 0;
-  char *tmp;
+    unsigned char code = 0;
+    char *tmp;
 
-  if (params && *params) {
-    if (isdigit(params[0][0]) || (params[0][0] == '-' && isdigit(params[0][1]))) {
-      code = (unsigned char) atoi(params[0]);
-    } else {
-      tmp = join(" ", params);
-      printf("Exiting:  %s\n", tmp);
-      FREE(tmp);
+    if (params && *params) {
+        if (isdigit(params[0][0]) || (params[0][0] == '-' && isdigit(params[0][1]))) {
+            code = (unsigned char) atoi(params[0]);
+        } else {
+            tmp = join(" ", params);
+            printf("Exiting:  %s\n", tmp);
+            FREE(tmp);
+        }
     }
-  }
-  exit(code);
+    exit(code);
 }
 
 /* kill():  Send a given signal to Eterm's child process
@@ -219,14 +218,14 @@ script_handler_exit(char **params)
 void
 script_handler_kill(char **params)
 {
-  int sig;
+    int sig;
 
-  if (params && *params) {
-    sig = atoi(params[0]);
-  } else {
-    sig = SIGTERM;
-  }
-  kill(cmd_pid, sig);
+    if (params && *params) {
+        sig = atoi(params[0]);
+    } else {
+        sig = SIGTERM;
+    }
+    kill(cmd_pid, sig);
 }
 
 /* paste():  Paste the contents of the specified clipboard or cut buffer
@@ -243,28 +242,28 @@ script_handler_kill(char **params)
 void
 script_handler_paste(char **params)
 {
-  unsigned char i;
-  char *buffer_id;
-  Atom sel = XA_PRIMARY;
+    unsigned char i;
+    char *buffer_id;
+    Atom sel = XA_PRIMARY;
 
-  if (params) {
-    for (i = 0; (buffer_id = params[i]) != NULL; i++) {
-      if (*buffer_id) {
-        if (*buffer_id >= '0' && *buffer_id <= '7') {
-          sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
-        } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
-          sel = XA_CLIPBOARD(Xdisplay);
-        } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
-          sel = XA_PRIMARY;
-        } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
-          sel = XA_SECONDARY;
-        } else {
-          print_error("Invalid parameter to paste():  \"%s\"\n", buffer_id);
+    if (params) {
+        for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+            if (*buffer_id) {
+                if (*buffer_id >= '0' && *buffer_id <= '7') {
+                    sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) *buffer_id);
+                } else if (!BEG_STRCASECMP(buffer_id, "clipboard")) {
+                    sel = XA_CLIPBOARD(Xdisplay);
+                } else if (!BEG_STRCASECMP(buffer_id, "primary")) {
+                    sel = XA_PRIMARY;
+                } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
+                    sel = XA_SECONDARY;
+                } else {
+                    print_error("Invalid parameter to paste():  \"%s\"\n", buffer_id);
+                }
+            }
         }
-      }
     }
-  }
-  selection_paste(sel);
+    selection_paste(sel);
 }
 
 /* save():  Save the current theme/user configuration
@@ -280,15 +279,15 @@ script_handler_paste(char **params)
 void
 script_handler_save(char **params)
 {
-  if (params && *params) {
-    if (!strcasecmp(params[0], "theme")) {
-      save_config(params[1], SAVE_THEME_CONFIG);
+    if (params && *params) {
+        if (!strcasecmp(params[0], "theme")) {
+            save_config(params[1], SAVE_THEME_CONFIG);
+        } else {
+            save_config(params[0], SAVE_USER_CONFIG);
+        }
     } else {
-      save_config(params[0], SAVE_USER_CONFIG);
+        save_config(NULL, SAVE_USER_CONFIG);
     }
-  } else {
-    save_config(NULL, SAVE_USER_CONFIG);
-  }
 }
 
 /* save_buff():  Dump the scrollback buffer to a file
@@ -301,9 +300,9 @@ script_handler_save(char **params)
 void
 script_handler_save_buff(char **params)
 {
-  if (params && *params) {
-    scr_dump_to_file(params[0]);
-  }
+    if (params && *params) {
+        scr_dump_to_file(params[0]);
+    }
 }
 
 /* scroll():  Scroll backward or forward in the scrollback buffer
@@ -321,43 +320,43 @@ script_handler_save_buff(char **params)
 void
 script_handler_scroll(char **params)
 {
-  char *type;
-  double cnt_float;
-  long count;
-  int direction = DN;
+    char *type;
+    double cnt_float;
+    long count;
+    int direction = DN;
 
-  if (params && *params) {
-    cnt_float = strtod(params[0], &type);
-    if (cnt_float == 0.0) {
-      return;
-    } else if (cnt_float < 0.0) {
-      cnt_float = -cnt_float;
-      direction = UP;
-    }
-    if (!type) {
-      type = params[1];
-    }
-    if (type && *type) {
-      for (; *type && !isalpha(*type); type++);
-      if (str_leading_match("lines", type)) {
-        count = (long) cnt_float;
-      } else if (str_leading_match("pages", type) || str_leading_match("screens", type)) {
-        count = (long) ((cnt_float * TermWin.nrow) - CONTEXT_LINES);
-      } else if (str_leading_match("buffers", type)) {
-        count = (long) (cnt_float * (TermWin.nrow + TermWin.saveLines));
-      } else {
-        print_error("Invalid modifier \"%s\" in scroll()\n", type);
-        return;
-      }
-    } else {
-      count = (long) cnt_float;
-    }
+    if (params && *params) {
+        cnt_float = strtod(params[0], &type);
+        if (cnt_float == 0.0) {
+            return;
+        } else if (cnt_float < 0.0) {
+            cnt_float = -cnt_float;
+            direction = UP;
+        }
+        if (!type) {
+            type = params[1];
+        }
+        if (type && *type) {
+            for (; *type && !isalpha(*type); type++);
+            if (str_leading_match("lines", type)) {
+                count = (long) cnt_float;
+            } else if (str_leading_match("pages", type) || str_leading_match("screens", type)) {
+                count = (long) ((cnt_float * TermWin.nrow) - CONTEXT_LINES);
+            } else if (str_leading_match("buffers", type)) {
+                count = (long) (cnt_float * (TermWin.nrow + TermWin.saveLines));
+            } else {
+                print_error("Invalid modifier \"%s\" in scroll()\n", type);
+                return;
+            }
+        } else {
+            count = (long) cnt_float;
+        }
 
-    if (count <= 0) {
-      return;
+        if (count <= 0) {
+            return;
+        }
+        scr_page(direction, count);
     }
-    scr_page(direction, count);
-  }
 }
 
 /* search():  Search the scrollback buffer for a string and highlight
@@ -371,7 +370,7 @@ script_handler_scroll(char **params)
 void
 script_handler_search(char **params)
 {
-  scr_search_scrollback(params ? params[0] : NULL);
+    scr_search_scrollback(params ? params[0] : NULL);
 }
 
 /* spawn():  Spawns a child process to execute a sub-command
@@ -383,15 +382,15 @@ script_handler_search(char **params)
 void
 script_handler_spawn(char **params)
 {
-  char *tmp;
+    char *tmp;
 
-  if (params && *params) {
-    tmp = join(" ", params);
-    system_no_wait(tmp);
-    FREE(tmp);
-  } else {
-    system_no_wait("Eterm");
-  }
+    if (params && *params) {
+        tmp = join(" ", params);
+        system_no_wait(tmp);
+        FREE(tmp);
+    } else {
+        system_no_wait("Eterm");
+    }
 }
 
 /* string():  Send a string to Eterm's escape code handler
@@ -403,11 +402,11 @@ script_handler_spawn(char **params)
 void
 script_handler_string(char **params)
 {
-  char **tmp;
+    char **tmp;
 
-  for (tmp = params; tmp && *tmp; tmp++) {
-    cmd_write(*tmp, strlen(*tmp));
-  }
+    for (tmp = params; tmp && *tmp; tmp++) {
+        cmd_write(*tmp, strlen(*tmp));
+    }
 }
 
 /* nop():  Do nothing
@@ -419,92 +418,91 @@ script_handler_string(char **params)
 void
 script_handler_nop(char **params)
 {
-  USE_VAR(params);
+    USE_VAR(params);
 }
 
 /********* ENGINE *********/
-eterm_script_handler_t *
-script_find_handler(const char *name)
+eterm_script_handler_t *script_find_handler(const char *name)
 {
-  register unsigned long i;
+    register unsigned long i;
 
-  for (i = 0; i < handler_count; i++) {
-    /* Small optimization.  Only call strcasecmp() if the first letter matches. */
-    if ((tolower(name[0]) == tolower(script_handlers[i].name[0]))
-        && !strcasecmp(name, script_handlers[i].name)) {
-      return &script_handlers[i];
+    for (i = 0; i < handler_count; i++) {
+        /* Small optimization.  Only call strcasecmp() if the first letter matches. */
+        if ((tolower(name[0]) == tolower(script_handlers[i].name[0]))
+            && !strcasecmp(name, script_handlers[i].name)) {
+            return &script_handlers[i];
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 
 void
 script_parse(char *s)
 {
-  char **token_list, **param_list;
-  register char *pstr;
-  register unsigned long i;
-  char *func_name, *params, *tmp;
-  size_t len;
-  eterm_script_handler_t *func;
+    char **token_list, **param_list;
+    register char *pstr;
+    register unsigned long i;
+    char *func_name, *params, *tmp;
+    size_t len;
+    eterm_script_handler_t *func;
 
-  REQUIRE(s != NULL);
+    REQUIRE(s != NULL);
 
-  D_SCRIPT(("Parsing:  \"%s\"\n", s));
+    D_SCRIPT(("Parsing:  \"%s\"\n", s));
 
-  token_list = split(";", s);
-  if (token_list == NULL) {
-    D_SCRIPT(("No tokens found; ignoring script.\n"));
-    return;
-  }
-
-  for (i = 0; token_list[i]; i++) {
-    pstr = token_list[i];
-    chomp(pstr);
-    if (!(*pstr)) {
-      continue;
-    }
-    if ((params = strchr(pstr, '(')) != NULL) {
-      if (params != pstr) {
-        len = params - pstr;
-        func_name = (char *) MALLOC(len + 1);
-        strncpy(func_name, pstr, len);
-        func_name[len] = 0;
-      } else {
-        print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
-        free_array((void **) token_list, 0);
+    token_list = split(";", s);
+    if (token_list == NULL) {
+        D_SCRIPT(("No tokens found; ignoring script.\n"));
         return;
-      }
-    } else {
-      func_name = STRDUP(pstr);
     }
-    if (!func_name) {
-      free_array((void **) token_list, 0);
-      return;
+
+    for (i = 0; token_list[i]; i++) {
+        pstr = token_list[i];
+        chomp(pstr);
+        if (!(*pstr)) {
+            continue;
+        }
+        if ((params = strchr(pstr, '(')) != NULL) {
+            if (params != pstr) {
+                len = params - pstr;
+                func_name = (char *) MALLOC(len + 1);
+                strncpy(func_name, pstr, len);
+                func_name[len] = 0;
+            } else {
+                print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
+                free_array((void **) token_list, 0);
+                return;
+            }
+        } else {
+            func_name = STRDUP(pstr);
+        }
+        if (!func_name) {
+            free_array((void **) token_list, 0);
+            return;
+        }
+        if (params) {
+            params++;
+            if ((tmp = strrchr(params, ')')) != NULL) {
+                *tmp = 0;
+            } else {
+                print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
+                free_array((void **) token_list, 0);
+                return;
+            }
+            param_list = split(", \t", params);
+        } else {
+            param_list = NULL;
+        }
+        D_SCRIPT(("Calling function %s with parameters:  %s\n", func_name, NONULL(params)));
+        if ((func = script_find_handler(func_name)) != NULL) {
+            (func->handler) (param_list);
+        } else {
+            print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);
+        }
     }
+
     if (params) {
-      params++;
-      if ((tmp = strrchr(params, ')')) != NULL) {
-        *tmp = 0;
-      } else {
-        print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
-        free_array((void **) token_list, 0);
-        return;
-      }
-      param_list = split(", \t", params);
-    } else {
-      param_list = NULL;
+        free_array((void **) param_list, 0);
     }
-    D_SCRIPT(("Calling function %s with parameters:  %s\n", func_name, NONULL(params)));
-    if ((func = script_find_handler(func_name)) != NULL) {
-      (func->handler)(param_list);
-    } else {
-      print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);
-    }
-  }
-
-  if (params) {
-    free_array((void **) param_list, 0);
-  }
-  free_array((void **) token_list, 0);
+    free_array((void **) token_list, 0);
 }

@@ -28,5 +28,5 @@ extern int eterm_bootstrap(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-  return (eterm_bootstrap(argc, argv));
+    return (eterm_bootstrap(argc, argv));
 }

@@ -38,29 +38,29 @@
 int
 main(int argc, char **argv)
 {
-  int scale = FALSE, trans = FALSE;
-  unsigned int pic = 0;
-  int i;
+    int scale = FALSE, trans = FALSE;
+    unsigned int pic = 0;
+    int i;
 
-  for (i = 1; i < argc; i++) {
-    if (strcasecmp(argv[i], "-scale") == 0) {
-      scale = TRUE;
-    } else if (strcasecmp(argv[i], "-trans") == 0) {
-      trans = TRUE;
-    } else if (strncasecmp(argv[i], "-h", 2) == 0) {
-      printf("Usage: %s [[-scale] file] [-trans]\n", argv[0]);
-      return 0;
-    } else {
-      pic = i;
+    for (i = 1; i < argc; i++) {
+        if (strcasecmp(argv[i], "-scale") == 0) {
+            scale = TRUE;
+        } else if (strcasecmp(argv[i], "-trans") == 0) {
+            trans = TRUE;
+        } else if (strncasecmp(argv[i], "-h", 2) == 0) {
+            printf("Usage: %s [[-scale] file] [-trans]\n", argv[0]);
+            return 0;
+        } else {
+            pic = i;
+        }
     }
-  }
 
-  if (pic && argv[pic]) {
-    printf("\033]6;0;0\a");
-    printf("\033]20;%s%s\a", argv[pic], scale ? "@100x100+50+50:scale" : "@0x0+0+0:tile");
-  }
-  if (trans) {
-    printf("\033]6;0;1\a");
-  }
-  return 0;
+    if (pic && argv[pic]) {
+        printf("\033]6;0;0\a");
+        printf("\033]20;%s%s\a", argv[pic], scale ? "@100x100+50+50:scale" : "@0x0+0+0:tile");
+    }
+    if (trans) {
+        printf("\033]6;0;1\a");
+    }
+    return 0;
 }

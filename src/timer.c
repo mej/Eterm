@@ -41,85 +41,91 @@ static const char cvs_ident[] = "$Id$";
 static etimer_t *timers = NULL;
 
 timerhdl_t
-timer_add(unsigned long msec, timer_handler_t handler, void *data) {
+timer_add(unsigned long msec, timer_handler_t handler, void *data)
+{
 
-  static etimer_t *timer;
-  struct timeval tv;
-  static struct timezone tz;
+    static etimer_t *timer;
+    struct timeval tv;
+    static struct timezone tz;
 
-  if (!timers) {
-    timers = (etimer_t *) MALLOC(sizeof(etimer_t));
-    timer = timers;
-  } else {
-    timer->next = (etimer_t *) MALLOC(sizeof(etimer_t));
-    timer = timer->next;
-  }
-  timer->msec = msec;
-  gettimeofday(&tv, &tz);
-  timer->time.tv_sec = (msec / 1000) + tv.tv_sec;
-  timer->time.tv_usec = ((msec % 1000) * 1000) + tv.tv_usec;
-  timer->handler = handler;
-  timer->data = data;
-  timer->next = NULL;
-  D_TIMER(("Added timer.  Timer set to %lu/%lu with handler %8p and data %8p\n", timer->time.tv_sec, timer->time.tv_usec, timer->handler, timer->data));
-  return ((timerhdl_t) timer);
-}
-
-unsigned char
-timer_del(timerhdl_t handle) {
-
-  register etimer_t *current;
-  etimer_t *temp;
-
-  if (timers == handle) {
-    timers = handle->next;
-    FREE(handle);
-    return 1;
-  }
-  for (current = timers; current->next; current = current->next) {
-    if (current->next == handle) {
-      break;
+    if (!timers) {
+        timers = (etimer_t *) MALLOC(sizeof(etimer_t));
+        timer = timers;
+    } else {
+        timer->next = (etimer_t *) MALLOC(sizeof(etimer_t));
+        timer = timer->next;
     }
-  }
-  if (!(current->next)) {
-    return 0;
-  }
-  temp = current->next;
-  current->next = temp->next;
-  FREE(temp);
-  return 1;
+    timer->msec = msec;
+    gettimeofday(&tv, &tz);
+    timer->time.tv_sec = (msec / 1000) + tv.tv_sec;
+    timer->time.tv_usec = ((msec % 1000) * 1000) + tv.tv_usec;
+    timer->handler = handler;
+    timer->data = data;
+    timer->next = NULL;
+    D_TIMER(("Added timer.  Timer set to %lu/%lu with handler %8p and data %8p\n", timer->time.tv_sec, timer->time.tv_usec, timer->handler,
+             timer->data));
+    return ((timerhdl_t) timer);
 }
 
 unsigned char
-timer_change_delay(timerhdl_t handle, unsigned long msec) {
+timer_del(timerhdl_t handle)
+{
 
-  struct timeval tv;
-  static struct timezone tz;
+    register etimer_t *current;
+    etimer_t *temp;
 
-  handle->msec = msec;
-  gettimeofday(&tv, &tz);
-  handle->time.tv_sec = (msec / 1000) + tv.tv_sec;
-  handle->time.tv_usec = ((msec % 1000) * 1000) + tv.tv_usec;
-  return 1;
+    if (timers == handle) {
+        timers = handle->next;
+        FREE(handle);
+        return 1;
+    }
+    for (current = timers; current->next; current = current->next) {
+        if (current->next == handle) {
+            break;
+        }
+    }
+    if (!(current->next)) {
+        return 0;
+    }
+    temp = current->next;
+    current->next = temp->next;
+    FREE(temp);
+    return 1;
+}
+
+unsigned char
+timer_change_delay(timerhdl_t handle, unsigned long msec)
+{
+
+    struct timeval tv;
+    static struct timezone tz;
+
+    handle->msec = msec;
+    gettimeofday(&tv, &tz);
+    handle->time.tv_sec = (msec / 1000) + tv.tv_sec;
+    handle->time.tv_usec = ((msec % 1000) * 1000) + tv.tv_usec;
+    return 1;
 }
 
 void
-timer_check(void) {
+timer_check(void)
+{
 
-  register etimer_t *current;
-  struct timeval tv;
-  static struct timezone tz;
+    register etimer_t *current;
+    struct timeval tv;
+    static struct timezone tz;
 
-  if (!timers) return;
+    if (!timers)
+        return;
 
-  gettimeofday(&tv, &tz);
-  for (current = timers; current; current = current->next) {
-    if ((current->time.tv_sec > tv.tv_sec) || ((current->time.tv_sec == tv.tv_sec) && (current->time.tv_usec >= tv.tv_usec))) {
-      if (!((current->handler)(current->data))) {
-        timer_del(current);
-      } else {
-        timer_change_delay(current, current->msec);
-      }
+    gettimeofday(&tv, &tz);
+    for (current = timers; current; current = current->next) {
+        if ((current->time.tv_sec > tv.tv_sec) || ((current->time.tv_sec == tv.tv_sec) && (current->time.tv_usec >= tv.tv_usec))) {
+            if (!((current->handler) (current->data))) {
+                timer_del(current);
+            } else {
+                timer_change_delay(current, current->msec);
+            }
+        }
     }
-  }
 }

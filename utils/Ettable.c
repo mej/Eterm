@@ -26,40 +26,39 @@ static const char cvs_ident[] = "$Id$";
 
 #include <stdio.h>
 
-const char *lookup[] =
-{
-  "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",	/*  0-7  */
-  "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",	/*  8-15 */
-  "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",	/* 16-23 */
-  "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"	/* 24-31 */
+const char *lookup[] = {
+    "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",	/*  0-7  */
+    "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",	/*  8-15 */
+    "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",	/* 16-23 */
+    "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"	/* 24-31 */
 };
 
 int
 main(void)
 {
 
-  unsigned short i;
+    unsigned short i;
 
-  printf("+-----------+---------+-------------+--------+\n");
-  printf("| Character | Decimal | Hexadecimal |  Octal |\n");
-  printf("+-----------+---------+-------------+--------+\n");
+    printf("+-----------+---------+-------------+--------+\n");
+    printf("| Character | Decimal | Hexadecimal |  Octal |\n");
+    printf("+-----------+---------+-------------+--------+\n");
 
-  for (i = 0; i < 32; i++) {
-    printf("|  %3s  ^%c  |   %3d   |    0x%02x     |   %03o  |\n", lookup[i], ('@' + i), i, i, i);
-  }
-  for (; i < 256; i++) {
-    printf("|    '%c'    |   %3d   |    0x%02x     |  %c%03o  |\n", (i == 127 ? ' ' : i), i, i, (i > '\077' ? '0' : ' '), i);
-  }
-  printf("+-----------+---------+-------------+--------+\n");
+    for (i = 0; i < 32; i++) {
+        printf("|  %3s  ^%c  |   %3d   |    0x%02x     |   %03o  |\n", lookup[i], ('@' + i), i, i, i);
+    }
+    for (; i < 256; i++) {
+        printf("|    '%c'    |   %3d   |    0x%02x     |  %c%03o  |\n", (i == 127 ? ' ' : i), i, i, (i > '\077' ? '0' : ' '), i);
+    }
+    printf("+-----------+---------+-------------+--------+\n");
 
-  printf("+---------------+---------+-------------+-------+\n");
-  printf("| ACS Character | Decimal | Hexadecimal | Octal |\n");
-  printf("+---------------+---------+-------------+-------+\n");
-  printf("\033)0");
+    printf("+---------------+---------+-------------+-------+\n");
+    printf("| ACS Character | Decimal | Hexadecimal | Octal |\n");
+    printf("+---------------+---------+-------------+-------+\n");
+    printf("\033)0");
 
-  for (i = 1; i < 32; i++) {
-    printf("|    \016%c\017   (%c)    |   %3d   |    0x%02x     |  %03o  |\n", i + 0x5e, i + 0x5e, i, i, i);
-  }
-  printf("+---------------+---------+-------------+-------+\n");
-  return 0;
+    for (i = 1; i < 32; i++) {
+        printf("|    \016%c\017   (%c)    |   %3d   |    0x%02x     |  %03o  |\n", i + 0x5e, i + 0x5e, i, i, i);
+    }
+    printf("+---------------+---------+-------------+-------+\n");
+    return 0;
 }

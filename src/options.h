@@ -134,6 +134,9 @@ extern char *rs_preedit_type;
 extern char *rs_name;
 extern char *rs_theme;
 extern char *rs_config_file;
+#ifdef ESCREEN
+extern char *rs_url;
+#endif
 extern unsigned int rs_line_space;
 extern unsigned int rs_meta_mod, rs_alt_mod, rs_numlock_mod;
 #ifndef NO_BOLDFONT

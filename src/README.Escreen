@@ -1,0 +1,123 @@
+
+ESCREEN
+
+1 - What is it?
+
+Eterm now offers you to compile in experimental support for the
+"screen" program.  "screen" is a terminal multiplexer (one window,
+several shells).  Yes, it's like konsole or multi-gnome-terminal,
+only that your shells won't die just because X or the Window Manager
+do.  Oh, and you can pick up your home session from work, and vice
+versa.  And several people can connect to the same session at once,
+and...
+
+You get this picture -- if you're a power-user, this is for you.
+
+Also, if you're not a power-user, this is *not* for you.  It's alpha.
+It's experimental.  Reported bugs will get fixed where possible, but
+there can be no newbie support at this time.
+
+
+
+2 - How do I get it?
+
+You already have all you need.  Now, compile with ESCREEN defined in
+the DEFS in src/Makefile.
+
+  If you don't know how to do that, sorry, but you're not Escreen's
+  intended audience at this point; please hold on.
+
+Oh, and you also need the screen program.  In our tests, we used
+$ screen -version
+Screen version 3.09.11 (FAU) 14-Feb-02
+
+
+
+3 - How do I start it?
+
+If you call it an Eterm, it will behave like one.  Same for an Escreen.
+(ln -s Eterm Escreen; ./Escreen).
+
+Additionally, when called with a command-line (-e "/some/program"), the
+suite will *always* behave like an Eterm, even if invoked as Escreen.
+Likewise, when called with an URL (-U "screen://user@some.host.gov/"),
+it will behave like an Escreen, even if invoked under another name.
+
+
+
+4 - What should I expect from it?  (subject to change)
+
+An Eterm should open with a screen (without a status-line) running
+inside of it.  There should be a button-bar in the Eterm enumerating
+the multiplexed terminal (you usually start with one).  If you normally
+don't use a button-bar, Escreen will create one for you.  Otherwise, it
+will add buttons to your existing bar.
+
+
+
+5 - What should I expect in the future?  (TODO)
+
+* Limited support for scrolling.  screen doesn't give us all the info
+  we'd need to make this really sexy.  There will likely be limited
+  support for screen (we need to keep this, it will be what we'll find
+  on remote machine), and possibly support for enhanced screen-clones
+  (like the perchance forthcoming "scream").
+
+* Support for ".screenrc".  This was temporarily disabled to aid in
+  debugging and will soon return in conjunction with
+
+* Escreen accepting non-default key setups and
+
+* menus for "screen"-functions so those unfamiliar with the program
+  will not need to learn a dozen arcance key-sequences (or even get
+  used to ^A meaning something new).
+
+
+
+9 - FAQ
+
+Q  I don't see any buttons!
+
+A  Debian-users reported this before, and it is presumed to be a problem
+   with the terminfo-data.  Call up Eterm (or xterm, or whatnot).  *Then*
+   call up "screen" from inside that terminal.  Is the last line inverted?
+   If it isn'T, something is seriously weird with your setup, and it's not
+   a problem in Escreen.  Sorry.  : (
+
+Q  ^A does funny things!
+
+A  Well, yes.  ^A talks to the screen program.  You will be able to move
+   that to a key of your choice with the next release.
+
+Q  I'd like for the button labels to be in a different colour.
+
+A  At this time, the labels follow the general (text) colours.
+   You will be able to define colours for (foreground|background|active|bell)
+   windows' labels in later releases.
+
+Q  Escreen opens, then closes again.
+
+A  Escreen cannot run "screen".  If you do have "screen", and it is in
+   the search path, screen apparently terminates right away.  Normally
+   this means that your screen-sessions are messed up; "screen -ls" will
+   give you a list of them; "screen -wipe" will do the cleaning up.
+   NOTE: If this happens with a remote session, the remote end might just
+   find our terminal type confusing.  The "--term-name" option with some-
+   thing vanilla (--term-name vt100) should remedy this.
+
+Q "screen" support rocks!  Can we have it in konsole/multi-gnome-terminal?
+
+A  I will not attempt anything like that before I am happy with Escreen.
+   The code, however, is GPL'd, and its use is documented by example of
+   Eterm.  If you can work with that, do.
+
+Q  Who's responsible for this?
+
+A  Escreen is an Eterm extension conceived and written by Azundris.
+   Do not complain to KainX (who courteously added the patch for the
+   enjoyment of the hardy) if you break your Eterm by compiling this
+   in (or by trying to use the alpha-functionality).  By using this,
+   you agree that anything happening while or because of using it is
+   your fault, and your fault only.
+
+-- Azundris 2002/05/03  <escreen@azundris.com>  http://www.azundris.com/

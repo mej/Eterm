@@ -53,6 +53,8 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
+#include "screamcfg.h"
+
 char *orig_argv0;
 
 #ifdef PIXMAP_SUPPORT
@@ -62,7 +64,7 @@ char *orig_argv0;
 short bg_needs_update = 1;
 #endif
 TermWin_t TermWin;
-Display *Xdisplay;		/* display */
+Display *Xdisplay;              /* display */
 Colormap cmap;
 char *display_name = NULL;
 unsigned int colorfgbg;
@@ -72,234 +74,257 @@ int
 eterm_bootstrap(int argc, char *argv[])
 {
 
-  int i;
-  char *val;
-  static char windowid_string[20], *display_string, *term_string;	/* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
-  orig_argv0 = argv[0];
+    int i;
+    char *val;
+    static char windowid_string[20], *display_string, *term_string;	/* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+    orig_argv0 = argv[0];
 
-  /* Security enhancements -- mej */
-  putenv("IFS= \t\n");
-  my_ruid = getuid();
-  my_euid = geteuid();
-  my_rgid = getgid();
-  my_egid = getegid();
-  privileges(REVERT);
-  install_handlers();
+    /* Security enhancements -- mej */
+    putenv("IFS= \t\n");
+    my_ruid = getuid();
+    my_euid = geteuid();
+    my_rgid = getgid();
+    my_egid = getegid();
+    privileges(REVERT);
+    install_handlers();
 
-  PABLO_START_TRACING();
-  getcwd(initial_dir, PATH_MAX);
+    PABLO_START_TRACING();
+    getcwd(initial_dir, PATH_MAX);
 
-  libast_set_program_name(PACKAGE);
-  libast_set_program_version(VERSION);
+    libast_set_program_name(PACKAGE);
+    libast_set_program_version(VERSION);
 
-  /* Open display, get options/resources and create the window */
-  if (getenv("DISPLAY") == NULL) {
-    display_name = STRDUP(":0");
-  } else {
-    display_name = STRDUP(getenv("DISPLAY"));
-  }
+    /* Open display, get options/resources and create the window */
+    if (getenv("DISPLAY") == NULL) {
+        display_name = STRDUP(":0");
+    } else {
+        display_name = STRDUP(getenv("DISPLAY"));
+    }
 
-  /* This MUST be called before any other Xlib functions */
+    /* This MUST be called before any other Xlib functions */
 
-  get_initial_options(argc, argv);
-  init_defaults();
+    get_initial_options(argc, argv);
+    init_defaults();
 
 #ifdef NEED_LINUX_HACK
-  privileges(INVOKE);		/* xdm in new Linux versions requires ruid != root to open the display -- mej */
+    privileges(INVOKE);         /* xdm in new Linux versions requires ruid != root to open the display -- mej */
 #endif
-  Xdisplay = XOpenDisplay(display_name);
+    Xdisplay = XOpenDisplay(display_name);
 #ifdef NEED_LINUX_HACK
-  privileges(REVERT);
+    privileges(REVERT);
 #endif
-  if (!Xdisplay) {
-    print_error("can't open display %s\n", display_name);
-    exit(EXIT_FAILURE);
-  }
-  XSetErrorHandler((XErrorHandler) xerror_handler);
+    if (!Xdisplay) {
+        print_error("can't open display %s\n", display_name);
+        exit(EXIT_FAILURE);
+    }
+    XSetErrorHandler((XErrorHandler) xerror_handler);
 
-  if (Options & Opt_install) {
-    cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
-    XInstallColormap(Xdisplay, cmap);
-  } else {
-    cmap = Xcmap;
-  }
+    if (Options & Opt_install) {
+        cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
+        XInstallColormap(Xdisplay, cmap);
+    } else {
+        cmap = Xcmap;
+    }
 #ifdef PIXMAP_SUPPORT
-  imlib_context_set_display(Xdisplay);
-  imlib_context_set_visual(Xvisual);
-  imlib_context_set_colormap(cmap);
-  imlib_context_set_dither_mask(0);
+    imlib_context_set_display(Xdisplay);
+    imlib_context_set_visual(Xvisual);
+    imlib_context_set_colormap(cmap);
+    imlib_context_set_dither_mask(0);
 #endif
 
-  get_modifiers();  /* Set up modifier masks before parsing config files. */
+    get_modifiers();            /* Set up modifier masks before parsing config files. */
 
-  /* Get all our properties set up. */
-  MEMSET(props, 0, sizeof(props));
-  props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
-  props[PROP_TRANS_PIXMAP] = XInternAtom(Xdisplay, "_XROOTPMAP_ID", False);
-  props[PROP_TRANS_COLOR] = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", False);
-  props[PROP_SELECTION_DEST] = XInternAtom(Xdisplay, "VT_SELECTION", False);
-  props[PROP_SELECTION_INCR] = XInternAtom(Xdisplay, "INCR", False);
-  props[PROP_SELECTION_TARGETS] = XInternAtom(Xdisplay, "TARGETS", False);
-  props[PROP_ENL_COMMS] = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
-  props[PROP_ENL_MSG] = XInternAtom(Xdisplay, "ENL_MSG", False);
-  props[PROP_DELETE_WINDOW] = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
-  props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
-  props[PROP_DND_SELECTION] = XInternAtom(Xdisplay, "DndSelection", False);
+    /* Get all our properties set up. */
+    MEMSET(props, 0, sizeof(props));
+    props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_WIN_WORKSPACE", False);
+    props[PROP_TRANS_PIXMAP] = XInternAtom(Xdisplay, "_XROOTPMAP_ID", False);
+    props[PROP_TRANS_COLOR] = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", False);
+    props[PROP_SELECTION_DEST] = XInternAtom(Xdisplay, "VT_SELECTION", False);
+    props[PROP_SELECTION_INCR] = XInternAtom(Xdisplay, "INCR", False);
+    props[PROP_SELECTION_TARGETS] = XInternAtom(Xdisplay, "TARGETS", False);
+    props[PROP_ENL_COMMS] = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
+    props[PROP_ENL_MSG] = XInternAtom(Xdisplay, "ENL_MSG", False);
+    props[PROP_DELETE_WINDOW] = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
+    props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
+    props[PROP_DND_SELECTION] = XInternAtom(Xdisplay, "DndSelection", False);
 
-  if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
-    char *tmp;
+    if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
+        char *tmp;
 
-    D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
-    tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
-    sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
-    putenv(tmp);
-  }
-  if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), 
-				   (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
-    char *tmp;
+        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
+        tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
+        sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
+        putenv(tmp);
+    }
+    if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
+                                     (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
+        char *tmp;
 
-    D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
-    tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
-    sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
-    putenv(tmp);
-  }
-
+        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
+        tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
+        sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
+        putenv(tmp);
+    }
 #if defined(PIXMAP_SUPPORT)
-  if (rs_path || theme_dir || user_dir) {
-    register unsigned long len;
-    register char *tmp;
+    if (rs_path || theme_dir || user_dir) {
+        register unsigned long len;
+        register char *tmp;
 
-    len = strlen(initial_dir);
-    if (rs_path) {
-      len += strlen(rs_path) + 1;	/* +1 for the colon */
+        len = strlen(initial_dir);
+        if (rs_path) {
+            len += strlen(rs_path) + 1;	/* +1 for the colon */
+        }
+        if (theme_dir) {
+            len += strlen(theme_dir) + 1;
+        }
+        if (user_dir) {
+            len += strlen(user_dir) + 1;
+        }
+        tmp = MALLOC(len + 1);  /* +1 here for the NUL */
+        snprintf(tmp, len + 1, "%s%s%s%s%s%s%s", (rs_path ? rs_path : ""), (rs_path ? ":" : ""), initial_dir,
+                 (theme_dir ? ":" : ""), (theme_dir ? theme_dir : ""), (user_dir ? ":" : ""), (user_dir ? user_dir : ""));
+        tmp[len] = '\0';
+        FREE(rs_path);
+        rs_path = tmp;
+        D_OPTIONS(("New rs_path set to \"%s\"\n", rs_path));
     }
-    if (theme_dir) {
-      len += strlen(theme_dir) + 1;
-    }
-    if (user_dir) {
-      len += strlen(user_dir) + 1;
-    }
-    tmp = MALLOC(len + 1);	/* +1 here for the NUL */
-    snprintf(tmp, len + 1, "%s%s%s%s%s%s%s", (rs_path ? rs_path : ""), (rs_path ? ":" : ""), initial_dir,
-	     (theme_dir ? ":" : ""), (theme_dir ? theme_dir : ""), (user_dir ? ":" : ""), (user_dir ? user_dir : ""));
-    tmp[len] = '\0';
-    FREE(rs_path);
-    rs_path = tmp;
-    D_OPTIONS(("New rs_path set to \"%s\"\n", rs_path));
-  }
 #endif
-  get_options(argc, argv);
-  D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
-  D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(),
-	  getegid()));
+    get_options(argc, argv);
+    D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
+    D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(), getegid()));
 
-  post_parse();
+#ifdef ESCREEN
+    TermWin.screen = NULL;
+    TermWin.screen_mode = NS_MODE_NONE;
+    {
+        char *p = strrchr(orig_argv0, '/');
+
+#  define ESCREEN_PREFIX "Escreen"
+#  define ETERM_PREFIX   "Eterm"
+        p = p ? (p + 1) : orig_argv0;
+        if (rs_url || !strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX)))
+            TermWin.screen_mode = NS_MODE_SCREEN;
+#  ifdef NS_DEBUG
+        if (!strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX)))
+            fputs("You called me \"Escreen\"!\n", stderr);
+        else if (!strncasecmp(ETERM_PREFIX, p, strlen(ETERM_PREFIX)))
+            fputs("You called me \"Eterm\"!\n", stderr);
+        else
+            fputs("Stop calling me funky names!\n", stderr);
+        fprintf(stderr, "Escreen mode is %d (%d rows, %s)\n", TermWin.screen_mode, TermWin.nrow, rs_url);
+#  endif
+    }
+#endif
+
+    post_parse();
 
 #ifdef PREFER_24BIT
-  cmap = DefaultColormap(Xdisplay, Xscreen);
+    cmap = DefaultColormap(Xdisplay, Xscreen);
 
-  /*
-   * If depth is not 24, look for a 24bit visual.
-   */
-  if (Xdepth != 24) {
-    XVisualInfo vinfo;
+    /*
+     * If depth is not 24, look for a 24bit visual.
+     */
+    if (Xdepth != 24) {
+        XVisualInfo vinfo;
 
-    if (XMatchVisualInfo(Xdisplay, Xscreen, 24, TrueColor, &vinfo)) {
-      Xdepth = 24;
-      Xvisual = vinfo.visual;
-      cmap = XCreateColormap(Xdisplay, RootWindow(Xdisplay, Xscreen),
-			     Xvisual, AllocNone);
+        if (XMatchVisualInfo(Xdisplay, Xscreen, 24, TrueColor, &vinfo)) {
+            Xdepth = 24;
+            Xvisual = vinfo.visual;
+            cmap = XCreateColormap(Xdisplay, RootWindow(Xdisplay, Xscreen), Xvisual, AllocNone);
+        }
     }
-  }
 #endif
 
-  process_colors();
+    process_colors();
 
-  Create_Windows(argc, argv);
-  scr_reset();			/* initialize screen */
+    Create_Windows(argc, argv);
+#ifdef ESCREEN
+    if (TermWin.screen_mode)
+        TermWin.nrow++;
+#endif
+    scr_reset();                /* initialize screen */
 
-  /* Initialize the scrollbar */
-  scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-  scrollbar_mapping((Options & Opt_scrollbar) && !((Options & Opt_scrollbar_popup) && !TermWin.focus));
+    /* Initialize the scrollbar */
+    scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
+    scrollbar_mapping((Options & Opt_scrollbar) && !((Options & Opt_scrollbar_popup) && !TermWin.focus));
 
-  /* Initialize the menu subsystem. */
-  menu_init();
+    /* Initialize the menu subsystem. */
+    menu_init();
 
-  if (buttonbar) {
-    bbar_init(buttonbar, szHint.width);
-  }
-
+    if (buttonbar) {
+        bbar_init(buttonbar, szHint.width);
+    }
 #if DEBUG >= DEBUG_X
-  if (DEBUG_LEVEL >= DEBUG_X) {
-    XSync(Xdisplay, False);
-    XSynchronize(Xdisplay, True);
-  }
+    if (DEBUG_LEVEL >= DEBUG_X) {
+        XSync(Xdisplay, False);
+        XSynchronize(Xdisplay, True);
+    }
 #endif
 
 #ifdef DISPLAY_IS_IP
-  /* Fixup display_name for export over pty to any interested terminal
-   * clients via "ESC[7n" (e.g. shells).  Note we use the pure IP number
-   * (for the first non-loopback interface) that we get from
-   * network_display().  This is more "name-resolution-portable", if you
-   * will, and probably allows for faster x-client startup if your name
-   * server is beyond a slow link or overloaded at client startup.  Of
-   * course that only helps the shell's child processes, not us.
-   *
-   * Giving out the display_name also affords a potential security hole
-   */
+    /* Fixup display_name for export over pty to any interested terminal
+     * clients via "ESC[7n" (e.g. shells).  Note we use the pure IP number
+     * (for the first non-loopback interface) that we get from
+     * network_display().  This is more "name-resolution-portable", if you
+     * will, and probably allows for faster x-client startup if your name
+     * server is beyond a slow link or overloaded at client startup.  Of
+     * course that only helps the shell's child processes, not us.
+     *
+     * Giving out the display_name also affords a potential security hole
+     */
 
-  val = display_name = network_display(display_name);
-  if (val == NULL)
+    val = display_name = network_display(display_name);
+    if (val == NULL)
 #endif /* DISPLAY_IS_IP */
-    val = XDisplayString(Xdisplay);
-  if (display_name == NULL)
-    display_name = val;		/* use broken `:0' value */
+        val = XDisplayString(Xdisplay);
+    if (display_name == NULL)
+        display_name = val;     /* use broken `:0' value */
 
-  i = strlen(val);
-  display_string = MALLOC(i + 9);
+    i = strlen(val);
+    display_string = MALLOC(i + 9);
 
-  sprintf(display_string, "DISPLAY=%s", val);
-  sprintf(windowid_string, "WINDOWID=%u", (unsigned int) TermWin.parent);
+    sprintf(display_string, "DISPLAY=%s", val);
+    sprintf(windowid_string, "WINDOWID=%u", (unsigned int) TermWin.parent);
 
-  /* add entries to the environment:
-   * DISPLAY:       X display name
-   * WINDOWID:      X windowid of the window
-   * COLORTERM:     Terminal supports color
-   * COLORTERM_BCE: Terminal supports BCE
-   * TERM:          Terminal type for termcap/terminfo
-   */
-  putenv(display_string);
-  putenv(windowid_string);
-  if (Xdepth <= 2) {
-    putenv("COLORTERM=" COLORTERMENV "-mono");
-    putenv("COLORTERM_BCE=" COLORTERMENV "-mono");
-    putenv("TERM=" TERMENV);
-  } else {
-    if (rs_term_name != NULL) {
-      i = strlen(rs_term_name);
-      term_string = MALLOC(i + 6);
-
-      sprintf(term_string, "TERM=%s", rs_term_name);
-      putenv(term_string);
+    /* add entries to the environment:
+     * DISPLAY:       X display name
+     * WINDOWID:      X windowid of the window
+     * COLORTERM:     Terminal supports color
+     * COLORTERM_BCE: Terminal supports BCE
+     * TERM:          Terminal type for termcap/terminfo
+     */
+    putenv(display_string);
+    putenv(windowid_string);
+    if (Xdepth <= 2) {
+        putenv("COLORTERM=" COLORTERMENV "-mono");
+        putenv("COLORTERM_BCE=" COLORTERMENV "-mono");
+        putenv("TERM=" TERMENV);
     } else {
+        if (rs_term_name != NULL) {
+            i = strlen(rs_term_name);
+            term_string = MALLOC(i + 6);
+
+            sprintf(term_string, "TERM=%s", rs_term_name);
+            putenv(term_string);
+        } else {
 #ifdef DEFINE_XTERM_COLOR
-      if (Xdepth <= 2)
-	putenv("TERM=" TERMENV);
-      else
-	putenv("TERM=" TERMENV "-color");
+            if (Xdepth <= 2)
+                putenv("TERM=" TERMENV);
+            else
+                putenv("TERM=" TERMENV "-color");
 #else
-      putenv("TERM=" TERMENV);
+            putenv("TERM=" TERMENV);
 #endif
+        }
+        putenv("COLORTERM=" COLORTERMENV);
+        putenv("COLORTERM_BCE=" COLORTERMENV);
     }
-    putenv("COLORTERM=" COLORTERMENV);
-    putenv("COLORTERM_BCE=" COLORTERMENV);
-  }
-  putenv("ETERM_VERSION=" VERSION);
+    putenv("ETERM_VERSION=" VERSION);
 
-  D_CMD(("init_command()\n"));
-  init_command(rs_exec_args);
+    D_CMD(("init_command()\n"));
+    init_command(rs_exec_args);
 
-  main_loop();
+    main_loop();
 
-  return (EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }

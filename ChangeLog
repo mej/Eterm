@@ -4624,3 +4624,11 @@ Mon Apr 29 21:18:20 2002                        Michael Jennings (mej)
 
 Fixed the --install option which hasn't worked for ages.
 ----------------------------------------------------------------------
+Sat May  4 10:23:38 2002                        Michael Jennings (mej)
+
+Ran reformat-code on the tree.
+
+Also merged in Azundris' Escreen patch.  It's disabled by default for
+the moment pending further testing, but you can enable it manually by
+defining ESCREEN.
+----------------------------------------------------------------------

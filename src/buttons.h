@@ -70,6 +70,9 @@ typedef struct button_struct {
   unsigned short x, y, w, h;
   unsigned short text_x, text_y;
   unsigned short icon_x, icon_y, icon_w, icon_h;
+#ifdef ESCREEN
+  int flags;
+#endif
   struct button_struct *next;
 } button_t;
 
