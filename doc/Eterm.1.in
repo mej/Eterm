@@ -1,4 +1,4 @@
-.TH ETERM 1 @DATE@ "X Version 11" "X Tools"
+.TH ETERM 1 "@DATE@" "X Version 11" "X Tools"
 .SH NAME
 Eterm - the Enlightened terminal emulator for the X Window System
 .SH SYNOPSIS
@@ -1757,27 +1757,25 @@ as its child process.  You can only have one of these!
 .TP
 BUILT-IN FUNCTIONS
 
-Eterm has a set of built-in functions which are available in config files.
-They can be used anywhere their output would be valid.  Built-in functions
-are prefixed with the
+Eterm has a set of built-in functions which are available in config
+files.  Each one accepts zero or more parameters and outputs a series
+of zero or more words.  "Words" are defined in shell terms; i.e.,
+words are separated by whitespace, and single or double quotes can be
+used to encapsulate words which contain whitespace themselves.  You
+also employ backquotes to execute a command whose output can become
+part of the config file itself or can be passed to a built-in function
+as its parameter list.  Built-in functions and backquotes may be used
+anywhere their output would be valid.  Built-in functions are prefixed
+with the
 .B %
 character.
 
 .RS 5
-.BI %random( params )
+.BI %appname()
 .RS 5
-This function randomly chooses one of the words which compose
-.I params
-and returns that.  "Words" are defined in shell terms, meaning that single or
-double quotes can be used to separate individual words of
-.I params
-which contain spaces.  And you can even get creative and use a
-backquote-executed command to generate the list of words to pass to
-.BR %random() .
-The default themes that come with Eterm demonstrate this technique, in fact.
-But keep in mind that random pixmaps aren't the only thing you can do with this
-function.  You can randomize anything...colors, toggles, fonts, tinting...you
-name it!
+Returns the application name, a hyphen, and the version number.  Currently this
+is the string 
+.BR Eterm-@VERSION@ .
 .RE
 
 .BI %exec( command )
@@ -1787,11 +1785,31 @@ Executes
 and returns the result.  Basically it's exactly like using backquotes.
 .RE
 
-.BI %appname()
+.BI %get( variable )
 .RS 5
-Returns the application name, a hyphen, and the version number.  Currently this
-is the string 
-.BR Eterm-@VERSION@ .
+Retrieve the value of a config file variable.  Refer to the
+.B %put()
+function below.
+.RE
+
+.BI %put( "variable value" )
+.RS 5
+Create a config variable named
+.I variable
+and assign it the value of
+.IR value .
+The value can then subsequently be retrieved using
+.BI %get( variable )
+.RE
+
+.BI %random( params )
+.RS 5
+This function randomly chooses one of the words which compose
+.I params
+and returns that.  The default themes that come with Eterm use this
+function to choose random backgrounds, but backgrounds aren't the only
+things that can be randomized with this function.  You can randomize
+anything...colors, toggles, fonts, tinting, etc.
 .RE
 
 .BI %version()
@@ -1808,13 +1826,177 @@ PREPROCESSING
 Eterm supports the
 .BI %include " file"
 directive to allow for separation of the configuration information into
-multiple files.
+multiple files.  Eterm will load and parse
+.I file
+just like any other config file, but will treat its contents as if
+they replaced the directive itself.
+
+You may also request that the config file be run through an external
+preprocessor (such as m4 or cpp) before Eterm reads it.  This is done
+via the
+.BI %preproc " command"
+directive.  You may specify anything you like for
+.I command
+so long as it accepts input on STDIN and sends output to STDOUT.  See
+the
+.B menus.cfg
+file in the default
+.B chooser
+theme for an example.
+
+.TP
+SCRIPT FUNCTIONS
+
+One of the action types which can be bound to keypresses, mouse
+buttons, menuitems, or buttonbar buttons is a
+.BR script .
+The script must be a single word (i.e., enclosed in quotes) and
+consists of one or more calls to the script functions below.  Each
+call is separated from the next by a semicolon
+.BR "" ( ; ).
+Function parameters are enclosed in parentheses; the parentheses are
+optional if no parameters are to be passed.  Commas and/or whitespace
+separate parameters from each other.
+
+.RS 5
+.BI copy( buffer )
+.RS 5
+Copies the current selection to the specified clipboard or cut buffer.
+.I buffer
+is either a number
+.BR 0 - 7 ,
+in which case the selection is copied to the cut buffer specified, or
+one of the words
+.BR clipboard ", " primary ", or " secondary
+(or any initial substring thereof), in which case the selection is
+copied to the specified clipboard.  You may omit
+.IR buffer ,
+in which case the default buffer is
+.B primary
+(XA_PRIMARY in Xlib-speak).
+.RE
+
+.BI exit( message )
+.br
+.BI exit( code )
+.RS 5
+Exit Eterm with an optional
+.I message
+or an integer return
+.IR code .
+Either parameter may be specified, but not both.  If neither is
+specified, a
+.I code
+of
+.B 0
+(zero) is the default.
+.RE
+
+.BI kill( signal )
+.RS 5
+Sends the specified signal to Eterm's primary child process (either
+your shell, or whatever you specify for Eterm to execute).  For the
+time being,
+.I signal
+must be numeric.
+.B SIGTERM
+is the default if
+.I signal
+is omitted.
+.RE
+
+.BI nop()
+.RS 5
+Does absolutely nothing except waste time. :-)
+.RE
+
+.BI paste( buffer )
+.RS 5
+Pastes the contents of the specified clipboard or cut buffer into the
+terminal window.
+.I buffer
+is either a number
+.BR 0 - 7 ,
+in which case the selection is copied to the cut buffer specified, or
+one of the words
+.BR clipboard ", " primary ", or " secondary
+(or any initial substring thereof), in which case the contents of the
+specified clipboard are pasted.  You may omit
+.IR buffer ,
+in which case the default buffer is
+.B primary
+(XA_PRIMARY in Xlib-speak).
+.RE
+
+.BI save( type ", " filename )
+.RS 5
+Save the current theme/user configuration.
+.I type
+can be either
+.BR user " or " theme ;
+the default is
+.BR user .
+.I filename
+is the file to which the settings should be saved.  It may contain a
+path which is either absolute or relative to the theme directory.  The
+default filename for
+.B user
+is
+.BR user.cfg ,
+and the default filename for
+.B theme
+is
+.BR theme.cfg .
+.RE
+
+.BI scroll( n )
+.RS 5
+Scrolls backward or forward in the scrollback buffer.
+.I n
+is a floating point number followed by an optional unit specifier.
+The unit specifier is one of:
+.BR lines " or " l "; " pages " or "
+.BR p "; or " buffers " or " b .
+The floating point number may be separated from the unit specifier by
+whitespace or a comma, but it is not required.  The floating point
+number should be positive to scroll down (forward) and negative to
+scroll up (backward).  For example, the key sequence Shift-PgUp is
+equivalent to
+.BR scroll(-1p) .
+You may also specify fractional quantities, such as
+.B scroll(0.5p)
+to scroll down half a page.  The default unit if not specified is
+.BR lines .
+.RE
+
+.BI search( str )
+.RS 5
+Search the scrollback buffer for
+.I str
+and highlight all occurances.  If
+.I str
+is not specified, the previous search highlighting is cleared.
+.RE
+
+.BI spawn( command )
+.RS 5
+Spawns a secondary child process to execute
+.IR command ,
+or
+.B Eterm
+if no value is passed.
+.RE
+
+Some functions have aliases for usability purposes.  Specifically,
+.BR die " or " quit
+are precisely equivalent to
+.BR exit ", and " exec " may be used in place of " spawn .
+.RE
 
 .SH AUTHORS
 Michael Jennings (mej@eterm.org)
-Man page re-written for version 0.8 by Shaleh (shaleh@debian.org).
 
 .SH URL(s)
 Eterm Home Page -- http://www.eterm.org/
 .br
-Eterm FAQ -- http://www.eterm.org/FAQ.html
+Author's Home Page -- http://www.kainx.org/

@@ -131,8 +131,8 @@ eterm_handle_winop(char *action)
  * Syntax:  copy([ <buffer> ])
  *
  * <buffer> is either a number 0-7, in which case the selection is copied to
- * the the cut buffer specified, or one of the words "clipboard," "primary,"
- * or "secondary" (or any initial substring thereof), in which case the
+ * the cut buffer specified, or one of the words "clipboard," "primary," or
+ * "secondary" (or any initial substring thereof), in which case the
  * selection is copied to the specified clipboard.  The default buffer is
  * the "primary" buffer (XA_PRIMARY in Xlib-speak).
  */

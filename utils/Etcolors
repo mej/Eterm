@@ -10,7 +10,7 @@ echo "------------------------"
 
 echo
 echo "The grid below displays all possible combinations of the terminal colors"
-echo "you have configured."
+echo "you have configured.  You may need to widen your terminal to see it properly."
 echo
 echo "FG                                        BG"
 echo "--                                        --"
