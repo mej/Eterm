@@ -1999,12 +1999,16 @@ parse_attributes(char *buff, void *state)
     char *tmp = PWord(2, buff);
     unsigned char n;
 
-    if (NumWords(buff) != 3) {
+    if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
+      if (parse_font_fx(PWord(2, tmp)) != 1) {
+        print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification",
+                    file_peek_path(), file_peek_line());
+      }
+    } else if (NumWords(buff) != 3) {
       print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for "
 		  "attribute font", file_peek_path(), file_peek_line(), NONULL(tmp));
       return NULL;
-    }
-    if (isdigit(*tmp)) {
+    } else if (isdigit(*tmp)) {
       n = (unsigned char) strtoul(tmp, (char **) NULL, 0);
       if (n <= 255) {
         eterm_font_add(&etfonts, PWord(2, tmp), n);
@@ -2022,11 +2026,6 @@ parse_attributes(char *buff, void *state)
     } else if (!BEG_STRCASECMP(tmp, "default ")) {
       def_font_idx = strtoul(PWord(2, tmp), (char **) NULL, 0);
 
-    } else if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
-      if (parse_font_fx(PWord(2, tmp)) != 1) {
-        print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification",
-                    file_peek_path(), file_peek_line());
-      }
     } else {
       tmp = Word(1, tmp);
       print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"",
