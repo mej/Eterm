@@ -38,12 +38,12 @@ echo "  libtoolize -c -f"
 libtoolize -c -f
 echo "  aclocal -I . $ACLOCAL_FLAGS"
 aclocal -I . $ACLOCAL_FLAGS
+echo "  autoconf"
+autoconf
 echo "  autoheader"
 autoheader
 echo "  automake -a -c"
 automake -a -c
-echo "  autoconf"
-autoconf
 
 ./configure "$@"
 
