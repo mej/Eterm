@@ -109,6 +109,7 @@ AC_CYGWIN
 AC_ARG_PROGRAM
 
 AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 dnl# Where are we?
 AC_MSG_CHECKING(for distribution root)

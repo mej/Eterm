@@ -5257,3 +5257,7 @@ Small patch for building against libast 0.6.1.
 Fixed compile error when enabling OFFIX_DND support pointed out by JG
 Miller <miller@yoyo.org>.
 ----------------------------------------------------------------------
+Sun Nov  7 15:37:43 2004                        Michael Jennings (mej)
+
+Fixed minor typo.
+----------------------------------------------------------------------
