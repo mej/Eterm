@@ -4607,3 +4607,7 @@ Laurence J. Lane <ljlane@debian.org>.
 
 Also made multiple buttonbars work properly.
 ----------------------------------------------------------------------
+Fri Apr 26 14:34:08 2002                        Michael Jennings (mej)
+
+Minor tweak so bottom-docked buttonbars are properly placed.
+----------------------------------------------------------------------

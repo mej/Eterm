@@ -959,7 +959,7 @@ bbar_calc_positions(void)
         D_BBAR(("top_y %lu, bottom_y %lu\n", top_y, bottom_y));
         bbar->x = 0;
         if (bbar_is_bottom_docked(bbar)) {
-            bottom_y = bottom_y - bbar->h + 1;
+            bottom_y = bottom_y - bbar->h;
             bbar->y = bottom_y;
         } else {
             bbar->y = top_y;
