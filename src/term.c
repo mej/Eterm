@@ -652,6 +652,8 @@ sprintf(kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
   }
 #endif /* DEBUG_CMD */
   tt_write(kbuf, len);
+
+  LK_RET();
 }
 
 /* print pipe */
