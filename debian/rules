@@ -9,7 +9,7 @@
 export DH_COMPAT=1
 pwd:=$(shell pwd)
 
-cfg = --mandir=$(pwd)/tmp/usr/share/man --enable-fsstd \
+cfg = --mandir=/usr/share/man --enable-fsstd \
   --enable-xim --with-backspace=del --with-delete=execute
 
 build: build-stamp
@@ -50,7 +50,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install prefix=$(pwd)/debian/tmp/usr
+	$(MAKE) install DESTDIR=$(pwd)/debian/tmp
 	install -d $(pwd)/debian/tmp/usr/share/doc/eterm
 	install $(pwd)/ChangeLog $(pwd)/debian/tmp/usr/share/doc/eterm
 
