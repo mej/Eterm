@@ -1131,8 +1131,7 @@ clean_exit(void)
         font_cache_clear();
         eterm_font_list_clear();
 # ifdef PIXMAP_SUPPORT
-        FOREACH_IMAGE(free_eterm_image(&(images[idx]));
-            );
+        FOREACH_IMAGE(free_eterm_image(&(images[idx])););
 # endif
         for (i = 0; i < NRS_COLORS; i++) {
             if (rs_color[i]) {
@@ -2107,7 +2106,7 @@ run_command(char **argv)
         char **a = argv;
         if (a) {
             while (*a) {
-                fprintf(stderr, NS_PREFIX "run_command: %s\n",*a);
+                fprintf(stderr, NS_PREFIX "run_command: %s\n", *a);
                 a++;
             }
         }
@@ -2335,20 +2334,22 @@ redraw_xywh(void *xd, int x, int y, int w, int h)
 
 
 
-button_t *screen_button_create(char *text,char code) {
-  button_t *b;
-  char p[3];
+button_t *screen_button_create(char *text, char code)
+{
+    button_t *b;
+    char p[3];
 
-  if(!text||!*text||!(b=button_create(text)))
-    return NULL;
+    if (!text || !*text || !(b = button_create(text)))
+        return NULL;
 
-  p[0]=NS_SCREEN_ESCAPE;
-  p[1]=code;
-  p[2]='\0';
+    p[0] = NS_SCREEN_ESCAPE;
+    p[1] = code;
+    p[2] = '\0';
 
-  button_set_action(b, ACTION_ECHO, p);
+    button_set_action(b, ACTION_ECHO, p);
 
-  return b; }
+    return b;
+}
 
 
 
@@ -2361,20 +2362,21 @@ ins_disp(void *xd, int after, char *name)
     buttonbar_t *bbar;
     button_t *button;
 
-    if(!xd||!name||!*name)
-      return NS_FAIL;
+    if (!xd || !name || !*name)
+        return NS_FAIL;
     bbar = *((buttonbar_t **) xd);
 
-    if(!(button=screen_button_create(name,'0' + after + 1)))
-      return NS_FAIL;
+    if (!(button = screen_button_create(name, '0' + after + 1)))
+        return NS_FAIL;
 
 #ifdef NS_DEBUG
     fprintf(stderr, NS_PREFIX "ins_disp: %s after %d...\n", name, after);
 #endif
 
-    if((bbar=bbar_insert_button(bbar,button,after,FALSE))) {
-      *((buttonbar_t **) xd) = bbar;
-      return NS_SUCC; }
+    if ((bbar = bbar_insert_button(bbar, button, after, FALSE))) {
+        *((buttonbar_t **) xd) = bbar;
+        return NS_SUCC;
+    }
 
     button_free(button);
     return NS_FAIL;
@@ -2387,21 +2389,22 @@ ins_disp(void *xd, int after, char *name)
    if our user's configured a bbar, we'll add to that,
    otherwise, we'll create one. */
 int
-add_screen_ctl_button(buttonbar_t **xd,char *name,char key)
+add_screen_ctl_button(buttonbar_t **xd, char *name, char key)
 {
     buttonbar_t *bbar;
     button_t *button;
 
-    if(!xd||!name||!*name)
-      return NS_FAIL;
+    if (!xd || !name || !*name)
+        return NS_FAIL;
     bbar = *xd;
 
-    if(!(button=screen_button_create(name,key)))
-      return NS_FAIL;
+    if (!(button = screen_button_create(name, key)))
+        return NS_FAIL;
 
-    if((bbar=bbar_insert_button(bbar,button,-1,TRUE))) {
-      *xd = bbar;
-      return NS_SUCC; }
+    if ((bbar = bbar_insert_button(bbar, button, -1, TRUE))) {
+        *xd = bbar;
+        return NS_SUCC;
+    }
 
     button_free(button);
     return NS_FAIL;
@@ -2504,8 +2507,8 @@ upd_disp(void *xd, int n, int flags, char *name)
 int
 err_msg(void *xd, int err, char *msg)
 {
-    if(strlen(msg))
-        menu_dial(NULL,msg,0,NULL,NULL);
+    if (strlen(msg))
+        menu_dial(NULL, msg, 0, NULL, NULL);
     return NS_SUCC;
 }
 
@@ -2523,16 +2526,17 @@ inp_text(void *xd, int id, char *txt)
 
 /* open a dialog */
 int
-inp_dial(void *xd, char *prompt, int maxlen, char **retstr,
-         int (*inp_tab)(void *,char *,size_t,size_t))
+inp_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
-  switch(menu_dial(xd, prompt, maxlen, retstr,inp_tab)) {
-  case 0:
-    return NS_SUCC;
-  case -2:
-    return NS_USER_CXL;
-  default:
-    return NS_FAIL; }}
+    switch (menu_dial(xd, prompt, maxlen, retstr, inp_tab)) {
+      case 0:
+          return NS_SUCC;
+      case -2:
+          return NS_USER_CXL;
+      default:
+          return NS_FAIL;
+    }
+}
 
 
 
@@ -2606,56 +2610,65 @@ init_command(char **argv)
     if (!TermWin.screen_mode)
         cmd_fd = run_command(argv);
     else if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, (void *) &buttonbar))) {
-        button_t   *button;
-        menu_t     *m;
+        button_t *button;
+        menu_t *m;
         menuitem_t *i;
-        if((m=menu_create(NS_MENU_TITLE))) {
-            char     *sc[]={ "New", "\x01\x03", "Close", "\x01k" };
-            int       n,nsc=sizeof(sc)/sizeof(char *);
+        if ((m = menu_create(NS_MENU_TITLE))) {
+            char *sc[] = { "New", "\x01\x03", "Close", "\x01k" };
+            int n, nsc = sizeof(sc) / sizeof(char *);
 
-	    if(menu_list) {
-            for(n=0;n<menu_list->nummenus;n++) { /* blend in w/ l&f */
+            if (menu_list) {
+                for (n = 0; n < menu_list->nummenus; n++) {	/* blend in w/ l&f */
 #ifdef NS_DEBUG
-                fprintf(stderr,NS_PREFIX "font: %d: %p\n",n,menu_list->menus[n]->font);
+                    fprintf(stderr, NS_PREFIX "font: %d: %p\n", n, menu_list->menus[n]->font);
 #endif
-                if(menu_list->menus[n]->font) {
-                    m->font   =menu_list->menus[n]->font;
-                    m->fwidth =menu_list->menus[n]->fwidth;
-                    m->fheight=menu_list->menus[n]->fheight;
+                    if (menu_list->menus[n]->font) {
+                        m->font = menu_list->menus[n]->font;
+                        m->fwidth = menu_list->menus[n]->fwidth;
+                        m->fheight = menu_list->menus[n]->fheight;
 #ifdef MULTI_CHARSET
-                    m->fontset=menu_list->menus[n]->fontset;
+                        m->fontset = menu_list->menus[n]->fontset;
 #endif
-                    break; }}}
+                        break;
+                    }
+                }
+            }
 
-            for(n=0;n<(nsc-1);n+=2) {
-                if((i=menuitem_create(sc[n]))) {
+            for (n = 0; n < (nsc - 1); n += 2) {
+                if ((i = menuitem_create(sc[n]))) {
 #  ifdef NS_DEBUG
-		    fprintf(stderr, NS_PREFIX "register %s (%d)\n",&sc[n+1][1],*sc[n+1]);
+                    fprintf(stderr, NS_PREFIX "register %s (%d)\n", &sc[n + 1][1], *sc[n + 1]);
 #  endif
-                    menuitem_set_action(i,MENUITEM_ECHO,sc[n+1]);
-                    menu_add_item(m,i); }}
+                    menuitem_set_action(i, MENUITEM_ECHO, sc[n + 1]);
+                    menu_add_item(m, i);
+                }
+            }
 
-           if((i=menuitem_create("About..."))) {
-                menuitem_set_action(i,MENUITEM_ALERT,"Screen compatibility layer by Azundris <scream@azundris.com>");
-                menu_add_item(m,i); }
+            if ((i = menuitem_create("About..."))) {
+                menuitem_set_action(i, MENUITEM_ALERT, "Screen compatibility layer by Azundris <scream@azundris.com>");
+                menu_add_item(m, i);
+            }
 
-            if((button=button_create(NS_MENU_TITLE))) {
-                if(!(buttonbar=bbar_insert_button(buttonbar,button,-1,TRUE))) {
-                    m->font=NULL;
+            if ((button = button_create(NS_MENU_TITLE))) {
+                if (!(buttonbar = bbar_insert_button(buttonbar, button, -1, TRUE))) {
+                    m->font = NULL;
 #ifdef MULTI_CHARSET
-                    m->fontset=NULL;
+                    m->fontset = NULL;
 #endif
                     menu_delete(m);
-                    button_set_action(button,ACTION_STRING,NS_MENU_TITLE);
-                    button_free(button); }
-                else {
-                    int j,k=menu_list?menu_list->nummenus:0;
-                    menu_list=menulist_add_menu(menu_list,m);
-                    for (j=k;j<menu_list->nummenus;j++)
-                        event_data_add_mywin(&menu_event_data,menu_list->menus[j]->win);
-                    if(!k)
+                    button_set_action(button, ACTION_STRING, NS_MENU_TITLE);
+                    button_free(button);
+                } else {
+                    int j, k = menu_list ? menu_list->nummenus : 0;
+                    menu_list = menulist_add_menu(menu_list, m);
+                    for (j = k; j < menu_list->nummenus; j++)
+                        event_data_add_mywin(&menu_event_data, menu_list->menus[j]->win);
+                    if (!k)
                         menu_init();
-                    button_set_action(button,ACTION_MENU,NS_MENU_TITLE); }}}
+                    button_set_action(button, ACTION_MENU, NS_MENU_TITLE);
+                }
+            }
+        }
 /*      add_screen_ctl_button(&buttonbar,"New",'c'); */
         cmd_fd = TermWin.screen->fd;
     }

@@ -60,11 +60,11 @@ action_handle_echo(event_t *ev, action_t *action)
     USE_VAR(ev);
     REQUIRE_RVAL(action->param.string != NULL, 0);
 #ifdef ESCREEN
-    if(TermWin.screen_mode&&TermWin.screen)  /* translate escapes */
-      ns_screen_command(TermWin.screen,action->param.string);
+    if (TermWin.screen_mode && TermWin.screen)	/* translate escapes */
+        ns_screen_command(TermWin.screen, action->param.string);
     else
 #endif
-    tt_write((unsigned char *) action->param.string, strlen(action->param.string));
+        tt_write((unsigned char *) action->param.string, strlen(action->param.string));
     return 1;
 }
 

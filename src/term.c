@@ -262,18 +262,17 @@ lookup_key(XEvent * ev)
 #endif /* USE_XIM */
 
 #ifdef ESCREEN
-            if (escreen_escape) {
-                if(kbuf[0]) {
-                    escreen_escape=0;
-                    if(kbuf[0]<128)
-                        (void)ns_parse_screen_key(TermWin.screen,kbuf[0]);
-                    LK_RET();
-                }
-            }
-            else if (TermWin.screen&&TermWin.screen->escape==kbuf[0]) {
-                escreen_escape=1;
-                LK_RET();
-            }
+    if (escreen_escape) {
+        if (kbuf[0]) {
+            escreen_escape = 0;
+            if (kbuf[0] < 128)
+                (void) ns_parse_screen_key(TermWin.screen, kbuf[0]);
+            LK_RET();
+        }
+    } else if (TermWin.screen && TermWin.screen->escape == kbuf[0]) {
+        escreen_escape = 1;
+        LK_RET();
+    }
 #endif
 
 #ifdef USE_XIM
@@ -1857,11 +1856,11 @@ xterm_seq(int op, const char *str)
            */
           switch (eterm_seq_op) {
 #ifdef PIXMAP_SUPPORT
-          case 0:
-              nstr = (char *) strsep(&tnstr, ";");
-              if (nstr) {
-                  if (BOOL_OPT_ISTRUE(nstr)) {
-                      D_CMD(("   Request to enable transparency.\n"));
+            case 0:
+                nstr = (char *) strsep(&tnstr, ";");
+                if (nstr) {
+                    if (BOOL_OPT_ISTRUE(nstr)) {
+                        D_CMD(("   Request to enable transparency.\n"));
                       /* *INDENT-OFF* */
                       FOREACH_IMAGE(
                                     if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) {
@@ -1873,8 +1872,8 @@ xterm_seq(int op, const char *str)
                                     }
                                     );
                       /* *INDENT-ON* */
-                  } else if (BOOL_OPT_ISFALSE(nstr)) {
-                      D_CMD(("   Request to disable transparency.\n"));
+                    } else if (BOOL_OPT_ISFALSE(nstr)) {
+                        D_CMD(("   Request to disable transparency.\n"));
                       /* *INDENT-OFF* */
                       FOREACH_IMAGE(
                                     if (image_mode_is(idx, MODE_TRANS)) {
@@ -1886,12 +1885,12 @@ xterm_seq(int op, const char *str)
                                     }
                                     );
                       /* *INDENT-ON* */
-                  } else {
-                      D_CMD(("   Bad boolean value in transparency request.\n"));
-                      break;
-                  }
-              } else {
-                  D_CMD(("   Request to toggle transparency.\n"));
+                    } else {
+                        D_CMD(("   Bad boolean value in transparency request.\n"));
+                        break;
+                    }
+                } else {
+                    D_CMD(("   Request to toggle transparency.\n"));
                   /* *INDENT-OFF* */
                   FOREACH_IMAGE(
                                 if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) {
@@ -1909,9 +1908,9 @@ xterm_seq(int op, const char *str)
                                 }
                                 );
                   /* *INDENT-ON* */
-              }
-              redraw_all_images();
-              break;
+                }
+                redraw_all_images();
+                break;
             case 1:
                 changed = 0;
                 for (; 1;) {

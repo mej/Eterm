@@ -1218,31 +1218,31 @@ menu_action(menuitem_t *item)
           break;
       case MENUITEM_ECHO:
 #ifdef ESCREEN
-          if(TermWin.screen_mode&&TermWin.screen) {  /* translate escapes */
+          if (TermWin.screen_mode && TermWin.screen) {	/* translate escapes */
 #  ifdef NS_DEBUG
-	      {
-	          char *p=item->action.string;
-                  fprintf(stderr,NS_PREFIX "::menu_action: ");
-		  while(*p) {
-		      if(*p<' ')
-			  fprintf(stderr,"^%c",*p-1+'A');
-		      else
-			  fprintf(stderr,"%c",*p);
-		      p++;
-		  }
-		  fputs("\n",stderr);
-	      }
+              {
+                  char *p = item->action.string;
+                  fprintf(stderr, NS_PREFIX "::menu_action: ");
+                  while (*p) {
+                      if (*p < ' ')
+                          fprintf(stderr, "^%c", *p - 1 + 'A');
+                      else
+                          fprintf(stderr, "%c", *p);
+                      p++;
+                  }
+                  fputs("\n", stderr);
+              }
 #  endif
-              (void)ns_screen_command(TermWin.screen,item->action.string); }
-          else
+              (void) ns_screen_command(TermWin.screen, item->action.string);
+          } else
 #endif
-          tt_write((unsigned char *) item->action.string, strlen(item->action.string));
+              tt_write((unsigned char *) item->action.string, strlen(item->action.string));
           break;
       case MENUITEM_SCRIPT:
           script_parse((char *) item->action.script);
           break;
       case MENUITEM_ALERT:
-          menu_dial(NULL,item->action.alert,0,NULL,NULL);
+          menu_dial(NULL, item->action.alert, 0, NULL, NULL);
           break;
       default:
           fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
@@ -1294,23 +1294,30 @@ menu_invoke_by_title(int x, int y, Window win, char *title, Time timestamp)
    <-  error code */
 
 int
-menu_tab(void *xd,char *sc[],int nsc,char *b,size_t l,size_t m) {
-    int      n,n2=0;
+menu_tab(void *xd, char *sc[], int nsc, char *b, size_t l, size_t m)
+{
+    int n, n2 = 0;
 
-    for(n=0;n<nsc;n++) {          /* second tab? cycle. */
-      if((!strcasecmp(b,sc[n]))&&(n<nsc-1)&&!strncasecmp(b,sc[n+1],l)) {
-        n2=n+1;
-        break; }}
+    for (n = 0; n < nsc; n++) { /* second tab? cycle. */
+        if ((!strcasecmp(b, sc[n])) && (n < nsc - 1) && !strncasecmp(b, sc[n + 1], l)) {
+            n2 = n + 1;
+            break;
+        }
+    }
 
-    for(n=n2;n<nsc;n++) {
-      if(!strncasecmp(b,sc[n],l)) {
-        if(strcmp(b,sc[n])) {
-          if(strlen(sc[n])>=m)    /* buffer would overflow => fail */
-            return -1;
-          strcpy(b,sc[n]);
-          return 0; }}}
+    for (n = n2; n < nsc; n++) {
+        if (!strncasecmp(b, sc[n], l)) {
+            if (strcmp(b, sc[n])) {
+                if (strlen(sc[n]) >= m)	/* buffer would overflow => fail */
+                    return -1;
+                strcpy(b, sc[n]);
+                return 0;
+            }
+        }
+    }
 
-    return -1; }
+    return -1;
+}
 
 /* open a dialog. this is a bit of a hack and should really resize otf.
    xd       extra-data (userdef) for inp_tab
@@ -1325,113 +1332,116 @@ menu_tab(void *xd,char *sc[],int nsc,char *b,size_t l,size_t m) {
  */
 
 int
-menu_dial(void *xd, char *prompt, int maxlen, char **retstr,int (*inp_tab)(void *,char *,size_t,size_t))
+menu_dial(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
     static unsigned char short_buf[256];
     unsigned char *kbuf = short_buf;
-    menu_t        *m;
-    menuitem_t    *i;
-    register int   ch;
-    int            f=0,len,ret=-1,tab=0;
-    XEvent         ev;
-    KeySym         keysym;
-    char          *b,*old;
-    size_t         l;
+    menu_t *m;
+    menuitem_t *i;
+    register int ch;
+    int f = 0, len, ret = -1, tab = 0;
+    XEvent ev;
+    KeySym keysym;
+    char *b, *old;
+    size_t l;
 
-    if(!prompt||!*prompt)
-      return ret;
-
-    if(!maxlen||!retstr) {
-      inp_tab=NULL;
-      maxlen=0;
-      retstr=NULL;
-      if((b=strdup("Press \"Return\" to continue..."))==NULL)
-        return ret; }
-    else {
-      if(((b=malloc(maxlen+1))==NULL))
+    if (!prompt || !*prompt)
         return ret;
-      if(*retstr) {
-        strncpy(b,*retstr,maxlen);
-        b[maxlen]='\0'; }
-      else
-        b[0]='\0'; }
 
-    if((m=menu_create(prompt))) {
-      for(l=0;l<menu_list->nummenus;l++) {  /* copycat font entry to */
-        if(menu_list->menus[l]->font) {     /* blend in with l&f */
-          m->font   =menu_list->menus[l]->font;
-          m->fwidth =menu_list->menus[l]->fwidth;
-          m->fheight=menu_list->menus[l]->fheight;
+    if (!maxlen || !retstr) {
+        inp_tab = NULL;
+        maxlen = 0;
+        retstr = NULL;
+        if ((b = strdup("Press \"Return\" to continue...")) == NULL)
+            return ret;
+    } else {
+        if (((b = malloc(maxlen + 1)) == NULL))
+            return ret;
+        if (*retstr) {
+            strncpy(b, *retstr, maxlen);
+            b[maxlen] = '\0';
+        } else
+            b[0] = '\0';
+    }
+
+    if ((m = menu_create(prompt))) {
+        for (l = 0; l < menu_list->nummenus; l++) {	/* copycat font entry to */
+            if (menu_list->menus[l]->font) {	/* blend in with l&f */
+                m->font = menu_list->menus[l]->font;
+                m->fwidth = menu_list->menus[l]->fwidth;
+                m->fheight = menu_list->menus[l]->fheight;
 #ifdef MULTI_CHARSET
-          m->fontset=menu_list->menus[l]->fontset;
+                m->fontset = menu_list->menus[l]->fontset;
 #endif
-          break; }}
+                break;
+            }
+        }
 
-      if((i=menuitem_create("..."))) {
-        int h;
-        old=i->text;
-        i->text=b;
-        i->len =strlen(b);
+        if ((i = menuitem_create("..."))) {
+            int h;
+            old = i->text;
+            i->text = b;
+            i->len = strlen(b);
 
-        if(m->font) {   /* pre-calc width so we can center the dialog */
-          l=strlen(prompt);
-          if(i->len>l)
-            l=XTextWidth(m->font,i->text,i->len);
-          else
-            l=XTextWidth(m->font,prompt,l); }
-        else
-          l=200;
+            if (m->font) {      /* pre-calc width so we can center the dialog */
+                l = strlen(prompt);
+                if (i->len > l)
+                    l = XTextWidth(m->font, i->text, i->len);
+                else
+                    l = XTextWidth(m->font, prompt, l);
+            } else
+                l = 200;
 
-        menuitem_set_action(i,MENUITEM_STRING,"error");
-        menu_add_item(m,i);
-        menu_invoke((int)((TermWin_TotalWidth()-l)/2),(int)(TermWin_TotalHeight()/2)-20,TermWin.parent,m,CurrentTime);
+            menuitem_set_action(i, MENUITEM_STRING, "error");
+            menu_add_item(m, i);
+            menu_invoke((int) ((TermWin_TotalWidth() - l) / 2), (int) (TermWin_TotalHeight() / 2) - 20, TermWin.parent, m, CurrentTime);
 
-        do {
-          do {
-            while(!XPending(Xdisplay))
-              ;
-            XNextEvent(Xdisplay,&ev);
-          } while(ev.type!=KeyPress);
+            do {
+                do {
+                    while (!XPending(Xdisplay));
+                    XNextEvent(Xdisplay, &ev);
+                } while (ev.type != KeyPress);
 
-          len=XLookupString(&ev.xkey,(char *)kbuf,sizeof(short_buf),&keysym,NULL);
-          ch=kbuf[0];
-          l=strlen(b);
+                len = XLookupString(&ev.xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
+                ch = kbuf[0];
+                l = strlen(b);
 
-          if(ch!='\t')
-            tab=0;
+                if (ch != '\t')
+                    tab = 0;
 
-          if(ch>=' ') {
-            if(l<maxlen) {
-              b[l+1]='\0';
-              b[l]  =ch; }}
-          else if((ch=='\n')||(ch=='\r'))
-            f=1;
-          else if(ch=='\x08') {
-            if(maxlen&&l)
-              b[--l]='\0'; }
-          else if((ch=='\t')&&inp_tab) {
-            if(!tab)
-              tab=l;
-            inp_tab(xd,b,tab,maxlen); }
-          else if(ch=='\x1b')
-            f=2;
-          i->len=strlen(b);
-          menu_draw(m);
-        } while(!f);
+                if (ch >= ' ') {
+                    if (l < maxlen) {
+                        b[l + 1] = '\0';
+                        b[l] = ch;
+                    }
+                } else if ((ch == '\n') || (ch == '\r'))
+                    f = 1;
+                else if (ch == '\x08') {
+                    if (maxlen && l)
+                        b[--l] = '\0';
+                } else if ((ch == '\t') && inp_tab) {
+                    if (!tab)
+                        tab = l;
+                    inp_tab(xd, b, tab, maxlen);
+                } else if (ch == '\x1b')
+                    f = 2;
+                i->len = strlen(b);
+                menu_draw(m);
+            } while (!f);
 
-        i->text=old;
-        i->len =strlen(old);
+            i->text = old;
+            i->len = strlen(old);
 
-        /* we could just return b, but it might be longer than we need */
-        if(retstr)
-          *retstr=(!maxlen||(f==2))?NULL:strdup(b);
-        ret=(f==2)?-2:0;
-      }
-      m->font=NULL;
+            /* we could just return b, but it might be longer than we need */
+            if (retstr)
+                *retstr = (!maxlen || (f == 2)) ? NULL : strdup(b);
+            ret = (f == 2) ? -2 : 0;
+        }
+        m->font = NULL;
 #ifdef MULTI_CHARSET
-      m->fontset=NULL;
+        m->fontset = NULL;
 #endif
-      menu_delete(m);
+        menu_delete(m);
     }
     free(b);
     return ret;

@@ -614,7 +614,7 @@ check_image_ipc(unsigned char reset)
             print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
             image_mode_fallback(i);
         } else if (strstr(reply, "Error")) {
-            print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
+            print_error
             /* *INDENT-OFF* */
             FOREACH_IMAGE(
                           if (image_mode_is(idx, MODE_AUTO)) {
@@ -629,6 +629,7 @@ check_image_ipc(unsigned char reset)
                           }
                           );
             /* *INDENT-ON* */
+                ("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
             FREE(reply);
             checked = 2;
             return 0;

@@ -1566,12 +1566,10 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "buttonbar")) {
         if (bool_val) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
             rs_buttonbars = 1;  /* Reset for future use. */
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
             rs_buttonbars = 1;  /* Reset for future use. */
         }
 
@@ -3057,11 +3055,9 @@ post_parse(void)
        specified.  If specified, it will either become 3 (on) or 0 (off). */
     if (rs_buttonbars != 1) {
         if (rs_buttonbars) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
         }
         rs_buttonbars = 1;      /* Reset for future use. */
     }
