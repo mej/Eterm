@@ -49,7 +49,8 @@
 #define NS_SCREEN_UPDATE     "\x01w"
 #define NS_SCREEN_VERSION    "\x01v"
 #define NS_SCREEN_SESSION    "\x01:sessionname\r"
-#define NS_SCREEN_INIT       "\x01:msgminwait 0\r\x01:msgwait 0\r\x01:hardstatus on\r\x01:hardstatus alwayslastline \"%w\"\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:nethack off\r" NS_SCREEN_UPDATE "\r" NS_SCREEN_VERSION NS_SCREEN_SESSION "\x0c" NS_SCREEN_UPDATE "\r"
+#define NS_SCREEN_BELL       "\x01:bell_msg Wuff\r\x01:vbell_msg Wuff\r"
+#define NS_SCREEN_INIT       "\x01:msgminwait 0\r\x01:msgwait 0\r\x01:hardstatus on\r\x01:hardstatus alwayslastline \"%w\"\r\x01:defhstatus \"\\005w\"\r\x01:hstatus \"\\005w\"\r\x01:nethack off\r" NS_SCREEN_UPDATE "\r" NS_SCREEN_VERSION NS_SCREEN_SESSION "\x0c" NS_SCREEN_UPDATE "\r" NS_SCREEN_BELL
 #define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22

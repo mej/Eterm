@@ -2518,7 +2518,7 @@ err_msg(void *xd, int err, char *msg)
 {
 #if DEBUG >= DEBUG_ESCREEN
     if (DEBUG_LEVEL >= DEBUG_ESCREEN) {
-        char *sc[] = { "Copy mode", "Bell in", "Wuff,  Wuff!!" };
+        char *sc[] = { "Copy mode", "Bell in", "Wuff" };
         int n, nsc = sizeof(sc) / sizeof(char *);
 
         /* there are certain things that would make sense if we were displaying
@@ -2527,6 +2527,10 @@ err_msg(void *xd, int err, char *msg)
         if (strlen(msg)) {
             for (n = 0; n < nsc; n++) {
                 if (!strncmp(msg, sc[n], strlen(sc[n]))) {
+                    if (n == 2) {
+                        /* Beep */
+                        scr_bell();
+                    }
                     break;
                 }
             }

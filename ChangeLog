@@ -4935,3 +4935,7 @@ Thu Nov 21 14:11:29 2002                        Michael Jennings (mej)
 
 Fixed a typo noted by Bill Allombert <allomber@math.u-bordeaux.fr>.
 ----------------------------------------------------------------------
+Tue Nov 26 17:51:34 2002                        Michael Jennings (mej)
+
+I need my Escreen sessions to be able to beep, so let's allow that.
+----------------------------------------------------------------------
