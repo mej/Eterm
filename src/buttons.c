@@ -111,8 +111,6 @@ bbar_create(void)
 void
 bbar_free(buttonbar_t *bbar)
 {
-  button_t *b;
-
   if (bbar->next) {
     bbar_free(bbar->next);
   }

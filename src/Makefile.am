@@ -4,7 +4,7 @@ lib_LTLIBRARIES = libEterm.la
 bin_PROGRAMS = Eterm
 
 MMX_SRCS = mmx_cmod.S
-MMX_OBJS = $(MMX_SRCS:.S.o)
+MMX_OBJS = $(MMX_SRCS:.S=.lo)
 
 libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c          \
                       command.h draw.c draw.h e.c e.h eterm_debug.h eterm_utmp.h \
@@ -16,7 +16,7 @@ libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c         
                       windows.c windows.h
 libEterm_la_DEPENDENCIES = feature.h $(MMX_OBJS)
 libEterm_la_LDFLAGS = -release $(VERSION)
-libEterm_la_LDADD = $(MMX_OBJS)
+libEterm_la_LIBADD = $(MMX_OBJS)
 
 Eterm_SOURCES = main.c
 Eterm_DEPENDENCIES = libEterm.la
