@@ -997,7 +997,9 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
         }
     }
 
-    if (pwe && !sess->home) {
+    if (getenv("SCREENRC")) {
+        sess->home = strdup(getenv("SCREENRC"));
+    } else if (pwe && !sess->home) {
         if ((sess->home = malloc(strlen(pwe->pw_dir) + strlen(NS_SCREEN_RC) + 2)))
             sprintf(sess->home, "%s/%s", pwe->pw_dir, NS_SCREEN_RC);
         else

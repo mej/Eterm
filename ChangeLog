@@ -4655,3 +4655,7 @@ Mon May 13 23:58:16 2002                        Michael Jennings (mej)
 
 Fixed a bad paste.
 ----------------------------------------------------------------------
+Fri May 17 11:55:52 2002                        Michael Jennings (mej)
+
+If $SCREENRC is defined, use it.
+----------------------------------------------------------------------
