@@ -5215,3 +5215,7 @@ Enable title-reporting and iconname-reporting escape sequences only if
 specifically requested by user at compile time.  This exists solely to
 protect the ignorant and careless from themselves.
 ----------------------------------------------------------------------
+Mon May 10 18:43:15 2004                        Michael Jennings (mej)
+
+Revert change from February 29th.  I never could reproduce it anyway.
+----------------------------------------------------------------------
