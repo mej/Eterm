@@ -7,6 +7,16 @@
 
 
 
+#include "screamcfg.h"
+
+#ifdef NS_HAVE_TWIN
+#  include <Tw/Tw.h>
+#endif
+
+#define NS_TWIN_PROTO      "twin://"
+#define NS_SCREEN_PROTO    "screen://"
+#define NS_SCREAM_PROTO    "scream://"
+
 #define NS_DK              0
 #define NS_SSH             1
 #define NS_LCL             2
@@ -16,6 +26,9 @@
 #define NS_MODE_NONE       0
 #define NS_MODE_SCREEN     1
 #define NS_MODE_SCREAM     2
+#define NS_MODE_TWIN       3
+
+#define NS_MAGIC_LINE(a)   (((a)==NS_MODE_SCREEN)||((a)==NS_MODE_NEGOTIATE))
 
 #define NS_SUCC          (-1)
 #define NS_FAIL            0
@@ -102,6 +115,10 @@ typedef struct __ns_sess {   /* a whole screen-session with many clients */
   struct __ns_disp  *curr;   /* current display (NULL for none) */
   struct __ns_sess  *prvs;   /* previous session in session list */
   struct __ns_sess  *next;   /* next     session in session list */
+#ifdef NS_HAVE_TWIN
+  tdisplay twin;
+  char *twin_str;
+#endif
 } _ns_sess;
 
 
@@ -164,6 +181,9 @@ _ns_efuns *ns_new_efuns(void);
 _ns_efuns *ns_dst_efuns(_ns_efuns **);
 _ns_efuns *ns_get_efuns(_ns_sess *,_ns_disp *);
 
+/* get session anchor (for iterations) */
+_ns_sess *ns_1st_sess(void);
+
 /* transparent attach/detach */
 _ns_sess *ns_attach_by_sess(_ns_sess **,int *);
 _ns_sess *ns_attach_by_URL(char *,char *,_ns_efuns **,int *,void *);
@@ -172,8 +192,10 @@ int ns_detach(_ns_sess **);
 /* convenience */
 int ns_run(_ns_efuns *, char *);
 int ns_get_ssh_port(void);
+
 int disp_get_real_by_screen(_ns_sess *,int);
 int disp_get_screen_by_real(_ns_sess *,int);
+int ns_magic_disp(_ns_sess **,_ns_disp **);
 
 /* send command to screen */
 int ns_screen_command(_ns_sess *, char *);
@@ -204,17 +226,37 @@ int ns_parse_screen(_ns_sess *,int,int,char *);
 
 /* backend abstraction */
 /* things the term might ask screen/scream to do ***************************/
-int ns_scroll2x(_ns_sess *,int);
-int ns_scroll2y(_ns_sess *,int);
+int ns_tog_disp(_ns_sess *);
 int ns_go2_disp(_ns_sess *,int);
+int ns_rel_disp(_ns_sess *,int);
 int ns_add_disp(_ns_sess *,int,char *);
-int ns_mov_disp(_ns_sess * s,int,int);
+int ns_mov_disp(_ns_sess *,int,int);
 int ns_rsz_disp(_ns_sess *,int,int,int);
-int ns_rem_disp(_ns_sess *,int);
+int ns_rem_disp(_ns_sess *,int,int);
 int ns_ren_disp(_ns_sess *,int,char *);
 int ns_log_disp(_ns_sess *,int,char *);
+int ns_mon_disp(_ns_sess *,int);
+int ns_sbb_disp(_ns_sess *,int);
+
+int ns_tog_region(_ns_sess *,_ns_disp *);
+int ns_go2_region(_ns_sess *,_ns_disp *,int);
+int ns_rel_region(_ns_sess *,_ns_disp *,int);
+int ns_add_region(_ns_sess *,_ns_disp *,int,char *);
+int ns_mov_region(_ns_sess *,_ns_disp *,int,int);
+int ns_rsz_region(_ns_sess *,_ns_disp *,int,int,int);
+int ns_rem_region(_ns_sess *,_ns_disp *,int,int);
+int ns_ren_region(_ns_sess *,_ns_disp *,int,char *);
+int ns_log_region(_ns_sess *,_ns_disp *,int,char *);
+int ns_mon_region(_ns_sess *,_ns_disp *,int);
+int ns_sbb_region(_ns_sess *,_ns_disp *,int);
+int ns_one_region(_ns_sess *,_ns_disp *,int);
+
 int ns_upd_stat(_ns_sess *);
+int ns_scroll2x(_ns_sess *,int);
+int ns_scroll2y(_ns_sess *,int);
 int ns_inp_dial(_ns_sess *,char *,int,char **,int (*)(void *,char *,size_t,size_t));
+int ns_statement(_ns_sess *,char *);
+int ns_reset(_ns_sess *,int);
 char *ns_get_url(_ns_sess *,int);
 
 

@@ -55,6 +55,14 @@ extern void script_handler_search(char **);
 extern void script_handler_spawn(char **);
 extern void script_handler_string(char **);
 extern void script_handler_nop(char **);
+extern void script_handler_dialog(char **);
+
+#ifdef ESCREEN
+extern void script_handler_display(char **);
+extern void script_handler_region(char **);
+extern void script_handler_statement(char **);
+extern void script_handler_reset(char **);
+#endif
 
 /* Engine */
 extern eterm_script_handler_t *script_find_handler(const char *);

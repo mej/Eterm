@@ -1005,7 +1005,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         return;
     gcvalue.foreground = gcvalue.background = PixColors[bgColor];
     gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
-    pixmap = simg->pmap->pixmap;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* Save this for later */
+    pixmap = simg->pmap->pixmap;        /* Save this for later */
     if ((which == image_bg) && (buffer_pixmap != None)) {
         LIBAST_X_FREE_PIXMAP(buffer_pixmap);
         buffer_pixmap = None;
@@ -1992,7 +1992,7 @@ get_desktop_pixmap(void)
 
     D_PIXMAP(("Current desktop pixmap is 0x%08x\n", (unsigned int) desktop_pixmap));
     if (desktop_pixmap == None) {
-        orig_desktop_pixmap = None;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* Forced re-read. */
+        orig_desktop_pixmap = None;     /* Forced re-read. */
     }
     if (desktop_window == None) {
         D_PIXMAP(("No desktop window.  Aborting.\n"));

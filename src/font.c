@@ -237,7 +237,7 @@ font_cache_del(const void *info)
                     current->next = current->next->next;
                     XFreeFont(Xdisplay, (XFontStruct *) info);
                     if (cur_font == tmp) {
-                        cur_font = current;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* If we're nuking the last entry in the cache, point cur_font to the *new* last entry. */
+                        cur_font = current;     /* If we're nuking the last entry in the cache, point cur_font to the *new* last entry. */
                     }
                     FREE(tmp->name);
                     FREE(tmp);
@@ -632,7 +632,7 @@ change_font(int init, const char *fontname)
 
         fw = boldFont->min_bounds.width;
         fh = boldFont->ascent + boldFont->descent + rs_line_space;
-        if (TermWin.fprop == 0) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* bold font must also be monospaced */
+        if (TermWin.fprop == 0) {       /* bold font must also be monospaced */
             if (fw != boldFont->max_bounds.width)
                 fw = -1;
         } else {

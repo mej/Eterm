@@ -173,11 +173,6 @@ static const struct {
 
     OPT_STR('t', "theme", "select a theme", &rs_theme),
         OPT_STR('X', "config-file", "choose an alternate config file", &rs_config_file), OPT_STR('d', "display", "X server to connect to", &display_name),
-#ifdef ESCREEN
-        OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
-        OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
-        OPT_INT('z', "delay", "initial delay in seconds", &rs_delay),
-#endif
 #if DEBUG <= 0
         OPT_ILONG("debug", "level of debugging information to show (support not compiled in)", &DEBUG_LEVEL),
 #elif DEBUG == 1
@@ -329,7 +324,13 @@ static const struct {
         OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
         OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
         OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL),
-        OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console), OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
+        OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
+#ifdef ESCREEN
+        OPT_STR('U', "URL", "an URL pointing at a screen-session to pick up", &rs_url),
+        OPT_STR('Z', "[lclport:]fw[:fwport]", "the destination machine -U can only be seen by the firewall fw. tunnel.", &rs_hop),
+        OPT_INT('z', "delay", "initial delay in seconds", &rs_delay),
+#endif
+        OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
 };
 
 /* Print usage information */
@@ -891,7 +892,7 @@ get_options(int argc, char *argv[])
             } else if (!strcasecmp(opt, "attribute")) {
                 conf_parse_line(NULL, val_ptr);
             } else {            /* It's not --exec */
-                if (optList[j].flag & OPT_BOOLEAN) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* Boolean value */
+                if (optList[j].flag & OPT_BOOLEAN) {    /* Boolean value */
                     D_OPTIONS(("Boolean option detected\n"));
                     if (val_ptr) {
                         if (BOOL_OPT_ISTRUE(val_ptr)) {
@@ -914,7 +915,7 @@ get_options(int argc, char *argv[])
                             *(optList[j].maskvar) |= optList[j].mask;
                         }
                     }
-                } else if (optList[j].flag & OPT_INTEGER) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* Integer value */
+                } else if (optList[j].flag & OPT_INTEGER) {     /* Integer value */
                     D_OPTIONS(("Integer option detected\n"));
                     *((int *) optList[j].pval) = strtol(val_ptr, (char **) NULL, 0);
                 } else {        /* String value */
@@ -962,13 +963,13 @@ get_options(int argc, char *argv[])
                     if ((val_ptr == NULL) || ((*val_ptr == '-') && (optList[j].short_opt != 'F') && (optList[j].short_opt != 'g'))) {
                         print_error("option -%c requires a%s value\n", opt[pos], (optList[j].flag & OPT_INTEGER ? "n integer" : " string"));
                         CHECK_BAD();
-                        if (val_ptr) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* If the "arg" was actually an option, don't skip it */
+                        if (val_ptr) {  /* If the "arg" was actually an option, don't skip it */
                             i--;
                         }
                         continue;
                     }
                 }
-                if (opt[pos] == 'e') {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 /* It's an exec */
+                if (opt[pos] == 'e') {  /* It's an exec */
 
                     register unsigned short k, len;
 
@@ -1003,12 +1004,12 @@ get_options(int argc, char *argv[])
                 } else if (opt[pos] == 'a') {
                     conf_parse_line(NULL, val_ptr);
                 } else {
-                    if (optList[j].flag & OPT_BOOLEAN) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* Boolean value */
+                    if (optList[j].flag & OPT_BOOLEAN) {        /* Boolean value */
                         D_OPTIONS(("Boolean option detected\n"));
                         if (optList[j].maskvar) {
                             *(optList[j].maskvar) |= optList[j].mask;
                         }
-                    } else if (optList[j].flag & OPT_INTEGER) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* Integer value */
+                    } else if (optList[j].flag & OPT_INTEGER) { /* Integer value */
                         D_OPTIONS(("Integer option detected\n"));
                         *((int *) optList[j].pval) = strtol(val_ptr, (char **) NULL, 0);
                         D_OPTIONS(("Got value %d\n", *((int *) optList[j].pval)));
@@ -1137,7 +1138,7 @@ get_initial_options(int argc, char *argv[])
                 D_OPTIONS(("val_ptr == %s  done == %d\n", val_ptr, done));
                 if ((val_ptr == NULL) || (*val_ptr == '-')) {
                     print_error("option -%c requires a string value\n", opt[pos]);
-                    if (val_ptr) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* If the "arg" was actually an option, don't skip it */
+                    if (val_ptr) {      /* If the "arg" was actually an option, don't skip it */
                         i--;
                     }
                     continue;
@@ -1556,12 +1557,10 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "buttonbar")) {
         if (bool_val) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
             rs_buttonbars = 1;  /* Reset for future use. */
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
             rs_buttonbars = 1;  /* Reset for future use. */
         }
 
@@ -2162,7 +2161,7 @@ parse_image(char *buff, void *state)
         if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
             && (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
             FREE(images[idx].current->iml->border);
-            images[idx].current->iml->border = (Imlib_Border *) NULL;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* No sense in wasting CPU time and memory if there are no borders */
+            images[idx].current->iml->border = (Imlib_Border *) NULL;   /* No sense in wasting CPU time and memory if there are no borders */
         }
     } else if (!BEG_STRCASECMP(buff, "bevel ")) {
         if (!CHECK_VALID_INDEX(idx)) {
@@ -2477,9 +2476,9 @@ parse_bbar(char *buff, void *state)
             print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(), file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             bbar_set_docked(bbar, BBAR_DOCKED_TOP);
-        } else if (!BEG_STRCASECMP(where, "bot")) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* "bot" or "bottom" */
+        } else if (!BEG_STRCASECMP(where, "bot")) {     /* "bot" or "bottom" */
             bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
-        } else if (!BEG_STRCASECMP(where, "no")) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* "no" or "none" */
+        } else if (!BEG_STRCASECMP(where, "no")) {      /* "no" or "none" */
             bbar_set_docked(bbar, BBAR_UNDOCKED);
         } else {
             print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(), file_peek_line(), where);
@@ -2888,7 +2887,7 @@ post_parse(void)
         if (rs_pixmaps[i]) {
             reset_simage(images[i].norm, RESET_ALL_SIMG);
             load_image(rs_pixmaps[i], images[i].norm);
-            FREE(rs_pixmaps[i]);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* These are created by STRDUP() */
+            FREE(rs_pixmaps[i]);        /* These are created by STRDUP() */
         }
 #else
         /* Right now, solid mode is the only thing we can do without pixmap support. */
@@ -2997,11 +2996,9 @@ post_parse(void)
        specified.  If specified, it will either become 3 (on) or 0 (off). */
     if (rs_buttonbars != 1) {
         if (rs_buttonbars) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
-                );
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
         }
         rs_buttonbars = 1;      /* Reset for future use. */
     }
@@ -3168,11 +3165,11 @@ post_parse(void)
             unsigned long w, h;
             int count;
 
-            count = num_words(rs_anim_pixmap_list) - 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* -1 for the delay */
+            count = num_words(rs_anim_pixmap_list) - 1; /* -1 for the delay */
             rs_anim_pixmaps = (char **) MALLOC(sizeof(char *) * (count + 1));
 
             for (i = 0; i < count; i++) {
-                temp = get_word(i + 2, rs_anim_pixmap_list);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* +2 rather than +1 to account for the delay */
+                temp = get_word(i + 2, rs_anim_pixmap_list);    /* +2 rather than +1 to account for the delay */
                 if (temp == NULL)
                     break;
                 if (num_words(temp) != 3) {

@@ -727,13 +727,13 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
         c = str[i++];
 #ifdef MULTI_CHARSET
         if ((encoding_method != LATIN1) && (chstat == WBYTE)) {
-            rstyle |= RS_multiMask;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* multibyte 2nd byte */
+            rstyle |= RS_multiMask;     /* multibyte 2nd byte */
             chstat = SBYTE;
             if (encoding_method == EUCJ) {
                 c |= 0x80;      /* maybe overkill, but makes it selectable */
             }
         } else if (chstat == SBYTE) {
-            if ((encoding_method != LATIN1) && (multi_byte || (c & 0x80))) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* multibyte 1st byte */
+            if ((encoding_method != LATIN1) && (multi_byte || (c & 0x80))) {    /* multibyte 1st byte */
                 rstyle &= ~RS_multiMask;
                 rstyle |= RS_multi1;
                 chstat = WBYTE;
@@ -759,8 +759,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                           screen.row++;
                           row = screen.row + TermWin.saveLines;
                       }
-                      stp = screen.text[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* _must_ refresh */
-                      srp = screen.rend[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* _must_ refresh */
+                      stp = screen.text[row];   /* _must_ refresh */
+                      srp = screen.rend[row];   /* _must_ refresh */
                       continue;
                   case '\r':
                       LOWER_BOUND(stp[last_col], screen.col);
@@ -788,8 +788,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 screen.row++;
                 row = screen.row + TermWin.saveLines;
             }
-            stp = screen.text[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* _must_ refresh */
-            srp = screen.rend[row];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* _must_ refresh */
+            stp = screen.text[row];     /* _must_ refresh */
+            srp = screen.rend[row];     /* _must_ refresh */
             screen.col = 0;
             screen.flags &= ~Screen_WrapNext;
         }
@@ -822,8 +822,8 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
         selection_reset();
 
 #ifdef ESCREEN
-    if (TermWin.screen_mode) {
-        if (screen.row >= TermWin.nrow - 1) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* last row -> upd-flag */
+    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
+        if (screen.row >= TermWin.nrow - 1) {   /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         }
     }
@@ -911,17 +911,17 @@ scr_gotorc(int row, int col, int relative)
                 screen.row += row;
         }
     } else {
-        if (screen.flags & Screen_Relative) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* relative origin mode */
+        if (screen.flags & Screen_Relative) {   /* relative origin mode */
             screen.row = row + screen.tscroll;
             UPPER_BOUND(screen.row, screen.bscroll);
         } else
             screen.row = row;
     }
 #ifdef ESCREEN
-    if (TermWin.screen_mode) {
-        if (screen.row >= TermWin.nrow - 1) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* last row -> upd-flag */
+    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
+        if (screen.row >= TermWin.nrow - 1) {   /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
-        } else if (TermWin.screen_pending) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* left last -> upd-finis */
+        } else if (TermWin.screen_pending) {    /* left last -> upd-finis */
             TermWin.screen_pending |= 2;
         }
     }
@@ -1051,7 +1051,7 @@ scr_erase_screen(int mode)
       default:
           return;
     }
-    if (row >= 0 && row <= TermWin.nrow) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* check OOB */
+    if (row >= 0 && row <= TermWin.nrow) {      /* check OOB */
         UPPER_BOUND(num, (TermWin.nrow - row));
         if (rstyle & RS_RVid || rstyle & RS_Uline)
             ren = -1;
@@ -1639,8 +1639,9 @@ scr_refresh(int type)
     PROF_INIT(scr_refresh);
 
 #ifdef ESCREEN
-    if (TermWin.screen_mode)
+    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
         nrows--;
+    }
 #endif
 
     switch (type) {
@@ -1719,9 +1720,9 @@ scr_refresh(int type)
                 /* compare new text with old - if exactly the same then continue */
                 rt1 = srp[col];
                 rt2 = drp[col];
-                if ((stp[col] == dtp[col])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* must match characters to skip */
-                    &&((rt1 == rt2)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* either rendition the same or  */
-                       ||((stp[col] == ' ')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* space w/ no bg change */
+                if ((stp[col] == dtp[col])      /* must match characters to skip */
+                    &&((rt1 == rt2)     /* either rendition the same or  */
+                       ||((stp[col] == ' ')     /* space w/ no bg change */
                           &&(GET_BGATTR(rt1) == GET_BGATTR(rt2))))) {
 #ifdef MULTI_CHARSET
                     /* if first byte is multibyte then compare second bytes */
@@ -1789,8 +1790,8 @@ scr_refresh(int type)
                         /* XXX : maybe do the same thing for RS_multi2 */
                         /* corrupt character - you're outta there */
                         rend &= ~RS_multiMask;
-                        drp[col] = rend;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               /* TODO check: may also want */
-                        dtp[col] = ' ';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* to poke into stp/srp      */
+                        drp[col] = rend;        /* TODO check: may also want */
+                        dtp[col] = ' '; /* to poke into stp/srp      */
                         buffer[0] = ' ';
                     }
                     if (wbyte) {
@@ -1832,10 +1833,10 @@ scr_refresh(int type)
                 rvid = !rvid;
             if (rend & RS_Cursor) {
                 if (focus) {
-                    is_cursor = 2;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* normal cursor */
+                    is_cursor = 2;      /* normal cursor */
                     rvid = !rvid;
                 } else {
-                    is_cursor = 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* outline cursor */
+                    is_cursor = 1;      /* outline cursor */
                     rend &= ~RS_Cursor;
                 }
                 srp[col] &= ~RS_Cursor;
@@ -2844,7 +2845,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
         }
         if (!(Options & Opt_xterm_select)) {
             if (beg_col == col && beg_col > 0) {
-                if (DELIMIT_TEXT(*stp))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* space or tab or cutchar */
+                if (DELIMIT_TEXT(*stp)) /* space or tab or cutchar */
                     break;
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[beg_row + row_offset][beg_col - 1]);
@@ -2907,7 +2908,7 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
         }
         if (!(Options & Opt_xterm_select)) {
             if (end_col == col && end_col < last_col) {
-                if (DELIMIT_TEXT(*stp))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* space or tab or cutchar */
+                if (DELIMIT_TEXT(*stp)) /* space or tab or cutchar */
                     break;
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[end_row + row_offset][end_col + 1]);
@@ -3283,7 +3284,7 @@ mouse_drag_report(XButtonEvent * ev)
 
     switch (ev->button) {
       case AnyButton:          /* Button release */
-          button_number = pb + Button1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* yeah, yeah */
+          button_number = pb + Button1; /* yeah, yeah */
           break;
       case Button1:            /* Button press */
       case Button2:

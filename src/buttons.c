@@ -825,7 +825,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
       case ACTION_ECHO:
           if (!press) {
 #ifdef ESCREEN
-              if (TermWin.screen && TermWin.screen->backend) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         /* translate escapes */
+              if (TermWin.screen && TermWin.screen->backend) {  /* translate escapes */
                   button_t *b = bbar->buttons;
                   _ns_disp *d2 = TermWin.screen->dsps;
                   int n = (button->action.string)[1] - '0';
@@ -855,7 +855,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
 
                       if (prvs == 2) {
                           /* middle button -- kill */
-                          (void) ns_rem_disp(TermWin.screen, n);
+                          (void) ns_rem_disp(TermWin.screen, n, TRUE);
                       } else {
                           /* right button -- rename */
                           (void) ns_ren_disp(TermWin.screen, n, NULL);
@@ -1164,7 +1164,7 @@ buttonbar_t *bbar_insert_button(buttonbar_t *bbar, button_t *button, int after, 
             }
         }
     } else {                    /* add to buttons */
-        if (!bbar->buttons || after < 0) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             /* first button */
+        if (!bbar->buttons || after < 0) {      /* first button */
             button->next = bbar->buttons;
             bbar->buttons = button;
         } else {

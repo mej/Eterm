@@ -309,7 +309,7 @@ menu_handle_button_release(event_t *ev)
             menu_reset_all(menu_list);
             current_menu = NULL;
         } else {
-            current_menu->state &= ~MENU_STATE_IS_DRAGGING;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /* Click, brief drag, release == single click */
+            current_menu->state &= ~MENU_STATE_IS_DRAGGING;     /* Click, brief drag, release == single click */
         }
 
     } else {
@@ -1304,7 +1304,7 @@ menu_tab(void *xd, char *sc[], int nsc, char *b, size_t l, size_t m)
     for (n = n2; n < nsc; n++) {
         if (!strncasecmp(b, sc[n], l)) {
             if (strcmp(b, sc[n])) {
-                if (strlen(sc[n]) >= m)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* buffer would overflow => fail */
+                if (strlen(sc[n]) >= m) /* buffer would overflow => fail */
                     return -1;
                 strcpy(b, sc[n]);
                 return 0;
@@ -1360,8 +1360,8 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
     }
 
     if ((m = menu_create(prompt))) {
-        for (l = 0; l < menu_list->nummenus; l++) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* copycat font entry to */
-            if (menu_list->menus[l]->font) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* blend in with l&f */
+        for (l = 0; l < menu_list->nummenus; l++) {     /* copycat font entry to */
+            if (menu_list->menus[l]->font) {    /* blend in with l&f */
                 m->font = menu_list->menus[l]->font;
                 m->fwidth = menu_list->menus[l]->fwidth;
                 m->fheight = menu_list->menus[l]->fheight;

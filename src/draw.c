@@ -144,7 +144,7 @@ bevel_pixmap(Pixmap p, int w, int h, Imlib_Border * bord, unsigned char up)
     unsigned int r, g, b;
     int real_depth = 0, depth_factor;
     register int br, bg, bb;    /* Bitshifts */
-    register unsigned int mr, mg, mb;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  /* Bitmasks */
+    register unsigned int mr, mg, mb;   /* Bitmasks */
     GC gc;
 
     if (!bord)

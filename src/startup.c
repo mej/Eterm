@@ -76,7 +76,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     int i;
     char *val;
-    static char windowid_string[20], *display_string, *term_string;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
+    static char windowid_string[20], *display_string, *term_string;     /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
 
     orig_argv0 = argv[0];
 
@@ -172,7 +172,7 @@ eterm_bootstrap(int argc, char *argv[])
 
         len = strlen(initial_dir);
         if (rs_path) {
-            len += strlen(rs_path) + 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* +1 for the colon */
+            len += strlen(rs_path) + 1; /* +1 for the colon */
         }
         if (theme_dir) {
             len += strlen(theme_dir) + 1;
@@ -202,8 +202,19 @@ eterm_bootstrap(int argc, char *argv[])
 #  define ESCREEN_PREFIX "Escreen"
 #  define ETERM_PREFIX   "Eterm"
         p = p ? (p + 1) : orig_argv0;
-        if (rs_url || !strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX)))
+        if (rs_url) {
+            if (!strncmp(rs_url, NS_TWIN_PROTO, strlen(NS_TWIN_PROTO))) {
+                TermWin.screen_mode = NS_MODE_TWIN;
+            } else if (!strncmp(rs_url, NS_SCREEN_PROTO, strlen(NS_SCREEN_PROTO))) {
+                TermWin.screen_mode = NS_MODE_SCREEN;
+            } else if (!strncmp(rs_url, NS_SCREAM_PROTO, strlen(NS_SCREAM_PROTO))) {
+                TermWin.screen_mode = NS_MODE_SCREAM;
+            } else {
+                TermWin.screen_mode = NS_MODE_NEGOTIATE;
+            }
+        } else if (!strncasecmp(ESCREEN_PREFIX, p, strlen(ESCREEN_PREFIX))) {
             TermWin.screen_mode = NS_MODE_SCREEN;
+        }
     }
 #endif
 
@@ -230,8 +241,9 @@ eterm_bootstrap(int argc, char *argv[])
 
     Create_Windows(argc, argv);
 #ifdef ESCREEN
-    if (TermWin.screen_mode)
+    if (NS_MAGIC_LINE(TermWin.screen_mode)) {
         TermWin.nrow++;
+    }
 #endif
     scr_reset();                /* initialize screen */
 

@@ -63,7 +63,7 @@ static short last_top = 0, last_bot = 0;
 
 #ifdef XTERM_SCROLLBAR
 static GC gc_stipple, gc_border;
-static unsigned char xterm_sb_bits[] = { 0xaa, 0x0a, 0x55, 0x05 };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* 12x2 bitmap */
+static unsigned char xterm_sb_bits[] = { 0xaa, 0x0a, 0x55, 0x05 };      /* 12x2 bitmap */
 #endif
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
 static GC gc_top, gc_bottom;
@@ -243,7 +243,7 @@ sb_handle_button_press(event_t *ev)
             }
             switch (ev->xbutton.button) {
               case Button2:
-                  button_state.mouse_offset = scrollbar_anchor_height() / 2;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           /* Align to center */
+                  button_state.mouse_offset = scrollbar_anchor_height() / 2;    /* Align to center */
                   if (!scrollbar_win_is_anchor(ev->xany.window)) {
                       scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
                   } else if (scrollbar.type == SCROLLBAR_XTERM) {

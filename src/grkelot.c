@@ -53,9 +53,9 @@ static const char cvs_ident[] = "$Id$";
 # include <string.h>
 
 /* --- Macros, Types --------- */
-# define MAX_STATES	4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* max # states for the FSM */
-# define MAX_SWITCHER	2U                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /* per state */
-# define MAX_VAL 	256                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    /* for temp allocation */
+# define MAX_STATES	4       /* max # states for the FSM */
+# define MAX_SWITCHER	2U      /* per state */
+# define MAX_VAL 	256     /* for temp allocation */
 
 typedef unsigned char u_char;
 typedef unsigned int u_int;
@@ -77,7 +77,7 @@ typedef struct s_state {
     u_int num_xlat;             /* number of translations */
     K_XLAT *xlat;               /* State translations ((dynamic - realloc'ed) */
     u_int num_switcher;         /* number of switcher keys */
-    K_SWITCH switcher[MAX_SWITCHER];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   /* switcher keys to other states */
+    K_SWITCH switcher[MAX_SWITCHER];    /* switcher keys to other states */
     u_char life;                /* 0 = until switched by key */
     u_char prev_state;          /* filled when jumped to a new state */
 } K_STATE;
@@ -111,7 +111,7 @@ static char elot_xlat_plain[] =
 /* c and s give copyright and section sign */
 static char elot_xlat_acc[] = "65-122:182,194,216,196,184,214,195,185,186,206,202,203,204,205,188,208,81,209,211,212,200,191,87,215,190,198,91,92,93,94,95,96,220,226,"
     /*248 */ "169,228,221,246,227,222,223,238,234,235,236,237,252,240,113,241," /*243 */ "167,244,232,254,242,247,253,230";
-static char elot_xlat_acc_xtra[] = "46-62:183,47,48,49,50,51,52,53,54,55,56,57,58,59,171,61,187";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* anw teleia, quotes */
+static char elot_xlat_acc_xtra[] = "46-62:183,47,48,49,50,51,52,53,54,55,56,57,58,59,171,61,187";       /* anw teleia, quotes */
 static char elot_xlat_uml[] =
     "65-122:193,194,216,196,197,214,195,199,218,206,202,203,204,205,207,208,81,209,211,212,200,217,87,215,219,198,91,92,93,94,95,96,225,226,248,228,229,246,227,231,250,238,234,235,236,237,239,240,113,241,243,244,232,249,242,247,251,230";
 static char elot_xlat_umacc[] =
@@ -122,7 +122,7 @@ static char i437_xlat_plain[] =
     "65-122:128,129,150,131,132,148,130,134,136,141,137,138,139,140,142,143,81,144,145,146,135,151,87,149,147,133,91,92,93,94,95,96,152,153,175,155,156,173,154,158,160,165,161,162,163,164,166,167,113,168,169,171,159,224,170,174,172,157";
 static char i437_xlat_acc[] =
     "65-122:234,129,150,131,235,148,130,236,237,141,137,138,139,140,238,143,81,144,145,146,135,240,87,149,239,133,91,92,93,94,95,96,225,153,175,155,226,173,154,227,229,165,161,162,163,164,230,167,113,168,169,171,159,233,170,174,231,157";
-static char i437_xlat_acc_xtra[] = "46-46:250";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* anw teleia */
+static char i437_xlat_acc_xtra[] = "46-46:250"; /* anw teleia */
 static char i437_xlat_uml[] =
     "65-122:128,129,150,131,132,148,130,134,136,141,137,138,139,140,142,143,81,144,145,146,135,151,87,149,147,133,91,92,93,94,95,96,152,153,175,155,156,173,154,158,228,165,161,162,163,164,166,167,113,168,169,171,159,224,170,174,232,157";
 static char i437_xlat_umacc[] =
@@ -195,7 +195,7 @@ kstate_init_all(int greek_mode)
         kstate_setcurr(i);
         kstate_init();
     }
-    if (greek_mode < 0 || greek_mode >= NUM_XLAT_TYPES)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* avoid death */
+    if (greek_mode < 0 || greek_mode >= NUM_XLAT_TYPES) /* avoid death */
         greek_mode = GREEK_ELOT928;
     xlat_now = &xlat_type[greek_mode];
     kstate_setcurr(0);
@@ -309,7 +309,7 @@ kstate_cxlat(unsigned int c)
 
     /* check for ascii switcher */
     for (i = 0; i < pStateNow->num_switcher; i++)
-        if (pStateNow->switcher[i].type == 'A' &&                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* only ascii here */
+        if (pStateNow->switcher[i].type == 'A' &&       /* only ascii here */
             c == pStateNow->switcher[i].code) {
             kstate_setcurr(pStateNow->switcher[i].nextstate);
             pStateNow->switcher[i].on = 1;

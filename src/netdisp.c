@@ -78,7 +78,7 @@ network_display(const char *display)
     if (display[0] != ':' && strncmp(display, "unix:", 5))
         return display;         /* nothing to do */
 
-    ifc.ifc_len = sizeof(buffer);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      /* Get names of all ifaces */
+    ifc.ifc_len = sizeof(buffer);       /* Get names of all ifaces */
     ifc.ifc_buf = buffer;
 
     if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {

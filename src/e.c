@@ -144,7 +144,7 @@ enl_ipc_send(char *str)
         }
     }
     len = strlen(str);
-    for (; XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev););                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         /* Discard any out-of-sync messages */
+    for (; XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev););  /* Discard any out-of-sync messages */
     ev.xclient.type = ClientMessage;
     ev.xclient.serial = 0;
     ev.xclient.send_event = True;

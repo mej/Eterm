@@ -292,7 +292,7 @@ process_colors(void)
                   break;
 #endif
               default:
-                  pixel = PixColors[fgColor];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* None */
+                  pixel = PixColors[fgColor];   /* None */
                   break;
             }
         }
@@ -614,7 +614,7 @@ handle_resize(unsigned int width, unsigned int height)
     if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
         TermWin.ncol = new_ncol;
 #ifdef ESCREEN
-        TermWin.nrow = new_nrow + (TermWin.screen_mode ? 1 : 0);
+        TermWin.nrow = new_nrow + (NS_MAGIC_LINE(TermWin.screen_mode) ? 1 : 0);
 #else
         TermWin.nrow = new_nrow;
 #endif
@@ -675,7 +675,7 @@ set_window_color(int idx, const char *color)
     /* handle color aliases */
     if (isdigit(*color)) {
         i = atoi(color);
-        if (i >= 8 && i <= 15) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       /* bright colors */
+        if (i >= 8 && i <= 15) {        /* bright colors */
             i -= 8;
 # ifndef NO_BRIGHTCOLOR
             PixColors[idx] = PixColors[minBright + i];

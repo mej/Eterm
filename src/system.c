@@ -56,7 +56,7 @@ wait_for_chld(int system_pid)
         /* If the child that exited is the command we spawned, or if the
            child exited before fork() returned in the parent, it must be
            our immediate child that exited.  We exit gracefully. */
-        if ((pid == -1) && (errno == ECHILD)) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        /* No children exist.  Punt. */
+        if ((pid == -1) && (errno == ECHILD)) { /* No children exist.  Punt. */
             errno = save_errno;
             break;
         }
