@@ -3277,7 +3277,7 @@ selection_send(XSelectionRequestEvent * rq)
 }
 
 void                            /* drag report as used by the "twin" program */
-mouse_drag_report(XButtonEvent * ev)
+twin_mouse_drag_report(XButtonEvent * ev)
 {
     int button_number, key_state, x = Pixel2Col(ev->x), y = Pixel2Row(ev->y);
 

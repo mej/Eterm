@@ -4975,3 +4975,9 @@ Mon Jan 27 17:31:41 2003                        Michael Jennings (mej)
 Support for xterm's cursor color change sequence (\e]12;<color>\a) as
 requested by Thomas <arnognul@tiscali.se>.
 ----------------------------------------------------------------------
+Wed Feb 19 11:41:00 2003                        Michael Jennings (mej)
+
+Patch from Paul Brannan <pbrannan@atdesk.com> to fix a conflict
+between twin's non-standard mouse drag reporting and vim when twin
+support is not enabled.
+----------------------------------------------------------------------

@@ -805,10 +805,15 @@ handle_motion_notify(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
+#ifdef HAVE_TWIN
+    /* It's really silly that Twin uses mouse drag codes that are
+     * different from the ones that xterm uses.
+     */
     if ((PrivateModes & PrivMode_mouse_report) && !(button_state.bypass_keystate)) {
-        mouse_drag_report(&(ev->xbutton));
+        twin_mouse_drag_report(&(ev->xbutton));
         return 1;
     }
+#endif
 
     if (ev->xany.window == TermWin.vt) {
         if (ev->xbutton.state & (Button1Mask | Button3Mask)) {
