@@ -840,7 +840,7 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
   register unsigned long v, i;
   unsigned long x, y;
   unsigned int r, g, b;
-  float rm, gm, bm, shade;
+  unsigned short rm, gm, bm, shade;
   ImlibColor ctab[256];
   int real_depth = 0;
   register int br, bg, bb;
@@ -848,27 +848,27 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
   imlib_t *iml = images[image_bg].current->iml;
 
   if (iml->mod) {
-    shade = (float) (iml->mod->brightness / 255.0);
+    shade = iml->mod->brightness;
   } else {
-    shade = 1.0;
+    shade = 256;
   }
   if (iml->rmod) {
-    rm = (float) (iml->rmod->brightness) / 255.0 * shade;
+    rm = (iml->rmod->brightness * shade) >> 8;
   } else {
     rm = shade;
   }
   if (iml->gmod) {
-    gm = (float) (iml->gmod->brightness) / 255.0 * shade;
+    gm = (iml->gmod->brightness * shade) >> 8;
   } else {
     gm = shade;
   }
   if (iml->bmod) {
-    bm = (float) (iml->bmod->brightness) / 255.0 * shade;
+    bm = (iml->bmod->brightness * shade) >> 8;
   } else {
     bm = shade;
   }
 
-  if (shade == 1.0 && rm == 1.0 && gm == 1.0 && bm == 1.0) {
+  if (rm == 256 && gm == 256 && bm == 256) {
     return;			/* Nothing to do */
   }
   if (Xdepth <= 8) {
@@ -908,9 +908,9 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
 	v = XGetPixel(ximg, x, y);
-	r = (int) ctab[v & 0xff].r * rm;
-	g = (int) ctab[v & 0xff].g * gm;
-	b = (int) ctab[v & 0xff].b * bm;
+	r = (ctab[v & 0xff].r * rm) >> 8;
+	g = (ctab[v & 0xff].g * gm) >> 8;
+	b = (ctab[v & 0xff].b * bm) >> 8;
 	v = Imlib_best_color_match(imlib_id, &r, &g, &b);
 	XPutPixel(ximg, x, y, v);
       }
@@ -945,9 +945,9 @@ colormod_trans(Pixmap p, GC gc, unsigned short w, unsigned short h)
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
 	v = XGetPixel(ximg, x, y);
-	r = (int) (((v >> br) & mr) * rm) & 0xff;
-	g = (int) (((v >> bg) & mg) * gm) & 0xff;
-	b = (int) (((v << bb) & mb) * bm) & 0xff;
+	r = ((((v >> br) & mr) * rm) >> 8) & 0xff;
+	g = ((((v >> bg) & mg) * gm) >> 8) & 0xff;
+	b = ((((v << bb) & mb) * bm) >> 8) & 0xff;
 	v = ((r & mr) << br) | ((g & mg) << bg) | ((b & mb) >> bb);
 	XPutPixel(ximg, x, y, v);
       }
