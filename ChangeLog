@@ -4763,3 +4763,7 @@ disk.
 Also fixed a problem where PrintScreen would cause Eterm to exit.
 Pointed out by Laurence J. Lane <ljlane@debian.org>.
 ----------------------------------------------------------------------
+Thu Jul 11 20:03:23 2002                        Michael Jennings (mej)
+
+Each side of an || must have a valid shell command.
+----------------------------------------------------------------------

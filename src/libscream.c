@@ -1006,7 +1006,7 @@ ns_make_call(_ns_sess * sess)
         int r, l = strlen(NS_SCREEM_CALL) + (scream ? strlen(scream) : 0) + (screen ? strlen(screen) : 0) - 3;
 
         if ((screem = MALLOC(l))) {
-            r = snprintf(screem, l, NS_SCREEM_CALL, scream ? scream : "", screen ? screen : "");
+            r = snprintf(screem, l, NS_SCREEM_CALL, scream ? scream : ":", screen ? screen : ":");
 #ifdef NS_PARANOID
             if ((r < 0) || (r > l))
                 ns_free(&screem);
