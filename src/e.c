@@ -33,6 +33,7 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <limits.h>
 #include <X11/cursorfont.h>
+#include <signal.h>
 
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
@@ -43,9 +44,11 @@ static const char cvs_ident[] = "$Id$";
 #include "main.h"
 #include "options.h"
 #include "pixmap.h"
+#include "system.h"
 
 Window ipc_win = None;
 Atom ipc_atom = None;
+static unsigned char timeout = 0;
 
 /* Returns true if running under E, false otherwise */
 unsigned char
@@ -55,10 +58,10 @@ check_for_enlightenment(void)
 
   if (have_e == -1) {
     if (XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True) != None) {
-      D_X11(("Enlightenment detected.\n"));
+      D_ENL(("Enlightenment detected.\n"));
       have_e = 1;
     } else {
-      D_X11(("Enlightenment not detected.\n"));
+      D_ENL(("Enlightenment not detected.\n"));
       have_e = 0;
     }
   }
@@ -77,8 +80,11 @@ enl_ipc_get_win(void)
   int dummy_int;
   unsigned int dummy_uint;
 
+  D_ENL(("enl_ipc_get_win():  Searching for IPC window.\n"));
+
   prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
   if (prop == None) {
+    D_ENL((" -> Enlightenment is not running.  You lose!\n"));
     return None;
   }
   XGetWindowProperty(Xdisplay, Xroot, prop, 0, 14, False, AnyPropertyType, &prop2, &format, &num, &after, &str);
@@ -88,6 +94,7 @@ enl_ipc_get_win(void)
   }
   if (ipc_win != None) {
     if (!XGetGeometry(Xdisplay, ipc_win, &dummy_win, &dummy_int, &dummy_int, &dummy_uint, &dummy_uint, &dummy_uint, &dummy_uint)) {
+      D_ENL((" -> IPC Window property is valid, but the window doesn't exist.  I give up!\n"));
       ipc_win = None;
     }
     str = NULL;
@@ -96,11 +103,13 @@ enl_ipc_get_win(void)
       if (str) {
 	XFree(str);
       } else {
+        D_ENL((" -> IPC Window lacks the proper atom.  I can't talk to fake IPC windows....\n"));
 	ipc_win = None;
       }
     }
   }
   if (ipc_win != None) {
+    D_ENL((" -> IPC Window found and verified as 0x%08x.  Registering Eterm as an IPC client.\n", (int) ipc_win));
     XSelectInput(Xdisplay, ipc_win, StructureNotifyMask | SubstructureNotifyMask);
     enl_ipc_send("set clientname " APL_NAME);
     enl_ipc_send("set version " VERSION);
@@ -115,19 +124,28 @@ void
 enl_ipc_send(char *str)
 {
 
+  static char *last_msg = NULL;
   char buff[21];
   register unsigned short i;
   register unsigned char j;
   unsigned short len;
   XEvent ev;
 
-  ASSERT(str != NULL);
-
-  D_ENL(("enl_ipc_send():  Sending \"%s\" to Enlightenment.\n", str));
+  if (str == NULL) {
+    ASSERT(last_msg != NULL);
+    str = last_msg;
+    D_ENL(("enl_ipc_send():  Resending last message \"%s\" to Enlightenment.\n", str));
+  } else {
+    if (last_msg != NULL) {
+      FREE(last_msg);
+    }
+    last_msg = StrDup(str);
+    D_ENL(("enl_ipc_send():  Sending \"%s\" to Enlightenment.\n", str));
+  }
 
   if (ipc_win == None) {
     if ((ipc_win = enl_ipc_get_win()) == None) {
-      D_ENL((" ...or perhaps not, since Enlightenment doesn't seem to be running.  No IPC window, no IPC.  Sorry....\n"));
+      D_ENL(("enl_ipc_send():  ...or perhaps not, since Enlightenment doesn't seem to be running.  No IPC window, no IPC.  Sorry....\n"));
       return;
     }
   }
@@ -158,7 +176,14 @@ enl_ipc_send(char *str)
     }
     XSendEvent(Xdisplay, ipc_win, False, 0, (XEvent *) & ev);
   }
-  D_ENL(("enl_ipc_send():  Message sent.\n"));
+  D_ENL(("enl_ipc_send():  Message sent to IPC window 0x%08x.\n", ipc_win));
+}
+
+static RETSIGTYPE
+enl_ipc_timeout(int sig)
+{
+  timeout = 1;
+  return ((RETSIGTYPE) sig);
 }
 
 char *
@@ -169,7 +194,12 @@ enl_wait_for_reply(void)
   static char msg_buffer[20];
   register unsigned char i;
 
-  for (; !XCheckTypedWindowEvent(Xdisplay, TermWin.parent, ClientMessage, &ev););
+  alarm(3);
+  for (; !XCheckTypedWindowEvent(Xdisplay, TermWin.parent, ClientMessage, &ev) && !timeout;);
+  alarm(0);
+  if (ev.xany.type != ClientMessage) {
+    return (IPC_TIMEOUT);
+  }
   for (i = 0; i < 20; i++) {
     msg_buffer[i] = ev.xclient.data.b[i];
   }
@@ -186,6 +216,9 @@ enl_ipc_get(const char *msg_data)
   register unsigned char i;
   unsigned char blen;
 
+  if (msg_data == IPC_TIMEOUT) {
+    return (IPC_TIMEOUT);
+  }
   for (i = 0; i < 12; i++) {
     buff[i] = msg_data[i];
   }
@@ -208,17 +241,33 @@ enl_ipc_get(const char *msg_data)
   return (ret_msg);
 }
 
-void
-enl_query_for_image(unsigned char type)
+char *
+enl_send_and_wait(char *msg)
 {
 
-  char query[255], *filename;
+  char *reply = IPC_TIMEOUT;
+  sighandler_t old_alrm;
 
-  snprintf(query, sizeof(query), "insert correct IPC command here");
-  enl_ipc_send("");
-  for (; !(filename = enl_ipc_get(enl_wait_for_reply())););
-  /* Extract filename */
-  load_image(filename, type);
+  if (ipc_win == None) {
+    /* The IPC window is missing.  Wait for it to return or Eterm to be killed. */
+    for (; enl_ipc_get_win() == None;) {
+      sleep(1);
+    }
+  }
+  old_alrm = (sighandler_t) signal(SIGALRM, (sighandler_t) enl_ipc_timeout);
+  for (; reply == IPC_TIMEOUT;) {
+    timeout = 0;
+    enl_ipc_send(msg);
+    for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+    if (reply == IPC_TIMEOUT) {
+      /* We timed out.  The IPC window must be AWOL.  Reset and resend message. */
+      D_ENL(("enl_wait_for_reply():  IPC timed out.  IPC window 0x%08x has gone AWOL.  Clearing ipc_win.\n", ipc_win));
+      XSelectInput(Xdisplay, ipc_win, None);
+      ipc_win = None;
+    }
+  }
+  signal(SIGALRM, old_alrm);
+  return (reply);
 }
 
 void
@@ -255,8 +304,7 @@ eterm_ipc_parse(char *str)
     if (params) {
       char *reply, header[512];
 
-      enl_ipc_send(params);
-      for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+      reply = enl_send_and_wait(params);
       snprintf(header, sizeof(header), "Enlightenment IPC Reply to \"%s\":\n\n", params);
       tt_write(header, strlen(header));
       tt_write(reply, strlen(reply));

@@ -2488,3 +2488,9 @@ Thu Sep 23 17:15:27 PDT 1999	Michael Jennings <mej@eterm.org>
 	it keeps returning null pixmaps. =]  I'll have to dig deeper.
 	
 -------------------------------------------------------------------------------
+Fri Sep 24 13:05:40 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	The submenu image problem is fixed, and so is the bug where Eterm
+	would hang if you had anything in auto mode and restarted E.
+	
+-------------------------------------------------------------------------------

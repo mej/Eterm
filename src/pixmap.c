@@ -350,8 +350,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
 
     if (iclass) {
       snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
-      enl_ipc_send(buff);
-      for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+      reply = enl_send_and_wait(buff);
       if (strstr(reply, "not")) {
         print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
         if (image_mode_is(which, ALLOW_IMAGE)) {
@@ -359,14 +358,16 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
         } else {
           image_set_mode(which, MODE_SOLID);
         }
+        FREE(reply);
       } else if (strstr(reply, "Error")) {
         print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
         FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
                       if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
+        FREE(reply);
       } else {
+        FREE(reply);
         snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, w, h);
-        enl_ipc_send(buff);
-        for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+        reply = enl_send_and_wait(buff);
         if (strstr(reply, "Error")) {
           print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
           if (image_mode_is(which, ALLOW_IMAGE)) {
@@ -374,6 +375,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
           } else {
             image_set_mode(which, MODE_SOLID);
           }
+          FREE(reply);
         } else {
           GC gc;
           XGCValues gcvalues;
@@ -381,10 +383,13 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
           gc = XCreateGC(Xdisplay, win, 0, &gcvalues);
           pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
           mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
+          FREE(reply);
           if (pmap) {
             if (mask) {
               shaped_window_apply_mask(pmap, mask);
             }
+            XSetClipMask(Xdisplay, gc, mask);
+            XSetClipOrigin(Xdisplay, gc, x, y);
             XCopyArea(Xdisplay, pmap, win, gc, 0, 0, w, h, x, y);
             XFreePixmap(Xdisplay, pmap);
             XFreePixmap(Xdisplay, mask);
@@ -392,6 +397,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
             return;
           } else {
             print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
+            FREE(reply);
             if (image_mode_is(which, ALLOW_IMAGE)) {
               image_set_mode(which, MODE_IMAGE);
             } else {
@@ -522,8 +528,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     }
     if (iclass) {
       snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
-      enl_ipc_send(buff);
-      for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+      reply = enl_send_and_wait(buff);
       if (strstr(reply, "not")) {
         print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
         if (image_mode_is(which, ALLOW_IMAGE)) {
@@ -531,14 +536,17 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         } else {
           image_set_mode(which, MODE_SOLID);
         }
+        FREE(reply);
       } else if (strstr(reply, "Error")) {
         print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
         FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
                       if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
+        FREE(reply);
       } else {
+        FREE(reply);
         snprintf(buff, sizeof(buff), "imageclass %s apply 0x%x %s", iclass, (int) win, state);
-        enl_ipc_send(buff);
-        for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
+        reply = enl_send_and_wait(buff);
+        FREE(reply);
         return;
       }
     }

@@ -234,28 +234,39 @@ handle_property_notify(event_t * ev)
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
       D_EVENTS(("handle_property_notify():  On %s.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) prop, (int) ev->xproperty.atom));
-      if ((prop == None) || (ev->xproperty.atom != prop)) {
-        return 0;
-      }
-      if (desktop_pixmap != None) {
-        free_desktop_pixmap();
-      }
-      desktop_window = get_desktop_window();
-      if (desktop_window == None) {
-        FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
+      if (ev->xproperty.atom == prop) {
+        if (desktop_pixmap != None) {
+          free_desktop_pixmap();
+        }
+        desktop_window = get_desktop_window();
+        if (desktop_window == None) {
+          FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
+          return 1;
+        }
+        redraw_all_images();
         return 1;
       }
-      redraw_all_images();
-    } else if (ev->xany.window == desktop_window) {
+    }
+    if (ev->xany.window == desktop_window) {
       prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
-      D_EVENTS(("handle_property_notify():  On TermWin.parent.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
-      if ((prop == None) || (ev->xproperty.atom != prop)) {
-        return 0;
+      D_EVENTS(("handle_property_notify():  On desktop_window [0x%08x].  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
+      if (ev->xproperty.atom == prop) {
+        if (desktop_pixmap != None) {
+          free_desktop_pixmap();
+        }
+        redraw_all_images();
+        return 1;
       }
-      if (desktop_pixmap != None) {
-        free_desktop_pixmap();
-      }
-      redraw_all_images();
+    }
+  }
+  if ((ev->xany.window == Xroot) || (ev->xany.window == ipc_win)) {
+    prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
+    D_EVENTS(("handle_property_notify():  On 0x%08x.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) ev->xany.window, (int) prop, (int) ev->xproperty.atom));
+    if (ev->xproperty.atom == prop) {
+      D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
+      XSelectInput(Xdisplay, ipc_win, None);
+      ipc_win = None;
+      return 1;
     }
   }
   return 1;
@@ -268,6 +279,8 @@ handle_destroy_notify(event_t * ev)
   D_EVENTS(("handle_destroy_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
 
   if (ev->xany.window == ipc_win) {
+    D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
+    XSelectInput(Xdisplay, ipc_win, None);
     ipc_win = None;
   }
   return 1;

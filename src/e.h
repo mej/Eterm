@@ -32,6 +32,7 @@
 #include "pixmap.h"  /* For simage_t */
 
 /************ Macros and Definitions ************/
+#define IPC_TIMEOUT    ((char *) 1)
 
 /************ Variables ************/
 extern Window ipc_win;
