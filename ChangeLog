@@ -3183,3 +3183,8 @@ Tue Feb 15 19:31:04 PST 2000	Michael Jennings <mej@eterm.org>
 	the terminfo stuff is now done at install time instead of build time.
 	
 -------------------------------------------------------------------------------
+Wed Feb 16 14:58:51 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fix the XIM input positioning to work with the buttonbar.
+	
+-------------------------------------------------------------------------------

@@ -25,6 +25,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
+#include "buttons.h"
 #include "command.h"
 #include "debug.h"
 #include "startup.h"
@@ -3256,9 +3257,9 @@ debug_colors(void)
 void xim_get_position(XPoint *pos)
 {
    pos->x = Col2Pixel(screen.col);
-   if (scrollbar_is_visible() && !(Options & Opt_scrollbar_right))
+   if (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) {
      pos->x += scrollbar_trough_width();
-   pos->y = Height2Pixel(screen.row) + TermWin.font->ascent
-            + TermWin.internalBorder;
+   }
+   pos->y = Height2Pixel(screen.row) + TermWin.font->ascent + TermWin.internalBorder + bbar_calc_docked_height(BBAR_DOCKED_TOP);
 }
 #endif
