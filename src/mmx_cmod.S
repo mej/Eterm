@@ -129,7 +129,7 @@ shade_ximage_15_mmx:
 
         addl $4, %ecx
         js 2b
-        jz 4f
+        jmp 4f
 3:
         movw (%esi, %ecx, 2), %ax
         movd %eax, %mm0
@@ -157,9 +157,10 @@ shade_ximage_15_mmx:
         movw %ax, (%esi, %ecx, 2)
 
         incl %ecx
+4:
         cmpl $2, %ecx
         jng 3b
-4:
+
         addl bpl, %esi
         decl %edx
         jnz 1b
@@ -209,7 +210,7 @@ shade_ximage_15_mmx_saturate:
 
         addl $4, %ecx
         js 2b
-        jz 4f
+        jmp 4f
 3:
         movw (%esi, %ecx, 2), %ax
         movd %eax, %mm0
@@ -245,9 +246,10 @@ shade_ximage_15_mmx_saturate:
         movw %ax, (%esi, %ecx, 2)
 
         incl %ecx
+4:
         cmpl $2, %ecx
         jng 3b
-4:
+
         addl bpl, %esi
         decl %edx
         jnz 1b
@@ -309,7 +311,7 @@ shade_ximage_16_mmx:
 
         addl $4, %ecx
         js 2b
-        jz 4f
+	jmp 4f
 3:
         movw (%esi, %ecx, 2), %ax
         movd %eax, %mm0
@@ -337,9 +339,10 @@ shade_ximage_16_mmx:
         movw %ax, (%esi, %ecx, 2)
 
         incl %ecx
+4:
         cmpl $2, %ecx
         jng 3b
-4:
+
         addl bpl, %esi
         decl %edx
         jnz 1b
@@ -391,7 +394,7 @@ shade_ximage_16_mmx_saturate:
 
         addl $4, %ecx
         js 2b
-        jz 4f
+        jmp 4f
 3:
         movw (%esi, %ecx, 2), %ax
         movd %eax, %mm0
@@ -427,9 +430,10 @@ shade_ximage_16_mmx_saturate:
         movw %ax, (%esi, %ecx, 2)
 
         incl %ecx
+4:
         cmpl $2, %ecx
         jng 3b
-4:
+
         addl bpl, %esi
         decl %edx
         jnz 1b

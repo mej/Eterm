@@ -3674,3 +3674,8 @@ Sat Jun 10 11:38:36 PDT 2000	Michael Jennings <mej@eterm.org>
 	Some terminfo fixes, also from Marius Gedminas <mgedmin@takas.lt>.
 	
 -------------------------------------------------------------------------------
+Mon Jun 12 13:33:39 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixes from Willem Monsuwe <willem@stack.nl> to his MMX routines.
+	
+-------------------------------------------------------------------------------
