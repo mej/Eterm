@@ -2699,7 +2699,11 @@ parse_image(char *buff, void *state)
       print_error("Parse error in file %s, line %lu:  Missing filename", file_peek_path(), file_peek_line());
       return NULL;
     }
-    load_image(filename, images[idx].current);
+    if (!load_image(filename, images[idx].current)) {
+      print_error("Unable to locate image \"%s\" in the image path.", NONULL(filename));
+      images[idx].mode &= ~(MODE_IMAGE | ALLOW_IMAGE);
+      D_PIXMAP(("New image mode is 0x%02x, iml->im is 0x%08x\n", images[idx].mode, images[idx].current->iml->im));
+    }
 
   } else if (!BEG_STRCASECMP(buff, "geom ")) {
     char *geom = PWord(2, buff);

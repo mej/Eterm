@@ -358,7 +358,7 @@ reset_simage(simage_t * simg, unsigned long mask)
   D_PIXMAP(("reset_simage(%8p, 0x%08x)\n", simg, mask));
 
   if ((mask & RESET_PMAP_PIXMAP) && simg->pmap->pixmap != None) {
-    imlib_free_pixmap_and_mask(simg->pmap->pixmap);
+    IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
     simg->pmap->pixmap = None;
     simg->pmap->mask = None;
   }
@@ -485,8 +485,8 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     return None;
   }
   XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
-  p = XCreatePixmap(Xdisplay, d, width, height, Xdepth);
-  gc = XCreateGC(Xdisplay, d, 0, NULL);
+  p = X_CREATE_PIXMAP(width, height);
+  gc = X_CREATE_GC(0, NULL);
   D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y, desktop_window));
   if (p != None) {
     if (pw < scr->width || ph < scr->height) {
@@ -508,7 +508,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
       bevel_pixmap(p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
     }
   }
-  XFreeGC(Xdisplay, gc);
+  X_FREE_GC(gc);
   return p;
 }
 
@@ -595,17 +595,17 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
   if (simg->pmap->pixmap != None) {
     XGetGeometry(Xdisplay, simg->pmap->pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
     if (pw != width || ph != height) {
-      imlib_free_pixmap_and_mask(simg->pmap->pixmap);
+      IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
       simg->pmap->pixmap = None;
     } else {
       p = simg->pmap->pixmap;
     }
   }
   if (p == None) {
-    p = XCreatePixmap(Xdisplay, d, width, height, Xdepth);
+    p = X_CREATE_PIXMAP(width, height);
     D_PIXMAP(("Created p == 0x%08x\n", p));
   }
-  gc = XCreateGC(Xdisplay, d, 0, NULL);
+  gc = X_CREATE_GC(0, NULL);
   XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
   D_PIXMAP(("Translated coords are %d, %d\n", x, y));
   if ((images[image_bg].current->pmap->w > 0) || (images[image_bg].current->pmap->op & OP_SCALE)) {
@@ -616,7 +616,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
     XSetFillStyle(Xdisplay, gc, FillTiled);
     XFillRectangle(Xdisplay, p, gc, 0, 0, width, height);
   }
-  XFreeGC(Xdisplay, gc);
+  X_FREE_GC(gc);
   return p;
 }
 
@@ -661,13 +661,13 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
             FREE(reply);
             enl_ipc_sync();
             if (pmap) {
-              gc = XCreateGC(Xdisplay, d, 0, NULL);
+              gc = X_CREATE_GC(0, NULL);
               XSetClipMask(Xdisplay, gc, mask);
               XSetClipOrigin(Xdisplay, gc, x, y);
               XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
               snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
               enl_ipc_send(buff);
-              XFreeGC(Xdisplay, gc);
+              X_FREE_GC(gc);
               return;
             } else {
               print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
@@ -680,23 +680,23 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     } else if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
       Pixmap p;
 
-      gc = XCreateGC(Xdisplay, d, 0, NULL);
+      gc = X_CREATE_GC(0, NULL);
       /* FIXME:  The conditional on the next line works, but it's a hack.  Worth fixing?  :-) */
       p = create_trans_pixmap(simg, which, ((which == image_st) ? scrollbar.sa_win : d), x, y, w, h);
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
-      XFreePixmap(Xdisplay, p);
-      XFreeGC(Xdisplay, gc);
+      X_FREE_PIXMAP(p);
+      X_FREE_GC(gc);
     } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
       Pixmap p;
 
-      gc = XCreateGC(Xdisplay, d, 0, NULL);
+      gc = X_CREATE_GC(0, NULL);
       p = create_viewport_pixmap(simg, d, x, y, w, h);
       if (simg->iml->bevel != NULL) {
         bevel_pixmap(p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
-      XFreePixmap(Xdisplay, p);
-      XFreeGC(Xdisplay, gc);
+      X_FREE_PIXMAP(p);
+      X_FREE_GC(gc);
     }
   }
 
@@ -739,18 +739,18 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, w, h);
     }
     if (pmap == None) {
-      print_error("Delayed image load failure for \"%s\".", imlib_image_get_filename());
+      print_error("Delayed image load failure for \"%s\".", NONULL(imlib_image_get_filename()));
       reset_simage(simg, RESET_ALL_SIMG);
       return;
     }
-    gc = XCreateGC(Xdisplay, d, 0, NULL);
+    gc = X_CREATE_GC(0, NULL);
     if (mask) {
       XSetClipMask(Xdisplay, gc, mask);
       XSetClipOrigin(Xdisplay, gc, x, y);
     }
     XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
-    imlib_free_pixmap_and_mask(pmap);
-    XFreeGC(Xdisplay, gc);
+    IMLIB_FREE_PIXMAP(pmap);
+    X_FREE_GC(gc);
   }
 }
 
@@ -808,9 +808,9 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
   XGCValues gcvalue;
 
   ASSERT(buffer_pixmap == None);
-  buffer_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, width, height, Xdepth);
+  buffer_pixmap = X_CREATE_PIXMAP(width, height);
   gcvalue.foreground = (Pixel) fill;
-  gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground, &gcvalue);
+  gc = X_CREATE_GC(GCForeground, &gcvalue);
   XSetGraphicsExposures(Xdisplay, gc, False);
 
   if (mode == MODE_SOLID) {
@@ -818,15 +818,15 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
 
     simg = images[image_bg].current;
     if (simg->pmap->pixmap) {
-      XFreePixmap(Xdisplay, simg->pmap->pixmap);
+      X_FREE_PIXMAP(simg->pmap->pixmap);
     }
-    simg->pmap->pixmap = XCreatePixmap(Xdisplay, TermWin.vt, width, height, Xdepth);
+    simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
     XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
     XCopyArea(Xdisplay, simg->pmap->pixmap, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
   } else {
     XCopyArea(Xdisplay, (Pixmap) fill, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
   }
-  XFreeGC(Xdisplay, gc);
+  X_FREE_GC(gc);
 }
 
 void
@@ -861,11 +861,11 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     return;
 
   gcvalue.foreground = gcvalue.background = PixColors[bgColor];
-  gc = XCreateGC(Xdisplay, win, GCForeground | GCBackground, &gcvalue);
+  gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
   pixmap = simg->pmap->pixmap;	/* Save this for later */
 
   if ((which == image_bg) && (buffer_pixmap != None)) {
-    XFreePixmap(Xdisplay, buffer_pixmap);
+    X_FREE_PIXMAP(buffer_pixmap);
     buffer_pixmap = None;
   }
 
@@ -906,9 +906,9 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
                 XSetClipOrigin(Xdisplay, gc, 0, 0);
               }
               if (simg->pmap->pixmap) {
-                XFreePixmap(Xdisplay, simg->pmap->pixmap);
+                X_FREE_PIXMAP(simg->pmap->pixmap);
               }
-              simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
+              simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
               XCopyArea(Xdisplay, pmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
               XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
               snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
@@ -922,7 +922,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         } else {
           snprintf(buff, sizeof(buff), "imageclass %s apply 0x%x %s", iclass, (int) win, state);
           enl_ipc_send(buff);
-          XFreeGC(Xdisplay, gc);
+          X_FREE_GC(gc);
           return;
         }
       }
@@ -932,7 +932,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 # ifdef PIXMAP_OFFSET
   if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
     if (simg->pmap->pixmap != None) {
-      XFreePixmap(Xdisplay, simg->pmap->pixmap);
+      X_FREE_PIXMAP(simg->pmap->pixmap);
     }
     simg->pmap->pixmap = create_trans_pixmap(simg, which, win, 0, 0, width, height);
     if (simg->pmap->pixmap != None) {
@@ -952,7 +952,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     p = create_viewport_pixmap(simg, win, 0, 0, width, height);
     if (p && (p != simg->pmap->pixmap)) {
       if (simg->pmap->pixmap != None) {
-        XFreePixmap(Xdisplay, simg->pmap->pixmap);
+        X_FREE_PIXMAP(simg->pmap->pixmap);
       }
       simg->pmap->pixmap = p;
     }
@@ -1064,8 +1064,8 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         shaped_window_apply_mask(win, simg->pmap->mask);
       }
       if (simg->pmap->pixmap != None) {
-        if (pixmap != None) {
-          imlib_free_pixmap_and_mask(pixmap);
+        if (pixmap != None && pixmap != simg->pmap->pixmap) {
+          IMLIB_FREE_PIXMAP(pixmap);
         }
         if (xscaled != width || yscaled != height || xpos != 0 || ypos != 0) {
           unsigned char single;
@@ -1074,7 +1074,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           single = ((xscaled < width || yscaled < height) && !(simg->pmap->op & OP_TILE)) ? 1 : 0;
 
           pixmap = simg->pmap->pixmap;
-          simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
+          simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
           if (single) {
             XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
           }
@@ -1086,8 +1086,13 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           } else {
             XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
           }
-          imlib_free_pixmap_and_mask(pixmap);
-        }
+          IMLIB_FREE_PIXMAP(pixmap);
+        } else if (renderop & RENDER_FORCE_PIXMAP) {
+	  pixmap = simg->pmap->pixmap;
+	  simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+	  XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
+	  IMLIB_FREE_PIXMAP(pixmap);
+	}
         if (simg->iml->bevel != NULL) {
           bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
         }
@@ -1119,9 +1124,9 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     } else {
       if (renderop & RENDER_FORCE_PIXMAP) {
         if (simg->pmap->pixmap) {
-          XFreePixmap(Xdisplay, simg->pmap->pixmap);
+          X_FREE_PIXMAP(simg->pmap->pixmap);
         }
-        simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
+        simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
         XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
         XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
         if (simg->iml->bevel != NULL) {
@@ -1136,7 +1141,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     }
   }
   XClearWindow(Xdisplay, win);
-  XFreeGC(Xdisplay, gc);
+  X_FREE_GC(gc);
   return;
 }
 
@@ -1807,7 +1812,7 @@ get_desktop_pixmap(void)
   }
   if (color_pixmap != None) {
     D_PIXMAP(("Removing old solid color pixmap 0x%08x.\n", color_pixmap));
-    XFreePixmap(Xdisplay, color_pixmap);
+    X_FREE_PIXMAP(color_pixmap);
     color_pixmap = None;
   }
   if (prop != None) {
@@ -1832,19 +1837,19 @@ get_desktop_pixmap(void)
             Screen *scr = ScreenOfDisplay(Xdisplay, Xscreen);
 
             gcvalue.foreground = gcvalue.background = PixColors[bgColor];
-            gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground, &gcvalue);
+            gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
             XGetGeometry(Xdisplay, p, &w, &px, &py, &pw, &ph, &pb, &pd);
             D_PIXMAP(("XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
             if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
-              desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.parent, pw, ph, Xdepth);
+              desktop_pixmap = X_CREATE_PIXMAP(pw, ph);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
               colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, pw, ph);
             } else {
-              desktop_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, scr->width, scr->height, Xdepth);
+              desktop_pixmap = X_CREATE_PIXMAP(scr->width, scr->height);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
               colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, scr->width, scr->height);
             }
-            XFreeGC(Xdisplay, gc);
+            X_FREE_GC(gc);
             desktop_pixmap_is_mine = 1;
             D_PIXMAP(("Returning 0x%08x\n", (unsigned int) desktop_pixmap));
             return (desktop_pixmap);
@@ -1870,12 +1875,12 @@ get_desktop_pixmap(void)
       D_PIXMAP(("  Found solid color 0x%08x\n", pix));
       gcvalue.foreground = pix;
       gcvalue.background = pix;
-      gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground, &gcvalue);
+      gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
 
-      color_pixmap = XCreatePixmap(Xdisplay, TermWin.vt, 16, 16, Xdepth);
+      color_pixmap = X_CREATE_PIXMAP(16, 16);
       XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
       D_PIXMAP(("Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
-      XFreeGC(Xdisplay, gc);
+      X_FREE_GC(gc);
       return (desktop_pixmap = color_pixmap);
     }
   }
@@ -1890,7 +1895,7 @@ free_desktop_pixmap(void)
 {
 
   if (desktop_pixmap_is_mine && desktop_pixmap != None) {
-    XFreePixmap(Xdisplay, desktop_pixmap);
+    X_FREE_PIXMAP(desktop_pixmap);
     desktop_pixmap_is_mine = 0;
   }
   desktop_pixmap = None;

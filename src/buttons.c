@@ -102,7 +102,7 @@ bbar_create(void)
   XSelectInput(Xdisplay, bbar->win, mask);
   XStoreName(Xdisplay, bbar->win, "Eterm Button Bar");
 
-  bbar->gc = XCreateGC(Xdisplay, bbar->win, GCForeground | GCFont, &gcvalue);
+  bbar->gc = X_CREATE_GC(GCForeground | GCFont, &gcvalue);
   bbar_set_docked(bbar, BBAR_DOCKED_TOP);
   bbar_set_visible(bbar, 1);
 

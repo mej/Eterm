@@ -62,7 +62,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
   chmod +x .%{prefix}/lib/lib*so* ||:
 )
 
-strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
+#strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
 
 gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
 
@@ -137,6 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/share/%{name}/pix/button_arrow_up_[123].png
 %{prefix}/share/%{name}/pix/button_arrow_down_[123].png
 %{prefix}/share/%{name}/pix/menu[123].png
+%{prefix}/share/%{name}/pix/thumb_[12].png
 %dir %{prefix}/share/%{name}
 %dir %{prefix}/share/%{name}/pix
 

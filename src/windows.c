@@ -378,7 +378,9 @@ Create_Windows(int argc, char *argv[])
 
   Attributes.background_pixel = PixColors[bgColor];
   Attributes.border_pixel = PixColors[bgColor];
-  D_X11(("szHint == { %d, %d, %d, %d }\n", szHint.x, szHint.y, szHint.width, szHint.height));
+  D_X11(("Size Hints:  x %d, y %d.  Width/Height:  Base %dx%d, Minimum %dx%d, Current %dx%d, Increment %dx%d\n",
+	 szHint.x, szHint.y, szHint.base_width, szHint.base_height, szHint.min_width, szHint.min_height,
+	 szHint.width, szHint.height, szHint.width_inc, szHint.height_inc));
   TermWin.parent = XCreateWindow(Xdisplay, Xroot, szHint.x, szHint.y, szHint.width, szHint.height, 0, Xdepth, InputOutput,
 #ifdef PREFER_24BIT
 				 Xvisual,
@@ -468,7 +470,7 @@ Create_Windows(int argc, char *argv[])
     gcvalue.foreground = PixColors[fgColor];
     gcvalue.background = PixColors[bgColor];
     gcvalue.graphics_exposures = 0;
-    TermWin.gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
+    TermWin.gc = X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
   }
 
   if (Options & Opt_noCursor) {

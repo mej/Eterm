@@ -3602,3 +3602,18 @@ Fri May 26 20:43:03 PDT 2000	Michael Jennings <mej@eterm.org>
 	top-left, the second to top-right, and so on as listed above.
 	
 -------------------------------------------------------------------------------
+Sun May 28 14:45:03 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	My attempt to track down the strange X errors have revealed that a
+	pixmap given to me by Imlib2 is getting freed somehow behind my back.
+	Probably because this part of Imlib2 hadn't been tested before Eterm
+	was converted. =P
+
+	It doesn't seem to happen in XFree86 4.0; I'm wondering if XFree 4 is
+	smart enough to detect double-frees of old XID's and just ignore them?
+	Well, I'm going to have to add some debugging code to Imlib2 and see
+	if I can track down where it's freeing my pixmaps.  But I have some
+	errands to run first, so I'm going to commit this for now.  It
+	shouldn't actually change any functionality.
+	
+-------------------------------------------------------------------------------
