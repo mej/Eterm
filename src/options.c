@@ -1617,15 +1617,15 @@ parse_image(char *buff, void *state)
             char *allow;
 
             for (; (allow = (char *) strsep(&allow_list, " ")) != NULL;) {
-                if (!BEG_STRCASECMP("image", allow)) {
+                if (!BEG_STRCASECMP(allow, "image")) {
                     images[idx].mode |= ALLOW_IMAGE;
-                } else if (!BEG_STRCASECMP("transparent", allow)) {
+                } else if (!BEG_STRCASECMP(allow, "trans")) {
                     images[idx].mode |= ALLOW_TRANS;
-                } else if (!BEG_STRCASECMP("viewport", allow)) {
+                } else if (!BEG_STRCASECMP(allow, "viewport")) {
                     images[idx].mode |= ALLOW_VIEWPORT;
-                } else if (!BEG_STRCASECMP("auto", allow)) {
+                } else if (!BEG_STRCASECMP(allow, "auto")) {
                     images[idx].mode |= ALLOW_AUTO;
-                } else if (!BEG_STRCASECMP("solid", allow)) {
+                } else if (!BEG_STRCASECMP(allow, "solid")) {
                 } else {
                     print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(), allow);
                 }

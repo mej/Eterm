@@ -4939,3 +4939,10 @@ Tue Nov 26 17:51:34 2002                        Michael Jennings (mej)
 
 I need my Escreen sessions to be able to beep, so let's allow that.
 ----------------------------------------------------------------------
+Wed Nov 27 15:17:04 2002                        Michael Jennings (mej)
+
+Same as yesterday, only this time I'm *actually* going to fix the
+problem. >:I  I should really read more carefully.
+
+While I was at it, I fixed some bad uses of BEG_STRCASECMP().
+----------------------------------------------------------------------

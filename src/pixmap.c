@@ -222,15 +222,15 @@ parse_pixmap_ops(char *str)
     D_PIXMAP(("parse_pixmap_ops(str [%s]) called.\n", str));
 
     for (; (token = (char *) strsep(&str, ":"));) {
-        if (!BEG_STRCASECMP("tiled", token)) {
+        if (!BEG_STRCASECMP(token, "tile")) {
             op |= OP_TILE;
-        } else if (!BEG_STRCASECMP("hscaled", token)) {
+        } else if (!BEG_STRCASECMP(token, "hscale")) {
             op |= OP_HSCALE;
-        } else if (!BEG_STRCASECMP("vscaled", token)) {
+        } else if (!BEG_STRCASECMP(token, "vscale")) {
             op |= OP_VSCALE;
-        } else if (!BEG_STRCASECMP("scaled", token)) {
+        } else if (!BEG_STRCASECMP(token, "scale")) {
             op |= OP_SCALE;
-        } else if (!BEG_STRCASECMP("propscaled", token)) {
+        } else if (!BEG_STRCASECMP(token, "propscale")) {
             op |= OP_PROPSCALE;
         }
     }
