@@ -114,7 +114,7 @@ bbar_init(buttonbar_t *bbar, int width)
 {
   event_register_dispatcher(bbar_dispatch_event, bbar_event_init_dispatcher);
   XSetForeground(Xdisplay, bbar->gc, images[image_bbar].norm->fg);
-  bbar_dock(bbar, bbar_is_docked(bbar));
+  bbar_redock(bbar);
   if (bbar_is_visible(bbar)) {
     bbar_set_visible(bbar, 0);
     bbar_show(bbar, 1);
@@ -685,7 +685,7 @@ bbar_resize(buttonbar_t *bbar, int w)
   if ((w >= 0) && !bbar_is_visible(bbar)) {
     return;
   }
-  bbar_redock(bbar);
+  /*bbar_redock(bbar);  FIXME:  We can't do this here.  Did we ever actually need it? */
   if (w < 0) {
     bbar_calc_sizes(bbar);
     bbar_calc_height(bbar);
