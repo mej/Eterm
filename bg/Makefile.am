@@ -1,7 +1,7 @@
 # $Id$
 
 DIRS = tile scale
-EXTRA_DIST =  tile/014.png tile/circuit.png tile/backwave.jpg tile/40.png tile/blackstone.png \
+EXTRA_DIST =  tile/014.jpg tile/circuit.jpg tile/backwave.jpg tile/40.jpg tile/blackstone.jpg \
               tile/nebula.jpg scale/fourthday.jpg scale/gaia.jpg scale/galleon.jpg scale/night_of_the_dragon.jpg \
               README.backgrounds
 pixmapdir = $(pkgdatadir)/pix
