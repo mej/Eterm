@@ -945,15 +945,12 @@ void
 process_csi_seq(void)
 {
 
-  unsigned char ch, priv;
-  unsigned int nargs;
-  int arg[ESC_ARGS];
+  unsigned char ch;
+  unsigned char priv = 0;
+  unsigned int nargs = 0;
+  int arg[ESC_ARGS] = {0, 0};
+  int ignore = 0;
 
-  nargs = 0;
-  arg[0] = 0;
-  arg[1] = 0;
-
-  priv = 0;
   ch = cmd_getc();  /* Get the next character */
   if (ch >= '<' && ch <= '?') {
     priv = ch;  /* DEC private mode sequence.  Get next character. */
@@ -977,6 +974,8 @@ process_csi_seq(void)
       scr_add_lines(&ch, 0, 1);  /* Insert verbatim non-printable character (NPC) */
       return;
     }
+    if (ch == '-')  /* HACK: Ignore this sequence, but finish reading */
+      ignore = 1;   /* xterm ignores more than this, but we need this for vim */
     if (ch < '@')
       ch = cmd_getc();  /* Separator.  Go to next digit or operation. */
   } while (ch >= ' ' && ch < '@');
@@ -985,6 +984,9 @@ process_csi_seq(void)
     return;
   } else if (ch < ' ')
     return;  /* An NPC.  Punt. */
+
+  if(ignore)
+    return;
 
   switch (ch) {
     case '@':
@@ -1067,6 +1069,8 @@ process_csi_seq(void)
       break;
 
     case 'c':
+      /* TODO: A different response should be sent depending on the value of
+        priv and of arg[0], but what should those reponses be? */
 #ifndef NO_VT100_ANS
       tt_printf(VT100_ANS);
 #endif
@@ -1403,7 +1407,7 @@ void
 process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 {
   unsigned int i;
-  int state;
+  int state; /* This gets set by the PrivCases macro */
 
   if (nargs == 0)
     return;
@@ -1526,6 +1530,7 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 	    else
 	      Options |= Opt_home_on_input;
 	    break;
+      
           case 1047:            /* Alternate screen & clear */
             PrivCases(PrivMode_Screen);
             scr_change_screen(state);

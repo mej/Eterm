@@ -4386,3 +4386,9 @@ arranges certain variables in memory.
 Thanks to Richard Lowe <richlowe@richlowe.net> for reporting the
 problem.
 ----------------------------------------------------------------------
+Thu Sep  6 15:33:37 2001                        Michael Jennings (mej)
+
+While I'm at it, here's a patch to fix some escape sequence handling
+under vim from Paul W Brannan <pbranna@clemson.edu>.  This patch is
+reported to fix problems where vim would come up with underlines.
+----------------------------------------------------------------------
