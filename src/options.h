@@ -28,20 +28,6 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 /************ Macros and Definitions ************/
-#define OPT_BOOLEAN                     0x0001
-#define OPT_INTEGER                     0x0002
-#define OPT_STRING                      0x0004
-#define OPT_ARGUMENT                    0x0008
-
-#define OPT_STR(s, l, d, p)             { s, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_INT(s, l, d, p)             { s, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define OPT_BOOL(s, l, d, v, m)         { s, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
-#define OPT_LONG(l, d, p)               { 0, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_ARGS(s, l, d, p)            { s, l, "(str)  " d, OPT_ARGUMENT, (const char ***) p, 0, 0 }
-#define OPT_BLONG(l, d, v, m)           { 0, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
-#define OPT_ILONG(l, d, p)              { 0, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define optList_numoptions()            (sizeof(optList)/sizeof(optList[0]))
-
 # define Opt_console                    (1LU <<  0)
 # define Opt_login_shell                (1LU <<  1)
 # define Opt_iconic                     (1LU <<  2)
@@ -84,18 +70,6 @@
 #define PARSE_TRY_DEFAULT_THEME         ((unsigned char) 0x02)
 #define PARSE_TRY_NO_THEME              ((unsigned char) 0x04)
 #define PARSE_TRY_ALL                   ((unsigned char) 0x07)
-
-/* This defines how many mistakes to allow before giving up
-   and printing the usage                          -- mej   */
-#define BAD_THRESHOLD 3
-#define CHECK_BAD()  do { \
-	               if (++bad_opts >= BAD_THRESHOLD) { \
-			 print_error("Error threshold exceeded, giving up.\n"); \
-			 usage(); \
-		       } else { \
-			 print_error("Attempting to continue, but strange things may happen.\n"); \
-		       } \
-                     } while(0)
 
 #define to_keysym(p,s)             do { KeySym sym; \
                                      if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
@@ -166,9 +140,8 @@ extern KeySym ks_smallfont;
 _XFUNCPROTOBEGIN
 
 unsigned long num_words(const char *str);
-extern void get_initial_options(int, char **);
-extern void get_options(int, char **);
 extern char *conf_parse_theme(char **theme, char *conf_name, unsigned char fallback);
+extern void init_libast(void);
 extern void init_defaults(void);
 extern void post_parse(void);
 unsigned char save_config(char *, unsigned char);

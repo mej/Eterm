@@ -170,7 +170,7 @@ event_win_is_mywin(register event_dispatcher_data_t *data, Window win)
 
     register unsigned short i;
 
-    ASSERT(data != NULL);
+    ASSERT_RVAL(data != NULL, 0);
 
     for (i = 0; i < data->num_my_windows; i++) {
         if (data->my_windows[i] == win) {
@@ -186,7 +186,7 @@ event_win_is_parent(register event_dispatcher_data_t *data, Window win)
 
     register unsigned short i;
 
-    ASSERT(data != NULL);
+    ASSERT_RVAL(data != NULL, 0);
 
     for (i = 0; i < data->num_my_parents; i++) {
         if (data->my_parents[i] == win) {

@@ -271,10 +271,6 @@ inline void *memmove(void *, const void *, size_t);
 # define SB_WIDTH 10
 #endif
 
-#ifndef MENUBAR_MAX
-# define MENUBAR_MAX 0
-#endif
-
 #ifndef SAVELINES
 # define SAVELINES 256
 #endif

@@ -728,7 +728,7 @@ parse_font_fx(const char *line)
     unsigned char which, n;
     Pixel p;
 
-    ASSERT(line != NULL);
+    ASSERT_RVAL(line != NULL, 0);
 
     n = num_words(line);
 

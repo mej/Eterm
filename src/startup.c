@@ -91,9 +91,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     PABLO_START_TRACING();
     getcwd(initial_dir, PATH_MAX);
-
-    libast_set_program_name(PACKAGE);
-    libast_set_program_version(VERSION);
+    init_libast();
 
     /* Open display, get options/resources and create the window */
     if (getenv("DISPLAY") == NULL) {
@@ -104,7 +102,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* This MUST be called before any other Xlib functions */
 
-    get_initial_options(argc, argv);
+    spifopt_parse(argc, argv);
     init_defaults();
 
 #ifdef NEED_LINUX_HACK
@@ -189,7 +187,7 @@ eterm_bootstrap(int argc, char *argv[])
         D_OPTIONS(("New rs_path set to \"%s\"\n", rs_path));
     }
 #endif
-    get_options(argc, argv);
+    spifopt_parse(argc, argv);
     D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
     D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(), getegid()));
 
@@ -216,8 +214,6 @@ eterm_bootstrap(int argc, char *argv[])
     post_parse();
 
 #ifdef PREFER_24BIT
-    cmap = DefaultColormap(Xdisplay, Xscreen);
-
     /*
      * If depth is not 24, look for a 24bit visual.
      */

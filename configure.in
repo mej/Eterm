@@ -475,18 +475,19 @@ AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes")
 dnl#
 dnl# LibAST
 dnl#
+LIBAST_MIN=5
 AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
 if test "$LIBAST_CONFIG" = "false"; then
     FOUND_LIBAST=0
 else
-    FOUND_LIBAST=1
+    FOUND_LIBAST=`$LIBAST_CONFIG --version | awk -F. '{print $2}'`
     CPPFLAGS="$CPPFLAGS `$LIBAST_CONFIG --cppflags`"
     LDFLAGS="$LDFLAGS `$LIBAST_CONFIG --ldflags`"
 fi
-AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
+AC_CHECK_LIB(ast, libast_malloc, , FOUND_LIBAST=0, $GRLIBS)
 
-if test "$FOUND_LIBAST" -ne "1"; then
-  echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
+if test "$FOUND_LIBAST" -lt "$LIBAST_MIN"; then
+  echo "ERROR:  You need LibAST 0.$LIBAST_MIN or higher to build Eterm.  If you already have it,";
   echo "        you may have it installed in a strange place, or you may need to run";
   echo "        /sbin/ldconfig.  If you don't have it, I can download it for you.";
   echo "        Shall I retrieve and build LibAST now (y/n)?";
@@ -507,7 +508,7 @@ if test "$FOUND_LIBAST" -ne "1"; then
       test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
   fi
 fi
-if test "$FOUND_LIBAST" -eq "1"; then
+if test "$FOUND_LIBAST" -ge "$LIBAST_MIN"; then
   if test ! -z "$LIBAST_CONFIG"; then
     GRLIBS="-last $GRLIBS"
     AC_DEFINE(HAVE_LIBAST)

@@ -4799,3 +4799,10 @@ Sun Sep 29 21:48:10 2002                        Michael Jennings (mej)
 Fixed Debian Bug #155960.  WM_COMMAND was being set improperly because
 equals signs in the arg list were being NUL'd out for no reason.
 ----------------------------------------------------------------------
+Fri Oct  4 21:17:42 2002                        Michael Jennings (mej)
+
+LibAST 0.5 is now required to build Eterm.  Hope everyone updated.  By
+the way, this fixes that old font-starts-with-a-hyphen bug along with
+some compiler warnings the resulted from a change in the way the
+ASSERT() macro worked.
+----------------------------------------------------------------------

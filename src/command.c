@@ -1734,7 +1734,7 @@ create_fontset(const char *font1, const char *font2)
     int mc;
     const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";
 
-    ASSERT(font1 != NULL);
+    ASSERT_RVAL(font1 != NULL, (XFontSet) 0);
 
     if (font2) {
         fontname = MALLOC(strlen(font1) + strlen(font2) + sizeof(fs_base) + 2);

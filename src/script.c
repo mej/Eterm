@@ -34,6 +34,7 @@ static const char cvs_ident[] = "$Id$";
 #include <signal.h>
 
 #include "command.h"
+#include "menus.h"
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
@@ -73,7 +74,7 @@ static eterm_script_handler_t script_handlers[] = {
 };
 static size_t handler_count = sizeof(script_handlers) / sizeof(eterm_script_handler_t);
 
-#if 0
+#if UNUSED_BLOCK
 void
 eterm_handle_winop(char *action)
 {
