@@ -158,7 +158,8 @@ static char *v_bufend;		/* end of physical buffer */
 static Atom DndProtocol, DndSelection;
 #endif /* OFFIX_DND */
 #ifdef USE_XIM
-XIC Input_Context = NULL;	/* input context */
+XIC xim_input_context = NULL;	/* input context */
+static XIMStyle xim_input_style = 0;
 #endif
 
 /* Substitutes for missing system functions */
@@ -1745,21 +1746,23 @@ static void
 xim_send_spot(void)
 {
   XPoint spot;
+  static XPoint oldSpot = { -1, -1 };
   XVaNestedList preedit_attr;
-  XIMStyle input_style;
 
-  if (Input_Context == NULL) {
+  if (xim_input_context == NULL) {
     return;
-  } else {
-    XGetICValues(Input_Context, XNInputStyle, &input_style, NULL);
-    if (!(input_style & XIMPreeditPosition)) {
-      return;
+  }
+
+  if (xim_input_style & XIMPreeditPosition) {
+    xim_get_position(&spot);
+    if (spot.x != oldSpot.x || spot.y != oldSpot.y) {
+      oldSpot.x = spot.x;
+      oldSpot.y = spot.y;
+      preedit_attr = XVaCreateNestedList(0, XNSpotLocation, &spot, NULL);
+      XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, NULL);
+      XFree(preedit_attr);
     }
   }
-  xim_get_position(&spot);
-  preedit_attr = XVaCreateNestedList(0, XNSpotLocation, &spot, NULL);
-  XSetICValues(Input_Context, XNPreeditAttributes, preedit_attr, NULL);
-  XFree(preedit_attr);
 }
 
 static void
@@ -1783,7 +1786,7 @@ xim_get_area(XRectangle *preedit_rect, XRectangle *status_rect,
 static void
 xim_destroy_cb(XIM xim, XPointer client_data, XPointer call_data)
 {
-  Input_Context = NULL;
+  xim_input_context = NULL;
   XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
   xim = NULL;
   client_data = call_data = (XPointer) 0;
@@ -1793,7 +1796,7 @@ static void
 xim_instantiate_cb(Display *display, XPointer client_data, XPointer call_data)
 {
   xim_real_init();
-  if (Input_Context) {
+  if (xim_input_context) {
     XUnregisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
   }
   display = NULL;
@@ -1807,7 +1810,6 @@ xim_real_init(void)
   char *p, *s, buf[64], tmp[1024];
   char *end, *next_s;
   XIM xim = NULL;
-  XIMStyle input_style = 0;
   XIMStyles *xim_styles = NULL;
   int found;
   XPoint spot;
@@ -1816,7 +1818,9 @@ xim_real_init(void)
   XVaNestedList preedit_attr = NULL;
   XVaNestedList status_attr = NULL;
 
-  REQUIRE_RVAL(Input_Context == NULL, -1);
+  REQUIRE_RVAL(xim_input_context == NULL, -1);
+
+  xim_input_style = 0;
 
   if (rs_input_method && *rs_input_method) {
     strncpy(tmp, rs_input_method, sizeof(tmp) - 1);
@@ -1890,15 +1894,15 @@ xim_real_init(void)
     *(end + 1) = '\0';
 
     if (!strcmp(s, "OverTheSpot")) {
-      input_style = (XIMPreeditPosition | XIMStatusNothing);
+      xim_input_style = (XIMPreeditPosition | XIMStatusNothing);
     } else if (!strcmp(s, "OffTheSpot")) {
-      input_style = (XIMPreeditArea | XIMStatusArea);
+      xim_input_style = (XIMPreeditArea | XIMStatusArea);
     } else if (!strcmp(s, "Root")) {
-      input_style = (XIMPreeditNothing | XIMStatusNothing);
+      xim_input_style = (XIMPreeditNothing | XIMStatusNothing);
     }
 
     for (i = 0; i < xim_styles->count_styles; i++) {
-      if (input_style == xim_styles->supported_styles[i]) {
+      if (xim_input_style == xim_styles->supported_styles[i]) {
 	found = 1;
 	break;
       }
@@ -1911,18 +1915,19 @@ xim_real_init(void)
     XCloseIM(xim);
     return -1;
   }
-  if ((input_style != (XIMPreeditNothing | XIMStatusNothing)) && (input_style != (XIMPreeditArea | XIMStatusArea))
-      && (input_style != (XIMPreeditPosition | XIMStatusNothing))) {
+  if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
+      && (xim_input_style != (XIMPreeditArea | XIMStatusArea))
+      && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
     print_error("This program does not support the preedit type");
     XCloseIM(xim);
     return -1;
   }
-  if (input_style & XIMPreeditPosition) {
+  if (xim_input_style & XIMPreeditPosition) {
     xim_set_size(&rect);
     xim_get_position(&spot);
     xim_set_color(&fg, &bg);
     preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
-  } else if (input_style & XIMPreeditArea) {
+  } else if (xim_input_style & XIMPreeditArea) {
     xim_set_color(&fg, &bg);
     /* The necessary width of preedit area is unknown until create input context. */
     needed_rect.width = 0;
@@ -1930,16 +1935,16 @@ xim_real_init(void)
     preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
     status_attr = XVaCreateNestedList(0, XNArea, &status_rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
   }
-  Input_Context = XCreateIC(xim, XNInputStyle, input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
+  xim_input_context = XCreateIC(xim, XNInputStyle, xim_input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
                             preedit_attr ? XNPreeditAttributes : NULL, preedit_attr, status_attr ? XNStatusAttributes : NULL, status_attr, NULL);
   XFree(preedit_attr);
   XFree(status_attr);
-  if (Input_Context == NULL) {
+  if (xim_input_context == NULL) {
     print_error("Failed to create input context");
     XCloseIM(xim);
     return -1;
   }
-  if (input_style & XIMPreeditArea)
+  if (xim_input_style & XIMPreeditArea)
     xim_set_status_position();
   return 0;
 }
@@ -1947,25 +1952,22 @@ xim_real_init(void)
 void
 xim_set_status_position(void)
 {
-  XIMStyle input_style;
   XRectangle preedit_rect, status_rect, *needed_rect;
   XVaNestedList preedit_attr, status_attr;
 
-  REQUIRE(Input_Context != NULL);
+  REQUIRE(xim_input_context != NULL);
 
-  XGetICValues(Input_Context, XNInputStyle, &input_style, NULL);
-
-  if (input_style & XIMPreeditArea) {
+  if (xim_input_style & XIMPreeditArea) {
     /* Getting the necessary width of preedit area */
     status_attr = XVaCreateNestedList(0, XNAreaNeeded, &needed_rect, NULL);
-    XGetICValues(Input_Context, XNStatusAttributes, status_attr, NULL);
+    XGetICValues(xim_input_context, XNStatusAttributes, status_attr, NULL);
     XFree(status_attr);
 
     xim_get_area(&preedit_rect, &status_rect, needed_rect);
 
     preedit_attr = XVaCreateNestedList(0, XNArea, &preedit_rect, NULL);
     status_attr = XVaCreateNestedList(0, XNArea, &status_rect, NULL);
-    XSetICValues(Input_Context, XNPreeditAttributes, preedit_attr, XNStatusAttributes, status_attr, NULL);
+    XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, XNStatusAttributes, status_attr, NULL);
     XFree(preedit_attr);
     XFree(status_attr);
   }
@@ -1973,18 +1975,15 @@ xim_set_status_position(void)
 
 void xim_set_fontset(void)
 {
-  XIMStyle input_style;
   XVaNestedList preedit_attr;
   XVaNestedList status_attr;
 
-  REQUIRE(Input_Context != NULL);
+  REQUIRE(xim_input_context != NULL);
 
-  XGetICValues(Input_Context, XNInputStyle, &input_style, NULL);
-
-  if (input_style & (XIMPreeditArea | XIMPreeditPosition)) {
+  if (xim_input_style & (XIMPreeditArea | XIMPreeditPosition)) {
     preedit_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
     status_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
-    XSetICValues(Input_Context, XNPreeditAttributes, preedit_attr, XNStatusAttributes, status_attr, NULL);
+    XSetICValues(xim_input_context, XNPreeditAttributes, preedit_attr, XNStatusAttributes, status_attr, NULL);
     XFree(preedit_attr);
     XFree(status_attr);
   }
@@ -2407,7 +2406,7 @@ cmd_getc(void)
       XNextEvent(Xdisplay, &ev);
 
 #ifdef USE_XIM
-      if (Input_Context != NULL) {
+      if (xim_input_context != NULL) {
         if (!XFilterEvent(&ev, ev.xkey.window)) {
           event_dispatch(&ev);
         }

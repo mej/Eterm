@@ -185,9 +185,6 @@ Create_Windows(int argc, char *argv[])
   Attributes.backing_store = WhenMapped;
   Attributes.colormap = cmap;
 
-  TermWin.x = -1;
-  TermWin.y = -1;
-
   /*
    * grab colors before netscape does
    */
@@ -320,7 +317,7 @@ Create_Windows(int argc, char *argv[])
     PixColors[unfocusedMenuTopShadowColor] = get_top_shadow_color(PixColors[unfocusedMenuColor], "unfocusedMenuTopShadowColor");
   }
 
-  szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? scrollbar_trough_width() : 0));
+  szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
   szHint.base_height = (2 * TermWin.internalBorder);
 
   flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
@@ -414,15 +411,15 @@ Create_Windows(int argc, char *argv[])
   cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
 
   /* the vt window */
+  TermWin.x = (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
+  TermWin.y = 0;
   if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? scrollbar_trough_width() : 0), 0,
-                               szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWBackingStore | CWColormap, &Attributes);
   } else {
     D_X11(("Creating term window with no backing store\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? scrollbar_trough_width() : 0), 0,
-                               szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
   }
   if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {

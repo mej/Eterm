@@ -137,16 +137,16 @@ lookup_key(XEvent * ev)
     PrivMode((!numlock_state), PrivMode_aplKP);
   }
 #ifdef USE_XIM
-  if (Input_Context != NULL) {
+  if (xim_input_context != NULL) {
     Status status_return;
 
     kbuf[0] = '\0';
-    len = XmbLookupString(Input_Context, &ev->xkey, (char *) kbuf,
+    len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf,
                           sizeof(short_buf), &keysym, &status_return);
     if (status_return == XBufferOverflow) {
       kbuf = (unsigned char *) MALLOC(len + 1);
       kbuf_alloced = 1;
-      len = XmbLookupString(Input_Context, &ev->xkey, (char *) kbuf, len, &keysym, &status_return);
+      len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf, len, &keysym, &status_return);
     }
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {

@@ -327,7 +327,7 @@ extern unsigned long PrivateModes;
 extern Atom wmDeleteWindow;
 extern int refresh_count, refresh_limit, refresh_type;
 #ifdef USE_XIM
-extern XIC Input_Context;	/* input context */
+extern XIC xim_input_context;	/* input context */
 #endif
 
 /************ Function Prototypes ************/

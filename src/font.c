@@ -328,7 +328,7 @@ change_font(int init, const char *fontname)
     TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
   }
 # ifdef USE_XIM
-  if (Input_Context) {
+  if (xim_input_context) {
     if (TermWin.fontset) {
       XFreeFontSet(Xdisplay, TermWin.fontset);
     }

@@ -39,6 +39,8 @@
 #define SCROLLBAR_STATE_MOVING                (1UL << 1)
 #define SCROLLBAR_STATE_UP_CLICKED            (1UL << 2)
 #define SCROLLBAR_STATE_DOWN_CLICKED          (1UL << 3)
+#define SCROLLBAR_STATE_ANCHOR_CLICKED        (1UL << 4)
+#define SCROLLBAR_STATE_MOTION_MASK           (SCROLLBAR_STATE_UP_CLICKED | SCROLLBAR_STATE_DOWN_CLICKED | SCROLLBAR_STATE_ANCHOR_CLICKED | SCROLLBAR_STATE_MOVING)
 
 /* Scrollbar state macros */
 #define scrollbar_is_visible()                (scrollbar.state & SCROLLBAR_STATE_VISIBLE)
@@ -46,11 +48,13 @@
 #define scrollbar_uparrow_is_pressed()        (scrollbar.state & SCROLLBAR_STATE_UP_CLICKED)
 #define scrollbar_downarrow_is_pressed()      (scrollbar.state & SCROLLBAR_STATE_DOWN_CLICKED)
 #define scrollbar_arrow_is_pressed()          (scrollbar.state & (SCROLLBAR_STATE_UP_CLICKED | SCROLLBAR_STATE_DOWN_CLICKED))
-#define scrollbar_cancel_motion()             (scrollbar.state &= ~(SCROLLBAR_STATE_UP_CLICKED | SCROLLBAR_STATE_DOWN_CLICKED | SCROLLBAR_STATE_MOVING))
+#define scrollbar_anchor_is_pressed()         (scrollbar.state & SCROLLBAR_STATE_ANCHOR_CLICKED)
+#define scrollbar_cancel_motion()             (scrollbar.state &= ~(SCROLLBAR_STATE_MOTION_MASK))
 #define scrollbar_set_visible(bit)            ((bit) ? (scrollbar.state |= SCROLLBAR_STATE_VISIBLE) : (scrollbar.state &= ~(SCROLLBAR_STATE_VISIBLE)))
 #define scrollbar_set_motion(bit)             ((bit) ? (scrollbar.state |= SCROLLBAR_STATE_MOVING) : (scrollbar.state &= ~(SCROLLBAR_STATE_MOVING)))
 #define scrollbar_set_uparrow_pressed(bit)    ((bit) ? (scrollbar.state |= SCROLLBAR_STATE_UP_CLICKED) : (scrollbar.state &= ~(SCROLLBAR_STATE_UP_CLICKED)))
 #define scrollbar_set_downarrow_pressed(bit)  ((bit) ? (scrollbar.state |= SCROLLBAR_STATE_DOWN_CLICKED) : (scrollbar.state &= ~(SCROLLBAR_STATE_DOWN_CLICKED)))
+#define scrollbar_set_anchor_pressed(bit)     ((bit) ? (scrollbar.state |= SCROLLBAR_STATE_ANCHOR_CLICKED) : (scrollbar.state &= ~(SCROLLBAR_STATE_ANCHOR_CLICKED)))
 
 /* The various scrollbar elements */
 #define scrollbar_win_is_trough(w)            (scrollbar_is_visible() && (w) == scrollbar.win)

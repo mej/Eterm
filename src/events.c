@@ -389,8 +389,8 @@ handle_focus_in(event_t * ev)
       map_scrollbar(Options & Opt_scrollbar);
     }
 #ifdef USE_XIM
-    if (Input_Context != NULL)
-      XSetICFocus(Input_Context);
+    if (xim_input_context != NULL)
+      XSetICFocus(xim_input_context);
 #endif
   }
   return 1;
@@ -413,8 +413,8 @@ handle_focus_out(event_t * ev)
       map_scrollbar(0);
     }
 #ifdef USE_XIM
-    if (Input_Context != NULL)
-      XUnsetICFocus(Input_Context);
+    if (xim_input_context != NULL)
+      XUnsetICFocus(xim_input_context);
 #endif
   }
   return 1;

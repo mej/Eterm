@@ -42,8 +42,6 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-#error This code is broken.  Try back tomorrow.
-
 event_dispatcher_data_t scrollbar_event_data;
 scrollbar_t scrollbar = {
   None, None, None, None,
@@ -63,7 +61,7 @@ short scroll_arrow_delay;
 static GC gc_scrollbar;
 static short last_top = 0, last_bot = 0;
 #ifdef XTERM_SCROLLBAR
-static GC gc_stipple;
+static GC gc_stipple, gc_border;
 static unsigned char xterm_sb_bits[] = {0xaa, 0x0a, 0x55, 0x05};  /* 12x2 bitmap */
 #endif
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
@@ -239,6 +237,7 @@ sb_handle_button_press(event_t * ev)
       }
     } else {
       if (scrollbar_win_is_anchor(ev->xany.window)) {
+        scrollbar_set_anchor_pressed(1);
         scrollbar_draw_anchor(IMAGE_STATE_CLICKED, 0);
       }
       switch (ev->xbutton.button) {
@@ -266,7 +265,6 @@ sb_handle_button_press(event_t * ev)
               scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
 	      scr_page(DN, TermWin.nrow - 1);
 	    } else {
-              scrollbar_draw_anchor(IMAGE_STATE_CLICKED, 0);
 	      scrollbar_set_motion(1);
 	    }
 	  }
@@ -300,6 +298,7 @@ sb_handle_button_release(event_t * ev)
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
 
   XQueryPointer(Xdisplay, scrollbar_get_win(), &root, &child, &root_x, &root_y, &win_x, &win_y, &mask);
+  scrollbar_cancel_motion();
   if (scrollbar_win_is_uparrow(child)) {
     scrollbar_draw_uparrow(IMAGE_STATE_SELECTED, 0);
   } else {
@@ -319,14 +318,6 @@ sb_handle_button_release(event_t * ev)
     scrollbar_draw_trough(IMAGE_STATE_SELECTED, 0);
   } else {
     scrollbar_draw_trough(IMAGE_STATE_NORMAL, 0);
-  }
-  if (scrollbar_arrow_is_pressed()) {
-    if (scrollbar_uparrow_is_pressed()) {
-      scrollbar_set_uparrow_pressed(0);
-    } else {
-      scrollbar_set_downarrow_pressed(0);
-    }
-    scrollbar_set_motion(0);
   }
   return 1;
 }
@@ -389,9 +380,11 @@ scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes) {
   if (!image_mode_is(image_up, MODE_MASK)) {
     /* Solid mode.  Redraw every time since it's cheap. */
     XFillRectangle(Xdisplay, scrollbar.up_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
-    if (scrollbar_uparrow_is_pressed()) {
+    if (image_state == IMAGE_STATE_CLICKED) {
+      scrollbar_set_uparrow_pressed(1);
       draw_uparrow_clicked(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
     } else {
+      scrollbar_set_uparrow_pressed(0);
       draw_uparrow_raised(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
     }
     return;
@@ -444,9 +437,11 @@ scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes) {
   if (!image_mode_is(image_down, MODE_MASK)) {
     /* Solid mode.  Redraw every time since it's cheap. */
     XFillRectangle(Xdisplay, scrollbar.dn_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
-    if (scrollbar_downarrow_is_pressed()) {
+    if (image_state == IMAGE_STATE_CLICKED) {
+      scrollbar_set_downarrow_pressed(1);
       draw_downarrow_clicked(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
     } else {
+      scrollbar_set_downarrow_pressed(0);
       draw_downarrow_raised(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
     }
     return;
@@ -500,13 +495,20 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
     /* Solid mode.  Redraw every time since it's cheap. */
 #ifdef XTERM_SCROLLBAR
     if (scrollbar.type == SCROLLBAR_XTERM) {
-      XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
+      int x = ((Options & Opt_scrollbar_right) ? 1 : 0);
+
+      XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, x + 1, 0, scrollbar_anchor_width() - x - 1, scrollbar_anchor_height());
+      XClearWindow(Xdisplay, scrollbar.sa_win);
     }
 #endif /* XTERM_SCROLLBAR */
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
     if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
       XFillRectangle(Xdisplay, scrollbar.sa_win, gc_scrollbar, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
-      draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+      if (scrollbar_anchor_is_pressed()) {
+        draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+      } else {
+        draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+      }
     }
 #endif
     return;
@@ -560,7 +562,7 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes) {
   }
   if (!image_mode_is(image_sb, MODE_MASK)) {
     /* Solid mode.  Redraw every time since it's cheap. */
-    if (Options & Opt_scrollbar_floating) {
+    if ((Options & Opt_scrollbar_floating) || (scrollbar.type == SCROLLBAR_XTERM)) {
       XSetWindowBackground(Xdisplay, scrollbar.win, PixColors[bgColor]);
       XClearWindow(Xdisplay, scrollbar.win);
     } else {
@@ -820,9 +822,9 @@ scrollbar_drawing_init(void) {
     gcvalue.fill_style = FillOpaqueStippled;
     gcvalue.foreground = PixColors[fgColor];
     gcvalue.background = PixColors[bgColor];
-    gc_scrollbar = XCreateGC(Xdisplay, scrollbar.win, GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
+    gc_stipple = XCreateGC(Xdisplay, scrollbar.win, GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
     gcvalue.foreground = PixColors[borderColor];
-    gc_stipple = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
+    gc_border = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
   }
 #endif /* XTERM_SCROLLBAR */
 
