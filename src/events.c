@@ -548,10 +548,6 @@ handle_selection_request(event_t * ev)
 unsigned char
 handle_expose(event_t * ev)
 {
-#ifdef COUNT_X_EVENTS
-  static long long expose_cnt = 0;
-#endif
-
   PROF_INIT(handle_expose);
   D_EVENTS(("handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
