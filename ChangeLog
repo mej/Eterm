@@ -5140,3 +5140,7 @@ Sun Dec 21 21:43:58 2003                        Michael Jennings (mej)
 
 Fix :hscale and :vscale to work properly.
 ----------------------------------------------------------------------
+Mon Dec 22 13:39:02 2003                        Michael Jennings (mej)
+
+These two are going away.
+----------------------------------------------------------------------
