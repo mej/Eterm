@@ -54,6 +54,12 @@ In the absence of this option, the display specified by the
 .B DISPLAY
 environment variable is used.
 .TP
+.BI \-\-debug " level"
+Show debugging output.
+.I level
+is an integer between 0 and 5 which determines how verbose the debugging
+output is.
+.TP
 .B \-\-install
 Tells Eterm to install its own colormap rather than using the default one.
 .TP
@@ -64,12 +70,6 @@ Print out a message describing available options.
 Print
 .B Eterm
 version and compile-time configuration.
-.TP
-.BI \-\-debug " level"
-Show debugging output.
-.I level
-is an integer between 0 and 5 which determines how verbose the debugging
-output is.
 .TP
 .BR "\-r" , " \-\-reverse-video"
 Reverse video, swaps the foreground and background colors.
@@ -331,6 +331,27 @@ Eterm -N '10 image1.jpg image2.jpg'
 Eterm -N '10 "0 0 image1.jpg" "-1 -1 image2.jpg"'
 .RE
 .TP
+.BI \-M " font" ", \-\-mfont " font
+Sets the normal multibyte text font to
+.I font.
+.TP
+.BI \-\-mfont1 " font"
+.TP
+.BI ...
+.TP
+.BI \-\-mfont4 " font"
+Sets multibyte font X to
+.I font.
+.TP
+.BI \-\-mencoding " encoding"
+Sets multichar encoding mode (eucj or sjis or euckr)
+.TP
+.BI \-\-input-method " method"
+Sets XIM input method
+.TP
+.BI \-\-preedit-type " type"
+Sets XIM preedit type
+.TP
 .BR "\-l", " \-\-login-shell"
 Makes the new shell a login shell.
 .TP
@@ -416,6 +437,26 @@ Specify a keysym to decrease the font size.  Default is Shift and the -
 key on the keypad.  Ctrl-< or Meta-< may also work (if you #define one
 of the hotkeys in src/feature.h).
 .TP
+.BI \-\-meta-mod " num"
+Specify which X modifier (1-5) to treat as the Meta key.  See
+.IR xmodmap (1)
+and the output of
+.B xmodmap -pm
+for more details.
+.TP
+.BI \-\-alt-mod " num"
+Same as
+.BR \-\-meta-mod ","
+but for the Alt key.
+.TP
+.BI \-\-numlock-mod " num"
+Same as
+.BR \-\-meta-mod ","
+but for the NumLock key.
+.TP
+.BI "\-\-greek-keyboard" " mode"
+Use Greek keyboard mapping (iso or ibm).
+.TP
 .BR \-\-app-keypad
 Start Eterm in application keypad mode (as opposed to normal keypad mode).
 .TP
@@ -459,36 +500,6 @@ setuid root to do this.
 Execute
 .I command
 rather than a shell.
-
-.SH SPECIAL LANGUAGE FEATURES
-The following are
-.B *NOT*
-compiled in by default.
-.PP
-.TP
-.B Multichar (Multi-byte font) options
-.TP
-.BI \-M " font" ", \-\-mfont " font
-Use
-.I font
-as the default multichar font.
-.TP
-.BI \-\-mfont1 " font"
-.TP
-.BI ...
-.TP
-.BI \-\-mfont4 " font"
-Use
-.I font
-as multichar font X.
-.TP
-.BR "\-\-mencoding"
-Use multichar encoding mode (eucj, sjis, or euckr).
-.TP
-.B Greek options
-.TP
-.BI "\-\-greek-keyboard" " mode"
-Use Greek keyboard mapping (iso or ibm).
 
 .SH THEMES
 
@@ -1375,6 +1386,29 @@ to send
 instead of its default.
 .I keysym
 must be between 0xff00 and 0xffff or Eterm will complain.
+.RE
+
+.BI meta_mod " num"
+.RS 5
+Specify which X modifier (1-5) to treat as the Meta key.  See
+.IR xmodmap (1)
+and the output of
+.B xmodmap -pm
+for more details.
+.RE
+
+.BI alt_mod " num"
+.RS 5
+Same as
+.BR meta_mod ","
+but for the Alt key.
+.RE
+
+.BI numlock_mod " num"
+.RS 5
+Same as
+.BR meta_mod ","
+but for the NumLock key.
 .RE
 
 .BI greek " boolean"
