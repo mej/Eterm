@@ -4706,3 +4706,8 @@ Fri Jun 14 01:58:36 2002                        Michael Jennings (mej)
 
 Fixed a problem with Ctrl-< and Ctrl-> in Escreen mode.
 ----------------------------------------------------------------------
+Fri Jun 14 09:05:49 2002                        Michael Jennings (mej)
+
+This should fix the bug Creepy spotted where the buttonbar event
+initialization was crashing.
+----------------------------------------------------------------------

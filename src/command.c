@@ -2888,6 +2888,9 @@ escreen_init(char **argv)
             return -1;
         }
     } else {
+        if (buttonbar == NULL) {
+            buttonbar = bbar;
+        }
         bbar_set_font(bbar, "-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1");
         bbar_init(bbar, TermWin.width);
         bbar_add(bbar);
