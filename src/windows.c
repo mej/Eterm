@@ -338,11 +338,7 @@ Create_Windows(int argc, char *argv[])
 
   if (flags & XValue) {
     if (flags & XNegative) {
-      if (check_for_enlightenment()) {
-	x += (DisplayWidth(Xdisplay, Xscreen));
-      } else {
-	x += (DisplayWidth(Xdisplay, Xscreen) - (szHint.width + TermWin.internalBorder));
-      }
+      x += (DisplayWidth(Xdisplay, Xscreen) - (szHint.width + TermWin.internalBorder));
       szHint.win_gravity = NorthEastGravity;
     }
     szHint.x = x;
@@ -350,11 +346,7 @@ Create_Windows(int argc, char *argv[])
   }
   if (flags & YValue) {
     if (flags & YNegative) {
-      if (check_for_enlightenment()) {
-	y += (DisplayHeight(Xdisplay, Xscreen) - (2 * TermWin.internalBorder));
-      } else {
-	y += (DisplayHeight(Xdisplay, Xscreen) - (szHint.height + TermWin.internalBorder));
-      }
+      y += (DisplayHeight(Xdisplay, Xscreen) - (szHint.height + TermWin.internalBorder));
       szHint.win_gravity = (szHint.win_gravity == NorthEastGravity ?
 			    SouthEastGravity : SouthWestGravity);
     }

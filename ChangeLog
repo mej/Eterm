@@ -2940,3 +2940,9 @@ Mon Dec 20 19:38:40 PST 1999	Michael Jennings <mej@eterm.org>
 	I'll make it the default in the themes.
 	
 -------------------------------------------------------------------------------
+Tue Dec 21 13:19:06 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed the geometry handling again.  Also fixed the parsing of geometry
+	strings like '-0+0'.
+	
+-------------------------------------------------------------------------------

@@ -943,7 +943,7 @@ get_options(int argc, char *argv[])
 	hasequal = 1;
       } else {
 	if (argv[i + 1]) {
-	  if (*argv[i + 1] != '-' || StrCaseStr(optList[j].long_opt, "font")) {
+	  if (*argv[i + 1] != '-' || StrCaseStr(optList[j].long_opt, "font") || StrCaseStr(optList[j].long_opt, "geometry")) {
 	    val_ptr = argv[++i];
 	  }
 	}
@@ -1060,7 +1060,7 @@ get_options(int argc, char *argv[])
 	  if (j == 0 || j == 1) {
 	    continue;
 	  }
-	  if ((val_ptr == NULL) || ((*val_ptr == '-') && (optList[j].short_opt != 'F'))) {
+	  if ((val_ptr == NULL) || ((*val_ptr == '-') && (optList[j].short_opt != 'F') && (optList[j].short_opt != 'g'))) {
 	    print_error("option -%c requires a%s value", opt[pos],
 			(optList[j].flag & OPT_INTEGER ? "n integer" : " string"));
 	    CHECK_BAD();
