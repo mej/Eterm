@@ -3369,3 +3369,9 @@ Fri Mar 24 18:16:02 PST 2000	Michael Jennings <mej@eterm.org>
 	defaults.  These are compatible with the Linux console.
 	
 -------------------------------------------------------------------------------
+Mon Mar 27 12:48:09 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Some quick fixes from Cale Gibbard <gibbard@bfree.on.ca> for the color
+	changing stuff.
+	
+-------------------------------------------------------------------------------

@@ -1171,8 +1171,9 @@ process_xterm_seq(void)
   } else if (arg == 'P') {
     unsigned char i, idx;
 
-    idx = ((ch < '9') ? (ch - '0') : (tolower(ch) - 'a' + 10)) + minColor;
+    idx = ((ch <= '9') ? (ch - '0') : (tolower(ch) - 'a' + 10)) + minColor;
     string[0] = '#';
+    string[7] = 0;
     for (i = 1; i < 7; i++) {
       string[i] = cmd_getc();
     }
