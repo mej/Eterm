@@ -3892,3 +3892,8 @@ Fri Sep 15 14:48:51 PDT 2000	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
+Sun Sep 17 11:51:16 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Added ability to track Imlib2-created pixmaps via libmej.
+	
+-------------------------------------------------------------------------------

@@ -593,6 +593,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
       reset_simage(simg, RESET_ALL_SIMG);
       return None;
     }
+    IMLIB_REGISTER_PIXMAP(viewport_pixmap);
     D_PIXMAP(("Created viewport_pixmap == 0x%08x\n", viewport_pixmap));
   } else {
     XGetGeometry(Xdisplay, viewport_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
@@ -730,6 +731,7 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       reset_simage(simg, RESET_ALL_SIMG);
       return;
     }
+    IMLIB_REGISTER_PIXMAP(pmap);
     gc = LIBMEJ_X_CREATE_GC(0, NULL);
     if (mask) {
       XSetClipMask(Xdisplay, gc, mask);
@@ -1028,6 +1030,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         shaped_window_apply_mask(win, simg->pmap->mask);
       }
       if (simg->pmap->pixmap != None) {
+        IMLIB_REGISTER_PIXMAP(simg->pmap->pixmap);
         if (pixmap != None && pixmap != simg->pmap->pixmap) {
           IMLIB_FREE_PIXMAP(pixmap);
         }

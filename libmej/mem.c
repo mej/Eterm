@@ -31,8 +31,9 @@ static const char cvs_ident[] = "$Id$";
 #include "libmej.h"
 
 static void memrec_add_var(memrec_t *, const char *, unsigned long, void *, size_t);
-static void memrec_rem_var(memrec_t *, const char *, const char *, unsigned long, void *);
-static void memrec_chg_var(memrec_t *, const char *, const char *, unsigned long, void *, void *, size_t);
+static ptr_t *memrec_find_var(memrec_t *, const void *);
+static void memrec_rem_var(memrec_t *, const char *, const char *, unsigned long, const void *);
+static void memrec_chg_var(memrec_t *, const char *, const char *, unsigned long, const void *, void *, size_t);
 static void memrec_dump_pointers(memrec_t *);
 static void memrec_dump_resources(memrec_t *);
 
@@ -79,49 +80,53 @@ memrec_add_var(memrec_t *memrec, const char *filename, unsigned long line, void 
   p->line = line;
 }
 
-static void
-memrec_rem_var(memrec_t *memrec, const char *var, const char *filename, unsigned long line, void *ptr)
+static ptr_t *
+memrec_find_var(memrec_t *memrec, const void *ptr)
 {
-  register ptr_t *p = NULL;
+  register ptr_t *p;
   register unsigned long i;
 
   ASSERT(memrec != NULL);
-  for (i = 0; i < memrec->cnt; i++) {
-    if (memrec->ptrs[i].ptr == ptr) {
-      p = memrec->ptrs + i;
-      break;
+  REQUIRE_RVAL(ptr != NULL, NULL);
+
+  for (i = 0, p = memrec->ptrs; i < memrec->cnt; i++, p++) {
+    if (p->ptr == ptr) {
+      D_MEM(("Found pointer #%lu stored at %8p (from %8p)\n", i + 1, p, memrec->ptrs));
+      return p;
     }
   }
-  if (!p) {
+  return NULL;
+}
+
+static void
+memrec_rem_var(memrec_t *memrec, const char *var, const char *filename, unsigned long line, const void *ptr)
+{
+  register ptr_t *p;
+
+  ASSERT(memrec != NULL);
+
+  if ((p = memrec_find_var(memrec, ptr)) == NULL) {
     D_MEM(("ERROR:  File %s, line %d attempted to free variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, ptr));
     return;
   }
   memrec->cnt--;
   D_MEM(("Removing variable %s (%8p) of size %lu\n", var, ptr, p->size));
-  D_MEM(("Pointer #%lu is stored at %8p (from %8p)\n", i + 1, p, memrec->ptrs));
-  memmove(p, p + 1, sizeof(ptr_t) * (memrec->cnt - i));
+  memmove(p, p + 1, sizeof(ptr_t) * (memrec->cnt - (p - memrec->ptrs)));
   memrec->ptrs = (ptr_t *) realloc(memrec->ptrs, sizeof(ptr_t) * memrec->cnt);
 }
 
 static void
-memrec_chg_var(memrec_t *memrec, const char *var, const char *filename, unsigned long line, void *oldp, void *newp, size_t size)
+memrec_chg_var(memrec_t *memrec, const char *var, const char *filename, unsigned long line, const void *oldp, void *newp, size_t size)
 {
-  register ptr_t *p = NULL;
-  register unsigned long i;
+  register ptr_t *p;
 
   ASSERT(memrec != NULL);
-  for (i = 0; i < memrec->cnt; i++) {
-    if (memrec->ptrs[i].ptr == oldp) {
-      p = memrec->ptrs + i;
-      break;
-    }
-  }
-  if (i == memrec->cnt) {
+
+  if ((p = memrec_find_var(memrec, oldp)) == NULL) {
     D_MEM(("ERROR:  File %s, line %d attempted to realloc variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, oldp));
     return;
   }
   D_MEM(("Changing variable %s (%8p, %lu -> %8p, %lu)\n", var, oldp, p->size, newp, size));
-  D_MEM(("Pointer #%lu stored at %8p (from %8p)\n", i + 1, p, memrec->ptrs));
   p->ptr = newp;
   p->size = size;
   strncpy(p->file, filename, LIBMEJ_FNAME_LEN);
@@ -351,12 +356,43 @@ libmej_x_create_pixmap(const char *filename, unsigned long line, Display *d, Dra
 void
 libmej_x_free_pixmap(const char *var, const char *filename, unsigned long line, Display *d, Pixmap p)
 {
-  D_MEM(("libmej_x_free_pixmap() called for variable %s (0x%08x) at %s:%lu\n", var, p, filename, line));
+  D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu\n", var, p, filename, line));
   if (p) {
     if (DEBUG_LEVEL >= DEBUG_MEM) {
       memrec_rem_var(&pixmap_rec, var, filename, line, (void *) p);
     }
     XFreePixmap(d, p);
+  } else {
+    D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n"));
+  }
+}
+
+void
+libmej_imlib_register_pixmap(const char *var, const char *filename, unsigned long line, Pixmap p)
+{
+  D_MEM(("Registering pixmap %s (0x%08x) created by Imlib2 at %s:%lu\n", var, p, filename, line));
+  if (p) {
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+      if (!memrec_find_var(&pixmap_rec, (void *) p)) {
+        memrec_add_var(&pixmap_rec, filename, line, (void *) p, 1);
+      } else {
+        D_MEM(("Pixmap 0x%08x already registered.\n"));
+      }
+    }
+  } else {
+    D_MEM(("ERROR:  Refusing to register a NULL pixmap\n"));
+  }
+}
+
+void
+libmej_imlib_free_pixmap(const char *var, const char *filename, unsigned long line, Pixmap p)
+{
+  D_MEM(("Freeing pixmap %s (0x%08x) at %s:%lu using Imlib2\n", var, p, filename, line));
+  if (p) {
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+      memrec_rem_var(&pixmap_rec, var, filename, line, (void *) p);
+    }
+    imlib_free_pixmap_and_mask(p);
   } else {
     D_MEM(("ERROR:  Caught attempt to free NULL pixmap\n"));
   }

@@ -45,7 +45,7 @@ typedef void *Imlib_Color_Modifier;
 # define background_is_auto()     (images[image_bg].mode & MODE_AUTO)
 # define background_is_pixmap()   (background_is_image() || (images[image_bg].mode & (MODE_TRANS | MODE_VIEWPORT | MODE_AUTO)))
 # define delete_simage(simg)      do { \
-                                    imlib_free_pixmap_and_mask((simg)->pmap->pixmap); \
+                                    IMLIB_FREE_PIXMAP((simg)->pmap->pixmap); \
                                     imlib_context_set_image((simg)->iml->im); \
                                     imlib_free_image_and_decache(); \
                                     (simg)->pmap->pixmap = None; (simg)->iml->im = NULL; \
@@ -54,7 +54,6 @@ typedef void *Imlib_Color_Modifier;
 # define CONVERT_TINT_RED(t)      (((t) & 0xff0000) >> 16)
 # define CONVERT_TINT_GREEN(t)    (((t) & 0x00ff00) >> 8)
 # define CONVERT_TINT_BLUE(t)     ((t) & 0x0000ff)
-# define IMLIB_FREE_PIXMAP(p)     do {D_PIXMAP(("Freeing pixmap:  imlib_free_pixmap_and_mask(0x%08x)\n", (p))); imlib_free_pixmap_and_mask(p);} while (0)
 #else
 # define background_is_image()    (0)
 # define background_is_trans()    (0)
@@ -63,7 +62,6 @@ typedef void *Imlib_Color_Modifier;
 # define background_is_pixmap()   (0)
 # define get_image_type_string(t) ((char *) "")
 # define delete_simage(simg)      NOP
-# define IMLIB_FREE_PIXMAP(p)     NOP
 #endif
 #define LIBMEJ_X_CREATE_PIXMAP(w, h)  X_CREATE_PIXMAP(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (w), (h), Xdepth)
 #define LIBMEJ_X_FREE_PIXMAP(p)       X_FREE_PIXMAP(Xdisplay, p)

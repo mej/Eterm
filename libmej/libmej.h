@@ -230,6 +230,13 @@ typedef struct memrec_struct {
 # define MALLOC_DUMP()                          libmej_dump_mem_tables()
 # define X_CREATE_PIXMAP(d, win, w, h, depth)   libmej_x_create_pixmap(__FILE__, __LINE__, (d), (win), (w), (h), (depth))
 # define X_FREE_PIXMAP(d, p)                    libmej_x_free_pixmap(#p, __FILE__, __LINE__, (d), (p))
+# ifdef HAVE_LIBIMLIB2
+#  define IMLIB_REGISTER_PIXMAP(p)              libmej_imlib_register_pixmap(#p, __FILE__, __LINE__, (p))
+#  define IMLIB_FREE_PIXMAP(p)                  libmej_imlib_free_pixmap(#p, __FILE__, __LINE__, (p))
+# else
+#  define IMLIB_REGISTER_PIXMAP(p)              NOP
+#  define IMLIB_FREE_PIXMAP(p)                  NOP
+# endif
 # define PIXMAP_DUMP()                          libmej_dump_pixmap_tables()
 # define X_CREATE_GC(d, win, f, gcv)            libmej_x_create_gc(__FILE__, __LINE__, (d), (win), (f), (gcv))
 # define X_FREE_GC(d, gc)                       libmej_x_free_gc(#gc, __FILE__, __LINE__, (d), (gc))
@@ -247,6 +254,13 @@ typedef struct memrec_struct {
 # define MALLOC_DUMP()                          NOP
 # define X_CREATE_PIXMAP(d, win, w, h, depth)   XCreatePixmap((d), (win), (w), (h), (depth))
 # define X_FREE_PIXMAP(d, p)                    XFreePixmap((d), (p))
+# ifdef HAVE_LIBIMLIB2
+#  define IMLIB_REGISTER_PIXMAP(p)              NOP
+#  define IMLIB_FREE_PIXMAP(p)                  imlib_free_pixmap_and_mask(p)
+# else
+#  define IMLIB_REGISTER_PIXMAP(p)              NOP
+#  define IMLIB_FREE_PIXMAP(p)                  NOP
+# endif
 # define PIXMAP_DUMP()                          NOP
 # define X_CREATE_GC(d, win, f, gcv)            XCreateGC((d), (win), (f), (gcv))
 # define X_FREE_GC(d, gc)                       XFreeGC((d), (gc))
