@@ -4413,3 +4413,7 @@ Fixed a couple remaining bugs in 0.9.1, including that really
 annoying problem people keeping whining about where Eterm won't build
 without Imlib2.  It will now. :P
 ----------------------------------------------------------------------
+Thu Oct 25 02:01:27 2001                        Michael Jennings (mej)
+
+Argh.  This configure.in/configure.ac thing is getting really old.
+----------------------------------------------------------------------
