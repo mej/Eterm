@@ -648,7 +648,11 @@ change_font(int init, const char *fontname)
     set_colorfgbg();
 
     TermWin.width = TermWin.ncol * TermWin.fwidth;
+#ifdef ESCREEN
+    TermWin.height = (NS_MAGIC_LINE(TermWin.screen_mode) ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
+#else
     TermWin.height = TermWin.nrow * TermWin.fheight;
+#endif
     D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n", TermWin.fwidth, TermWin.fheight, TermWin.width, TermWin.height));
 
     /* If we're initializing, *we* do the size hints.  If not, resize the parent window. */

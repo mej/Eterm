@@ -569,7 +569,7 @@ term_resize(int width, int height)
     D_X11(("term_resize(%d, %d)\n", width, height));
     TermWin.width = TermWin.ncol * TermWin.fwidth;
 #ifdef ESCREEN
-    TermWin.height = (TermWin.screen_mode ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
+    TermWin.height = (NS_MAGIC_LINE(TermWin.screen_mode) ? TermWin.nrow - 1 : TermWin.nrow) * TermWin.fheight;
 #else
     TermWin.height = TermWin.nrow * TermWin.fheight;
 #endif

@@ -4702,3 +4702,7 @@ Fri Jun 14 01:40:50 2002                        Michael Jennings (mej)
 
 Fixed a couple bugs, trying to track down some others.
 ----------------------------------------------------------------------
+Fri Jun 14 01:58:36 2002                        Michael Jennings (mej)
+
+Fixed a problem with Ctrl-< and Ctrl-> in Escreen mode.
+----------------------------------------------------------------------
