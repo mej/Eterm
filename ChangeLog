@@ -4083,3 +4083,9 @@ Sat Apr 28 12:08:56 PDT 2001	Michael Jennings <mej@eterm.org>
 	state.  Bug pointed out by Hans Engren <h@ns.engren.org>.
 	
 -------------------------------------------------------------------------------
+Fri May  4 23:56:12 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Lots of spec file cleanups and fixes.  Also nuked a couple lousy
+	backgrounds.
+	
+-------------------------------------------------------------------------------

@@ -1,19 +1,21 @@
-%define name     @PACKAGE@
-%define ver      @VERSION@
-%define rel      1
-%define prefix   @prefix@
+%define bzip     0
+%define strip    0
 
 Summary: Enlightened terminal emulator
-Name: %{name}
-Version: %{ver}
-Release: %{rel}
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1
 Copyright: BSD
 Group: User Interface/X
-Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{ver}.tar.gz
-Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{ver}.tar.gz
+%if %{bzip}
+Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.bz2
+Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.bz2
+%else
+Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.gz
+Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.gz
+%endif
 URL: http://www.eterm.org/
-BuildRoot: /var/tmp/%{name}-root
-Requires: imlib >= 1.9.6
+BuildRoot: /var/tmp/%{name}-%{version}-root
 
 %description
 Eterm is a color vt102 terminal emulator with enhanced graphical
@@ -24,126 +26,125 @@ various themes and is very configurable, in keeping with the
 philosophy of Enlightenment. If you install Eterm, you'll also need to
 have the Imlib library installed.
 
-%package backgrounds
-Summary: Backgrounds for Eterm
-Group: User Interface/X
-Requires: %{name} = %{ver}
-%description backgrounds
-Install this package if you want additional backgrounds for Eterm
-
 %prep
-%setup -q -n %{name}-%{ver} 1
+%setup -n %{name}-%{version} -b 0 -a 1
 
 %build
-%configure --prefix=%{prefix} --with-backspace=bs --with-delete=execute
-make CFLAGS="$RPM_OPT_FLAGS"
+# When using the configure macro, I also specify all the directory
+# macros I use for compatibility with older versions of the macro
+%configure --bindir=%{_bindir} --libdir=%{_libdir} --mandir=%{_mandir} \
+           --datadir=%{_datadir} --sysconfdir=%{_sysconfdir} \
+           --with-backspace=bs --with-delete=execute
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/etc/X11/wmconfig/
-
-cat > $RPM_BUILD_ROOT/etc/X11/wmconfig/%{name} <<EOF
-%{name} name "%{name}"
-%{name} description "A featureful, themeable X11 terminal emulator."
-%{name} exec "%{name} &"
-%{name} group Utilities/Shells
-EOF
-
-chmod 0644 $RPM_BUILD_ROOT/etc/X11/wmconfig/%{name}
-
+# If the configure macro is used above (which it is), there
+# is NO reason to use the makeinstall macro here, so don't.
 make DESTDIR=$RPM_BUILD_ROOT install
 
 ( cd $RPM_BUILD_ROOT
-  mv .%{prefix}/bin/%{name} .%{prefix}/bin/%{name}-%{ver}
-  cd $RPM_BUILD_ROOT%{prefix}/bin
-  ln -sf %{name}-%{ver} %{name}
+  mv .%{_bindir}/%{name} .%{_bindir}/%{name}-%{version}
+  cd $RPM_BUILD_ROOT%{_bindir}
+  ln -sf %{name}-%{version} %{name}
   cd $RPM_BUILD_ROOT
-  chmod +x .%{prefix}/lib/lib*so* ||:
+  chmod +x .%{_libdir}/lib*so* ||:
 )
 
-#strip -s $RPM_BUILD_ROOT%{prefix}/bin/* || :
+%if %{strip}
+strip -s $RPM_BUILD_ROOT%{_bindir}/* || :
+%endif
 
-gzip $RPM_BUILD_ROOT%{prefix}/man/man1/*
-
-(cd $RPM_BUILD_ROOT%{prefix}/share/%{name}/pix/ ; \
- for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv $i $i.base ; done)
-
-tar --use-compress-program=bzip2 -xvf %{SOURCE1}
-
-make -C bg all
-make -C bg prefix=$RPM_BUILD_ROOT%{prefix} install
-
-#get the package listing for Eterm-backgrounds
-echo "%defattr(-,root,root)" > rpm-Eterm-bg-files
-cat > rpm-Eterm-bg-files <<EOF
-%defattr(-,root,root)
-%{prefix}/share/%{name}/pix/tiled-pixmaps.list
-%{prefix}/share/%{name}/pix/scaled-pixmaps.list
-%{prefix}/share/%{name}/pix/pixmaps.list
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop <<EOF
+[Desktop Entry]
+Name=Eterm
+Comment=Eterm
+TryExec=Eterm
+Exec=Eterm
+Icon=gnome-eterm.png
+Terminal=0
+Type=Application
 EOF
-find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
-       -not -name 'README*' -not -name 014.jpg \
-        -not -name 40.jpg -not -name blackstone.jpg -not -name backwave.jpg \
-        -not -name circuit.jpg -not -name nebula.jpg \
-        -not -name fourthday.jpg -not -name gaia.jpg \
-        -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
-        | sed "s#^\./bg/[scati]*le#%{prefix}/share/%{name}/pix#g" >> rpm-Eterm-bg-files
+chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 
 %post
 /sbin/ldconfig
-for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/%{name}/pix/$i.base %{prefix}/share/%{name}/pix/$i ; done
+
+if [ -d /usr/share/terminfo -a ! -f /usr/share/terminfo/E/Eterm ]; then
+    tic -o/usr/share/terminfo $RPM_DOC_DIR/%{name}-%{version}/%{name}.ti || :
+fi
 
 %postun
 /sbin/ldconfig
-for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  rm -f %{prefix}/share/%{name}/pix/$i* ; done
-
-%pre backgrounds
-for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/%{name}/pix/$i %{prefix}/share/%{name}/pix/$i.base ; done
-
-%postun backgrounds
-for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
-  mv -f %{prefix}/share/%{name}/pix/$i.base %{prefix}/share/%{name}/pix/$i ; done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc doc/Eterm_reference.html doc/Eterm.1.html
-%doc COPYING README ChangeLog
-%config(missingok) %{prefix}/share/%{name}/pix/*.list.base
-/etc/X11/wmconfig/%{name}
-%{prefix}/bin/*
-%{prefix}/lib/*
-%{prefix}/man/man1/*
-%{prefix}/share/%{name}/themes
-%{prefix}/share/%{name}/pix/014.jpg
-%{prefix}/share/%{name}/pix/40.jpg
-%{prefix}/share/%{name}/pix/blackstone.jpg
-%{prefix}/share/%{name}/pix/backwave.jpg
-%{prefix}/share/%{name}/pix/circuit.jpg
-%{prefix}/share/%{name}/pix/nebula.jpg
-%{prefix}/share/%{name}/pix/fourthday.jpg
-%{prefix}/share/%{name}/pix/gaia.jpg
-%{prefix}/share/%{name}/pix/galleon.jpg
-%{prefix}/share/%{name}/pix/night_of_the_dragon.jpg
-%{prefix}/share/%{name}/pix/bar_horizontal_[123].png
-%{prefix}/share/%{name}/pix/bar_vertical_[123].png
-%{prefix}/share/%{name}/pix/button_arrow_up_[123].png
-%{prefix}/share/%{name}/pix/button_arrow_down_[123].png
-%{prefix}/share/%{name}/pix/menu[123].png
-%{prefix}/share/%{name}/pix/thumb_[12].png
-%dir %{prefix}/share/%{name}
-%dir %{prefix}/share/%{name}/pix
-
-%files backgrounds -f rpm-Eterm-bg-files
+%doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti
+%doc README ReleaseNotes ReleaseNotes.1 ChangeLog
+%config %{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
+%{_bindir}/*
+%{_libdir}/*
+%{_mandir}/man1/*
+%{_datadir}/%{name}/*
 
 %changelog
+* Tue Feb 20 2001 Tim Powers <timp@redhat.com>
+- builds on Alpha now. No need to excludearch (bug 28472)
+
+* Wed Feb 14 2001 Tim Powers <timp@redhat.com>
+- removed images which are from Digital Blasphemy from the extra
+  images tarball, had to delete those images because they are not
+  allowed to be redistributed on CD, or in compressed format
+
+* Tue Jan  9 2001 Tim Powers <timp@redhat.com>
+- fixed a bunch of pre and post in/uninstall brokenness by dropping
+  split backgrounds package, backgrounds now included in Eterm
+  proper. This also makes the spec file a lot cleaner :)
+
+* Sat Aug 19 2000 Tim Powers <timp@redhat.com>
+- fix bug #15687
+
+* Tue Aug 8 2000 Tim Powers <timp@redhat.com>
+- fixed bug #15687 using Hans' patch
+
+* Wed Aug 2 2000 Tim Powers <timp@redhat.com>
+- rebuilt against libpng-1.0.8
+
+* Mon Jul 24 2000 Prospector <prospector@redhat.com>
+- rebuilt
+
+* Sat Jul 22 2000 Tim Powers <timp@redhat.com>
+- fix spec file problem with configure picking up egcs and running with it,
+  fixes linking bugs
+
+* Mon Jul 10 2000 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Fri Jun 2 2000 Tim Powers <timp@redhat.com>
+- no more wmconfig :) converted to applnk
+- fix man page location. Now FHS compliant
+- use macros wherever possible
+- removed redundant defines at the top of the spec
+
+* Mon Apr 10 2000 Tim Powers <timp@redhat.com>
+- rebuilt for 7.0
+
+* Thu Feb 03 2000 Tim Powers <timp@redhat.com>
+- strip debug from libraries
+
+* Wed Feb 02 2000 Tim Powers <timp@redhat.com>
+- fixed problems when upgrading and error messages due to a faulty script in
+        the post section for the Eterm package
+        
+* Tue Feb 01 2000 Tim Powers <timp@redhat.com>
+- applied patch from Hans de Goede <hans@highrise.nl> to fix some del, home
+        and end issues
+        
 * Fri Jan 29 2000 Tim Powers <timp@redhat.com>
 - rebuilt for 6.2 powertools
 - bzipped source to conserve space

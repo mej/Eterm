@@ -83,10 +83,10 @@ cat > rpm-Eterm-bg-files <<EOF
 EOF
 find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
        -not -name 'README*' -not -name 014.jpg \
-        -not -name 40.jpg -not -name blackstone.jpg -not -name backwave.jpg \
+        -not -name 40.jpg -not -name blackstone.jpg -not -name giger1.jpg \
         -not -name circuit.jpg -not -name nebula.jpg \
         -not -name fourthday.jpg -not -name gaia.jpg \
-        -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
+        -not -name galleon.jpg -not -name Dragon.jpg \
 	-not -name Root -not -name .cvsignore -not -name Entries \
 	-not -name Repository  \
         | sed "s#^\./bg/[scati]*le#%{_datadir}/%{name}/pix#g" >> rpm-Eterm-bg-files
@@ -127,13 +127,13 @@ for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
 %{_datadir}/%{name}/pix/014.jpg
 %{_datadir}/%{name}/pix/40.jpg
 %{_datadir}/%{name}/pix/blackstone.jpg
-%{_datadir}/%{name}/pix/backwave.jpg
+%{_datadir}/%{name}/pix/giger1.jpg
 %{_datadir}/%{name}/pix/circuit.jpg
 %{_datadir}/%{name}/pix/nebula.jpg
 %{_datadir}/%{name}/pix/fourthday.jpg
 %{_datadir}/%{name}/pix/gaia.jpg
 %{_datadir}/%{name}/pix/galleon.jpg
-%{_datadir}/%{name}/pix/night_of_the_dragon.jpg
+%{_datadir}/%{name}/pix/Dragon.jpg
 %{_datadir}/%{name}/pix/bar_horizontal_[123].png
 %{_datadir}/%{name}/pix/bar_vertical_[123].png
 %{_datadir}/%{name}/pix/button_arrow_up_[123].png

@@ -42,7 +42,7 @@ static const char cvs_ident[] = "$Id$";
 void
 eterm_handle_winop(char *action)
 {
-
+#if 0
   char *winid;
   Window win = 0;
 
@@ -100,4 +100,10 @@ eterm_handle_winop(char *action)
   } else {
     print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
   }
+#endif
+}
+
+void
+script_parse(char *s)
+{
 }
