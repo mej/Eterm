@@ -4394,9 +4394,11 @@ reported to fix problems where vim would come up with underlines.
 ----------------------------------------------------------------------
 Sat Sep 22 09:41:26 2001                        Michael Jennings (mej)
 
-Fixes for Solaris where ln requires a certain argument order.
+Fixes for Solaris where ln requires a certain argument order.  This
+was flagged by Kevin Doherty <kdoherty@cosanostra.net>.
 ----------------------------------------------------------------------
 Wed Sep 26 23:19:37 2001                        Michael Jennings (mej)
 
-Oops.  Let's get rid of that useless code. :P
+Oops.  Let's get rid of that useless code. :P  Problem pointed out by
+Andre Pang <ozone@algorithm.com.au>.
 ----------------------------------------------------------------------
