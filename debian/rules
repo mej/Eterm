@@ -1,94 +1,62 @@
 #!/usr/bin/make -f
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_COMPAT=2
 
-INSTALL_BASE=`pwd`/debian/tmp
+vpath build debian
+vpath install debian
+cfg = --prefix=/usr --mandir=/usr/share/man
 
-configure: configure.in
-	libtoolize --copy --force
-	aclocal $ACLOCAL_FLAGS
-	automake --add-missing
-	autoconf
-	autoheader
-
-build: build-stamp
-build-stamp:
+build:
 	dh_testdir
-	
-	# Add here commands to compile the package.
-	./configure --prefix=/usr --bindir=/usr/X11R6/bin \
-		--datadir=/usr/share --mandir=/usr/X11R6/man
+	test -x autogen.sh && ./autogen.sh $(cfg)  || ./configure $(cfg)
 
-
-        # because glibc 2.1's utmpx.h is incompatible on sparc
-	sed -e 's/#define HAVE_UTMPX_H 1/\/* #undef HAVE_UTMPX_H *\//' config.h > config.h.tmp
+	# because glibc 2.1's utmpx.h is incompatible on sparc
+	sed 's/#define HAVE_UTMPX_H 1/\/* #undef HAVE_UTMPX_H *\//' config.h > config.h.tmp
 	mv config.h.tmp config.h
 
 	# fix rpath issues
-	sed < libtool > libtool-2 \
-		-e 's/^hardcode_libdir_flag_spec.*$$/hardcode_libdir_flag_spec="-D__LIBTOOL_IS_A_FOOL__ "/' \
-		-e '/^archive_cmds="/s/"$$/ \\$$deplibs"/'
-	mv libtool-2 libtool
-	chmod 755 libtool
-
-	make
-
-	touch build-stamp
+	cp libtool libtool-2
+	sed \
+	-e 's/^hardcode_libdir_flag_spec.*$$/hardcode_libdir_flag_spec="-D__LIBTOOL_IS_A_FOOL__ "/' \
+	-e '/^archive_cmds="/s/"$$/ \\$$deplibs"/' libtool-2 > libtool
+	$(MAKE)
+	touch debian/$@
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
+	test -f Makefile && $(MAKE) -k distclean
+	dh_clean debian/{build,install,libtool-2}
 
-	# Add here commands to clean up after the build process.
-	-$(MAKE) -k distclean
-	-rm -f `find . -name "*~"`
-	-rm -rf `find . -name "\.deps"`
-	-rm -rf `find . -name "\.libs"`
-	-rm -rf debian/tmp `find debian/* -type d ! -name CVS` debian/files* core
-	-rm -f debian/*substvars
+install: build
+	dh_testdir 
+	dh_testroot 
+	dh_clean 
+	dh_installdirs 
+	$(MAKE) install DESTDIR=$(shell pwd)/debian/eterm
+	touch debian/$@
 
-	dh_clean
+binary-arch: build install
+	dh_testdir 
+	dh_testroot 
+	dh_installdocs README ReleaseNotes doc/{FAQ.html,Eterm.tcap,Eterm.ti,Eterm_reference.html}
+	dh_installmenu 
+	dh_undocumented  Esetroot.1 Etbg.1 Etcolors.1 Ettable.1 Etwinop.1
+	dh_installchangelogs 
+	dh_strip 
+	dh_compress 
+	dh_fixperms 
+	dh_suidregister usr/bin/Eterm
+	dh_installdeb 
+	dh_makeshlibs
+	dh_shlibdeps 
+	dh_gencontrol 
+	dh_md5sums 
+	dh_builddeb 
 
-# Build architecture-independent files here.
-binary-indep: build
-# We have nothing to do by default.
+binary-indep:
 
-# Build architecture-dependent files here.
-binary-arch: build
-	dh_testdir -a
-	dh_testroot -a
-	dh_clean -k -a
-	dh_installdirs -a
+binary: binary-arch
 
-	# Add here commands to install the files into debian/tmp
-	$(MAKE) install DESTDIR=$(INSTALL_BASE) \
-	    PREFIX=$(INSTALL_BASE)/usr \
-		datadir=$(INSTALL_BASE)/usr/share \
-		pkglibdir=$(INSTALL_BASE)/usr/share/Eterm \
-		DATADIR=$(INSTALL_BASE)/usr/share \
-		themedir=$(INSTALL_BASE)/usr/share/Eterm/themes
-
-	dh_installdocs -a
-	dh_installmenu -a
-	#dh_installmanpages --verbose -a
-	dh_undocumented -a Esetroot.1x
-	dh_installchangelogs -a
-	dh_strip -a
-	dh_compress -a
-	dh_fixperms -a
-	chown root.root debian/tmp/usr/X11R6/bin/Eterm
-	chmod 4755 debian/tmp/usr/X11R6/bin/Eterm
-	dh_suidregister 
-	dh_installdeb -a
-	dh_shlibdeps -a
-	dh_gencontrol -a
-	dh_md5sums -a
-	dh_builddeb -a
-
-source diff:                                                                  
-	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary
+.PHONY: clean binary-indep binary-arch binary

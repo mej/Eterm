@@ -1,13 +1,12 @@
 Source: eterm
 Section: x11
 Priority: optional
-Maintainer: Brian M. Almeida <bma@debian.org>
+Maintainer: Laurence J. Lane <ljlane@debian.org>
 Standards-Version: 2.5.0.0
 
 Package: eterm
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: eterm-backgrounds
 Description: Enlightened Terminal Emulator (ala xterm) with Imlib support
  A terminal emulator in the spirit of xterm or rxvt.  However this one differs
  in that it uses an Enlightenment style config file, as well as themes.  The
