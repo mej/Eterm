@@ -142,6 +142,8 @@ enum color_list {
                               default:  PrivMode(state, bit); break; \
                             }} while (0)
 
+#define COLOR_NAME(c)   ((rs_color[c]) ? (rs_color[c]) : (def_colorName[c]))
+
 /************ Variables ************/
 #ifdef META8_OPTION
 extern unsigned char meta_char;	/* Alt-key prefix */

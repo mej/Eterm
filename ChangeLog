@@ -4541,3 +4541,8 @@ Sun Apr  7 21:15:09 2002                        Michael Jennings (mej)
 
 Be even more anal when dumping a buffer to a file....
 ----------------------------------------------------------------------
+Mon Apr  8 15:29:27 2002                        Michael Jennings (mej)
+
+Fixed a bug spotted by Laurence J. Lane <ljlane@debian.org> with color
+settings not being properly saved.
+----------------------------------------------------------------------
