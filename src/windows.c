@@ -160,6 +160,13 @@ get_color_by_name(const char *name, const char *fallback)
 {
   XColor xcol;
 
+  if (name == NULL) {
+    if (fallback == NULL) {
+      return ((Pixel) -1);
+    } else {
+      name = fallback;
+    }
+  }
   if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
     print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".", name, NONULL(fallback));
     name = fallback;
@@ -242,7 +249,7 @@ process_colors(void)
   Pixel pixel;
 
   for (i = 0; i < NRS_COLORS; i++) {
-    if ((Xdepth <= 2) || (!rs_color[i]) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) -1)) {
+    if ((Xdepth <= 2) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) -1)) {
       switch (i) {
 	case fgColor:
           pixel = WhitePixel(Xdisplay, Xscreen);

@@ -3283,3 +3283,10 @@ Fri Mar  3 20:23:37 PST 2000	Michael Jennings <mej@eterm.org>
 	:-)
 	
 -------------------------------------------------------------------------------
+Fri Mar  3 21:05:11 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Tom Gilbert <gilbertt@tomgilbert.freeserve.co.uk> spotted a fallback
+	issue with colors which I have now fixed.  Tom, your e-mail address is
+	too damned long.  Just thought you should know.
+
+-------------------------------------------------------------------------------
