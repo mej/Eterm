@@ -41,7 +41,8 @@ static const char cvs_ident[] = "$Id$";
 #include "windows.h"
 
 char **etfonts = NULL;
-unsigned char font_idx = DEF_FONT_IDX, def_font_idx = DEF_FONT_IDX, font_cnt = 0;
+unsigned char font_idx = DEF_FONT_IDX, font_cnt = 0;
+int def_font_idx = DEF_FONT_IDX;
 char *rs_font[NFONTS];
 #ifdef MULTI_CHARSET
 char *rs_mfont[NFONTS];

@@ -73,7 +73,8 @@ typedef struct fontshadow_struct {
 } fontshadow_t;
 
 /************ Variables ************/
-extern unsigned char font_idx, def_font_idx, font_cnt, font_chg;
+extern unsigned char font_idx, font_cnt, font_chg;
+extern int def_font_idx;
 extern const char *def_fontName[];
 extern char *rs_font[NFONTS];
 extern char **etfonts, **etmfonts;

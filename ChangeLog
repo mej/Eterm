@@ -4376,3 +4376,13 @@ Tue Aug 28 00:30:55 2001                        Michael Jennings (mej)
 
 Let's see if this fixes the PrintScreen problems....
 ----------------------------------------------------------------------
+Thu Sep  6 15:16:05 2001                        Michael Jennings (mej)
+
+Argh.  I hate finding stuff like this after a release.  Luckily, it's
+not severe.  It only occurs when --default-font-index is specified on
+the command line.  Symptoms vary according to how the compiler
+arranges certain variables in memory.
+
+Thanks to Richard Lowe <richlowe@richlowe.net> for reporting the
+problem.
+----------------------------------------------------------------------
