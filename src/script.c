@@ -110,7 +110,7 @@ script_parse(char *s)
   char **token_list, **param_list;
   register char *pstr;
   register unsigned long i;
-  char *func_name, *params;
+  char *func_name, *params, *tmp;
   size_t len;
 
   REQUIRE(s != NULL);
@@ -146,7 +146,14 @@ script_parse(char *s)
       chomp(func_name);
     }
     if (params) {
-      chomp(params);
+      params++;
+      if ((tmp = strchr(params, ')')) != NULL) {
+        *tmp = 0;
+      } else {
+        print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
+        return;
+      }
+      param_list = split(", \t", params);
     }
     D_SCRIPT(("Calling function %s with parameters:  %s\n", NONULL(func_name), NONULL(params)));
   }
