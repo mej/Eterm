@@ -4,7 +4,7 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.2
-Release: 0.2
+Release: 1
 Copyright: BSD
 Group: User Interface/X
 %if %{bzip}
@@ -87,7 +87,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti
+%doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti doc/README.Escreen
 %doc README ReleaseNotes ReleaseNotes.1 ChangeLog
 %config %{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 %{_bindir}/*

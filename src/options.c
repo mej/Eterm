@@ -703,6 +703,11 @@ version(void)
 #else
     printf(" -WARN_OLDER");
 #endif
+#ifdef ESCREEN
+    printf(" +ESCREEN");
+#else
+    printf(" -ESCREEN");
+#endif
 
     printf("\n\nCompile-time definitions:\n");
 

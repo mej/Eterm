@@ -4889,3 +4889,9 @@ users can alter the dock location and font of the Escreen buttonbar.
 This should be it for feature additions and last-minute code changes.
 I need to update the docs, but that's about it.
 ----------------------------------------------------------------------
+Tue Oct 29 23:41:07 2002                        Michael Jennings (mej)
+
+Documentation updates and last-minute cleanups.  Barring something
+unexpected and disastrous, this is it for release.  So please make
+sure it works and the docs are accurate. :-)
+----------------------------------------------------------------------

@@ -1020,7 +1020,6 @@ environment variable in UNIX shells.
 .RS 5
 Specifies an animation list to be use in cycling the background pixmap.  The
 .I interval
-
 defines the delay, in seconds, between updates of the background.
 This should be set to a reasonable value to insure that Eterm doesn't
 spend all its time rendering backgrounds.  All the
@@ -1456,6 +1455,71 @@ Specify your preedit type of choice.
 .RE
 
 .TP
+ESCREEN CONTEXT
+
+This context allows for customizations specific to Escreen mode.  See
+the Escreen section below for more details.
+
+.RS 5
+.BI url " protocol" :// user @ host : port / params
+.RS 5
+Connect to (or create) a particular screen session via a URL-type
+construct.  Standard URL rules apply.  The
+.I protocol
+should be either
+.B screen
+(the default) or
+.BR twin .
+If
+.IR user ", " host ", and/or " port
+are specified, an ssh connection is made to the remote server using
+the given login information.  The default is to create/attach to a
+local session.
+
+Any
+.I params
+that are given are passed directly to the underlying protocol and are
+separated from each other by a plus sign
+.BR "" "(" "+" ")."
+.RE
+.RE
+
+.RS 5
+.BI firewall " localport" : firewall : remoteport
+.RS 5
+Bounce the connection through a firewall via ssh.
+.RE
+.RE
+
+.RS 5
+.BI delay " secs"
+.RS 5
+Specify the amount of time to wait before sending the screen/twin
+initialization sequence.  This is required to insure that the remote
+session has been established prior to sending the init sequence.
+.RE
+.RE
+
+.RS 5
+.BI bbar_font " font"
+.RS 5
+Font to use for the Escreen buttonbar.  The default is
+.BR "-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1" .
+.RE
+.RE
+
+.RS 5
+.BR bbar_dock " { " top " | " bottom " | " no " }"
+.RS 5
+Dock the Escreen buttonbar as specified.  Note that only
+.BR top " and " bottom
+are currently enabled.
+.RE
+.RE
+
+.RE
+
+.TP
 TOGGLES CONTEXT
 
 This context contains boolean variables which can be toggled on or off.  Valid
@@ -1764,7 +1828,7 @@ as the
 .B $TERM
 environment variable, which controls which termcap/terminfo entry gets used.
 The default is
-.BR xterm .
+.BR Eterm .
 .RE
 
 .BI exec " command"
@@ -1871,9 +1935,9 @@ SCRIPT FUNCTIONS
 One of the action types which can be bound to keypresses, mouse
 buttons, menuitems, or buttonbar buttons is a
 .BR script .
-The script must be a single word (i.e., enclosed in quotes) and
-consists of one or more calls to the script functions below.  Each
-call is separated from the next by a semicolon
+The script must be a single word (i.e., containing no spaces or
+enclosed in quotes) and consists of one or more calls to the script
+functions below.  Each call is separated from the next by a semicolon
 .BR "" ( ; ).
 Function parameters are enclosed in parentheses; the parentheses are
 optional if no parameters are to be passed.  Commas and/or whitespace
@@ -1897,9 +1961,137 @@ in which case the default buffer is
 (XA_PRIMARY in Xlib-speak).
 .RE
 
+.BI echo( string )
+.RS 5
+Send the specified
+.I string
+to the subcommand.  Exactly equivalent to the
+.B echo
+action.
+.RE
+
+.BI es_display( cmd ", " params )
+.br
+.BR "" "Aliases:  " es_disp
+.RS 5
+This is a master function which permits manipulation of Escreen
+displays through the use of a series of subcommands.  The specified
+.I cmd
+determines what, if any,
+.I params
+are permitted.  Available subcommands are:
+.RS 5
+.B goto
+- Switch to the specified display (0-9)
+.br
+.B prev
+- Switch to the previous display
+.br
+.B next
+- Switch to the next display
+.br
+.B toggle
+- Toggle display
+.br
+.B new
+- Create a new display.  A name for the new display may be passed as a
+parameter, or
+.B ask
+to prompt the user for the name.
+.br
+.B rename
+- Change the name of the current display.  A name for the new display
+may be passed as a parameter, or
+.B ask
+to prompt the user for the name.
+.br
+.B kill
+- Terminate the current (or specified) display.
+.br
+.B watch
+- Toggle monitoring of the current/specified display for activity.
+.br
+.B scrollback
+- View the scrollback for the current/specified display.
+.RE
+.RE
+
+.BI es_region( cmd ", " params )
+.br
+.BR "" "Aliases:  " "es_reg es_win es_window"
+.RS 5
+This is a master function which permits manipulation of Escreen
+display regions through the use of a series of subcommands.  The
+specified
+.I cmd
+determines what, if any,
+.I params
+are permitted.  Available subcommands are:
+.RS 5
+.B goto
+- Switch to the specified region (0-9)
+.br
+.B prev
+- Switch to the previous region
+.br
+.B next
+- Switch to the next region
+.br
+.B toggle
+- Toggle region
+.br
+.B new
+- Create a new region.  A name for the new region may be passed as a
+parameter, or
+.B ask
+to prompt the user for the name.
+.br
+.B rename
+- Change the name of the current region.  A name for the new region
+may be passed as a parameter, or
+.B ask
+to prompt the user for the name.
+.br
+.B kill
+- Terminate the current (or specified) region.
+.br
+.B only
+- Maximize the current/specified region to the full display.
+.br
+.B watch
+- Toggle monitoring of the current/specified region for activity.
+.br
+.B scrollback
+- View the scrollback for the current/specified region.
+.RE
+.RE
+
+.BI es_statement( statement )
+.RS 5
+Execute an Escreen (screen/twin) command directly.
+.RE
+
+.BI es_reset()
+.br
+.BR "" "Aliases:  " es_rst
+.RS 5
+Reset the Escreen session
+.RE
+
+.BI exec_dialog( command )
+.RS 5
+The same as
+.BR exec / spawn ,
+but this function presents the user with a dialog box in which she can
+edit/confirm the command to be run and specify additional parameters
+if needed.
+.RE
+
 .BI exit( message )
 .br
 .BI exit( code )
+.br
+.BR "" "Aliases:  " "die quit"
 .RS 5
 Exit Eterm with an optional
 .I message
@@ -1924,6 +2116,13 @@ must be numeric.
 is the default if
 .I signal
 is omitted.
+.RE
+
+.BI msgbox( message )
+.RS 5
+Displays a small dialog box containing
+.I message
+and waits for a keypress before continuing.
 .RE
 
 .BI nop()
@@ -1970,6 +2169,11 @@ is
 .BR theme.cfg .
 .RE
 
+.BI save_buff( filename )
+.RS 5
+Dumps the contents of the scrollback buffer to the specified file.
+.RE
+
 .BI scroll( n )
 .RS 5
 Scrolls backward or forward in the scrollback buffer.
@@ -1992,14 +2196,18 @@ to scroll down half a page.  The default unit if not specified is
 
 .BI search( str )
 .RS 5
-Search the scrollback buffer for
-.I str
-and highlight all occurances.  If
-.I str
-is not specified, the previous search highlighting is cleared.
+Presents a dialog box into which the user may enter a search term.
+The default value is set to
+.IR str .
+All occurances of the specified search string are highlighted in the
+scrollback buffer, and Eterm jumps back to the most recent one.
+Searching again with the same keyword will clear the previous
+highlighting.
 .RE
 
 .BI spawn( command )
+.br
+.BR "" "Aliases:  " exec
 .RS 5
 Spawns a secondary child process to execute
 .IR command ,
@@ -2008,11 +2216,52 @@ or
 if no value is passed.
 .RE
 
-Some functions have aliases for usability purposes.  Specifically,
-.BR die " or " quit
-are precisely equivalent to
-.BR exit ", and " exec " may be used in place of " spawn .
+.BI string( string )
+.RS 5
+The specified
+.I string
+is parsed via Eterm.  This is exactly identical to the
+.B string
+action.
 .RE
+
+.RE
+
+.SH ESCREEN
+Escreen is a screen/twin interface layer which allows Eterm to
+interoperate with GNU
+.B screen
+and with Massimiliano Ghilardi's
+.B twin
+software.  This allows Eterm to support multiple subshell sessions
+within a single window.  On the surface, this feature works similarly
+to the "tabbed" sessions offered by programs like
+.BR konsole " and " multi-gnome-terminal .
+However, Escreen has the advantage of being an interface to existing
+software, thus providing additional capabilities like multiple regions
+per display, detach/reattach capability, seamless remote session
+support, firewall support, and more.
+
+Escreen support is still somewhat experimental and is thus not
+compiled into Eterm by default.  To enable it, you must compile with
+.BR --enable-escreen " and/or " --enable-etwin
+(depending on whether you have screen, twin, or both).  If you
+installed from a package, you can use
+.B Eterm --version
+and check for either
+.BR "+ESCREEN" " (enabled) or " "-ESCREEN" " (disabled)."
+
+For best results, if you wish to use Escreen mode, do so by invoking
+Eterm with the Escreen theme
+.BR "" "(" "Eterm -t Escreen" ")."
+This theme supplies default key bindings, the basic Escreen menu,
+color definitions, etc. for use by the Escreen engine.  Most
+importantly, it supplies the required
+.B url
+parameter in order to invoke Escreen mode.
+
+Consult the README.Escreen file for more in-depth discussion of
+Escreen mode.
 
 .SH AUTHORS
 Michael Jennings (mej@eterm.org)

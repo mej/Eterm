@@ -387,6 +387,9 @@ script_handler_search(char **params)
     static char *search = NULL;
 
     if (params && *params) {
+        if (search != NULL) {
+            FREE(search);
+        }
         search = STRDUP(*params);
     }
     if ((menu_dialog(NULL, "Enter Search Term:", TERM_WINDOW_GET_REPORTED_COLS(), &search, NULL)) != -2) {
