@@ -30,7 +30,11 @@ static const char cvs_ident[] = "$Id$";
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "../libmej/debug.h"
 #include "debug.h"
@@ -298,6 +302,8 @@ safe_print_string(char *str, unsigned long len)
   unsigned long n = 0, i;
 
   if (len == ((unsigned long) -1)) {
+    len = strlen(str);
+  } else if (len == ((unsigned long) -2)) {
     FREE(ret_buff);
     rb_size = 0;
     return ((char *) NULL);
@@ -345,4 +351,52 @@ add_carriage_returns(unsigned char *buff, unsigned long cnt)
   FREE(outp);
   D_CMD(("buff == %8p \"%s\", i == %lu\n", buff, safe_print_string(buff, i), i));
   return i;
+}
+
+unsigned char
+mkdirhier(const char *path)
+{
+  char *str, *pstr;
+  struct stat dst;
+
+  D_CMD(("path == %s\n", path));
+  str = StrDup(path);  /* We need to modify it. */
+  pstr = str;
+  if (*pstr == '/') {
+    pstr++;
+  }
+  for (; (pstr = strchr(pstr, '/'));) {
+    *pstr = 0;
+    D_CMD(("Looking at \"%s\"\n", str));
+    if (stat(str, &dst)) {
+      /* It's not there.  Create it. */
+      D_CMD(("stat() failed.  Attempting to create it.\n"));
+      if (mkdir(str, 0755)) {
+        /* Couldn't create it.  Return failure. */
+        D_CMD(("mkdir(%s, 0755) failed -- %s\n", str, strerror(errno)));
+        return 0;
+      }
+    } else if (!S_ISDIR(dst.st_mode)) {
+      /* It's there, but it's not a directory.  Fail. */
+      D_CMD(("\"%s\" exists, but it's not a directory.\n", str));
+      return 0;
+    }
+    *pstr++ = '/';
+  }
+  D_CMD(("Looking at \"%s\"\n", str));
+  if (stat(str, &dst)) {
+    /* It's not there.  Create it. */
+    D_CMD(("stat() failed.  Attempting to create it.\n"));
+    if (mkdir(str, 0755)) {
+      /* Couldn't create it.  Return failure. */
+      D_CMD(("mkdir(%s, 0755) failed -- %s\n", str, strerror(errno)));
+      return 0;
+    }
+  } else if (!S_ISDIR(dst.st_mode)) {
+    /* It's there, but it's not a directory.  Fail. */
+    D_CMD(("\"%s\" exists, but it's not a directory.\n", str));
+    return 0;
+  }
+  D_CMD(("Done!\n"));
+  return 1;
 }

@@ -84,6 +84,9 @@
 
 # define BBAR_FORCE_TOGGLE              (0x03)
 
+# define SAVE_THEME_CONFIG              ((unsigned char) 1)
+# define SAVE_USER_CONFIG               ((unsigned char) 0)
+
 #define BOOL_OPT_ISTRUE(s)  (!strcasecmp((s), true_vals[0]) || !strcasecmp((s), true_vals[1]) \
                              || !strcasecmp((s), true_vals[2]) || !strcasecmp((s), true_vals[3]))
 #define BOOL_OPT_ISFALSE(s) (!strcasecmp((s), false_vals[0]) || !strcasecmp((s), false_vals[1]) \
@@ -256,7 +259,7 @@ extern char *conf_parse(char *conf_name, const char *dir, const char *path);
 extern char *conf_parse_theme(char *theme, char *conf_name, unsigned char fallback);
 extern void init_defaults(void);
 extern void post_parse(void);
-unsigned char save_config(char *);
+unsigned char save_config(char *, unsigned char);
 
 _XFUNCPROTOEND
 

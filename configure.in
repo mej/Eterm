@@ -655,6 +655,9 @@ AC_PREFIX(gcc)
 if test "$prefix" = "NONE"; then
   prefix=$ac_default_prefix
 fi
+if test "$exec_prefix" = "NONE"; then
+  exec_prefix=$prefix
+fi
 
 dnl Stack Tracing toys
 AC_ARG_ENABLE(stack-trace, [  --disable-stack-trace   disable stack trace on abnormal termination],
@@ -708,7 +711,15 @@ AC_CHECK_LIB(Kenny, life_signs, , [
 ])
 fi
 
-AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:${prefix}/share/Eterm/themes:${prefix}/share/Eterm")
+CONFIG_SEARCH_PATH=`eval eval eval eval eval echo "${datadir}/$PACKAGE/themes:${datadir}/$PACKAGE"`
+AC_DEFINE_UNQUOTED(CONFIG_SEARCH_PATH, "~/.Eterm/themes:~/.Eterm:$CONFIG_SEARCH_PATH")
+# Do replacements on theme files and such.  All variables to be replaced
+# by this routine MUST be exported before the awk script runs.
+if test "X$PKGDATADIR" = "X" ; then
+  PKGDATADIR=`eval eval eval eval echo "$datadir/$PACKAGE"`
+fi
+export PKGDATADIR
+AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
 
 CFLAGS=${CFLAGS--O}
 LDFLAGS=${LDFLAGS--O}
@@ -729,12 +740,6 @@ AM_CONFIG_HEADER(config.h)
 AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile libmej/Makefile
           pix/Makefile src/Makefile themes/Makefile Eterm.spec)
 
-# Do replacements on theme files and such.  All variables to be replaced
-# by this routine MUST be exported before the awk script runs.
-if test "X$PKGDATADIR" = "X" ; then
-  PKGDATADIR=`eval eval eval eval echo "$datadir/$PACKAGE"`
-fi
-export PKGDATADIR
 # Mega evals to make sure all the relative variables get resolved.
 BINDIR=`eval eval eval eval echo ${bindir}`
 export BINDIR bindir prefix exec_prefix datadir PACKAGE

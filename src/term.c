@@ -2170,9 +2170,14 @@ xterm_seq(int op, const char *str)
 	  /* Save current config */
 	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
-	    save_config(nstr);
+            valptr = (char *) strsep(&tnstr, ";");
+            if (!strcasecmp(nstr, "theme")) {
+              save_config(valptr, SAVE_THEME_CONFIG);
+            } else {
+              save_config(valptr, SAVE_USER_CONFIG);
+            }
 	  } else {
-	    save_config(NULL);
+	    save_config(NULL, SAVE_USER_CONFIG);
 	  }
 	  break;
 	case 72:

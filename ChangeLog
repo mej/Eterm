@@ -3414,3 +3414,20 @@ Mon Apr  3 16:42:06 PDT 2000	Michael Jennings <mej@eterm.org>
 	Added a --buttonbar option to force on/off all your buttonbars.
 	
 -------------------------------------------------------------------------------
+Wed Apr  5 21:48:39 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	There are now two different sets of settings you can save.  You can
+	save user settings, which are the things that one would generally
+	consider to be user-specific (toggles, text colors, etc.).  You can
+	also save theme settings, which saves *everything*, including the
+	stuff that user settings don't include (like imageclasses, menus,
+	etc.).  Settings are saved to user.cfg and theme.cfg, respectively.
+
+	Also, Eterm will now detect if it cannot write to the location from
+	which it got the theme (i.e., a system-wide directory), and will fall
+	back on ~/.Eterm/themes/<theme>.  It WILL create this directory tree
+	if it does not already exist.
+
+	Hopefully this will make more people happy. :-)
+	
+-------------------------------------------------------------------------------

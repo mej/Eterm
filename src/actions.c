@@ -154,10 +154,24 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
   action->type = type;
   action->keysym = keysym;
   switch(type) {
-  case ACTION_STRING: action->handler = (action_handler_t) action_handle_string; action->param.string = StrDup((char *) param); break;
-  case ACTION_ECHO: action->handler = (action_handler_t) action_handle_echo; action->param.string = StrDup((char *) param); break;
-  case ACTION_MENU: action->handler = (action_handler_t) action_handle_menu; action->param.menu = (menu_t *) param; break;
-  default: break;
+    case ACTION_STRING:
+      action->handler = (action_handler_t) action_handle_string;
+      action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
+      strcpy(action->param.string, (char *) param);
+      parse_escaped_string(action->param.string);
+      break;
+    case ACTION_ECHO:
+      action->handler = (action_handler_t) action_handle_echo;
+      action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
+      strcpy(action->param.string, (char *) param);
+      parse_escaped_string(action->param.string);
+      break;
+    case ACTION_MENU:
+      action->handler = (action_handler_t) action_handle_menu;
+      action->param.menu = (menu_t *) param;
+      break;
+    default:
+      break;
   }
   action->next = NULL;
   D_ACTIONS(("Added action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));

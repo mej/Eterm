@@ -30,6 +30,9 @@
 /************ Macros and Definitions ************/
 #define MAKE_CTRL_CHAR(c) ((c) == '?' ? 127 : ((toupper(c)) - '@'))
 
+#define CAN_READ(s)       (((s.st_mode) & S_IROTH) || ((my_ruid == (int)(s.st_uid)) && ((s.st_mode) & S_IRUSR)) || ((my_rgid == (int)(s.st_gid)) && ((s.st_mode) & S_IRGRP)))
+#define CAN_WRITE(s)      (((s.st_mode) & S_IWOTH) || ((my_ruid == (int)(s.st_uid)) && ((s.st_mode) & S_IWUSR)) || ((my_rgid == (int)(s.st_gid)) && ((s.st_mode) & S_IWGRP)))
+
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
@@ -44,6 +47,7 @@ extern const char *search_path(const char *pathlist, const char *file, const cha
 extern const char *find_file(const char *file, const char *ext);
 extern char *safe_print_string(char *buff, unsigned long len);
 extern unsigned long add_carriage_returns(unsigned char *buff, unsigned long cnt);
+extern unsigned char mkdirhier(const char *);
 
 _XFUNCPROTOEND
 

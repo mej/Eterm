@@ -329,6 +329,7 @@
 #undef KS_HOME
 #undef KS_END
 #undef CONFIG_BUFF
+#undef PKGDATADIR
 
 
 /* Leave that blank line there!!  Autoheader needs it.
