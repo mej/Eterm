@@ -2543,3 +2543,9 @@ Thu Oct  7 16:12:38 PDT 1999	Michael Jennings <mej@eterm.org>
 	let me know and I'll add a parameter for those too.
 	
 -------------------------------------------------------------------------------
+Thu Oct  7 16:39:48 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	raster pointed out that the "clicked" image for the scrollbar anchor
+	wasn't working.  It is now. :-)
+	
+-------------------------------------------------------------------------------

@@ -436,13 +436,13 @@ sb_handle_button_press(event_t * ev)
 	scrollbar_setDn();
       }
     } else {
+      if (scrollbar_anchor_is_pixmapped() && images[image_sa].current != images[image_sa].clicked) {
+        images[image_sa].current = images[image_sa].clicked;
+        render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+      }
       switch (ev->xbutton.button) {
 	case Button2:
 	  button_state.mouse_offset = scrollbar_anchor_height() / 2;	/* Align to center */
-	  if (scrollbar_anchor_is_pixmapped() && images[image_sa].current != images[image_sa].clicked) {
-	    images[image_sa].current = images[image_sa].clicked;
-	    render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-	  }
 	  if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)
 	      || scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)
 	      || scrollBar.type == SCROLLBAR_XTERM) {
