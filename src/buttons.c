@@ -137,7 +137,7 @@ bbar_event_init_dispatcher(void)
 }
 
 unsigned char
-bbar_handle_enter_notify(event_t * ev)
+bbar_handle_enter_notify(event_t *ev)
 {
   button_t *b;
   Window unused_root, unused_child;
@@ -158,7 +158,7 @@ bbar_handle_enter_notify(event_t * ev)
 }
 
 unsigned char
-bbar_handle_leave_notify(event_t * ev)
+bbar_handle_leave_notify(event_t *ev)
 {
   D_EVENTS(("bbar_handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -172,7 +172,7 @@ bbar_handle_leave_notify(event_t * ev)
 }
 
 unsigned char
-bbar_handle_button_press(event_t * ev)
+bbar_handle_button_press(event_t *ev)
 {
 
   D_EVENTS(("bbar_handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -187,7 +187,7 @@ bbar_handle_button_press(event_t * ev)
 }
 
 unsigned char
-bbar_handle_button_release(event_t * ev)
+bbar_handle_button_release(event_t *ev)
 {
   button_t *b;
   Window unused_root, unused_child;
@@ -214,7 +214,7 @@ bbar_handle_button_release(event_t * ev)
 }
 
 unsigned char
-bbar_handle_motion_notify(event_t * ev)
+bbar_handle_motion_notify(event_t *ev)
 {
   button_t *b;
   Window unused_root, unused_child;
@@ -247,7 +247,7 @@ bbar_handle_motion_notify(event_t * ev)
 }
 
 unsigned char
-bbar_dispatch_event(event_t * ev)
+bbar_dispatch_event(event_t *ev)
 {
   if (buttonbar->event_data.handlers[ev->type] != NULL) {
     return ((buttonbar->event_data.handlers[ev->type]) (ev));
@@ -587,7 +587,7 @@ button_create(char *text)
 }
 
 unsigned char
-button_set_icon(button_t *button, simage_t * icon)
+button_set_icon(button_t *button, simage_t *icon)
 {
   ASSERT_RVAL(button != NULL, 0);
   ASSERT_RVAL(icon != NULL, 0);

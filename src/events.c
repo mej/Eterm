@@ -77,7 +77,7 @@ event_register_dispatcher(event_dispatcher_t func, event_dispatcher_init_t init)
 }
 
 void
-event_dispatch(event_t * event)
+event_dispatch(event_t *event)
 {
 
   register unsigned char i;
@@ -93,7 +93,7 @@ event_dispatch(event_t * event)
 }
 
 void
-event_data_add_mywin(event_dispatcher_data_t * data, Window win)
+event_data_add_mywin(event_dispatcher_data_t *data, Window win)
 {
 
   ASSERT(data != NULL);
@@ -110,7 +110,7 @@ event_data_add_mywin(event_dispatcher_data_t * data, Window win)
 }
 
 void
-event_data_add_parent(event_dispatcher_data_t * data, Window win)
+event_data_add_parent(event_dispatcher_data_t *data, Window win)
 {
 
   ASSERT(data != NULL);
@@ -163,7 +163,7 @@ event_init_primary_dispatcher(void)
 }
 
 unsigned char
-event_win_is_mywin(register event_dispatcher_data_t * data, Window win)
+event_win_is_mywin(register event_dispatcher_data_t *data, Window win)
 {
 
   register unsigned short i;
@@ -179,7 +179,7 @@ event_win_is_mywin(register event_dispatcher_data_t * data, Window win)
 }
 
 unsigned char
-event_win_is_parent(register event_dispatcher_data_t * data, Window win)
+event_win_is_parent(register event_dispatcher_data_t *data, Window win)
 {
 
   register unsigned short i;
@@ -195,7 +195,7 @@ event_win_is_parent(register event_dispatcher_data_t * data, Window win)
 }
 
 unsigned char
-handle_key_press(event_t * ev)
+handle_key_press(event_t *ev)
 {
 #ifdef COUNT_X_EVENTS
   static unsigned long keypress_cnt = 0;
@@ -215,7 +215,7 @@ handle_key_press(event_t * ev)
 }
 
 unsigned char
-handle_property_notify(event_t * ev)
+handle_property_notify(event_t *ev)
 {
 
   Atom prop;
@@ -281,7 +281,7 @@ handle_property_notify(event_t * ev)
 }
 
 unsigned char
-handle_destroy_notify(event_t * ev)
+handle_destroy_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_destroy_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -296,7 +296,7 @@ handle_destroy_notify(event_t * ev)
 }
 
 unsigned char
-handle_client_message(event_t * ev)
+handle_client_message(event_t *ev)
 {
 
   D_EVENTS(("handle_client_message(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -337,7 +337,7 @@ handle_client_message(event_t * ev)
 }
 
 unsigned char
-handle_mapping_notify(event_t * ev)
+handle_mapping_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_mapping_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -348,7 +348,7 @@ handle_mapping_notify(event_t * ev)
 }
 
 unsigned char
-handle_visibility_notify(event_t * ev)
+handle_visibility_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_visibility_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -372,7 +372,7 @@ handle_visibility_notify(event_t * ev)
 }
 
 unsigned char
-handle_enter_notify(event_t * ev)
+handle_enter_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_enter_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -390,7 +390,7 @@ handle_enter_notify(event_t * ev)
 }
 
 unsigned char
-handle_leave_notify(event_t * ev)
+handle_leave_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -408,7 +408,7 @@ handle_leave_notify(event_t * ev)
 }
 
 unsigned char
-handle_focus_in(event_t * ev)
+handle_focus_in(event_t *ev)
 {
 
   D_EVENTS(("handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -449,7 +449,7 @@ handle_focus_in(event_t * ev)
 }
 
 unsigned char
-handle_focus_out(event_t * ev)
+handle_focus_out(event_t *ev)
 {
 
   D_EVENTS(("handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -477,7 +477,7 @@ handle_focus_out(event_t * ev)
 }
 
 unsigned char
-handle_configure_notify(event_t * ev)
+handle_configure_notify(event_t *ev)
 {
   D_EVENTS(("handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -520,7 +520,7 @@ handle_configure_notify(event_t * ev)
 }
 
 unsigned char
-handle_selection_clear(event_t * ev)
+handle_selection_clear(event_t *ev)
 {
 
   D_EVENTS(("handle_selection_clear(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -530,7 +530,7 @@ handle_selection_clear(event_t * ev)
 }
 
 unsigned char
-handle_selection_notify(event_t * ev)
+handle_selection_notify(event_t *ev)
 {
 
   D_EVENTS(("handle_selection_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -540,7 +540,7 @@ handle_selection_notify(event_t * ev)
 }
 
 unsigned char
-handle_selection_request(event_t * ev)
+handle_selection_request(event_t *ev)
 {
 
   D_EVENTS(("handle_selection_request(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -550,7 +550,7 @@ handle_selection_request(event_t * ev)
 }
 
 unsigned char
-handle_expose(event_t * ev)
+handle_expose(event_t *ev)
 {
   PROF_INIT(handle_expose);
   D_EVENTS(("handle_expose(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -578,7 +578,7 @@ handle_expose(event_t * ev)
 }
 
 unsigned char
-handle_button_press(event_t * ev)
+handle_button_press(event_t *ev)
 {
 
   D_EVENTS(("handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -662,7 +662,7 @@ handle_button_press(event_t * ev)
 }
 
 unsigned char
-handle_button_release(event_t * ev)
+handle_button_release(event_t *ev)
 {
 
   D_EVENTS(("handle_button_release(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -715,7 +715,7 @@ handle_button_release(event_t * ev)
 }
 
 unsigned char
-handle_motion_notify(event_t * ev)
+handle_motion_notify(event_t *ev)
 {
 #ifdef COUNT_X_EVENTS
   static unsigned long motion_cnt = 0;
@@ -754,7 +754,7 @@ handle_motion_notify(event_t * ev)
 }
 
 unsigned char
-process_x_event(event_t * ev)
+process_x_event(event_t *ev)
 {
 #ifdef COUNT_X_EVENTS
   static unsigned long event_cnt = 0;

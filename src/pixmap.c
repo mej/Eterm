@@ -344,7 +344,7 @@ create_simage(void)
 }
 
 void
-reset_simage(simage_t * simg, unsigned long mask)
+reset_simage(simage_t *simg, unsigned long mask)
 {
 
   ASSERT(simg != NULL);
@@ -818,7 +818,7 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
 }
 
 void
-render_simage(simage_t * simg, Window win, unsigned short width, unsigned short height, unsigned char which, renderop_t renderop)
+render_simage(simage_t *simg, Window win, unsigned short width, unsigned short height, unsigned char which, renderop_t renderop)
 {
 
   XGCValues gcvalue;

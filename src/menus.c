@@ -156,7 +156,7 @@ menu_event_init_dispatcher(void)
 }
 
 unsigned char
-menu_handle_enter_notify(event_t * ev)
+menu_handle_enter_notify(event_t *ev)
 {
 
   register menu_t *menu;
@@ -181,7 +181,7 @@ menu_handle_enter_notify(event_t * ev)
 }
 
 unsigned char
-menu_handle_leave_notify(event_t * ev)
+menu_handle_leave_notify(event_t *ev)
 {
 
   D_EVENTS(("menu_handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -195,7 +195,7 @@ menu_handle_leave_notify(event_t * ev)
 }
 
 unsigned char
-menu_handle_focus_in(event_t * ev)
+menu_handle_focus_in(event_t *ev)
 {
 
   D_EVENTS(("menu_handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -206,7 +206,7 @@ menu_handle_focus_in(event_t * ev)
 }
 
 unsigned char
-menu_handle_focus_out(event_t * ev)
+menu_handle_focus_out(event_t *ev)
 {
 
   D_EVENTS(("menu_handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -218,7 +218,7 @@ menu_handle_focus_out(event_t * ev)
 
 #if 0
 unsigned char
-menu_handle_expose(event_t * ev)
+menu_handle_expose(event_t *ev)
 {
 
   XEvent unused_xevent;
@@ -234,7 +234,7 @@ menu_handle_expose(event_t * ev)
 #endif
 
 unsigned char
-menu_handle_button_press(event_t * ev)
+menu_handle_button_press(event_t *ev)
 {
 
   D_EVENTS(("menu_handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -270,7 +270,7 @@ menu_handle_button_press(event_t * ev)
 }
 
 unsigned char
-menu_handle_button_release(event_t * ev)
+menu_handle_button_release(event_t *ev)
 {
   menuitem_t *item;
 
@@ -333,7 +333,7 @@ menu_handle_button_release(event_t * ev)
 }
 
 unsigned char
-menu_handle_motion_notify(event_t * ev)
+menu_handle_motion_notify(event_t *ev)
 {
 
   register menuitem_t *item = NULL;
@@ -392,7 +392,7 @@ menu_handle_motion_notify(event_t * ev)
 }
 
 unsigned char
-menu_dispatch_event(event_t * ev)
+menu_dispatch_event(event_t *ev)
 {
   if (menu_event_data.handlers[ev->type] != NULL) {
     return ((menu_event_data.handlers[ev->type]) (ev));
@@ -401,9 +401,8 @@ menu_dispatch_event(event_t * ev)
 }
 
 menulist_t *
-menulist_add_menu(menulist_t * list, menu_t * menu)
+menulist_add_menu(menulist_t *list, menu_t *menu)
 {
-
   ASSERT_RVAL(menu != NULL, list);
 
   if (list) {
@@ -418,10 +417,25 @@ menulist_add_menu(menulist_t * list, menu_t * menu)
   return list;
 }
 
+void
+menulist_clear(menulist_t *list)
+{
+  unsigned long i;
+
+  ASSERT(list != NULL);
+
+  for (i = 0; i < list->nummenus; i++) {
+    menu_delete(list->menus[i]);
+  }
+  FREE(list->menus);
+  LIBMEJ_X_FREE_GC(topShadowGC);
+  LIBMEJ_X_FREE_GC(botShadowGC);
+  FREE(list);
+}
+
 menu_t *
 menu_create(char *title)
 {
-
   menu_t *menu;
   static Cursor cursor;
   static long mask;
@@ -456,6 +470,43 @@ menu_create(char *title)
   return menu;
 }
 
+void
+menu_delete(menu_t *menu)
+{
+  unsigned short i;
+
+  ASSERT(menu != NULL);
+
+  for (i = 0; i < menu->numitems; i++) {
+    menuitem_delete(menu->items[i]);
+  }
+  FREE(menu->items);
+  if (menu->title) {
+    FREE(menu->title);
+  }
+  if (menu->bg) {
+    LIBMEJ_X_FREE_PIXMAP(menu->bg);
+  }
+  if (menu->gc) {
+    LIBMEJ_X_FREE_GC(menu->gc);
+  }
+#ifdef MULTI_CHARSET
+  if (menu->fontset) {
+    XFreeFontSet(Xdisplay, menu->fontset);
+  }
+#endif
+  if (menu->font) {
+    free_font(menu->font);
+  }
+  if (menu->win) {
+    XDestroyWindow(Xdisplay, menu->win);
+  }
+  if (menu->swin) {
+    XDestroyWindow(Xdisplay, menu->swin);
+  }
+  FREE(menu);
+}
+
 unsigned char
 menu_set_title(menu_t *menu, const char *title)
 {
@@ -469,9 +520,8 @@ menu_set_title(menu_t *menu, const char *title)
 }
 
 unsigned char
-menu_set_font(menu_t * menu, const char *fontname)
+menu_set_font(menu_t *menu, const char *fontname)
 {
-
   XFontStruct *font;
   XGCValues gcvalue;
 
@@ -494,9 +544,8 @@ menu_set_font(menu_t * menu, const char *fontname)
 }
 
 unsigned char
-menu_add_item(menu_t * menu, menuitem_t * item)
+menu_add_item(menu_t *menu, menuitem_t *item)
 {
-
   ASSERT_RVAL(menu != NULL, 0);
   ASSERT_RVAL(item != NULL, 0);
 
@@ -515,9 +564,8 @@ menu_add_item(menu_t * menu, menuitem_t * item)
 
 /* Return 1 if submenu is a child of menu, 0 if not. */
 unsigned char
-menu_is_child(menu_t * menu, menu_t * submenu)
+menu_is_child(menu_t *menu, menu_t *submenu)
 {
-
   register unsigned char i;
   register menuitem_t *item;
 
@@ -538,9 +586,8 @@ menu_is_child(menu_t * menu, menu_t * submenu)
 }
 
 menu_t *
-find_menu_by_title(menulist_t * list, char *title)
+find_menu_by_title(menulist_t *list, char *title)
 {
-
   register unsigned char i;
 
   REQUIRE_RVAL(list != NULL, NULL);
@@ -554,9 +601,8 @@ find_menu_by_title(menulist_t * list, char *title)
 }
 
 menu_t *
-find_menu_by_window(menulist_t * list, Window win)
+find_menu_by_window(menulist_t *list, Window win)
 {
-
   register unsigned char i;
 
   REQUIRE_RVAL(list != NULL, NULL);
@@ -570,9 +616,8 @@ find_menu_by_window(menulist_t * list, Window win)
 }
 
 menuitem_t *
-find_item_by_coords(menu_t * menu, int x, int y)
+find_item_by_coords(menu_t *menu, int x, int y)
 {
-
   register unsigned char i;
   register menuitem_t *item;
 
@@ -588,9 +633,8 @@ find_item_by_coords(menu_t * menu, int x, int y)
 }
 
 unsigned short
-find_item_in_menu(menu_t * menu, menuitem_t * item)
+find_item_in_menu(menu_t *menu, menuitem_t *item)
 {
-
   register unsigned char i;
 
   ASSERT_RVAL(menu != NULL, (unsigned short) -1);
@@ -646,7 +690,6 @@ menuitem_change_current(menuitem_t *item)
 menuitem_t *
 menuitem_create(char *text)
 {
-
   menuitem_t *menuitem;
 
   menuitem = (menuitem_t *) MALLOC(sizeof(menuitem_t));
@@ -659,8 +702,28 @@ menuitem_create(char *text)
   return menuitem;
 }
 
+void
+menuitem_delete(menuitem_t *item)
+{
+  ASSERT(item != NULL);
+
+  if (item->icon) {
+    free_simage(item->icon);
+  }
+  if (item->type == MENUITEM_STRING || item->type == MENUITEM_ECHO) {
+    FREE(item->action.string);
+  }
+  if (item->text) {
+    FREE(item->text);
+  }
+  if (item->rtext) {
+    FREE(item->rtext);
+  }
+  FREE(item);
+}
+
 unsigned char
-menuitem_set_text(menuitem_t * item, const char *text)
+menuitem_set_text(menuitem_t *item, const char *text)
 {
   ASSERT_RVAL(item != NULL, 0);
   REQUIRE_RVAL(text != NULL, 0);
@@ -674,9 +737,8 @@ menuitem_set_text(menuitem_t * item, const char *text)
 }
 
 unsigned char
-menuitem_set_icon(menuitem_t * item, simage_t * icon)
+menuitem_set_icon(menuitem_t *item, simage_t *icon)
 {
-
   ASSERT_RVAL(item != NULL, 0);
   ASSERT_RVAL(icon != NULL, 0);
 
@@ -685,9 +747,8 @@ menuitem_set_icon(menuitem_t * item, simage_t * icon)
 }
 
 unsigned char
-menuitem_set_action(menuitem_t * item, unsigned char type, char *action)
+menuitem_set_action(menuitem_t *item, unsigned char type, char *action)
 {
-
   ASSERT_RVAL(item != NULL, 0);
 
   item->type = type;
@@ -708,9 +769,8 @@ menuitem_set_action(menuitem_t * item, unsigned char type, char *action)
 }
 
 unsigned char
-menuitem_set_rtext(menuitem_t * item, char *rtext)
+menuitem_set_rtext(menuitem_t *item, char *rtext)
 {
-
   ASSERT_RVAL(item != NULL, 0);
   ASSERT_RVAL(rtext != NULL, 0);
 
@@ -720,9 +780,8 @@ menuitem_set_rtext(menuitem_t * item, char *rtext)
 }
 
 void
-menu_reset(menu_t * menu)
+menu_reset(menu_t *menu)
 {
-
   ASSERT(menu != NULL);
 
   D_MENU(("menu_reset(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
@@ -736,7 +795,7 @@ menu_reset(menu_t * menu)
 }
 
 void
-menu_reset_all(menulist_t * list)
+menu_reset_all(menulist_t *list)
 {
   register unsigned short i;
 
@@ -756,9 +815,8 @@ menu_reset_all(menulist_t * list)
 }
 
 void
-menu_reset_tree(menu_t * menu)
+menu_reset_tree(menu_t *menu)
 {
-
   register unsigned short i;
   register menuitem_t *item;
 
@@ -778,9 +836,8 @@ menu_reset_tree(menu_t * menu)
 }
 
 void
-menu_reset_submenus(menu_t * menu)
+menu_reset_submenus(menu_t *menu)
 {
-
   register unsigned short i;
   register menuitem_t *item;
 
@@ -796,7 +853,7 @@ menu_reset_submenus(menu_t * menu)
 }
 
 void
-menuitem_select(menu_t * menu)
+menuitem_select(menu_t *menu)
 {
   static Pixel top = 0, bottom = 0;
   menuitem_t *item;
@@ -822,9 +879,6 @@ menuitem_select(menu_t * menu)
       draw_shadow_from_colors(menu->swin, top, bottom, 0, 0, item->w - MENU_VGAP, item->h, 2);
       draw_arrow_from_colors(menu->swin, top, bottom, item->w - 3 * MENU_HGAP, (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
     }
-#if 0
-    paste_simage(images[image_submenu].selected, image_submenu, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
-#endif
   } else {
     if (image_mode_is(image_menu, MODE_MASK)) {
       render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
@@ -844,7 +898,7 @@ menuitem_select(menu_t * menu)
 }
 
 void
-menuitem_deselect(menu_t * menu)
+menuitem_deselect(menu_t *menu)
 {
   menuitem_t *item;
 
@@ -858,7 +912,7 @@ menuitem_deselect(menu_t * menu)
 }
 
 void
-menu_display_submenu(menu_t * menu, menuitem_t * item)
+menu_display_submenu(menu_t *menu, menuitem_t *item)
 {
   menu_t *submenu;
 
@@ -893,9 +947,8 @@ menu_move(menu_t *menu, unsigned short x, unsigned short y) {
 }
 
 void
-menu_draw(menu_t * menu)
+menu_draw(menu_t *menu)
 {
-
   register unsigned short i, len;
   unsigned long width, height;
 #if 0
@@ -1070,9 +1123,8 @@ menu_draw(menu_t * menu)
 }
 
 void
-menu_display(int x, int y, menu_t * menu)
+menu_display(int x, int y, menu_t *menu)
 {
-
   ASSERT(menu != NULL);
 
   menu->state |= (MENU_STATE_IS_CURRENT);
@@ -1091,9 +1143,8 @@ menu_display(int x, int y, menu_t * menu)
 }
 
 void
-menu_action(menuitem_t * item)
+menu_action(menuitem_t *item)
 {
-
   ASSERT(item != NULL);
 
   D_MENU(("menu_action() called to invoke %s\n", item->text));
@@ -1117,9 +1168,8 @@ menu_action(menuitem_t * item)
 }
 
 void
-menu_invoke(int x, int y, Window win, menu_t * menu, Time timestamp)
+menu_invoke(int x, int y, Window win, menu_t *menu, Time timestamp)
 {
-
   int root_x, root_y;
   Window unused;
 
@@ -1138,7 +1188,6 @@ menu_invoke(int x, int y, Window win, menu_t * menu, Time timestamp)
 void
 menu_invoke_by_title(int x, int y, Window win, char *title, Time timestamp)
 {
-
   menu_t *menu;
 
   REQUIRE(title != NULL);

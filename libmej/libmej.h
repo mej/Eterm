@@ -98,6 +98,9 @@
 #define FIXME_NOP(x)
 #define FIXME_BLOCK 0
 
+/* An "unused block" marker similar to the above. */
+#define UNUSED_BLOCK 0
+
 /* The basic debugging output leader. */
 #if defined(__FILE__) && defined(__LINE__)
 # ifdef __GNUC__

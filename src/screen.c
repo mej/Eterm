@@ -102,7 +102,7 @@ encoding_t encoding_method = LATIN1;
 /* Fill part/all of a drawn line with blanks. */
 inline void blank_line(text_t *, rend_t *, int, rend_t);
 inline void
-blank_line(text_t * et, rend_t * er, int width, rend_t efs)
+blank_line(text_t *et, rend_t *er, int width, rend_t efs)
 {
 /*    int             i = width; */
   register unsigned int i = width;
@@ -2713,7 +2713,7 @@ selection_click(int clicks, int x, int y)
 #endif
 
 void
-selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
+selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
 {
   int beg_col, beg_row, end_col, end_row, last_col;
   int row_offset, w1;

@@ -3875,3 +3875,14 @@ Fri Sep  1 15:25:28 PDT 2000	Michael Jennings <mej@eterm.org>
 	shot.
 	
 -------------------------------------------------------------------------------
+Fri Sep  1 21:03:53 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	I'm working on some deallocators now.  The idea is that when Eterm
+	exits and memory debugging is on, several routines get called to free
+	the in-use memory (menus, font cache, etc.) that we still know about.
+	Anything left after that would be either unavoidable leaks (like
+	environment variables...read the putenv() man page sometime...sigh)
+	or genuine memory leaks that need fixing.  I'm down to about 4.5K of
+	leftover malloc'd memory now.  Making progress....
+	
+-------------------------------------------------------------------------------

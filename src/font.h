@@ -46,6 +46,7 @@
 #define SHADOW_BOTTOM_LEFT   2
 #define SHADOW_BOTTOM_RIGHT  3
 
+/* The macros are used to advance to the next/previous font as with Ctrl-> and Ctrl-< */
 #define NEXT_FONT(i)   do { if (font_idx + ((i)?(i):1) >= font_cnt) {font_idx = font_cnt - 1;} else {font_idx += ((i)?(i):1);} \
                             while (!etfonts[font_idx]) {if (font_idx == font_cnt) {font_idx--; break;} font_idx++;} } while (0)
 #define PREV_FONT(i)   do { if (font_idx - ((i)?(i):1) < 0) {font_idx = 0;} else {font_idx -= ((i)?(i):1);} \
@@ -55,10 +56,11 @@
 
 /************ Structures ************/
 typedef struct cachefont_struct {
-  char *name;
-  unsigned char type;
-  unsigned char ref_cnt;
+  char *name;             /* Font name in canonical format */
+  unsigned char type;     /* Font type (FONT_TYPE_* from above */
+  unsigned char ref_cnt;  /* Reference count */
   union {
+    /* This union will eventually have members for TTF/Fnlib fonts */
     XFontStruct *xfontinfo;
   } fontinfo;
   struct cachefont_struct *next;
@@ -86,6 +88,8 @@ _XFUNCPROTOBEGIN
 
 extern void eterm_font_add(char ***plist, const char *fontname, unsigned char idx);
 extern void eterm_font_delete(char **flist, unsigned char idx);
+extern void eterm_font_list_clear(void);
+extern void font_cache_clear(void);
 extern void *load_font(const char *, const char *, unsigned char);
 extern void free_font(const void *);
 extern void change_font(int, const char *);

@@ -7,3 +7,4 @@ for i in *.c src/*.c utils/*.c ; do
   fi
 done
 
+perl -p -i.bak -e 's/(\w+)_t (\*+)\s+/$1_t ($2)/g;' */*.[ch]

@@ -94,7 +94,7 @@ scrollbar_event_init_dispatcher(void)
 }
 
 unsigned char
-sb_handle_enter_notify(event_t * ev)
+sb_handle_enter_notify(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_enter_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -114,7 +114,7 @@ sb_handle_enter_notify(event_t * ev)
 }
 
 unsigned char
-sb_handle_leave_notify(event_t * ev)
+sb_handle_leave_notify(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -134,7 +134,7 @@ sb_handle_leave_notify(event_t * ev)
 }
 
 unsigned char
-sb_handle_focus_in(event_t * ev)
+sb_handle_focus_in(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -145,7 +145,7 @@ sb_handle_focus_in(event_t * ev)
 }
 
 unsigned char
-sb_handle_focus_out(event_t * ev)
+sb_handle_focus_out(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_focus_out(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -156,7 +156,7 @@ sb_handle_focus_out(event_t * ev)
 }
 
 unsigned char
-sb_handle_expose(event_t * ev)
+sb_handle_expose(event_t *ev)
 {
 
   XEvent unused_xevent;
@@ -181,7 +181,7 @@ sb_handle_expose(event_t * ev)
 }
 
 unsigned char
-sb_handle_button_press(event_t * ev)
+sb_handle_button_press(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_button_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -282,7 +282,7 @@ sb_handle_button_press(event_t * ev)
 }
 
 unsigned char
-sb_handle_button_release(event_t * ev)
+sb_handle_button_release(event_t *ev)
 {
 
   Window root, child;
@@ -321,7 +321,7 @@ sb_handle_button_release(event_t * ev)
 }
 
 unsigned char
-sb_handle_motion_notify(event_t * ev)
+sb_handle_motion_notify(event_t *ev)
 {
 
   D_EVENTS(("sb_handle_motion_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
@@ -349,7 +349,7 @@ sb_handle_motion_notify(event_t * ev)
 }
 
 unsigned char
-scrollbar_dispatch_event(event_t * ev)
+scrollbar_dispatch_event(event_t *ev)
 {
   if (scrollbar_event_data.handlers[ev->type] != NULL) {
     return ((scrollbar_event_data.handlers[ev->type]) (ev));

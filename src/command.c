@@ -1119,7 +1119,16 @@ install_handlers(void)
 void
 clean_exit(void)
 {
-  scr_release();
+#if DEBUG >= DEBUG_MEM
+  if (DEBUG_LEVEL >= DEBUG_MEM) {
+    /* Deallocate all our crap to help find memory leaks */
+    scr_release();
+    menulist_clear(menu_list);
+    font_cache_clear();
+    eterm_font_list_clear();
+  }
+#endif
+
   privileges(INVOKE);
 
 #ifndef __CYGWIN32__
@@ -1471,7 +1480,7 @@ get_tty(void)
                                    } while (0)
 #  define SHOW_CONT_CHAR(entry, name) fprintf(stderr, "%s=%#3o ", name, ttymode->c_cc[entry])
 static void
-debug_ttymode(ttymode_t * ttymode)
+debug_ttymode(ttymode_t *ttymode)
 {
 
   /* c_iflag bits */
@@ -1541,7 +1550,7 @@ debug_ttymode(ttymode_t * ttymode)
 
 /* get_ttymode() */
 static void
-get_ttymode(ttymode_t * tio)
+get_ttymode(ttymode_t *tio)
 {
 #ifdef HAVE_TERMIOS_H
   /*
