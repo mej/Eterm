@@ -4632,3 +4632,9 @@ Also merged in Azundris' Escreen patch.  It's disabled by default for
 the moment pending further testing, but you can enable it manually by
 defining ESCREEN.
 ----------------------------------------------------------------------
+Sat May  4 11:12:19 2002                        Michael Jennings (mej)
+
+Added a --enable-escreen option for those who wish to try it out.
+Also fixed the compile with Escreen and profiling are both enabled,
+and disabled Escreen debugging.
+----------------------------------------------------------------------

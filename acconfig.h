@@ -363,6 +363,7 @@
 #undef WINDOWS_IDENT
 #undef HAVE_SAVED_UIDS
 #undef MOUSEWHEEL
+#undef ESCREEN
 
 
 /* Leave that blank line there!!  Autoheader needs it.

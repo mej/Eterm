@@ -16,7 +16,7 @@
 #define NS_PARANOID
 
 /* define NS_DEBUG to get debug-info. no support for those who undef this. */
-#define NS_DEBUG
+#undef NS_DEBUG
 
 /* debug memory stuff. never actually used this. */
 #undef  NS_DEBUG_MEM

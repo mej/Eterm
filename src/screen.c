@@ -1630,12 +1630,12 @@ scr_refresh(int type)
 #endif
     int ascent, descent;
 
+    PROF_INIT(scr_refresh);
+
 #ifdef ESCREEN
     if (TermWin.screen_mode)
         nrows--;
 #endif
-
-    PROF_INIT(scr_refresh);
 
     switch (type) {
       case NO_REFRESH:
