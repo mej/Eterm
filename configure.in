@@ -506,6 +506,7 @@ AC_ARG_ENABLE(xim,
 	        AC_DEFINE(USE_XIM)
 	        XIM="TRUE"
 )
+
 AC_MSG_CHECKING(for Greek keyboard support)
 AC_ARG_ENABLE(greek,
 [  --enable-greek          compile with support for Greek keyboards],
@@ -516,6 +517,17 @@ AC_ARG_ENABLE(greek,
               AC_MSG_RESULT(no)
             fi, AC_MSG_RESULT(no)
 )
+
+CONFIG_BUFF_SIZE=20480
+AC_MSG_CHECKING(for the buffer size of the config file parser)
+AC_ARG_WITH(config-buffer-size,
+[  --config-buffer-size    specifies the size of the buffer Eterm uses for parsing the config file (default is 20 Kb)],
+            if test "$withval" != "yes" -a "$withval" != "no"; then
+              CONFIG_BUFF_SIZE=$withval
+            fi)
+AC_MSG_RESULT($CONFIG_BUFF_SIZE bytes)
+AC_DEFINE_UNQUOTED(CONFIG_BUFF, $CONFIG_BUFF_SIZE)
+
 AC_ARG_WITH(terminfo,
 [  --without-terminfo      do not compile the Eterm terminfo file],
             if test "$withval" = "yes"; then 
@@ -523,6 +535,7 @@ AC_ARG_WITH(terminfo,
             else
               TIC=true
             fi)
+
 AC_ARG_WITH(theme-update,
 [  --with-theme-update     existing themes will be forceably removed and new ones installed],
             if test "$withval" = "yes"; then 

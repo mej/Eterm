@@ -1440,7 +1440,9 @@ builtin_get(char *param)
   v = conf_get_var(s);
   FREE(s);
   if (v) {
-    FREE(f);
+    if (f) {
+      FREE(f);
+    }
     return (StrDup(v));
   } else if (f) {
     return f;
@@ -1677,11 +1679,10 @@ shell_expand(char *s)
               strncpy(new + j, Output, max - j);
               cnt2 = max - j - 1;
               j += MIN(l, cnt2);
-              FREE(Output);
             } else {
-              FREE(Output);
               j--;
             }
+            FREE(Output);
 	  } else {
 	    j--;
 	  }
@@ -1702,12 +1703,16 @@ shell_expand(char *s)
           Command = shell_expand(Command);
           Output = builtin_exec(Command);
 	  FREE(Command);
-	  if (Output && *Output) {
-	    l = strlen(Output) - 1;
-	    strncpy(new + j, Output, max - j);
-            cnt2 = max - j - 1;
-	    j += MIN(l, cnt2);
-	    FREE(Output);
+	  if (Output) {
+            if (*Output) {
+              l = strlen(Output) - 1;
+              strncpy(new + j, Output, max - j);
+              cnt2 = max - j - 1;
+              j += MIN(l, cnt2);
+            } else {
+              j--;
+            }
+            FREE(Output);
 	  } else {
 	    j--;
 	  }
@@ -3442,7 +3447,11 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
 	      file_poke_outfile(outfile);
 	    }
 	  } else {
-	    print_error("Parse error in file %s, line %lu:  Undefined macro \"%s\"", file_peek_path(), file_peek_line(), buff);
+            D_OPTIONS(("read_config():  Parsing line #%lu of file %s\n", file_peek_line(), file_peek_path()));
+            if (file_peek_skip()) {
+              continue;
+            }
+            shell_expand(buff);
 	  }
 	  break;
 	case 'b':

@@ -98,9 +98,6 @@
 		       } \
                      } while(0)
 
-/* Max length of a line in the config file */
-#define CONFIG_BUFF 20480
-
 /* The context table */
 #define ctx_name_to_id(the_id, n, i) do { \
                                        for ((i)=0; (i) <= ctx_idx; (i)++) { \

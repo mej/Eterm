@@ -3204,3 +3204,41 @@ Thu Feb 17 21:38:23 PST 2000	Michael Jennings <mej@eterm.org>
 	tried testing it at *all*, so I'm not prepared to talk about it.
 	
 -------------------------------------------------------------------------------
+Fri Feb 18 21:09:29 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Okay, I've added a new option to configure.  --config-buffer-size=NNNN
+	will set the theme parser's line buffer size.  What does this mean?
+	Well, this determines how big a line being parsed can get at any one
+	stage of parsing.  So if you use %dirscan() on a large directory, or
+	you use %random() on a large list, or you simply have some very large
+	lines in your config file, making this buffer size larger will enable
+	them to be handled.  The down side to this is that your Eterms will
+	appear to take up more memory.  In reality they don't, since all that
+	memory gets freed, but it isn't returned to the OS until Eterm exits,
+	and the RSS won't go down unless part or all of Eterm is swapped out
+	by the OS.  So you've been warned. :-)
+
+	For those who didn't go digging by themselves, what I added yesterday
+	were three new builtin functions:
+
+	%get(variable)         Retrieves the value of a theme variable
+	%put(variable value)   Sets the value of a theme variable
+	%put(variable)         Removes a theme variable
+	%dirscan(directory)    Returns a list of the files in a directory
+
+	Everything here should be fairly self-explanatory.  The variables
+	are internal to Eterm.  They will last until Eterm exits, so you
+	can refer to them in later theme files, unless of course you call
+	%put() with a variable but no value (which removes the variable).
+	Also note that %dirscan() returns only the filenames, not the
+	full pathnames.  This is for two reasons:  One, you already know the
+	path to the file since you specified it.  Two, it enables handling of
+	directories with larger numbers of files since the path isn't
+	uselessly duplicated for each entry it generates.
+
+	These new functions will be the backbone for a new random background
+	system since the *.list files are rather clumsy in a lot of ways.  I
+	am not yet sure how it will work exactly, but I know I'll need these
+	functions to do it. :-)
+	
+-------------------------------------------------------------------------------

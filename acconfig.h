@@ -328,6 +328,7 @@
 #undef ENABLE_PROFILE
 #undef KS_HOME
 #undef KS_END
+#undef CONFIG_BUFF
 
 
 /* Leave that blank line there!!  Autoheader needs it.
