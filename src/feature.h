@@ -209,12 +209,13 @@
 /* To control what the Eterm detection sequence, ESC-Z, replies with */
 /* #define ESCZ_ANSWER	"\033[?1;2C" */
 
-/* Comment this out to allow printing of the VT100_ANS sequence. See
- * command.c. I have no idea what this is supposed to do, but disabling
- * it will prevent your terminal from getting garbage when ^E (ctrl-E)
- * is printed on it.
+/* Defining NO_ENQ_ANS disables the response to the ENQ (Ctrl-E) character.  I
+ * don't believe xterm answers this one, so neither will we by default.  xterm
+ * does, however, answer the ANSI/ECMA-48 DA sequence \e[c (the u9 capability),
+ * so we will too.
  */
-#define NO_VT100_ANS
+#define NO_ENQ_ANS
+/* #define NO_VT100_ANS */
 
 /* Allow changing of the foreground and background colors with "\E]39;color^G" */
 #define XTERM_COLOR_CHANGE

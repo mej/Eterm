@@ -4140,3 +4140,20 @@ Wed May  9 23:03:20 PDT 2001	Michael Jennings <mej@eterm.org>
 	the pointer move along with the menu when a move is necessary.
 	
 -------------------------------------------------------------------------------
+Wed May 16 18:09:55 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	I made several corrections to the terminfo entry noted by Thomas
+	Dickey <dickey@herndon4.his.com>:
+
+	 - Removed cvvis.  It wasn't actually supported and thus conflicted
+	   with cnorm.
+	 - Removed kf0, which conflicted with kf10.
+	 - Added the CPR (u6) capability which I inadvertantly omitted.
+
+	I also removed the extraneous identities, keeping only "Eterm" and
+	"Eterm-color".
+
+	In a similar vein, I enabled the u8/u9 handshake while keeping the
+	ENQ (^E) response disabled.
+	
+-------------------------------------------------------------------------------

@@ -12,6 +12,7 @@ Eterm.1.html: Eterm.1
 
 install-data-hook:
 	$(TIC) Eterm.ti || (mkinstalldirs $(HOME)/.terminfo && $(TIC) -o$(HOME)/.terminfo Eterm.ti) || :
+	-infocmp -C -sc Eterm | sed -e '/Reconstructed/d' -e '/\.\.sa=/d' > Eterm.tcap.new && mv Eterm.tcap.new Eterm.tcap || rm -f Eterm.tcap.new
 
 EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti Makefile.am Makefile.in
 

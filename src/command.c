@@ -2687,7 +2687,7 @@ main_loop(void)
       scr_add_lines(str, nlines, (cmdbuf_ptr - str));
     } else {
       switch (ch) {
-# ifdef NO_VT100_ANS
+# ifdef NO_ENQ_ANS
 	case 005:
 	  break;
 # else

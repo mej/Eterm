@@ -1,10 +1,11 @@
 # Eterm terminfo file
 
-Eterm-base|Eterm basic terminal capabilities,
+Eterm|Eterm-color|Eterm with xterm-style color support (X Window System),
 # FIXME:  xterm does not specify bce, bw, eo, or xon.  Should we?
 	am, bw, bce, km, mir, msgr, xenl, xon, eo, mc5i,
 	cols#80, lines#24, it#8, lm#0, btns#5,
 	cr=\r, bel=^G,
+	colors#8, pairs#64,
 
 # Scroll text down/up one line
 	ind=\n, ri=\eM,
@@ -36,8 +37,8 @@ Eterm-base|Eterm basic terminal capabilities,
 
 # Turn on/off auto margins
 	smam=\e[?7h, rmam=\e[?7l,
-# Make cursor invisible, normal, bold (not supported)
-	civis=\e[?25l, cnorm=\e[?25h, cvvis=\e[?25h,
+# Make cursor invisible, normal  (bold cursor cvvis not supported)
+	civis=\e[?25l, cnorm=\e[?25h,
 # Save/restore cursor position
 	sc=\e7, rc=\e8,
 
@@ -83,8 +84,6 @@ Eterm-base|Eterm basic terminal capabilities,
 	kf6=\e[17~, kf7=\e[18~, kf8=\e[19~, kf9=\e[20~, kf10=\e[21~,
 	kf11=\e[23~, kf12=\e[24~, kf13=\e[25~, kf14=\e[26~, kf15=\e[28~,
 	kf16=\e[29~, kf17=\e[31~, kf18=\e[32~, kf19=\e[33~, kf20=\e[34~,
-# F0, same as F10
-	kf0=\e[21~,
 
 # Find, Insert, Delete, Select, Prior (PgUp), Next (PgDn).  The first set of
 # sequences are accurate.  The second set lets Find/Select act like Home/End.
@@ -111,10 +110,10 @@ Eterm-base|Eterm basic terminal capabilities,
 
 # Reset terminal, turn off all attributes
 	rs1=\e>\e[1;3;4;5;6l\e[?7h\e[m\e[r\e[2J\e[H,
-	rs2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l\e[4l\e>,
+	rs2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l\e>,
 # Init terminal
 	is1=\e[?47l\e>\e[?1l,
-	is2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l\e[4l,
+	is2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l,
 
 # Enter/leave cursor address mode.  The 1st set uses the
 # secondary screen.  The 2nd one doesn't.
@@ -125,28 +124,23 @@ Eterm-base|Eterm basic terminal capabilities,
 	mc4=\e[4i, mc5=\e[5i,
 
 # User-defined string capabilities
-# Report current screen position
+# Cursor Position Report (CPR)
+	u6=\e[%i%d;%dR,
+# Report current screen position (DSR 6) (replies with u6)
 	u7=\e[6n,
 # vt100 answerback
 	u8=\e[?1;2c,
-# Request identity (replies with u8)
+# Request identity (replies with u8)  If VT100_ANS is enabled, use
+# the first value.  If ENQ_ANS is enabled, use the second value.
 	u9=\e[c,
+##	u9=^E,
 
-###### Add ANSI color support
-Eterm-ansi|Eterm with ANSI color (X Window System),
-	use=Eterm-base,
+# Add ANSI color support
  	sgr=\e[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t^N%e^O%;,
 ##	sgr=\e[%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p6%t;1%;m,
 
-###### Add mouse reporting
-Eterm-mouse|Eterm with X11 mouse reporting,
-	use=Eterm-ansi,
 # Mouse info packet introducer
 	kmous=\e[M,
-
-###### Add xterm-style color sequences.
-Eterm|Eterm-color|Eterm with xterm-style color support (X Window System),
-	use=Eterm-mouse, colors#8, pairs#64,
 
 # Revert to the original foreground/background pair
 	op=\e[39;49m,
