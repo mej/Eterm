@@ -4620,21 +4620,9 @@ Mon Apr 29 10:48:33 2002                        Michael Jennings (mej)
 Disable the screen dump escape sequence and implement a save_buff()
 script function instead.
 ----------------------------------------------------------------------
-Mon Apr 29 17:44:46 2002                        Michael Jennings (mej)
+Mon Apr 29 21:18:20 2002                        Michael Jennings (mej)
 
-Use the new option parser in libast.  You will need the latest libast
-from CVS to use this version, but if you have it, and you've always
-been bugged by that -F -font-name-with-dashes problem, give this a
-try.
-
-This branch is a playground for 0.10 development.  Be careful before
-attempting to use anything you get from here.
-----------------------------------------------------------------------
-Mon Apr 29 21:06:07 2002                        Michael Jennings (mej)
-
-Oops...need to pre-parse some of those options. :)
-
-Also fixed the --install option which hasn't worked for ages.
+Fixed the --install option which hasn't worked for ages.
 ----------------------------------------------------------------------
 Sat May  4 10:23:38 2002                        Michael Jennings (mej)
 
@@ -4655,18 +4643,13 @@ Tue May  7 10:16:56 2002                        Michael Jennings (mej)
 configure.in and configure.ac should no longer differ, so let's not
 maintain both.
 ----------------------------------------------------------------------
-Thu May  9 11:30:15 2002                        Michael Jennings (mej)
-
-Getting synced back up with the main trunk.  This includes Azundris'
-Escreen patch and re-indenting the code.
-----------------------------------------------------------------------
-Thu May  9 11:39:02 2002                        Michael Jennings (mej)
-
-Now works with the latest libast.
-----------------------------------------------------------------------
-Mon May 13 19:15:34 2002                        Michael Jennings (mej)
+Mon May 13 18:46:06 2002                        Michael Jennings (mej)
 
 Latest Escreen patch from Azundris <hacks@azundris.com>.
+----------------------------------------------------------------------
+Mon May 13 19:18:46 2002                        Michael Jennings (mej)
+
+Fixed indentation.
 ----------------------------------------------------------------------
 Mon May 13 23:58:16 2002                        Michael Jennings (mej)
 
@@ -5241,8 +5224,4 @@ Fri Jun 25 17:48:24 2004                        Michael Jennings (mej)
 Chris Schoeneman <crs23@bigfoot.com> pointed out that Eterm didn't get
 keypresses if another app (like synergy) decided to listen for its
 events.  This should correct that behavior.
-----------------------------------------------------------------------
-Mon Jun 28 12:04:05 2004                        Michael Jennings (mej)
-
-Merge.
 ----------------------------------------------------------------------
