@@ -476,6 +476,20 @@ redraw_image(unsigned char which) {
   }
 }
 
+void
+redraw_images_by_mode(unsigned char mode) {
+
+  if (mode == MODE_SOLID) {
+    redraw_all_images();
+  } else {
+    if (image_mode_is(image_bg, mode)) {
+      render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+      scr_touch();
+    }
+    scrollbar_draw(mode);
+  }
+}
+
 static void
 copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height)
 {
@@ -1249,7 +1263,7 @@ get_desktop_pixmap(void)
   Pixmap p;
   Atom prop, type, prop2;
   int format;
-  static Pixmap color_pixmap = None;
+  static Pixmap color_pixmap = None, orig_desktop_pixmap = None;
   unsigned long length, after;
   unsigned char *data;
 
@@ -1278,12 +1292,13 @@ get_desktop_pixmap(void)
       p = *((Pixmap *) data);
       if (p != None) {
         D_PIXMAP(("  Found pixmap 0x%08x\n", p));
-        if (desktop_pixmap == p) {
+        if (orig_desktop_pixmap == p) {
           D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap is unchanged.\n"));
           return ((Pixmap) 1);
         } else {
           D_PIXMAP(("get_desktop_pixmap():  Desktop pixmap has changed.  Updating desktop_pixmap\n"));
           free_desktop_pixmap();
+          orig_desktop_pixmap = p;
           if (need_colormod(images[image_bg].current->iml)) {
             int px, py;
             unsigned int pw, ph, pb, pd;
@@ -1307,9 +1322,11 @@ get_desktop_pixmap(void)
             }
             XFreeGC(Xdisplay, gc);
             desktop_pixmap_is_mine = 1;
+            D_PIXMAP(("get_desktop_pixmap() returning 0x%08x\n", (unsigned int) desktop_pixmap));
             return (desktop_pixmap);
           } else {
             desktop_pixmap_is_mine = 0;
+            D_PIXMAP(("get_desktop_pixmap() returning 0x%08x\n", (unsigned int) p));
             return (desktop_pixmap = p);
           }
         }

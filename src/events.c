@@ -252,7 +252,7 @@ handle_property_notify(event_t * ev)
           /* Pixmap is unchanged */
           return 1;
         }
-        redraw_all_images();
+        redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
         return 1;
       }
     }
@@ -265,7 +265,7 @@ handle_property_notify(event_t * ev)
           /* Pixmap is unchanged */
           return 1;
         }
-        redraw_all_images();
+        redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
         return 1;
       }
     }
@@ -275,7 +275,7 @@ handle_property_notify(event_t * ev)
     D_EVENTS(("handle_property_notify():  On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
     if ((prop != None) && (ev->xproperty.atom == prop)) {
       if ((enl_ipc_get_win()) != None) {
-        redraw_all_images();
+        redraw_images_by_mode(MODE_AUTO);
       }
     }
   }

@@ -168,6 +168,7 @@ extern unsigned char check_image_ipc(unsigned char);
 extern void reset_simage(simage_t *, unsigned long);
 extern void paste_simage(simage_t *, unsigned char, Window, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);
+extern void redraw_images_by_mode(unsigned char);
 extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
 extern const char *search_path(const char *, const char *, const char *);
 extern unsigned short load_image(const char *, short);

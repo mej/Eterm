@@ -1881,7 +1881,7 @@ xterm_seq(int op, const char *str)
             break;
           }
           get_desktop_pixmap();
-          redraw_all_images();
+          redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
 	  break;
 #endif
 	case 10:
@@ -1950,7 +1950,7 @@ xterm_seq(int op, const char *str)
 	case 24:
 	  nstr = (char *) strsep(&tnstr, ";");
           FOREACH_IMAGE(if (!image_mode_is(idx, MODE_VIEWPORT) && image_mode_is(idx, ALLOW_VIEWPORT)) {image_set_mode(idx, MODE_VIEWPORT);});
-          redraw_all_images();
+          redraw_images_by_mode(MODE_VIEWPORT);
 	  break;
 	case 25:
 	  nstr = (char *) strsep(&tnstr, ";");
