@@ -4245,3 +4245,7 @@ Mon Jun 18 13:51:07 2001                        Michael Jennings (mej)
 Oops.  ChangeLog entries were ending up in the bit-bucket.  Fixed and
 re-synced. :)
 ----------------------------------------------------------------------
+Mon Jun 18 16:12:45 2001                        Michael Jennings (mej)
+
+Adding a scaled background; we need at least 1. :)
+----------------------------------------------------------------------
