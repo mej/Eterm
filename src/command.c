@@ -122,7 +122,6 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/strings.h"
 #include "events.h"
 #include "font.h"
-#include "graphics.h"
 #include "grkelot.h"
 #include "options.h"
 #include "pixmap.h"

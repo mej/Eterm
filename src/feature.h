@@ -108,9 +108,6 @@
  * problems some people have had. See also NO_BOLDOVERSTRIKE. */
 # define FORCE_CLEAR_CHARS
 
-/* Rob Nation's graphics escape sequences */
-/* #define RXVT_GRAPHICS */
-
 /* The command through which to pipe print-screen requests */
 #define PRINTPIPE	"lp"
 

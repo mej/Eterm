@@ -635,11 +635,6 @@ version(void)
 #else
   printf(" -FORCE_CLEAR_CHARS");
 #endif
-#ifdef RXVT_GRAPHICS
-  printf(" +RXVT_GRAPHICS");
-#else
-  printf(" -RXVT_GRAPHICS");
-#endif
 #ifdef PREFER_24BIT
   printf(" +PREFER_24BIT");
 #else

@@ -178,7 +178,6 @@ extern void process_xterm_seq(void);
 extern void process_window_mode(unsigned int, int []);
 extern void process_terminal_mode(int, int, unsigned int, int []);
 extern void process_sgr_mode(unsigned int, int []);
-extern void process_graphics(void);
 extern void color_aliases(int);
 #ifndef NO_BRIGHTCOLOR
 extern void set_colorfgbg(void);

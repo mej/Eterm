@@ -44,7 +44,6 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "e.h"
 #include "events.h"
-#include "graphics.h"
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"
@@ -474,7 +473,6 @@ handle_expose(event_t * ev)
 
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
-    Gr_expose(ev->xany.window);
   }
   if (desktop_window != None) {
     XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
@@ -503,9 +501,7 @@ handle_button_press(event_t * ev)
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
 
   if (ev->xany.window == TermWin.vt) {
-    if (ev->xbutton.subwindow != None) {
-      Gr_ButtonPress(ev->xbutton.x, ev->xbutton.y);
-    } else {
+    if (ev->xbutton.subwindow == None) {
       if (button_state.report_mode) {
 	if (PrivateModes & PrivMode_MouseX10) {
 	  /* no state info allowed */
@@ -567,9 +563,7 @@ handle_button_release(event_t * ev)
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
 
   if (ev->xany.window == TermWin.vt) {
-    if (ev->xbutton.subwindow != None)
-      Gr_ButtonRelease(ev->xbutton.x, ev->xbutton.y);
-    else {
+    if (ev->xbutton.subwindow == None) {
       if (button_state.report_mode) {
 	switch (PrivateModes & PrivMode_mouse_report) {
 	  case PrivMode_MouseX10:

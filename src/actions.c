@@ -44,7 +44,6 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "e.h"
 #include "events.h"
-#include "graphics.h"
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"

@@ -52,7 +52,6 @@ static const char cvs_ident[] = "$Id$";
 #include "command.h"
 #include "eterm_utmp.h"
 #include "events.h"
-#include "graphics.h"
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
@@ -205,7 +204,6 @@ eterm_bootstrap(int argc, char *argv[])
 
   Create_Windows(argc, argv);
   scr_reset();			/* initialize screen */
-  Gr_reset();			/* reset graphics */
 
   /* add scrollBar, do it directly to avoid resize() */
   scrollbar_mapping(Options & Opt_scrollBar);

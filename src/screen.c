@@ -27,7 +27,6 @@ static const char cvs_ident[] = "$Id$";
 #include "debug.h"
 #include "startup.h"
 #include "mem.h"
-#include "graphics.h"
 #include "screen.h"
 #include "scrollbar.h"
 #include "options.h"
@@ -410,7 +409,6 @@ scr_poweron(void)
   scr_reset();
   XClearWindow(Xdisplay, TermWin.vt);
   scr_refresh(SLOW_REFRESH);
-  Gr_reset();
 }
 
 /* ------------------------------------------------------------------------- *
@@ -482,19 +480,15 @@ scr_change_screen(int scrn)
   screen.flags |= Screen_VisibleCursor;
   swap.flags |= Screen_VisibleCursor;
 
-  GR_DISPLAY(Gr_scroll(0));
-  GR_DISPLAY(Gr_ChangeScreen());
 #else
 # ifndef DONT_SCROLL_ME
-  GR_DISPLAY(Gr_ClearScreen);
   if (current_screen == PRIMARY)
     if (current_screen == PRIMARY) {
-      GR_NO_DISPLAY(scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0));
+      scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0);
       for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++)
 	if (screen.text[i] == NULL) {
 	  make_screen_mem(screen.text, screen.rend, i);
-	  blank_line(screen.text[i], screen.rend[i], TermWin.ncol,
-		     DEFAULT_RSTYLE);
+	  blank_line(screen.text[i], screen.rend[i], TermWin.ncol, DEFAULT_RSTYLE);
 	  screen.text[i][TermWin.ncol] = 0;
 	}
     }
@@ -709,7 +703,6 @@ scroll_text(int row1, int row2, int count, int spec)
     }
     count = -count;
   }
-  GR_DISPLAY(Gr_scroll(count));
 #ifdef PROFILE_SCREEN
   P_SETTIMEVAL(cnt.stop);
   total_time += P_CMPTIMEVALS_USEC(cnt.start, cnt.stop);
@@ -956,7 +949,6 @@ scr_gotorc(int row, int col, int relative)
 
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
-  GR_DISPLAY(Gr_scroll(0));
 
   screen.col = ((relative & C_RELATIVE) ? (screen.col + col) : col);
   MAX_IT(screen.col, 0);
@@ -1004,7 +996,6 @@ scr_index(int direction)
 
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
-  GR_DISPLAY(Gr_scroll(0));
 
   if (screen.flags & Screen_WrapNext) {
     screen.flags &= ~Screen_WrapNext;
@@ -1042,7 +1033,6 @@ scr_erase_line(int mode)
   D_SCREEN(("scr_erase_line(%d) at screen row: %d\n", mode, screen.row));
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
-  GR_DISPLAY(Gr_scroll(0));
 
   if (screen.flags & Screen_WrapNext)
     screen.flags &= ~Screen_WrapNext;
@@ -1102,7 +1092,6 @@ scr_erase_screen(int mode)
       num = screen.row;
       break;
     case 2:			/* erase whole screen */
-      Gr_ClearScreen();
       row = 0;
       num = TermWin.nrow;
       break;
@@ -1175,7 +1164,6 @@ scr_insdel_lines(int count, int insdel)
 
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
-  GR_DISPLAY(Gr_scroll(0));
 
   if (screen.row > screen.bscroll)
     return;
@@ -1217,7 +1205,6 @@ scr_insdel_chars(int count, int insdel)
 
   ZERO_SCROLLBACK;
   RESET_CHSTAT;
-  GR_DISPLAY(Gr_scroll(0));
 
   if (count <= 0)
     return;
@@ -1516,7 +1503,6 @@ big5dummy(unsigned char *str, int len)
 }
 #endif
 
-/* ------------------------------------------------------------------------- */
 void
 set_multichar_encoding(const char *str)
 {
@@ -1537,34 +1523,7 @@ set_multichar_encoding(const char *str)
 #endif /* MULTI_CHARSET */
 }
 
-/* ------------------------------------------------------------------------- *
- *                           GRAPHICS COLORS                                * 
- * ------------------------------------------------------------------------- */
-
-#ifdef RXVT_GRAPHICS
-int
-scr_get_fgcolor(void)
-{
-  return GET_FGCOLOR(rstyle);
-}
-#endif
-
-/* ------------------------------------------------------------------------- */
-#ifdef RXVT_GRAPHICS
-int
-scr_get_bgcolor(void)
-{
-  return GET_BGCOLOR(rstyle);
-}
-#endif
-
-/* ------------------------------------------------------------------------- *
- *                        MAJOR SCREEN MANIPULATION                          * 
- * ------------------------------------------------------------------------- */
-
-/*
- * Refresh an area
- */
+/* Refresh an area */
 void
 scr_expose(int x, int y, int width, int height)
 {
@@ -1654,7 +1613,6 @@ scr_move_to(int y, int len)
   MAX_IT(TermWin.view_start, 0);
   MIN_IT(TermWin.view_start, TermWin.nscrolled);
 
-  GR_DISPLAY(Gr_scroll(0));
   return (TermWin.view_start - start);
 }
 /* ------------------------------------------------------------------------- */
@@ -1677,7 +1635,6 @@ scr_page(int direction, int nlines)
   MAX_IT(TermWin.view_start, 0);
   MIN_IT(TermWin.view_start, TermWin.nscrolled);
 
-  GR_DISPLAY(Gr_scroll(0));
   return (TermWin.view_start - start);
 }
 

@@ -2570,3 +2570,9 @@ Mon Oct 11 15:54:52 PDT 1999	Michael Jennings <mej@eterm.org>
 	SVR4-style pty's (/dev/pts/*) under Linux.
 	
 -------------------------------------------------------------------------------
+Mon Oct 11 16:48:22 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	More useless, hackish, and/or poorly-written code meets an untimely
+	end.
+	
+-------------------------------------------------------------------------------

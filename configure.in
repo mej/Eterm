@@ -523,7 +523,6 @@ utils/Makefile \
 libmej/Makefile \
 pix/Makefile \
 src/Makefile \
-src/graphics/Makefile \
 themes/Makefile \
 Eterm.spec \
 )
