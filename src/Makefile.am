@@ -3,7 +3,7 @@
 lib_LTLIBRARIES = libEterm.la
 bin_PROGRAMS = Eterm
 
-MMX_SRCS = $(srcdir)/mmx_cmod.S
+MMX_SRCS = mmx_cmod.S
 MMX_OBJS = mmx_cmod.lo
 
 libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c          \
@@ -14,16 +14,14 @@ libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c         
                       screen.h scrollbar.c scrollbar.h startup.c startup.h       \
                       system.c system.h term.c term.h timer.c timer.h utmp.c     \
                       windows.c windows.h
+EXTRA_libEterm_la_SOURCES = $(MMX_SRCS)
+
 libEterm_la_LDFLAGS = -release $(VERSION)
 if HAVE_MMX
 libEterm_la_DEPENDENCIES = feature.h $(MMX_OBJS)
 libEterm_la_LIBADD = $(MMX_OBJS)
 else
 libEterm_la_DEPENDENCIES = feature.h
-endif
-
-if HAVE_MMX
-$(MMX_OBJS): $(MMX_SRCS)
 endif
 
 Eterm_SOURCES = main.c
