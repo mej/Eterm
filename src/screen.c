@@ -247,18 +247,19 @@ scr_reset(void)
       drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
       swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
 
-      k = min(TermWin.nscrolled, TermWin.nrow - prev_nrow);
+      k = MIN(TermWin.nscrolled, TermWin.nrow - prev_nrow);
       for (i = prev_total_rows; i < total_rows - k; i++) {
+        screen.text[i] = NULL;
         blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
       }
-      for (i = total_rows - k; i < total_rows; i++) {
+      for ( /* i = total_rows - k */ ; i < total_rows; i++) {
         screen.text[i] = NULL;
         screen.rend[i] = NULL;
       }
       for (i = prev_nrow; i < TermWin.nrow; i++) {
+        swap.text[i] = NULL;
+        drawn_text[i] = NULL;
         blank_screen_mem(swap.text, swap.rend, i, DEFAULT_RSTYLE);
-      }
-      for (i = prev_nrow; i < TermWin.nrow; i++) {
         blank_screen_mem(drawn_text, drawn_rend, i, DEFAULT_RSTYLE);
       }
       if (k > 0) {

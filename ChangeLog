@@ -2991,3 +2991,9 @@ Mon Jan  3 12:47:59 PST 2000	Michael Jennings <mej@eterm.org>
 	focus changed.  Pointed out by cirin <stevenr@houston.rr.com>.
 	
 -------------------------------------------------------------------------------
+Mon Jan  3 19:36:16 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a seg fault on large resizes.  Also redid some of the memory
+	tracking code to provide more information.
+	
+-------------------------------------------------------------------------------

@@ -3113,14 +3113,13 @@ init_defaults(void)
 {
   unsigned char i;
 
-  rs_name = StrDup(APL_NAME " " VERSION);
-
 #if DEBUG >= DEBUG_MALLOC
   if (debug_level >= DEBUG_MALLOC) {
     memrec_init();
   }
 #endif
 
+  rs_name = StrDup(APL_NAME " " VERSION);
   Options = (Opt_scrollbar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
   display_name = NULL;

@@ -42,11 +42,10 @@ typedef struct memrec_struct {
 #  define REALLOC(mem,sz)	realloc((mem), (sz))
 #  define FREE(ptr)		do { free(ptr); ptr = NULL; } while (0)
 #elif (DEBUG >= DEBUG_MALLOC)
-#  define MALLOC(sz)		Malloc(sz)
-#  define CALLOC(type,n)	Calloc((n),(sizeof(type)))
-#  define REALLOC(mem,sz)	Realloc((mem),(sz))
-/* #  define FREE(ptr)		Free(ptr) */
-#  define FREE(ptr)		do { Free(ptr); ptr = NULL; } while (0)
+#  define MALLOC(sz)		Malloc(__FILE__, __LINE__, sz)
+#  define CALLOC(type,n)	Calloc(__FILE__, __LINE__, (n),(sizeof(type)))
+#  define REALLOC(mem,sz)	Realloc(#mem, __FILE__, __LINE__, (mem),(sz))
+#  define FREE(ptr)		do { Free(#ptr, __FILE__, __LINE__, ptr); ptr = NULL; } while (0)
 #  define MALLOC_MOD 25
 #  define REALLOC_MOD 25
 #  define CALLOC_MOD 25
@@ -62,18 +61,14 @@ extern char *SafeStr(char *, unsigned short);
 extern MemRec memrec;
 extern void memrec_init(void);
 extern void memrec_add_var(void *, size_t);
-extern void memrec_rem_var(void *);
-extern void memrec_chg_var(void *, void *, size_t);
+extern void memrec_rem_var(const char *, unsigned long, void *);
+extern void memrec_chg_var(const char *, unsigned long, void *, void *, size_t);
 extern void memrec_dump(void);
-extern void *Malloc(size_t);
-extern void *Realloc(void *, size_t);
-extern void *Calloc(size_t, size_t);
-extern void Free(void *);
-extern void myalarm(long);
+extern void *Malloc(const char *, unsigned long, size_t);
+extern void *Realloc(const char *, const char *, unsigned long, void *, size_t);
+extern void *Calloc(const char *, unsigned long, size_t, size_t);
+extern void Free(const char *, const char *, unsigned long, void *);
 extern void HandleSigSegv(int);
-extern char *GarbageCollect(char *, size_t);
-extern char *FileGarbageCollect(char *, size_t);
-extern void *fixed_realloc(void *, size_t);
 
 #endif /* _MEM_H_ */
 

@@ -1939,8 +1939,12 @@ xim_real_init(void)
   }
   xim_input_context = XCreateIC(xim, XNInputStyle, xim_input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
                             preedit_attr ? XNPreeditAttributes : NULL, preedit_attr, status_attr ? XNStatusAttributes : NULL, status_attr, NULL);
-  XFree(preedit_attr);
-  XFree(status_attr);
+  if (preedit_attr) {
+    XFree(preedit_attr);
+  }
+  if (status_attr) {
+    XFree(status_attr);
+  }
   if (xim_input_context == NULL) {
     print_error("Failed to create input context");
     XCloseIM(xim);

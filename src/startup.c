@@ -96,8 +96,6 @@ eterm_bootstrap(int argc, char *argv[])
   PABLO_START_TRACING();
   getcwd(initial_dir, PATH_MAX);
 
-  init_defaults();
-
   /* Open display, get options/resources and create the window */
   if ((display_name = getenv("DISPLAY")) == NULL)
     display_name = ":0";
@@ -105,6 +103,8 @@ eterm_bootstrap(int argc, char *argv[])
   /* This MUST be called before any other Xlib functions */
 
   get_initial_options(argc, argv);
+  init_defaults();
+
 #ifdef NEED_LINUX_HACK
   privileges(INVOKE);		/* xdm in new Linux versions requires ruid != root to open the display -- mej */
 #endif

@@ -60,7 +60,6 @@ MemRec memrec =
 char *
 SafeStr(register char *str, unsigned short len)
 {
-
   register unsigned short i;
 
   for (i = 0; i < len; i++) {
@@ -75,20 +74,17 @@ SafeStr(register char *str, unsigned short len)
 void
 memrec_init(void)
 {
-
   memrec.Count = 0;
   D_MALLOC(("Constructing memrec\n"));
   memrec.Ptrs = (void **) malloc(sizeof(void *));
 
   memrec.Size = (size_t *) malloc(sizeof(size_t));
   memrec.init = 1;
-
 }
 
 void
 memrec_add_var(void *ptr, size_t size)
 {
-
   memrec.Count++;
   if ((memrec.Ptrs = (void **) realloc(memrec.Ptrs, sizeof(void *) * memrec.Count)) == NULL) {
     D_MALLOC(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
@@ -99,13 +95,10 @@ memrec_add_var(void *ptr, size_t size)
   D_MALLOC(("Adding variable of size %lu at %8p\n", size, ptr));
   memrec.Ptrs[memrec.Count - 1] = ptr;
   memrec.Size[memrec.Count - 1] = size;
-#if 0
-  memrec_dump();
-#endif
 }
 
 void
-memrec_rem_var(void *ptr)
+memrec_rem_var(const char *filename, unsigned long line, void *ptr)
 {
 
   unsigned long i;
@@ -114,11 +107,7 @@ memrec_rem_var(void *ptr)
     if (memrec.Ptrs[i] == ptr)
       break;
   if (i == memrec.Count && memrec.Ptrs[i] != ptr) {
-#if 0
-    memrec_dump();
-#endif
-    D_MALLOC(("Attempt to remove a pointer not allocated with Malloc/Realloc:"
-	     "  %8p\n", ptr));
+    D_MALLOC(("ERROR:  File %s, line %d attempted to free a pointer not allocated with Malloc/Realloc:  %8p\n", filename, line, ptr));
     return;
   }
   memrec.Count--;
@@ -129,13 +118,10 @@ memrec_rem_var(void *ptr)
   memrec.Ptrs = (void **) realloc(memrec.Ptrs, sizeof(void *) * memrec.Count);
 
   memrec.Size = (size_t *) realloc(memrec.Size, sizeof(size_t) * memrec.Count);
-#if 0
-  memrec_dump();
-#endif
 }
 
 void
-memrec_chg_var(void *oldp, void *newp, size_t size)
+memrec_chg_var(const char *filename, unsigned long line, void *oldp, void *newp, size_t size)
 {
 
   unsigned long i;
@@ -144,20 +130,12 @@ memrec_chg_var(void *oldp, void *newp, size_t size)
     if (memrec.Ptrs[i] == oldp)
       break;
   if (i == memrec.Count && memrec.Ptrs[i] != oldp) {
-#if 0
-    memrec_dump();
-#endif
-    D_MALLOC(("Attempt to move a pointer not allocated with Malloc/Realloc:"
-	     "  %8p\n", oldp));
+    D_MALLOC(("ERROR:  File %s, line %d attempted to realloc a pointer not allocated with Malloc/Realloc:  %8p\n", filename, line, oldp));
     return;
   }
-  D_MALLOC(("Changing variable of %lu bytes at %8p to one "
-	   "of %lu bytes at %8p\n", memrec.Size[i], memrec.Ptrs[i], size, newp));
+  D_MALLOC(("Changing variable of %lu bytes at %8p to one of %lu bytes at %8p\n", memrec.Size[i], memrec.Ptrs[i], size, newp));
   memrec.Ptrs[i] = newp;
   memrec.Size[i] = size;
-#if 0
-  memrec_dump();
-#endif
 }
 
 void
@@ -229,20 +207,11 @@ memrec_dump(void)
 
 /************* Function prototypes ****************/
 
-/* Replacements for malloc(), realloc(), calloc(), and free() */
-void *Malloc(size_t);
-void *Realloc(void *, size_t);
-void *Calloc(size_t, size_t);
-void Free(void *);
-
-/* A handler for SIGSEGV */
-void HandleSigSegv(int);
-
 void *
-Malloc(size_t size)
+Malloc(const char *filename, unsigned long line, size_t size)
 {
 
-  void *temp = NULL;
+  void *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++malloc_count;
@@ -251,6 +220,7 @@ Malloc(size_t size)
   }
 #endif
 
+  D_MALLOC(("Malloc(%lu) called at %s:%lu\n", size, filename, line));
   if (!memrec.init) {
     D_MALLOC(("WARNING:  You must call memrec_init() before using the libmej memory management calls.\n"));
     memrec_init();
@@ -266,10 +236,10 @@ Malloc(size_t size)
 }
 
 void *
-Realloc(void *ptr, size_t size)
+Realloc(const char *var, const char *filename, unsigned long line, void *ptr, size_t size)
 {
 
-  void *temp = NULL;
+  void *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++realloc_count;
@@ -283,24 +253,23 @@ Realloc(void *ptr, size_t size)
     memrec_init();
   }
 
+  D_MALLOC(("Realloc(%lu) called for variable %s (%8p) at %s:%lu\n", size, var, ptr, filename, line));
   if (ptr == NULL) {
-    temp = (void *) Malloc(size);
+    temp = (void *) Malloc(__FILE__, __LINE__, size);
   } else {
     temp = (void *) realloc(ptr, size);
     if (debug_level >= DEBUG_MALLOC) {
-      memrec_chg_var(ptr, temp, size);
+      memrec_chg_var(filename, line, ptr, temp, size);
     }
   }
-  if (!temp)
-    return NULL;
   return (temp);
 }
 
 void *
-Calloc(size_t count, size_t size)
+Calloc(const char *filename, unsigned long line, size_t count, size_t size)
 {
 
-  char *temp = NULL;
+  char *temp;
 
 #ifdef MALLOC_CALL_DEBUG
   ++calloc_count;
@@ -314,17 +283,16 @@ Calloc(size_t count, size_t size)
     memrec_init();
   }
 
+  D_MALLOC(("Calloc(%lu, %lu) called at %s:%lu\n", count, size, filename, line));
   temp = (char *) calloc(count, size);
   if (debug_level >= DEBUG_MALLOC) {
     memrec_add_var(temp, size * count);
   }
-  if (!temp)
-    return NULL;
   return (temp);
 }
 
 void
-Free(void *ptr)
+Free(const char *var, const char *filename, unsigned long line, void *ptr)
 {
 
 #ifdef MALLOC_CALL_DEBUG
@@ -339,13 +307,14 @@ Free(void *ptr)
     memrec_init();
   }
 
+  D_MALLOC(("Free() called for variable %s (%8p) at %s:%lu\n", var, ptr, filename, line));
   if (ptr) {
     if (debug_level >= DEBUG_MALLOC) {
-      memrec_rem_var(ptr);
+      memrec_rem_var(filename, line, ptr);
     }
     free(ptr);
   } else {
-    D_MALLOC(("Caught attempt to free NULL pointer\n"));
+    D_MALLOC(("ERROR:  Caught attempt to free NULL pointer\n"));
   }
 }
 
