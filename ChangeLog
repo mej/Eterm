@@ -4297,3 +4297,9 @@ Thu Jul 19 12:19:21 2001                        Michael Jennings (mej)
 
 Minor fix to correct popup scrollbar handling on startup.
 ----------------------------------------------------------------------
+Sat Jul 21 20:22:26 2001                        Michael Jennings (mej)
+
+Although I have yet to be able to reproduce it, I believe this will
+fix Debian bug #104393.  I don't think the lower parts of that array
+were getting properly zeroed. :(
+----------------------------------------------------------------------

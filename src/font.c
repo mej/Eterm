@@ -75,30 +75,30 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx) {
     unsigned char new_size = sizeof(char *) * (idx + 1);
 
     /* The below looks messy with all the cpp stuff, but it really just malloc's/realloc's
-       both etfonts and etmfonts at the same time to the same size, then prints some goop. */
+       both etfonts and etmfonts at the same time to the same size, zeros all the new
+       memory space using MEMSET(), and then prints some goop. */
     if (etfonts) {
       etfonts = (char **) REALLOC(etfonts, new_size);
+      MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
 #ifdef MULTI_CHARSET
       etmfonts = (char **) REALLOC(etmfonts, new_size);
+      MEMSET(etmfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
       D_FONT((" -> Reallocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
       D_FONT((" -> Reallocated font list:  %u bytes at %8p\n", new_size, etfonts));
 #endif
     } else {
       etfonts = (char **) MALLOC(new_size);
+      MEMSET(etfonts, 0, new_size);
 #ifdef MULTI_CHARSET
       etmfonts = (char **) MALLOC(new_size);
+      MEMSET(etmfonts, 0, new_size);
       D_FONT((" -> Allocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
       D_FONT((" -> Allocating font list:  %u bytes at %8p\n", new_size, etfonts));
 #endif
     }
 
-    /* Initialize the new memory so we don't think it's got valid font info. */
-    MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
-#ifdef MULTI_CHARSET
-    MEMSET(etmfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
-#endif
     font_cnt = idx + 1;  /* Update the font count. */
 #ifdef MULTI_CHARSET
     flist = ((plist == &etfonts) ? (etfonts) : (etmfonts));
