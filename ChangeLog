@@ -3705,3 +3705,9 @@ Tue Jun 20 20:01:07 PDT 2000	Michael Jennings <mej@eterm.org>
 	size.
 	
 -------------------------------------------------------------------------------
+Mon Jun 26 09:50:37 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Another multi-byte font support patch from Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------

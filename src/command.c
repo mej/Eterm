@@ -131,6 +131,7 @@ static const char cvs_ident[] = "$Id$";
 # include "eterm_utmp.h"
 #endif
 #include "windows.h"
+#include "buttons.h"
 
 static RETSIGTYPE handle_child_signal(int);
 static RETSIGTYPE handle_exit_signal(int);
@@ -1742,7 +1743,7 @@ static void
 xim_set_size(XRectangle * size)
 {
   size->x = TermWin.internalBorder;
-  size->y = TermWin.internalBorder;
+  size->y = TermWin.internalBorder + bbar_calc_docked_height(BBAR_DOCKED_TOP);
   size->width = Width2Pixel(TermWin.ncol);
   size->height = Height2Pixel(TermWin.nrow);
 }

@@ -1894,17 +1894,14 @@ scr_refresh(int type)
 #endif
 
 #ifdef MULTI_CHARSET
-      if (wbyte) {
-	  ascent = TermWin.mfont->ascent;
-	  descent = TermWin.mfont->descent;
-	  ypixel = TermWin.mfont->ascent + Row2Pixel(row);
-      } else
+      ascent = MAX(TermWin.mfont->ascent, TermWin.font->ascent);
+      descent = MAX(TermWin.mfont->descent, TermWin.font->descent);
+#else
+      ascent = TermWin.font->ascent;
+      descent = TermWin.font->descent;
 #endif
-      {
-	  ascent = TermWin.font->ascent;
-	  descent = TermWin.font->descent;
-	  ypixel = TermWin.font->ascent + Row2Pixel(row);
-      }
+      ypixel = ascent + Row2Pixel(row);
+
 
       /* The actual drawing of the string is done here. */
       if (fprop) {
@@ -2009,9 +2006,34 @@ scr_refresh(int type)
 #endif
           {
 #ifdef FORCE_CLEAR_CHARS
-            CLEAR_CHARS(xpixel, ypixel - ascent, wlen);
+            CLEAR_CHARS(xpixel, ypixel - ascent, len);
 #endif
             DRAW_STRING(draw_image_string, xpixel, ypixel, buffer, wlen);
+#ifdef MULTI_CHARSET
+	    {
+	      XFontStruct *font = wbyte? TermWin.mfont: TermWin.font;
+
+	      if (font->ascent < ascent || font->descent < descent) {
+		SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
+		gcmask |= (GCForeground | GCBackground);
+		XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
+		if (font->ascent < ascent) {
+		  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel,
+				 Row2Pixel(row),
+				 Width2Pixel(len),
+				 ascent - font->ascent);
+		}
+		if (font->descent < descent) {
+		  XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel,
+				 Row2Pixel(row) + ascent + font->descent,
+				 Width2Pixel(len),
+				 descent - font->descent);
+		}
+		SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
+		XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
+	      }
+	    }
+#endif
             UPDATE_BOX(xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
           }
       }
@@ -3294,10 +3316,13 @@ debug_colors(void)
 #ifdef USE_XIM
 void xim_get_position(XPoint *pos)
 {
-   pos->x = Col2Pixel(screen.col);
-   if (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) {
-     pos->x += scrollbar_trough_width();
-   }
-   pos->y = Height2Pixel(screen.row) + TermWin.font->ascent + TermWin.internalBorder + bbar_calc_docked_height(BBAR_DOCKED_TOP);
+  pos->x = Col2Pixel(screen.col);
+  if (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) {
+    pos->x += scrollbar_trough_width();
+  }
+  pos->y = (Height2Pixel(screen.row)
+	    + MAX(TermWin.mfont->ascent, TermWin.font->ascent)
+	    + TermWin.internalBorder
+	    + bbar_calc_docked_height(BBAR_DOCKED_TOP));
 }
 #endif

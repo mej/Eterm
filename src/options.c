@@ -4128,12 +4128,14 @@ save_config(char *path, unsigned char save_theme)
   for (i = 0; i < 16; i++) {
     fprintf(fp, "    color %d %s\n", i, rs_color[minColor + i]);
   }
+#ifndef NO_BOLDUNDERLINE
   if (rs_color[colorBD]) {
     fprintf(fp, "    color bd %s\n", rs_color[colorBD]);
   }
   if (rs_color[colorUL]) {
     fprintf(fp, "    color ul %s\n", rs_color[colorUL]);
   }
+#endif
   fprintf(fp, "  end color\n\n");
 
   fprintf(fp, "  begin attributes\n");

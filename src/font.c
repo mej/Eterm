@@ -428,7 +428,13 @@ change_font(int init, const char *fontname)
   }
 
   fw = TermWin.font->min_bounds.width;
+#ifdef MULTI_CHARSET
+  fh = (MAX(TermWin.font->ascent, TermWin.mfont->ascent)
+	+ MAX(TermWin.font->descent, TermWin.mfont->descent)
+	+ rs_line_space);
+#else
   fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
+#endif
 
   D_FONT(("Font information:  Ascent == %hd, Descent == %hd, width min/max %d/%d\n", TermWin.font->ascent, TermWin.font->descent,
           TermWin.font->min_bounds.width, TermWin.font->max_bounds.width));
