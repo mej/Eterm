@@ -4819,3 +4819,17 @@ coupled, for example, with --buttonbar 0.  Azundris spotted this ages
 ago, and I've been putting off fixing it.  But it should be all
 straightened out now.
 ----------------------------------------------------------------------
+Mon Oct  7 22:19:58 2002                        Michael Jennings (mej)
+
+Patch from Azundris for Escreen.  In her words:
+
+Debian Unstable comes with a version that is newer than 3.09.11 (which
+most other distributions seem to have).  On top of that, it comes with
+a global setup file in /etc that breaks our very best intentions.
+Find enclosed some modifications that will (hopefully) make screen
+work on those special Debs in your life as well as on the machines it
+used to run on so far.  As a side-effect, the default action is now
+-RDD rather than -xRR, but since several people have requested that
+anyways, I might be the only one missing the previous default.  Guess
+I'll change my actionclasses.cfg and hold my peace forever.  : )
+----------------------------------------------------------------------

@@ -620,7 +620,7 @@ Pick up a "screen" session at
 .I URL
 rather than a local (-U "") one. URLs look like so
 (screen://user@host.dom:port/screen_options), with all parts optional,
-defaulting to "screen://current_user@localhost:22/-xRR". Forces Escreen mode,
+defaulting to "screen://current_user@localhost:22/-RDD". Forces Escreen mode,
 overrides \-\-exec. Note that only screen-options (see "man screen") are
 allowed; do not pass a command (with or without arguments) here: to pass
 a command to the screen-session, use

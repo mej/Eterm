@@ -86,6 +86,8 @@ A  An Eterm should open with a screen (without a status-line) running
 
 Q  What's new?
 
+*  Should work with Debian Unstable now (2002/10/03)
+
 *  libscream's functions are available through Eterm's scripting
    facility.  See escreen.cfg for an example.
 
@@ -237,14 +239,14 @@ Q  Escreen only creates a new session when there is none; otherwise,
    it connects to the existing one!
 
 A  It's not a bug, it's a feature. : )  The default parameters for
-   the screen Escreen starts are "-xRR".  You can override those by
+   the screen Escreen starts are "-RDD".  You can override those by
    putting your own parameters in the URL
 
      Eterm -U "protocol://user@host:port/screen_parameters"
 
    like so:
 
-     Eterm -U "screen://foo@bar.com/-r"
+     Eterm -U "screen://foo@bar.com/-xRR"
 
    or, for a local screen with no parameters:
 
