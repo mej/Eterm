@@ -204,9 +204,6 @@ scr_reset(void)
       k = MIN(TermWin.nscrolled, prev_nrow - TermWin.nrow);
       scroll_text(0, prev_nrow - 1, k, 1);
 	    
-      /* FIXME: Looks like one of these FREEs can crash Eterm at
-       * times :( -vendu.
-       */
       for (i = TermWin.nrow; i < prev_nrow; i++) {
         j = i + TermWin.saveLines;
         if (screen.text[j])

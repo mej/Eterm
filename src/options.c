@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1999-1997, Michael Jennings
+ * Copyright (C) 1997-2000, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -439,7 +439,7 @@ usage(void)
   unsigned short i, col;
 
   printf("Eterm Enlightened Terminal Emulator for X Windows\n");
-  printf("Copyright (c) 1997-1999, " AUTHORS "\n\n");
+  printf("Copyright (c) 1997-2000, " AUTHORS "\n\n");
   printf("Usage for " APL_NAME " " VERSION ":\n\n");
   printf("%7s %17s %40s\n", "POSIX", "GNU", "Description");
   printf("%8s %10s %41s\n", "=======", "===============================",
@@ -479,7 +479,7 @@ version(void)
 {
 
   printf("Eterm " VERSION "\n");
-  printf("Copyright (c) 1997-1999, Tuomo Venalainen and Michael Jennings\n\n");
+  printf("Copyright (c) 1997-2000, " AUTHORS "\n\n");
 
   printf("Debugging configuration:  ");
 #ifdef DEBUG
