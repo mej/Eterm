@@ -3662,3 +3662,10 @@ Thu Jun  1 20:05:49 PDT 2000	Michael Jennings <mej@eterm.org>
 	stupid part is that I already KNEW that!  *slaps self*
 	
 -------------------------------------------------------------------------------
+Fri Jun  9 22:33:29 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a seg fault when resizing to one row while on the secondary
+	screen.  I have no clue how that bug crept in there all of a sudden,
+	but thanks to Marius Gedminas <mgedmin@takas.lt> for pointing it out.
+	
+-------------------------------------------------------------------------------

@@ -504,8 +504,8 @@ rather than a shell.
 .SH THEMES
 
 Eterm is built on the philosophy of Freedom of Choice.  Each user should be
-able to choose the environment in which he wishes to exist, and the tools he
-uses should support that.  In accordance with that philosophy, Eterm is
+able to choose the environment in which he or she wishes to exist, and the tools
+used should support that.  In accordance with that philosophy, Eterm is
 extremely configurable.  Eterm supports a concept called "themes," which should
 be familiar to users of Enlightenment, icewm, or Microsoft Windows 95/98/NT.
 The general concept of a theme is a collection of resources that change as many

@@ -319,7 +319,6 @@ scr_reset(void)
   prev_ncol = TermWin.ncol;
 
   tt_resize();
-
   if (chscr) {
     scr_change_screen(chscr);
   }
@@ -466,6 +465,7 @@ scr_change_screen(int scrn)
     }
 # endif
 #endif
+
   return scrn;
 }
 
@@ -1659,6 +1659,9 @@ scr_refresh(int type)
 
   draw_string = XDrawString;
   draw_image_string = XDrawImageString;
+
+  BOUND(screen.row, 0, TermWin.nrow - 1);
+  BOUND(screen.col, 0, TermWin.ncol - 1);
 
   row = screen.row + TermWin.saveLines;
   col = screen.col;

@@ -70,7 +70,7 @@
 /* Scrollbar dimensions */
 #define scrollbar_scrollarea_height()         (scrollbar.scrollarea_end - scrollbar.scrollarea_start)
 #define scrollbar_anchor_width()              ((scrollbar.type == SCROLLBAR_XTERM) ? (scrollbar.win_width) : (scrollbar.width))
-#define scrollbar_anchor_height()             (scrollbar.anchor_bottom - scrollbar.anchor_top)
+#define scrollbar_anchor_height()             (MAX((scrollbar.anchor_bottom - scrollbar.anchor_top), 2))
 #define scrollbar_trough_width()              (scrollbar.win_width)
 #define scrollbar_trough_height()             (scrollbar.win_height)
 #define scrollbar_arrow_width()               (scrollbar.width)
