@@ -1,10 +1,9 @@
 # $Id$
 
-THEMES = Eterm auto cEterm chooser emacs irc mutt trans
+THEMES = Eterm auto chooser trans
 
-EXTRA_DIST = Eterm/theme.cfg.in irc/theme.cfg.in chooser/theme.cfg.in emacs/theme.cfg.in mutt/theme.cfg.in trans/theme.cfg.in \
-             Eterm/menus.cfg irc/menus.cfg chooser/menus.cfg emacs/menus.cfg mutt/menus.cfg trans/menus.cfg \
-             cEterm/menus.cfg cEterm/theme.cfg.in auto/menus.cfg auto/theme.cfg.in
+EXTRA_DIST = Eterm/theme.cfg.in chooser/theme.cfg.in trans/theme.cfg.in auto/theme.cfg.in \
+             Eterm/menus.cfg chooser/menus.cfg trans/menus.cfg auto/menus.cfg
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)/themes
