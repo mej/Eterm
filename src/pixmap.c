@@ -1048,7 +1048,7 @@ get_desktop_window(void)
   if (prop == None && prop2 == None) {
     return None;
   }
-  if (desktop_window != None) {
+  if ((desktop_window != None) && (desktop_window != Xroot)) {
     XSelectInput(Xdisplay, desktop_window, None);
   }
 
@@ -1067,17 +1067,17 @@ get_desktop_window(void)
     }
 
     if (prop != None) {
-      XGetWindowProperty(Xdisplay, w, prop, 0L, 1L, False, AnyPropertyType,
-			 &type, &format, &length, &after, &data);
+      XGetWindowProperty(Xdisplay, w, prop, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     } else if (prop2 != None) {
-      XGetWindowProperty(Xdisplay, w, prop2, 0L, 1L, False, AnyPropertyType,
-			 &type, &format, &length, &after, &data);
+      XGetWindowProperty(Xdisplay, w, prop2, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
     } else {
       continue;
     }
     if (type != None) {
       D_PIXMAP(("  Found desktop as window 0x%08x\n", w));
-      XSelectInput(Xdisplay, w, PropertyChangeMask);
+      if (w != Xroot) {
+        XSelectInput(Xdisplay, w, PropertyChangeMask);
+      }
       return (desktop_window = w);
     }
   }

@@ -380,6 +380,7 @@ Create_Windows(int argc, char *argv[])
 #endif
 
   XSetWMProperties(Xdisplay, TermWin.parent, NULL, NULL, argv, argc, &szHint, &wmHint, &classHint);
+  XSelectInput(Xdisplay, Xroot, PropertyChangeMask);
   XSelectInput(Xdisplay, TermWin.parent, (KeyPressMask | FocusChangeMask | StructureNotifyMask | VisibilityChangeMask | PropertyChangeMask));
   if (mwmhints.flags) {
     XChangeProperty(Xdisplay, TermWin.parent, prop, prop, 32, PropModeReplace, (unsigned char *) &mwmhints, PROP_MWM_HINTS_ELEMENTS);

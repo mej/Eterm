@@ -2434,3 +2434,9 @@ Mon Sep 20 20:33:13 PDT 1999	Michael Jennings <mej@eterm.org>
 	and isn't now....
 	
 -------------------------------------------------------------------------------
+Mon Sep 20 21:00:46 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed a problem with sticky transparent Eterms not updating their
+	background image.
+	
+-------------------------------------------------------------------------------
