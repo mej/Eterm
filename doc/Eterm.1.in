@@ -1642,9 +1642,9 @@ first and last names, or the @ sign in an e-mail address, etc.
 
 .BI select_line " boolean"
 .RS 5
-If true, this attribute causes a triple-click to select from the current
-word to the end of the line.  If off, a triple click selects the entire
-line from beginning to end.
+If true, this attribute causes a triple click to select the entire
+line from beginning to end.  If false (default), a triple-click
+selects from the current word to the end of the line.
 .RE
 
 .BI select_trailing_spaces " boolean"

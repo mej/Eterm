@@ -4960,3 +4960,8 @@ Wed Jan  8 01:16:29 2003                        Michael Jennings (mej)
 
 Fixed a bug with non-bordered icons being rendered at 0 size.
 ----------------------------------------------------------------------
+Mon Jan 13 18:17:43 2003                        Michael Jennings (mej)
+
+Fixed an error in the "select_line" description in the man page
+spotted by Yasufumi Haga <yasufumi.haga@nifty.com>.
+----------------------------------------------------------------------
