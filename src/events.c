@@ -209,7 +209,9 @@ handle_key_press(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
   COUNT_EVENT(keypress_cnt);
-  lookup_key(ev);
+  if (!(Options & Opt_no_input)) {
+    lookup_key(ev);
+  }
   PROF_DONE(handle_key_press);
   PROF_TIME(handle_key_press);
   return 1;

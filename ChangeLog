@@ -3395,3 +3395,12 @@ Tue Mar 28 18:42:09 PST 2000	Michael Jennings <mej@eterm.org>
 	30% shade to the scrollbar anchor.
 	
 -------------------------------------------------------------------------------
+Thu Mar 30 20:34:10 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Quick little option -q/--no-input.  It keeps Eterm from accepting
+	keyboard input, and keeps the window manager from focusing it.  Useful
+	for log tailers and such, maybe.  This feature was requested by
+	Peter Ward <than@ilm.com>.  I will be adding an escape sequence to
+	toggle this.
+	
+-------------------------------------------------------------------------------

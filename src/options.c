@@ -297,8 +297,9 @@ static const struct {
       OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollbar),
       OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_utmpLogging),
       OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visualBell),
-      OPT_BOOL('H', "home-on-echo", "jump to bottom on output", &Options, Opt_home_on_output),
+      OPT_BOOL('H', "home-on-output", "jump to bottom on output", &Options, Opt_home_on_output),
       OPT_BLONG("home-on-input", "jump to bottom on input", &Options, Opt_home_on_input),
+      OPT_BOOL('q', "no-input", "configure for output only", &Options, Opt_no_input),
       OPT_BLONG("scrollbar-right", "display the scrollbar on the right", &Options, Opt_scrollbar_right),
       OPT_BLONG("scrollbar-floating", "display the scrollbar with no trough", &Options, Opt_scrollbar_floating),
       OPT_BLONG("scrollbar-popup", "popup the scrollbar only when focused", &Options, Opt_scrollbar_popup),
@@ -872,7 +873,6 @@ get_options(int argc, char *argv[])
       }
       if (!strcasecmp(opt, "exec")) {
 	D_OPTIONS(("--exec option detected\n"));
-	Options |= Opt_exec;
 	if (!hasequal) {
 
 	  register unsigned short k, len = argc - i;
@@ -987,7 +987,6 @@ get_options(int argc, char *argv[])
 	  register unsigned short k, len;
 
 	  D_OPTIONS(("-e option detected\n"));
-	  Options |= Opt_exec;
 
 	  if (opt[pos + 1]) {
 	    len = argc - i + 2;
@@ -2134,6 +2133,13 @@ parse_toggles(char *buff, void *state)
       Options &= ~(Opt_home_on_input);
     }
 
+  } else if (!BEG_STRCASECMP(buff, "no_input ")) {
+    if (bool_val) {
+      Options |= Opt_no_input;
+    } else {
+      Options &= ~(Opt_no_input);
+    }
+
   } else if (!BEG_STRCASECMP(buff, "scrollbar_floating ")) {
     if (bool_val) {
       Options |= Opt_scrollbar_floating;
@@ -2432,8 +2438,6 @@ parse_misc(char *buff, void *state)
   } else if (!BEG_STRCASECMP(buff, "exec ")) {
 
     register unsigned short k, n;
-
-    Options |= Opt_exec;
 
     RESET_AND_ASSIGN(rs_execArgs, (char **) MALLOC(sizeof(char *) * ((n = NumWords(PWord(2, buff))) + 1)));
 
@@ -4463,6 +4467,7 @@ save_config(char *path)
   fprintf(fp, "    iconic %d\n", (Options & Opt_iconic ? 1 : 0));
   fprintf(fp, "    home_on_output %d\n", (Options & Opt_home_on_output ? 1 : 0));
   fprintf(fp, "    home_on_input %d\n", (Options & Opt_home_on_input ? 1 : 0));
+  fprintf(fp, "    no_input %d\n", (Options & Opt_no_input ? 1 : 0));
   fprintf(fp, "    scrollbar_floating %d\n", (Options & Opt_scrollbar_floating ? 1 : 0));
   fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollbar_right ? 1 : 0));
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
@@ -4521,7 +4526,7 @@ save_config(char *path)
   fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
   fprintf(fp, "    term_name %s\n", getenv("TERM"));
   fprintf(fp, "    debug %d\n", debug_level);
-  if (Options & Opt_exec && rs_execArgs) {
+  if (rs_execArgs) {
     fprintf(fp, "    exec ");
     for (i = 0; rs_execArgs[i]; i++) {
       fprintf(fp, "'%s' ", rs_execArgs[i]);

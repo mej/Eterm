@@ -425,7 +425,7 @@ Create_Windows(int argc, char *argv[])
   classHint.res_name = (char *) rs_name;
   classHint.res_class = APL_NAME;
   wmHint.window_group = TermWin.parent;
-  wmHint.input = True;
+  wmHint.input = ((Options & Opt_no_input) ? False : True);
   wmHint.initial_state = (Options & Opt_iconic ? IconicState : NormalState);
   wmHint.window_group = TermWin.parent;
   wmHint.flags = (InputHint | StateHint | WindowGroupHint);
