@@ -429,9 +429,9 @@ change_font(int init, const char *fontname)
 
   fw = TermWin.font->min_bounds.width;
 #ifdef MULTI_CHARSET
-  fh = (MAX(TermWin.font->ascent, TermWin.mfont->ascent)
-	+ MAX(TermWin.font->descent, TermWin.mfont->descent)
-	+ rs_line_space);
+  fh = (MAX((encoding_method == LATIN1 ? 0 : TermWin.mfont->ascent), TermWin.font->ascent)
+        + MAX((encoding_method == LATIN1 ? 0 : TermWin.mfont->descent), TermWin.font->descent)
+        + rs_line_space);
 #else
   fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
 #endif

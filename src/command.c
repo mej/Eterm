@@ -2409,7 +2409,7 @@ cmd_getc(void)
   /* characters already read in */
   if (CHARS_READ()) {
     RETURN_CHAR();
-  } else if (paused == 1) {
+  } else if (paused == 1 && cmd_fd == -1) {
     const char *done = " -- Task Finished, ESC to exit";
 
     append_to_title(done);

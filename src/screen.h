@@ -160,6 +160,9 @@ typedef enum {
   SELECTION_CONT,
   SELECTION_DONE
 } selection_op_t;
+typedef enum {
+  LATIN1 = 0, EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
+} encoding_t;
 typedef struct {
   short row, col;
 } row_col_t;
@@ -224,6 +227,9 @@ typedef struct {
 extern unsigned int colorfgbg;
 #endif
 extern unsigned char refresh_all;
+#ifdef MULTI_CHARSET
+extern encoding_t encoding_method;
+#endif
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

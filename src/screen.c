@@ -94,13 +94,11 @@ unsigned char refresh_all = 0;
 
 #ifdef MULTI_CHARSET
 static short multi_byte = 0;
-static enum {
-  EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5, LATIN1
-} encoding_method = LATIN1;
+static short lost_multi = 0;
 static enum {
   SBYTE, WBYTE
 } chstat = SBYTE;
-static short lost_multi = 0;
+encoding_t encoding_method = LATIN1;
 
 #define RESET_CHSTAT	if (chstat == WBYTE) chstat = SBYTE, lost_multi = 1
 #else
@@ -1897,8 +1895,8 @@ scr_refresh(int type)
 #endif
 
 #ifdef MULTI_CHARSET
-      ascent = MAX(TermWin.mfont->ascent, TermWin.font->ascent);
-      descent = MAX(TermWin.mfont->descent, TermWin.font->descent);
+      ascent = MAX((encoding_method == LATIN1 ? 0 : TermWin.mfont->ascent), TermWin.font->ascent);
+      descent = MAX((encoding_method == LATIN1 ? 0 : TermWin.mfont->descent), TermWin.font->descent);
 #else
       ascent = TermWin.font->ascent;
       descent = TermWin.font->descent;
@@ -3212,7 +3210,7 @@ selection_send(XSelectionRequestEvent * rq)
 		    (unsigned char *) target_list,
 		    (sizeof(target_list) / sizeof(target_list[0])));
     ev.xselection.property = rq->property;
-#ifdef MULTI_CHARSET
+#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
   } else if (rq->target == XA_STRING || rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
     XTextProperty xtextp;
     char *l[1];
@@ -3325,7 +3323,7 @@ void xim_get_position(XPoint *pos)
   }
   pos->y = (Height2Pixel(screen.row)
 # ifdef MULTI_CHARSET
-	    + MAX(TermWin.mfont->ascent, TermWin.font->ascent)
+	    + MAX((encoding_method == LATIN1 ? 0 : TermWin.mfont->ascent), TermWin.font->ascent)
 # else
             + TermWin.font->ascent
 # endif

@@ -3763,3 +3763,11 @@ Wed Jul  5 18:31:39 PDT 2000	Michael Jennings <mej@eterm.org>
 	Imlib2.h works again.
 	
 -------------------------------------------------------------------------------
+Wed Jul  5 19:48:10 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	The multibyte font size patches caused weird behavior if your
+	multibyte font sizes didn't match your regular font sizes for those
+	who don't actually use the multibyte support.  So I fixed that.  I
+	also fixed the XA_TEXT problem for people using old/broken X.
+	
+-------------------------------------------------------------------------------
