@@ -4956,3 +4956,7 @@ Thu Jan  2 14:54:45 2003                        Michael Jennings (mej)
 
 Spec file update.
 ----------------------------------------------------------------------
+Wed Jan  8 01:16:29 2003                        Michael Jennings (mej)
+
+Fixed a bug with non-bordered icons being rendered at 0 size.
+----------------------------------------------------------------------

@@ -554,10 +554,12 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
     }
 #ifdef PIXMAP_SUPPORT
     if (button->icon) {
-        unsigned short b = 0;
+        unsigned short b;
 
         if (bord) {
             b = button->h - bord->top - bord->bottom;
+        } else {
+            b = button->h;
         }
         imlib_context_set_image(button->icon->iml->im);
         button->icon_w = imlib_image_get_width();

@@ -788,8 +788,12 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
     GC gc;
 
     ASSERT(simg != NULL);
-    REQUIRE(d != None);
     D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win, (int) d, x, y, w, h));
+
+    REQUIRE(d != None);
+    REQUIRE(w > 0);
+    REQUIRE(h > 0);
+
     if (which != image_max) {
         if (image_mode_is(which, MODE_AUTO) && image_mode_is(which, ALLOW_AUTO)) {
             char buff[255], *reply;
