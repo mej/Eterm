@@ -122,16 +122,16 @@ get_modifiers(void)
       switch (XKeycodeToKeysym(Xdisplay, kc[k], 0)) {
         case XK_Meta_L:
         case XK_Meta_R:
-          D_X11(("get_modifiers() found Meta key as mod %d\n", l + 1));
+          D_X11(("Found Meta key as mod %d\n", l + 1));
           match = MetaMask = modmasks[l];
           break;
         case XK_Alt_L:
         case XK_Alt_R:
-          D_X11(("get_modifiers() found Alt key as mod %d\n", l + 1));
+          D_X11(("Found Alt key as mod %d\n", l + 1));
           match = AltMask = modmasks[l];
           break;
         case XK_Num_Lock:
-          D_X11(("get_modifiers() found NumLock key as mod %d\n", l + 1));
+          D_X11(("Found NumLock key as mod %d\n", l + 1));
           match = NumLockMask = modmasks[l];
           break;
         default:
@@ -145,15 +145,15 @@ get_modifiers(void)
   XFreeModifiermap(modmap);
   if (MetaMask == 0) {
     if (AltMask != 0) {
-      D_X11(("get_modifiers() defaulted Meta key to match Alt mask\n"));
+      D_X11(("Defaulted Meta key to match Alt mask\n"));
       MetaMask = AltMask;
     } else {
-      D_X11(("get_modifiers() defaulted Meta key to mod 1\n"));
+      D_X11(("Defaulted Meta key to mod 1\n"));
       MetaMask = Mod1Mask;
     }
   }
   if (AltMask == 0) {
-    D_X11(("get_modifiers() defaulted Alt key to match Meta mask\n"));
+    D_X11(("Defaulted Alt key to match Meta mask\n"));
     AltMask = MetaMask;  /* MetaMask will always be defined at this point. */
   }
 }
@@ -179,9 +179,6 @@ lookup_key(XEvent * ev)
   int kbuf_alloced = 0;
 #else
   static unsigned char kbuf[KBUFSZ];
-#endif
-#if DEBUG >= DEBUG_CMD
-  static int debug_key = 1;	/* accessible by a debugger only */
 #endif
 #ifdef GREEK_SUPPORT
   static short greek_mode = 0;
@@ -236,13 +233,9 @@ lookup_key(XEvent * ev)
 
   if (action_dispatch(ev, keysym)) {
     LK_RET();
-  } 
-  if (len) {
-    if (keypress_exit) {
+  }
+  if (len && keypress_exit) {
       exit(0);
-    } else if (Options & Opt_homeOnInput) {
-      TermWin.view_start = 0;
-    }
   }
 
   if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
@@ -355,6 +348,11 @@ lookup_key(XEvent * ev)
       LK_RET();
 #endif
       break;
+  }
+
+  /* If we get this far, the keypress had no special meaning to us. */
+  if (Options & Opt_home_on_input) {
+    TermWin.view_start = 0;
   }
 
   if (keysym >= 0xFF00 && keysym <= 0xFFFF) {
@@ -571,22 +569,22 @@ lookup_key(XEvent * ev)
 	  kbuf[2] += (keysym - XK_KP_F1);
 	  break;
 
-	case XK_KP_Multiply:	/* "\033Oj" : "*" */
-	case XK_KP_Add:	/* "\033Ok" : "+" */
-	case XK_KP_Separator:	/* "\033Ol" : "," */
-	case XK_KP_Subtract:	/* "\033Om" : "-" */
-	case XK_KP_Decimal:	/* "\033On" : "." */
-	case XK_KP_Divide:	/* "\033Oo" : "/" */
-	case XK_KP_0:		/* "\033Op" : "0" */
-	case XK_KP_1:		/* "\033Oq" : "1" */
-	case XK_KP_2:		/* "\033Or" : "2" */
-	case XK_KP_3:		/* "\033Os" : "3" */
-	case XK_KP_4:		/* "\033Ot" : "4" */
-	case XK_KP_5:		/* "\033Ou" : "5" */
-	case XK_KP_6:		/* "\033Ov" : "6" */
-	case XK_KP_7:		/* "\033Ow" : "7" */
-	case XK_KP_8:		/* "\033Ox" : "8" */
-	case XK_KP_9:		/* "\033Oy" : "9" */
+        case XK_KP_Multiply:    /* "\033Oj" : "*" */
+        case XK_KP_Add:         /* "\033Ok" : "+" */
+        case XK_KP_Separator:   /* "\033Ol" : "," */
+        case XK_KP_Subtract:    /* "\033Om" : "-" */
+        case XK_KP_Decimal:     /* "\033On" : "." */
+        case XK_KP_Divide:      /* "\033Oo" : "/" */
+        case XK_KP_0:           /* "\033Op" : "0" */
+        case XK_KP_1:           /* "\033Oq" : "1" */
+        case XK_KP_2:           /* "\033Or" : "2" */
+        case XK_KP_3:           /* "\033Os" : "3" */
+        case XK_KP_4:           /* "\033Ot" : "4" */
+        case XK_KP_5:           /* "\033Ou" : "5" */
+        case XK_KP_6:           /* "\033Ov" : "6" */
+        case XK_KP_7:           /* "\033Ow" : "7" */
+        case XK_KP_8:           /* "\033Ox" : "8" */
+        case XK_KP_9:           /* "\033Oy" : "9" */
 	  /* allow shift to override */
 	  if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
 	    len = 3;
@@ -603,55 +601,55 @@ len = 5; \
 sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 } while (0);
 
-	case XK_F1:		/* "\033[11~" */
-	case XK_F2:		/* "\033[12~" */
-	case XK_F3:		/* "\033[13~" */
-	case XK_F4:		/* "\033[14~" */
-	case XK_F5:		/* "\033[15~" */
-	  FKEY(11, XK_F1);
-	  break;
+        case XK_F1:             /* "\033[11~" */
+        case XK_F2:             /* "\033[12~" */
+        case XK_F3:             /* "\033[13~" */
+        case XK_F4:             /* "\033[14~" */
+        case XK_F5:             /* "\033[15~" */
+          FKEY(11, XK_F1);
+          break;
 
-	case XK_F6:		/* "\033[17~" */
-	case XK_F7:		/* "\033[18~" */
-	case XK_F8:		/* "\033[19~" */
-	case XK_F9:		/* "\033[20~" */
-	case XK_F10:		/* "\033[21~" */
-	  FKEY(17, XK_F6);
-	  break;
+        case XK_F6:             /* "\033[17~" */
+        case XK_F7:             /* "\033[18~" */
+        case XK_F8:             /* "\033[19~" */
+        case XK_F9:             /* "\033[20~" */
+        case XK_F10:            /* "\033[21~" */
+          FKEY(17, XK_F6);
+          break;
 
-	case XK_F11:		/* "\033[23~" */
-	case XK_F12:		/* "\033[24~" */
-	case XK_F13:		/* "\033[25~" */
-	case XK_F14:		/* "\033[26~" */
-	  FKEY(23, XK_F11);
-	  break;
+        case XK_F11:            /* "\033[23~" */
+        case XK_F12:            /* "\033[24~" */
+        case XK_F13:            /* "\033[25~" */
+        case XK_F14:            /* "\033[26~" */
+          FKEY(23, XK_F11);
+          break;
 
-	case XK_F15:		/* "\033[28~" */
-	case XK_F16:		/* "\033[29~" */
-	  FKEY(28, XK_F15);
-	  break;
+        case XK_F15:            /* "\033[28~" */
+        case XK_F16:            /* "\033[29~" */
+          FKEY(28, XK_F15);
+          break;
 
-	case XK_F17:		/* "\033[31~" */
-	case XK_F18:		/* "\033[32~" */
-	case XK_F19:		/* "\033[33~" */
-	case XK_F20:		/* "\033[34~" */
-	case XK_F21:		/* "\033[35~" */
-	case XK_F22:		/* "\033[36~" */
-	case XK_F23:		/* "\033[37~" */
-	case XK_F24:		/* "\033[38~" */
-	case XK_F25:		/* "\033[39~" */
-	case XK_F26:		/* "\033[40~" */
-	case XK_F27:		/* "\033[41~" */
-	case XK_F28:		/* "\033[42~" */
-	case XK_F29:		/* "\033[43~" */
-	case XK_F30:		/* "\033[44~" */
-	case XK_F31:		/* "\033[45~" */
-	case XK_F32:		/* "\033[46~" */
-	case XK_F33:		/* "\033[47~" */
-	case XK_F34:		/* "\033[48~" */
-	case XK_F35:		/* "\033[49~" */
-	  FKEY(31, XK_F17);
-	  break;
+        case XK_F17:            /* "\033[31~" */
+        case XK_F18:            /* "\033[32~" */
+        case XK_F19:            /* "\033[33~" */
+        case XK_F20:            /* "\033[34~" */
+        case XK_F21:            /* "\033[35~" */
+        case XK_F22:            /* "\033[36~" */
+        case XK_F23:            /* "\033[37~" */
+        case XK_F24:            /* "\033[38~" */
+        case XK_F25:            /* "\033[39~" */
+        case XK_F26:            /* "\033[40~" */
+        case XK_F27:            /* "\033[41~" */
+        case XK_F28:            /* "\033[42~" */
+        case XK_F29:            /* "\033[43~" */
+        case XK_F30:            /* "\033[44~" */
+        case XK_F31:            /* "\033[45~" */
+        case XK_F32:            /* "\033[46~" */
+        case XK_F33:            /* "\033[47~" */
+        case XK_F34:            /* "\033[48~" */
+        case XK_F35:            /* "\033[49~" */
+          FKEY(31, XK_F17);
+          break;
 #undef FKEY
       }
 
@@ -685,8 +683,9 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
   }
 #endif
 
-  if (len <= 0)
-    LK_RET();			/* not mapped */
+  if (len <= 0) {
+    LK_RET();
+  }
 
   /*
    * these modifications only affect the static keybuffer
@@ -694,12 +693,13 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
    *
    * eg,
    *  Prior = "ESC[5~"
-   *  Shift+Prior = "ESC[5~"
+   *  Shift+Prior = "ESC[5$"
    *  Ctrl+Prior = "ESC[5^"
    *  Ctrl+Shift+Prior = "ESC[5@"
    */
-  if (kbuf[0] == '\033' && kbuf[1] == '[' && kbuf[len - 1] == '~')
+  if (kbuf[0] == '\033' && kbuf[1] == '[' && kbuf[len - 1] == '~') {
     kbuf[len - 1] = (shft ? (ctrl ? '@' : '$') : (ctrl ? '^' : '~'));
+  }
 
   /* escape prefix */
   if (meta
@@ -713,8 +713,7 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
     tt_write(&ch, 1);
   }
 #if DEBUG >= DEBUG_CMD
-  if (debug_level >= DEBUG_CMD && debug_key) {	/* Display keyboard buffer contents */
-
+  if (debug_level >= DEBUG_CMD) {
     char *p;
     int i;
 
@@ -1417,22 +1416,16 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 	    break;		/* X11 mouse highlighting */
 #endif
 	  case 1010:		/* Scroll to bottom on TTY output */
-	    if (Options & Opt_homeOnEcho)
-	      Options &= ~Opt_homeOnEcho;
+	    if (Options & Opt_home_on_output)
+	      Options &= ~Opt_home_on_output;
 	    else
-	      Options |= Opt_homeOnEcho;
-	    break;
-	  case 1011:		/* scroll to bottom on refresh */
-	    if (Options & Opt_homeOnRefresh)
-	      Options &= ~Opt_homeOnRefresh;
-	    else
-	      Options |= Opt_homeOnRefresh;
+	      Options |= Opt_home_on_output;
 	    break;
 	  case 1012:		/* Scroll to bottom on TTY input */
-	    if (Options & Opt_homeOnInput)
-	      Options &= ~Opt_homeOnInput;
+	    if (Options & Opt_home_on_input)
+	      Options &= ~Opt_home_on_input;
 	    else
-	      Options |= Opt_homeOnInput;
+	      Options |= Opt_home_on_input;
 	    break;
 	}
       break;
@@ -1509,27 +1502,6 @@ process_sgr_mode(unsigned int nargs, int arg[])
     }
 }
 
-/* color aliases, fg/bg bright-bold */
-void
-color_aliases(int idx)
-{
-
-  if (rs_color[idx] && isdigit(*rs_color[idx])) {
-
-    int i = atoi(rs_color[idx]);
-
-    if (i >= 8 && i <= 15) {	/* bright colors */
-      i -= 8;
-#ifndef NO_BRIGHTCOLOR
-      rs_color[idx] = rs_color[minBright + i];
-      return;
-#endif
-    }
-    if (i >= 0 && i <= 7)	/* normal colors */
-      rs_color[idx] = rs_color[minColor + i];
-  }
-}
-
 /* find if fg/bg matches any of the normal (low-intensity) colors */
 #ifndef NO_BRIGHTCOLOR
 void
@@ -1604,7 +1576,7 @@ set_title(const char *str)
     if (name != NULL) {
       FREE(name);
     }
-    D_X11(("set_title():  Setting window title to \"%s\"\n", str));
+    D_X11(("Setting window title to \"%s\"\n", str));
     XStoreName(Xdisplay, TermWin.parent, str);
     name = StrDup(str);
   }
@@ -1620,7 +1592,7 @@ set_icon_name(const char *str)
     if (name != NULL) {
       FREE(name);
     }
-    D_X11(("set_icon_name():  Setting window icon name to \"%s\"\n", str));
+    D_X11(("Setting window icon name to \"%s\"\n", str));
     XSetIconName(Xdisplay, TermWin.parent, str);
     name = StrDup(str);
   }
@@ -1708,6 +1680,7 @@ xterm_seq(int op, const char *str)
          50    Move window to another desktop
          70    Exit Eterm
          71    Save current configuration to a file
+         72    Search scrollback for a string
          and <arg> is an optional argument, depending
          on the particular sequence being used.  It
          (along with its preceeding semicolon) may or
@@ -2022,6 +1995,22 @@ xterm_seq(int op, const char *str)
 	    save_config(NULL);
 	  }
 	  break;
+	case 72:
+	  /* Search scrollback buffer for a string.  NULL to clear. */
+	  nstr = (char *) strsep(&tnstr, ";");
+	  if (nstr && *nstr) {
+	    scr_search_scrollback(nstr);
+	  } else {
+	    scr_search_scrollback(NULL);
+	  }
+	  break;
+	case 73:
+	  /* Spawn a subprogram */
+	  nstr = (char *) strsep(&tnstr, ";");
+	  if (nstr && *nstr) {
+	    system_no_wait(nstr);
+	  }
+	  break;
 	case 80:
 	  /* Set debugging level */
 	  nstr = (char *) strsep(&tnstr, ";");
@@ -2047,7 +2036,7 @@ xterm_seq(int op, const char *str)
 	  if (*nstr) {
 	    set_pixmap_scale("", images[image_bg].current->pmap);
 	    bg_needs_update = 1;
-	    load_image(nstr, image_bg);
+	    load_image(nstr, images[image_bg].current);
 	  }
 	  while ((nstr = (char *) strsep(&tnstr, ";")) && *nstr) {
 	    changed += set_pixmap_scale(nstr, images[image_bg].current->pmap);

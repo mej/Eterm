@@ -118,7 +118,7 @@
 /* This will force clearing of characters before writing new ones on top of
  * them. This is experimental - added in order to try and fix pixel dropping
  * problems some people have had. See also NO_BOLDOVERSTRIKE. */
-# define FORCE_CLEAR_CHARS
+/*# define FORCE_CLEAR_CHARS*/
 
 /* The command through which to pipe print-screen requests */
 #define PRINTPIPE	"lp"

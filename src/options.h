@@ -28,51 +28,55 @@
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
 /************ Macros and Definitions ************/
-#define OPT_BOOLEAN          0x0001
-#define OPT_INTEGER          0x0002
-#define OPT_STRING           0x0004
-#define OPT_ARGUMENT         0x0008
-
-#define OPT_STR(s, l, d, p)         { s, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_INT(s, l, d, p)         { s, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define OPT_BOOL(s, l, d, v, m)     { s, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
-#define OPT_LONG(l, d, p)           { 0, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
-#define OPT_ARGS(s, l, d, p)        { s, l, "(str)  " d, OPT_ARGUMENT, (const char ***) p, 0, 0 }
-#define OPT_BLONG(l, d, v, m)       { 0, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
-#define OPT_ILONG(l, d, p)          { 0, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
-#define optList_numoptions()        (sizeof(optList)/sizeof(optList[0]))
-
-#if PATH_MAX < 1024
+#if defined(PATH_MAX) && (PATH_MAX < 255)
 #  undef PATH_MAX
-#  define PATH_MAX 1024
+#endif
+#ifndef PATH_MAX
+#  define PATH_MAX 255
 #endif
 
-# define Opt_console			(1LU <<  0)
-# define Opt_loginShell			(1LU <<  1)
-# define Opt_iconic			(1LU <<  2)
-# define Opt_visualBell			(1LU <<  3)
-# define Opt_mapAlert			(1LU <<  4)
-# define Opt_reverseVideo		(1LU <<  5)
-# define Opt_utmpLogging		(1LU <<  6)
-# define Opt_scrollbar			(1LU <<  7)
-# define Opt_meta8			(1LU <<  8)
-# define Opt_exec			(1LU <<  9)
-# define Opt_homeOnEcho			(1LU << 10)
-# define Opt_homeOnRefresh		(1LU << 11)
-# define Opt_scrollbar_right		(1LU << 12)
-# define Opt_borderless			(1LU << 13)
-# define Opt_backing_store		(1LU << 14)
-# define Opt_noCursor			(1LU << 15)
-# define Opt_pause			(1LU << 16)
-# define Opt_homeOnInput		(1LU << 17)
-# define Opt_report_as_keysyms		(1LU << 18)
-# define Opt_xterm_select		(1LU << 19)
-# define Opt_select_whole_line		(1LU << 20)
-# define Opt_scrollbar_popup		(1LU << 21)
-# define Opt_select_trailing_spaces	(1LU << 22)
-# define Opt_install                	(1LU << 23)
-# define Opt_scrollbar_floating		(1LU << 24)
-# define Opt_double_buffer		(1LU << 25)
+#define CONF_BEGIN_CHAR                 ((char) 1)
+#define CONF_END_CHAR                   ((char) 2)
+
+#define OPT_BOOLEAN                     0x0001
+#define OPT_INTEGER                     0x0002
+#define OPT_STRING                      0x0004
+#define OPT_ARGUMENT                    0x0008
+
+#define OPT_STR(s, l, d, p)             { s, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
+#define OPT_INT(s, l, d, p)             { s, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
+#define OPT_BOOL(s, l, d, v, m)         { s, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
+#define OPT_LONG(l, d, p)               { 0, l, "(str)  " d, OPT_STRING,   (const char **)  p, 0, 0 }
+#define OPT_ARGS(s, l, d, p)            { s, l, "(str)  " d, OPT_ARGUMENT, (const char ***) p, 0, 0 }
+#define OPT_BLONG(l, d, v, m)           { 0, l, "(bool) " d, OPT_BOOLEAN,                NULL, v, m }
+#define OPT_ILONG(l, d, p)              { 0, l, "(int)  " d, OPT_INTEGER,  (const int *)    p, 0, 0 }
+#define optList_numoptions()            (sizeof(optList)/sizeof(optList[0]))
+
+# define Opt_console                    (1LU <<  0)
+# define Opt_loginShell                 (1LU <<  1)
+# define Opt_iconic                     (1LU <<  2)
+# define Opt_visualBell                 (1LU <<  3)
+# define Opt_mapAlert                   (1LU <<  4)
+# define Opt_reverseVideo               (1LU <<  5)
+# define Opt_utmpLogging                (1LU <<  6)
+# define Opt_scrollbar                  (1LU <<  7)
+# define Opt_meta8                      (1LU <<  8)
+# define Opt_exec                       (1LU <<  9)
+# define Opt_home_on_output             (1LU << 10)
+# define Opt_scrollbar_right            (1LU << 11)
+# define Opt_borderless                 (1LU << 12)
+# define Opt_backing_store              (1LU << 13)
+# define Opt_noCursor                   (1LU << 14)
+# define Opt_pause                      (1LU << 15)
+# define Opt_home_on_input              (1LU << 16)
+# define Opt_report_as_keysyms          (1LU << 17)
+# define Opt_xterm_select               (1LU << 18)
+# define Opt_select_whole_line          (1LU << 19)
+# define Opt_scrollbar_popup            (1LU << 20)
+# define Opt_select_trailing_spaces     (1LU << 21)
+# define Opt_install                    (1LU << 22)
+# define Opt_scrollbar_floating         (1LU << 23)
+# define Opt_double_buffer              (1LU << 24)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_VIEWPORT                 (1U << 1)
@@ -87,96 +91,63 @@
 #define BAD_THRESHOLD 3
 #define CHECK_BAD()  do { \
 	               if (++bad_opts >= BAD_THRESHOLD) { \
-			 print_error("error threshold exceeded, giving up"); \
+			 print_error("Error threshold exceeded, giving up."); \
 			 usage(); \
 		       } else { \
-			 print_error("attempting to continue, but performance may be unpredictable"); \
+			 print_error("Attempting to continue, but strange things may happen."); \
 		       } \
                      } while(0)
 
 /* Max length of a line in the config file */
 #define CONFIG_BUFF 20480
 
-/* The context identifier.  This tells us what section of the config file
-   we're in, for syntax checking purposes and the like.            -- mej */
-
-enum {
-  CTX_NULL,
-  CTX_MAIN,
-  CTX_COLOR,
-  CTX_ATTRIBUTES,
-  CTX_TOGGLES,
-  CTX_KEYBOARD,
-  CTX_MISC,
-  CTX_IMAGECLASSES,
-  CTX_IMAGE,
-  CTX_ACTIONS,
-  CTX_MENU,
-  CTX_MENUITEM,
-  CTX_XIM,
-  CTX_MULTI_CHARSET,
-  CTX_MAX = CTX_MULTI_CHARSET,
-  CTX_UNDEF
-};
-
+/* The context table */
 #define ctx_name_to_id(the_id, n, i) do { \
-                                       for ((i)=0; (i) <= CTX_MAX; (i)++) { \
-                                         if (!strcasecmp((n), contexts[(i)].description)) { \
-		                           (the_id) = contexts[(i)].id; \
+                                       for ((i)=0; (i) <= ctx_idx; (i)++) { \
+                                         if (!strcasecmp((n), context[(i)].name)) { \
+		                           (the_id) = (i); \
 					   break; \
 					 } \
 			               } \
-                                       if ((i) > CTX_MAX) (the_id) = CTX_UNDEF; \
+                                       if ((i) > ctx_idx) (the_id) = 0; \
                                      } while (0)
+#define ctx_id_to_name(id)         (context[(id)].name)
+#define ctx_id_to_func(id)         (context[(id)].handler)
 
-#define ctx_id_to_name(id) (contexts[(id)].description)
-#define ctx_id_to_func(id) (contexts[(id)].ctx_handler)
+/* The context state stack.  This keeps track of the current context and each previous one. */
+#define ctx_push(ctx)              conf_register_context_state(ctx)
+#define ctx_pop()                  (ctx_state_idx--)
+#define ctx_peek()                 (ctx_state[ctx_state_idx])
+#define ctx_peek_id()              (ctx_state[ctx_state_idx].ctx_id)
+#define ctx_peek_state()           (ctx_state[ctx_state_idx].state)
+#define ctx_peek_last_id()         (ctx_state[(ctx_state_idx?ctx_state_idx-1:0)].ctx_id)
+#define ctx_peek_last_state()      (ctx_state[(ctx_state_idx?ctx_state_idx-1:0)].state)
+#define ctx_poke_state(q)          ((ctx_state[ctx_state_idx].state) = (q))
+#define ctx_get_depth()            (ctx_state_idx)
 
-/* The context stack.  This keeps track of the current context and each
-   previous one.  You MUST define MAX_CTX_DEPTH to the absolute maximum
-   number of context levels deep your contexts go, or the results can be
-   Very Bad.  I recommend erring on the side of caution.          -- mej */
+/* The file state stack */
+#define FILE_SKIP_TO_END           (0x01)
+#define FILE_PREPROC               (0x02)
+#define file_push(f, p, o, l, fl)  conf_register_fstate(f, p, o, l, fl)
+#define file_pop()                 (fstate_idx--)
+#define file_peek()                (fstate[fstate_idx])
+#define file_peek_fp()             (fstate[fstate_idx].fp)
+#define file_peek_path()           (fstate[fstate_idx].path)
+#define file_peek_outfile()        (fstate[fstate_idx].outfile)
+#define file_peek_line()           (fstate[fstate_idx].line)
+#define file_peek_skip()           (fstate[fstate_idx].flags & FILE_SKIP_TO_END)
+#define file_peek_preproc()        (fstate[fstate_idx].flags & FILE_PREPROC)
 
-#define MAX_CTX_DEPTH 10
-#define ctx_push(ctx) id_stack[++cur_ctx] = (ctx)
-#define ctx_pop()  (id_stack[cur_ctx--])
-#define ctx_peek() (id_stack[cur_ctx])
-#define ctx_poke(c) (id_stack[cur_ctx] = (c))
-#define ctx_peek_last() (id_stack[(cur_ctx?cur_ctx-1:0)])
-#define ctx_get_depth() (cur_ctx)
-#define MAX_FILE_DEPTH 10
-#define FILE_SKIP_TO_END	(0x01)
-#define FILE_PREPROC		(0x02)
-#define file_push(fs) do { \
-                        cur_file++; \
-                        file_stack[cur_file].fp = (fs).fp; \
-                        file_stack[cur_file].path = (fs).path; \
-                        file_stack[cur_file].line = (fs).line; \
-			file_stack[cur_file].flags = (fs).flags; \
-                      } while (0)
+#define file_poke_fp(f)            ((fstate[fstate_idx].fp) = (f))
+#define file_poke_path(p)          ((fstate[fstate_idx].path) = (p))
+#define file_poke_outfile(o)       ((fstate[fstate_idx].outfile) = (o))
+#define file_poke_line(l)          ((fstate[fstate_idx].line) = (l))
+#define file_skip_to_end()         ((fstate[fstate_idx].flags) |= (FILE_SKIP_TO_END))
+#define file_poke_skip(s)          do {if (s) {fstate[fstate_idx].flags |= FILE_SKIP_TO_END;} else {fstate[fstate_idx].flags &= ~(FILE_SKIP_TO_END);} } while (0)
+#define file_poke_preproc(s)       do {if (s) {fstate[fstate_idx].flags |= FILE_PREPROC;} else {fstate[fstate_idx].flags &= ~(FILE_PREPROC);} } while (0)
+#define file_poke(f, p, o, l, fl)  do {file_poke_fp(f); file_poke_path(p); file_poke_outfile(o); file_poke_line(l); fstate[fstate_idx].flags = (fl);} while (0)
 
-#define file_pop()    (cur_file--)
-#define file_peek(fs) do { \
-                        (fs).fp = file_stack[cur_file].fp; \
-                        (fs).path = file_stack[cur_file].path; \
-                        (fs).line = file_stack[cur_file].line; \
-			(fs).flags = file_stack[cur_file].flags; \
-                      } while (0)
-#define file_peek_fp()      (file_stack[cur_file].fp)
-#define file_peek_path()    (file_stack[cur_file].path)
-#define file_peek_outfile() (file_stack[cur_file].outfile)
-#define file_peek_line()    (file_stack[cur_file].line)
-#define file_peek_skip()    (file_stack[cur_file].flags & FILE_SKIP_TO_END)
-#define file_peek_preproc() (file_stack[cur_file].flags & FILE_PREPROC)
-
-#define file_poke_fp(f)      ((file_stack[cur_file].fp) = (f))
-#define file_poke_path(p)    ((file_stack[cur_file].path) = (p))
-#define file_poke_outfile(p) ((file_stack[cur_file].outfile) = (p))
-#define file_poke_line(l)    ((file_stack[cur_file].line) = (l))
-#define file_poke_skip(s)    do {if (s) {file_stack[cur_file].flags |= FILE_SKIP_TO_END;} else {file_stack[cur_file].flags &= ~(FILE_SKIP_TO_END);} } while (0)
-#define file_poke_preproc(s) do {if (s) {file_stack[cur_file].flags |= FILE_PREPROC;} else {file_stack[cur_file].flags &= ~(FILE_PREPROC);} } while (0)
-
-#define file_inc_line()     (file_stack[cur_file].line++)
+#define file_inc_line()            (fstate[fstate_idx].line++)
 
 #define to_keysym(p,s) do { KeySym sym; \
                             if (s && ((sym = XStringToKeysym(s)) != 0)) *p = sym; \
@@ -185,24 +156,35 @@ enum {
 #define RESET_AND_ASSIGN(var, val)  do {if ((var) != NULL) FREE(var);  (var) = (val);} while (0)
 
 /************ Structures ************/
-/* The file state stack.  This keeps track of the file currently being
-   parsed.  This allows for %include directives.                  -- mej */
+/* Contexts */
+typedef void * (*ctx_handler_t)(char *, void *);
+typedef struct context_struct {
+  char *name;
+  ctx_handler_t handler;
+} ctx_t;
+typedef struct ctx_state_struct {
+  unsigned char ctx_id;
+  void *state;
+} ctx_state_t;
+
+/* Parser states */
 typedef struct file_state_struct {
   FILE *fp;
   char *path, *outfile;
   unsigned long line;
   unsigned char flags;
-} file_state;
-typedef char *(*eterm_function_ptr) (char *);
-typedef struct eterm_function_struct {
+} fstate_t;
 
+/* Built-in functions */
+typedef char * (*eterm_func_ptr_t) (char *);
+typedef struct eterm_func_struct {
   char *name;
-  eterm_function_ptr ptr;
-  int params;
-
-} eterm_func;
+  eterm_func_ptr_t ptr;
+} eterm_func_t;
 
 /************ Variables ************/
+extern fstate_t *fstate;
+extern unsigned char fstate_idx;
 extern unsigned long Options, image_toggles;
 extern char *theme_dir, *user_dir;
 extern       char **rs_execArgs;        /* Args to exec (-e or --exec) */
@@ -213,8 +195,6 @@ extern        int   rs_desktop;         /* Startup desktop */
 extern        int   rs_saveLines;	/* Lines in the scrollback buffer */
 extern unsigned short rs_min_anchor_size; /* Minimum size, in pixels, of the scrollbar anchor */
 extern       char  *rs_term_name;
-extern const char  *rs_menubar;
-extern const char  *rs_menu;
 extern       char  *rs_icon;
 extern       char  *rs_scrollbar_type;
 extern unsigned long rs_scrollbar_width;
@@ -229,6 +209,7 @@ extern char *rs_input_method;
 extern char *rs_preedit_type;
 #endif
 extern char *rs_name;
+extern char *rs_theme;
 extern char *rs_config_file;
 extern unsigned int rs_line_space;
 #ifndef NO_BOLDFONT
@@ -257,11 +238,17 @@ _XFUNCPROTOBEGIN
 unsigned long NumWords(const char *str);
 extern void get_initial_options(int, char **);
 extern void get_options(int, char **);
+extern void conf_init_subsystem(void);
+extern unsigned char conf_register_context(char *name, ctx_handler_t handler);
+extern unsigned char conf_register_fstate(FILE *fp, char *path, char *outfile, unsigned long line, unsigned char flags);
+extern unsigned char conf_register_builtin(char *name, eterm_func_ptr_t ptr);
+extern unsigned char conf_register_context_state(unsigned char ctx_id);
 extern char *chomp(char *);
 extern char *shell_expand(char *);
-extern char *find_theme(char *, char *, char *);
-extern unsigned char open_config_file(char *);
-extern void read_config(char *);
+extern char *conf_find_file(const char *file, const char *dir, const char *pathlist);
+extern FILE *open_config_file(char *name);
+extern char *conf_parse(char *conf_name, const char *dir, const char *path);
+extern char *conf_parse_theme(char *theme, char *conf_name, unsigned char fallback);
 extern void init_defaults(void);
 extern void post_parse(void);
 unsigned char save_config(char *);

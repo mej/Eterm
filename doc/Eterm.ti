@@ -1,147 +1,153 @@
-#-------------------------------------------------------------------------
-# terminfo for Eterm (and xterm) -- [modified from the Midnight Commander]
-#
-# Install using `tic Eterm.ti', to be used with the enclosed termcap
-#-------------------------------------------------------------------------
+# Eterm terminfo file
 
-xterm-basic|xterm terminal base (X Window System),
-	am, km, mir, msgr, xenl, xon, cols#80, lines#24, it#8,
-# Not sure about eo (Erase overstrike with a blank)
-	eo,
+Eterm-base|Eterm basic terminal capabilities,
+# FIXME:  xterm does not specify bce, bw, eo, or xon.  Should we?
+	am, bw, bce, km, mir, msgr, xenl, xon, eo, mc5i,
+	cols#80, lines#24, it#8, lm#0, btns#5,
 	cr=\r, bel=^G,
 
-# Scroll text up, down
-	ind=\n, ri=\EM,
+# Scroll text down/up one line
+	ind=\n, ri=\eM,
 
-# Clear Screen, EOS, EOL, BOL
-	clear=\E[H\E[2J, ed=\E[J, el=\E[K, el1=\E[1K,
+# Clear entire screen (home, then clear to EOS), EOS, EOL, BOL
+	clear=\e[H\e[2J, ed=\e[J, el=\e[K, el1=\e[1K,
 
-# Change Scroll Region
-	csr=\E[%i%p1%d;%p2%dr,
+# Change scrolling region to lines $1+1 to $2+1
+# %i means add one to params 1 and 2; convert from 0-based to
+# 1-based counting.
+	csr=\e[%i%p1%d;%p2%dr,
 
-# Cursor Position
-	cup=\E[%i%p1%d;%p2%dH,
+# Move cursor to row $1+1, column $2+1.  Can end with H or f
+	cup=\e[%i%p1%d;%p2%dH,
+# Move cursor to column n, same row; or row n, same column
+	hpa=\e[%i%p1%dG, vpa=\e[%i%p1%dd,
+# Move cursor up/down/forward/back by n chars
+	cuu=\e[%p1%dA, cud=\e[%p1%dB, cuf=\e[%p1%dC, cub=\e[%p1%dD,
+# Move cursor up/down/forward/back by 1 char
+	cuu1=\e[A,     cud1=\e[B,       cuf1=\e[C,     cub1=\b,
+# Home cursor (row 1, col 1).  Was \e[1;1H but 1's are redundant
+	home=\e[H,
 
-# Horizontal & Vertical Position Absolute
-	hpa=\E[%i%p1%dG, vpa=\E[%i%p1%dd,
-
-# Cursor Up/Down/Forward/Backward: any, 1 char
-	cuu=\E[%p1%dA, cud=\E[%p1%dB, cuf=\E[%p1%dC, cub=\E[%p1%dD,
-	cuu1=\E[A,     cud1=\E[B,       cuf1=\E[C,     cub1=\b,
-
-# Misc cursor motion
-	home=\E[1;1H,
-
-# Enter insert mode, leave insert mode
-	smir=\E[4h, rmir=\E[4l,
+# Enter/leave insert mode
+	smir=\e[4h, rmir=\e[4l,
 
 # Set tab stops, clear tab stops, tab character
-	hts=\EH, tbc=\E[3g, ht=\t,
+	hts=\eH, tbc=\e[3g, ht=\t,
 
-# Make cursor invisible, normal, bold
-	civis=\E[?25l, cnorm=\E[?25h, cvvis=\E[?25h,
+# Turn on/off auto margins
+	smam=\e[?7h, rmam=\e[?7l,
+# Make cursor invisible, normal, bold (not supported)
+	civis=\e[?25l, cnorm=\e[?25h, cvvis=\e[?25h,
+# Save/restore cursor position
+	sc=\e7, rc=\e8,
 
-# Save/Restore Cursor position
-	sc=\E7, rc=\E8,
-
-# Alternate Char Set (line drawing), enable/enter/exit ACS
+# Alternate character set (line drawing), enable/enter/exit ACS
 	acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
-	enacs=\E(B\E)0, smacs=\E(B\E)U^N, rmacs=\E(B\E)0^O,
+	enacs=\e)0, smacs=^N, rmacs=^O,
 
-#-- begin AIX 3.2.5 hack
-# acsc (box2 is the standard AIX form, box1 has been changed to work!)
-#	box1=llqqkkxxjjmmwwuuvvttnn,
-#	box2=lqkxjmwuvtn,
-#	font0=\E(B, font1=\E(0,
-# position occupied by kend
-#	colf7=\E[8~,
-#-- end AIX 3.2.5 hack
+# Delete/insert n chars, 1 char
+	dch=\e[%p1%dP, ich=\e[%p1%d@, dch1=\e[P, ich1=\e[@,
+# Delete/insert n lines, 1 line
+	dl=\e[%p1%dM, il=\e[%p1%dL, dl1=\e[M, il1=\e[L,
+# Erase next n chars
+	ech=\e[%p1%dX,
 
-# Delete/Insert: Chars, Lines, 1-char, 1-line
-	dch=\E[%p1%dP, dl=\E[%p1%dM,
-	ich=\E[%p1%d@, il=\E[%p1%dL,
-	dch1=\E[P, dl1=\E[M,
-	ich1=\E[@, il1=\E[L,
+# Activate SGR mode:  bold, reverse video, blink (bright bg color)
+	bold=\e[1m, rev=\e[7m, blink=\e[5m,
+# Start/stop underline, standout (reverse video)
+	smul=\e[4m, rmul=\e[24m, smso=\e[7m, rmso=\e[27m,
+# Flash the screen (sets and resets reverse video for the whole screen)
+	flash=\e[?5h\e[?5l,
 
-# Erase Chars
-	ech=\E[%p1%dX,
+# Enter/leave application keypad mode.  We always send the ANSI values
+# because that seems to be the most portable solution.  The valid escape
+# sequences are here but are commented out for this reason. The 1st set
+# is for keypad cursor keys, the second is for application cursor key
+# mode.  The third is what gets sent by default.
+##	smkx=\e=, rmkx=\e>,
+	smkx=, rmkx=,
+##	kcuu1=\e[Ox, kcud1=\e[Or, kcuf1=\e[Ov, kcub1=\e[Ot,
+##	kcuu1=\eOA, kcud1=\eOB, kcuf1=\eOC, kcub1=\eOD,
+	kcuu1=\e[A, kcud1=\e[B, kcuf1=\e[C, kcub1=\e[D,
 
-# Enter/Leave Fonts: Bold, Reverse, Blink, Underline
-# standout (enter/leave), Define attribs 1-9
-	bold=\E[1m, rev=\E[7m,   blink=\E[5m,
-	smul=\E[4m, rmul=\E[24m, smso=\E[7m, rmso=\E[m,
-
-# visual bell
-	flash=\E[?5h\E[?5l,
-
-# Enter/leave keypad transmit, Cursor keys (sent by terminal).   Don't touch
-# cursor keys! use ANSI cursor keys rather than application cursor keys to
-# avoid starting in application cursor mode when `$xterm&' is used and to
-# enable the Eterm Shift/Ctrl cursor extensions.
-	smkx=\E=, rmkx=\E>,
-	kcuu1=\E[A, kcud1=\E[B, kcuf1=\E[C, kcub1=\E[D,
-
-# Other nice keys
-	ka1=\EOw, ka3=\EOy, kb2=\EOu, kc1=\EOq, kc3=\EOs
+# Keypad 7, 9, 5, 1, and 3.  The 1st set are the appl. keypad mode
+# sequences.  The 2nd set are the values for Home/End/PgUp/PgDn.
+# The 5 key is the same either way.
+##	ka1=\eOw, ka3=\eOy, kb2=\eOu, kc1=\eOq, kc3=\eOs,
+	ka1=\e[7~, ka3=\e[5~, kb2=\eOu, kc1=\e[8~, kc3=\e[6~,
 
 # Function keys
-	kf0=\E[21~,
-	kf1=\E[11~, kf2=\E[12~, kf3=\E[13~, kf4=\E[14~, kf5=\E[15~,
-	kf6=\E[17~, kf7=\E[18~, kf8=\E[19~, kf9=\E[20~, kf10=\E[21~,
-	kf11=\E[23~, kf12=\E[24~, kf13=\E[25~, kf14=\E[26~,
-	kf15=\E[28~, kf16=\E[29~, kf17=\E[31~,
-	kf18=\E[32~, kf19=\E[33~, kf20=\E[34~,
+	kf1=\e[11~, kf2=\e[12~, kf3=\e[13~, kf4=\e[14~, kf5=\e[15~,
+	kf6=\e[17~, kf7=\e[18~, kf8=\e[19~, kf9=\e[20~, kf10=\e[21~,
+	kf11=\e[23~, kf12=\e[24~, kf13=\e[25~, kf14=\e[26~, kf15=\e[28~,
+	kf16=\e[29~, kf17=\e[31~, kf18=\e[32~, kf19=\e[33~, kf20=\e[34~,
+# F0, same as F10
+	kf0=\e[21~,
 
-# Find, Insert, Delete, Select, Prior, Next
-	kfnd=\E[1~, kich1=\E[2~, kdch1=\E[3~, kslt=\E[4~, kpp=\E[5~, knp=\E[6~,
-# Home (vt100 may use khome=\E[H), End, Backspace, Enter, Backtab
-	khome=\E[7~, kend=\E[8~, kbs=\177, kent=\EOM, kcbt=\E[Z,
+# Find, Insert, Delete, Select, Prior (PgUp), Next (PgDn).  The first set of
+# sequences are accurate.  The second set lets Find/Select act like Home/End.
+	kfnd=\e[1~, kich1=\e[2~, kdch1=\e[3~, kslt=\e[4~, kpp=\e[5~, knp=\e[6~,
+##	kfnd=\e[7~, kich1=\e[2~, kdch1=\e[3~, kslt=\e[8~, kpp=\e[5~, knp=\e[6~,
 
-# Shifted Right, Left, Delete, Prior, Next, Home, End, Ctrl-End
-	kRIT=\E[c, kLFT=\E[d,
-	kDC=\E[3$, kPRV=\E[5$, kNXT=\E[6$,
-	kHOM=\E[7$, kEND=\E[8$, kel=\E[8^,
+# Home (vt100 may use khome=\e[H), End, Backspace, Keypad Enter, Shift-Tab
+# The 1st set is the default.  The 2nd set is based on Linux console/vt220
+# settings for Home/End and Backspace sending Delete (^?).  The 3rd set gives
+# xterm's settings for Home/End.
+	khome=\e[7~, kend=\e[8~, kbs=\010, kent=\eOM, kcbt=\e[Z,
+##	khome=\e[1~, kend=\e[4~, kbs=\177, kent=\eOM, kcbt=\e[Z,
+##	khome=\e[H, kend=\e[F, kbs=\010, kent=\eOM, kcbt=\e[Z,
+
+# Help and Begin keys
+	khlp=\e[28~, kbeg=\eOu,
+# "Shifted" right and left (actually Ctrl, not Shift)
+	kRIT=\e[c, kLFT=\e[d,
+# Shift-Prior/Next (PgUp/PgDn).  Usually, these key combos scroll.
+	kPRV=\e[5$, kNXT=\e[6$,
+# Shift-Delete/Home/End and Ctrl-End.  It's a $ instead of a ~ for
+# Shift-, a ^ for Ctrl-, and @ for Ctrl-Shift-.
+	kDC=\e[3$, kHOM=\e[7$, kEND=\e[8$, kel=\e[8^,
 
 # Reset terminal, turn off all attributes
-	rs1=\E>\E[1;3;4;5;6l\E[?7h\E[m\E[r\E[2J\E[H,
-	rs2=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;3;4;6l\E[4l\E>,
-# dec.ti
-#	rs2=@,
-
+	rs1=\e>\e[1;3;4;5;6l\e[?7h\e[m\e[r\e[2J\e[H,
+	rs2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l\e[4l\e>,
 # Init terminal
-	is1=\E[?47l\E=\E[?1l,
-	is2=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;3;4;6l\E[4l,
+	is1=\e[?47l\e>\e[?1l,
+	is2=\e[r\e[m\e[2J\e[H\e[?7h\e[?1;3;4;6l\e[4l,
 
-# Leave/Enter CA-Mode.
-	smcup=\E7\E[?47h, rmcup=\E[?47l\E8,
-# dec.ti
-#	smcup=\E[?7h\E[?1l\E(B\E=,      rmcup=\E[?7h,
+# Enter/leave cursor address mode.  The 1st set uses the
+# secondary screen.  The 2nd one doesn't.
+	smcup=\e7\e[?47h, rmcup=\e[2J\e[?47l\e8,
+##	smcup=\e7, rmcup=\e8,
 
-# turn on/off the printer
-#	mc5=\E[5i, mc4=\E[4i,
-	mc4=\E[4i,
+# Start/stop redirection to the printpipe
+	mc4=\e[4i, mc5=\e[5i,
 
-#
-# XTerm with color support.
-#
-xterm|vs100|xterm terminal emulator (X Window System),
-	use=xterm-basic,
-# 	sgr=\E[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t^N%e^O%;,
-	sgr=\E[%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p6%t;1%;m,
-	sgr0=\E[m^O,
-# from dec.ti
-#	sgr0=\E[m\E(B,
-#	sgr0=\E[m,
-#	sgr=\E[%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p6%t;1%;m%?%p9%t\E(0%e\E(B%;,
+# User-defined string capabilities
+# Report current screen position
+	u7=\e[6n,
+# vt100 answerback
+	u8=\e[?1;2c,
+# Request identity (replies with u8)
+	u9=\e[c,
 
-xterm-color|color-xterm|Eterm|eterm|color xterm terminal emulator (X Window System),
-	use=xterm, colors#8, pairs#64,
+###### Add ANSI color support
+Eterm-ansi|Eterm with ANSI color (X Window System),
+	use=Eterm-base,
+ 	sgr=\e[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t^N%e^O%;,
+##	sgr=\e[%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p6%t;1%;m,
+	sgr0=\e[m^O,
 
-# Set all color pairs to the original ones
-#	op=\E[0m,
-	op=\E[39;49m,
+###### Add mouse reporting
+Eterm-mouse|Eterm with X11 mouse reporting,
+	use=Eterm-ansi,
+# Mouse info packet introducer
+	kmous=\e[M,
 
+###### Add xterm-style color sequences.
+Eterm|Eterm-color|eterm|Eterm with xterm-style color support (X Window System),
+	use=Eterm-mouse, colors#8, pairs#64,
+
+# Revert to the original foreground/background pair
+	op=\e[39;49m,
 # Set foreground color, background color
-	setf=\E[%p1%{30}%+%dm, setb=\E[%p1%{40}%+%dm,
-
-#--------------------------------------------------------------------- eof
+	setaf=\e[%p1%{30}%+%dm, setab=\e[%p1%{40}%+%dm,

@@ -62,8 +62,14 @@ enum {
   image_right,
   image_sb,
   image_sa,
+  image_st,
   image_menu,
+  image_menuitem,
   image_submenu,
+  image_button,
+  image_bbar,
+  image_gbar,
+  image_dialog,
   image_max
 };
 
@@ -94,6 +100,11 @@ enum {
 #define IMAGE_STATE_NORMAL    (1)
 #define IMAGE_STATE_SELECTED  (2)
 #define IMAGE_STATE_CLICKED   (3)
+#define IMAGE_STATE_DISABLED  (4)
+
+/* Render options */
+#define RENDER_NORMAL         (0)
+#define RENDER_FORCE_PIXMAP   (1 << 0)
 
 /* Helper macros */
 #define FOREACH_IMAGE(x)                  do {unsigned char idx; for (idx = 0; idx < image_max; idx++) { x } } while (0)
@@ -103,7 +114,7 @@ enum {
 #define image_mode_is(which, bit)         (images[which].mode & (bit))
 #define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
 #define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
-                                              scr_touch(); scrollbar_draw(MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
+                                              scr_touch(); scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
@@ -120,7 +131,13 @@ enum {
 #define RESET_PMAP_PIXMAP	(1UL << 7)
 #define RESET_PMAP_MASK		(1UL << 8)
 #define RESET_ALL_PMAP		(RESET_PMAP_GEOM | RESET_PMAP_PIXMAP | RESET_PMAP_MASK)
-#define RESET_ALL		(RESET_ALL_IMLIB | RESET_ALL_PMAP)
+#define RESET_ALL_SIMG		(RESET_ALL_IMLIB | RESET_ALL_PMAP)
+#define RESET_NORM              (1UL << 9)
+#define RESET_SELECTED          (1UL << 10)
+#define RESET_CLICKED           (1UL << 11)
+#define RESET_DISABLED          (1UL << 12)
+#define RESET_MODE              (1UL << 13)
+#define RESET_ALL               (RESET_NORM | RESET_SELECTED | RESET_CLICKED | RESET_DISABLED | RESET_MODE)
 
 /************ Structures ************/
 typedef struct {
@@ -143,11 +160,12 @@ typedef struct {
 typedef struct {
   pixmap_t *pmap;
   imlib_t *iml;
+  Pixel fg, bg;
 } simage_t;
 typedef struct {
   Window win;
-  unsigned char mode;
-  simage_t *norm, *selected, *clicked, *current;
+  unsigned char mode, userdef;
+  simage_t *norm, *selected, *clicked, *disabled, *current;
 } image_t;
 typedef short renderop_t;
 
@@ -165,17 +183,25 @@ extern unsigned char image_mode_any(unsigned char);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
 extern unsigned char check_image_ipc(unsigned char);
+extern image_t *create_eterm_image(void);
+extern void reset_eterm_image(image_t *, unsigned long);
+extern void free_eterm_image(image_t *);
+extern simage_t *create_simage(void);
 extern void reset_simage(simage_t *, unsigned long);
+extern void free_simage(simage_t *);
+extern Pixmap create_trans_pixmap(simage_t *, unsigned char, Drawable, int, int, unsigned short, unsigned short);
+extern Pixmap create_viewport_pixmap(simage_t *, Drawable, int, int, unsigned short, unsigned short);
 extern void paste_simage(simage_t *, unsigned char, Drawable, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);
 extern void redraw_images_by_mode(unsigned char);
 extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
 extern const char *search_path(const char *, const char *, const char *);
-extern unsigned short load_image(const char *, short);
+extern unsigned char load_image(const char *, simage_t *);
 extern void free_desktop_pixmap(void);
 #ifdef PIXMAP_OFFSET
 extern unsigned char need_colormod(imlib_t *);
 extern void colormod_trans(Pixmap, imlib_t *, GC, unsigned short, unsigned short);
+extern unsigned char update_desktop_info(int *, int *);
 extern Window get_desktop_window(void);
 extern Pixmap get_desktop_pixmap(void);
 #endif

@@ -23,11 +23,11 @@
 
 #define ZERO_SCROLLBACK do { \
                           D_SCREEN(("ZERO_SCROLLBACK()\n")); \
-                          if (Options & Opt_homeOnEcho) TermWin.view_start = 0; \
+                          if (Options & Opt_home_on_output) TermWin.view_start = 0; \
                         } while (0)
 #define REFRESH_ZERO_SCROLLBACK do { \
                                   D_SCREEN(("REFRESH_ZERO_SCROLLBACK()\n")); \
-                                  if (Options & Opt_homeOnRefresh) TermWin.view_start = 0; \
+                                  if (Options & Opt_home_on_output) TermWin.view_start = 0; \
                                 } while (0)
 #define CHECK_SELECTION	do { \
                           if (selection.op) selection_check(); \
@@ -261,6 +261,9 @@ extern int scr_page(int, int);
 extern void scr_bell(void);
 extern void scr_printscreen(int);
 extern void scr_refresh(int);
+extern int scr_strmatch(unsigned long, unsigned long, const char *);
+extern void scr_search_scrollback(char *);
+extern void scr_dump(void);
 extern void selection_check(void);
 extern void PasteIt(unsigned char *, unsigned int);
 extern void selection_paste(Window, unsigned, int);

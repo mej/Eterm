@@ -172,14 +172,18 @@ int
 parse_escaped_string(char *str)
 {
 
-  register char *pold, *pnew;
+  register char *pold = str, *pnew;
   unsigned char i;
 
   D_STRINGS(("parse_escaped_string(\"%s\")\n", str));
 
+  if (!BEG_STRCASECMP(pold, "m-")) {
+    *pold = '\\';
+    *(pold + 1) = 'e';
+  }
   for (pold = pnew = str; *pold; pold++, pnew++) {
     D_STRINGS(("Looking at \"%s\"\n", pold));
-    if (!BEG_STRCASECMP(pold, "m-")) {
+    if (!BEG_STRCASECMP(pold, "m-") && (isspace(*(pold - 1)) || !isprint(*(pold -1)))) {
       *pold = '\\';
       *(pold + 1) = 'e';
     } else if (!BEG_STRCASECMP(pold, "c-")) {

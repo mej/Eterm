@@ -30,6 +30,8 @@ static const char cvs_ident[] = "$Id$";
 
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
+#include "debug.h"
+#include "buttons.h"
 #include "command.h"
 #include "draw.h"
 #include "e.h"
@@ -374,6 +376,9 @@ scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes) {
     } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_up].current != images[image_up].clicked)) {
       images[image_up].current = images[image_up].clicked;
       force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_DISABLED) && (images[image_up].current != images[image_up].disabled)) {
+      images[image_up].current = images[image_up].disabled;
+      force_modes = MODE_MASK;
     }
   }
   if (!image_mode_is(image_up, MODE_MASK)) {
@@ -435,6 +440,9 @@ scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes) {
       force_modes = MODE_MASK;
     } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_down].current != images[image_down].clicked)) {
       images[image_down].current = images[image_down].clicked;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_DISABLED) && (images[image_down].current != images[image_down].disabled)) {
+      images[image_down].current = images[image_down].disabled;
       force_modes = MODE_MASK;
     }
   }
@@ -498,6 +506,22 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
     } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_sa].current != images[image_sa].clicked)) {
       images[image_sa].current = images[image_sa].clicked;
       force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_DISABLED) && (images[image_sa].current != images[image_sa].disabled)) {
+      images[image_sa].current = images[image_sa].disabled;
+      force_modes = MODE_MASK;
+    }
+    if ((image_state == IMAGE_STATE_NORMAL) && (images[image_st].current != images[image_st].norm)) {
+      images[image_st].current = images[image_st].norm;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_SELECTED) && (images[image_st].current != images[image_st].selected)) {
+      images[image_st].current = images[image_st].selected;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_st].current != images[image_st].clicked)) {
+      images[image_st].current = images[image_st].clicked;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_DISABLED) && (images[image_st].current != images[image_st].disabled)) {
+      images[image_st].current = images[image_st].disabled;
+      force_modes = MODE_MASK;
     }
   }
   if (!image_mode_is(image_sa, MODE_MASK)) {
@@ -532,6 +556,34 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
   }
   if (scrollbar_anchor_height() > 1) {
     render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+
+    /* Draw the thumb if there is one. */
+    if (images[image_st].current->iml) {
+      unsigned short tw = 0, th = 0;
+      imlib_t *iml = images[image_st].current->iml, *siml = images[image_sa].current->iml;
+
+      if (image_mode_is(image_st, MODE_IMAGE) && iml->im) {
+        tw = iml->im->rgb_width;
+        th = iml->im->rgb_height;
+      } else if (siml->bevel) {
+        tw = scrollbar_anchor_width() - (siml->bevel->edges->left + siml->bevel->edges->right);
+        th = scrollbar_anchor_width() - (siml->bevel->edges->top + siml->bevel->edges->bottom);
+      } else if (siml->border) {
+        tw = scrollbar_anchor_width() - (siml->border->left + siml->border->right);
+        th = scrollbar_anchor_width() - (siml->border->top + siml->border->bottom);
+      } else if (iml->bevel) {
+        tw = iml->bevel->edges->left + iml->bevel->edges->right + 4;
+        th = iml->bevel->edges->top + iml->bevel->edges->bottom + 4;
+      }
+      UPPER_BOUND(tw, scrollbar_anchor_width());
+      UPPER_BOUND(th, scrollbar_anchor_height() >> 1);
+      D_SCROLLBAR(("Thumb width/height has been calculated at %hux%hu.\n", tw, th));
+      if ((tw > 0) && (th > 0)) {
+        paste_simage(images[image_st].current, image_st, images[image_sa].current->pmap->pixmap, (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
+        XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, images[image_sa].current->pmap->pixmap);
+        XClearWindow(Xdisplay, scrollbar.sa_win);
+      }
+    }
   }
 }
 
@@ -540,7 +592,7 @@ scrollbar_move_anchor(void) {
   static int last_x = -1, last_y = -1, last_w = -1, last_h = -1;
   int x, y, w, h;
 
-  D_SCROLLBAR(("scrollbar_move_anchor()\n"));
+  D_SCROLLBAR(("Last values:  %d, %d, %d, %d\n", last_x, last_y, last_w, last_h));
   x = scrollbar_get_shadow();
   y = scrollbar.anchor_top;
   w = scrollbar_anchor_width();
@@ -572,6 +624,9 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes) {
     } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_sb].current != images[image_sb].clicked)) {
       images[image_sb].current = images[image_sb].clicked;
       force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_DISABLED) && (images[image_sb].current != images[image_sb].disabled)) {
+      images[image_sb].current = images[image_sb].disabled;
+      force_modes = MODE_MASK;
     }
   }
   if (!image_mode_is(image_sb, MODE_MASK)) {
@@ -598,10 +653,10 @@ scrollbar_init(int width, int height)
   Cursor cursor;
   long mask;
 
-  D_SCROLLBAR(("scrollbar_init():  Initializing all scrollbar elements.\n"));
+  D_SCROLLBAR(("Initializing all scrollbar elements.\n"));
 
-  Attributes.background_pixel = PixColors[scrollColor];
-  Attributes.border_pixel = PixColors[bgColor];
+  Attributes.background_pixel = images[image_sb].norm->bg;
+  Attributes.border_pixel = images[image_sb].norm->bg;
   Attributes.override_redirect = TRUE;
   Attributes.save_under = TRUE;
   cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
@@ -612,30 +667,30 @@ scrollbar_init(int width, int height)
   scrollbar.anchor_bottom = scrollbar.scrollarea_end;
 
   /* Create the scrollbar trough window.  It will be the parent to the other windows. */
-  scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height,
+  scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_total_height(), scrollbar_trough_width(), height,
                                 0, Xdepth, InputOutput, CopyFromParent,	CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
   XDefineCursor(Xdisplay, scrollbar.win, cursor);
   XSelectInput(Xdisplay, scrollbar.win, mask);
-  D_SCROLLBAR(("scrollbar_init():  Created scrollbar window 0x%08x\n", scrollbar.win));
+  D_SCROLLBAR(("Created scrollbar window 0x%08x\n", scrollbar.win));
 
   /* Now the up arrow window. */
   scrollbar.up_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
                                    0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.up_win, mask);
-  D_SCROLLBAR(("scrollbar_init():  Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
+  D_SCROLLBAR(("Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
 
   /* The down arrow window */
   scrollbar.dn_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
                                    0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.dn_win, mask);
-  D_SCROLLBAR(("scrollbar_init():  Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
+  D_SCROLLBAR(("Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
 
   /* The anchor window */
   scrollbar.sa_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar.anchor_top, scrollbar_anchor_width(), scrollbar_anchor_height(),
                                    0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.sa_win, mask);
   XMapWindow(Xdisplay, scrollbar.sa_win);
-  D_SCROLLBAR(("scrollbar_init():  Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));
+  D_SCROLLBAR(("Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));
 
   if (scrollbar_get_type() != SCROLLBAR_XTERM) {
     scrollbar_map_arrows();
@@ -643,7 +698,7 @@ scrollbar_init(int width, int height)
   event_register_dispatcher(scrollbar_dispatch_event, scrollbar_event_init_dispatcher);
 
   scrollbar_drawing_init();
-  scrollbar_draw(MODE_MASK);
+  scrollbar_draw(IMAGE_STATE_CURRENT, MODE_MASK);
 }
 
 unsigned char
@@ -720,8 +775,9 @@ scrollbar_resize(int width, int height)
 
   D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
   scrollbar_calc_size(width, height);
-  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height));
-  XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height);
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+               bbar_total_height(), scrollbar_trough_width(), height));
+  XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_total_height(), scrollbar_trough_width(), height);
   scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
   scrollbar_reposition_and_draw(MODE_MASK);
   scrollbar.init = 0;
@@ -802,7 +858,7 @@ scrollbar_drawing_init(void) {
 
   XGCValues gcvalue;
 
-  D_SCROLLBAR(("scrollbar_drawing_init()\n"));
+  D_SCROLLBAR(("Called.\n"));
 #ifdef XTERM_SCROLLBAR
   gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollbar.win, (char *) xterm_sb_bits, 12, 2);
   if (!gcvalue.stipple) {
@@ -821,7 +877,7 @@ scrollbar_drawing_init(void) {
 #endif /* XTERM_SCROLLBAR */
 
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-  gcvalue.foreground = PixColors[scrollColor];
+  gcvalue.foreground = images[image_sb].norm->bg;
   gc_scrollbar = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[topShadowColor];
   gc_top = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
@@ -839,7 +895,7 @@ scrollbar_set_focus(short has_focus) {
   D_SCROLLBAR(("scrollbar_set_focus(%hd):  focus == %hd\n", has_focus, focus));
   if (focus != has_focus) {
     focus = has_focus;
-    gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
+    gcvalue.foreground = (focus ? (images[image_sb].norm->bg) : (images[image_sb].disabled->bg));
     XChangeGC(Xdisplay, gc_scrollbar, GCForeground, &gcvalue);
     gcvalue.foreground = PixColors[focus ? topShadowColor : unfocusedTopShadowColor];
     XChangeGC(Xdisplay, gc_top, GCForeground, &gcvalue);
@@ -895,13 +951,13 @@ scrollbar_anchor_update_position(short mouseoffset) {
 }
 
 void
-scrollbar_draw(unsigned char force_modes)
+scrollbar_draw(unsigned char image_state, unsigned char force_modes)
 {
-  D_SCROLLBAR(("scrollbar_draw(0x%02x)\n", force_modes));
-  scrollbar_draw_trough(IMAGE_STATE_CURRENT, force_modes);
-  scrollbar_draw_anchor(IMAGE_STATE_CURRENT, force_modes);
-  scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, force_modes);
-  scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, force_modes);
+  D_SCROLLBAR(("scrollbar_draw(%d, 0x%02x)\n", image_state, force_modes));
+  scrollbar_draw_trough(image_state, force_modes);
+  scrollbar_draw_anchor(image_state, force_modes);
+  scrollbar_draw_uparrow(image_state, force_modes);
+  scrollbar_draw_downarrow(image_state, force_modes);
   scrollbar.init = 1;
 }
 

@@ -222,7 +222,7 @@ font_cache_find(const char *name, unsigned char type) {
       return (current);
     }
   }
-  D_FONT(("font_cache_find():  No matches found. =(\n"));
+  D_FONT(("No matches found. =(\n"));
   return ((cachefont_t *) NULL);
 }
 
@@ -247,7 +247,7 @@ font_cache_find_info(const char *name, unsigned char type) {
       }
     }
   }
-  D_FONT(("font_cache_find_info():  No matches found. =(\n"));
+  D_FONT(("No matches found. =(\n"));
   return (NULL);
 }
 
@@ -327,8 +327,6 @@ change_font(int init, const char *fontname)
 #endif
   short idx = 0, old_idx = font_idx;
   int fh, fw = 0;
-  register unsigned long i;
-  register int cw;
 
   D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx, (unsigned int) font_idx));
 
@@ -436,11 +434,8 @@ change_font(int init, const char *fontname)
     TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
   else
     TermWin.fprop = 1;	/* Proportional font */
-  if (TermWin.fprop == 1 && TermWin.font->per_char)
-    for (i = TermWin.font->min_char_or_byte2; i <= TermWin.font->max_char_or_byte2; i++) {
-      cw = TermWin.font->per_char[i].width;
-      MAX_IT(fw, cw);
-    }
+  LOWER_BOUND(fw, TermWin.font->max_bounds.width);
+
   /* not the first time thru and sizes haven't changed */
   if (fw == TermWin.fwidth && fh == TermWin.fheight)
     return;			/* TODO: not return; check MULTI_CHARSET if needed */
@@ -459,14 +454,7 @@ change_font(int init, const char *fontname)
       if (fw != boldFont->max_bounds.width)
 	fw = -1;
     } else {
-      if (boldFont->per_char) {
-        for (i = 0; i < 256; i++) {
-          if (!isprint(i))
-            continue;
-          cw = boldFont->per_char[i].width;
-          MAX_IT(fw, cw);
-        }
-      }
+      LOWER_BOUND(fw, boldFont->max_bounds.width);
     }
 
     if (fw == TermWin.fwidth && fh == TermWin.fheight) {

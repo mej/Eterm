@@ -226,11 +226,10 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #define CONSOLE		"/dev/console"	/* console device */
 
 /* key-strings: if only these keys were standardized <sigh> */
-#ifdef LINUX_KEYS
-# define KS_HOME "\033[1~"	/* Home == Find */
-# define KS_END  "\033[4~"	/* End == Select */
-#else
+#ifndef KS_HOME
 # define KS_HOME "\033[7~"	/* Home */
+#endif
+#ifndef KS_END
 # define KS_END  "\033[8~"	/* End */
 #endif
 #ifdef NO_DELETE_KEY

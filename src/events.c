@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include "mem.h"
 #include "strings.h"
 #include "actions.h"
+#include "buttons.h"
 #include "command.h"
 #include "e.h"
 #include "events.h"
@@ -141,6 +142,8 @@ event_init_primary_dispatcher(void)
   EVENT_DATA_ADD_HANDLER(primary_data, ClientMessage, handle_client_message);
   EVENT_DATA_ADD_HANDLER(primary_data, MappingNotify, handle_mapping_notify);
   EVENT_DATA_ADD_HANDLER(primary_data, VisibilityNotify, handle_visibility_notify);
+  EVENT_DATA_ADD_HANDLER(primary_data, EnterNotify, handle_enter_notify);
+  EVENT_DATA_ADD_HANDLER(primary_data, LeaveNotify, handle_leave_notify);
   EVENT_DATA_ADD_HANDLER(primary_data, FocusIn, handle_focus_in);
   EVENT_DATA_ADD_HANDLER(primary_data, FocusOut, handle_focus_out);
   EVENT_DATA_ADD_HANDLER(primary_data, ConfigureNotify, handle_configure_notify);
@@ -155,12 +158,6 @@ event_init_primary_dispatcher(void)
 
   event_data_add_mywin(&primary_data, TermWin.parent);
   event_data_add_mywin(&primary_data, TermWin.vt);
-#if 0
-  event_data_add_mywin(&primary_data, scrollbar_get_win());
-  event_data_add_mywin(&primary_data, scrollbar_get_uparrow_win());
-  event_data_add_mywin(&primary_data, scrollbar_get_downarrow_win());
-  event_data_add_mywin(&primary_data, scrollbar_get_anchor_win());
-#endif
 
   if (desktop_window != None) {
     event_data_add_parent(&primary_data, desktop_window);
@@ -233,7 +230,7 @@ handle_property_notify(event_t * ev)
   if (background_is_trans()) {
     if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
-      D_EVENTS(("handle_property_notify():  On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
+      D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n", ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"),
                 (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
         win = get_desktop_window();
@@ -258,7 +255,7 @@ handle_property_notify(event_t * ev)
     }
     if (ev->xany.window == desktop_window) {
       prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
-      D_EVENTS(("handle_property_notify():  On desktop_window [0x%08x].  prop (_XROOTPMAP_ID) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
+      D_EVENTS(("On desktop_window [0x%08x].  prop (_XROOTPMAP_ID) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) desktop_window, (int) prop, (int) ev->xproperty.atom));
       if (ev->xproperty.atom == prop) {
         pmap = get_desktop_pixmap();
         if (pmap == (Pixmap) 1) {
@@ -272,7 +269,7 @@ handle_property_notify(event_t * ev)
   }
   if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
     prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
-    D_EVENTS(("handle_property_notify():  On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
+    D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) prop, (int) ev->xproperty.atom));
     if ((prop != None) && (ev->xproperty.atom == prop)) {
       if ((enl_ipc_get_win()) != None) {
         redraw_images_by_mode(MODE_AUTO);
@@ -315,7 +312,7 @@ handle_client_message(event_t * ev)
       buff[i] = ev->xclient.data.b[i + 8];
     }
     buff[12] = 0;
-    D_ENL(("handle_client_message():  Discarding unexpected Enlightenment IPC message:  \"%s\"\n", buff));
+    D_ENL(("Discarding unexpected Enlightenment IPC message:  \"%s\"\n", buff));
     return 1;
   }
 #ifdef OFFIX_DND
@@ -358,19 +355,55 @@ handle_visibility_notify(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   switch (ev->xvisibility.state) {
     case VisibilityUnobscured:
-      D_X11(("handle_visibility_notify():  Window completely visible\n"));
+      D_X11(("Window completely visible.  Using FAST_REFRESH.\n"));
       refresh_type = FAST_REFRESH;
       break;
     case VisibilityPartiallyObscured:
-      D_X11(("handle_visibility_notify():  Window partially hidden\n"));
+      D_X11(("Window partially hidden.  Using SLOW_REFRESH.\n"));
       refresh_type = SLOW_REFRESH;
       break;
     default:
-      D_X11(("handle_visibility_notify():  Window completely hidden\n"));
+      D_X11(("Window completely hidden.  Using NO_REFRESH.\n"));
       refresh_type = NO_REFRESH;
       break;
   }
   return 1;
+}
+
+unsigned char
+handle_enter_notify(event_t * ev)
+{
+
+  D_EVENTS(("handle_enter_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
+
+  REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
+
+  if (ev->xany.window == TermWin.vt) {
+    if (images[image_bg].norm != images[image_bg].selected) {
+      images[image_bg].current = images[image_bg].selected;
+      redraw_image(image_bg);
+    }
+    return 1;
+  }
+  return 0;
+}
+
+unsigned char
+handle_leave_notify(event_t * ev)
+{
+
+  D_EVENTS(("handle_leave_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
+
+  REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
+
+  if (ev->xany.window == TermWin.vt) {
+    if (images[image_bg].norm != images[image_bg].selected) {
+      images[image_bg].current = images[image_bg].norm;
+      redraw_image(image_bg);
+    }
+    return 1;
+  }
+  return 0;
 }
 
 unsigned char
@@ -380,18 +413,32 @@ handle_focus_in(event_t * ev)
   D_EVENTS(("handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
+
   if (!TermWin.focus) {
+    Window unused_root, child;
+    int unused_root_x, unused_root_y;
+    unsigned int unused_mask;
+
     TermWin.focus = 1;
-    if (images[image_bg].norm != images[image_bg].selected) {
-      images[image_bg].current = images[image_bg].selected;
-      redraw_image(image_bg);
+    XQueryPointer(Xdisplay, TermWin.parent, &unused_root, &child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+    if (child == TermWin.vt) {
+      if (images[image_bg].current != images[image_bg].selected) {
+        images[image_bg].current = images[image_bg].selected;
+        redraw_image(image_bg);
+      }
+    } else {
+      if (images[image_bg].current != images[image_bg].norm) {
+        images[image_bg].current = images[image_bg].norm;
+        redraw_image(image_bg);
+      }
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(Options & Opt_scrollbar);
     } else {
       scrollbar_set_focus(TermWin.focus);
-      scrollbar_draw(MODE_SOLID);
+      scrollbar_draw(IMAGE_STATE_NORMAL, MODE_SOLID);
     }
+    bbar_draw_all(IMAGE_STATE_NORMAL, MODE_SOLID);
 #ifdef USE_XIM
     if (xim_input_context != NULL)
       XSetICFocus(xim_input_context);
@@ -409,16 +456,17 @@ handle_focus_out(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (TermWin.focus) {
     TermWin.focus = 0;
-    if (images[image_bg].norm != images[image_bg].selected) {
-      images[image_bg].current = images[image_bg].norm;
+    if (images[image_bg].current != images[image_bg].disabled) {
+      images[image_bg].current = images[image_bg].disabled;
       redraw_image(image_bg);
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(0);
     } else {
       scrollbar_set_focus(TermWin.focus);
-      scrollbar_draw(MODE_SOLID);
+      scrollbar_draw(IMAGE_STATE_DISABLED, MODE_SOLID);
     }
+    bbar_draw_all(IMAGE_STATE_DISABLED, MODE_SOLID);
 #ifdef USE_XIM
     if (xim_input_context != NULL)
       XUnsetICFocus(xim_input_context);

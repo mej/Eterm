@@ -44,11 +44,12 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xos.h>
 
 #include "../libmej/debug.h"	/* from libmej */
-#include "debug.h"
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
+#include "debug.h"
 #include "startup.h"
 #include "actions.h"
+#include "buttons.h"
 #include "command.h"
 #include "eterm_utmp.h"
 #include "events.h"
@@ -154,8 +155,23 @@ eterm_bootstrap(int argc, char *argv[])
 
   get_modifiers();  /* Set up modifier masks before parsing config files. */
 
-  read_config(THEME_CFG);
-  read_config((rs_config_file ? rs_config_file : USER_CFG));
+  /* Initialize the parser */
+  conf_init_subsystem();
+
+  if ((theme_dir = conf_parse_theme(rs_theme, THEME_CFG, 1)) != NULL) {
+    char *tmp;
+
+    tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
+    sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
+    putenv(tmp);
+  }
+  if ((user_dir = conf_parse_theme(rs_theme, (rs_config_file ? rs_config_file : USER_CFG), 0)) != NULL) {
+    char *tmp;
+
+    tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
+    sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
+    putenv(tmp);
+  }
 
 #if defined(PIXMAP_SUPPORT)
   if (rs_path || theme_dir || user_dir) {
@@ -206,15 +222,23 @@ eterm_bootstrap(int argc, char *argv[])
   }
 #endif
 
+  process_colors();
+
   Create_Windows(argc, argv);
   scr_reset();			/* initialize screen */
 
   /* Initialize the scrollbar */
-  scrollbar_init(szHint.width, szHint.height);
+  scrollbar_init(szHint.width, szHint.height - bbar_total_height());
   scrollbar_mapping(Options & Opt_scrollbar);
 
   /* Initialize the menu subsystem. */
   menu_init();
+
+  if (buttonbar) {
+    bbar_init(buttonbar, szHint.width);
+    bbar_dock(buttonbar, BBAR_DOCKED_TOP);
+    bbar_show(buttonbar, 1);
+  }
 
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {

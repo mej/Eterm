@@ -57,14 +57,14 @@ wait_for_chld(int system_pid)
     /* If the child that exited is the command we spawned, or if the
        child exited before fork() returned in the parent, it must be
        our immediate child that exited.  We exit gracefully. */
-    D_OPTIONS(("wait_for_chld():  %ld exited.\n", pid));
+    D_OPTIONS(("%ld exited.\n", pid));
     if (pid == system_pid || system_pid == -1) {
       if (WIFEXITED(status)) {
 	code = WEXITSTATUS(status);
-	D_OPTIONS(("wait_for_chld():  Child process exited with return code %lu\n", code));
+	D_OPTIONS(("Child process exited with return code %lu\n", code));
       } else if (WIFSIGNALED(status)) {
 	code = WTERMSIG(status);
-	D_OPTIONS(("wait_for_chld():  Child process was terminated by unhandled signal %lu\n", code));
+	D_OPTIONS(("Child process was terminated by unhandled signal %lu\n", code));
       } else {
 	code = 0;
       }
@@ -89,7 +89,7 @@ system_wait(char *command)
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-    print_error("system_wait():  execl(%s) failed -- %s", command, strerror(errno));
+    print_error("execl(%s) failed -- %s", command, strerror(errno));
     exit(EXIT_FAILURE);
   } else {
     D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
@@ -109,7 +109,7 @@ system_no_wait(char *command)
     setreuid(my_ruid, my_ruid);
     setregid(my_rgid, my_rgid);
     execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-    print_error("system_no_wait():  execl(%s) failed -- %s", command, strerror(errno));
+    print_error("execl(%s) failed -- %s", command, strerror(errno));
     exit(EXIT_FAILURE);
   }
   return (0);

@@ -23,10 +23,11 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xmd.h>		/* CARD32 */
 
 #include "../libmej/debug.h"
+#include "../libmej/mem.h"
+#include "../libmej/strings.h"
 #include "command.h"
 #include "debug.h"
 #include "startup.h"
-#include "mem.h"
 #include "screen.h"
 #include "scrollbar.h"
 #include "options.h"
@@ -100,9 +101,9 @@ unsigned char refresh_all = 0;
  *                        SCREEN `COMMON' ROUTINES                           *
  * ------------------------------------------------------------------------- */
 /* Fill part/all of a drawn line with blanks. */
-inline void blank_line(text_t *, rend_t *, int, rend_t);
+__inline__ void blank_line(text_t *, rend_t *, int, rend_t);
 
-inline void
+__inline__ void
 blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 {
 /*    int             i = width; */
@@ -114,9 +115,9 @@ blank_line(text_t * et, rend_t * er, int width, rend_t efs)
     *r++ = fs;
 }
 
-inline void blank_screen_mem(text_t **, rend_t **, int, rend_t);
+__inline__ void blank_screen_mem(text_t **, rend_t **, int, rend_t);
 
-inline void
+__inline__ void
 blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
 {
   register unsigned int i = TermWin.ncol;
@@ -206,18 +207,18 @@ scr_reset(void)
 	    
       for (i = TermWin.nrow; i < prev_nrow; i++) {
         j = i + TermWin.saveLines;
-        if (screen.text[j])
+        if (screen.text[j]) {
           FREE(screen.text[j]);
-        if (screen.rend[j])
           FREE(screen.rend[j]);
-        if (swap.text[i])
+        }
+        if (swap.text[i]) {
           FREE(swap.text[i]);
-        if (swap.rend[i])
           FREE(swap.rend[i]);
-        if (drawn_text[i])
+        }
+        if (drawn_text[i]) {
           FREE(drawn_text[i]);
-        if (drawn_rend[i])
           FREE(drawn_rend[i]);
+        }
       }
       screen.text = REALLOC(screen.text, total_rows   * sizeof(text_t*));
       buf_text =    REALLOC(buf_text   , total_rows   * sizeof(text_t*));
@@ -666,7 +667,7 @@ scroll_text(int row1, int row2, int count, int spec)
   } else if (count < 0) {
 /* B: scroll down */
 
-    count = min(-count, row2 - row1 + 1);
+    count = MIN(-count, row2 - row1 + 1);
 /* B1: Copy and blank out lines that will get clobbered by the rotation */
     for (i = 0, j = row2; i < count; i++, j--) {
       buf_text[i] = screen.text[j];
@@ -1602,15 +1603,14 @@ scr_move_to(int y, int len)
 int
 scr_page(int direction, int nlines)
 {
-  int start, dirn;
+  int start;
 
   D_SCREEN(("scr_page(%s, %d) view_start:%d\n", ((direction == UP) ? "UP" : "DN"), nlines, TermWin.view_start));
 
-  dirn = (direction == UP) ? 1 : -1;
   start = TermWin.view_start;
   MAX_IT(nlines, 1);
   MIN_IT(nlines, TermWin.nrow);
-  TermWin.view_start += (nlines * dirn);
+  TermWin.view_start += ((direction == UP) ? nlines : (-nlines));
   MAX_IT(TermWin.view_start, 0);
   MIN_IT(TermWin.view_start, TermWin.nscrolled);
 
@@ -2104,7 +2104,7 @@ scr_refresh(int type)
   if (type == SLOW_REFRESH) {
     XSync(Xdisplay, False);
   }
-  D_SCREEN(("scr_refresh() exiting.\n"));
+  D_SCREEN(("Exiting.\n"));
 
 #ifdef PROFILE_SCREEN
   P_SETTIMEVAL(cnt.stop);
@@ -2113,7 +2113,127 @@ scr_refresh(int type)
 	  ++call_cnt, P_CMPTIMEVALS_USEC(cnt.start, cnt.stop), total_time);
 #endif
 }
-/*    TermWin term_win screen scr foobar */
+
+int
+scr_strmatch(unsigned long row, unsigned long col, const char *str)
+{
+  unsigned char c;
+  const char *s;
+
+  for (c = screen.text[row][col], s = str; s; s++) {
+    if (c != *s) {
+      return (0);
+    }
+  }
+  return 1;
+}
+
+/* Find and highlight all occurances of "str" in the scrollback. */
+void
+scr_search_scrollback(char *str)
+{
+  unsigned char *c;
+  char *s;
+  static char *last_str = NULL;
+  unsigned int *i;
+  unsigned long row, lrow, col, rows, cols, len, k;
+
+  if (str == NULL) {
+    if ((str = last_str) == NULL) {
+      return;
+    }
+  } else {
+    last_str = StrDup(str);
+  }
+  lrow = rows = TermWin.nrow + TermWin.saveLines;
+  cols = TermWin.ncol;
+  len = strlen(str);
+
+  D_SCREEN(("%d, %d\n", rows, cols));
+  for (row = 0; row < rows; row++) {
+    if (screen.text[row]) {
+      c = screen.text[row];
+      for (s = strstr(c, str); s; s = strstr(++s, str)) {
+        unsigned long j;
+
+        col = (int) s - (int) c;
+        for (i = screen.rend[row] + col, j = 0; j < len; i++, j++) {
+          if (*i & RS_RVid) {
+            *i &= ~RS_RVid;
+          } else {
+            *i |= RS_RVid;
+          }
+        }
+        if ((long) row <= TermWin.saveLines) {
+          lrow = row;
+        }
+      }
+      for (s = screen.text[row] + cols - len + 1, k = len - 1; k; s++, k--) {
+        unsigned long j;
+
+        if ((row < rows - 1) && !strncasecmp(s, str, k) && screen.text[row + 1] && !strncasecmp(screen.text[row + 1], str + k, len - k)) {
+          col = (int) s - (int) c;
+          for (i = &(screen.rend[row][cols - k]), j = 0; j < k; i++, j++) {
+            (*i & RS_RVid) ? (*i &= ~RS_RVid) : (*i |= RS_RVid);
+          }
+          for (i = screen.rend[row + 1], j = 0, k = len - k; j < k; i++, j++) {
+            (*i & RS_RVid) ? (*i &= ~RS_RVid) : (*i |= RS_RVid);
+          }
+          if ((long) row <= TermWin.saveLines) {
+            lrow = row;
+          }
+          break;
+        }
+      }
+    }
+  }
+  if (last_str == str) {
+    FREE(last_str);
+  } else {
+    if (lrow != rows) {
+      TermWin.view_start = rows - lrow - TermWin.nrow;
+      LOWER_BOUND(TermWin.view_start, 0);
+      UPPER_BOUND(TermWin.view_start, TermWin.nscrolled);
+      D_SCREEN(("New view start is %d\n", TermWin.view_start));
+    }
+  }
+  scr_refresh(refresh_type);
+}
+
+/* Dump the entire contents of the scrollback buffer to stderr in hex and ASCII */
+void
+scr_dump(void)
+{
+  unsigned char *c;
+  unsigned int *i;
+  unsigned long row, col, rows, cols;
+
+  rows = TermWin.nrow + TermWin.saveLines;
+  cols = TermWin.ncol;
+
+  D_SCREEN(("%d, %d\n", rows, cols));
+  for (row = 0; row < rows; row++) {
+    fprintf(stderr, "%lu:  ", row);
+    if (screen.text[row]) {
+      for (col = 0, c = screen.text[row]; col < cols; c++, col++) {
+        fprintf(stderr, "%02x ", *c);
+      }
+      fprintf(stderr, "\"");
+      for (col = 0, c = screen.text[row]; col < cols; c++, col++) {
+        fprintf(stderr, "%c", ((isprint(*c)) ? (*c) : '.'));
+      }
+      fprintf(stderr, "\"");
+      for (col = 0, i = screen.rend[row]; col < cols; i++, col++) {
+        fprintf(stderr, " %08x", *i);
+      }
+    } else {
+      fprintf(stderr, "NULL");
+    }
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  }
+}
+
 
 /* ------------------------------------------------------------------------- *
  *                           CHARACTER SELECTION                             * 
@@ -2269,7 +2389,7 @@ selection_reset(void)
 
   i = (current_screen == PRIMARY) ? 0 : TermWin.saveLines;
   for (; i < lrow; i++) {
-    if (screen.text[i])	{	/* not everything may be malloc()d yet */
+    if (screen.text[i]) {
       for (j = 0; j < lcol; j++) {
 	screen.rend[i][j] &= ~RS_Select;
       }
@@ -2401,7 +2521,7 @@ selection_make(Time tm)
   char *str;
   text_t *t;
 
-  D_SELECT(("selection_make(): selection.op=%d, selection.clicks=%d\n", selection.op, selection.clicks));
+  D_SELECT(("selection.op=%d, selection.clicks=%d\n", selection.op, selection.clicks));
   switch (selection.op) {
     case SELECTION_CONT:
       break;
@@ -2430,7 +2550,7 @@ selection_make(Time tm)
   str = MALLOC(i * sizeof(char));
   new_selection_text = (unsigned char *) str;
 
-  col = max(selection.beg.col, 0);
+  col = MAX(selection.beg.col, 0);
   row = selection.beg.row + TermWin.saveLines;
   end_row = selection.end.row + TermWin.saveLines;
 /*
@@ -2486,7 +2606,7 @@ selection_make(Time tm)
     print_error("can't get primary selection");
   XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8,
 		  PropModeReplace, selection.text, selection.len);
-  D_SELECT(("selection_make(): selection.len=%d\n", selection.len));
+  D_SELECT(("selection.len=%d\n", selection.len));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -2736,7 +2856,7 @@ selection_extend(int x, int y, int flag)
     selection.beg.row = selection.end.row = selection.mark.row;
     selection.beg.col = selection.end.col = selection.mark.col;
     selection.clicks = 4;
-    D_SELECT(("selection_extend() selection.clicks = 4\n"));
+    D_SELECT(("selection.clicks = 4\n"));
     return;
   }
   if (selection.clicks == 4)
@@ -2934,7 +3054,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
     }
     selection.end.col = TermWin.ncol - 1;
   }
-  D_SELECT(("selection_extend_colrow(): (c:%d,r:%d)-(c:%d,r:%d) old (c:%d,r:%d)-(c:%d,r:%d)\n", selection.beg.col, selection.beg.row,
+  D_SELECT(("(c:%d,r:%d)-(c:%d,r:%d) old (c:%d,r:%d)-(c:%d,r:%d)\n", selection.beg.col, selection.beg.row,
 	    selection.end.col, selection.end.row, old_beg.col, old_beg.row, old_end.col, old_end.row));
 
 /* 

@@ -103,6 +103,8 @@ extern unsigned char handle_client_message(event_t *);
 extern unsigned char handle_mapping_notify(event_t *);
 extern unsigned char handle_leave_notify(event_t *);
 extern unsigned char handle_visibility_notify(event_t *);
+extern unsigned char handle_enter_notify(event_t *);
+extern unsigned char handle_leave_notify(event_t *);
 extern unsigned char handle_focus_in(event_t *);
 extern unsigned char handle_focus_out(event_t *);
 extern unsigned char handle_configure_notify(event_t *);

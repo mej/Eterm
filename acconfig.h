@@ -326,6 +326,8 @@
 #undef HAVE_UTEMPTER
 #undef PTY_GRP_NAME
 #undef ENABLE_PROFILE
+#undef KS_HOME
+#undef KS_END
 
 
 /* Leave that blank line there!!  Autoheader needs it.

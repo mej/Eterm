@@ -3,7 +3,7 @@
 INCLUDES = -I. -I../libmej -I.. -I$(includedir) -I$(prefix)/include $(X_CFLAGS)
 
 bin_PROGRAMS = Esetroot Etbg Ettable
-bin_SCRIPTS = Etcolors Etwinop
+bin_SCRIPTS = Etcolors Etwinop Etsearch kEsetroot
 
 Esetroot_SOURCES = Esetroot.c
 Esetroot_LDFLAGS = -rpath $(libdir):$(pkglibdir)
@@ -12,5 +12,6 @@ Esetroot_LDADD = -L$(DIST_ROOT)/libmej -L$(libdir) -L$(prefix)/lib $(LIBS) $(GRL
 Etbg_SOURCES = Etbg.c
 Ettable_SOURCES = Ettable.c
 
-EXTRA_DIST = Etbg.c Esetroot.c Ettable.c Makefile.am Makefile.in Etcolors Etwinop
+EXTRA_DIST = Etbg.c Esetroot.c Ettable.c Makefile.am Makefile.in Etcolors Etwinop Etsearch \
+             kEsetroot.in
 

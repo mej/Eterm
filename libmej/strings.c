@@ -83,7 +83,7 @@ usleep(unsigned long usec)
 
 /***** Not needed ******
 #ifndef HAVE_NANOSLEEP
-inline void
+__inline__ void
 nanosleep(unsigned long nsec) {
     usleep(nsec / 1000);
 }

@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "debug.h"
+#include "buttons.h"
 #include "command.h"
 #include "e.h"
 #include "events.h"
@@ -135,13 +136,13 @@ get_top_shadow_color(Pixel norm_color, const char *type)
   xcol.pixel = norm_color;
   XQueryColor(Xdisplay, cmap, &xcol);
 
-  xcol.red = max((white.red / 5), xcol.red);
-  xcol.green = max((white.green / 5), xcol.green);
-  xcol.blue = max((white.blue / 5), xcol.blue);
+  xcol.red = MAX((white.red / 5), xcol.red);
+  xcol.green = MAX((white.green / 5), xcol.green);
+  xcol.blue = MAX((white.blue / 5), xcol.blue);
 
-  xcol.red = min(white.red, (xcol.red * 7) / 5);
-  xcol.green = min(white.green, (xcol.green * 7) / 5);
-  xcol.blue = min(white.blue, (xcol.blue * 7) / 5);
+  xcol.red = MIN(white.red, (xcol.red * 7) / 5);
+  xcol.green = MIN(white.green, (xcol.green * 7) / 5);
+  xcol.blue = MIN(white.blue, (xcol.blue * 7) / 5);
   r = xcol.red;
   g = xcol.green;
   b = xcol.blue;
@@ -154,6 +155,142 @@ get_top_shadow_color(Pixel norm_color, const char *type)
   return (xcol.pixel);
 }
 
+Pixel
+get_color_by_name(const char *name, const char *fallback)
+{
+  XColor xcol;
+
+  if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
+    print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".", name, NONULL(fallback));
+    name = fallback;
+    if (name) {
+      if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
+        print_warning("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.", name);
+        return ((Pixel) -1);
+      }
+    } else {
+      return ((Pixel) -1);
+    }
+  }
+  if (Xdepth < 24) {
+    int r, g, b;
+
+    r = xcol.red;
+    g = xcol.green;
+    b = xcol.blue;
+    xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
+    xcol.red = r;
+    xcol.green = g;
+    xcol.blue = b;
+  }
+  if (!XAllocColor(Xdisplay, cmap, &xcol)) {
+    print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".",
+                  name, xcol.pixel, xcol.red, xcol.green, xcol.blue, NONULL(fallback));
+    name = fallback;
+    if (name) {
+      if (!XAllocColor(Xdisplay, cmap, &xcol)) {
+        print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.", name, xcol.pixel, xcol.red, xcol.green, xcol.blue);
+        return ((Pixel) -1);
+      }
+    } else {
+      return ((Pixel) -1);
+    }
+  }
+  return (xcol.pixel);
+}
+
+Pixel
+get_color_by_pixel(Pixel pixel, Pixel fallback)
+{
+  XColor xcol;
+
+  xcol.pixel = pixel;
+  if (!XQueryColor(Xdisplay, cmap, &xcol)) {
+    print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.", pixel, fallback);
+    xcol.pixel = fallback;
+    if (!XQueryColor(Xdisplay, cmap, &xcol)) {
+      print_warning("Unable to convert pixel value 0x%08x to an XColor structure.", xcol.pixel);
+      return ((Pixel) 0);
+    }
+  }
+  if (Xdepth < 24) {
+    int r, g, b;
+
+    r = xcol.red;
+    g = xcol.green;
+    b = xcol.blue;
+    xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
+    xcol.red = r;
+    xcol.green = g;
+    xcol.blue = b;
+  }
+  if (!XAllocColor(Xdisplay, cmap, &xcol)) {
+    print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.", xcol.pixel, xcol.red, xcol.green, xcol.blue, fallback);
+    xcol.pixel = fallback;
+    if (!XAllocColor(Xdisplay, cmap, &xcol)) {
+      print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.", xcol.pixel, xcol.red, xcol.green, xcol.blue);
+      return ((Pixel) 0);
+    }
+  }
+  return (xcol.pixel);
+}
+
+void
+process_colors(void)
+{
+  int i;
+  Pixel pixel;
+
+  for (i = 0; i < NRS_COLORS; i++) {
+    if ((Xdepth <= 2) || (!rs_color[i]) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) -1)) {
+      switch (i) {
+	case fgColor:
+          pixel = WhitePixel(Xdisplay, Xscreen);
+          break;
+	case bgColor:
+          pixel = BlackPixel(Xdisplay, Xscreen);
+          break;
+#ifndef NO_CURSORCOLOR
+	case cursorColor:           pixel = PixColors[bgColor]; break;
+	case cursorColor2:          pixel = PixColors[fgColor]; break;
+#endif /* NO_CURSORCOLOR */
+        case pointerColor:          pixel = PixColors[fgColor]; break;
+        case borderColor:           pixel = PixColors[bgColor]; break;
+#ifndef NO_BOLDUNDERLINE
+        case colorBD:               pixel = PixColors[fgColor]; break;
+        case colorUL:               pixel = PixColors[fgColor]; break;
+#endif
+	default:
+	  pixel = PixColors[fgColor];	/* None */
+	  break;
+      }
+    }
+    PixColors[i] = pixel;
+  }
+
+  if (Xdepth <= 2) {		/* Monochrome */
+    PixColors[topShadowColor] = PixColors[fgColor];
+    PixColors[bottomShadowColor] = PixColors[fgColor];
+    PixColors[unfocusedTopShadowColor] = PixColors[fgColor];
+    PixColors[unfocusedBottomShadowColor] = PixColors[fgColor];
+
+    PixColors[menuTopShadowColor] = PixColors[fgColor];
+    PixColors[menuBottomShadowColor] = PixColors[fgColor];
+    PixColors[unfocusedMenuTopShadowColor] = PixColors[fgColor];
+    PixColors[unfocusedMenuBottomShadowColor] = PixColors[fgColor];
+  } else {
+    PixColors[bottomShadowColor] = get_bottom_shadow_color(images[image_sb].norm->bg, "bottomShadowColor");
+    PixColors[unfocusedBottomShadowColor] = get_bottom_shadow_color(images[image_sb].disabled->bg, "unfocusedBottomShadowColor");
+    PixColors[topShadowColor] = get_top_shadow_color(images[image_sb].norm->bg, "topShadowColor");
+    PixColors[unfocusedTopShadowColor] = get_top_shadow_color(images[image_sb].disabled->bg, "unfocusedTopShadowColor");
+
+    PixColors[menuBottomShadowColor] = get_bottom_shadow_color(images[image_menu].norm->bg, "menuBottomShadowColor");
+    PixColors[unfocusedMenuBottomShadowColor] = get_bottom_shadow_color(images[image_menu].disabled->bg, "unfocusedMenuBottomShadowColor");
+    PixColors[menuTopShadowColor] = get_top_shadow_color(images[image_menu].norm->bg, "menuTopShadowColor");
+    PixColors[unfocusedMenuTopShadowColor] = get_top_shadow_color(images[image_menu].disabled->bg, "unfocusedMenuTopShadowColor");
+  }
+}
+
 /* Create_Windows() - Open and map the window */
 void
 Create_Windows(int argc, char *argv[])
@@ -164,9 +301,8 @@ Create_Windows(int argc, char *argv[])
   XWMHints wmHint;
   Atom prop = None;
   CARD32 val;
-  int i, x = 0, y = 0, flags;
+  int x = 0, y = 0, flags;
   unsigned int width = 0, height = 0;
-  int r, g, b;
   MWMHints mwmhints;
 
   if (Options & Opt_borderless) {
@@ -185,140 +321,8 @@ Create_Windows(int argc, char *argv[])
   Attributes.backing_store = WhenMapped;
   Attributes.colormap = cmap;
 
-  /*
-   * grab colors before netscape does
-   */
-  for (i = 0; i < (Xdepth <= 2 ? 2 : NRS_COLORS); i++) {
-
-    XColor xcol;
-    unsigned char found_color = 0;
-
-    if (rs_color[i]) {
-      if (!XParseColor(Xdisplay, cmap, rs_color[i], &xcol)) {
-	print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".",
-		      rs_color[i], def_colorName[i] ? def_colorName[i] : "(nil)");
-	rs_color[i] = def_colorName[i];
-	if (rs_color[i]) {
-	  if (!XParseColor(Xdisplay, cmap, rs_color[i], &xcol)) {
-	    print_warning("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.", rs_color[i]);
-	    found_color = 0;
-	  } else {
-	    found_color = 1;
-	  }
-	}
-      } else {
-	found_color = 1;
-      }
-      if (found_color) {
-	r = xcol.red;
-	g = xcol.green;
-	b = xcol.blue;
-	xcol.pixel = Imlib_best_color_match(imlib_id, &r, &g, &b);
-	if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-	  print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  "
-			"Falling back on \"%s\".",
-			rs_color[i], xcol.pixel, r, g, b, def_colorName[i] ? def_colorName[i] : "(nil)");
-	  rs_color[i] = def_colorName[i];
-	  if (rs_color[i]) {
-	    if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-	      print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.",
-			    rs_color[i], xcol.pixel, r, g, b);
-	      found_color = 0;
-	    } else {
-	      found_color = 1;
-	    }
-	  }
-	} else {
-	  found_color = 1;
-	}
-      }
-    } else {
-      found_color = 0;
-    }
-    if (!found_color) {
-      switch (i) {
-	case fgColor:
-	case bgColor:
-	  /* fatal: need bg/fg color */
-	  fatal_error("Unable to get foreground/background colors!");
-	  break;
-#ifndef NO_CURSORCOLOR
-	case cursorColor:
-	  xcol.pixel = PixColors[bgColor];
-	  break;
-	case cursorColor2:
-	  xcol.pixel = PixColors[fgColor];
-	  break;
-#endif /* NO_CURSORCOLOR */
-	case unfocusedMenuColor:
-	  xcol.pixel = PixColors[menuColor];
-	  break;
-	case unfocusedScrollColor:
-	case menuColor:
-	  xcol.pixel = PixColors[scrollColor];
-	  break;
-	default:
-	  xcol.pixel = PixColors[bgColor];	/* None */
-	  break;
-      }
-    }
-    PixColors[i] = xcol.pixel;
-  }
-
-#ifndef NO_CURSORCOLOR
-  if (Xdepth <= 2 || !rs_color[cursorColor])
-    PixColors[cursorColor] = PixColors[bgColor];
-  if (Xdepth <= 2 || !rs_color[cursorColor2])
-    PixColors[cursorColor2] = PixColors[fgColor];
-#endif /* NO_CURSORCOLOR */
-  if (Xdepth <= 2 || !rs_color[pointerColor])
-    PixColors[pointerColor] = PixColors[fgColor];
-  if (Xdepth <= 2 || !rs_color[borderColor])
-    PixColors[borderColor] = PixColors[bgColor];
-
-#ifndef NO_BOLDUNDERLINE
-  if (Xdepth <= 2 || !rs_color[colorBD])
-    PixColors[colorBD] = PixColors[fgColor];
-  if (Xdepth <= 2 || !rs_color[colorUL])
-    PixColors[colorUL] = PixColors[fgColor];
-#endif /* NO_BOLDUNDERLINE */
-
-  /*
-   * get scrollbar/menu shadow colors
-   *
-   * The calculations of topShadow/bottomShadow values are adapted
-   * from the fvwm window manager.
-   */
-  if (Xdepth <= 2) {		/* Monochrome */
-    PixColors[scrollColor] = PixColors[bgColor];
-    PixColors[topShadowColor] = PixColors[fgColor];
-    PixColors[bottomShadowColor] = PixColors[fgColor];
-
-    PixColors[unfocusedScrollColor] = PixColors[bgColor];
-    PixColors[unfocusedTopShadowColor] = PixColors[fgColor];
-    PixColors[unfocusedBottomShadowColor] = PixColors[fgColor];
-
-    PixColors[menuColor] = PixColors[bgColor];
-    PixColors[menuTopShadowColor] = PixColors[fgColor];
-    PixColors[menuBottomShadowColor] = PixColors[fgColor];
-
-    PixColors[unfocusedMenuColor] = PixColors[bgColor];
-    PixColors[unfocusedMenuTopShadowColor] = PixColors[fgColor];
-    PixColors[unfocusedMenuBottomShadowColor] = PixColors[fgColor];
-  } else {
-    PixColors[bottomShadowColor] = get_bottom_shadow_color(PixColors[scrollColor], "bottomShadowColor");
-    PixColors[unfocusedBottomShadowColor] = get_bottom_shadow_color(PixColors[unfocusedScrollColor], "unfocusedBottomShadowColor");
-    PixColors[topShadowColor] = get_top_shadow_color(PixColors[scrollColor], "topShadowColor");
-    PixColors[unfocusedTopShadowColor] = get_top_shadow_color(PixColors[unfocusedScrollColor], "unfocusedTopShadowColor");
-
-    PixColors[menuBottomShadowColor] = get_bottom_shadow_color(PixColors[menuColor], "menuBottomShadowColor");
-    PixColors[unfocusedMenuBottomShadowColor] = get_bottom_shadow_color(PixColors[unfocusedMenuColor], "unfocusedMenuBottomShadowColor");
-    PixColors[menuTopShadowColor] = get_top_shadow_color(PixColors[menuColor], "menuTopShadowColor");
-    PixColors[unfocusedMenuTopShadowColor] = get_top_shadow_color(PixColors[unfocusedMenuColor], "unfocusedMenuTopShadowColor");
-  }
-
   szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
-  szHint.base_height = (2 * TermWin.internalBorder);
+  szHint.base_height = (2 * TermWin.internalBorder) + bbar_total_height();
 
   flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
   D_X11(("XParseGeometry(geom, %d, %d, %d, %d)\n", x, y, width, height));
@@ -359,6 +363,7 @@ Create_Windows(int argc, char *argv[])
 
   Attributes.background_pixel = PixColors[bgColor];
   Attributes.border_pixel = PixColors[bgColor];
+  D_X11(("szHint == { %d, %d, %d, %d }\n", szHint.x, szHint.y, szHint.width, szHint.height));
   TermWin.parent = XCreateWindow(Xdisplay, Xroot, szHint.x, szHint.y, szHint.width, szHint.height, 0, Xdepth, InputOutput,
 #ifdef PREFER_24BIT
 				 Xvisual,
@@ -404,7 +409,7 @@ Create_Windows(int argc, char *argv[])
 
   /* the vt window */
   TermWin.x = (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
-  TermWin.y = 0;
+  TermWin.y = bbar_total_height();
   if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
     TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
@@ -419,7 +424,7 @@ Create_Windows(int argc, char *argv[])
     XClearWindow(Xdisplay, TermWin.vt);
   }
   XDefineCursor(Xdisplay, TermWin.vt, TermWin_cursor);
-  XSelectInput(Xdisplay, TermWin.vt, (ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button3MotionMask));
+  XSelectInput(Xdisplay, TermWin.vt, (EnterWindowMask | LeaveWindowMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button3MotionMask));
 
   /* If the user wants a specific desktop, tell the WM that */
   if (rs_desktop != -1) {
@@ -474,9 +479,9 @@ set_width(unsigned short width)
 void
 update_size_hints(void)
 {
-  D_X11(("update_size_hints() called.\n"));
+  D_X11(("Called.\n"));
   szHint.base_width = (2 * TermWin.internalBorder);
-  szHint.base_height = (2 * TermWin.internalBorder);
+  szHint.base_height = (2 * TermWin.internalBorder) + bbar_total_height();
   szHint.base_width += ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
 
   szHint.width_inc = TermWin.fwidth;
@@ -503,8 +508,9 @@ term_resize(int width, int height)
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
   D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
-  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0))), 0, width, height + 1);
-  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0))), bbar_total_height(),
+                    width, height - bbar_total_height());
+  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
   if (image_mode_is(image_bg, MODE_AUTO)) {
     enl_ipc_sync();
   }
@@ -514,12 +520,13 @@ term_resize(int width, int height)
 void
 parent_resize(void)
 {
-  D_X11(("parent_resize() called.\n"));
+  D_X11(("Called.\n"));
   update_size_hints();
   XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
   D_X11((" -> New parent width/height == %lux%lu\n", szHint.width, szHint.height));
   term_resize(szHint.width, szHint.height);
-  scrollbar_resize(szHint.width, szHint.height);
+  scrollbar_resize(szHint.width, szHint.height + bbar_total_height());
+  bbar_resize_all(szHint.width);
   if (buffer_pixmap != None) {
     scr_touch();
   }
@@ -548,7 +555,8 @@ handle_resize(unsigned int width, unsigned int height)
     szHint.width = szHint.base_width + TermWin.width;
     szHint.height = szHint.base_height + TermWin.height;
     D_X11((" -> New szHint.width/height == %lux%lu\n", szHint.width, szHint.height));
-    scrollbar_resize(width, height);
+    scrollbar_resize(width, szHint.height - bbar_total_height());
+    bbar_resize_all(szHint.width);
     scr_reset();
     if (buffer_pixmap != None) {
       scr_touch();
@@ -559,13 +567,6 @@ handle_resize(unsigned int width, unsigned int height)
     }
     first_time = 0;
   }
-#if 0
- else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
-    term_resize(width, height);
-    scrollbar_resize(width, height);
-    scr_touch();
-  }
-#endif
 }
 
 void
@@ -649,3 +650,47 @@ set_window_color(int idx, const char *color)
 # define set_window_color(idx,color) ((void)0)
 #endif /* XTERM_COLOR_CHANGE */
 
+Window
+find_window_by_coords(Window win, int win_x, int win_y, int rel_x, int rel_y)
+{
+  Window *children = NULL;
+  XWindowAttributes attr;
+  Window child = 0, parent_win = 0, root_win = 0;
+  int i;
+  unsigned int ww, wh, num;
+  int wx, wy;
+
+  D_X11(("win 0x%08x at %d, %d.  Coords are %d, %d.\n", win, win_x, win_y, rel_x, rel_y));
+
+  /* Bad or invisible window. */
+  if ((!XGetWindowAttributes(Xdisplay, win, &attr)) || (attr.map_state != IsViewable)) {
+    return None;
+  }
+  wx = attr.x + win_x;
+  wy = attr.y + win_y;
+  ww = attr.width;
+  wh = attr.height;
+   
+  if (!((rel_x >= wx) && (rel_y >= wy) && (rel_x < (int)(wx + ww)) && (rel_y < (int)(wy + wh)))) {
+    return None;
+  }
+
+  if (!XQueryTree(Xdisplay, win, &root_win, &parent_win, &children, &num)) {
+    return win;
+  }
+  if (children) {
+    D_X11(("%d children.\n", num));
+    for (i = num - 1; i >= 0; i--) {
+      D_X11(("Trying children[%d] (0x%08x)\n", i, children[i]));
+      if ((child = find_window_by_coords(children[i], wx, wy, rel_x, rel_y)) != None) {
+        D_X11(("Match!\n"));
+        XFree(children);
+        return child;
+      }
+    }
+    D_X11(("XFree(children)\n"));
+    XFree(children);
+  }
+  D_X11(("Returning 0x%08x\n", win));
+  return win;
+}

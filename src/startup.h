@@ -24,40 +24,49 @@
  */
 
 #ifndef _STARTUP_H
-# define _STARTUP_H
-# include <X11/Xfuncproto.h>
-# include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
-# include <ctype.h>
-# include <stdio.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <string.h>
-# include "misc.h"
+#define _STARTUP_H
+#include <X11/Xfuncproto.h>
+#include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include "misc.h"
 
 /************ Macros and Definitions ************/
-# ifndef EXIT_SUCCESS		/* missing from <stdlib.h> */
-#  define EXIT_SUCCESS	0	/* exit function success */
-#  define EXIT_FAILURE	1	/* exit function failure */
-# endif
+#ifndef EXIT_SUCCESS		/* missing from <stdlib.h> */
+# define EXIT_SUCCESS	0	/* exit function success */
+# define EXIT_FAILURE	1	/* exit function failure */
+#endif
 
-# define THEME_CFG	"theme.cfg"
-# define USER_CFG	"user.cfg"
+#define THEME_CFG	"theme.cfg"
+#define USER_CFG	"user.cfg"
 
-# define MAX_COLS	200
-# define MAX_ROWS	128
+#define MAX_COLS	200
+#define MAX_ROWS	128
 
-# ifndef min
-#  define min(a,b)	(((a) < (b)) ? (a) : (b))
-# endif
-# ifndef max
-#  define max(a,b)	(((a) > (b)) ? (a) : (b))
-# endif
-# ifndef MIN
-#  define MIN(a,b)	(((a) < (b)) ? (a) : (b))
-# endif
-# ifndef MAX
-#  define MAX(a,b)	(((a) > (b)) ? (a) : (b))
-# endif
+#ifdef MIN
+# undef MIN
+#endif
+#ifdef MAX
+# undef MAX
+#endif
+#ifdef __GNUC__
+# define MIN(a,b)                       __extension__ ({__typeof__(a) aa = (a); __typeof__(b) bb = (b); (aa < bb) ? (aa) : (bb);})
+# define MAX(a,b)                       __extension__ ({__typeof__(a) aa = (a); __typeof__(b) bb = (b); (aa > bb) ? (aa) : (bb);})
+# define LOWER_BOUND(current, other)    __extension__ ({__typeof__(other) o = (other); ((current) < o) ? ((current) = o) : (current);})
+# define AT_LEAST(current, other)       LOWER_BOUND(current, other)
+# define MAX_IT(current, other)         LOWER_BOUND(current, other)
+# define UPPER_BOUND(current, other)    __extension__ ({__typeof__(other) o = (other); ((current) > o) ? ((current) = o) : (current);})
+# define AT_MOST(current, other)        UPPER_BOUND(current, other)
+# define MIN_IT(current, other)         UPPER_BOUND(current, other)
+# define BOUND(val, min, max)           __extension__ ({__typeof__(min) m1 = (min); __typeof__(max) m2 = (max); ((val) < m1) ? ((val) = m1) : (((val) > m2) ? ((val) = m2) : (val));})
+# define CONTAIN(val, min, max)         BOUND(val, min, max)
+# define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
+#else
+# define MIN(a,b)	                (((a) < (b)) ? (a) : (b))
+# define MAX(a,b)                       (((a) > (b)) ? (a) : (b))
 # define LOWER_BOUND(current, other)    (((current) < (other)) ? ((current) = (other)) : (current))
 # define AT_LEAST(current, other)       LOWER_BOUND(current, other)
 # define MAX_IT(current, other)         LOWER_BOUND(current, other)
@@ -67,32 +76,33 @@
 # define BOUND(val, min, max)           (((val) < (min)) ? ((val) = (min)) : (((val) > (max)) ? ((val) = (max)) : (val)))
 # define CONTAIN(val, min, max)         BOUND(val, min, max)
 # define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
+#endif
 
 /* width of scrollbar, menuBar shadow ... don't change! */
-# define SHADOW	2
+#define SHADOW	2
 
 /* convert pixel dimensions to row/column values */
-# define Pixel2Width(x)		((x) / TermWin.fwidth)
-# define Pixel2Height(y)	((y) / TermWin.fheight)
-# define Pixel2Col(x)		Pixel2Width((x) - TermWin.internalBorder)
-# define Pixel2Row(y)		Pixel2Height((y) - TermWin.internalBorder)
-# define Width2Pixel(n)		((n) * TermWin.fwidth)
-# define Height2Pixel(n)	((n) * TermWin.fheight)
-# define Col2Pixel(col)		(Width2Pixel(col) + TermWin.internalBorder)
-# define Row2Pixel(row)		(Height2Pixel(row) + TermWin.internalBorder)
+#define Pixel2Width(x)		((x) / TermWin.fwidth)
+#define Pixel2Height(y)	((y) / TermWin.fheight)
+#define Pixel2Col(x)		Pixel2Width((x) - TermWin.internalBorder)
+#define Pixel2Row(y)		Pixel2Height((y) - TermWin.internalBorder)
+#define Width2Pixel(n)		((n) * TermWin.fwidth)
+#define Height2Pixel(n)	((n) * TermWin.fheight)
+#define Col2Pixel(col)		(Width2Pixel(col) + TermWin.internalBorder)
+#define Row2Pixel(row)		(Height2Pixel(row) + TermWin.internalBorder)
 
-# define TermWin_TotalWidth()	(TermWin.width  + 2 * TermWin.internalBorder)
-# define TermWin_TotalHeight()	(TermWin.height + 2 * TermWin.internalBorder)
+#define TermWin_TotalWidth()	(TermWin.width  + 2 * TermWin.internalBorder)
+#define TermWin_TotalHeight()	(TermWin.height + 2 * TermWin.internalBorder)
 
-# define Xscreen		DefaultScreen(Xdisplay)
-# define Xcmap			DefaultColormap(Xdisplay,Xscreen)
-# define Xdepth			DefaultDepth(Xdisplay,Xscreen)
-# define Xroot			DefaultRootWindow(Xdisplay)
-# define Xvisual		DefaultVisual(Xdisplay, Xscreen)
-# ifdef DEBUG_DEPTH
-#  undef Xdepth
-#  define Xdepth		DEBUG_DEPTH
-# endif
+#define Xscreen		DefaultScreen(Xdisplay)
+#define Xcmap			DefaultColormap(Xdisplay,Xscreen)
+#define Xdepth			DefaultDepth(Xdisplay,Xscreen)
+#define Xroot			DefaultRootWindow(Xdisplay)
+#define Xvisual		DefaultVisual(Xdisplay, Xscreen)
+#ifdef DEBUG_DEPTH
+# undef Xdepth
+# define Xdepth		DEBUG_DEPTH
+#endif
 
 /************ Structures ************/
 typedef struct {
@@ -110,12 +120,12 @@ typedef struct {
   GC gc;			/* GC for drawing text */
   XFontStruct	* font;		/* main font structure */
   XFontSet fontset;
-# ifndef NO_BOLDFONT
+#ifndef NO_BOLDFONT
   XFontStruct	* boldFont;	/* bold font */
-# endif
-# ifdef MULTI_CHARSET
+#endif
+#ifdef MULTI_CHARSET
   XFontStruct	* mfont;	/* multibyte font structure */
-# endif
+#endif
 } TermWin_t;
 
 /************ Variables ************/

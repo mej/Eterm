@@ -1064,7 +1064,7 @@ Exit_signal(int sig)
   privileges(REVERT);
 #endif
 
-  D_CMD(("Exit_signal(): exit(%s)\n", sig_to_str(sig)));
+  D_CMD(("exit(%s)\n", sig_to_str(sig)));
   exit(sig);
   SIG_RETURN(0);
 }
@@ -1129,9 +1129,9 @@ clean_exit(void)
  */
 
 #ifdef __sgi
-inline int sgi_get_pty(void);
+__inline__ int sgi_get_pty(void);
 
-inline int
+__inline__ int
 sgi_get_pty(void)
 {
 
@@ -1144,9 +1144,9 @@ sgi_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTC
-inline int aix_get_pty(void);
+__inline__ int aix_get_pty(void);
 
-inline int
+__inline__ int
 aix_get_pty(void)
 {
 
@@ -1161,9 +1161,9 @@ aix_get_pty(void)
 #endif
 
 #ifdef HAVE_SCO_PTYS
-inline int sco_get_pty(void);
+__inline__ int sco_get_pty(void);
 
-inline int
+__inline__ int
 sco_get_pty(void)
 {
 
@@ -1195,9 +1195,9 @@ sco_get_pty(void)
 #endif
 
 #ifdef HAVE_DEV_PTMX
-inline int svr_get_pty(void);
+__inline__ int svr_get_pty(void);
 
-inline int
+__inline__ int
 svr_get_pty(void)
 {
 
@@ -1228,9 +1228,9 @@ svr_get_pty(void)
 #define PTYCHAR1 "pqrstuvwxyz"
 #define PTYCHAR2 "0123456789abcdefghijklmnopqrstuvwxyz"
 
-inline int gen_get_pty(void);
+__inline__ int gen_get_pty(void);
 
-inline int
+__inline__ int
 gen_get_pty(void)
 {
 
@@ -1297,7 +1297,6 @@ get_tty(void)
   int fd;
   pid_t pid;
 
-  D_TTY(("get_tty() called.\n"));
   /*
    * setsid() [or setpgrp] must be before open of the terminal,
    * otherwise there is no controlling terminal (Solaris 2.4, HP-UX 9)
@@ -1367,7 +1366,7 @@ get_tty(void)
   {
     unsigned short i;
 
-    D_TTY(("get_tty() closing file descriptors 0-%d.\n", num_fds));
+    D_TTY(("Closing file descriptors 0-%d.\n", num_fds));
     for (i = 0; i < num_fds; i++) {
       if (i != fd)
 	close(i);
@@ -1423,7 +1422,7 @@ get_tty(void)
 
   privileges(REVERT);
 
-  D_TTY(("get_tty() done, fd is %d\n", fd));
+  D_TTY(("Returning fd == %d\n", fd));
   return (fd);
 }
 
@@ -2083,7 +2082,7 @@ run_command(char *argv[])
   /* need to trap SIGURG for SVR4 (Unixware) rlogin */
   /* signal (SIGURG, SIG_DFL); */
 
-  D_CMD(("run_command(): forking\n"));
+  D_CMD(("Forking\n"));
   cmd_pid = fork();
   D_CMD(("After fork(), cmd_pid == %d\n", cmd_pid));
   if (cmd_pid < 0) {
@@ -2200,7 +2199,7 @@ run_command(char *argv[])
   privileges(IGNORE);
 #endif
 
-  D_CMD(("run_command() returning\n"));
+  D_CMD(("Returning ptyfd == %d\n", ptyfd));
   return (ptyfd);
 }
 
@@ -2393,7 +2392,7 @@ cmd_getc(void)
       refresh_limit++;
     refresh_count = 0;
     refreshed = 1;
-    D_CMD(("cmd_getc(): scr_refresh() #1\n"));
+    D_CMD(("scr_refresh() #1\n"));
 #ifdef PROFILE
     P_CALL(scr_refresh(refresh_type), "cmd_getc()->scr_refresh()");
 #else
@@ -2490,7 +2489,7 @@ cmd_getc(void)
       refresh_limit = 1;
       if (!refreshed) {
 	refreshed = 1;
-	D_CMD(("cmd_getc(): select() timed out, time to update the screen.\n"));
+	D_CMD(("select() timed out, time to update the screen.\n"));
 	scr_refresh(refresh_type);
 	if (scrollbar_is_visible()) {
 	  scrollbar_anchor_update_position(1);
@@ -2501,8 +2500,6 @@ cmd_getc(void)
       }
     }
   }
-
-  D_CMD(("cmd_getc() returning\n"));
   return (0);
 }
 
@@ -2551,7 +2548,7 @@ main_loop(void)
   /*   int ch; */
   register int ch;
 
-  D_CMD(("[%d] main_loop() called\n", getpid()));
+  D_CMD(("PID %d\n", getpid()));
 
 #ifdef BACKGROUND_CYCLING_SUPPORT
   if (rs_anim_delay) {
@@ -2597,26 +2594,26 @@ main_loop(void)
 	case 005:
 	  break;
 # else
-	case 005:
+        case 005:  /* ^E (ENQ) terminal status enquiry */
 	  tt_printf(VT100_ANS);
-	  break;		/* terminal Status */
+	  break;
 # endif
-	case 007:
+        case 007:  /* ^G (BEL) */
 	  scr_bell();
-	  break;		/* bell */
+	  break;
 	case '\b':
 	  scr_backspace();
-	  break;		/* backspace */
-	case 013:
-	case 014:
+	  break;
+        case 013:  /* ^K (VT) */
+        case 014:  /* ^L (FF) */
 	  scr_index(UP);
-	  break;		/* vertical tab, form feed */
-	case 016:
+	  break;
+        case 016:  /* ^N (SO) shift out (enter ACS mode) */
 	  scr_charset_choose(1);
-	  break;		/* shift out - acs */
-	case 017:
+	  break;
+        case 017:  /* ^O (SI) shift in (leave ACS mode) */
 	  scr_charset_choose(0);
-	  break;		/* shift in - acs */
+	  break;
 	case 033:
 	  process_escape_seq();
 	  break;
@@ -2718,7 +2715,7 @@ v_writeBig(int f, char *d, int len)
     if (written < 0) {
       written = 0;
     }
-    D_TTY(("v_writeBig(): Wrote %d characters\n", written));
+    D_TTY(("Wrote %d characters\n", written));
     v_bufstr += written;
     if (v_bufstr >= v_bufptr)	/* we wrote it all */
       v_bufstr = v_bufptr = v_buffer;

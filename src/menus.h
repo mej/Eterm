@@ -44,7 +44,7 @@
 /* Constants */
 #define MENU_HGAP	4
 #define MENU_VGAP	4
-#define MENU_CLICK_TIME	20
+#define MENU_CLICK_TIME	200
 #define NO_CURRENT_ITEM ((unsigned short) -1)
 
 #define menu_is_pixmapped()          ((images[image_menu].current->iml->im) && (images[image_menu].mode & MODE_MASK))
@@ -57,7 +57,7 @@
 typedef struct menu_t_struct menu_t;
 
 typedef struct {
-  image_t *icon;
+  simage_t *icon;
   unsigned char type, state;
   union {
     menu_t *submenu;
@@ -108,6 +108,7 @@ extern unsigned char menu_handle_motion_notify(event_t *);
 extern unsigned char menu_dispatch_event(event_t *);
 extern menulist_t *menulist_add_menu(menulist_t *, menu_t *);
 extern menu_t *menu_create(char *);
+extern unsigned char menu_set_title(menu_t *, const char *);
 extern unsigned char menu_set_font(menu_t *, const char *);
 extern unsigned char menu_add_item(menu_t *, menuitem_t *);
 extern unsigned char menu_is_child(menu_t *, menu_t *);
@@ -117,7 +118,8 @@ extern menuitem_t *find_item_by_coords(menu_t *, int, int);
 extern unsigned short find_item_in_menu(menu_t *, menuitem_t *);
 extern void menuitem_change_current(menuitem_t *);
 extern menuitem_t *menuitem_create(char *);
-extern unsigned char menuitem_set_icon(menuitem_t *, image_t *);
+extern unsigned char menuitem_set_text(menuitem_t *, const char *);
+extern unsigned char menuitem_set_icon(menuitem_t *, simage_t *);
 extern unsigned char menuitem_set_action(menuitem_t *, unsigned char, char *);
 extern unsigned char menuitem_set_rtext(menuitem_t *, char *);
 

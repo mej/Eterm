@@ -45,24 +45,25 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-event_dispatcher_data_t menu_event_data;
 menulist_t *menu_list = NULL;
+static event_dispatcher_data_t menu_event_data;
 static GC topShadowGC, botShadowGC;
 static Time button_press_time;
+static int button_press_x = 0, button_press_y = 0;
 static menu_t *current_menu;
 
-static inline void grab_pointer(Window win);
-static inline void ungrab_pointer(void);
-static inline void draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len);
-static inline unsigned short center_coords(register unsigned short c1, register unsigned short c2);
+static __inline__ void grab_pointer(Window win);
+static __inline__ void ungrab_pointer(void);
+static __inline__ void draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len);
+static __inline__ unsigned short center_coords(register unsigned short c1, register unsigned short c2);
 
-static inline void
+static __inline__ void
 grab_pointer(Window win)
 {
 
   int success;
 
-  D_EVENTS(("grab_pointer():  Grabbing control of pointer for window 0x%08x.\n", win));
+  D_EVENTS(("Grabbing control of pointer for window 0x%08x.\n", win));
   success = XGrabPointer(Xdisplay, win, False,
 			 EnterWindowMask | LeaveWindowMask | PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask
 			 | Button1MotionMask | Button2MotionMask | Button3MotionMask,
@@ -87,19 +88,19 @@ grab_pointer(Window win)
   }
 }
 
-static inline void
+static __inline__ void
 ungrab_pointer(void)
 {
 
-  D_EVENTS(("ungrab_pointer():  Releasing pointer grab.\n"));
+  D_EVENTS(("Releasing pointer grab.\n"));
   XUngrabPointer(Xdisplay, CurrentTime);
 }
 
-static inline void
+static __inline__ void
 draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 
-  D_MENU(("draw_string():  Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
+  D_MENU(("Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
 
 #ifdef MULTI_CHARSET
   if (current_menu && current_menu->fontset)
@@ -109,7 +110,7 @@ draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
     XDrawString(Xdisplay, d, gc, x, y, str, len);
 }
 
-static inline unsigned short
+static __inline__ unsigned short
 center_coords(register unsigned short c1, register unsigned short c2)
 {
 
@@ -137,8 +138,6 @@ void
 menu_event_init_dispatcher(void)
 {
   register unsigned char i;
-
-  MEMSET(&menu_event_data, 0, sizeof(event_dispatcher_data_t));
 
   EVENT_DATA_ADD_HANDLER(menu_event_data, EnterNotify, menu_handle_enter_notify);
   EVENT_DATA_ADD_HANDLER(menu_event_data, LeaveNotify, menu_handle_leave_notify);
@@ -247,8 +246,29 @@ menu_handle_button_press(event_t * ev)
 
   D_EVENTS(("ButtonPress at %d, %d\n", ev->xbutton.x, ev->xbutton.y));
 
-  button_press_time = ev->xbutton.time;
+  if (!current_menu || (ev->xbutton.x < 0) || (ev->xbutton.y < 0) || (ev->xbutton.x >= current_menu->w) || (ev->xbutton.y >= current_menu->h)) {
+    Window unused_win, child_win;
 
+    /* Click outside the current menu, or there is no current menu.  Reset. */
+    ungrab_pointer();
+    menu_reset_all(menu_list);
+    current_menu = NULL;
+    XTranslateCoordinates(Xdisplay, ev->xany.window, Xroot, ev->xbutton.x, ev->xbutton.y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_win);
+    child_win = find_window_by_coords(Xroot, 0, 0, ev->xbutton.x, ev->xbutton.y);
+    if (child_win != None) {
+      XTranslateCoordinates(Xdisplay, Xroot, child_win, ev->xbutton.x, ev->xbutton.y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_win);
+      ev->xany.window = child_win;
+      D_EVENTS(("Sending synthetic event on to window 0x%08x at %d, %d\n", child_win, ev->xbutton.x, ev->xbutton.y));
+      XSendEvent(Xdisplay, child_win, False, 0, ev);
+    }
+  } else {
+    button_press_time = ev->xbutton.time;
+    button_press_x = ev->xbutton.x;
+    button_press_y = ev->xbutton.y;
+    if (current_menu && (current_menu->state & MENU_STATE_IS_DRAGGING)) {
+      current_menu->state &= ~MENU_STATE_IS_DRAGGING;
+    }
+  }
   return 1;
 }
 
@@ -266,30 +286,30 @@ menu_handle_button_release(event_t * ev)
   if (current_menu && (current_menu->state & MENU_STATE_IS_DRAGGING)) {
 
     /* Dragging-and-release mode */
-    D_MENU(("Drag-and-release mode, detected release.\n"));
+    D_MENU(("Drag-and-release mode, detected release.  Button press time is %lu, release time is %lu\n", button_press_time, ev->xbutton.time));
     ungrab_pointer();
 
     if (button_press_time && (ev->xbutton.time - button_press_time > MENU_CLICK_TIME)) {
       /* Take action here based on the current menu item */
-      if (current_menu) {
-        if ((item = menuitem_get_current(current_menu)) != NULL) {
-          if (item->type == MENUITEM_SUBMENU) {
-            menu_display_submenu(current_menu, item);
-          } else {
-            menu_action(item);
-            menuitem_deselect(current_menu);
-          }
+      if ((item = menuitem_get_current(current_menu)) != NULL) {
+        if (item->type == MENUITEM_SUBMENU) {
+          menu_display_submenu(current_menu, item);
+        } else {
+          menu_action(item);
+          menuitem_deselect(current_menu);
 	}
       }
+      /* Reset the state of the menu system. */
+      menu_reset_all(menu_list);
+      current_menu = NULL;
+    } else {
+      current_menu->state &= ~MENU_STATE_IS_DRAGGING; /* Click, brief drag, release == single click */
     }
-    /* Reset the state of the menu system. */
-    menu_reset_all(menu_list);
-    current_menu = NULL;
 
   } else {
 
     /* Single-click mode */
-    D_MENU(("Single click mode, detected click.\n"));
+    D_MENU(("Single click mode, detected click.  Button press time is %lu, release time is %lu\n", button_press_time, ev->xbutton.time));
     if ((ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w) && (ev->xbutton.y < current_menu->h)) {
       /* Click inside the menu window.  Activate the current item. */
       if (current_menu) {
@@ -303,7 +323,8 @@ menu_handle_button_release(event_t * ev)
           }
 	}
       }
-    } else {
+    } else if (!(button_press_time && (ev->xbutton.time - button_press_time < MENU_CLICK_TIME)) || (button_press_x && button_press_y)) {
+      /* Single click which lasted too long, or the second click occured outside the menu */
       ungrab_pointer();
       /* Reset the state of the menu system. */
       menu_reset_all(menu_list);
@@ -311,6 +332,7 @@ menu_handle_button_release(event_t * ev)
     }
   }
   button_press_time = 0;
+  button_press_x = button_press_y = 0;
 
   return 1;
 }
@@ -330,11 +352,12 @@ menu_handle_motion_notify(event_t * ev)
     return 1;
   }
 
-  if (button_press_time) {
-    current_menu->state |= MENU_STATE_IS_DRAGGING;
-  }
+  D_MENU(("Mouse is in motion.  Button press time is %lu, motion time is %lu\n", button_press_time, ev->xbutton.time));
   if ((ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w) && (ev->xbutton.y < current_menu->h)) {
     /* Motion within the current menu */
+    if (button_press_time) {
+      current_menu->state |= MENU_STATE_IS_DRAGGING;
+    }
     item = find_item_by_coords(current_menu, ev->xbutton.x, ev->xbutton.y);
     menuitem_change_current(item);
   } else {
@@ -355,6 +378,7 @@ menu_handle_motion_notify(event_t * ev)
         menu_reset_tree(current_menu);
       }
       current_menu = menu;
+      current_menu->state |= MENU_STATE_IS_DRAGGING;
       XTranslateCoordinates(Xdisplay, ev->xany.window, child, ev->xbutton.x, ev->xbutton.y, &dest_x, &dest_y, &child);
       item = find_item_by_coords(menu, dest_x, dest_y);
       if (!item || item != menuitem_get_current(current_menu)) {
@@ -404,8 +428,6 @@ menu_create(char *title)
   static XGCValues gcvalue;
   static XSetWindowAttributes xattr;
 
-  ASSERT_RVAL(title != NULL, NULL);
-
   if (!mask) {
     xattr.border_pixel = BlackPixel(Xdisplay, Xscreen);
     xattr.save_under = TRUE;
@@ -414,13 +436,12 @@ menu_create(char *title)
     xattr.colormap = cmap;
 
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-    mask = EnterNotify | LeaveNotify | PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask
-	| Button1MotionMask | Button2MotionMask | Button3MotionMask;
-    gcvalue.foreground = PixColors[menuTextColor];
+    mask = PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask;
+    gcvalue.foreground = images[image_menu].norm->fg;
   }
   menu = (menu_t *) MALLOC(sizeof(menu_t));
   MEMSET(menu, 0, sizeof(menu_t));
-  menu->title = StrDup(title);
+  menu->title = StrDup(title ? title : "");
 
   menu->win = XCreateWindow(Xdisplay, Xroot, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 			    CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
@@ -438,6 +459,18 @@ menu_create(char *title)
 }
 
 unsigned char
+menu_set_title(menu_t *menu, const char *title)
+{
+  ASSERT_RVAL(menu != NULL, 0);
+  REQUIRE_RVAL(title != NULL, 0);
+
+  FREE(menu->title);
+  menu->title = StrDup(title);
+  XStoreName(Xdisplay, menu->win, menu->title);
+  return 1;
+}
+
+unsigned char
 menu_set_font(menu_t * menu, const char *fontname)
 {
 
@@ -445,7 +478,7 @@ menu_set_font(menu_t * menu, const char *fontname)
   XGCValues gcvalue;
 
   ASSERT_RVAL(menu != NULL, 0);
-  ASSERT_RVAL(fontname != NULL, 0);
+  REQUIRE_RVAL(fontname != NULL, 0);
 
   font = (XFontStruct *) load_font(fontname, "fixed", FONT_TYPE_X);
 #ifdef MULTI_CHARSET
@@ -582,7 +615,7 @@ menuitem_change_current(menuitem_t *item)
 
   current = menuitem_get_current(current_menu);
   if (current != item) {
-    D_MENU(("menuitem_change_current():  Changing current item in menu \"%s\" from \"%s\" to \"%s\"\n", current_menu->title, (current ? current->text : "(NULL)"), (item ? item->text : "(NULL)")));
+    D_MENU(("Changing current item in menu \"%s\" from \"%s\" to \"%s\"\n", current_menu->title, (current ? current->text : "(NULL)"), (item ? item->text : "(NULL)")));
     if (current) {
       /* Reset the current item */
       menuitem_deselect(current_menu);
@@ -608,7 +641,7 @@ menuitem_change_current(menuitem_t *item)
       menuitem_clear_current(current_menu);
     }
   } else {
-    D_MENU(("menuitem_change_current():  Current item in menu \"%s\" does not require changing.\n", current_menu->title));
+    D_MENU(("Current item in menu \"%s\" does not require changing.\n", current_menu->title));
   }
 }
 
@@ -629,7 +662,21 @@ menuitem_create(char *text)
 }
 
 unsigned char
-menuitem_set_icon(menuitem_t * item, image_t * icon)
+menuitem_set_text(menuitem_t * item, const char *text)
+{
+  ASSERT_RVAL(item != NULL, 0);
+  REQUIRE_RVAL(text != NULL, 0);
+
+  if (item->text) {
+    FREE(item->text);
+  }
+  item->text = StrDup(text);
+  item->len = strlen(text);
+  return 1;
+}
+
+unsigned char
+menuitem_set_icon(menuitem_t * item, simage_t * icon)
 {
 
   ASSERT_RVAL(item != NULL, 0);
@@ -680,7 +727,7 @@ menu_reset(menu_t * menu)
 
   ASSERT(menu != NULL);
 
-  D_MENU(("menu_reset() called for menu \"%s\" (window 0x%08x)\n", menu->title, menu->win));
+  D_MENU(("menu_reset(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
   if (!(menu->state & MENU_STATE_IS_MAPPED)) {
     return;
   }
@@ -693,7 +740,6 @@ menu_reset(menu_t * menu)
 void
 menu_reset_all(menulist_t * list)
 {
-
   register unsigned short i;
 
   ASSERT(list != NULL);
@@ -701,7 +747,7 @@ menu_reset_all(menulist_t * list)
   if (list->nummenus == 0)
     return;
 
-  D_MENU(("menu_reset_all() called\n"));
+  D_MENU(("menu_reset_all(%8p) called\n", list));
   if (menuitem_get_current(current_menu) != NULL) {
     menuitem_deselect(current_menu);
   }
@@ -720,7 +766,7 @@ menu_reset_tree(menu_t * menu)
 
   ASSERT(menu != NULL);
 
-  D_MENU(("menu_reset_tree() called for menu \"%s\" (window 0x%08x)\n", menu->title, menu->win));
+  D_MENU(("menu_reset_tree(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
   if (!(menu->state & MENU_STATE_IS_MAPPED)) {
     return;
   }
@@ -742,7 +788,7 @@ menu_reset_submenus(menu_t * menu)
 
   ASSERT(menu != NULL);
 
-  D_MENU(("menu_reset_submenus() called for menu \"%s\" (window 0x%08x)\n", menu->title, menu->win));
+  D_MENU(("menu_reset_submenus(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
   for (i = 0; i < menu->numitems; i++) {
     item = menu->items[i];
     if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
@@ -760,8 +806,7 @@ menuitem_select(menu_t * menu)
 
   item = menuitem_get_current(menu);
   REQUIRE(item != NULL);
-  D_MENU(("menuitem_select():  Selecting new current item \"%s\" within menu \"%s\" (window 0x%08x, selection window 0x%08x)\n",
-	  item->text, menu->title, menu->win, menu->swin));
+  D_MENU(("Selecting new current item \"%s\" within menu \"%s\" (window 0x%08x, selection window 0x%08x)\n", item->text, menu->title, menu->win, menu->swin));
   item->state |= MENU_STATE_IS_CURRENT;
   XMoveWindow(Xdisplay, menu->swin, item->x, item->y);
   XMapWindow(Xdisplay, menu->swin);
@@ -788,10 +833,12 @@ menuitem_select(menu_t * menu)
       enl_ipc_sync();
     }
   }
+  XSetForeground(Xdisplay, menu->gc, images[image_menu].selected->fg);
   draw_string(menu->swin, menu->gc, MENU_HGAP, item->h - MENU_VGAP, item->text, item->len);
   if (item->rtext) {
     draw_string(menu->swin, menu->gc, item->w - XTextWidth(menu->font, item->rtext, item->rlen) - 2 * MENU_HGAP, item->h - MENU_VGAP, item->rtext, item->rlen);
   }
+  XSetForeground(Xdisplay, menu->gc, images[image_menu].norm->fg);
 }
 
 void
@@ -803,7 +850,7 @@ menuitem_deselect(menu_t * menu)
 
   item = menuitem_get_current(menu);
   REQUIRE(item != NULL);
-  D_MENU(("menuitem_deselect():  Deselecting item \"%s\"\n", item->text));
+  D_MENU(("Deselecting item \"%s\"\n", item->text));
   item->state &= ~(MENU_STATE_IS_CURRENT);
   XUnmapWindow(Xdisplay, menu->swin);
 }
@@ -818,7 +865,7 @@ menu_display_submenu(menu_t * menu, menuitem_t * item)
   REQUIRE(item->action.submenu != NULL);
 
   submenu = item->action.submenu;
-  D_MENU(("menu_display_submenu():  Displaying submenu \"%s\" (window 0x%08x) of menu \"%s\" (window 0x%08x)\n", submenu->title, submenu->win, menu->title, menu->win));
+  D_MENU(("Displaying submenu \"%s\" (window 0x%08x) of menu \"%s\" (window 0x%08x)\n", submenu->title, submenu->win, menu->title, menu->win));
   menu_invoke(item->x + item->w, item->y, menu->win, submenu, CurrentTime);
 
   /* Invoking the submenu makes it current.  Undo that behavior. */
@@ -834,7 +881,7 @@ menu_move(menu_t *menu, unsigned short x, unsigned short y) {
 
   ASSERT(menu != NULL);
 
-  D_MENU(("menu_move():  Moving menu \"%s\" to %hu, %hu\n", menu->title, x, y));
+  D_MENU(("Moving menu \"%s\" to %hu, %hu\n", menu->title, x, y));
   menu->x = x;
   menu->y = y;
   XMoveWindow(Xdisplay, menu->win, menu->x, menu->y);
@@ -864,7 +911,7 @@ menu_draw(menu_t * menu)
   if (!menu->font) {
     menu_set_font(menu, etfonts[def_font_idx]);
   }
-  gcvalue.foreground = PixColors[menuTextColor];
+  gcvalue.foreground = images[image_menu].norm->fg;
   gcvalue.graphics_exposures = False;
   XChangeGC(Xdisplay, menu->gc, GCForeground | GCGraphicsExposures, &gcvalue);
 
@@ -935,34 +982,12 @@ menu_draw(menu_t * menu)
   XUnmapWindow(Xdisplay, menu->swin);
 
   /* Draw menu background */
-  if (image_mode_is(image_menu, MODE_AUTO)) {
-    pixmap_t *pmap = images[image_menu].norm->pmap;
-
-    if (pmap->pixmap != None) {
-      XFreePixmap(Xdisplay, pmap->pixmap);
-    }
-    pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, menu->w, menu->h, Xdepth);
-    paste_simage(images[image_menu].norm, image_menu, pmap->pixmap, 0, 0, menu->w, menu->h);
-    enl_ipc_sync();
-  } else {
-    render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
-  }
-  if (!image_mode_is(image_menu, MODE_MASK)) {
-    GC gc;
-    pixmap_t *pmap = images[image_menu].norm->pmap;
-
-    if (pmap->pixmap != None) {
-      XFreePixmap(Xdisplay, pmap->pixmap);
-    }
-    pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, menu->w, menu->h, Xdepth);
-    gcvalue.foreground = PixColors[menuColor];
-    gc = XCreateGC(Xdisplay, menu->win, GCForeground, &gcvalue);
-    XFillRectangle(Xdisplay, pmap->pixmap, gc, 0, 0, menu->w, menu->h);
-    XFreeGC(Xdisplay, gc);
-    draw_shadow_from_colors(pmap->pixmap, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], 0, 0, menu->w, menu->h, 2);
-  }
+  render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, RENDER_FORCE_PIXMAP);
   menu->bg = images[image_menu].norm->pmap->pixmap;
-  D_MENU(("menu_draw():  Menu background is 0x%08x\n", menu->bg));
+  if (!image_mode_is(image_menu, MODE_MASK)) {
+    draw_shadow_from_colors(menu->bg, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], 0, 0, menu->w, menu->h, 2);
+  }
+  D_MENU(("Menu background is 0x%08x\n", menu->bg));
   XMapWindow(Xdisplay, menu->win);
   XRaiseWindow(Xdisplay, menu->win);
 
@@ -989,8 +1014,7 @@ menu_draw(menu_t * menu)
 	item->y = str_y - 2 * MENU_VGAP;
 	item->w = menu->w - MENU_HGAP;
 	item->h = 2 * MENU_VGAP;
-	D_MENU(("menu_draw():  Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
-		item->w, item->h));
+	D_MENU(("Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h, item->w, item->h));
       }
       draw_shadow(menu->bg, botShadowGC, topShadowGC, str_x, str_y - MENU_VGAP - MENU_VGAP / 2, menu->w - 4 * MENU_HGAP, MENU_VGAP, 2);
 
@@ -1001,8 +1025,7 @@ menu_draw(menu_t * menu)
 	item->y = str_y - menu->fheight - MENU_VGAP / 2;
 	item->w = menu->w - MENU_HGAP;
 	item->h = menu->fheight + MENU_VGAP;
-	D_MENU(("menu_draw():  Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
-		item->w, item->h));
+	D_MENU(("Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h, item->w, item->h));
       }
       switch (item->type) {
 	case MENUITEM_SUBMENU:

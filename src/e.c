@@ -78,7 +78,7 @@ enl_ipc_get_win(void)
   int dummy_int;
   unsigned int dummy_uint;
 
-  D_ENL(("enl_ipc_get_win():  Searching for IPC window.\n"));
+  D_ENL(("Searching for IPC window.\n"));
 
   prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
   if (prop == None) {
@@ -135,25 +135,25 @@ enl_ipc_send(char *str)
   if (str == NULL) {
     ASSERT(last_msg != NULL);
     str = last_msg;
-    D_ENL(("enl_ipc_send():  Resending last message \"%s\" to Enlightenment.\n", str));
+    D_ENL(("Resending last message \"%s\" to Enlightenment.\n", str));
   } else {
     if (last_msg != NULL) {
       FREE(last_msg);
     }
     last_msg = StrDup(str);
-    D_ENL(("enl_ipc_send():  Sending \"%s\" to Enlightenment.\n", str));
+    D_ENL(("Sending \"%s\" to Enlightenment.\n", str));
   }
 
   if (ipc_win == None) {
     if ((ipc_win = enl_ipc_get_win()) == None) {
-      D_ENL(("enl_ipc_send():  ...or perhaps not, since Enlightenment doesn't seem to be running.  No IPC window, no IPC.  Sorry....\n"));
+      D_ENL(("...or perhaps not, since Enlightenment doesn't seem to be running.  No IPC window, no IPC.  Sorry....\n"));
       return;
     }
   }
   len = strlen(str);
   ipc_atom = XInternAtom(Xdisplay, "ENL_MSG", False);
   if (ipc_atom == None) {
-    D_ENL(("enl_ipc_send():  IPC error:  Unable to find/create ENL_MSG atom.\n"));
+    D_ENL(("IPC error:  Unable to find/create ENL_MSG atom.\n"));
     return;
   }
   for (; XCheckTypedWindowEvent(Xdisplay, my_ipc_win, ClientMessage, &ev););  /* Discard any out-of-sync messages */
@@ -178,7 +178,7 @@ enl_ipc_send(char *str)
     }
     XSendEvent(Xdisplay, ipc_win, False, 0, (XEvent *) & ev);
   }
-  D_ENL(("enl_ipc_send():  Message sent to IPC window 0x%08x.\n", ipc_win));
+  D_ENL(("Message sent to IPC window 0x%08x.\n", ipc_win));
 }
 
 static RETSIGTYPE
@@ -239,7 +239,7 @@ enl_ipc_get(const char *msg_data)
   if (blen < 12) {
     ret_msg = message;
     message = NULL;
-    D_ENL(("enl_ipc_get():  Received complete reply:  \"%s\"\n", ret_msg));
+    D_ENL(("Received complete reply:  \"%s\"\n", ret_msg));
   }
   return (ret_msg);
 }
@@ -264,7 +264,7 @@ enl_send_and_wait(char *msg)
     for (; !(reply = enl_ipc_get(enl_wait_for_reply())););
     if (reply == IPC_TIMEOUT) {
       /* We timed out.  The IPC window must be AWOL.  Reset and resend message. */
-      D_ENL(("enl_wait_for_reply():  IPC timed out.  IPC window 0x%08x has gone AWOL.  Clearing ipc_win.\n", ipc_win));
+      D_ENL(("IPC timed out.  IPC window 0x%08x has gone AWOL.  Clearing ipc_win.\n", ipc_win));
       XSelectInput(Xdisplay, ipc_win, None);
       ipc_win = None;
       check_image_ipc(1);

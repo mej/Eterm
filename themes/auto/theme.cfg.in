@@ -23,11 +23,6 @@ begin main
     background black
     cursor #ffff00
     cursor_text #880000
-    scrollbar #3f1c00
-    unfocused_scrollbar #777777
-    menu #777777
-    unfocused_menu #777777
-    menu_text black
     pointer white
 
 # video attribute can either be "normal" or "reverse"
@@ -149,27 +144,43 @@ begin main
       type trough
       mode auto allow image trans viewport auto
       state normal
+      color black #666666
       file bar_vertical_3.png
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
       geom :scale
-      border 3 3 2 2
+      border 2 2 2 2
     end image
     begin image
       type anchor
       mode auto allow image auto
       state normal
+      color black #666666
       file bar_vertical_1.png
       geom :scale
-      border 3 3 2 2
+      border 2 2 2 2
       state selected
       file bar_vertical_2.png
       geom :scale
-      border 3 3 2 2
+      border 2 2 2 2
+    end image
+    begin image
+      type thumb
+      mode auto allow image auto
+      state normal
+      color black #666666
+      file thumb_1.png
+      geom :scale
+      border 3 3 3 3
+      state selected
+      file thumb_2.png
+      geom :scale
+      border 3 3 3 3
     end image
     begin image
       type up_arrow
       mode auto allow image auto
       state normal
+      color black #666666
       file button_arrow_up_1.png
       geom :scale
       border 2 2 2 2
@@ -186,6 +197,7 @@ begin main
       type down_arrow
       mode auto allow image auto
       state normal
+      color black #666666
       file button_arrow_down_1.png
       geom :scale
       border 2 2 2 2
@@ -202,18 +214,20 @@ begin main
       type menu
       mode auto allow image auto
       state normal
+      color black #999999
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
-      border 3 3 2 2
+      border 2 2 2 2
       state selected
       file bar_horizontal_2.png
       geom 100x100+0+0:scale
-      border 3 3 2 2
+      border 2 2 2 2
     end image
     begin image
       type submenu
       mode auto allow image auto
       state normal
+      color black #999999
       file menu1.png
       geom 100x100+0+0:scale
       border 3 15 3 3
@@ -229,6 +243,36 @@ begin main
       border 3 15 3 3
       padding 3 15 3 3
     end image
+    begin image
+      type button_bar
+      mode auto allow image auto
+      state normal
+      color black #999999
+      file bar_horizontal_1.png
+      geom 100x100+0+0:scale
+      border 2 2 2 2
+      state disabled
+      color white #333333
+      cmod image 0xc0
+      border 2 2 2 2
+    end image
+    begin image
+      type button
+      mode auto allow image auto
+      state normal
+      color black #cccccc
+      file bar_horizontal_1.png
+      geom 100x100+0+0:scale
+      border 2 2 2 2
+      state selected
+      file bar_horizontal_2.png
+      geom 100x100+0+0:scale
+      border 2 2 2 2
+      state clicked
+      file bar_horizontal_3.png
+      geom 100x100+0+0:scale
+      border 2 2 2 2
+    end image
   end
 
 %include "menus.cfg"
@@ -242,8 +286,26 @@ begin main
     bind ctrl button1 to string "\e]5;\a"
     bind ctrl button2 to string "\e[?30t"
     bind ctrl button3 to menu Eterm
-    bind anymod 0xffbe to menu Eterm
   end actions
+
+# This section must also come after the menus if you want any buttons
+# to launch menus.  (If not, it can go anywhere.)
+  begin button_bar
+
+# Specify a font.  The default buttonbar font is the default terminal
+# font as defined in the attributes section above.
+    font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1"
+
+# Add a button.  The syntax is:
+#   button <text> [ icon <filename> ] action { string | echo | menu } <parameter>
+#
+    button Eterm action menu "Eterm Operations"
+    button Font action menu Font
+    button Background action menu Background
+    button Terminal action menu Terminal
+    rbutton icon help.png action string "\e]6;73;Eterm -e man Eterm\a"
+    rbutton icon exit.png action string "\e]6;70\a"
+  end button_bar
 
 # The XIM support options.
 # input_method: set the name of your favorate input method program
@@ -285,13 +347,12 @@ begin main
 # If true, Eterm will start iconified.
     iconic false
 
-# If true, Eterm will jump to the bottom of the window when something is echoed
-# to the terminal, either by program output or user input.
-    home_on_echo 1
+# If true, Eterm will jump to the bottom of the window when something is output
+# to the terminal.
+    home_on_output 1
 
-# If true, Eterm will jump to the bottom of the window when you refresh the
-# screen (^L).
-    home_on_refresh 1
+# If true, Eterm will jump to the bottom of the window when a key is pressed.
+    home_on_input 1
 
 # If true, Eterm will put the scrollbar on the right of the window (default is left).
     scrollbar_right true

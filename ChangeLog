@@ -3084,3 +3084,80 @@ Fri Jan 21 18:40:13 PST 2000	Michael Jennings <mej@eterm.org>
 	updated it.
 	
 -------------------------------------------------------------------------------
+Thu Feb 10 15:10:01 PST 2000	Michael Jennings <mej@eterm.org>
+
+	This is the first public availability of the work thus far on Eterm
+	0.9.1.  There's quite a bit of new stuff here.
+
+	* Added scrollbar thumb support.
+	
+	* Completely redid the terminfo/termcap stuff.  The terminfo file is
+	now compiled (by tic) and installed by default (unless you specify
+	--without-terminfo).  The config files still say xterm, though,
+	because some programs (like SLang and GNU mc) use the silly algorithm
+	of "Is $TERM set to xterm?" to detect mouse reporting support in a
+	terminal. =P  But if you don't ever use xterm, you can use Eterm's
+	termcap and just name it "xterm" instead.  Thanks to Marius Gedminas
+	<mgedmin@takas.lt> for his patch that started this whole revamp.
+
+	* Added the kEsetroot script for KDE users from Dax Games
+	<dgames@isoc.net>.
+
+	* You can now configure the Home and End emulation via --with-home=
+	and --with-end= options to configure.  The --with-terminfo option is
+	also new, and --enable-xim is now the default.
+
+	* Added a new image state, disabled, for when Eterm loses focus.  This
+	is supported by all widgets (well, all those that could possibly be
+	on screen when Eterm lost focus), even the background image.  So you
+	could actually have all your images darken on focus out and restore
+	to normal on focus in.
+
+	* Widget colors formerly dealt with as colors (menu text color,
+	scrollbar color, etc.) are now handled by the imageclasses.  Each
+	image state can have a foreground and background color defined.  The
+	current exception is the background image; I hope to add that later.
+	The foreground is the text color and the background is the object
+	color (for solid color mode).  So menu text color is set by the menu
+	imageclass.  And again, for unfocused colors, use the disabled state
+	of the imageclass.
+
+	* Proportionally-spaced fonts are now handled much better.  They are
+	still forced into evenly-spaced columns (it's a terminal for crying
+	out loud!) but at least you don't end up with Eterm's wider than your
+	screen. :-)
+
+	* Home on refresh is gone, as is home on echo.  It's now much simpler.
+	There are two options:  home on output, and home on input, the former
+	being a combination of echo and refresh.  Also, keypresses that don't
+	necessarily have corresonding output can trigger a home on input,
+	like Ctrl-End or whatever...ones that don't have special meaning.
+	Credit to Darren Stuart Embry <dse@louisville.edu> for pointing out
+	this issue and the one with "m-" in font names.
+
+	* I finally got around to re-merging the new parser stuff from my
+	work on the Not Game.  Closed up some old potential behavior quirks
+	with theme parsing.
+
+	* Added a new escape sequence to fork-and-exec a program.  Also added
+	a scrollback search capability to highlight all occurances of a string
+	in your scrollback buffer.  Use the new "Etsearch" utility to access
+	it.  "Etsearch string" to search for a string, then "Etsearch" by
+	itself to reset the highlighting.
+
+	* And of course, the biggie.  Eterm now supports a completely-
+	customizeable buttonbar.  Not a menubar, a buttonbar.  It can have an
+	arbitrary number of buttons, and each button can perform an action,
+	just like a menuitem.  So a button could bring up a menu (like a
+	menubar) or launch a program (like a launchbar) or perform an
+	operation (like a toolbar).  Each button can have an icon, text, or
+	both.  And you can have buttons left- or right-justified in the
+	buttonbar.  You will eventually be able to have an arbitrary number
+	of buttonbars, but I'm still working on that.
+
+	As with any change this big, things could very easily be broken.  So
+	beware. :-)  I have tested this myself, and everything seems to work,
+	but I can't test every possibility.  Let me know if you find anything
+	that's broken, and enjoy!
+
+-------------------------------------------------------------------------------

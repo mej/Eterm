@@ -148,7 +148,7 @@ extern void scrollbar_change_width(unsigned short);
 extern void scrollbar_drawing_init(void);
 extern unsigned char scrollbar_set_focus(short has_focus);
 extern unsigned char scrollbar_anchor_update_position(short mouseoffset);
-extern void scrollbar_draw(unsigned char force_modes);
+extern void scrollbar_draw(unsigned char image_state, unsigned char force_modes);
 extern void scrollbar_reposition_and_draw(unsigned char force_modes);
 extern void scrollbar_reposition_and_always_draw(void);
 extern unsigned char scrollbar_show(short);
