@@ -4903,3 +4903,8 @@ Thu Oct 31 11:52:59 2002                        Michael Jennings (mej)
 
 Argh!  Last-minute discoveries....
 ----------------------------------------------------------------------
+Mon Nov  4 16:28:17 2002                        Michael Jennings (mej)
+
+Added XK_ISO_Left_Tab as an alias for XK_Tab, suggested by Jason
+<jason@sdf.lonestar.org>.
+----------------------------------------------------------------------

@@ -477,6 +477,7 @@ lookup_key(XEvent * ev)
 
                       /* Tab key is normal unless it's shift-tab. */
                   case XK_Tab:
+                  case XK_ISO_Left_Tab:
                       if (shft) {
                           len = 3;
                           strcpy(kbuf, "\033[Z");
