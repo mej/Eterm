@@ -436,6 +436,10 @@ change_font(int init, const char *fontname)
     TermWin.fprop = 1;	/* Proportional font */
   LOWER_BOUND(fw, TermWin.font->max_bounds.width);
 
+  if (TermWin.fprop) {
+    fw = (fw << 1) / 3;
+  }
+
   /* not the first time thru and sizes haven't changed */
   if (fw == TermWin.fwidth && fh == TermWin.fheight)
     return;			/* TODO: not return; check MULTI_CHARSET if needed */

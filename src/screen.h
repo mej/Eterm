@@ -35,7 +35,7 @@
 #define CLEAR_SELECTION (selection.beg.row = selection.beg.col = selection.end.row = selection.end.col = 0)
 #define CLEAR_ALL_SELECTION (selection.beg.row = selection.beg.col = selection.mark.row = selection.mark.col = selection.end.row = selection.end.col = 0)
 
-#define scr_touch()  scr_expose(0, 0, TermWin.width, TermWin.height)
+#define scr_touch()  (refresh_all = 1)
 
 /*
  * CLEAR_ROWS : clear <num> rows starting from row <row>
@@ -111,7 +111,6 @@ enum {
 #define RS_Bold			0x00008000u	/* bold */
 #define RS_bgMask		0x001F0000u	/* 32 colors */
 #define RS_Blink		0x00800000u	/* blink */
-#define RS_Dirty		0x00400000u	/* forced update of char */
 
 #define RS_attrMask		(0xFF000000u|RS_Bold|RS_Blink)
 
@@ -135,87 +134,89 @@ enum {
 #define Screen_DefaultFlags	(Screen_VisibleCursor|Screen_Autowrap)
 
 /************ Structures ************/
+/* General overview of the screen stuff:
+
+   TermWin.saveLines tells us how many lines are in the scrollback buffer.
+   There are a total of TermWin.saveLines + TermWin.nrow rows in the
+   screen buffer, with the scrollback coming before the on-screen data.
+   TermWin.nscrolled tells us how many lines of the scrollback buffer have
+   actually been used (i.e., allocated).  TermWin.view_start tells us how
+   many lines back into the scrollback buffer the currently-visible data
+   is.  (0 means we're at the bottom and not in scrollback.)
+*/
 typedef unsigned char text_t;
 typedef unsigned int rend_t;
+typedef enum {
+  SELECTION_CLEAR = 0,
+  SELECTION_INIT,
+  SELECTION_BEGIN,
+  SELECTION_CONT,
+  SELECTION_DONE
+} selection_op_t;
 typedef struct {
-    int             row, col;
+  short row, col;
 } row_col_t;
-/*
- * screen accounting:
- * screen_t elements
- *   text:      Contains all the text information including the scrollback
- *              buffer.  Each line is length (TermWin.ncol + 1)
- *              The final character is either the _length_ of the line or
- *              for wrapped lines: (MAX_COLS + 1) 
- *   rend:      Contains rendition information: font, bold, color, etc.
- * * Note: Each line for both text and rend are only allocated on demand, and
- *              text[x] is allocated <=> rend[x] is allocated  for all x.
- *   row:       Cursor row position                   : 0 <= row < TermWin.nrow
- *   col:       Cursor column position                : 0 <= col < TermWin.ncol
- *   tscroll:   Scrolling region top row inclusive    : 0 <= row < TermWin.nrow
- *   bscroll:   Scrolling region bottom row inclusive : 0 <= row < TermWin.nrow
- *
- * selection_t elements
- *   clicks:    1, 2 or 3 clicks - 4 indicates a special condition of 1 where
- *              nothing is selected
- *   beg:       row/column of beginning of selection  : never past mark
- *   mark:      row/column of initial click           : never past end
- *   end:       row/column of end of selection
- * * Note: -TermWin.nscrolled <= beg.row <= mark.row <= end.row < TermWin.nrow
- * * Note: col == -1 ==> we're left of screen
- *
- * TermWin.saveLines:
- *              Maximum number of lines in the scrollback buffer.
- *              This is fixed for each rxvt instance.
- * TermWin.nscrolled:
- *              Actual number of lines we've used of the scrollback buffer
- *              0 <= TermWin.nscrolled <= TermWin.saveLines
- * TermWin.view_start:  
- *              Offset back into the scrollback buffer for out current view
- *              0 <= TermWin.view_start <= TermWin.nscrolled
- *
- * Layout of text/rend information in the screen_t text/rend structures:
- *   Rows [0] ... [TermWin.saveLines - 1]
- *     scrollback region : we're only here if TermWin.view_start != 0
- *   Rows [TermWin.saveLines] ... [TermWin.saveLines + TermWin.nrow - 1]
- *     normal `unscrolled' screen region
- */
+/* screen_t:
+
+   screen.text contains a 2-D array of the screen data.  screen.rend contains
+   a matching 2-D array of rendering information (as 32-bit masks).  They are
+   allocated together, so you can always be sure that screen.rend[r] will be
+   allocated if screen.text[r] is.  You are also guaranteed that each row of
+   screen.text is TermWin.ncol + 1 columns long, and each row of screen.rend
+   is TermWin.ncol columns long.  They both have (TermWin.nrow +
+   TermWin.saveLines) rows, but only TermWin.nrow + TermWin.nscrolled lines
+   are actually allocated.  The extra column in the text array is for storing
+   line wrap information.  It will either be the length of the line, or 
+   WRAP_CHAR if the line wraps into the next line.
+
+   screen.row and screen.col contain the current cursor position.  It is always
+   somewhere on the visible screen.  screen.tscroll and screen.bscroll are the
+   top and bottom rows of the current scroll region.  screen.charset is the
+   character set currently being used (0-3).
+*/
 typedef struct {
-    text_t        **text;	/* _all_ the text                            */
-    rend_t        **rend;	/* rendition, uses RS_ flags                 */
-    short           row,	/* cursor row on the screen                  */
-                    col;	/* cursor column on the screen               */
-    short           tscroll,	/* top of settable scroll region             */
-                    bscroll;	/* bottom of settable scroll region          */
-    short           charset;	/* character set number [0..3]               */
-    unsigned int    flags;
+  text_t **text;
+  rend_t **rend;
+  short row, col;
+  short tscroll, bscroll;
+  unsigned char charset:2;
+  unsigned char flags:5;
 } screen_t;
+/* A save_t object is used to save/restore the cursor position and other
+   relevant data when requested to do so by the application. */
 typedef struct {
-    short           row,	/* cursor row                                */
-                    col,	/* cursor column                             */
-                    charset;	/* character set number [0..3]               */
-    char            charset_char;
-    rend_t          rstyle;	/* rendition style                           */
+  short row, col;
+  short charset;
+  char charset_char;
+  rend_t rstyle;
 } save_t;
+/* selection_t:
+
+   selection.text is a string containing the current selection text.  It is
+   duplicated from the screen data.  selection.len is the length of that string.
+   selection.op represents the current state, selection-wise.  selection.screen
+   gives the number (0 or 1) of the current screen.  selection.clicks tells how
+   many clicks created the current selection (0-3, or 4 if nothing is selected).
+   beg, mark, and end represent the row and column of the beginning of the
+   selection, the click that created the selection, and the end of the selection,
+   respectively.
+
+   -TermWin.nscrolled <= beg.row <= mark.row <= end.row < TermWin.nrow
+*/
 typedef struct {
-    unsigned char  *text;	/* selected text                             */
-    int             len;	/* length of selected text                   */
-    enum {
-	SELECTION_CLEAR = 0,	/* nothing selected                          */
-	SELECTION_INIT,		/* marked a point                            */
-	SELECTION_BEGIN,	/* started a selection                       */
-	SELECTION_CONT,		/* continued selection                       */
-	SELECTION_DONE		/* selection put in CUT_BUFFER0              */
-    } op;			/* current operation                         */
-    short           screen;	/* screen being used                         */
-    short           clicks;	/* number of clicks                          */
-    row_col_t       beg, mark, end;
+  text_t  *text;
+  int len;
+  selection_op_t op;
+  unsigned short screen:1;
+  unsigned char clicks:3;
+  row_col_t beg, mark, end;
 } selection_t;
 
 /************ Variables ************/
 #ifndef NO_BRIGHTCOLOR
 extern unsigned int colorfgbg;
 #endif
+extern unsigned char refresh_all;
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN

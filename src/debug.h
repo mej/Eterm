@@ -180,7 +180,7 @@ extern unsigned int debug_level;
     char *c_dest; \
  \
     /* areas of less than 4 * sizeof(long) are set in 1-byte chunks. */ \
-    if ((count) >= 4 * sizeof(long)) { \
+    if (((unsigned long) count) >= 4 * sizeof(long)) { \
         /* fill l with c. */ \
         l = (c) | (c)<<8; \
         l |= l<<16; \

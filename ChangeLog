@@ -3276,3 +3276,10 @@ Thu Mar  2 21:40:09 PST 2000	Michael Jennings <mej@eterm.org>
 	my ass once again.
 	
 -------------------------------------------------------------------------------
+Fri Mar  3 20:23:37 PST 2000	Michael Jennings <mej@eterm.org>
+
+	I did some optimizations for expose handling and full-screen redraws.
+	It will have a greater impact on those who don't use double buffering.
+	:-)
+	
+-------------------------------------------------------------------------------

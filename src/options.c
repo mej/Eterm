@@ -4039,7 +4039,7 @@ save_config(char *path)
       case image_button:    fprintf(fp, "      type button\n"); break;
       case image_bbar:      fprintf(fp, "      type button_bar\n"); break;
       case image_gbar:      fprintf(fp, "      type grab_bar\n"); break;
-      case image_dialog:    fprintf(fp, "      type dialog\n"); break;
+      case image_dialog:    fprintf(fp, "      type dialog_box\n"); break;
     }
     fprintf(fp, "      mode ");
     switch (images[i].mode & MODE_MASK) {

@@ -46,14 +46,16 @@ static const char cvs_ident[] = "$Id$";
 #endif
 #include "term.h"
 
-/* This tells what's actually on the screen */
+/* These arrays store the text and rendering info that were last drawn to the screen. */
 static text_t **drawn_text = NULL;
 static rend_t **drawn_rend = NULL;
 
+/* These are used for buffering during text scrolls. */
 static text_t **buf_text = NULL;
 static rend_t **buf_rend = NULL;
 
-static char *tabs = NULL;	/* a 1 for a location with a tab-stop */
+/* Tab stop locations */
+static char *tabs = NULL;
 
 static screen_t screen =
 {
@@ -85,8 +87,9 @@ static char charsets[4] =
 
 static short current_screen = PRIMARY;
 static rend_t rstyle = DEFAULT_RSTYLE;
-static short rvideo = 0;	/* reverse video */
-int prev_nrow = -1, prev_ncol = -1;	/* moved from scr_reset() to squash seg fault in scroll_text() */
+static short rvideo = 0;
+int prev_nrow = -1, prev_ncol = -1;
+unsigned char refresh_all = 0;
 
 #ifdef MULTI_CHARSET
 static short multi_byte = 0;
@@ -97,19 +100,14 @@ static enum {
   SBYTE, WBYTE
 } chstat = SBYTE;
 static short lost_multi = 0;
-unsigned char refresh_all = 0;
 
 #define RESET_CHSTAT	if (chstat == WBYTE) chstat = SBYTE, lost_multi = 1
 #else
 #define RESET_CHSTAT
 #endif
 
-/* ------------------------------------------------------------------------- *
- *                        SCREEN `COMMON' ROUTINES                           *
- * ------------------------------------------------------------------------- */
 /* Fill part/all of a drawn line with blanks. */
 __inline__ void blank_line(text_t *, rend_t *, int, rend_t);
-
 __inline__ void
 blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 {
@@ -122,8 +120,8 @@ blank_line(text_t * et, rend_t * er, int width, rend_t efs)
     *r++ = fs;
 }
 
+/* Create a new row in the screen buffer and initialize it. */
 __inline__ void blank_screen_mem(text_t **, rend_t **, int, rend_t);
-
 __inline__ void
 blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
 {
@@ -140,22 +138,9 @@ blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
     *r++ = fs;
 }
 
-/* ------------------------------------------------------------------------- */
-/* allocate memory for this screen line */
-void
-make_screen_mem(text_t ** tp, rend_t ** rp, int row)
-{
-  tp[row] = MALLOC(sizeof(text_t) * (TermWin.ncol + 1));
-  rp[row] = MALLOC(sizeof(rend_t) * TermWin.ncol);
-}
-
-/* ------------------------------------------------------------------------- *
- *                          SCREEN INITIALISATION                            *
- * ------------------------------------------------------------------------- */
 void
 scr_reset(void)
 {
-/*    int             i, j, k, total_rows, prev_total_rows; */
   int total_rows, prev_total_rows, chscr = 0;
   register int i, j, k;
   text_t tc;
@@ -339,20 +324,16 @@ scr_reset(void)
   }
 }
 
-/* ------------------------------------------------------------------------- */
-/*
- * Free everything.  That way malloc debugging can find leakage.
- */
+/* Release all screen memory. */
 void
 scr_release(void)
 {
-/*    int             i, total_rows; */
   int total_rows;
   register int i;
 
   total_rows = TermWin.nrow + TermWin.saveLines;
   for (i = 0; i < total_rows; i++) {
-    if (screen.text[i]) {	/* then so is screen.rend[i] */
+    if (screen.text[i]) {
       FREE(screen.text[i]);
       FREE(screen.rend[i]);
     }
@@ -374,22 +355,19 @@ scr_release(void)
   FREE(tabs);
 }
 
-/* ------------------------------------------------------------------------- */
+/* Perform a full reset on the terminal.  Called by the "\ec" sequence or by an xterm color change. */
 void
 scr_poweron(void)
 {
-  int last_col;
-
   D_SCREEN(("scr_poweron()\n"));
 
-  TermWin.nscrolled = 0;	/* xterm doesn't do this */
-
-  last_col = TermWin.ncol - 1;
-
+  /* Reset all character sets to Latin1 */
   MEMSET(charsets, 'B', sizeof(charsets));
   rvideo = 0;
+  /* Reset the rendering style to the default colors/style */
   scr_rendition(0, ~RS_None);
 #if NSCREENS
+  /* Reset the secondary screen */
   scr_change_screen(SECONDARY);
   scr_erase_screen(2);
   swap.tscroll = 0;
@@ -398,6 +376,7 @@ scr_poweron(void)
   swap.charset = 0;
   swap.flags = Screen_DefaultFlags;
 #endif
+  /* Reset the primary screen */
   scr_change_screen(PRIMARY);
   scr_erase_screen(2);
   screen.row = screen.col = 0;
@@ -405,15 +384,10 @@ scr_poweron(void)
   screen.flags = Screen_DefaultFlags;
 
   scr_cursor(SAVE);
-
   scr_reset();
-  XClearWindow(Xdisplay, TermWin.vt);
   scr_refresh(SLOW_REFRESH);
 }
 
-/* ------------------------------------------------------------------------- *
- *                         PROCESS SCREEN COMMANDS                           *
- * ------------------------------------------------------------------------- */
 /*
  * Save and Restore cursor
  * XTERM_SEQ: Save cursor   : ESC 7     
@@ -443,7 +417,6 @@ scr_cursor(int mode)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Swap between primary and secondary screens
  * XTERM_SEQ: Primary screen  : ESC [ ? 4 7 h
@@ -495,7 +468,6 @@ scr_change_screen(int scrn)
   return scrn;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Change the color for following text
  */
@@ -540,7 +512,6 @@ scr_color(unsigned int color, unsigned int Intensity)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Change the rendition style for following text
  */
@@ -605,14 +576,10 @@ scr_rendition(int set, int style)
   }
 }
 
-/* ------------------------------------------------------------------------- */
-/*
- * Scroll text between <row1> and <row2> inclusive, by <count> lines
- */
+/* Scroll text region from <row1> through <row2> by <count> lines */
 int
 scroll_text(int row1, int row2, int count, int spec)
 {
-/*    int             i, j; */
   register int i, j;
 
 #ifdef PROFILE_SCREEN
@@ -620,8 +587,6 @@ scroll_text(int row1, int row2, int count, int spec)
   static long long total_time = 0;
 
   P_INITCOUNTER(cnt);
-/*    struct timeval start = { 0, 0 }, stop = { 0, 0 }; */
-
   P_SETTIMEVAL(cnt.start);
 #endif
 
@@ -723,7 +688,6 @@ scroll_text(int row1, int row2, int count, int spec)
   return count;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Add text given in <str> of length <len> to screen struct
  */
@@ -878,7 +842,6 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
     selection_reset();
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Process Backspace.  Move back the cursor back a position, wrap if have to
  * XTERM_SEQ: CTRL-H
@@ -897,7 +860,6 @@ scr_backspace(void)
     scr_gotorc(0, -1, RELATIVE);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Process Horizontal Tab
  * count: +ve = forward; -ve = backwards
@@ -933,7 +895,6 @@ scr_tab(int count)
     scr_gotorc(0, x, R_RELATIVE);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Goto Row/Column
  */
@@ -977,7 +938,6 @@ scr_gotorc(int row, int col, int relative)
   MIN_IT(screen.row, TermWin.nrow - 1);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * direction  should be UP or DN
  */
@@ -1010,7 +970,6 @@ scr_index(int direction)
   CHECK_SELECTION;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Erase part or whole of a line
  * XTERM_SEQ: Clear line to right: ESC [ 0 K
@@ -1052,7 +1011,6 @@ scr_erase_line(int mode)
 	     rstyle & ~(RS_RVid | RS_Uline));
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Erase part of whole of the screen
  * XTERM_SEQ: Clear screen after cursor : ESC [ 0 J
@@ -1124,7 +1082,6 @@ scr_erase_screen(int mode)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Fill the screen with `E's
  * XTERM_SEQ: Screen Alignment Test: ESC # 8
@@ -1151,7 +1108,6 @@ scr_E(void)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Insert/Delete <count> lines
  */
@@ -1189,7 +1145,6 @@ scr_insdel_lines(int count, int insdel)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Insert/Delete <count> characters from the current position
  */
@@ -1249,7 +1204,6 @@ scr_insdel_chars(int count, int insdel)
 #endif
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set the scrolling region
  * XTERM_SEQ: Set region <top> - <bot> inclusive: ESC [ <top> ; <bot> r
@@ -1266,7 +1220,6 @@ scr_scroll_region(int top, int bot)
   scr_gotorc(0, 0, 0);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Make the cursor visible/invisible
  * XTERM_SEQ: Make cursor visible  : ESC [ ? 25 h
@@ -1281,7 +1234,6 @@ scr_cursor_visible(int mode)
     screen.flags &= ~Screen_VisibleCursor;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set/unset automatic wrapping
  * XTERM_SEQ: Set Wraparound  : ESC [ ? 7 h
@@ -1296,7 +1248,6 @@ scr_autowrap(int mode)
     screen.flags &= ~Screen_Autowrap;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set/unset margin origin mode
  * Absolute mode: line numbers are counted relative to top margin of screen
@@ -1316,7 +1267,6 @@ scr_relative_origin(int mode)
   scr_gotorc(0, 0, 0);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set insert/replace mode
  * XTERM_SEQ: Set Insert mode : ESC [ ? 4 h
@@ -1331,7 +1281,6 @@ scr_insert_mode(int mode)
     screen.flags &= ~Screen_Insert;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set/Unset tabs
  * XTERM_SEQ: Set tab at current column  : ESC H
@@ -1348,7 +1297,6 @@ scr_set_tab(int mode)
     tabs[screen.col] = (mode ? 1 : 0);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set reverse/normal video
  * XTERM_SEQ: Reverse video: ESC [ ? 5 h
@@ -1371,7 +1319,6 @@ scr_rvideo_mode(int mode)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Report current cursor position
  * XTERM_SEQ: Report position: ESC [ 6 n
@@ -1381,14 +1328,8 @@ scr_report_position(void)
 {
   tt_printf((unsigned char *) "\033[%d;%dR", screen.row + 1, screen.col + 1);
 }
-
-/* ------------------------------------------------------------------------- *
- *                                  FONTS                                    * 
- * ------------------------------------------------------------------------- */
 
-/*
- * Set font style
- */
+/* Set font style */
 void
 set_font_style(void)
 {
@@ -1413,7 +1354,6 @@ set_font_style(void)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Choose a font
  * XTERM_SEQ: Invoke G0 character set: CTRL-O
@@ -1428,7 +1368,6 @@ scr_charset_choose(int set)
   set_font_style();
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Set a font
  * XTERM_SEQ: Set G0 character set: ESC ( <C>
@@ -1448,9 +1387,6 @@ scr_charset_set(int set, unsigned int ch)
   set_font_style();
 }
 
-/* ------------------------------------------------------------------------- *
- *             MULTIPLE-CHARACTER SET MANIPULATION FUNCTIONS                 * 
- * ------------------------------------------------------------------------- */
 #ifdef MULTI_CHARSET
 
 static void eucj2jis(unsigned char *str, int len);
@@ -1526,81 +1462,33 @@ void
 scr_expose(int x, int y, int width, int height)
 {
   int i;
-  rend_t *r;
-  row_col_t full_beg, full_end, part_beg, part_end;
+  register short nc, nr;
+  row_col_t rect_beg, rect_end;
 
-  if (drawn_text == NULL)	/* sanity check */
-    return;
+  REQUIRE(drawn_text != NULL);
 
-  part_beg.col = Pixel2Col(x);
-  part_beg.row = Pixel2Row(y);
-  part_end.col = Pixel2Width(x + width + TermWin.fwidth - 1);
-  part_end.row = Pixel2Row(y + height + TermWin.fheight - 1);
+  nc = TermWin.ncol - 1;
+  nr = TermWin.nrow - 1;
 
-  full_beg.col = Pixel2Col(x + TermWin.fwidth - 1);
-  full_beg.row = Pixel2Row(y + TermWin.fheight - 1);
-  full_end.col = Pixel2Width(x + width);
-  full_end.row = Pixel2Row(y + height);
+  rect_beg.col = Pixel2Col(x);
+  BOUND(rect_beg.col, 0, nc);
+  rect_beg.row = Pixel2Row(y);
+  BOUND(rect_beg.row, 0, nr);
+  rect_end.col = Pixel2Width(x + width + TermWin.fwidth - 1);
+  BOUND(rect_end.col, 0, nc);
+  rect_end.row = Pixel2Row(y + height + TermWin.fheight - 1);
+  BOUND(rect_end.row, 0, nr);
 
-  /* sanity checks */
-  MAX_IT(part_beg.col, 0);
-  MAX_IT(full_beg.col, 0);
-  MAX_IT(part_end.col, 0);
-  MAX_IT(full_end.col, 0);
-  MAX_IT(part_beg.row, 0);
-  MAX_IT(full_beg.row, 0);
-  MAX_IT(part_end.row, 0);
-  MAX_IT(full_end.row, 0);
-  MIN_IT(part_beg.col, TermWin.ncol - 1);
-  MIN_IT(full_beg.col, TermWin.ncol - 1);
-  MIN_IT(part_end.col, TermWin.ncol - 1);
-  MIN_IT(full_end.col, TermWin.ncol - 1);
-  MIN_IT(part_beg.row, TermWin.nrow - 1);
-  MIN_IT(full_beg.row, TermWin.nrow - 1);
-  MIN_IT(part_end.row, TermWin.nrow - 1);
-  MIN_IT(full_end.row, TermWin.nrow - 1);
+  D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, rect_beg.col, rect_beg.row,
+	    rect_end.col, rect_end.row));
 
-  D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, part_beg.col, part_beg.row,
-	    part_end.col, part_end.row));
-
-  if (full_end.col >= full_beg.col)
-    /* set DEFAULT_RSTYLE for totally exposed characters */
-    for (i = full_beg.row; i <= full_end.row; i++)
-      blank_line(&(drawn_text[i][full_beg.col]),
-		 &(drawn_rend[i][full_beg.col]),
-		 full_end.col - full_beg.col + 1, DEFAULT_RSTYLE);
-
-/* force an update for partially exposed characters */
-  if (part_beg.row != full_beg.row) {
-    r = &(drawn_rend[part_beg.row][part_beg.col]);
-    for (i = part_end.col - part_beg.col + 1; i--;)
-      *r++ = RS_Dirty;
-  }
-  if (part_end.row != full_end.row) {
-    r = &(drawn_rend[part_end.row][part_beg.col]);
-    for (i = part_end.col - part_beg.col + 1; i--;)
-      *r++ = RS_Dirty;
-  }
-  if (part_beg.col != full_beg.col)
-    for (i = full_beg.row; i <= full_end.row; i++)
-      drawn_rend[i][part_beg.col] = RS_Dirty;
-  if (part_end.col != full_end.col)
-    for (i = full_beg.row; i <= full_end.row; i++)
-      drawn_rend[i][part_end.col] = RS_Dirty;
-
-  if (buffer_pixmap) {
-    x = Col2Pixel(full_beg.col);
-    y = Row2Pixel(full_beg.row);
-    XCopyArea(Xdisplay, images[image_bg].current->pmap->pixmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(full_end.col - full_beg.col + 1),
-              Height2Pixel(full_end.row - full_beg.row + 1), x, y);
+  for (i = rect_beg.row; i <= rect_end.row; i++) {
+    MEMSET(&(drawn_text[i][rect_beg.col]), 0, rect_end.col - rect_beg.col + 1);
   }
 }
 
-/* ------------------------------------------------------------------------- */
-/*
- * Move the display so that the line represented by scrollbar value Y is at
- * the top of the screen
- */
+/* Move the display so that the line represented by scrollbar value Y is at
+   the top of the screen */
 int
 scr_move_to(int y, int len)
 {
@@ -1616,11 +1504,8 @@ scr_move_to(int y, int len)
 
   return (TermWin.view_start - start);
 }
-/* ------------------------------------------------------------------------- */
-/*
- * Page the screen up/down nlines
- * direction  should be UP or DN
- */
+
+/* Scroll the visible region up/down by <nlines> lines */
 int
 scr_page(int direction, int nlines)
 {
@@ -1629,16 +1514,12 @@ scr_page(int direction, int nlines)
   D_SCREEN(("scr_page(%s, %d) view_start:%d\n", ((direction == UP) ? "UP" : "DN"), nlines, TermWin.view_start));
 
   start = TermWin.view_start;
-  MAX_IT(nlines, 1);
-  MIN_IT(nlines, TermWin.nrow);
+  BOUND(nlines, 1, TermWin.nrow);
   TermWin.view_start += ((direction == UP) ? nlines : (-nlines));
-  MAX_IT(TermWin.view_start, 0);
-  MIN_IT(TermWin.view_start, TermWin.nscrolled);
-
+  BOUND(TermWin.view_start, 0, TermWin.nscrolled);
   return (TermWin.view_start - start);
 }
 
-/* ------------------------------------------------------------------------- */
 void
 scr_bell(void)
 {
@@ -1649,13 +1530,12 @@ scr_bell(void)
     XMapWindow(Xdisplay, TermWin.parent);
 #endif
   if (Options & Opt_visualBell) {
-    scr_rvideo_mode(!rvideo);	/* scr_refresh() also done */
-    scr_rvideo_mode(!rvideo);	/* scr_refresh() also done */
+    scr_rvideo_mode(!rvideo);
+    scr_rvideo_mode(!rvideo);
   } else
     XBell(Xdisplay, 0);
 }
 
-/* ------------------------------------------------------------------------- */
 void
 scr_printscreen(int fullhist)
 {
@@ -1687,7 +1567,6 @@ scr_printscreen(int fullhist)
 #endif
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Refresh the screen
  * drawn_text/drawn_rend contain the screen information before the update.
@@ -1705,9 +1584,6 @@ scr_refresh(int type)
    fprop,			/* proportional font used                    */
    is_cursor,			/* cursor this position                      */
    rvid,			/* reverse video this position               */
-#if 0
-   rend,			/* rendition                                 */
-#endif
    fore, back,			/* desired foreground/background             */
    wbyte,			/* we're in multibyte                        */
    xpixel,			/* x offset for start of drawing (font)      */
@@ -1740,7 +1616,6 @@ scr_refresh(int type)
   static long call_cnt = 0;
   static long long total_time = 0;
 
-  /*    struct timeval start = { 0, 0 }, stop = { 0, 0 }; */
   P_INITCOUNTER(cnt);
 #endif
 
@@ -1773,9 +1648,6 @@ scr_refresh(int type)
 
   gcvalue.foreground = PixColors[fgColor];
   gcvalue.background = PixColors[bgColor];
-/*
- * always go back to the base font - it's much safer
- */
   wbyte = 0;
 
   XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
@@ -1783,9 +1655,6 @@ scr_refresh(int type)
   draw_string = XDrawString;
   draw_image_string = XDrawImageString;
 
-/*
- * Setup the cursor
- */
   row = screen.row + TermWin.saveLines;
   col = screen.col;
   if (screen.flags & Screen_VisibleCursor) {
@@ -1814,11 +1683,8 @@ scr_refresh(int type)
       }
     }
   }
-  /*
-   * Go over every single position
-   */
-  for (row = 0; row < nrows; row++) {
 
+  for (row = 0; row < nrows; row++) {
     scrrow = row + row_offset;
     stp = screen.text[scrrow];
     srp = screen.rend[scrrow];
@@ -1826,26 +1692,27 @@ scr_refresh(int type)
     drp = drawn_rend[row];
 
     for (col = 0; col < ncols; col++) {
-      /* compare new text with old - if exactly the same then continue */
-      rt1 = srp[col];		/* screen rendition */
-      rt2 = drp[col];		/* drawn rendition  */
-      if ((stp[col] == dtp[col])	/* must match characters to skip */
-	  && ((rt1 == rt2)	/* either rendition the same or  */
-	      || ((stp[col] == ' ')	/* space w/ no bg change */
-		  &&(GET_BGATTR(rt1) == GET_BGATTR(rt2))
-		  && !(rt2 & RS_Dirty)))) {
+      if (!refresh_all) {
+        /* compare new text with old - if exactly the same then continue */
+        rt1 = srp[col];
+        rt2 = drp[col];
+        if ((stp[col] == dtp[col])	/* must match characters to skip */
+            && ((rt1 == rt2)	/* either rendition the same or  */
+                || ((stp[col] == ' ')	/* space w/ no bg change */
+                    && (GET_BGATTR(rt1) == GET_BGATTR(rt2))))) {
 #ifdef MULTI_CHARSET
-	/* if first byte is multibyte then compare second bytes */
-	if ((rt1 & RS_multiMask) != RS_multi1)
-	  continue;
-	else if (stp[col + 1] == dtp[col + 1]) {
-	  /* assume no corrupt characters on the screen */
-	  col++;
-	  continue;
-	}
+          /* if first byte is multibyte then compare second bytes */
+          if ((rt1 & RS_multiMask) != RS_multi1)
+            continue;
+          else if (stp[col + 1] == dtp[col + 1]) {
+            /* assume no corrupt characters on the screen */
+            col++;
+            continue;
+          }
 #else
-	continue;
+          continue;
 #endif
+        }
       }
       lasttext = dtp[col];
       lastrend = drp[col];
@@ -1933,9 +1800,7 @@ scr_refresh(int type)
       }
       buffer[len] = '\0';
 
-/*
- * Determine the attributes for the string
- */
+      /* Determine the attributes for the string */
       fore = GET_FGCOLOR(rend);
       back = GET_BGCOLOR(rend);
       rend = GET_ATTR(rend);
@@ -2018,9 +1883,8 @@ scr_refresh(int type)
 	XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
       }
 #endif
-/*
- * Actually do the drawing of the string here
- */
+
+      /* The actual drawing of the string is done here. */
       if (fprop) {
 	if (back != bgColor) {
 	  SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
@@ -2032,6 +1896,22 @@ scr_refresh(int type)
 	} else {
 	  CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, 1);
 	}
+        if (TermWin.font->per_char) {
+          int fw, cw;
+
+          fw = TermWin.fwidth;
+          cw = TermWin.font->per_char[((int) (*buffer))].width;
+          if (cw > 0 && cw < TermWin.font->max_bounds.width) {
+            if (fw > cw) {
+              xpixel += ((fw - cw) >> 1);
+            } else {
+              xpixel -= ((cw - fw) >> 1);
+              if (col < ncols - 1) {
+                dtp[col + 1] = 0;
+              }
+            }
+          }
+        }
 	DRAW_STRING(draw_string, xpixel, ypixel, buffer, 1);
         UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(1), ypixel + Height2Pixel(1));
 #ifndef NO_BOLDOVERSTRIKE
@@ -2086,14 +1966,10 @@ scr_refresh(int type)
       }
       if (MONO_BOLD(lastrend)) {
 	if (col < ncols - 1) {
-	  drp[col + 1] |= RS_Dirty;
-	  if (wbyte || ((TermWin.font->per_char == NULL) ?
-                        (TermWin.font->max_bounds.width == TermWin.font->max_bounds.rbearing) :
-                        (TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].width == TermWin.font->per_char[lasttext - TermWin.font->min_char_or_byte2].rbearing))) {
-	    drp[col + 1] |= RS_Dirty;
-          }
-	} else
+	  dtp[col + 1] = 0;
+	} else {
 	  boldlast = 1;
+        }
       }
     }				/* for (col = 0; col < TermWin.ncol; col++) */
   }				/* for (row = 0; row < TermWin.nrow; row++) */
@@ -2114,17 +1990,13 @@ scr_refresh(int type)
     XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
   } else {
     if (boldlast) {
-      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
-                 1, TermWin_TotalHeight() - 1, 0);
-    }
-    if (boldlast) {
-      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0,
-                 1, TermWin_TotalHeight() - 1, 0);
+      XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, 0);
     }
   }
   if (type == SLOW_REFRESH) {
     XSync(Xdisplay, False);
   }
+  refresh_all = 0;
   D_SCREEN(("Exiting.\n"));
 
 #ifdef PROFILE_SCREEN
@@ -2292,11 +2164,6 @@ scr_dump_to_file(const char *fname)
   FREE(buff);
 }
 
-
-/* ------------------------------------------------------------------------- *
- *                           CHARACTER SELECTION                             * 
- * ------------------------------------------------------------------------- */
-
 /*
  * If (row,col) is within a selected region of text, remove the selection
  * -TermWin.nscrolled <= (selection row) <= TermWin.nrow - 1
@@ -2352,7 +2219,6 @@ selection_check(void)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Paste a selection direct to the command
  */
@@ -2376,7 +2242,6 @@ PasteIt(unsigned char *data, unsigned int nitems)
     tt_write(data, num);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Respond to a notification that a primary selection has been sent
  * EXT: SelectionNotify
@@ -2421,7 +2286,6 @@ selection_paste(Window win, unsigned prop, int Delete)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Request the current primary selection
  * EXT: button 2 release
@@ -2448,7 +2312,6 @@ selection_request(Time tm, int x, int y)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Clear the current selection from the screen rendition list
  */
@@ -2472,7 +2335,6 @@ selection_reset(void)
     }
   }
 }
-/* ------------------------------------------------------------------------- */
 /*
  * Clear all selected text
  * EXT:
@@ -2488,7 +2350,6 @@ selection_clear(void)
   selection.len = 0;
   selection_reset();
 }
-/* ------------------------------------------------------------------------- */
 /*
  * Set or clear between selected points (inclusive)
  */
@@ -2540,7 +2401,6 @@ selection_setclr(int set, int startr, int startc, int endr, int endc)
   }
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Mark a selection at the specified x/y pixel location
  */
@@ -2551,7 +2411,6 @@ selection_start(int x, int y)
   selection_start_colrow(Pixel2Col(x), Pixel2Row(y));
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Mark a selection at the specified col/row
  */
@@ -2584,7 +2443,6 @@ selection_start_colrow(int col, int row)
   selection.mark.row = row;
 }
 
-/* ------------------------------------------------------------------------- */
 /* 
  * Copy a selection into the cut buffer
  * EXT: button 1 or 3 release
@@ -2593,7 +2451,7 @@ void
 selection_make(Time tm)
 {
   int i, col, end_col, row, end_row;
-  unsigned char *new_selection_text;
+  text_t *new_selection_text;
   char *str;
   text_t *t;
 
@@ -2685,7 +2543,6 @@ selection_make(Time tm)
   D_SELECT(("selection.len=%d\n", selection.len));
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Mark or select text based upon number of clicks: 1, 2, or 3
  * EXT: button 1 press
@@ -2710,7 +2567,6 @@ selection_click(int clicks, int x, int y)
 			    selection.mark.row + TermWin.view_start, 0, 1);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Select text for 2 clicks
  * row is given as a normal selection row value
@@ -2903,7 +2759,6 @@ selection_delimit_word(int col, int row, row_col_t * beg, row_col_t * end)
   end->row = end_row;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Extend the selection to the specified x/y pixel location
  * EXT: button 3 press; button 1 or 3 drag
@@ -2940,7 +2795,6 @@ selection_extend(int x, int y, int flag)
   selection_extend_colrow(col, row, flag, 0);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Extend the selection to the specified col/row
  */
@@ -3167,7 +3021,6 @@ selection_extend_colrow(int col, int row, int flag, int cont)
   return;
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * Double click on button 3 when already selected
  * EXT: button 3 double click
@@ -3183,7 +3036,6 @@ selection_rotate(int x, int y)
   selection_extend_colrow(col, row, 1, 0);
 }
 
-/* ------------------------------------------------------------------------- */
 /*
  * On some systems, the Atom typedef is 64 bits wide.  We need to have a type
  * that is exactly 32 bits wide, because a format of 64 is not allowed by
@@ -3191,7 +3043,6 @@ selection_rotate(int x, int y)
  */
 typedef CARD32 Atom32;
 
-/* ------------------------------------------------------------------------- */
 /*
  * Respond to a request for our current selection
  * EXT: SelectionRequest
@@ -3244,10 +3095,6 @@ selection_send(XSelectionRequestEvent * rq)
   }
   XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);
 }
-
-/* ------------------------------------------------------------------------- *
- *                              MOUSE ROUTINES                               * 
- * ------------------------------------------------------------------------- */
 
 void
 mouse_report(XButtonEvent * ev)
@@ -3263,7 +3110,6 @@ mouse_report(XButtonEvent * ev)
 	    (32 + Pixel2Row(ev->y) + 1));
 }
 
-/* ------------------------------------------------------------------------- */
 
 void
 mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
@@ -3276,9 +3122,6 @@ mouse_tracking(int report, int x, int y, int firstrow, int lastrow)
 /* TODO */
 }
 
-/* ------------------------------------------------------------------------- *
- *                              DEBUG ROUTINES                               * 
- * ------------------------------------------------------------------------- */
 void
 debug_PasteIt(unsigned char *data, int nitems)
 {
@@ -3287,7 +3130,6 @@ debug_PasteIt(unsigned char *data, int nitems)
 /* TODO */
 }
 
-/* ------------------------------------------------------------------------- */
 int
 debug_selection(void)
 {
@@ -3295,7 +3137,6 @@ debug_selection(void)
   return 0;
 }
 
-/* ------------------------------------------------------------------------- */
 void
 debug_colors(void)
 {

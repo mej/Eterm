@@ -78,21 +78,20 @@
 # define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
 #endif
 
-/* width of scrollbar, menuBar shadow ... don't change! */
 #define SHADOW	2
 
 /* convert pixel dimensions to row/column values */
-#define Pixel2Width(x)		((x) / TermWin.fwidth)
-#define Pixel2Height(y)	((y) / TermWin.fheight)
-#define Pixel2Col(x)		Pixel2Width((x) - TermWin.internalBorder)
-#define Pixel2Row(y)		Pixel2Height((y) - TermWin.internalBorder)
-#define Width2Pixel(n)		((n) * TermWin.fwidth)
-#define Height2Pixel(n)	((n) * TermWin.fheight)
-#define Col2Pixel(col)		(Width2Pixel(col) + TermWin.internalBorder)
-#define Row2Pixel(row)		(Height2Pixel(row) + TermWin.internalBorder)
+#define Pixel2Width(x)          ((x) / TermWin.fwidth)
+#define Pixel2Height(y)         ((y) / TermWin.fheight)
+#define Pixel2Col(x)            Pixel2Width((x) - TermWin.internalBorder)
+#define Pixel2Row(y)            Pixel2Height((y) - TermWin.internalBorder)
+#define Width2Pixel(n)          ((n) * TermWin.fwidth)
+#define Height2Pixel(n)         ((n) * TermWin.fheight)
+#define Col2Pixel(col)          (Width2Pixel(col) + TermWin.internalBorder)
+#define Row2Pixel(row)          (Height2Pixel(row) + TermWin.internalBorder)
 
-#define TermWin_TotalWidth()	(TermWin.width  + 2 * TermWin.internalBorder)
-#define TermWin_TotalHeight()	(TermWin.height + 2 * TermWin.internalBorder)
+#define TermWin_TotalWidth()    (TermWin.width  + 2 * TermWin.internalBorder)
+#define TermWin_TotalHeight()   (TermWin.height + 2 * TermWin.internalBorder)
 
 #define Xscreen		DefaultScreen(Xdisplay)
 #define Xcmap			DefaultColormap(Xdisplay,Xscreen)
