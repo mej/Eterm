@@ -270,6 +270,9 @@ begin main
 # (Default is 5).
     border_width 0
 
+# Defines the number of pixels to add between lines (default is 0).
+#    line_space 2
+
 # Value to use for $TERM
     term_name xterm
 

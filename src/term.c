@@ -149,6 +149,10 @@ lookup_key(XEvent * ev)
   }
 #endif /* USE_XIM */
 
+#ifdef USE_XIM
+  if (valid_keysym) {
+#endif
+
   if (action_dispatch(ev, keysym)) {
     return;
   } 
@@ -159,10 +163,6 @@ lookup_key(XEvent * ev)
       TermWin.view_start = 0;
     }
   }
-
-#ifdef USE_XIM
-  if (valid_keysym) {
-#endif
 
   if ((Options & Opt_report_as_keysyms) && (keysym >= 0xff00)) {
     len = sprintf(kbuf, "\e[k%X;%X~", (unsigned int) (ev->xkey.state & 0xff), (unsigned int) (keysym & 0xff));

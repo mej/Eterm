@@ -958,6 +958,21 @@ request_code_to_name(int code)
   return "Unknown";
 }
 
+static void
+hard_exit(void) {
+
+#ifdef HAVE__EXIT
+  _exit(-1);
+#elif defined(SIGKILL)
+  kill(cmd_pid, SIGKILL);
+  raise(SIGKILL);
+#else
+  kill(cmd_pid, 9);
+  raise(9);
+#endif
+
+}
+
 /* Try to get a stack trace when we croak */
 void
 dump_stack_trace(void)
@@ -991,19 +1006,9 @@ dump_stack_trace(void)
   print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
   return;
 #endif
+  signal(SIGALRM, (sighandler_t) hard_exit);
+  alarm(10);
   system(cmd);
-}
-
-void
-hard_exit(void) {
-
-  dump_stack_trace();
-#ifdef HAVE__EXIT
-  _exit(-1);
-#else
-  abort();
-#endif
-
 }
 
 /* signal handling, exit handler */

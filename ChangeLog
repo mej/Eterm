@@ -2372,3 +2372,10 @@ Tue Sep  7 13:15:30 PDT 1999	Michael Jennings <mej@eterm.org>
 	make distcheck works without breaking regular makes now. =P
 	
 -------------------------------------------------------------------------------
+Wed Sep  8 11:11:00 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Patch from Sung-Hyun Nam <namsh@lgic.co.kr> for the theme files.  Also
+	added a timeout for the backtrace attempt so that it hopefully won't
+	hang around forever when gdb decides to hang.
+	
+-------------------------------------------------------------------------------
