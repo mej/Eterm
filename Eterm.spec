@@ -2,6 +2,8 @@
 %define compression gz
 %endif
 
+%define __os_install_post /usr/lib/rpm/brp-compress
+
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.4
@@ -30,14 +32,16 @@ have the Imlib2 library installed.
 %setup -a 1
 
 %build
-CFLAGS="$RPM_OPT_FLAGS"
+#CFLAGS="$RPM_OPT_FLAGS"
+CFLAGS="-O0 -g3"
 export CFLAGS
 
 # When using the configure macro, I also specify all the directory
 # macros I use for compatibility with older versions of the macro
 %configure --bindir=%{_bindir} --libdir=%{_libdir} --mandir=%{_mandir} \
            --datadir=%{_datadir} --sysconfdir=%{_sysconfdir} \
-           --enable-multi-charset --enable-escreen --enable-auto-encoding %{?acflags}
+           --enable-multi-charset --enable-escreen --enable-auto-encoding \
+           --with-debugging=9 %{?acflags}
 %{__make} %{?mflags}
 
 %install

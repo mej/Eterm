@@ -15,45 +15,50 @@ DIE=0
 echo "Generating configuration files for Eterm, please wait...."
 
 LIBTOOLIZE_CHOICES="$LIBTOOLIZE libtoolize glibtoolize"
-AUTOHEADER_CHOICES="$AUTOHEADER autoheader213 autoheader-2.13 autoheader"
-ACLOCAL_CHOICES="$ACLOCAL aclocal14 aclocal-1.4 aclocal"
-AUTOMAKE_CHOICES="$AUTOMAKE automake14 automake-1.4 automake"
-AUTOCONF_CHOICES="$AUTOCONF autoconf213 autoconf-2.13 autoconf"
+ACLOCAL_CHOICES="$ACLOCAL aclocal"
+AUTOCONF_CHOICES="$AUTOCONF autoconf"
+AUTOHEADER_CHOICES="$AUTOHEADER autoheader"
+AUTOMAKE_CHOICES="$AUTOMAKE automake"
 
 for i in $LIBTOOLIZE_CHOICES ; do
     $i --version </dev/null >/dev/null 2>&1 && LIBTOOLIZE=$i && break
 done
 [ "x$LIBTOOLIZE" = "x" ] && broken libtool
 
-for i in $AUTOHEADER_CHOICES ; do
-    $i --version </dev/null >/dev/null 2>&1 && AUTOHEADER=$i && break
-done
-[ "x$AUTOHEADER" = "x" ] && broken autoconf
-
 for i in $ACLOCAL_CHOICES ; do
     $i --version </dev/null >/dev/null 2>&1 && ACLOCAL=$i && break
 done
 [ "x$ACLOCAL" = "x" ] && broken automake
-
-for i in $AUTOMAKE_CHOICES ; do
-    $i --version </dev/null >/dev/null 2>&1 && AUTOMAKE=$i && break
-done
-[ "x$AUTOMAKE" = "x" ] && broken automake
 
 for i in $AUTOCONF_CHOICES ; do
     $i --version </dev/null >/dev/null 2>&1 && AUTOCONF=$i && break
 done
 [ "x$AUTOCONF" = "x" ] && broken autoconf
 
+for i in $AUTOHEADER_CHOICES ; do
+    $i --version </dev/null >/dev/null 2>&1 && AUTOHEADER=$i && break
+done
+[ "x$AUTOHEADER" = "x" ] && broken autoconf
+
+for i in $AUTOMAKE_CHOICES ; do
+    $i --version </dev/null >/dev/null 2>&1 && AUTOMAKE=$i && break
+done
+[ "x$AUTOMAKE" = "x" ] && broken automake
+
 # Export them so configure can AC_SUBST() them.
-export LIBTOOLIZE AUTOHEADER ACLOCAL AUTOMAKE AUTOCONF
+export LIBTOOLIZE ACLOCAL AUTOCONF AUTOHEADER AUTOMAKE
+
+# Check for existing libast.m4 we can use.  Use the local one if not.
+if test ! -f "`$ACLOCAL --print-ac-dir`/libast.m4"; then
+    ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
+fi
 
 # Run the stuff.
 (set -x && $LIBTOOLIZE -c -f)
-(set -x && $AUTOHEADER)
 (set -x && $ACLOCAL $ACLOCAL_FLAGS)
-(set -x && $AUTOMAKE -a -c)
 (set -x && $AUTOCONF)
+(set -x && $AUTOHEADER)
+(set -x && $AUTOMAKE -a -c)
 
 # Run configure.
 ./configure "$@"

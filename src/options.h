@@ -127,6 +127,7 @@ extern char *rs_es_font;
 #endif
 extern spif_uint32_t rs_opacity;
 extern unsigned int rs_line_space;
+extern spif_charptr_t rs_beep_command;
 extern unsigned int rs_meta_mod, rs_alt_mod, rs_numlock_mod;
 #ifndef NO_BOLDFONT
 extern char *rs_boldFont;

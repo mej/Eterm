@@ -5293,3 +5293,10 @@ Wed Jan  5 15:17:51 2005                        Michael Jennings (mej)
 
 Spec dependency fixes.
 ----------------------------------------------------------------------
+Wed Feb 23 15:37:40 2005                        Michael Jennings (mej)
+
+Merged in previous autoFUCK changes from libast.
+
+Added a feature to specify a command to be run in place of the normal
+PC speaker beep.
+----------------------------------------------------------------------

@@ -1546,8 +1546,11 @@ scr_bell(void)
     if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_VISUAL_BELL)) {
         scr_rvideo_mode(!rvideo);
         scr_rvideo_mode(!rvideo);
-    } else
+    } else if (!SPIF_PTR_ISNULL(rs_beep_command)) {
+        system_no_wait(SPIF_CAST_C(char *) rs_beep_command);
+    } else {
         XBell(Xdisplay, 0);
+    }
 }
 
 void

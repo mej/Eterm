@@ -150,6 +150,7 @@ int rs_delay = -1;
 unsigned char rs_es_dock = BBAR_DOCKED_BOTTOM;
 char *rs_es_font = NULL;
 #endif
+spif_charptr_t rs_beep_command = NULL;
 spif_uint32_t rs_opacity = 0xffffffff;
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
@@ -342,6 +343,7 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("finished-text", "post-termination terminal text", rs_finished_text),
     SPIFOPT_STR_LONG("term-name", "value to use for setting $TERM", rs_term_name),
     SPIFOPT_STR_LONG("pipe-name", "filename of console pipe to emulate -C", rs_pipe_name),
+    SPIFOPT_STR_LONG("beep-command", "command to run instead of normal beep", rs_beep_command),
 #ifdef ESCREEN
     SPIFOPT_STR('U', "url", "a URL pointing to a screen session to pick up", rs_url),
     SPIFOPT_STR('Z', "firewall", "connect session via forwarded port", rs_hop),
@@ -405,7 +407,11 @@ version(void)
            "    " SCREEN_IDENT "\n"
            "    " SCROLLBAR_IDENT "\n"
            "    " STARTUP_IDENT "\n"
-           "    " SYSTEM_IDENT "\n" "    " TERM_IDENT "\n" "    " TIMER_IDENT "\n" "    " UTMP_IDENT "\n" "    " WINDOWS_IDENT "\n" "\n");
+           "    " SYSTEM_IDENT "\n"
+           "    " TERM_IDENT "\n"
+           "    " TIMER_IDENT "\n"
+           "    " UTMP_IDENT "\n"
+           "    " WINDOWS_IDENT "\n" "\n");
 
     printf("Debugging configuration:  ");
 #ifdef DEBUG
@@ -1472,6 +1478,9 @@ parse_misc(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "term_name ")) {
         RESET_AND_ASSIGN(rs_term_name, get_word(2, buff));
+
+    } else if (!BEG_STRCASECMP(buff, "beep_command ")) {
+        RESET_AND_ASSIGN(rs_beep_command, get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "debug ")) {
         DEBUG_LEVEL = (unsigned int) strtoul(get_pword(2, buff), (char **) NULL, 0);
@@ -3830,6 +3839,7 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    min_anchor_size %d\n", rs_min_anchor_size);
     fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
     fprintf(fp, "    term_name %s\n", getenv("TERM"));
+    fprintf(fp, "    beep_command \"%s\"\n", rs_beep_command);
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
     if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
         fprintf(fp, "    exec ");

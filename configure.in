@@ -3,23 +3,23 @@ dnl# $Id$
 PATH=$PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/ucb/bin
 export PATH
 
-test "x$LIBTOOLIZE" = "x" && LIBTOOLIZE=true
-test "x$AUTOHEADER" = "x" && AUTOHEADER=true
-test "x$ACLOCAL" = "x" && ACLOCAL=true
-test "x$AUTOMAKE" = "x" && AUTOMAKE=true
-test "x$AUTOCONF" = "x" && AUTOCONF=true
+test "x$LIBTOOLIZE" = "x" && LIBTOOLIZE=libtoolize
+test "x$ACLOCAL" = "x" && ACLOCAL=aclocal
+test "x$AUTOCONF" = "x" && AUTOCONF=autoconf
+test "x$AUTOHEADER" = "x" && AUTOHEADER=autoheader
+test "x$AUTOMAKE" = "x" && AUTOMAKE=automake
 
 AC_SUBST(LIBTOOLIZE)
-AC_SUBST(AUTOHEADER)
 AC_SUBST(ACLOCAL)
-AC_SUBST(AUTOMAKE)
 AC_SUBST(AUTOCONF)
+AC_SUBST(AUTOHEADER)
+AC_SUBST(AUTOMAKE)
 
 SAVE_LIBTOOLIZE="$LIBTOOLIZE"
-SAVE_AUTOHEADER="$AUTOHEADER"
 SAVE_ACLOCAL="$ACLOCAL"
-SAVE_AUTOMAKE="$AUTOMAKE"
 SAVE_AUTOCONF="$AUTOCONF"
+SAVE_AUTOHEADER="$AUTOHEADER"
+SAVE_AUTOMAKE="$AUTOMAKE"
 
 AC_INIT(src/feature.h)
 AM_INIT_AUTOMAKE(Eterm, 0.9.4)
@@ -33,11 +33,22 @@ AUTHORS="Michael Jennings (mej@eterm.org) "
 AC_SUBST(AUTHORS)
 AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS", [Authors])
 
-LIBTOOLIZE="$SAVE_LIBTOOLIZE"
-AUTOHEADER="$SAVE_AUTOHEADER"
-ACLOCAL="$SAVE_ACLOCAL"
-AUTOMAKE="$SAVE_AUTOMAKE"
-AUTOCONF="$SAVE_AUTOCONF"
+LIBTOOLIZE="${SAVE_LIBTOOLIZE:-libtoolize}"
+ACLOCAL="${SAVE_ACLOCAL:-aclocal}"
+AUTOCONF="${SAVE_AUTOCONF:-autoconf}"
+AUTOHEADER="${SAVE_AUTOHEADER:-autoheader}"
+AUTOMAKE="${SAVE_AUTOMAKE:-automake}"
+
+AC_MSG_CHECKING(for preferred libtoolize)
+AC_MSG_RESULT($LIBTOOLIZE)
+AC_MSG_CHECKING(for preferred aclocal)
+AC_MSG_RESULT($ACLOCAL)
+AC_MSG_CHECKING(for preferred autoconf)
+AC_MSG_RESULT($AUTOCONF)
+AC_MSG_CHECKING(for preferred autoheader)
+AC_MSG_RESULT($AUTOHEADER)
+AC_MSG_CHECKING(for preferred automake)
+AC_MSG_RESULT($AUTOMAKE)
 
 dnl# Find RCS Ident info from source files
 AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$''Id:' $srcdir/src/actions.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [actions.c RCS ID])
