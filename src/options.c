@@ -2892,6 +2892,32 @@ parse_bbar(char *buff, void *state)
     bbar_set_font(bbar, font);
     FREE(font);
 
+  } else if (!BEG_STRCASECMP(buff, "dock ")) {
+    char *where = PWord(2, buff);
+
+    if (!where) {
+      print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter", file_peek_path(), file_peek_line());
+    } else if (!BEG_STRCASECMP(where, "top")) {
+      bbar_set_docked(bbar, BBAR_DOCKED_TOP);
+    } else if (!BEG_STRCASECMP(where, "bot")) {  /* "bot" or "bottom" */
+      bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
+    } else if (!BEG_STRCASECMP(where, "no")) {  /* "no" or "none" */
+      bbar_set_docked(bbar, BBAR_UNDOCKED);
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock", file_peek_path(), file_peek_line(), where);
+    }
+
+  } else if (!BEG_STRCASECMP(buff, "visible ")) {
+    char *tmp = PWord(2, buff);
+
+    if (BOOL_OPT_ISTRUE(tmp)) {
+      bbar_set_visible(bbar, 1);
+    } else if (BOOL_OPT_ISFALSE(tmp)) {
+      bbar_set_visible(bbar, 0);
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context button_bar", file_peek_path(), file_peek_line(), tmp);
+    }
+
   } else if (!BEG_STRCASECMP(buff, "button ") || !BEG_STRCASECMP(buff, "rbutton ")) {
     char *text = PWord(2, buff);
     char *icon = StrCaseStr(buff, "icon ");

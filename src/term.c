@@ -38,6 +38,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/strings.h"
 #include "debug.h"
 #include "actions.h"
+#include "buttons.h"
 #include "command.h"
 #include "e.h"
 #include "events.h"
@@ -1692,9 +1693,8 @@ xterm_seq(int op, const char *str)
       eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
       D_CMD(("    XTerm_EtermSeq operation is %d\n", eterm_seq_op));
       /* Yes, there is order to the numbers for this stuff.  And here it is:
-         0-9      Transparency Configuration
-         10-14    Scrollbar Configuration
-         15-19    Menu Configuration
+         0-9      Image Class/Mode Configuration
+         10-19    Scrollbar/Buttonbar/Menu Configuration
          20-29    Miscellaneous Toggles
          30-39    Foreground/Text Color Configuration
          40-49    Background Color Configuration
@@ -1916,6 +1916,19 @@ xterm_seq(int op, const char *str)
 	case 13:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_popup);
+	  break;
+	case 14:
+	  nstr = (char *) strsep(&tnstr, ";");
+          if (!(nstr) || !(*(nstr))) {
+            bbar_show_all(-1);
+            parent_resize();
+          } else if (BOOL_OPT_ISTRUE(nstr)) {
+            bbar_show_all(1);
+            parent_resize();
+          } else if (BOOL_OPT_ISFALSE(nstr)) {
+            bbar_show_all(0);
+            parent_resize();
+          }
 	  break;
 	case 20:
 	  nstr = (char *) strsep(&tnstr, ";");

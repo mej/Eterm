@@ -288,6 +288,7 @@ begin main
     bind ctrl button1 to string "\e]5;\a"
     bind ctrl button2 to string "\e[?30t"
     bind ctrl button3 to menu Eterm
+    bind ctrl shift button3 to string "\e]6;14\a"
   end actions
 
 # This section must also come after the menus if you want any buttons

@@ -230,7 +230,7 @@ eterm_bootstrap(int argc, char *argv[])
   scr_reset();			/* initialize screen */
 
   /* Initialize the scrollbar */
-  scrollbar_init(szHint.width, szHint.height - bbar_total_height());
+  scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
   scrollbar_mapping(Options & Opt_scrollbar);
 
   /* Initialize the menu subsystem. */
@@ -238,8 +238,6 @@ eterm_bootstrap(int argc, char *argv[])
 
   if (buttonbar) {
     bbar_init(buttonbar, szHint.width);
-    bbar_dock(buttonbar, BBAR_DOCKED_TOP);
-    bbar_show(buttonbar, 1);
   }
 
 #if DEBUG >= DEBUG_X

@@ -3168,3 +3168,18 @@ Mon Feb 14 16:35:01 PST 2000	Michael Jennings <mej@eterm.org>
 	:-)
 	
 -------------------------------------------------------------------------------
+Tue Feb 15 19:31:04 PST 2000	Michael Jennings <mej@eterm.org>
+
+	The buttonbar can now be toggled on and off both in the config file
+	and via an escape sequence.  The themes in CVS use Ctrl-Shift-Button3.
+	You can also specify in the config file whether to dock the buttonbar
+	at the top or the bottom of the Eterm window.  You can't move it on
+	the fly yet, but that will come.
+
+	I also fixed resizing so that the term window didn't redraw itself
+	unnecessarily.  Hopefully I didn't break anything in the process.  :-)
+
+	Plus, I fixed poor handling of X-generated ConfigureNotify events, and
+	the terminfo stuff is now done at install time instead of build time.
+	
+-------------------------------------------------------------------------------

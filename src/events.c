@@ -489,8 +489,8 @@ handle_configure_notify(event_t * ev)
     int x = ev->xconfigurerequest.x, y = ev->xconfigurerequest.y;
     unsigned int width = ev->xconfigurerequest.width, height = ev->xconfigurerequest.height;
 
-    D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  Internal cache data shows %dx%d at (%hd, %hd)\n",
-              width, height, x, y, szHint.width, szHint.height, TermWin.x, TermWin.y));
+    D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  Internal cache data shows %dx%d at (%hd, %hd).  send_event is %d\n",
+              width, height, x, y, szHint.width, szHint.height, TermWin.x, TermWin.y, ev->xconfigure.send_event));
     /* If the font change count is non-zero, this event is telling us we resized ourselves. */
     if (font_chg > 0) {
       font_chg--;
@@ -503,8 +503,10 @@ handle_configure_notify(event_t * ev)
       xim_set_status_position();
 #endif
       /* A resize requires the additional handling of a move */
-      handle_move(x, y);
-    } else if ((x != TermWin.x) || (y != TermWin.y)) {
+      if (ev->xconfigure.send_event) {
+        handle_move(x, y);
+      }
+    } else if (((x != TermWin.x) || (y != TermWin.y)) && (ev->xconfigure.send_event)) {
       /* There was an external move, but no resize.  Handle the move. */
       D_EVENTS((" -> External move detected.\n"));
       handle_move(x, y);

@@ -104,6 +104,7 @@ bbar_create(void)
 
   bbar->gc = XCreateGC(Xdisplay, bbar->win, GCForeground | GCFont, &gcvalue);
   bbar_set_docked(bbar, BBAR_DOCKED_TOP);
+  bbar_set_visible(bbar, 1);
 
   return bbar;
 }
@@ -113,9 +114,13 @@ bbar_init(buttonbar_t *bbar, int width)
 {
   event_register_dispatcher(bbar_dispatch_event, bbar_event_init_dispatcher);
   XSetForeground(Xdisplay, bbar->gc, images[image_bbar].norm->fg);
-  bbar_resize(bbar, width);
+  bbar_dock(bbar, bbar_is_docked(bbar));
+  if (bbar_is_visible(bbar)) {
+    bbar_set_visible(bbar, 0);
+    bbar_show(bbar, 1);
+  }
+  bbar_resize(bbar, -width);
   bbar_reset_total_height();
-  bbar_calc_total_height();
 }
 
 void
@@ -263,7 +268,6 @@ bbar_add(buttonbar_t *bbar)
   }
   bbar->next = NULL;
   bbar_reset_total_height();
-  bbar_calc_total_height();
 }
 
 unsigned short
@@ -651,27 +655,44 @@ bbar_show(buttonbar_t *bbar, unsigned char visible)
   D_BBAR(("bbar_show(%8p, %d) called.\n", bbar, visible));
   if (visible && !bbar_is_visible(bbar)) {
     D_BBAR((" -> Making bbar visible.\n"));
-    XMapWindow(Xdisplay, bbar->win);
     bbar_set_visible(bbar, 1);
+    XMapWindow(Xdisplay, bbar->win);
+    bbar_draw(bbar, IMAGE_STATE_CURRENT, MODE_MASK);
     changed = 1;
   } else if (!visible && bbar_is_visible(bbar)) {
     D_BBAR((" -> Making bbar invisible.\n"));
-    XUnmapWindow(Xdisplay, bbar->win);
     bbar_set_visible(bbar, 0);
+    XUnmapWindow(Xdisplay, bbar->win);
     changed = 1;
   }
   return changed;
 }
 
 void
+bbar_show_all(char visible)
+{
+  buttonbar_t *bbar;
+
+  for (bbar = buttonbar; bbar; bbar = bbar->next) {
+    bbar_show(bbar, ((visible == -1) ? (!bbar_is_visible(bbar)) : visible));
+  }
+}
+
+void
 bbar_resize(buttonbar_t *bbar, int w)
 {
   D_BBAR(("bbar_resize(%8p, %d) called.\n", bbar, w));
-  if (w == -1) {
+  if ((w >= 0) && !bbar_is_visible(bbar)) {
+    return;
+  }
+  bbar_redock(bbar);
+  if (w < 0) {
     bbar_calc_sizes(bbar);
     bbar_calc_height(bbar);
     bbar_reset_total_height();
-  } else if (bbar->w != w) {
+    w = -w;
+  }
+  if (bbar->w != w) {
     bbar->w = w;
     bbar_calc_positions(bbar);
     D_BBAR(("Resizing window 0x%08x to %dx%d\n", bbar->win, bbar->w, bbar->h));
@@ -688,7 +709,6 @@ bbar_resize_all(int width)
   for (bbar = buttonbar; bbar; bbar = bbar->next) {
     bbar_resize(bbar, width);
   }
-  bbar_calc_total_height();
 }
 
 void
@@ -715,6 +735,8 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
     }
   }
   if (image_mode_is(image_bbar, MODE_MASK) && !((images[image_bbar].mode & MODE_MASK) & (force_modes))) {
+    return;
+  } else if (!bbar_is_visible(bbar)) {
     return;
   } else {
     render_simage(images[image_bbar].current, bbar->win, bbar->w, bbar->h, image_bbar, RENDER_FORCE_PIXMAP);
@@ -756,11 +778,23 @@ void
 bbar_dock(buttonbar_t *bbar, unsigned char dock)
 {
   D_BBAR(("bbar_dock(%8p, %d) called.\n", bbar, dock));
-  bbar_set_docked(bbar, dock);
   if (dock == BBAR_DOCKED_TOP) {
+    bbar_set_docked(bbar, BBAR_DOCKED_TOP);
     bbar->x = 0;
     bbar->y = 0;
     XReparentWindow(Xdisplay, bbar->win, TermWin.parent, bbar->x, bbar->y);
+    XMoveResizeWindow(Xdisplay, bbar->win, bbar->x, bbar->y, bbar->w, bbar->h);
+  } else if (dock == BBAR_DOCKED_BOTTOM) {
+    bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
+    bbar->x = 0;
+    bbar->y = szHint.height - bbar->h + 1;
+    XReparentWindow(Xdisplay, bbar->win, TermWin.parent, bbar->x, bbar->y);
+    XMoveResizeWindow(Xdisplay, bbar->win, bbar->x, bbar->y, bbar->w, bbar->h);
+  } else {
+    bbar_set_docked(bbar, 0);
+    bbar->x = 0;
+    bbar->y = 0;
+    XReparentWindow(Xdisplay, bbar->win, Xroot, bbar->x, bbar->y);
     XMoveResizeWindow(Xdisplay, bbar->win, bbar->x, bbar->y, bbar->w, bbar->h);
   }
 }
@@ -768,14 +802,29 @@ bbar_dock(buttonbar_t *bbar, unsigned char dock)
 unsigned long
 bbar_calc_total_height(void)
 {
-  buttonbar_t *bbar;
+  register buttonbar_t *bbar;
 
   bbar_total_h = 0;
   for (bbar = buttonbar; bbar; bbar = bbar->next) {
-    if (bbar_is_docked(bbar)) {
+    if (bbar_is_visible(bbar)) {
       bbar_total_h += bbar->h;
     }
   }
   D_BBAR(("Returning %d\n", bbar_total_h));
   return bbar_total_h;
+}
+
+unsigned long
+bbar_calc_docked_height(register unsigned char dock_flag)
+{
+  register buttonbar_t *bbar;
+  register unsigned long h = 0;
+
+  for (bbar = buttonbar; bbar; bbar = bbar->next) {
+    if ((bbar->state & dock_flag) && bbar_is_visible(bbar)) {
+      h += bbar->h;
+    }
+  }
+  D_BBAR(("Returning %d\n", h));
+  return h;
 }

@@ -149,7 +149,7 @@ void
 scr_reset(void)
 {
 /*    int             i, j, k, total_rows, prev_total_rows; */
-  int total_rows, prev_total_rows;
+  int total_rows, prev_total_rows, chscr = 0;
   register int i, j, k;
   text_t tc;
 
@@ -161,6 +161,9 @@ scr_reset(void)
   if (TermWin.ncol == prev_ncol && TermWin.nrow == prev_nrow)
     return;
 
+  if (current_screen != PRIMARY) {
+    chscr = scr_change_screen(PRIMARY);
+  }
   if (TermWin.ncol <= 0)
     TermWin.ncol = 80;
   if (TermWin.nrow <= 0)
@@ -316,6 +319,10 @@ scr_reset(void)
   prev_ncol = TermWin.ncol;
 
   tt_resize();
+
+  if (chscr) {
+    scr_change_screen(chscr);
+  }
 }
 
 /* ------------------------------------------------------------------------- */

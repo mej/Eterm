@@ -83,7 +83,11 @@
 #define scrollbar_dn_loc()                    (scrollbar.down_arrow_loc)
 
 /* Scrollbar operations */
-#define map_scrollbar(show)                   do {PrivMode(show, PrivMode_scrollbar); if (scrollbar_mapping(show)) {scr_touch(); parent_resize();} } while (0)
+#if 0
+#define map_scrollbar(show)                   do {PrivMode(show, PrivMode_scrollbar); if (scrollbar_mapping(show)) {scr_touch(); parent_resize();}} while (0)
+#else
+#define map_scrollbar(show)                   do {PrivMode(show, PrivMode_scrollbar); if (scrollbar_mapping(show)) {parent_resize();}} while (0)
+#endif
 #define scrollbar_map_arrows()                do {XMapWindow(Xdisplay, scrollbar.up_win); XMapWindow(Xdisplay, scrollbar.dn_win);} while (0)
 #define scrollbar_unmap_arrows()              do {XUnmapWindow(Xdisplay, scrollbar.up_win); XUnmapWindow(Xdisplay, scrollbar.dn_win);} while (0)
 #define scrollbar_get_shadow()                ((scrollbar.type == SCROLLBAR_XTERM) ? (0) : (scrollbar.shadow))

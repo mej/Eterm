@@ -45,7 +45,6 @@ static const char cvs_ident[] = "$Id$";
 int
 wait_for_chld(int system_pid)
 {
-
   int pid, status = 0, save_errno = errno, code;
 
   D_OPTIONS(("wait_for_chld(%ld) called.\n", system_pid));
@@ -57,6 +56,10 @@ wait_for_chld(int system_pid)
     /* If the child that exited is the command we spawned, or if the
        child exited before fork() returned in the parent, it must be
        our immediate child that exited.  We exit gracefully. */
+    if ((pid == -1) && (errno == ECHILD)) {  /* No children exist.  Punt. */
+      errno = save_errno;
+      break;
+    }
     D_OPTIONS(("%ld exited.\n", pid));
     if (pid == system_pid || system_pid == -1) {
       if (WIFEXITED(status)) {

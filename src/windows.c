@@ -322,7 +322,7 @@ Create_Windows(int argc, char *argv[])
   Attributes.colormap = cmap;
 
   szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
-  szHint.base_height = (2 * TermWin.internalBorder) + bbar_total_height();
+  szHint.base_height = (2 * TermWin.internalBorder) + bbar_calc_docked_height(BBAR_DOCKED);
 
   flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
   D_X11(("XParseGeometry(geom, %d, %d, %d, %d)\n", x, y, width, height));
@@ -409,7 +409,7 @@ Create_Windows(int argc, char *argv[])
 
   /* the vt window */
   TermWin.x = (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
-  TermWin.y = bbar_total_height();
+  TermWin.y = bbar_calc_docked_height(BBAR_DOCKED_TOP);
   if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
     TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
@@ -480,9 +480,8 @@ void
 update_size_hints(void)
 {
   D_X11(("Called.\n"));
-  szHint.base_width = (2 * TermWin.internalBorder);
-  szHint.base_height = (2 * TermWin.internalBorder) + bbar_total_height();
-  szHint.base_width += ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
+  szHint.base_width = (2 * TermWin.internalBorder) + ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
+  szHint.base_height = (2 * TermWin.internalBorder) + bbar_calc_docked_height(BBAR_DOCKED);
 
   szHint.width_inc = TermWin.fwidth;
   szHint.height_inc = TermWin.fheight;
@@ -504,15 +503,25 @@ update_size_hints(void)
 void
 term_resize(int width, int height)
 {
+  static int last_width = 0, last_height = 0;
+
   D_X11(("term_resize(%d, %d)\n", width, height));
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
   D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
-  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0))), bbar_total_height(),
-                    width, height - bbar_total_height());
-  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
-  if (image_mode_is(image_bg, MODE_AUTO)) {
-    enl_ipc_sync();
+  width = TermWin_TotalWidth();
+  height = TermWin_TotalHeight();
+  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0))),
+                    bbar_calc_docked_height(BBAR_DOCKED_TOP), width, height);
+  if (width != last_width || height != last_height) {
+    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+    scr_reset();
+    scr_touch();
+    if (image_mode_is(image_bg, MODE_AUTO)) {
+      enl_ipc_sync();
+    }
+    last_width = width;
+    last_height = height;
   }
 }
 
@@ -525,11 +534,8 @@ parent_resize(void)
   XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
   D_X11((" -> New parent width/height == %lux%lu\n", szHint.width, szHint.height));
   term_resize(szHint.width, szHint.height);
-  scrollbar_resize(szHint.width, szHint.height + bbar_total_height());
+  scrollbar_resize(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
   bbar_resize_all(szHint.width);
-  if (buffer_pixmap != None) {
-    scr_touch();
-  }
 }
 
 void
@@ -541,13 +547,6 @@ handle_resize(unsigned int width, unsigned int height)
 
   D_EVENTS(("handle_resize(%u, %u)\n", width, height));
   if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
-    int curr_screen = -1;
-
-    /* scr_reset only works on the primary screen */
-    if (!first_time) {
-      selection_clear();
-      curr_screen = scr_change_screen(PRIMARY);
-    }
     TermWin.ncol = new_ncol;
     TermWin.nrow = new_nrow;
 
@@ -555,16 +554,8 @@ handle_resize(unsigned int width, unsigned int height)
     szHint.width = szHint.base_width + TermWin.width;
     szHint.height = szHint.base_height + TermWin.height;
     D_X11((" -> New szHint.width/height == %lux%lu\n", szHint.width, szHint.height));
-    scrollbar_resize(width, szHint.height - bbar_total_height());
+    scrollbar_resize(width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
     bbar_resize_all(szHint.width);
-    scr_reset();
-    if (buffer_pixmap != None) {
-      scr_touch();
-    }
-
-    if (curr_screen >= 0) {
-      scr_change_screen(curr_screen);
-    }
     first_time = 0;
   }
 }
@@ -572,11 +563,13 @@ handle_resize(unsigned int width, unsigned int height)
 void
 handle_move(int x, int y)
 {
-  if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
-    redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+  if ((TermWin.x != x) || (TermWin.y != y)) {
+    if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
+      redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+    }
+    TermWin.x = x;
+    TermWin.y = y;
   }
-  TermWin.x = x;
-  TermWin.y = y;
 }
 
 #ifdef XTERM_COLOR_CHANGE

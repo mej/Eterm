@@ -33,10 +33,14 @@
 #define BBAR_DOCKED_TOP               (1 << 0)
 #define BBAR_DOCKED_BOTTOM            (1 << 1)
 #define BBAR_DOCKED                   (BBAR_DOCKED_TOP | BBAR_DOCKED_BOTTOM)
+#define BBAR_UNDOCKED                 (~BBAR_DOCKED)
 #define BBAR_VISIBLE                  (1 << 2)
 
 #define bbar_is_docked(bbar)          (bbar->state & BBAR_DOCKED)
+#define bbar_is_top_docked(bbar)      (bbar->state & BBAR_DOCKED_TOP)
+#define bbar_is_bottom_docked(bbar)   (bbar->state & BBAR_DOCKED_BOTTOM)
 #define bbar_set_docked(bbar, d)      do {bbar->state &= ~BBAR_DOCKED; bbar->state |= (d);} while (0)
+#define bbar_redock(bbar)             bbar_dock(bbar, bbar_is_docked(bbar));
 #define bbar_is_visible(bbar)         (bbar->state & BBAR_VISIBLE)
 #define bbar_set_visible(bbar, v)     ((v) ? (bbar->state |= BBAR_VISIBLE) : (bbar->state &= ~BBAR_VISIBLE))
 #define bbar_get_width(bbar)          (bbar->w)
@@ -117,12 +121,14 @@ extern void bbar_deselect_button(buttonbar_t *bbar, button_t *button);
 extern void bbar_click_button(buttonbar_t *bbar, button_t *button);
 extern void button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Time t);
 extern unsigned char bbar_show(buttonbar_t *bbar, unsigned char visible);
+extern void bbar_show_all(char visible);
 extern void bbar_resize(buttonbar_t *bbar, int w);
 extern void bbar_resize_all(int width);
 extern void bbar_dock(buttonbar_t *bbar, unsigned char dock);
 extern void bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_modes);
 extern void bbar_draw_all(unsigned char image_state, unsigned char force_modes);
 extern unsigned long bbar_calc_total_height(void);
+extern unsigned long bbar_calc_docked_height(unsigned char);
 
 _XFUNCPROTOEND
 

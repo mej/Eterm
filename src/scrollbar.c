@@ -667,8 +667,9 @@ scrollbar_init(int width, int height)
   scrollbar.anchor_bottom = scrollbar.scrollarea_end;
 
   /* Create the scrollbar trough window.  It will be the parent to the other windows. */
-  scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_total_height(), scrollbar_trough_width(), height,
-                                0, Xdepth, InputOutput, CopyFromParent,	CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
+  scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_calc_docked_height(BBAR_DOCKED_TOP),
+                                scrollbar_trough_width(), height, 0, Xdepth, InputOutput, CopyFromParent,
+                                CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
   XDefineCursor(Xdisplay, scrollbar.win, cursor);
   XSelectInput(Xdisplay, scrollbar.win, mask);
   D_SCROLLBAR(("Created scrollbar window 0x%08x\n", scrollbar.win));
@@ -775,9 +776,10 @@ scrollbar_resize(int width, int height)
 
   D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
   scrollbar_calc_size(width, height);
-  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
-               bbar_total_height(), scrollbar_trough_width(), height));
-  XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_total_height(), scrollbar_trough_width(), height);
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, y, %d, %d)\n", scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)),
+               scrollbar_trough_width(), scrollbar.win_height));
+  XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_calc_docked_height(BBAR_DOCKED_TOP),
+                    scrollbar_trough_width(), scrollbar.win_height);
   scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
   scrollbar_reposition_and_draw(MODE_MASK);
   scrollbar.init = 0;
