@@ -2316,3 +2316,11 @@ Fri Aug 20 15:21:51 PDT 1999	Michael Jennings <mej@eterm.org>
 	difference. :-)
 	
 -------------------------------------------------------------------------------
+Fri Aug 20 16:05:59 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Ugh.  I'd fixed this on my local theme but never on the CVS stuff.
+	Sorry, folks.  Thanks to Ashley Penney <ashp@bastard.co.uk> for
+	pointing this out.  The F1 key should bring up the menu now, and that
+	line should no longer generate a parse error. =)
+	
+-------------------------------------------------------------------------------

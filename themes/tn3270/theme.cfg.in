@@ -221,7 +221,7 @@ begin main
     bind ctrl button1 to string "\e]5;\a"
     bind ctrl button2 to string "\e[?30t"
     bind ctrl button3 to menu Eterm
-    bind anymod f1 to menu Eterm
+    bind anymod 0xffbe to menu Eterm
   end actions
 
 # The Multichar support options.  Same goes for these fonts as for the normal
