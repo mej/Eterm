@@ -2083,15 +2083,15 @@ ns_statement(_ns_sess * s, char *c)
 
     y = x = s->escape;
 
-    if (!c || !*c) {
-        (void) ns_inp_dial(s, "Enter a command to send to the \"screen\" program", 64, &i, ns_inp_tab);
-        if (!i || !*i)
-            return NS_FAIL;
-    }
-
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
       case NS_MODE_SCREEN:
+          if (!c || !*c) {
+              (void) ns_inp_dial(s, "Enter a command to send to the \"screen\" program", 64, &i, ns_inp_tab);
+              if (!i || !*i)
+                  return NS_FAIL;
+          }
+
           if ((ret = ns_parse_screen_cmd(s, i ? i : c, NS_ESC_INTERACTIVE)) == NS_SUCC) {
               if (s->escape != x) {
                   y = s->escape;
