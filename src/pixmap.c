@@ -1296,25 +1296,25 @@ search_path(const char *pathlist, const char *file)
     }
     getcwd(name, PATH_MAX);
     len = strlen(name);
-    D_eterm_options(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
+    D_OPTIONS(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
     if (len < PATH_MAX - 1) {
         strcat(name, "/");
         strncat(name, file, PATH_MAX - len - 1);
     }
-    D_eterm_options(("Checking for file \"%s\"\n", name));
+    D_OPTIONS(("Checking for file \"%s\"\n", name));
     if (!access(name, R_OK)) {
         if (stat(name, &fst)) {
-            D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
+            D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
         } else {
-            D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+            D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
         }
         if (!S_ISDIR(fst.st_mode)) {
             return name;
         } else {
-            D_eterm_options(("%s is a directory.\n", name));
+            D_OPTIONS(("%s is a directory.\n", name));
         }
     } else {
-        D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
+        D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
     }
 
     if ((p = strchr(file, '@')) == NULL)
@@ -1327,20 +1327,20 @@ search_path(const char *pathlist, const char *file)
     /* check if we can find it now */
     strncpy(name, file, len);
     name[len] = '\0';
-    D_eterm_options(("Checking for file \"%s\"\n", name));
+    D_OPTIONS(("Checking for file \"%s\"\n", name));
     if (!access(name, R_OK)) {
         if (stat(name, &fst)) {
-            D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
+            D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
         } else {
-            D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+            D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
         }
         if (!S_ISDIR(fst.st_mode)) {
             return name;
         } else {
-            D_eterm_options(("%s is a directory.\n", name));
+            D_OPTIONS(("%s is a directory.\n", name));
         }
     } else {
-        D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
+        D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
     }
     for (path = pathlist; path != NULL && *path != '\0'; path = p) {
         int n;
@@ -1372,24 +1372,24 @@ search_path(const char *pathlist, const char *file)
                 name[n++] = '/';
             name[n] = '\0';
             strncat(name, file, len);
-            D_eterm_options(("Checking for file \"%s\"\n", name));
+            D_OPTIONS(("Checking for file \"%s\"\n", name));
             if (!access(name, R_OK)) {
                 if (stat(name, &fst)) {
-                    D_eterm_options(("Unable to stat %s -- %s\n", name, strerror(errno)));
+                    D_OPTIONS(("Unable to stat %s -- %s\n", name, strerror(errno)));
                 } else {
-                    D_eterm_options(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
+                    D_OPTIONS(("Stat returned mode 0x%08o, S_ISDIR() == %d\n", fst.st_mode, S_ISDIR(fst.st_mode)));
                 }
                 if (!S_ISDIR(fst.st_mode)) {
                     return name;
                 } else {
-                    D_eterm_options(("%s is a directory.\n", name));
+                    D_OPTIONS(("%s is a directory.\n", name));
                 }
             } else {
-                D_eterm_options(("Unable to access %s -- %s\n", name, strerror(errno)));
+                D_OPTIONS(("Unable to access %s -- %s\n", name, strerror(errno)));
             }
         }
     }
-    D_eterm_options(("File \"%s\" not found in path.\n", file));
+    D_OPTIONS(("File \"%s\" not found in path.\n", file));
     return ((const char *) NULL);
 }
 

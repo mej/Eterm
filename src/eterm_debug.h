@@ -28,58 +28,58 @@
    To change the debugging level at which something appears, change the number in
    both the DEBUG_ definition and the D_ macro (if there is one). -- mej */
 
-#  define DEBUG_SCREEN			1
-#  define D_SCREEN(x)			DPRINTF1(x)
-#  define DEBUG_CMD			1
-#  define D_CMD(x)			DPRINTF1(x)
-#  define DEBUG_TTY			1
-#  define D_TTY(x)			DPRINTF1(x)
-#  define DEBUG_SELECTION		1
-#  define D_SELECT(x)			DPRINTF1(x)
-#  define DEBUG_UTMP			1
-#  define D_UTMP(x)			DPRINTF1(x)
-#  define DEBUG_eterm_options			1
-#  define D_eterm_options(x)			DPRINTF1(x)
-#  define DEBUG_IMLIB			1
-#  define D_IMLIB(x)			DPRINTF1(x)
-#  define DEBUG_PIXMAP			1
-#  define D_PIXMAP(x)			DPRINTF1(x)
-#  define DEBUG_EVENTS			1
-#  define D_EVENTS(x)			DPRINTF1(x)
+#  define DEBUG_SCREEN          1
+#  define D_SCREEN(x)           DPRINTF1(x)
+#  define DEBUG_CMD             1
+#  define D_CMD(x)              DPRINTF1(x)
+#  define DEBUG_TTY             1
+#  define D_TTY(x)              DPRINTF1(x)
+#  define DEBUG_SELECTION       1
+#  define D_SELECT(x)           DPRINTF1(x)
+#  define DEBUG_UTMP            1
+#  define D_UTMP(x)             DPRINTF1(x)
+#  define DEBUG_OPTIONS         1
+#  define D_OPTIONS(x)    DPRINTF1(x)
+#  define DEBUG_IMLIB           1
+#  define D_IMLIB(x)            DPRINTF1(x)
+#  define DEBUG_PIXMAP          1
+#  define D_PIXMAP(x)           DPRINTF1(x)
+#  define DEBUG_EVENTS          1
+#  define D_EVENTS(x)           DPRINTF1(x)
  
-#  define DEBUG_X11			2
-#  define D_X11(x)			DPRINTF2(x)
-#  define DEBUG_ENL			2
-#  define D_ENL(x)			DPRINTF2(x)
-#  define DEBUG_SCROLLBAR		2
-#  define D_SCROLLBAR(x)		DPRINTF2(x)
-#  define DEBUG_BBAR			2
-#  define D_BBAR(x)			DPRINTF2(x)
-#  define DEBUG_TIMER			2
-#  define D_TIMER(x)			DPRINTF2(x)
-#  define DEBUG_SCRIPT			2
-#  define D_SCRIPT(x)			DPRINTF2(x)
+#  define DEBUG_X11             2
+#  define D_X11(x)              DPRINTF2(x)
+#  define DEBUG_ENL             2
+#  define D_ENL(x)              DPRINTF2(x)
+#  define DEBUG_SCROLLBAR       2
+#  define D_SCROLLBAR(x)        DPRINTF2(x)
+#  define DEBUG_BBAR            2
+#  define D_BBAR(x)             DPRINTF2(x)
+#  define DEBUG_TIMER           2
+#  define D_TIMER(x)            DPRINTF2(x)
+#  define DEBUG_SCRIPT          2
+#  define D_SCRIPT(x)           DPRINTF2(x)
  
-#  define DEBUG_MENU			3
-#  define D_MENU(x)			DPRINTF3(x)
-#  define DEBUG_FONT			3
-#  define D_FONT(x)			DPRINTF3(x)
-#  define DEBUG_TTYMODE			3
-#  define D_TTYMODE(x)			DPRINTF3(x)
-#  define DEBUG_COLORS			3
-#  define D_COLORS(x)			DPRINTF3(x)
+#  define DEBUG_MENU            3
+#  define D_MENU(x)             DPRINTF3(x)
+#  define DEBUG_FONT            3
+#  define D_FONT(x)             DPRINTF3(x)
+#  define DEBUG_TTYMODE         3
+#  define D_TTYMODE(x)          DPRINTF3(x)
+#  define DEBUG_COLORS          3
+#  define D_COLORS(x)           DPRINTF3(x)
  
-#  define DEBUG_ACTIONS			4
-#  define D_ACTIONS(x)			DPRINTF4(x)
-#  define DEBUG_ESCREEN                 4
-#  define D_ESCREEN(x)			DPRINTF4(x)
+#  define DEBUG_ACTIONS         4
+#  define D_ACTIONS(x)          DPRINTF4(x)
+#  define DEBUG_ESCREEN         4
+#  define D_ESCREEN(x)          DPRINTF4(x)
 
-#  define DEBUG_PROFILE			5
-#  define D_PROFILE(x)			DPRINTF5(x)
+#  define DEBUG_PROFILE         5
+#  define D_PROFILE(x)          DPRINTF5(x)
 
-#  define DEBUG_VT                      6
-#  define D_VT(x)                       DPRINTF6(x)
+#  define DEBUG_VT              6
+#  define D_VT(x)               DPRINTF6(x)
 
-#  define DEBUG_X			9
+#  define DEBUG_X               9
 
 #endif /* _ETERM_DEBUG_H */

@@ -158,7 +158,7 @@ KeySym ks_bigfont = XK_greater;
 KeySym ks_smallfont = XK_less;
 #endif
 
-/* eterm_options structure */
+/* Eterm options structure */
 spifopt_t option_list[] = {
     SPIFOPT_STR_PP('t', "theme", "select a theme", rs_theme),
     SPIFOPT_STR_PP('X', "config-file", "choose an alternate config file", rs_config_file),
@@ -422,8 +422,8 @@ version(void)
 #if DEBUG >= DEBUG_UTMP
     printf(" +DEBUG_UTMP");
 #endif
-#if DEBUG >= DEBUG_eterm_options
-    printf(" +DEBUG_eterm_options");
+#if DEBUG >= DEBUG_OPTIONS
+    printf(" +DEBUG_OPTIONS");
 #endif
 #if DEBUG >= DEBUG_IMLIB
     printf(" +DEBUG_IMLIB");
@@ -1459,7 +1459,7 @@ parse_misc(char *buff, void *state)
 
         for (k = 0; k < n; k++) {
             rs_exec_args[k] = get_word(k + 2, buff);
-            D_eterm_options(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
+            D_OPTIONS(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
         }
         rs_exec_args[n] = (char *) NULL;
 
@@ -3043,7 +3043,7 @@ save_config(char *path, unsigned char save_theme)
     action_t *action;
     buttonbar_t *bbar;
 
-    D_eterm_options(("Saving %s config to \"%s\"\n", (save_theme ? "theme" : "user"), NONULL(path)));
+    D_OPTIONS(("Saving %s config to \"%s\"\n", (save_theme ? "theme" : "user"), NONULL(path)));
 
     cur_tm = localtime(&cur_time);
 
@@ -3055,7 +3055,7 @@ save_config(char *path, unsigned char save_theme)
             if (stat(path, &fst) || !S_ISDIR(fst.st_mode) || !CAN_WRITE(fst)) {
                 char *tmp = NULL;
 
-                D_eterm_options(("Problem with \"%s\".  S_ISDIR == %d, CAN_WRITE == %d\n", path, S_ISDIR(fst.st_mode), CAN_WRITE(fst)));
+                D_OPTIONS(("Problem with \"%s\".  S_ISDIR == %d, CAN_WRITE == %d\n", path, S_ISDIR(fst.st_mode), CAN_WRITE(fst)));
                 if (theme_dir) {
                     tmp = strrchr(theme_dir, '/');
                     if (tmp) {
@@ -3063,7 +3063,7 @@ save_config(char *path, unsigned char save_theme)
                     }
                 }
                 snprintf(path, PATH_MAX, "%s/.Eterm/themes/%s", getenv("HOME"), (tmp ? tmp : "Eterm"));
-                D_eterm_options(("Trying \"%s\" instead, tmp == \"%s\"\n", path, tmp));
+                D_OPTIONS(("Trying \"%s\" instead, tmp == \"%s\"\n", path, tmp));
                 if (tmp) {
                     *(--tmp) = '/';
                 }
@@ -3074,7 +3074,7 @@ save_config(char *path, unsigned char save_theme)
                 }
             }
             strcat(path, "/" THEME_CFG);
-            D_eterm_options(("Final path is \"%s\"\n", path));
+            D_OPTIONS(("Final path is \"%s\"\n", path));
             path[PATH_MAX] = 0;
         }
     } else {
@@ -3085,7 +3085,7 @@ save_config(char *path, unsigned char save_theme)
             if (stat(path, &fst) || !S_ISDIR(fst.st_mode) || !CAN_WRITE(fst)) {
                 char *tmp = NULL;
 
-                D_eterm_options(("Problem with \"%s\".  S_ISDIR == %d, CAN_WRITE == %d\n", path, S_ISDIR(fst.st_mode), CAN_WRITE(fst)));
+                D_OPTIONS(("Problem with \"%s\".  S_ISDIR == %d, CAN_WRITE == %d\n", path, S_ISDIR(fst.st_mode), CAN_WRITE(fst)));
                 if (user_dir) {
                     tmp = strrchr(user_dir, '/');
                     if (tmp) {
@@ -3093,7 +3093,7 @@ save_config(char *path, unsigned char save_theme)
                     }
                 }
                 snprintf(path, PATH_MAX, "%s/.Eterm/themes/%s", getenv("HOME"), (tmp ? tmp : "Eterm"));
-                D_eterm_options(("Trying \"%s\" instead, tmp == \"%s\"\n", path, tmp));
+                D_OPTIONS(("Trying \"%s\" instead, tmp == \"%s\"\n", path, tmp));
                 if (tmp) {
                     *(--tmp) = '/';
                 }
@@ -3104,7 +3104,7 @@ save_config(char *path, unsigned char save_theme)
                 }
             }
             strcat(path, "/" USER_CFG);
-            D_eterm_options(("Final path is \"%s\"\n", path));
+            D_OPTIONS(("Final path is \"%s\"\n", path));
             path[PATH_MAX] = 0;
         }
     }
@@ -3809,7 +3809,7 @@ save_config(char *path, unsigned char save_theme)
         }
         fprintf(fp, "\n");
     }
-#ifdef CUTCHAR_eterm_options
+#ifdef CUTCHAR_OPTION
     if (rs_cutchars) {
         fprintf(fp, "    cut_chars '%s'\n", rs_cutchars);
     }

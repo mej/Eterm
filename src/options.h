@@ -21,8 +21,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _eterm_options_H_
-#define _eterm_options_H_
+#ifndef _OPTIONS_H_
+#define _OPTIONS_H_
 
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
@@ -150,4 +150,4 @@ unsigned char save_config(char *, unsigned char);
 
 _XFUNCPROTOEND
 
-#endif	/* _eterm_options_H_ */
+#endif	/* _OPTIONS_H_ */
