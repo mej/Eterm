@@ -4638,3 +4638,8 @@ Added a --enable-escreen option for those who wish to try it out.
 Also fixed the compile with Escreen and profiling are both enabled,
 and disabled Escreen debugging.
 ----------------------------------------------------------------------
+Tue May  7 10:16:56 2002                        Michael Jennings (mej)
+
+configure.in and configure.ac should no longer differ, so let's not
+maintain both.
+----------------------------------------------------------------------
