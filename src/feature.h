@@ -202,7 +202,7 @@
 #define META8_OPTION
 
 /* Attempt to deactivate UTF-8 and similar locales. */
-#define NO_UTF8_LOCALE
+/* #define NO_UTF8_LOCALE */
 
 /********************* Miscellaneous options *********************/
 

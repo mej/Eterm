@@ -150,6 +150,7 @@ int rs_delay = -1;
 unsigned char rs_es_dock = BBAR_DOCKED_BOTTOM;
 char *rs_es_font = NULL;
 #endif
+spif_uint32_t rs_opacity = 0xffffffff;
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
 #ifdef KEYSYM_ATTRIBUTE
@@ -245,6 +246,7 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("trough-pixmap", "scrollbar background (trough) pixmap", rs_pixmaps[image_sb]),
     SPIFOPT_STR_LONG("anchor-pixmap", "scrollbar anchor pixmap", rs_pixmaps[image_sa]),
     SPIFOPT_STR_LONG("menu-pixmap", "menu pixmap", rs_pixmaps[image_menu]),
+    SPIFOPT_INT('o', "opacity", "window opacity (0-255; requires X COMPOSITE extension)", rs_opacity),
     SPIFOPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", image_options, IMAGE_OPTIONS_TRANS),
     SPIFOPT_BOOL('0', "itrans", "use immotile-optimized transparency", image_options, IMAGE_OPTIONS_ITRANS),
     SPIFOPT_BOOL_LONG("viewport-mode", "use viewport mode for the background image", image_options, IMAGE_OPTIONS_VIEWPORT),
@@ -2961,6 +2963,12 @@ post_parse(void)
         imlib_set_cache_size(rs_cache_size);
     }
 #endif
+
+    if (rs_opacity < 0x100) {
+        rs_opacity |= (rs_opacity << 24) | (rs_opacity << 16) | (rs_opacity << 8);
+    } else {
+        rs_opacity = 0xffffffff;
+    }
 
     if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_REVERSE_VIDEO)) {
         char *tmp;

@@ -5265,3 +5265,9 @@ Tue Dec 14 17:13:02 2004                        Michael Jennings (mej)
 
 0.9.3 release
 ----------------------------------------------------------------------
+Tue Dec 14 17:22:23 2004                        Michael Jennings (mej)
+
+The benefits of being a passenger on a long road trip...  The
+beginnings of EWMH opacity (a la xcompmgr) support and (hopefully)
+UTF-8 support.  Both as yet untested.
+----------------------------------------------------------------------

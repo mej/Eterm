@@ -2017,7 +2017,8 @@ xterm_seq(int op, const char *str)
                     if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                         break;
                     }
-                    D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
+                    D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n",
+                           mod, color, get_image_type(which), valptr));
                     changed = 1;
 # ifdef PIXMAP_OFFSET
                     if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
@@ -2365,30 +2366,37 @@ xterm_seq(int op, const char *str)
                     xev.message_type = props[PROP_DESKTOP];
                     xev.format = 32;
                     xev.data.l[0] = rs_desktop;
-                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &rs_desktop, 1);
+                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
+                                    PropModeReplace, (unsigned char *) &rs_desktop, 1);
                     XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) & xev);
                 }
                 break;
-#if 0
-            case 70:
-                /* Exit Eterm */
-                exit(0);
-                break;
-            case 71:
-                /* Save current config */
+            case 51:
+                /* Change opacity */
                 nstr = (char *) strsep(&tnstr, ";");
                 if (nstr && *nstr) {
-                    valptr = (char *) strsep(&tnstr, ";");
-                    if (!strcasecmp(nstr, "theme")) {
-                        save_config(valptr, SAVE_THEME_CONFIG);
+                    XClientMessageEvent xev;
+                    spif_uint32_t tmp;
+
+                    tmp = (int) strtol(nstr, (char **) NULL, 0);
+                    if (tmp < 0x100) {
+                        rs_opacity = tmp | (tmp << 24) | (tmp << 16) | (tmp << 8);
                     } else {
-                        save_config(valptr, SAVE_USER_CONFIG);
+                        rs_opacity = 0xffffffff;
                     }
-                } else {
-                    save_config(NULL, SAVE_USER_CONFIG);
+                    xev.type = ClientMessage;
+                    xev.window = TermWin.parent;
+                    xev.message_type = props[PROP_EWMH_OPACITY];
+                    xev.format = 32;
+                    xev.data.l[0] = rs_opacity;
+                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
+                                    PropModeReplace, (unsigned char *) &rs_opacity, 1);
+                    XChangeProperty(Xdisplay, TermWin.vt, xev.message_type, XA_CARDINAL, 32,
+                                    PropModeReplace, (unsigned char *) &rs_opacity, 1);
+                    XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) (&xev));
                 }
                 break;
-#endif
+
             case 72:
                 /* Search scrollback buffer for a string.  NULL to clear. */
                 nstr = (char *) strsep(&tnstr, ";");
@@ -2398,15 +2406,7 @@ xterm_seq(int op, const char *str)
                     scr_search_scrollback(NULL);
                 }
                 break;
-#if 0
-            case 73:
-                /* Spawn a subprogram */
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    system_no_wait(nstr);
-                }
-                break;
-#endif
+
             case 80:
                 /* Set debugging level */
                 nstr = (char *) strsep(&tnstr, ";");

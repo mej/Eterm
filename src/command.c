@@ -107,6 +107,11 @@ static const char cvs_ident[] = "$Id$";
 #if defined(linux)
 # include <linux/tty.h>         /* For N_TTY_BUF_SIZE. */
 #endif
+#ifdef MULTI_CHARSET
+# include <locale.h>
+# include <langinfo.h>
+# include <iconv.h>
+#endif
 
 /* Eterm-specific Headers */
 #include "command.h"
@@ -3464,9 +3469,7 @@ main_loop(void)
         if (ch >= ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
             /* Read a text string from the input buffer */
             int nlines = 0;
-
-            /*           unsigned char * str; */
-            register unsigned char *str;
+            unsigned char *str;
 
             D_CMD(("Command buffer contains %d characters.\n", cmdbuf_endp - cmdbuf_ptr));
             D_VT(("\n%s\n\n", safe_print_string(cmdbuf_ptr - 1, cmdbuf_endp - cmdbuf_ptr + 1)));
@@ -3489,18 +3492,59 @@ main_loop(void)
                 }
 #endif
                 if (ch >= ' ' || ch == '\t' || ch == '\r') {
-                    /* nothing */
+                    NOP;
                 } else if (ch == '\n') {
                     nlines++;
                     if (++refresh_count >= (refresh_limit * (TERM_WINDOW_GET_ROWS() - 1)))
                         break;
-                } else {        /* unprintable */
+                } else {
+                    /* unprintable */
                     cmdbuf_ptr--;
                     break;
                 }
             }
-            D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n", nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
-            scr_add_lines(str, nlines, (cmdbuf_ptr - str));
+            D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
+                      nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
+#ifdef MULTI_CHARSET
+            if (!strcmp(nl_langinfo(CODESET), "UTF-8")) {
+                iconv_t handle;
+
+                handle = iconv_open("UTF-8", "UCS2");
+                if (handle == SPIF_CAST_C(iconv_t) -1) {
+                    print_error("Unable to decode UTF-8 locale %s to UCS-2.  Defaulting to portable C locale.\n",
+                                setlocale(LC_ALL, ""));
+                    setlocale(LC_ALL, "C");
+                } else {
+                    char *outbuff, *pinbuff, *poutbuff;
+                    size_t bufflen, outlen = 0, retval;
+
+                    pinbuff = (char *) str;
+                    bufflen = cmdbuf_ptr - str;
+                    poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(bufflen * 6);
+                    errno = 0;
+                    retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
+                    if (retval != (size_t) -1) {
+                        errno = 0;
+                    }
+                    if (errno == E2BIG) {
+                        print_error("My UTF-8 decode buffer was too small by %lu bytes?!", bufflen);
+                    } else if (errno == EILSEQ) {
+                        print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n",
+                                    *pinbuff, *pinbuff);
+                        *pinbuff = ' ';
+                        pinbuff++;
+                    } else if (errno == EINVAL) {
+                        D_VT(("Incomplete multibyte sequence encountered.\n"));
+                    }
+
+                    if (pinbuff > (char *) str) {
+                        cmdbuf_ptr = (unsigned char *) pinbuff;
+                        scr_add_lines(str, nlines, (cmdbuf_ptr - str));
+                    }
+                }
+            } else
+#endif
+                scr_add_lines(str, nlines, (cmdbuf_ptr - str));
         } else {
             switch (ch) {
 # ifdef NO_ENQ_ANS

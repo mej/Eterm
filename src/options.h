@@ -125,6 +125,7 @@ extern int rs_delay;
 extern unsigned char rs_es_dock;
 extern char *rs_es_font;
 #endif
+extern spif_uint32_t rs_opacity;
 extern unsigned int rs_line_space;
 extern unsigned int rs_meta_mod, rs_alt_mod, rs_numlock_mod;
 #ifndef NO_BOLDFONT

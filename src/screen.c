@@ -183,7 +183,8 @@ scr_reset(void)
         buf_rend = CALLOC(rend_t *, total_rows);
         drawn_rend = CALLOC(rend_t *, TERM_WINDOW_GET_REPORTED_ROWS());
         swap.rend = CALLOC(rend_t *, TERM_WINDOW_GET_REPORTED_ROWS());
-        D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
+        D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n",
+                  screen.text, screen.rend, swap.text, swap.rend));
 
         for (i = 0; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
             j = i + TermWin.saveLines;
@@ -226,7 +227,8 @@ scr_reset(void)
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
             drawn_rend = REALLOC(drawn_rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
             swap.rend = REALLOC(swap.rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
-            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
+            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n",
+                      screen.text, screen.rend, swap.text, swap.rend));
 
             /* we have fewer rows so fix up number of scrolled lines */
             UPPER_BOUND(screen.row, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
@@ -242,7 +244,8 @@ scr_reset(void)
             buf_rend = REALLOC(buf_rend, total_rows * sizeof(rend_t *));
             drawn_rend = REALLOC(drawn_rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
             swap.rend = REALLOC(swap.rend, TERM_WINDOW_GET_REPORTED_ROWS() * sizeof(rend_t *));
-            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
+            D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n",
+                      screen.text, screen.rend, swap.text, swap.rend));
 
             k = MIN(TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - prev_nrow);
             for (i = prev_total_rows; i < total_rows - k; i++) {
@@ -279,7 +282,8 @@ scr_reset(void)
                     screen.rend[i] = REALLOC(screen.rend[i], TERM_WINDOW_GET_REPORTED_COLS() * sizeof(rend_t));
                     screen.text[i][TERM_WINDOW_GET_REPORTED_COLS()] = MIN(tc, TERM_WINDOW_GET_REPORTED_COLS());
                     if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
-                        blank_line(&(screen.text[i][prev_ncol]), &(screen.rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
+                        blank_line(&(screen.text[i][prev_ncol]), &(screen.rend[i][prev_ncol]),
+                                   TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
                 }
             }
             for (i = 0; i < TERM_WINDOW_GET_REPORTED_ROWS(); i++) {
@@ -291,10 +295,12 @@ scr_reset(void)
                     swap.rend[i] = REALLOC(swap.rend[i], TERM_WINDOW_GET_REPORTED_COLS() * sizeof(rend_t));
                     swap.text[i][TERM_WINDOW_GET_REPORTED_COLS()] = MIN(tc, TERM_WINDOW_GET_REPORTED_COLS());
                     if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
-                        blank_line(&(swap.text[i][prev_ncol]), &(swap.rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
+                        blank_line(&(swap.text[i][prev_ncol]), &(swap.rend[i][prev_ncol]),
+                                   TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
                 }
                 if (TERM_WINDOW_GET_REPORTED_COLS() > prev_ncol)
-                    blank_line(&(drawn_text[i][prev_ncol]), &(drawn_rend[i][prev_ncol]), TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
+                    blank_line(&(drawn_text[i][prev_ncol]), &(drawn_rend[i][prev_ncol]),
+                               TERM_WINDOW_GET_REPORTED_COLS() - prev_ncol, DEFAULT_RSTYLE);
             }
         }
         if (tabs)

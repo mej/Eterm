@@ -380,7 +380,8 @@ Create_Windows(int argc, char *argv[])
     }
     Attributes.colormap = cmap;
 
-    szHint.base_width = (2 * TermWin.internalBorder + ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
+    szHint.base_width = (2 * TermWin.internalBorder + ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR))
+                                                       ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
     szHint.base_height = (2 * TermWin.internalBorder) + bbar_calc_docked_height(BBAR_DOCKED);
 
     flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
@@ -447,8 +448,10 @@ Create_Windows(int argc, char *argv[])
     XSelectInput(Xdisplay, TermWin.parent, (KeyPressMask | FocusChangeMask | StructureNotifyMask | VisibilityChangeMask | PropertyChangeMask));
     if (mwmhints.flags) {
         prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", False);
-        XChangeProperty(Xdisplay, TermWin.parent, prop, prop, 32, PropModeReplace, (unsigned char *) &mwmhints, PROP_MWM_HINTS_ELEMENTS);
+        XChangeProperty(Xdisplay, TermWin.parent, prop, prop, 32,
+                        PropModeReplace, (unsigned char *) &mwmhints, PROP_MWM_HINTS_ELEMENTS);
     }
+
     /* vt cursor: Black-on-White is standard, but this is more popular */
     TermWin_cursor = XCreateFontCursor(Xdisplay, XC_xterm);
     set_pointer_colors(NULL, NULL);
@@ -457,9 +460,12 @@ Create_Windows(int argc, char *argv[])
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
 
     /* the vt window */
-    TermWin.x = (((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR)) && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
+    TermWin.x = (((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR))
+                  && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)))
+                 ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
     TermWin.y = bbar_calc_docked_height(BBAR_DOCKED_TOP);
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height,
+                               0, Xdepth, InputOutput, CopyFromParent,
                                CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
     D_X11(("Created terminal window 0x%08x at %dx%d\n", TermWin.vt, TermWin.x, TermWin.y));
     if (!(background_is_pixmap()) && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_BORDERLESS))) {
@@ -475,7 +481,16 @@ Create_Windows(int argc, char *argv[])
     /* If the user wants a specific desktop, tell the WM that */
     if (rs_desktop != -1) {
         val = rs_desktop;
-        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
+        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP],
+                        XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
+    }
+
+    /* Set window opacity if needed. */
+    if ((props[PROP_EWMH_OPACITY] != None) && (rs_opacity != 0xff)) {
+        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_OPACITY],
+                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) &rs_opacity, 1);
+        XChangeProperty(Xdisplay, TermWin.vt, props[PROP_EWMH_OPACITY],
+                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) &rs_opacity, 1);
     }
 
     /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */
