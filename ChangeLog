@@ -2402,3 +2402,28 @@ Thu Sep 16 16:21:22 PDT 1999	Michael Jennings <mej@eterm.org>
 	from the themes for the time being.
 	
 -------------------------------------------------------------------------------
+Mon Sep 20 16:08:41 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Lots of changes here.  First off, this should fix the background draw
+	bug with transparency that several people pointed out.  While I was
+	at it, I also cleaned up a lot of other related stuff.  Three-state
+	images should be a lot more robust now.
+
+	Then again, some stuff may be broken entirely from this, so let me
+	know. :-)
+
+	For one thing, the various image modes should work as expected now.
+	You can allow and disallow modes for the various widgets.  The
+	fallback mode is "solid" now, rather than "image," so you can cause
+	a certain widget to refuse to use an image if you want to.  If you
+	specify an image without specifying a "mode" line that allows the
+	"image" mode, your image will not appear. <-- READ THIS TWICE!  I
+	had to go back and fix all the theme files because of this, so you
+	will need to remove your current theme directory and allow Eterm's
+	"make install" to put the new ones in place; otherwise, everything
+	will go back to being solid colors. =]
+
+	Anytime something changes this drastically, there are bound to be
+	problems.  Let me know if you find any of them. :)
+	
+-------------------------------------------------------------------------------
