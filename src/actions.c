@@ -126,7 +126,7 @@ action_dispatch(event_t *ev, KeySym keysym) {
       }
     }      
     D_ACTIONS(("Modifiers passed.  keysym == 0x%08x, action->keysym == 0x%08x\n", keysym, action->keysym));
-    if ((keysym) && (action->keysym) && (keysym != action->keysym)) {
+    if ((ev->xany.type == KeyPress) && (action->keysym) && (keysym != action->keysym)) {
       continue;
     }
     D_ACTIONS(("Match found.\n"));

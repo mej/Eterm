@@ -2976,3 +2976,12 @@ Thu Dec 30 14:55:59 PST 1999	Michael Jennings <mej@eterm.org>
 	gdb with Eterm for ages.
 	
 -------------------------------------------------------------------------------
+Mon Jan  3 11:14:27 PST 2000	Michael Jennings <mej@eterm.org>
+
+	First commit of the new year!  (Notice I didn't say the new millenium,
+	since *that* doesn't start until Jan 1, 2001.)
+
+	This should hopefully fix the bug where dead keys would bring up the
+	menu.
+	
+-------------------------------------------------------------------------------
