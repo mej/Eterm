@@ -1786,6 +1786,7 @@ xterm_seq(int op, const char *str)
             if (!strcasecmp(mod, "clear")) {
               imlib_t *iml = images[which].current->iml;
 
+              D_CMD(("Clearing the %s color modifier of the %s image\n", color, get_image_type(which)));
               if (!strcasecmp(color, "image")) {
                 FREE(iml->mod);
               } else if (!strcasecmp(color, "red")) {
@@ -1794,6 +1795,12 @@ xterm_seq(int op, const char *str)
                 FREE(iml->gmod);
               } else if (!strcasecmp(color, "blue")) {
                 FREE(iml->bmod);
+              }
+              if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
+                free_desktop_pixmap();
+              } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
+                XFreePixmap(Xdisplay, viewport_pixmap);
+                viewport_pixmap = None;	/* Force the re-read */
               }
               changed = 1;
               continue;
@@ -1805,8 +1812,7 @@ xterm_seq(int op, const char *str)
             changed = 1;
             if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
               free_desktop_pixmap();
-            }
-            if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
+            } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
               XFreePixmap(Xdisplay, viewport_pixmap);
               viewport_pixmap = None;	/* Force the re-read */
             }

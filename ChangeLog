@@ -3018,3 +3018,9 @@ Mon Jan 10 14:47:33 PST 2000	Michael Jennings <mej@eterm.org>
 	Fixed the problem with menus in auto mode.
 	
 -------------------------------------------------------------------------------
+Mon Jan 10 16:55:51 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed some transparency issues noticed by keebler
+	<keebler@sandwich.net>.
+	
+-------------------------------------------------------------------------------

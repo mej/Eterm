@@ -1263,11 +1263,14 @@ get_desktop_pixmap(void)
   Pixmap p;
   Atom prop, type, prop2;
   int format;
-  static Pixmap color_pixmap = None, orig_desktop_pixmap = None;
+  static Pixmap color_pixmap = None, orig_desktop_pixmap;
   unsigned long length, after;
   unsigned char *data;
 
   D_PIXMAP(("get_desktop_pixmap() called.  Current desktop pixmap is 0x%08x\n", (unsigned int) desktop_pixmap));
+  if (desktop_pixmap == None) {
+    orig_desktop_pixmap = None;  /* Forced re-read. */
+  }
   if (desktop_window == None) {
     D_PIXMAP(("get_desktop_pixmap():  No desktop window.  Aborting.\n"));
     free_desktop_pixmap();
