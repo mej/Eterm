@@ -3771,3 +3771,9 @@ Wed Jul  5 19:48:10 PDT 2000	Michael Jennings <mej@eterm.org>
 	also fixed the XA_TEXT problem for people using old/broken X.
 	
 -------------------------------------------------------------------------------
+Wed Jul  5 20:07:09 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Hopefully this will fix the problem where the titlebar wouldn't always
+	get updated with the pause mode message.
+	
+-------------------------------------------------------------------------------

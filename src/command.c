@@ -2409,12 +2409,6 @@ cmd_getc(void)
   /* characters already read in */
   if (CHARS_READ()) {
     RETURN_CHAR();
-  } else if (paused == 1 && cmd_fd == -1) {
-    const char *done = " -- Task Finished, ESC to exit";
-
-    append_to_title(done);
-    append_to_icon_name(done);
-    paused++;
   }
   for (;;) {
 
@@ -2439,6 +2433,13 @@ cmd_getc(void)
       if (CHARS_READ()) {
 	RETURN_CHAR();
       }
+    }
+    if (paused == 1 && cmd_fd == -1) {
+      const char *done = " -- Task Finished, ESC to exit";
+
+      append_to_title(done);
+      append_to_icon_name(done);
+      paused++;
     }
 
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
