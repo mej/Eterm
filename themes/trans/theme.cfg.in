@@ -293,9 +293,6 @@ begin main
 # If true, Eterm will use save-unders.
     save_under true
 
-# If true, Eterm will run pseudo-transparent.
-    trans true
-
   end toggles
 
   begin keyboard

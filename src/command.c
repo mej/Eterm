@@ -1815,7 +1815,7 @@ xim_real_init(void)
   XVaNestedList preedit_attr = NULL;
   XVaNestedList status_attr = NULL;
 
-  REQUIRE(Input_Context != NULL);
+  REQUIRE(Input_Context == NULL);
 
   if (rs_inputMethod && *rs_inputMethod) {
     strncpy(tmp, rs_inputMethod, sizeof(tmp) - 1);

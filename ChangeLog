@@ -2346,3 +2346,8 @@ Tue Aug 24 13:00:46 PDT 1999	Michael Jennings <mej@eterm.org>
 	caused incorrect updates in trans mode.
 	
 -------------------------------------------------------------------------------
+Wed Aug 25 12:28:50 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Applied XIM fix from Sung-Hyun Nam <namsh@lgic.co.kr>.
+	
+-------------------------------------------------------------------------------
