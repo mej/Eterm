@@ -4783,3 +4783,9 @@ Tue Aug 13 22:55:58 2002                        Michael Jennings (mej)
 
 Documentation fix from Jim Lewis <jel@louie.cc>.
 ----------------------------------------------------------------------
+Thu Sep  5 21:47:57 2002                        Michael Jennings (mej)
+
+Updates to the termcap/terminfo stuff to make everything work on *BSD.
+Thanks to Thomas Dickey <dickey@herndon4.his.com> and Will Yardley
+<william@hq.newdream.net> for their assistance with this.
+----------------------------------------------------------------------

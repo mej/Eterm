@@ -301,7 +301,7 @@ inline void *memmove(void *, const void *, size_t);
 # define PATH_ENV "ETERMPATH"
 #endif
 
-#if !(HAVE_SAVED_UIDS) && defined(_POSIX_VERSION) && (_POSIX_SAVED_IDS)
+#if defined(_POSIX_VERSION) && defined(_POSIX_SAVED_IDS) && (_POSIX_SAVED_IDS == 1)
 # define HAVE_SAVED_UIDS 1
 #endif
 

@@ -1,6 +1,6 @@
 # Eterm terminfo file
 
-Eterm|Eterm-color|Eterm with xterm-style color support (X Window System),
+Eterm|Eterm Terminal Emulator (X11 Window System),
 # FIXME:  xterm does not specify bce, bw, eo, or xon.  Should we?
 	am, bw, bce, km, mir, msgr, xenl, xon, eo, mc5i,
 	cols#80, lines#24, it#8, lm#0, btns#5,

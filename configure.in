@@ -494,6 +494,7 @@ if test "$FOUND_LIBAST" -ne "1"; then
   if test "x$ANS" = "xy" -o "x$ANS" = "xyes" -o "x$ANS" = "xY" -o "x$ANS" = "xYES"; then
       # Download from CVS server
       CVSROOT=":pserver:anonymous@cvs.enlightenment.sourceforge.net:/cvsroot/enlightenment"
+      test -f $HOME/.cvspass || touch $HOME/.cvspass
       grep $CVSROOT $HOME/.cvspass >/dev/null 2>&1 || cvs -d $CVSROOT login
       cvs -z3 -d $CVSROOT co -d libast eterm/libast
       (cd libast && ./autogen.sh $ac_configure_args && make install && cd .. && rm -rf libast)
