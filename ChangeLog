@@ -4986,3 +4986,37 @@ Mon Feb 24 21:05:00 2003                        Michael Jennings (mej)
 Screw it.  I don't see any way to "sanitize" these, as they put it,
 so we'll just disable that for now until someone can throw me a clue.
 ----------------------------------------------------------------------
+Sun Mar  2 23:40:39 2003                        Michael Jennings (mej)
+
+Fixed a bug with foreground/background color change pointed out by
+Thomas <arnognul@tiscali.se>.
+
+Also added support for all the other OSC color change sequences (at
+least those for the colors that Eterm uses).  The sequences are of
+the form "\e];n;color[;color[...]]\a", where n is between 10 and 19.
+You can specify up to (20 - n) semicolon-separated colors representing
+the following attributes in order:  foreground, background, cursor,
+mouse pointer, mouse pointer background (*), Tek foreground (*), Tek
+background (*), highlight color (*), bold color, and underline color.
+Attributes marked with a (*) are ignored by Eterm and may be left
+empty, but their trailing semicolons must be present for xterm
+compatibility.
+
+For example, to set a white foreground, black background, yellow text
+cursor, green mouse cursor, #ffaa00 for bold, and cyan for underline,
+you could use either of the following:
+
+echo -e "\e]10;white;black;yellow;green;;;;;#ffaa00;cyan\007"
+
+ or
+
+echo -e "\e]10;white\007"
+echo -e "\e]11;black\007"
+echo -e "\e]12;yellow\007"
+echo -e "\e]13;green\007"
+echo -e "\e]18;#ffaa00\007"
+echo -e "\e]19;cyan\007"
+
+Note that the setting of bold and underline colors using 18 and 19 are
+Eterm extensions.
+----------------------------------------------------------------------

@@ -460,8 +460,48 @@ Portions of this document were taken from the XTerm documentation.</P>
                             <A HREF="#eterm_esc">below</A>.)
         <LI><I>n</I> == 6:  Eterm-specific escape sequences (See
                             <A HREF="#eterm_esc">below</A>.)
+        <LI><I>n</I> == 10:  Set foreground color to <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 11.
+        <LI><I>n</I> == 11:  Set background color to <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 12.
+        <LI><I>n</I> == 12:  Set cursor color to <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 13.
+        <LI><I>n</I> == 13:  Set mouse pointer color to <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 14.
+        <LI><I>n</I> == 14:  Ignore <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 15.
+        <LI><I>n</I> == 15:  Ignore <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 16.
+        <LI><I>n</I> == 16:  Ignore <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 17.
+        <LI><I>n</I> == 17:  Ignore <I>string</I>.
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 18.
+        <LI><I>n</I> == 18:  Set bold color to <I>string</I>.
+                             Eterm extension (see <A HREF="#image">below</A>).
+                             If additional semicolon-delimited
+                             <I>string</I> values are specified,
+                             continue with <I>n</I> == 19.
+        <LI><I>n</I> == 19:  Set underline color to <I>string</I>.
+                             Eterm extension (see <A HREF="#image">below</A>).
         <LI><I>n</I> == 20:  Image commands (see <A HREF="#image">below</A>)
-        <LI><I>n</I> == 30:  Dump contents of scrollback to file <I>string</I>
+        <LI><I>n</I> == 30:  Dump contents of scrollback to file
+                             <I>string</I>.  (Disabled by default.)
         <LI><I>n</I> == 39:  Set the default foreground color to <I>string</I>
         <LI><I>n</I> == 49:  Set the default background color to <I>string</I>
         <LI><I>n</I> == 50:  Set font to <I>string</I>.  rxvt/Eterm extensions:
@@ -1232,7 +1272,7 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
 <TR>
   <TD><TT>ESC <B>] 6 ; 50 ;</B> <I>desktop</I> BEL</TT></TD>
   <TD>Move Eterm to desktop <I>desktop</I> and make it the current desktop.
-      This requires a GNOME-compliant Window Manager, such as
+      This requires a compliant Window Manager, such as
       <A HREF="http://www.enlightenment.org/" TARGET="_top">Enlightenment</A>.
   </TD>
 </TR>
@@ -1245,6 +1285,14 @@ are:  <TT><B>1</B></TT>, <TT><B>on</B></TT>, <TT><B>yes</B></TT>, or (of course)
 <TR>
   <TD><TT>ESC <B>] 6 ; 80 ;</B> <I>level</I> BEL</TT></TD>
   <TD>Set the debugging level to <I>level</I>.</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] 18 ;</B> <I>string</I> BEL</TT></TD>
+  <TD>Set bold color to <I>string</I>.</TD>
+</TR>
+<TR>
+  <TD><TT>ESC <B>] 19 ;</B> <I>string</I> BEL</TT></TD>
+  <TD>Set underline color to <I>string</I>.</TD>
 </TR>
 </TABLE>
 

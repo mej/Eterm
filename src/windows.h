@@ -46,6 +46,7 @@ extern Pixel get_top_shadow_color(Pixel, const char *);
 extern Pixel get_color_by_name(const char *, const char *);
 extern Pixel get_color_by_pixel(Pixel, Pixel);
 extern void process_colors(void);
+extern void set_pointer_colors(const char *, const char *);
 extern void Create_Windows(int, char * []);
 extern void resize_parent(unsigned int, unsigned int);
 extern void set_width(unsigned short);

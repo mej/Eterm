@@ -224,7 +224,7 @@ parse_escaped_string(char *str)
 }
 
 char *
-safe_print_string(char *str, unsigned long len)
+safe_print_string(const char *str, unsigned long len)
 {
     static char *ret_buff = NULL;
     static unsigned long rb_size = 0;

@@ -331,6 +331,26 @@ process_colors(void)
     stored_palette(SAVE);
 }
 
+void
+set_pointer_colors(const char *fg_name, const char *bg_name)
+{
+    XColor fg, bg;
+
+    if (fg_name != NULL) {
+        fg.pixel = get_color_by_name(fg_name, COLOR_NAME(pointerColor));
+    } else {
+        fg.pixel = PixColors[pointerColor];
+    }
+    XQueryColor(Xdisplay, cmap, &fg);
+    if (bg_name != NULL) {
+        bg.pixel = get_color_by_name(bg_name, COLOR_NAME(bgColor));
+    } else {
+        bg.pixel = PixColors[bgColor];
+    }
+    XQueryColor(Xdisplay, cmap, &bg);
+    XRecolorCursor(Xdisplay, TermWin_cursor, &fg, &bg);
+}
+
 /* Create_Windows() - Open and map the window */
 void
 Create_Windows(int argc, char *argv[])
@@ -409,8 +429,8 @@ Create_Windows(int argc, char *argv[])
 #endif
                                    CWBackPixel | CWBorderPixel | CWColormap | CWOverrideRedirect, &Attributes);
 
-    xterm_seq(XTerm_title, rs_title);
-    xterm_seq(XTerm_iconName, rs_iconName);
+    xterm_seq(ESCSEQ_XTERM_TITLE, rs_title);
+    xterm_seq(ESCSEQ_XTERM_ICONNAME, rs_iconName);
     classHint.res_name = (char *) rs_name;
     classHint.res_class = APL_NAME;
     wmHint.window_group = TermWin.parent;
@@ -431,16 +451,7 @@ Create_Windows(int argc, char *argv[])
     }
     /* vt cursor: Black-on-White is standard, but this is more popular */
     TermWin_cursor = XCreateFontCursor(Xdisplay, XC_xterm);
-    {
-
-        XColor fg, bg;
-
-        fg.pixel = PixColors[pointerColor];
-        XQueryColor(Xdisplay, cmap, &fg);
-        bg.pixel = PixColors[bgColor];
-        XQueryColor(Xdisplay, cmap, &bg);
-        XRecolorCursor(Xdisplay, TermWin_cursor, &fg, &bg);
-    }
+    set_pointer_colors(NULL, NULL);
 
     /* cursor (menu/scrollbar): Black-on-White */
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
@@ -704,10 +715,10 @@ set_window_color(int idx, const char *color)
         print_warning("Unable to resolve \"%s\" as a color name.\n", color);
         return;
     }
-    redraw_image(image_bg);
     set_colorfgbg();
     scr_touch();
     scr_refresh(DEFAULT_REFRESH);
+    redraw_image(image_bg);
 }
 #endif /* XTERM_COLOR_CHANGE */
 

@@ -256,7 +256,7 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
     D_PIXMAP(("scale_pixmap(\"%s\")\n", geom));
     if (!strcmp(geom, "?")) {
         sprintf(str, "[%dx%d+%d+%d]", pmap->w, pmap->h, pmap->x, pmap->y);
-        xterm_seq(XTerm_title, str);
+        xterm_seq(ESCSEQ_XTERM_TITLE, str);
         return 0;
     }
     if ((opstr = strchr(geom, ':')) != NULL) {

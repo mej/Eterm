@@ -327,7 +327,7 @@ lookup_key(XEvent * ev)
               LK_RET();
               break;
           case SunXK_Front:
-              xterm_seq(XTerm_Takeover, "");
+              xterm_seq(ESCSEQ_XTERM_TAKEOVER, "");
               LK_RET();
               break;
           default:
@@ -412,10 +412,10 @@ lookup_key(XEvent * ev)
 #ifdef GREEK_SUPPORT
               greek_mode = !greek_mode;
               if (greek_mode) {
-                  xterm_seq(XTerm_title, (greek_getmode() == GREEK_ELOT928 ? "[Greek: iso]" : "[Greek: ibm]"));
+                  xterm_seq(ESCSEQ_XTERM_TITLE, (greek_getmode() == GREEK_ELOT928 ? "[Greek: iso]" : "[Greek: ibm]"));
                   greek_reset();
               } else
-                  xterm_seq(XTerm_title, APL_NAME "-" VERSION);
+                  xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
               LK_RET();
 #endif
               break;
@@ -1143,7 +1143,7 @@ process_csi_seq(void)
                 break;
 #endif
             case 8:
-                xterm_seq(XTerm_title, APL_NAME "-" VERSION);
+                xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
                 break;
             case 9:
 #ifdef PIXMAP_OFFSET
@@ -1165,7 +1165,7 @@ process_csi_seq(void)
                         tint = (tint & 0xffff00) | (images[image_bg].current->iml->bmod->brightness & 0xff);
                     }
                     snprintf(tbuff, sizeof(tbuff), APL_NAME "-" VERSION ":  Transparent - %d%% shading - 0x%06lx tint mask", shading, tint);
-                    xterm_seq(XTerm_title, tbuff);
+                    xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
                 } else
 #endif
 #ifdef PIXMAP_SUPPORT
@@ -1181,10 +1181,10 @@ process_csi_seq(void)
                         len = strlen(fname) + sizeof(APL_NAME) + sizeof(VERSION) + 5;
                         tbuff = MALLOC(len);
                         snprintf(tbuff, len, APL_NAME "-" VERSION ":  %s", fname);
-                        xterm_seq(XTerm_title, tbuff);
+                        xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
                         FREE(tbuff);
                     } else {
-                        xterm_seq(XTerm_title, APL_NAME "-" VERSION ":  No Pixmap");
+                        xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION ":  No Pixmap");
                     }
                 }
 #endif /* PIXMAP_SUPPORT */
@@ -1298,10 +1298,10 @@ process_xterm_seq(void)
         }
         switch (arg) {
           case 'l':
-              xterm_seq(XTerm_title, (char *) string);
+              xterm_seq(ESCSEQ_XTERM_TITLE, (char *) string);
               break;
           case 'L':
-              xterm_seq(XTerm_iconName, (char *) string);
+              xterm_seq(ESCSEQ_XTERM_ICONNAME, (char *) string);
               break;
           case 'I':
               set_icon_pixmap((char *) string, NULL);
@@ -1377,7 +1377,8 @@ process_window_mode(unsigned int nargs, int args[])
               BOUND(y, 1, scr->height / TermWin.fheight);
               BOUND(x, 1, scr->width / TermWin.fwidth);
               XResizeWindow(Xdisplay, TermWin.parent,
-                            Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0), Height2Pixel(y) + 2 * TermWin.internalBorder);
+                            Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
+                            Height2Pixel(y) + 2 * TermWin.internalBorder);
               break;
           case 11:
               break;
@@ -1397,20 +1398,16 @@ process_window_mode(unsigned int nargs, int args[])
               tt_write((unsigned char *) buff, strlen(buff));
               break;
           case 20:
-#if FIXME_BLOCK
               XGetIconName(Xdisplay, TermWin.parent, &name);
               snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
-#endif
               break;
           case 21:
-#if FIXME_BLOCK
               XFetchName(Xdisplay, TermWin.parent, &name);
               snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
               tt_write((unsigned char *) buff, strlen(buff));
               XFree(name);
-#endif
               break;
           default:
               break;
@@ -1825,10 +1822,15 @@ xterm_seq(int op, const char *str)
 #endif
 
     switch (op) {
-      case XTerm_title:
+      case ESCSEQ_XTERM_NAME: /* 0 */
+          set_title(str);       /* drop */
+      case ESCSEQ_XTERM_ICONNAME: /* 1 */
+          set_icon_name(str);
+          break;
+      case ESCSEQ_XTERM_TITLE: /* 2 */
           set_title(str);
           break;
-      case XTerm_prop:
+      case ESCSEQ_XTERM_PROP: /* 3 */
           if ((nstr = (char *) strsep(&tnstr, ";")) == NULL) {
               break;
           }
@@ -1837,23 +1839,17 @@ xterm_seq(int op, const char *str)
           }
           set_text_property(TermWin.parent, nstr, valptr);
           break;
-      case XTerm_name:
-          set_title(str);       /* drop */
-      case XTerm_iconName:
-          set_icon_name(str);
-          break;
-      case XTerm_Takeover:
+      case ESCSEQ_XTERM_TAKEOVER: /* 5 */
           XSetInputFocus(Xdisplay, TermWin.parent, RevertToParent, CurrentTime);
           XRaiseWindow(Xdisplay, TermWin.parent);
           break;
 
-      case XTerm_EtermSeq:
-
+      case ESCSEQ_XTERM_ETERMSEQ: /* 6 */
           /* Eterm proprietary escape sequences.  See technical reference for details. */
-          D_CMD(("Got XTerm_EtermSeq sequence\n"));
+          D_CMD(("Got ESCSEQ_XTERM_ETERMSEQ sequence\n"));
           nstr = (char *) strsep(&tnstr, ";");
           eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
-          D_CMD(("    XTerm_EtermSeq operation is %d\n", eterm_seq_op));
+          D_CMD(("    ESCSEQ_XTERM_ETERMSEQ operation is %d\n", eterm_seq_op));
           /* Yes, there is order to the numbers for this stuff.  And here it is:
              0-9      Image Class/Mode Configuration
              10-19    Scrollbar/Buttonbar/Menu Configuration
@@ -2369,20 +2365,62 @@ xterm_seq(int op, const char *str)
           }
           break;
 
-      case XTerm_ccolor:
-          /* Change cursor color */
-#ifndef NO_CURSORCOLOR
-          nstr = (char *) strsep(&tnstr, ";");
-          if (nstr) {
-              if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
-                  PixColors[cursorColor] = xcol.pixel;
-                  scr_refresh(DEFAULT_REFRESH);
-              }
+#ifdef XTERM_COLOR_CHANGE
+      case ESCSEQ_XTERM_FGCOLOR: /* 10 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              set_window_color(fgColor, nstr);
+          }
+          /* drop */
+      case ESCSEQ_XTERM_BGCOLOR: /* 11 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              set_window_color(bgColor, nstr);
+          }
+          /* drop */
+      case ESCSEQ_XTERM_CURSOR_COLOR: /* 12 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+# ifndef NO_CURSORCOLOR
+              set_window_color(cursorColor, nstr);
+# endif
+          }
+          /* drop */
+      case ESCSEQ_XTERM_PTR_FGCOLOR: /* 13 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              set_pointer_colors(nstr, NULL);
+          }
+          /* drop */
+      case ESCSEQ_XTERM_PTR_BGCOLOR: /* 14 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              /* UNSUPPORTED */
+          }
+          /* drop */
+      case ESCSEQ_XTERM_TEK_FGCOLOR: /* 15 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              /* UNSUPPORTED */
+          }
+          /* drop */
+      case ESCSEQ_XTERM_TEK_BGCOLOR: /* 16 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              /* UNSUPPORTED */
+          }
+          /* drop */
+      case ESCSEQ_XTERM_HILIGHT_COLOR: /* 17 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              /* UNSUPPORTED */
+          }
+          /* drop */
+      case ESCSEQ_XTERM_BOLD_COLOR: /* 18 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              set_window_color(colorBD, nstr);
+          }
+          /* drop */
+      case ESCSEQ_XTERM_ULINE_COLOR: /* 19 */
+          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              set_window_color(colorUL, nstr);
           }
 #endif
           break;
 
-      case XTerm_Pixmap:
+      case ESCSEQ_XTERM_PIXMAP: /* 20 */
 #ifdef PIXMAP_SUPPORT
           FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {
                         image_set_mode(idx, MODE_IMAGE);}
@@ -2413,17 +2451,7 @@ xterm_seq(int op, const char *str)
 #endif /* PIXMAP_SUPPORT */
           break;
 
-      case XTerm_restoreFG:
-#ifdef XTERM_COLOR_CHANGE
-          set_window_color(fgColor, str);
-#endif
-          break;
-      case XTerm_restoreBG:
-#ifdef XTERM_COLOR_CHANGE
-          set_window_color(bgColor, str);
-#endif
-          break;
-      case XTerm_DumpScreen:
+      case ESCSEQ_XTERM_DUMPSCREEN: /* 30 */
 #if 0
           nstr = (char *) strsep(&tnstr, ";");
           if (nstr && *nstr) {
@@ -2431,7 +2459,17 @@ xterm_seq(int op, const char *str)
           }
           break;
 #endif
-      case XTerm_logfile:
+      case ESCSEQ_XTERM_RESTOREFG: /* 39 */
+#ifdef XTERM_COLOR_CHANGE
+          set_window_color(fgColor, str);
+#endif
+          break;
+      case ESCSEQ_XTERM_RESTOREBG: /* 40 */
+#ifdef XTERM_COLOR_CHANGE
+          set_window_color(bgColor, str);
+#endif
+          break;
+      case ESCSEQ_XTERM_LOGFILE: /* 46 */
           nstr = (char *) strsep(&tnstr, ";");
           if (nstr && *nstr && BOOL_OPT_ISTRUE(nstr)) {
               /* Logging on */
@@ -2439,7 +2477,7 @@ xterm_seq(int op, const char *str)
               /* Logging off */
           }
           break;
-      case XTerm_font:
+      case ESCSEQ_XTERM_FONT: /* 50 */
           change_font(0, str);
           break;
       default:

@@ -3109,7 +3109,7 @@ check_pixmap_change(int sig)
         imlib_context_set_image(images[image_bg].current->iml->im);
         imlib_free_image_and_decache();
         images[image_bg].current->iml->im = NULL;
-        xterm_seq(XTerm_Pixmap, rs_anim_pixmaps[image_idx++]);
+        xterm_seq(ESCSEQ_XTERM_PIXMAP, rs_anim_pixmaps[image_idx++]);
         last_update = now;
         old_handler = signal(SIGALRM, check_pixmap_change);
         alarm(rs_anim_delay);

@@ -59,24 +59,33 @@
       } } while (0)
 
 /* XTerm escape sequences: ESC ] Ps;Pt BEL */
-# define XTerm_name	0
-# define XTerm_iconName	1
-# define XTerm_title	2
-# define XTerm_prop	3
-# define XTerm_ccolor	12
-# define XTerm_logfile	46
-# define XTerm_font	50
+# define ESCSEQ_XTERM_NAME           0
+# define ESCSEQ_XTERM_ICONNAME       1
+# define ESCSEQ_XTERM_TITLE          2
+# define ESCSEQ_XTERM_PROP           3
+# define ESCSEQ_XTERM_FGCOLOR       10
+# define ESCSEQ_XTERM_BGCOLOR       11
+# define ESCSEQ_XTERM_CURSOR_COLOR  12
+# define ESCSEQ_XTERM_PTR_FGCOLOR   13
+# define ESCSEQ_XTERM_PTR_BGCOLOR   14
+# define ESCSEQ_XTERM_TEK_FGCOLOR   15
+# define ESCSEQ_XTERM_TEK_BGCOLOR   16
+# define ESCSEQ_XTERM_HILIGHT_COLOR 17
+# define ESCSEQ_XTERM_BOLD_COLOR    18
+# define ESCSEQ_XTERM_ULINE_COLOR   19
+# define ESCSEQ_XTERM_LOGFILE       46
+# define ESCSEQ_XTERM_FONT          50
 
 /* rxvt/Eterm extensions of XTerm escape sequences: ESC ] Ps;Pt BEL */
-# define XTerm_Takeover     5     /* Steal keyboard focus and raise window */
-# define XTerm_EtermSeq     6     /* Eterm proprietary escape sequences */
-# define XTerm_Pixmap	   20     /* new bg pixmap */
-# define XTerm_DumpScreen  30     /* Dump contents of scrollback to a file */
-# define XTerm_restoreFG   39     /* change default fg color */
-# define XTerm_restoreBG   49     /* change default bg color */
+# define ESCSEQ_XTERM_TAKEOVER     5     /* Steal keyboard focus and raise window */
+# define ESCSEQ_XTERM_ETERMSEQ     6     /* Eterm proprietary escape sequences */
+# define ESCSEQ_XTERM_PIXMAP      20     /* new bg pixmap */
+# define ESCSEQ_XTERM_DUMPSCREEN  30     /* Dump contents of scrollback to a file */
+# define ESCSEQ_XTERM_RESTOREFG   39     /* change default fg color */
+# define ESCSEQ_XTERM_RESTOREBG   49     /* change default bg color */
 
-# define restoreFG	39	/* restore default fg color */
-# define restoreBG	49	/* restore default bg color */
+# define restoreFG  39  /* restore default fg color */
+# define restoreBG  49  /* restore default bg color */
 
 enum color_list {
     fgColor,
