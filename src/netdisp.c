@@ -94,7 +94,7 @@ network_display(const char *display)
 
         struct ifreq ifr2;
 
-        strcpy(ifr2.ifr_name, ifr->ifr_name);
+        snprintf(ifr2.ifr_name, sizeof(ifr2.ifr_name), ifr->ifr_name);
         if (ioctl(skfd, SIOCGIFADDR, &ifr2) >= 0) {
             unsigned long addr;
             struct sockaddr_in *p_addr;

@@ -2414,10 +2414,10 @@ conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
 
         path_env = getenv(PATH_ENV);
         if (path_env) {
-            strcpy(path, CONFIG_SEARCH_PATH ":");
-            strcat(path, path_env);
+            snprintf(path, sizeof(path), "%s:%s", CONFIG_SEARCH_PATH,
+                     path_env);
         } else {
-            strcpy(path, CONFIG_SEARCH_PATH);
+            snprintf(path, sizeof(path), CONFIG_SEARCH_PATH);
         }
         shell_expand(path);
     }

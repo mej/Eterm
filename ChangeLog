@@ -5051,3 +5051,8 @@ Mon May 12 22:07:45 2003                        Michael Jennings (mej)
 Use icon window instead of icon pixmap only if strict ICCCM compliance
 is requested via ./configure --enable-strict-icccm
 ----------------------------------------------------------------------
+Tue Jun 10 12:19:00 2003                        Michael Jennings (mej)
+
+Patch from Matt Zimmerman <mdz@debian.org> to correct buffer overflow
+when $ETERMPATH is set too large.
+----------------------------------------------------------------------
