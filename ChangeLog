@@ -3347,3 +3347,16 @@ Tue Mar 14 19:11:26 PST 2000	Michael Jennings <mej@eterm.org>
 	in the pasting code.
 	
 -------------------------------------------------------------------------------
+Fri Mar 17 18:27:51 PST 2000	Michael Jennings <mej@eterm.org>
+
+	I added accelerated scrollwheel support.  I also added a #define in
+	src/feature.h for specifying the number of lines of context to keep
+	when paging up or down.
+
+	Also, we're back to the old behavior where home on input won't be
+	triggered unless the key pressed has an associated string value.  I
+	went back on this because Shift causing a jump to the bottom was
+	really annoying when trying to Shift-PgUp or Shift-PgDown.  Sorry,
+	Darren, but you lose.
+	
+-------------------------------------------------------------------------------

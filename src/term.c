@@ -259,9 +259,15 @@ lookup_key(XEvent * ev)
   if (action_dispatch(ev, keysym)) {
     LK_RET();
   }
-  /* If we're in pause mode, exit. */
-  if (len && keypress_exit) {
+  if (len) {
+    /* If we're in pause mode, exit. */
+    if (keypress_exit) {
       exit(0);
+    }
+    /* Only home for keypresses with length. */
+    if (Options & Opt_home_on_input) {
+      TermWin.view_start = 0;
+    }
   }
 
   /* This is a special mode that reports all extended keysyms (above 0xff00) to the application
@@ -290,26 +296,17 @@ lookup_key(XEvent * ev)
       keysym += (XK_F11 - XK_F1);
       shft = 0;
     } else if (!ctrl && !meta && (PrivateModes & PrivMode_ShiftKeys)) {
-
-      int lnsppg;		/* Lines per page to scroll */
-
-#ifdef PAGING_CONTEXT_LINES
-      lnsppg = TermWin.nrow - PAGING_CONTEXT_LINES;
-#else
-      lnsppg = TermWin.nrow * 4 / 5;
-#endif
-
       switch (keysym) {
         case XK_Prior:  /* Shift-PgUp scrolls up a page */
 	  if (TermWin.saveLines) {
-	    scr_page(UP, lnsppg);
+	    scr_page(UP, (TermWin.nrow - CONTEXT_LINES));
 	    LK_RET();
 	  }
 	  break;
 
 	case XK_Next:  /* Shift-PgDn scrolls down a page */
 	  if (TermWin.saveLines) {
-	    scr_page(DN, lnsppg);
+	    scr_page(DN, (TermWin.nrow - CONTEXT_LINES));
 	    LK_RET();
 	  }
 	  break;
@@ -337,14 +334,14 @@ lookup_key(XEvent * ev)
     switch (keysym) {
       case XK_Prior:
 	if (TermWin.saveLines) {
-	  scr_page(UP, TermWin.nrow * 4 / 5);
+	  scr_page(UP, TermWin.nrow - CONTEXT_LINES);
 	  LK_RET();
 	}
 	break;
 
       case XK_Next:
 	if (TermWin.saveLines) {
-	  scr_page(DN, TermWin.nrow * 4 / 5);
+	  scr_page(DN, TermWin.nrow - CONTEXT_LINES);
 	  LK_RET();
 	}
 	break;
@@ -376,11 +373,6 @@ lookup_key(XEvent * ev)
       LK_RET();
 #endif
       break;
-  }
-
-  /* If we get this far, the keypress had no special meaning to us. */
-  if (Options & Opt_home_on_input) {
-    TermWin.view_start = 0;
   }
 
   /* Process extended keysyms.  This is where the conversion to escape sequences happens. */

@@ -615,23 +615,42 @@ handle_button_press(event_t * ev)
       } else {
 	switch (ev->xbutton.button) {
 	  case Button1:
-	    if (button_state.last_button_press == 1
-		&& (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME))
+	    if ((button_state.last_button_press == 1) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
 	      button_state.clicks++;
-	    else
+	    } else {
 	      button_state.clicks = 1;
+            }
 	    selection_click(button_state.clicks, ev->xbutton.x, ev->xbutton.y);
 	    button_state.last_button_press = 1;
 	    break;
 
 	  case Button3:
-	    if (button_state.last_button_press == 3
-		&& (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME))
+	    if ((button_state.last_button_press == 3) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
 	      selection_rotate(ev->xbutton.x, ev->xbutton.y);
-	    else
+	    } else {
 	      selection_extend(ev->xbutton.x, ev->xbutton.y, 1);
+            }
 	    button_state.last_button_press = 3;
 	    break;
+          case Button4:
+	    if ((button_state.last_button_press == 4) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
+	      button_state.clicks++;
+	    } else {
+	      button_state.clicks = 1;
+            }
+	    button_state.last_button_press = 4;
+            scr_page(UP, ((ev->xbutton.state & ShiftMask) ? (1) : (TermWin.nrow - CONTEXT_LINES)) * ((button_state.clicks > 1) ? 3 : 1));
+            break;
+          case Button5:
+	    if ((button_state.last_button_press == 5) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
+	      button_state.clicks++;
+	    } else {
+	      button_state.clicks = 1;
+            }
+	    button_state.last_button_press = 5;
+            scr_page(DN, ((ev->xbutton.state & ShiftMask) ? (1) : (TermWin.nrow - CONTEXT_LINES)) * ((button_state.clicks > 1) ? 3 : 1));
+            break;
+          default: break;
 	}
       }
       button_state.button_press = ev->xbutton.time;
@@ -687,12 +706,7 @@ handle_button_release(event_t * ev)
 	case Button2:
           selection_request(ev->xbutton.time, ev->xbutton.x, ev->xbutton.y);
 	  break;
-	case Button4:
-	  scr_page(UP, (ev->xbutton.state & ShiftMask) ? 1 : 5);
-	  break;
-	case Button5:
-	  scr_page(DN, (ev->xbutton.state & ShiftMask) ? 1 : 5);
-	  break;
+        default: break;
       }
     }
   }

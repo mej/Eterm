@@ -189,6 +189,9 @@
 /* #define SCROLLBAR_INITIAL_DELAY 40 */
 /* #define SCROLLBAR_CONTINUOUS_DELAY 2 */
 
+/* How many lines of context to keep on screen when paging up/down */
+#define CONTEXT_LINES 1
+
 /********************* Multi-lingual support options *********************/
 
 /* Allow option/attribute for Meta to set the 8th bit */
