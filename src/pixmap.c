@@ -369,13 +369,13 @@ check_image_ipc(unsigned char reset)
 }
 
 void
-paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
 
   ASSERT(simg != NULL);
-  REQUIRE(win != None);
+  REQUIRE(d != None);
 
-  D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win, x, y, w, h));
+  D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) d, x, y, w, h));
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
     char buff[255], *reply;
@@ -395,7 +395,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
       D_PIXMAP((" -> iclass == \"%s\", state == \"%s\"\n", NONULL(iclass), NONULL(state)));
 
       if (iclass) {
-        snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, w, h);
+        snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) d, state, w, h);
         reply = enl_send_and_wait(buff);
         if (strstr(reply, "Error")) {
           print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
@@ -405,7 +405,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
           GC gc;
           XGCValues gcvalues;
 
-          gc = XCreateGC(Xdisplay, win, 0, &gcvalues);
+          gc = XCreateGC(Xdisplay, d, 0, &gcvalues);
           pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
           mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
           FREE(reply);
@@ -416,7 +416,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
             }
             XSetClipMask(Xdisplay, gc, mask);
             XSetClipOrigin(Xdisplay, gc, x, y);
-            XCopyArea(Xdisplay, pmap, win, gc, 0, 0, w, h, x, y);
+            XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
             snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
             enl_ipc_send(buff);
             XFreeGC(Xdisplay, gc);
@@ -446,7 +446,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
     if (simg->iml->bmod) {
       Imlib_set_image_blue_modifier(imlib_id, simg->iml->im, simg->iml->bmod);
     }
-    Imlib_paste_image(imlib_id, simg->iml->im, win, x, y, w, h);
+    Imlib_paste_image(imlib_id, simg->iml->im, (Window) d, x, y, w, h);
   }
 }
 

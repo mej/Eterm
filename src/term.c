@@ -1001,6 +1001,7 @@ process_csi_seq(void)
 #if defined (ENABLE_DISPLAY_ANSWER)
 	case 7:
 	  tt_write((unsigned char *) display_name, strlen(display_name));
+          tt_write("\n", 1);
 	  break;
 #endif
 	case 8:

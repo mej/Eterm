@@ -3013,3 +3013,8 @@ Fri Jan  7 20:11:48 PST 2000	Michael Jennings <mej@eterm.org>
 	font configuration in the default theme files.
 	
 -------------------------------------------------------------------------------
+Mon Jan 10 14:47:33 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed the problem with menus in auto mode.
+	
+-------------------------------------------------------------------------------

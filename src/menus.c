@@ -844,7 +844,8 @@ menu_draw(menu_t * menu)
     menu_set_font(menu, etfonts[def_font_idx]);
   }
   gcvalue.foreground = PixColors[menuTextColor];
-  XChangeGC(Xdisplay, menu->gc, GCForeground, &gcvalue);
+  gcvalue.graphics_exposures = False;
+  XChangeGC(Xdisplay, menu->gc, GCForeground | GCGraphicsExposures, &gcvalue);
 
   if (!menu->w) {
     unsigned short longest;
@@ -872,11 +873,19 @@ menu_draw(menu_t * menu)
 
     /* Size and render menu window */
     XResizeWindow(Xdisplay, menu->win, menu->w, menu->h);
-    render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
-    menu->bg = images[image_menu].norm->pmap->pixmap;
     if (image_mode_is(image_menu, MODE_AUTO)) {
+      pixmap_t *pmap = images[image_menu].norm->pmap;
+
+      if (pmap->pixmap != None) {
+        XFreePixmap(Xdisplay, pmap->pixmap);
+      }
+      pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, width, height, Xdepth);
+      paste_simage(images[image_menu].norm, image_menu, pmap->pixmap, 0, 0, width, height);
       enl_ipc_sync();
+    } else {
+      render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
     }
+    menu->bg = images[image_menu].norm->pmap->pixmap;
 
     /* Size and render selected item window */
     XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
