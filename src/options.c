@@ -91,7 +91,8 @@ static eterm_func_t *builtins;
 static unsigned char ctx_cnt, ctx_idx, ctx_state_idx, ctx_state_cnt, fstate_cnt, builtin_cnt, builtin_idx;
 static conf_var_t *conf_vars = NULL;
 static char *rs_pipe_name = NULL;
-static int rs_shade = 0, rs_tint = -1;
+static int rs_shade = 0;
+static char *rs_tint = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -265,7 +266,7 @@ static const struct {
       OPT_BOOL('0', "itrans", "use immotile-optimized transparency", &image_toggles, IMOPT_ITRANS),
       OPT_BLONG("viewport-mode", "use viewport mode for the background image", &image_toggles, IMOPT_VIEWPORT),
       OPT_ILONG("shade", "old-style shade percentage (deprecated)", &rs_shade),
-      OPT_ILONG("tint", "old-style tint mask (deprecated)", &rs_tint),
+      OPT_LONG("tint", "old-style tint mask (deprecated)", &rs_tint),
       OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
       OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
       OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
@@ -3800,25 +3801,68 @@ post_parse(void)
     sprintf(buff, "0x%03x", ((100 - rs_shade) << 8) / 100);
     rs_cmod_image = StrDup(buff);
   }
-  if (rs_tint >= 0) {
+  if (rs_tint) {
     char buff[10];
-    int r, g, b;
+    unsigned long r, g, b, t;
 
-    r = (rs_tint & 0xff0000) >> 16;
-    if (r != 0xff) {
-      sprintf(buff, "0x%03x", r);
-      rs_cmod_red = StrDup(buff);
+    if (!isdigit(*rs_tint)) {
+      XColor xcol, wcol;
+    
+      wcol.pixel = WhitePixel(Xdisplay, Xscreen);
+      XQueryColor(Xdisplay, Xcmap, &wcol);
+      D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", rs_tint, wcol.red, wcol.green, wcol.blue));
+      if (!XParseColor(Xdisplay, Xcmap, rs_tint, &xcol)) {
+        print_error("Unable to parse tint color \"%s\".  Ignoring.", rs_tint);
+        t = 0xffffff;
+      } else {
+        D_PIXMAP(("RGB values for color are %d/%d/%d\n", xcol.red, xcol.green, xcol.blue));
+        if ((wcol.flags & DoRed) && (xcol.flags & DoRed)) {
+          r = (xcol.red << 8) / wcol.red;
+          D_PIXMAP(("Got red == %lu\n", r));
+          if (r >= 0x100) r = 0xff;
+        } else {
+          r = 0xff;
+        }
+        if ((wcol.flags & DoGreen) && (xcol.flags & DoGreen)) {
+          g = (xcol.green << 8) / wcol.green;
+          D_PIXMAP(("Got green == %lu\n", g));
+          if (g >= 0x100) g = 0xff;
+        } else {
+          g = 0xff;
+        }
+        if ((wcol.flags & DoBlue) && (xcol.flags & DoBlue)) {
+          b = (xcol.blue << 8) / wcol.blue;
+          D_PIXMAP(("Got blue == %lu\n", b));
+          if (b >= 0x100) b = 0xff;
+        } else {
+          b = 0xff;
+        }
+        t = (r << 16) | (g << 8) | b;
+        D_PIXMAP(("Final tint is 0x%06x\n", t));
+      }
+    } else {
+      t = (unsigned long) strtoul(rs_tint, (char **) NULL, 0);
+      D_PIXMAP(("Got numerical tint 0x%06x\n", t));
     }
-    g = (rs_tint & 0xff00) >> 8;
-    if (g != 0xff) {
-      sprintf(buff, "0x%03x", g);
-      rs_cmod_green = StrDup(buff);
+
+    if (t != 0xffffff) {
+      r = (t & 0xff0000) >> 16;
+      if (r != 0xff) {
+        sprintf(buff, "0x%03lx", r);
+        rs_cmod_red = StrDup(buff);
+      }
+      g = (t & 0xff00) >> 8;
+      if (g != 0xff) {
+        sprintf(buff, "0x%03lx", g);
+        rs_cmod_green = StrDup(buff);
+      }
+      b = t & 0xff;
+      if (b != 0xff) {
+        sprintf(buff, "0x%03lx", b);
+        rs_cmod_blue = StrDup(buff);
+      }
     }
-    b = rs_tint & 0xff;
-    if (b != 0xff) {
-      sprintf(buff, "0x%03x", b);
-      rs_cmod_blue = StrDup(buff);
-    }
+    FREE(rs_tint);
   }
   if (rs_cmod_image) {
     unsigned char n = NumWords(rs_cmod_image);

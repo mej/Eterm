@@ -3380,3 +3380,9 @@ Mon Mar 27 19:08:03 PST 2000	Michael Jennings <mej@eterm.org>
 	--shade and --tint have returned with the same syntax as before.
 	
 -------------------------------------------------------------------------------
+Tue Mar 28 12:31:06 PST 2000	Michael Jennings <mej@eterm.org>
+
+	You can tint by X color values (like "grey75" or "MidnightBlue" or
+	"#8080ff").  Severely twisted. :-)
+	
+-------------------------------------------------------------------------------
