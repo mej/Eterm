@@ -56,7 +56,7 @@ unsigned long PrivateModes = PrivMode_Default;
 unsigned long SavedModes = PrivMode_Default;
 char *def_colorName[] =
 {
-  "rgb:ff/ff/ff", "rgb:0/0/0",	/* fg/bg */
+  "rgb:aa/aa/aa", "rgb:0/0/0",	/* fg/bg */
   "rgb:0/0/0",			/* 0: black             (#000000) */
 #ifndef NO_BRIGHTCOLOR
     /* low-intensity colors */
@@ -66,7 +66,7 @@ char *def_colorName[] =
   "rgb:00/00/cc",		/* 4: blue    */
   "rgb:cc/00/cc",		/* 5: magenta */
   "rgb:00/cc/cc",		/* 6: cyan    */
-  "rgb:fa/eb/d7",		/* 7: white   */
+  "rgb:aa/aa/aa",		/* 7: white   */
     /* high-intensity colors */
   "rgb:33/33/33",		/* 8: bright black */
 #endif				/* NO_BRIGHTCOLOR */

@@ -4533,3 +4533,7 @@ commented it out.  I also put back the old font lines and commented
 those out too.  The Eterm theme config file is intended as a teaching
 tool as well as a theme config. :)
 ----------------------------------------------------------------------
+Tue Feb 26 10:01:41 2002                        Michael Jennings (mej)
+
+Fixed the default fg color and color 7.
+----------------------------------------------------------------------
