@@ -10,7 +10,8 @@ export DH_COMPAT=1
 pwd:=$(shell pwd)
 
 cfg = --mandir=/usr/share/man --enable-fsstd \
-  --enable-xim --with-backspace=del --with-delete=execute
+  --enable-xim --with-backspace=del --with-delete=execute \
+  --with-home=linux --with-end=linux
 
 build: build-stamp
 build-stamp:
