@@ -32,7 +32,8 @@
 /************ Macros and Definitions ************/
 #ifdef PIXMAP_SUPPORT
 # define background_is_image() (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im)
-# define background_is_pixmap() (background_is_image() || Options & Opt_pixmapTrans)
+# define background_is_trans() (images[image_bg].mode & MODE_TRANS)
+# define background_is_pixmap() (background_is_image() || background_is_trans())
 # define delete_simage(simg) do { \
                                Imlib_free_pixmap(imlib_id, (simg)->pmap->pixmap); \
                                Imlib_destroy_image(imlib_id, (simg)->iml->im); \
@@ -43,8 +44,9 @@
 # define CONVERT_TINT_GREEN(t) (((t) & 0x00ff00) >> 8)
 # define CONVERT_TINT_BLUE(t)  ((t) & 0x0000ff)
 #else
-# define background_is_pixmap() ((int)0)
 # define background_is_image() ((int)0)
+# define background_is_trans() ((int)0)
+# define background_is_pixmap() ((int)0)
 # define delete_simage(simg) ((void)0)
 #endif
 #define PIXMAP_EXT NULL
@@ -77,16 +79,27 @@ enum {
 #define OP_SCALE	(OP_HSCALE | OP_VSCALE)
 
 /* Image modes */
-#define MODE_IMAGE	0x00
-#define MODE_TRANS	0x01
-#define MODE_VIEWPORT	0x02
-#define MODE_AUTO	0x04
-#define MODE_MASK	0x07
-#define ALLOW_IMAGE	0x00
-#define ALLOW_TRANS	0x10
-#define ALLOW_VIEWPORT	0x20
-#define ALLOW_AUTO	0x40
-#define ALLOW_MASK	0x70
+#define MODE_SOLID	0x00
+#define MODE_IMAGE	0x01
+#define MODE_TRANS	0x02
+#define MODE_VIEWPORT	0x04
+#define MODE_AUTO	0x08
+#define MODE_MASK	0x0f
+#define ALLOW_SOLID	0x00
+#define ALLOW_IMAGE	0x10
+#define ALLOW_TRANS	0x20
+#define ALLOW_VIEWPORT	0x40
+#define ALLOW_AUTO	0x80
+#define ALLOW_MASK	0xf0
+
+/* Helper macros */
+#define FOREACH_IMAGE(x)                  do {unsigned char idx; for (idx = 0; idx < image_max; idx++) { x } } while (0)
+#define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
+                                              scr_touch(); scrollbar_show(0);} while (0)
+#define image_set_mode(which, bit)        do {images[which].mode &= ~(MODE_MASK); images[which].mode |= (bit);} while (0)
+#define image_allow_mode(which, bit)      (images[which].mode |= (bit))
+#define image_disallow_mode(which, bit)   (images[which].mode &= ~(bit))
+#define image_mode_is(which, bit)         (images[which].mode & (bit))
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
@@ -143,11 +156,13 @@ extern Window desktop_window;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
+extern const char *get_image_type(unsigned short);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
 extern void reset_simage(simage_t *, unsigned long);
 extern void paste_simage(simage_t *, Window, unsigned short, unsigned short, unsigned short, unsigned short);
-extern void render_simage(simage_t *, Window, unsigned short, unsigned short, int, renderop_t);
+extern void redraw_image(unsigned char);
+extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
 #ifdef USE_POSIX_THREADS
 extern void init_bg_pixmap_thread(void *);
 #endif

@@ -151,8 +151,8 @@ Create_Windows(int argc, char *argv[])
   XWMHints wmHint;
   Atom prop = None;
   CARD32 val;
-  int i, x, y, flags;
-  unsigned int width, height;
+  int i, x = 0, y = 0, flags;
+  unsigned int width = 0, height = 0;
   unsigned int r, g, b;
   MWMHints mwmhints;
 
@@ -348,7 +348,9 @@ Create_Windows(int argc, char *argv[])
     szHint.y = y;
     szHint.flags |= USPosition;
   }
-  D_X11(("Geometry values after parsing:  %dx%d%+d%+d\n", width, height, x, y));
+  if (flags) {
+    D_X11(("Geometry values after parsing:  %dx%d%+d%+d\n", width, height, x, y));
+  }
 
   /* parent window - reverse video so we can see placement errors
    * sub-window placement & size in resize_subwindows()
@@ -498,11 +500,9 @@ resize_subwindows(int width, int height)
     }
 #endif
     width -= scrollbar_trough_width();
-    XMoveResizeWindow(Xdisplay, scrollBar.win,
-		      ((Options & Opt_scrollBar_right) ? (width) : (x)),
-		      0, scrollbar_trough_width(), height);
+    XMoveResizeWindow(Xdisplay, scrollBar.win, ((Options & Opt_scrollBar_right) ? (width) : (x)), 0, scrollbar_trough_width(), height);
     if (scrollbar_is_pixmapped()) {
-      render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+      scrollbar_show(0);
     }
     if (!(Options & Opt_scrollBar_right)) {
       x = scrollbar_trough_width();
@@ -514,40 +514,14 @@ resize_subwindows(int width, int height)
   if (old_width)
     Gr_Resize(old_width, old_height);
 #endif
-  XClearWindow(Xdisplay, TermWin.vt);
-  if (!(background_is_pixmap()))
+  if (!(background_is_pixmap())) {
     XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-
+    XClearWindow(Xdisplay, TermWin.vt);
+  } else {
 #ifdef PIXMAP_SUPPORT
-# ifdef USE_POSIX_THREADS
-
-  D_PIXMAP(("resize_subwindows(): start_bg_thread()\n"));
-  pthread_attr_init(&resize_sub_thr_attr);
-
-#  ifdef MUTEX_SYNCH
-  if (pthread_mutex_trylock(&mutex) == EBUSY) {
-    D_THREADS(("resize_subwindows(): mutex locked, bbl\n"));
-  } else {
-    D_THREADS(("pthread_mutex_trylock(&mutex): "));
-    pthread_mutex_unlock(&mutex);
-    D_THREADS(("pthread_mutex_unlock(&mutex)\n"));
-  }
-#  endif
-
-  if (!(pthread_create(&resize_sub_thr, &resize_sub_thr_attr,
-		       (void *) &render_bg_thread, NULL))) {
-    /*              bg_set = 0; */
-    D_THREADS(("thread created\n"));
-  } else {
-    D_THREADS(("pthread_create() failed!\n"));
-  }
-
-# else
-  D_PIXMAP(("resize_subwindows(): render_pixmap(TermWin.vt)\n"));
-  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-  XSync(Xdisplay, 0);
-# endif
+    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
 #endif
+  }
 }
 
 void
@@ -601,11 +575,8 @@ resize_window1(unsigned int width, unsigned int height)
     if (curr_screen >= 0)	/* this is not the first time thru */
       scr_change_screen(curr_screen);
     first_time = 0;
-  } else if (((Options & Opt_pixmapTrans) || (images[image_bg].mode & MODE_TRANS))
-             || ((Options & Opt_viewport_mode) || (images[image_bg].mode & MODE_VIEWPORT))) {
+  } else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
     resize_subwindows(width, height);
-    scrollbar_show(0);
-    scr_touch();
   }
 }
 

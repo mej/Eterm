@@ -229,22 +229,23 @@ handle_property_notify(event_t * ev)
 
   D_EVENTS(("handle_property_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
 
-  if (((Options & Opt_pixmapTrans) || (images[image_bg].mode & MODE_TRANS)) && (desktop_window != None)) {
+  if (background_is_trans()) {
     if (ev->xany.window == TermWin.parent) {
       prop = XInternAtom(Xdisplay, "_WIN_WORKSPACE", True);
       if ((prop == None) || (ev->xproperty.atom != prop)) {
         return 0;
       }
       XSelectInput(Xdisplay, desktop_window, None);
-      desktop_window = get_desktop_window();
-      XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
       if (desktop_pixmap != None) {
         free_desktop_pixmap();
       }
-      render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_touch();
-      scrollbar_show(0);
-
+      desktop_window = get_desktop_window();
+      if (desktop_window == None) {
+        FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
+        return 1;
+      }
+      XSelectInput(Xdisplay, desktop_window, PropertyChangeMask);
+      redraw_all_images();
     } else if (ev->xany.window == desktop_window) {
       prop = XInternAtom(Xdisplay, "_XROOTPMAP_ID", True);
       if ((prop == None) || (ev->xproperty.atom != prop)) {
@@ -253,9 +254,7 @@ handle_property_notify(event_t * ev)
       if (desktop_pixmap != None) {
         free_desktop_pixmap();
       }
-      render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_touch();
-      scrollbar_show(0);
+      redraw_all_images();
     }
   }
   return 1;
@@ -345,10 +344,9 @@ handle_focus_in(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (!TermWin.focus) {
     TermWin.focus = 1;
-    if (background_is_pixmap() && (images[image_bg].norm != images[image_bg].selected)) {
+    if (images[image_bg].norm != images[image_bg].selected) {
       images[image_bg].current = images[image_bg].selected;
-      render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_touch();
+      redraw_image(image_bg);
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(Options & Opt_scrollBar);
@@ -370,10 +368,9 @@ handle_focus_out(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   if (TermWin.focus) {
     TermWin.focus = 0;
-    if (background_is_pixmap() && (images[image_bg].norm != images[image_bg].selected)) {
+    if (images[image_bg].norm != images[image_bg].selected) {
       images[image_bg].current = images[image_bg].norm;
-      render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-      scr_touch();
+      redraw_image(image_bg);
     }
     if (Options & Opt_scrollbar_popup) {
       map_scrollbar(0);
@@ -400,7 +397,7 @@ handle_configure_notify(event_t * ev)
 #ifdef USE_XIM
   xim_set_status_position();
 #endif
-  return 1;
+  return 0;
 }
 
 unsigned char

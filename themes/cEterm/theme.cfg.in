@@ -43,24 +43,24 @@ begin main
 
 # These colors are taken from Alfredo Kojima's cEterm script.  Lots of
 # people seem to like them. :-)
-   color  0 0    0    0
-   color  1 0x9e 0x18 0x28
-   color  2 0x9e 0x18 0x28
-   color  3 #968a38
-   color  4 #414171
-   color  5 #963c59
-   color  6 #418179
-   color  7 gray
-   color  8 gray40
-   color  9 #cf6171
-   color 10 #c5f779
-   color 11 #fff796
-   color 12 #4186be
-   color 13 #cf9ebe
-   color 14 #71bebe
-   color 15 white
-   color bd white
-   color ul white
+    color  0 0    0    0
+    color  1 0x9e 0x18 0x28
+    color  2 0x9e 0x18 0x28
+    color  3 #968a38
+    color  4 #414171
+    color  5 #963c59
+    color  6 #418179
+    color  7 gray
+    color  8 gray40
+    color  9 #cf6171
+    color 10 #c5f779
+    color 11 #fff796
+    color 12 #4186be
+    color 13 #cf9ebe
+    color 14 #71bebe
+    color 15 white
+    color bd white
+    color ul white
 
 # This ends the color section.  Any text after the word "end" is
 # assumed to be a comment and ignored.
@@ -120,7 +120,7 @@ begin main
 # The mode line.  This defines the startup mode for the image, as well as what modes are allowed.
 # Valid modes are "image" (to display the image file), "trans" (to be transparent), or "viewport"
 # (for viewport mode).  Syntax is "mode <startup_mode> allow <allowed_modes>".
-      mode image allow trans viewport
+      mode image allow image trans viewport auto
 
 # Set the image border.  This is a portion of the image which will be kept at its actual size when
 # scaling.  Use this for beveled images (buttons, etc.).
@@ -132,7 +132,7 @@ begin main
 # The rest of the images.
     begin image
       type trough
-      mode image allow trans viewport
+      mode image allow image trans viewport auto
       state normal
       file bar_vertical_3.png
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
@@ -141,6 +141,7 @@ begin main
     end image
     begin image
       type anchor
+      mode image allow image auto
       state normal
       file bar_vertical_1.png
       geom :scale
@@ -152,6 +153,7 @@ begin main
     end image
     begin image
       type up_arrow
+      mode image allow image auto
       state normal
       file button_arrow_up_1.png
       geom :scale
@@ -167,6 +169,7 @@ begin main
     end image
     begin image
       type down_arrow
+      mode image allow image auto
       state normal
       file button_arrow_down_1.png
       geom :scale
@@ -182,6 +185,7 @@ begin main
     end image
     begin image
       type menu
+      mode image allow image auto
       state normal
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
@@ -193,6 +197,7 @@ begin main
     end image
     begin image
       type submenu
+      mode image allow image auto
       state normal
       file menu1.png
       geom 100x100+0+0:scale

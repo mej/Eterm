@@ -80,7 +80,7 @@ image_t images[image_max] =
 #endif
 
 #ifdef PIXMAP_SUPPORT
-inline const char *
+const char *
 get_image_type(unsigned short type)
 {
 
@@ -338,7 +338,39 @@ paste_simage(simage_t * simg, Window win, unsigned short x, unsigned short y, un
 }
 
 void
-render_simage(simage_t * simg, Window win, unsigned short width, unsigned short height, int which, renderop_t renderop)
+redraw_image(unsigned char which) {
+
+  switch (which) {
+  case image_bg:
+    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+    scr_touch();
+    break;
+  case image_up:
+    render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
+    scrollbar_show(0);
+    break;
+  case image_down:
+    render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
+    scrollbar_show(0);
+    break;
+# ifdef PIXMAP_SCROLLBAR
+  case image_sb:
+    render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+    scrollbar_show(0);
+    break;
+  case image_sa:
+    render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+    scrollbar_show(0);
+    break;
+# endif
+  default:
+    D_PIXMAP(("redraw_image():  Bad value %u\n", which));
+    break;
+  }
+}
+
+void
+render_simage(simage_t * simg, Window win, unsigned short width, unsigned short height, unsigned char which, renderop_t renderop)
 {
 
   XGCValues gcvalue;
@@ -365,10 +397,10 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   ASSERT(simg->iml != NULL);
   ASSERT(simg->pmap != NULL);
 
-  D_PIXMAP(("render_simage():  Rendering simg->iml->im 0x%08x (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which),
-	    width, height, win));
+  D_PIXMAP(("render_simage():  Rendering simg->iml->im 0x%08x (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width, height, win));
+  D_PIXMAP(("render_simage():  Image mode is 0x%02x\n", images[which].mode));
 
-  if (which == image_bg && (Options & Opt_viewport_mode)) {
+  if ((which == image_bg) && image_mode_is(image_bg, MODE_VIEWPORT)) {
     width = scr->width;
     height = scr->height;
   }
@@ -412,16 +444,14 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   }
 
 # ifdef PIXMAP_OFFSET
-  if (((Options & Opt_pixmapTrans) || (images[which].mode & MODE_TRANS)) && (images[which].mode & ALLOW_TRANS)) {
+  if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
     if (desktop_window == None) {
       get_desktop_window();
     }
     if (desktop_window == None) {
       print_error("Unable to locate desktop window.  If you are running Enlightenment, please\n"
 		  "restart.  If not, please set your background image with Esetroot, then try again.");
-      Options &= ~(Opt_pixmapTrans);
-      images[which].mode |= (MODE_IMAGE | ALLOW_IMAGE);
-      images[which].mode &= ~(MODE_TRANS | ALLOW_TRANS);
+      FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
       render_simage(simg, win, width, height, which, renderop);
       return;
     }
@@ -453,7 +483,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 	XFreePixmap(Xdisplay, simg->pmap->pixmap);
       }
       simg->pmap->pixmap = XCreatePixmap(Xdisplay, win, width, height, Xdepth);
-      D_PIXMAP(("desktop_pixmap == %08x, simg->pmap->pixmap == %08x\n", desktop_pixmap, simg->pmap->pixmap));
+      D_PIXMAP(("desktop_pixmap == 0x%08x, simg->pmap->pixmap == 0x%08x\n", desktop_pixmap, simg->pmap->pixmap));
       if (simg->pmap->pixmap != None) {
 	XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
         if ((pw <= 0) || (ph <= 0)) {
@@ -481,9 +511,8 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       D_PIXMAP(("Setting background of window 0x%08x to the background color\n", win));
       XSetWindowBackground(Xdisplay, win, PixColors[bgColor]);
     }
-  } else if (((Options & Opt_viewport_mode) || (images[which].mode & MODE_VIEWPORT)) && (images[which].mode & ALLOW_VIEWPORT)) {
-    D_PIXMAP(("Viewport mode enabled.  viewport_pixmap == 0x%08x and simg->pmap->pixmap == 0x%08x\n",
-	      viewport_pixmap, simg->pmap->pixmap));
+  } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
+    D_PIXMAP(("Viewport mode enabled.  viewport_pixmap == 0x%08x and simg->pmap->pixmap == 0x%08x\n", viewport_pixmap, simg->pmap->pixmap));
     if (viewport_pixmap == None) {
       imlib_t *tmp_iml = images[image_bg].current->iml;
 
@@ -545,8 +574,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
   } else
 # endif
-  {
-
+  if (image_mode_is(which, MODE_IMAGE) && image_mode_is(which, ALLOW_IMAGE)) {
     if (simg->iml->im) {
       int w = simg->pmap->w;
       int h = simg->pmap->h;
@@ -664,6 +692,31 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       D_PIXMAP(("Setting background of window 0x%08x to 0x%08x\n", win, simg->pmap->pixmap));
       XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
     }
+  } else {
+    unsigned short cidx;
+
+    switch (which) {
+    case image_up:
+    case image_down:
+    case image_left:
+    case image_right:
+# ifdef PIXMAP_SCROLLBAR
+    case image_sb:
+    case image_sa:
+# endif
+      cidx = (TermWin.focus ? scrollColor : unfocusedScrollColor);
+      break;
+    case image_menu:
+    case image_submenu:
+      cidx = (TermWin.focus ? menuColor : unfocusedMenuColor);
+      break;
+    default:
+      cidx = bgColor;
+      break;
+    }
+    
+    XSetWindowBackground(Xdisplay, win, PixColors[cidx]);
+    image_set_mode(which, MODE_SOLID);
   }
   XClearWindow(Xdisplay, win);
   XFreeGC(Xdisplay, gc);

@@ -47,7 +47,8 @@
 #define MENU_VGAP	4
 #define MENU_CLICK_TIME	20
 
-#define menu_is_pixmapped() (images[image_menu].current->iml->im)
+#define menu_is_pixmapped() ((images[image_menu].current->iml->im) && (images[image_menu].mode & MODE_MASK))
+#define menu_submenu_is_pixmapped() ((images[image_submenu].current->iml->im) && (images[image_submenu].mode & MODE_MASK))
 
 /************ Structures ************/
 typedef struct menu_t_struct menu_t;

@@ -28,7 +28,7 @@ install-data-hook:
 	  for i in `ls -1 | grep -v CVS | grep -v \.cvsignore | grep -v pixmaps.list` ; do \
 	    echo $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
 	    $(INSTALL_DATA) $$i $(DESTDIR)${pixmapdir} ; \
-	  done ; \
+	  done ; cd .. ; \
 	done)
 	@for i in tiled-pixmaps.list scaled-pixmaps.list pixmaps.list ; do \
           if test -f $(DESTDIR)${pixmapdir}/$$i ; then \
