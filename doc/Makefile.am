@@ -21,5 +21,4 @@ install-data-hook:
 	    cap_mkdb termcap ; \
 	fi || :
 
-EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti Makefile.am Makefile.in
-
+EXTRA_DIST = Eterm.1.in Eterm_reference.html Eterm.tcap Eterm.ti README.Escreen Makefile.am Makefile.in

@@ -4895,3 +4895,7 @@ Documentation updates and last-minute cleanups.  Barring something
 unexpected and disastrous, this is it for release.  So please make
 sure it works and the docs are accurate. :-)
 ----------------------------------------------------------------------
+Wed Oct 30 14:53:30 2002                        Michael Jennings (mej)
+
+Make sure the Escreen README goes in the tarball.
+----------------------------------------------------------------------
