@@ -2052,6 +2052,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 {
   const char *icon_path;
   Imlib_Image temp_im = (Imlib_Image) NULL;
+  Imlib_Load_Error im_err;
   XWMHints *wm_hints;
   int w = 8, h = 8;
 
@@ -2069,29 +2070,35 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       XIconSize *icon_sizes;
       int count, i;
 
-      temp_im = imlib_load_image(icon_path);
-      /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
-      if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {
-	for (i = 0; i < count; i++) {
-	  D_PIXMAP(("Got icon sizes:  Width %d to %d +/- %d, Height %d to %d +/- %d\n", icon_sizes[i].min_width, icon_sizes[i].max_width,
-		    icon_sizes[i].width_inc, icon_sizes[i].min_height, icon_sizes[i].max_height, icon_sizes[i].height_inc));
-          if (icon_sizes[i].max_width > 64 || icon_sizes[i].max_height > 64) {
-            continue;
-          }
-          /* Find the largest supported size <= 64 */
-	  w = MAX(icon_sizes[i].max_width, w);
-	  h = MAX(icon_sizes[i].max_height, h);
-	}
-	fflush(stdout);
-	XFree(icon_sizes);
+      temp_im = imlib_load_image_with_error_return(f, &im_err);
+      if (temp_im == NULL) {
+	print_error("Unable to load icon file \"%s\" -- %s\n", filename, imlib_strerror(im_err));
       } else {
-        w = h = 48;
+        /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
+        if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {
+          for (i = 0; i < count; i++) {
+            D_PIXMAP(("Got icon sizes:  Width %d to %d +/- %d, Height %d to %d +/- %d\n", icon_sizes[i].min_width, icon_sizes[i].max_width,
+                      icon_sizes[i].width_inc, icon_sizes[i].min_height, icon_sizes[i].max_height, icon_sizes[i].height_inc));
+            if (icon_sizes[i].max_width > 64 || icon_sizes[i].max_height > 64) {
+              continue;
+            }
+            /* Find the largest supported size <= 64 */
+            w = MAX(icon_sizes[i].max_width, w);
+            h = MAX(icon_sizes[i].max_height, h);
+          }
+          fflush(stdout);
+          XFree(icon_sizes);
+        } else {
+          w = h = 48;
+        }
+        BOUND(w, 8, 64);
+        BOUND(h, 8, 64);
+        imlib_context_set_image(temp_im);
       }
-      BOUND(w, 8, 64);
-      BOUND(h, 8, 64);
     }
-    imlib_context_set_image(temp_im);
-  } else {
+  }
+
+  if (temp_im == NULL) {
     w = h = 48;
     temp_im = imlib_create_image_using_data(48, 48, (DATA32 *) icon_data);
     imlib_context_set_image(temp_im);
