@@ -3,8 +3,8 @@
 lib_LTLIBRARIES = libEterm.la
 bin_PROGRAMS = Eterm
 
-MMX_SRCS = mmx_cmod.S
-MMX_OBJS = $(MMX_SRCS:.S=.lo)
+MMX_SRCS = $(srcdir)/mmx_cmod.S
+MMX_OBJS = mmx_cmod.lo
 
 libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c          \
                       command.h draw.c draw.h e.c e.h eterm_debug.h eterm_utmp.h \
@@ -22,10 +22,16 @@ else
 libEterm_la_DEPENDENCIES = feature.h
 endif
 
+if HAVE_MMX
+$(MMX_OBJS): $(MMX_SRCS)
+endif
+
 Eterm_SOURCES = main.c
 Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Eterm_LDADD = libEterm.la 
+
+EXTRA_DIST = mmx_cmod.S
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
