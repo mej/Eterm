@@ -106,7 +106,6 @@ AC_LN_S
 AC_PATH_PROG(PERL, perl, /usr/bin/perl, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
 AC_PATH_PROG(AWK, awk, /usr/bin/awk, $PATH:/usr/bin:/bin:/usr/local/bin:/usr/ccs/bin:/usr/contrib/bin)
 export PERL AWK
-AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
 
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
@@ -380,8 +379,37 @@ dnl#
 dnl# LibAST
 dnl#
 AC_CHECK_LIB(ast, libast_malloc, FOUND_LIBAST=1, FOUND_LIBAST=0, $GRLIBS)
-test -z "$LIBAST_CONFIG" && FOUND_LIBAST=0
+if test "$FOUND_LIBAST" -eq "1"; then
+  AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
+  test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
+fi
 
+if test "$FOUND_LIBAST" -ne "1"; then
+  echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
+  echo "        you may have it installed in a strange place, or you may need to run";
+  echo "        /sbin/ldconfig.  If you don't have it, I can download it for you.";
+  echo "        Shall I retrieve and build LibAST now (y/n)?";
+  read ANS
+  if test "x$ANS" = "xy" -o "x$ANS" = "xyes" -o "x$ANS" = "xY" -o "x$ANS" = "xYES"; then
+    if test -d CVS ; then
+      # Download from CVS server
+      CVSROOT=":pserver:anonymous@cvs.enlightenment.sourceforge.net:/cvsroot/enlightenment"
+      grep $CVSROOT $HOME/.cvspass >/dev/null 2>&1 || cvs -d $CVSROOT login
+      cvs -z3 -d $CVSROOT co -d libast eterm/libast
+      (cd libast && ./autogen.sh $ac_configure_args && make install && cd .. && rm -rf libast)
+      if test $? -ne 0; then
+        echo 'ERROR:  Unable to auto-get libast, sorry.' 1>&2
+        exit 1
+      fi
+      FOUND_LIBAST=1
+      AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
+      test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
+    else
+      # Download tarball
+      :
+    fi
+  fi
+fi
 if test "$FOUND_LIBAST" -eq "1"; then
   if test ! -z "$LIBAST_CONFIG"; then
     GRLIBS="-last $GRLIBS"
@@ -405,27 +433,7 @@ if test "$FOUND_LIBAST" -eq "1"; then
     done
   fi
 else
-  echo "ERROR:  You need the LibAST package to build Eterm.  If you already have it,";
-  echo "        you may have it installed in a strange place, or you may need to run";
-  echo "        /sbin/ldconfig.  If you don't have it, I can download it for you.";
-  echo "        Shall I retrieve and build LibAST now (y/n)?";
-  read ANS
-  if test "x$ANS" = "xy" -o "x$ANS" = "xyes" -o "x$ANS" = "xY" -o "x$ANS" = "xYES"; then
-    if test -d CVS ; then
-      # Download from CVS server
-      cvs -z3 -d :pserver:anonymous@cvs.enlightenment.sourceforge.net:/cvsroot/enlightenment co -d libast eterm/libast
-      (cd libast && ./autogen.sh "$@" && make install && cd .. && rm -rf libast)
-      if test $? -ne 0; then
-        echo 'ERROR:  Unable to auto-get libast, sorry.' 1>&2
-        exit 1
-      fi
-    else
-      # Download tarball
-      :
-    fi
-  else
-    AC_MSG_ERROR(Fatal:  libast not found.)
-  fi
+  AC_MSG_ERROR(Fatal:  libast not found.)
 fi
 
 AC_MSG_CHECKING(for utmp support)
