@@ -344,7 +344,7 @@ handle_client_message(event_t *ev)
         XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
         if (data != NULL) {
             XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
-            selection_paste(Xroot, XA_CUT_BUFFER0, True);
+            selection_paste(XA_CUT_BUFFER0);
             XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
             XFree(data);
         }

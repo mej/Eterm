@@ -102,7 +102,9 @@ eterm_bootstrap(int argc, char *argv[])
     }
 
     /* This MUST be called before any other Xlib functions */
-
+#ifdef SPIFOPT_SETTING_PREPARSE
+    SPIFOPT_FLAG_SET(SPIFOPT_SETTING_PREPARSE);
+#endif
     spifopt_parse(argc, argv);
     init_defaults();
 
