@@ -4126,3 +4126,10 @@ Tue May  8 19:53:56 PDT 2001	Michael Jennings <mej@eterm.org>
 	You will also need to update your themes.
 	
 -------------------------------------------------------------------------------
+Wed May  9 17:18:11 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	Fixed several bugs in the saving of settings and the support of
+	scripts in menus.  Also fixed the definition of term_name in the theme
+	files as pointed out by Laurence J. Lane <ljlane@debian.org>.
+	
+-------------------------------------------------------------------------------

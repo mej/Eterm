@@ -33,6 +33,7 @@
 #define MENUITEM_SUBMENU	(1UL << 1)
 #define MENUITEM_STRING		(1UL << 2)
 #define MENUITEM_ECHO		(1UL << 3)
+#define MENUITEM_SCRIPT		(1UL << 4)
 
 #define MENU_STATE_IS_MAPPED	(1UL << 0)
 #define MENU_STATE_IS_CURRENT	(1UL << 1)
@@ -61,6 +62,7 @@ typedef struct {
   union {
     menu_t *submenu;
     char *string;
+    char *script;
   } action;
   char *text, *rtext;
   unsigned short len, rlen;

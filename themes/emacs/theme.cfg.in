@@ -396,7 +396,7 @@ begin main
 #    line_space 2
 
 # Value to use for $TERM
-    term_name xterm
+    term_name Eterm
 
 # Program to exec (intended for use with themes)
     exec emacs -nw

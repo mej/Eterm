@@ -56,6 +56,8 @@ Eterm-base|Eterm basic terminal capabilities,
 	bold=\e[1m, rev=\e[7m, blink=\e[5m,
 # Start/stop underline, standout (reverse video)
 	smul=\e[4m, rmul=\e[24m, smso=\e[7m, rmso=\e[27m,
+# Turn off all attributes (exit_attribute_mode)
+	sgr0=\e[m^O,
 # Flash the screen (sets and resets reverse video for the whole screen)
 	flash=\e[?5h\e[?5l,
 
@@ -135,7 +137,6 @@ Eterm-ansi|Eterm with ANSI color (X Window System),
 	use=Eterm-base,
  	sgr=\e[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t^N%e^O%;,
 ##	sgr=\e[%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p6%t;1%;m,
-	sgr0=\e[m^O,
 
 ###### Add mouse reporting
 Eterm-mouse|Eterm with X11 mouse reporting,

@@ -39,6 +39,7 @@ static const char cvs_ident[] = "$Id$";
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
+#include "script.h"
 #include "term.h"
 #include "windows.h"
 
@@ -712,6 +713,8 @@ menuitem_delete(menuitem_t *item)
   }
   if (item->type == MENUITEM_STRING || item->type == MENUITEM_ECHO) {
     FREE(item->action.string);
+  } else if (item->type == MENUITEM_SCRIPT) {
+    FREE(item->action.script);
   }
   if (item->text) {
     FREE(item->text);
@@ -755,6 +758,9 @@ menuitem_set_action(menuitem_t *item, unsigned char type, char *action)
   switch (type) {
     case MENUITEM_SUBMENU:
       item->action.submenu = find_menu_by_title(menu_list, action);
+      break;
+    case MENUITEM_SCRIPT:
+      item->action.script = STRDUP(action);
       break;
     case MENUITEM_STRING:
     case MENUITEM_ECHO:
@@ -1163,6 +1169,9 @@ menu_action(menuitem_t *item)
       break;
     case MENUITEM_ECHO:
       tt_write((unsigned char *) item->action.string, strlen(item->action.string));
+      break;
+    case MENUITEM_SCRIPT:
+      script_parse((char *) item->action.script);
       break;
     default:
       fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);

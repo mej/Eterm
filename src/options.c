@@ -3129,6 +3129,9 @@ parse_menuitem(char *buff, void *state)
     } else if (!BEG_STRCASECMP(type, "string ")) {
       menuitem_set_action(curitem, MENUITEM_STRING, action);
 
+    } else if (!BEG_STRCASECMP(type, "script ")) {
+      menuitem_set_action(curitem, MENUITEM_SCRIPT, action);
+
     } else if (!BEG_STRCASECMP(type, "echo ")) {
       menuitem_set_action(curitem, MENUITEM_ECHO, action);
 
@@ -3295,7 +3298,8 @@ parse_multichar(char *buff, void *state)
 	  && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "euckr")
 	  && BEG_STRCASECMP(rs_multichar_encoding, "big5")
-	  && BEG_STRCASECMP(rs_multichar_encoding, "gb")) {
+	  && BEG_STRCASECMP(rs_multichar_encoding, "gb")
+	  && BEG_STRCASECMP(rs_multichar_encoding, "iso-10646")) {
 	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
 		    file_peek_path(), file_peek_line(), rs_multichar_encoding);
 	return NULL;
@@ -4602,6 +4606,8 @@ save_config(char *path, unsigned char save_theme)
             fprintf(fp, "echo \"%s\"\n", safe_print_string(item->action.string, -1));
           } else if (item->type == MENUITEM_SUBMENU) {
             fprintf(fp, "submenu \"%s\"\n", (item->action.submenu)->title);
+          } else if (item->type == MENUITEM_SCRIPT) {
+            fprintf(fp, "script \"%s\"\n", item->action.script);
           }
           fprintf(fp, "    end\n");
         }
@@ -4648,30 +4654,21 @@ save_config(char *path, unsigned char save_theme)
       if (action->mod & MOD_MOD5) {
         fprintf(fp, "mod5 ");
       }
-      if (action->keysym) {
-        fprintf(fp, "0x%04x", (unsigned int) action->keysym);
-      } else {
-        fprintf(fp, "button");
-        if (action->button == Button5) {
-          fprintf(fp, "5");
-        } else if (action->button == Button4) {
-          fprintf(fp, "4");
-        } else if (action->button == Button3) {
-          fprintf(fp, "3");
-        } else if (action->button == Button2) {
-          fprintf(fp, "2");
-        } else {
-          fprintf(fp, "1");
-        }
-      }
-      fprintf(fp, " to ");
-      if (action->type == ACTION_STRING) {
-        fprintf(fp, "string \"%s\"\n", safe_print_string(action->param.string, -1));
-      } else if (action->type == ACTION_ECHO) {
-        fprintf(fp, "echo \"%s\"\n", safe_print_string(action->param.string, -1));
-      } else if (action->type == ACTION_MENU) {
-        fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title);
-      }
+    }
+    if (action->keysym) {
+      fprintf(fp, "0x%04x", (unsigned int) action->keysym);
+    } else {
+      fprintf(fp, "button%d", (int) action->button);
+    }
+    fprintf(fp, " to ");
+    if (action->type == ACTION_STRING) {
+      fprintf(fp, "string \"%s\"\n", safe_print_string(action->param.string, -1));
+    } else if (action->type == ACTION_ECHO) {
+      fprintf(fp, "echo \"%s\"\n", safe_print_string(action->param.string, -1));
+    } else if (action->type == ACTION_MENU) {
+      fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title);
+    } else if (action->type == ACTION_SCRIPT) {
+      fprintf(fp, "script \"%s\"\n", action->param.script);
     }
   }
   fprintf(fp, "  end actions\n\n");
@@ -4745,7 +4742,7 @@ save_config(char *path, unsigned char save_theme)
   }
   for (i = 0; i < 256; i++) {
     if (KeySym_map[i]) {
-      fprintf(fp, "    keysym 0xff%02x \"%s\"\n", i, (KeySym_map[i] + 1));
+      fprintf(fp, "    keysym 0xff%02x \'%s\'\n", i, safe_print_string((char *) (KeySym_map[i] + 1), (unsigned long) KeySym_map[i][0]));
     }
   }
 #ifdef GREEK_SUPPORT

@@ -248,6 +248,8 @@ script_parse(char *s)
         return;
       }
       param_list = split(", \t", params);
+    } else {
+      param_list = NULL;
     }
     D_SCRIPT(("Calling function %s with parameters:  %s\n", func_name, NONULL(params)));
     if ((func = script_find_handler(func_name)) != NULL) {
