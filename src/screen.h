@@ -165,7 +165,7 @@ typedef enum {
   SELECTION_DONE
 } selection_op_t;
 typedef enum {
-  LATIN1 = 0, EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
+  LATIN1 = 0, UCS2, EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
 } encoding_t;
 typedef struct {
   short row, col;

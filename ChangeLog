@@ -5271,3 +5271,11 @@ The benefits of being a passenger on a long road trip...  The
 beginnings of EWMH opacity (a la xcompmgr) support and (hopefully)
 UTF-8 support.  Both as yet untested.
 ----------------------------------------------------------------------
+Fri Dec 17 16:35:31 2004                        Michael Jennings (mej)
+
+Another attempt (and failure) at UTF-8 support.  Disabled until
+someone can help me out.
+
+If you know iconv(), please have a look at the FIXME_BLOCK starting at
+line 3509 of src/command.c.
+----------------------------------------------------------------------

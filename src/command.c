@@ -111,6 +111,7 @@ static const char cvs_ident[] = "$Id$";
 # include <locale.h>
 # include <langinfo.h>
 # include <iconv.h>
+# include <wchar.h>
 #endif
 
 /* Eterm-specific Headers */
@@ -3505,29 +3506,45 @@ main_loop(void)
             }
             D_SCREEN(("Adding %d lines (%d chars); str == %8p, cmdbuf_ptr == %8p, cmdbuf_endp == %8p\n",
                       nlines, cmdbuf_ptr - str, str, cmdbuf_ptr, cmdbuf_endp));
-#ifdef MULTI_CHARSET
+#if FIXME_BLOCK
+            /* 
+             * iconv() is not my friend. :-( I've tried various things
+             * to make this work (including UCS2, SJIS, EUCJ, and
+             * WCHAR_T), but nothing has worked.  I'm obviously
+             * missing something, so if you know what, kindly throw me
+             * a clue.  :-)                                       -- mej
+             */
             if (!strcmp(nl_langinfo(CODESET), "UTF-8")) {
                 iconv_t handle;
 
-                handle = iconv_open("UTF-8", "UCS2");
+                if (encoding_method != UCS2) {
+                    set_multichar_encoding("utf8");
+                }
+                handle = iconv_open("UTF-8", "WCHAR_T");
                 if (handle == SPIF_CAST_C(iconv_t) -1) {
-                    print_error("Unable to decode UTF-8 locale %s to UCS-2.  Defaulting to portable C locale.\n",
+                    print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
                     setlocale(LC_ALL, "C");
+                    scr_add_lines(str, nlines, (cmdbuf_ptr - str));
                 } else {
                     char *outbuff, *pinbuff, *poutbuff;
+                    wchar_t *wcbuff;
+                    mbstate_t mbs;
                     size_t bufflen, outlen = 0, retval;
 
                     pinbuff = (char *) str;
                     bufflen = cmdbuf_ptr - str;
-                    poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(bufflen * 6);
+                    outlen = bufflen * 6;
+                    poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
                     errno = 0;
+                    D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff, bufflen));
+                    print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
                     if (retval != (size_t) -1) {
                         errno = 0;
                     }
                     if (errno == E2BIG) {
-                        print_error("My UTF-8 decode buffer was too small by %lu bytes?!", bufflen);
+                        print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
                     } else if (errno == EILSEQ) {
                         print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n",
                                     *pinbuff, *pinbuff);
@@ -3535,12 +3552,33 @@ main_loop(void)
                         pinbuff++;
                     } else if (errno == EINVAL) {
                         D_VT(("Incomplete multibyte sequence encountered.\n"));
+                        print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n", (cmdbuf_ptr - str), outlen);
+                    } else {
+                        print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
                     }
 
-                    if (pinbuff > (char *) str) {
-                        cmdbuf_ptr = (unsigned char *) pinbuff;
-                        scr_add_lines(str, nlines, (cmdbuf_ptr - str));
+                    print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
+                    MEMSET(outbuff + outlen, 0, sizeof(wchar_t));
+                    wcbuff = SPIF_CAST_C(wchar_t *) outbuff;
+                    MEMSET(&mbs, 0, sizeof(mbstate_t));
+                    outlen = wcsrtombs(NULL, &wcbuff, 0, &mbs) + 1;
+                    if (outlen > 0) {
+                        outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+                        outlen = wcsrtombs(outbuff, &wcbuff, outlen, &mbs);
+                        if ((long)outlen >= 0) {
+                            FREE(wcbuff);
+                            print_error("I win!\n");
+                        } else {
+                            print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno, strerror(errno));
+                        }
+                        if (pinbuff > (char *) str) {
+                            cmdbuf_ptr = (unsigned char *) pinbuff;
+                            scr_add_lines(outbuff, nlines, outlen);
+                        }
+                    } else {
+                        print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen, errno, strerror(errno));
                     }
+                    FREE(outbuff);
                 }
             } else
 #endif

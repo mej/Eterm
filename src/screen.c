@@ -1450,7 +1450,10 @@ set_multichar_encoding(const char *str)
 {
 #ifdef MULTI_CHARSET
     if (str && *str) {
-        if (!strcasecmp(str, "sjis")) {
+        if (!strcasecmp(str, "utf8") || !strcasecmp(str, "ucs2")) {
+            encoding_method = UCS2;
+            multichar_decode = latin1;
+        } else if (!strcasecmp(str, "sjis")) {
             encoding_method = SJIS;
             multichar_decode = sjis2jis;
         } else if (!strcasecmp(str, "eucj") || !strcasecmp(str, "euckr") || !strcasecmp(str, "gb")) {
