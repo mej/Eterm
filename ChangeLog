@@ -4931,3 +4931,7 @@ Thu Nov 21 14:03:23 2002                        Michael Jennings (mej)
 
 Fix for Debian Bug #169933, seg fault with invalid default font index.
 ----------------------------------------------------------------------
+Thu Nov 21 14:11:29 2002                        Michael Jennings (mej)
+
+Fixed a typo noted by Bill Allombert <allomber@math.u-bordeaux.fr>.
+----------------------------------------------------------------------
