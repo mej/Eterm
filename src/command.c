@@ -2199,7 +2199,7 @@ run_command(char *argv[])
 	shell = "/bin/sh";
 
       argv0 = my_basename(shell);
-      if (Options & Opt_loginShell) {
+      if (Options & Opt_login_shell) {
 	char *p = MALLOC(strlen(argv0) + 2);
 
 	p[0] = '-';
@@ -2214,7 +2214,7 @@ run_command(char *argv[])
   }
 #ifdef UTMP_SUPPORT
   privileges(RESTORE);
-  if (Options & Opt_utmpLogging) {
+  if (Options & Opt_write_utmp) {
     add_utmp_entry(ttydev, display_name, ptyfd);
   }
   privileges(IGNORE);

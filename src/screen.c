@@ -1528,11 +1528,11 @@ scr_bell(void)
 {
 #ifndef NO_MAPALERT
 #ifdef MAPALERT_OPTION
-  if (Options & Opt_mapAlert)
+  if (Options & Opt_map_alert)
 #endif
     XMapWindow(Xdisplay, TermWin.parent);
 #endif
-  if (Options & Opt_visualBell) {
+  if (Options & Opt_visual_bell) {
     scr_rvideo_mode(!rvideo);
     scr_rvideo_mode(!rvideo);
   } else

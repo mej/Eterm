@@ -2153,12 +2153,12 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 20:
 	  nstr = (char *) strsep(&tnstr, ";");
-	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_visualBell);
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_visual_bell);
 	  break;
 #ifdef MAPALERT_OPTION
 	case 21:
 	  nstr = (char *) strsep(&tnstr, ";");
-	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_mapAlert);
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_map_alert);
 	  break;
 #endif
 	case 22:

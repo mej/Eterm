@@ -138,7 +138,6 @@ char *rs_finished_text = NULL;
 char *rs_term_name = NULL;
 #ifdef PIXMAP_SUPPORT
 char *rs_pixmapScale = NULL;
-char *rs_backing_store = NULL;
 char *rs_icon = NULL;
 char *rs_cmod_image = NULL;
 char *rs_cmod_red = NULL;
@@ -198,7 +197,7 @@ static const struct {
       OPT_BLONG("version", "display version and configuration information", NULL, 0),
 
 /* =======[ Color options ]======= */
-      OPT_BOOL('r', "reverse-video", "reverse video", &Options, Opt_reverseVideo),
+      OPT_BOOL('r', "reverse-video", "reverse video", &Options, Opt_reverse_video),
       OPT_STR('b', "background-color", "background color", &rs_color[bgColor]),
       OPT_STR('f', "foreground-color", "foreground color", &rs_color[fgColor]),
       OPT_LONG("color0", "color 0", &rs_color[minColor]),
@@ -296,10 +295,10 @@ static const struct {
 #endif
 
 /* =======[ Toggles ]======= */
-      OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &Options, Opt_loginShell),
+      OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &Options, Opt_login_shell),
       OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollbar),
-      OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_utmpLogging),
-      OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visualBell),
+      OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_write_utmp),
+      OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visual_bell),
       OPT_BOOL('H', "home-on-output", "jump to bottom on output", &Options, Opt_home_on_output),
       OPT_BLONG("home-on-input", "jump to bottom on input", &Options, Opt_home_on_input),
       OPT_BOOL('q', "no-input", "configure for output only", &Options, Opt_no_input),
@@ -309,15 +308,14 @@ static const struct {
       OPT_BOOL('x', "borderless", "force Eterm to have no borders", &Options, Opt_borderless),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
-      OPT_BOOL('m', "map-alert", "uniconify on beep", &Options, Opt_mapAlert),
+      OPT_BOOL('m', "map-alert", "uniconify on beep", &Options, Opt_map_alert),
 # endif
 #endif
 #ifdef META8_OPTION
       OPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", &Options, Opt_meta8),
 #endif
-      OPT_BLONG("backing-store", "use backing store", &Options, Opt_backing_store),
       OPT_BLONG("double-buffer", "use double-buffering to reduce exposes (uses more memory)", &Options, Opt_double_buffer),
-      OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_noCursor),
+      OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_no_cursor),
       OPT_BLONG("pause", "pause after the child process exits", &Options, Opt_pause),
       OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &Options, Opt_xterm_select),
       OPT_BLONG("select-line", "triple-click selects whole line", &Options, Opt_select_whole_line),
@@ -507,11 +505,6 @@ version(void)
   printf(" +BACKGROUND_CYCLING_SUPPORT");
 #else
   printf(" -BACKGROUND_CYCLING_SUPPORT");
-#endif
-#ifdef BACKING_STORE
-  printf(" +BACKING_STORE");
-#else
-  printf(" -BACKING_STORE");
 #endif
 #ifdef USE_EFFECTS
   printf(" +USE_EFFECTS");
@@ -1849,7 +1842,7 @@ parse_color(char *buff, void *state)
     char *tmp = get_pword(2, buff);
 
     if (!BEG_STRCASECMP(tmp, "reverse")) {
-      Options |= Opt_reverseVideo;
+      Options |= Opt_reverse_video;
     } else if (BEG_STRCASECMP(tmp, "normal")) {
       print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n",
 		  file_peek_path(), file_peek_line(), tmp);
@@ -2059,9 +2052,9 @@ parse_toggles(char *buff, void *state)
   if (!BEG_STRCASECMP(buff, "map_alert ")) {
 #if !defined(NO_MAPALERT) && defined(MAPALERT_OPTION)
     if (bool_val) {
-      Options |= Opt_mapAlert;
+      Options |= Opt_map_alert;
     } else {
-      Options &= ~(Opt_mapAlert);
+      Options &= ~(Opt_map_alert);
     }
 #else
     print_warning("Support for the map_alert attribute was not compiled in, ignoring\n");
@@ -2069,15 +2062,15 @@ parse_toggles(char *buff, void *state)
 
   } else if (!BEG_STRCASECMP(buff, "visual_bell ")) {
     if (bool_val) {
-      Options |= Opt_visualBell;
+      Options |= Opt_visual_bell;
     } else {
-      Options &= ~(Opt_visualBell);
+      Options &= ~(Opt_visual_bell);
     }
   } else if (!BEG_STRCASECMP(buff, "login_shell ")) {
     if (bool_val) {
-      Options |= Opt_loginShell;
+      Options |= Opt_login_shell;
     } else {
-      Options &= ~(Opt_loginShell);
+      Options &= ~(Opt_login_shell);
     }
   } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
     if (bool_val) {
@@ -2089,9 +2082,9 @@ parse_toggles(char *buff, void *state)
   } else if (!BEG_STRCASECMP(buff, "utmp_logging ")) {
 #ifdef UTMP_SUPPORT
     if (bool_val) {
-      Options |= Opt_utmpLogging;
+      Options |= Opt_write_utmp;
     } else {
-      Options &= ~(Opt_utmpLogging);
+      Options &= ~(Opt_write_utmp);
     }
 #else
     print_warning("Support for the utmp_logging attribute was not compiled in, ignoring\n");
@@ -2161,13 +2154,6 @@ parse_toggles(char *buff, void *state)
     } else {
       Options &= ~(Opt_borderless);
     }
-  } else if (!BEG_STRCASECMP(buff, "backing_store ")) {
-    if (bool_val) {
-      Options |= Opt_backing_store;
-    } else {
-      Options &= ~(Opt_backing_store);
-    }
-
   } else if (!BEG_STRCASECMP(buff, "double_buffer ")) {
     if (bool_val) {
       Options |= Opt_double_buffer;
@@ -2177,9 +2163,9 @@ parse_toggles(char *buff, void *state)
 
   } else if (!BEG_STRCASECMP(buff, "no_cursor ")) {
     if (bool_val) {
-      Options |= Opt_noCursor;
+      Options |= Opt_no_cursor;
     } else {
-      Options &= ~(Opt_noCursor);
+      Options &= ~(Opt_no_cursor);
     }
 
   } else if (!BEG_STRCASECMP(buff, "pause ")) {
@@ -3985,7 +3971,7 @@ post_parse(void)
   }
 #endif
 
-  if (Options & Opt_reverseVideo) {
+  if (Options & Opt_reverse_video) {
     char *tmp;
 
     /* swap foreground/background colors */
@@ -4646,11 +4632,11 @@ save_config(char *path, unsigned char save_theme)
 #endif
 
   fprintf(fp, "  begin toggles\n");
-  fprintf(fp, "    map_alert %d\n", (Options & Opt_mapAlert ? 1 : 0));
-  fprintf(fp, "    visual_bell %d\n", (Options & Opt_visualBell ? 1 : 0));
-  fprintf(fp, "    login_shell %d\n", (Options & Opt_loginShell ? 1 : 0));
+  fprintf(fp, "    map_alert %d\n", (Options & Opt_map_alert ? 1 : 0));
+  fprintf(fp, "    visual_bell %d\n", (Options & Opt_visual_bell ? 1 : 0));
+  fprintf(fp, "    login_shell %d\n", (Options & Opt_login_shell ? 1 : 0));
   fprintf(fp, "    scrollbar %d\n", (Options & Opt_scrollbar ? 1 : 0));
-  fprintf(fp, "    utmp_logging %d\n", (Options & Opt_utmpLogging ? 1 : 0));
+  fprintf(fp, "    utmp_logging %d\n", (Options & Opt_write_utmp ? 1 : 0));
   fprintf(fp, "    meta8 %d\n", (Options & Opt_meta8 ? 1 : 0));
   fprintf(fp, "    iconic %d\n", (Options & Opt_iconic ? 1 : 0));
   fprintf(fp, "    home_on_output %d\n", (Options & Opt_home_on_output ? 1 : 0));
@@ -4660,9 +4646,8 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollbar_right ? 1 : 0));
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
   fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
-  fprintf(fp, "    backing_store %d\n", (Options & Opt_backing_store ? 1 : 0));
   fprintf(fp, "    double_buffer %d\n", (Options & Opt_double_buffer ? 1 : 0));
-  fprintf(fp, "    no_cursor %d\n", (Options & Opt_noCursor ? 1 : 0));
+  fprintf(fp, "    no_cursor %d\n", (Options & Opt_no_cursor ? 1 : 0));
   fprintf(fp, "    pause %d\n", (Options & Opt_pause ? 1 : 0));
   fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));
   fprintf(fp, "    select_line %d\n", (Options & Opt_select_whole_line ? 1 : 0));

@@ -444,7 +444,6 @@ menu_create(char *title)
   if (!mask) {
     xattr.border_pixel = BlackPixel(Xdisplay, Xscreen);
     xattr.save_under = TRUE;
-    xattr.backing_store = WhenMapped;
     xattr.override_redirect = TRUE;
     xattr.colormap = cmap;
 
@@ -456,13 +455,13 @@ menu_create(char *title)
   menu->title = STRDUP(title ? title : "");
 
   menu->win = XCreateWindow(Xdisplay, Xroot, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-			    CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
+			    CWOverrideRedirect | CWSaveUnder | CWBorderPixel | CWColormap, &xattr);
   XDefineCursor(Xdisplay, menu->win, cursor);
   XSelectInput(Xdisplay, menu->win, mask);
   XStoreName(Xdisplay, menu->win, menu->title);
 
   menu->swin = XCreateWindow(Xdisplay, menu->win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-			     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
+			     CWOverrideRedirect | CWSaveUnder | CWBorderPixel | CWColormap, &xattr);
 
   menu->gc = LIBMEJ_X_CREATE_GC(0, NULL);
   menuitem_clear_current(menu);

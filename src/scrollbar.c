@@ -682,26 +682,26 @@ scrollbar_init(int width, int height)
   /* Create the scrollbar trough window.  It will be the parent to the other windows. */
   scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), bbar_calc_docked_height(BBAR_DOCKED_TOP),
                                 scrollbar_trough_width(), height, 0, Xdepth, InputOutput, CopyFromParent,
-                                CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
+                                CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
   XDefineCursor(Xdisplay, scrollbar.win, cursor);
   XSelectInput(Xdisplay, scrollbar.win, mask);
   D_SCROLLBAR(("Created scrollbar window 0x%08x\n", scrollbar.win));
 
   /* Now the up arrow window. */
   scrollbar.up_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
-                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.up_win, mask);
   D_SCROLLBAR(("Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
 
   /* The down arrow window */
   scrollbar.dn_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
-                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.dn_win, mask);
   D_SCROLLBAR(("Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
 
   /* The anchor window */
   scrollbar.sa_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar.anchor_top, scrollbar_anchor_width(), scrollbar_anchor_height(),
-                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWColormap, &Attributes);
   XSelectInput(Xdisplay, scrollbar.sa_win, mask);
   XMapWindow(Xdisplay, scrollbar.sa_win);
   D_SCROLLBAR(("Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));

@@ -80,7 +80,6 @@ bbar_create(void)
 
   xattr.border_pixel = BlackPixel(Xdisplay, Xscreen);
   xattr.save_under = FALSE;
-  xattr.backing_store = NotUseful;
   xattr.override_redirect = TRUE;
   xattr.colormap = cmap;
 
@@ -96,7 +95,7 @@ bbar_create(void)
   gcvalue.font = bbar->font->fid;
 
   bbar->win = XCreateWindow(Xdisplay, Xroot, bbar->x, bbar->y, bbar->w, bbar->h, 0, Xdepth, InputOutput, CopyFromParent,
-			    CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
+			    CWOverrideRedirect | CWSaveUnder | CWBorderPixel | CWColormap, &xattr);
   XDefineCursor(Xdisplay, bbar->win, cursor);
   XSelectInput(Xdisplay, bbar->win, mask);
   XStoreName(Xdisplay, bbar->win, "Eterm Button Bar");

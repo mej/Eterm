@@ -3904,3 +3904,8 @@ Sun Sep 17 13:05:13 PDT 2000	Michael Jennings <mej@eterm.org>
 	<gnea@rochester.rr.com>.
 	
 -------------------------------------------------------------------------------
+Sun Sep 17 17:29:26 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Got rid of the useless backing_store option.
+	
+-------------------------------------------------------------------------------

@@ -329,7 +329,6 @@ Create_Windows(int argc, char *argv[])
   } else {
     mwmhints.flags = 0;
   }
-  Attributes.backing_store = WhenMapped;
   Attributes.colormap = cmap;
 
   szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0));
@@ -420,15 +419,9 @@ Create_Windows(int argc, char *argv[])
   /* the vt window */
   TermWin.x = (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? (scrollbar_get_width() + (2 * scrollbar_get_shadow())) : 0);
   TermWin.y = bbar_calc_docked_height(BBAR_DOCKED_TOP);
-  if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
-    D_X11(("Creating term window with save_under = TRUE\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
-			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWBackingStore | CWColormap, &Attributes);
-  } else {
-    D_X11(("Creating term window with no backing store\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
-			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
-  }
+  TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, TermWin.x, TermWin.y, szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
+                             CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
+  D_X11(("Created terminal window 0x%08x at %dx%d\n", TermWin.vt, TermWin.x, TermWin.y));
   if (!(background_is_pixmap()) && !(Options & Opt_borderless)) {
     XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
     XClearWindow(Xdisplay, TermWin.vt);
@@ -466,7 +459,7 @@ Create_Windows(int argc, char *argv[])
     TermWin.gc = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
   }
 
-  if (Options & Opt_noCursor) {
+  if (Options & Opt_no_cursor) {
     scr_cursor_visible(0);
   }
 }

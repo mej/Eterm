@@ -58,19 +58,19 @@
 #define optList_numoptions()            (sizeof(optList)/sizeof(optList[0]))
 
 # define Opt_console                    (1LU <<  0)
-# define Opt_loginShell                 (1LU <<  1)
+# define Opt_login_shell                (1LU <<  1)
 # define Opt_iconic                     (1LU <<  2)
-# define Opt_visualBell                 (1LU <<  3)
-# define Opt_mapAlert                   (1LU <<  4)
-# define Opt_reverseVideo               (1LU <<  5)
-# define Opt_utmpLogging                (1LU <<  6)
+# define Opt_visual_bell                (1LU <<  3)
+# define Opt_map_alert                  (1LU <<  4)
+# define Opt_reverse_video              (1LU <<  5)
+# define Opt_write_utmp                 (1LU <<  6)
 # define Opt_scrollbar                  (1LU <<  7)
 # define Opt_meta8                      (1LU <<  8)
 # define Opt_home_on_output             (1LU <<  9)
 # define Opt_scrollbar_right            (1LU << 10)
 # define Opt_borderless                 (1LU << 11)
-# define Opt_backing_store              (1LU << 12)
-# define Opt_noCursor                   (1LU << 13)
+# define Opt_no_input                   (1LU << 12)
+# define Opt_no_cursor                  (1LU << 13)
 # define Opt_pause                      (1LU << 14)
 # define Opt_home_on_input              (1LU << 15)
 # define Opt_report_as_keysyms          (1LU << 16)
@@ -81,7 +81,6 @@
 # define Opt_install                    (1LU << 21)
 # define Opt_scrollbar_floating         (1LU << 22)
 # define Opt_double_buffer              (1LU << 23)
-# define Opt_no_input                   (1LU << 24)
 
 # define IMOPT_TRANS                    (1U << 0)
 # define IMOPT_ITRANS                   (1U << 1)
@@ -219,7 +218,7 @@ extern       char  *rs_anim_pixmap_list;
 extern       char **rs_anim_pixmaps;
 extern     time_t   rs_anim_delay;
 extern char *rs_path;
-extern char *rs_noCursor;
+extern char *rs_no_cursor;
 #ifdef USE_XIM
 extern char *rs_input_method;
 extern char *rs_preedit_type;
