@@ -31,7 +31,9 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/cursorfont.h>
 
 #include "../libmej/debug.h"
+#include "../libmej/mem.h"
 #include "command.h"
+#include "e.h"
 #include "events.h"
 #include "main.h"
 #include "options.h"
@@ -46,10 +48,10 @@ static const char cvs_ident[] = "$Id$";
 event_dispatcher_data_t scrollbar_event_data;
 #ifdef PIXMAP_SCROLLBAR
 scrollbar_t scrollBar =
-{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, 0, None, None, None, None};
+{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, 0, 0, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, None, None, None, None};
 #else                                             
-scrollbar_t scrollBar =                           
-{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, 0, None};
+scrollbar_t scrollBar =
+{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, 0, 0, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, None};
 #endif
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
 short scroll_arrow_delay;
@@ -665,6 +667,7 @@ scrollbar_reset(void)
   } else {
     scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
   }
+  scrollBar.init = 0;
 }
 
 unsigned char
@@ -710,6 +713,10 @@ scrollbar_show(short mouseoffset)
         XSetWindowBackground(Xdisplay, scrollBar.win, PixColors[bgColor]);
       } else {
 	render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+        if (image_mode_is(image_sb, MODE_AUTO)) {
+          enl_ipc_sync();
+          XClearWindow(Xdisplay, scrollBar.win);
+        }
       }
       gcvalue.foreground = PixColors[topShadowColor];
       topShadowGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
@@ -726,6 +733,7 @@ scrollbar_show(short mouseoffset)
 
       focus = TermWin.focus;
       gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
+#if 0
 # ifdef PIXMAP_OFFSET
       if (!((Options & Opt_scrollBar_floating) && image_mode_is(image_sb, (MODE_TRANS | MODE_VIEWPORT)))) {
 # endif
@@ -738,6 +746,7 @@ scrollbar_show(short mouseoffset)
 # ifdef PIXMAP_OFFSET
       }
 # endif				/* PIXMAP_OFFSET */
+#endif
       XChangeGC(Xdisplay, scrollbarGC, GCForeground, &gcvalue);
 
       gcvalue.foreground = PixColors[focus ? topShadowColor : unfocusedTopShadowColor];
@@ -833,19 +842,27 @@ scrollbar_show(short mouseoffset)
     }
     /* Draw scrollbar arrows */
     if (scrollbar_uparrow_is_pixmapped()) {
-      XMoveResizeWindow(Xdisplay, scrollBar.up_win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
-      render_simage(images[image_up].current, scrollBar.up_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
+      if (scrollBar.init == 0) {
+        XMoveResizeWindow(Xdisplay, scrollBar.up_win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
+        render_simage(images[image_up].current, scrollBar.up_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
+      }
     } else {
       Draw_up_button(scrollbar_get_shadow(), scrollbar_up_loc(), (scrollbar_isUp()? -1 : +1));
     }
     if (scrollbar_downarrow_is_pixmapped()) {
-      XMoveResizeWindow(Xdisplay, scrollBar.dn_win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
-      render_simage(images[image_down].current, scrollBar.dn_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
+      if (scrollBar.init == 0) {
+        XMoveResizeWindow(Xdisplay, scrollBar.dn_win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
+        render_simage(images[image_down].current, scrollBar.dn_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
+      }
     } else {
       Draw_dn_button(scrollbar_get_shadow(), scrollbar_dn_loc(), (scrollbar_isDn()? -1 : +1));
     }
   }
+  if (image_mode_is(image_up, MODE_AUTO) || image_mode_is(image_down, MODE_AUTO) || image_mode_is(image_sb, MODE_AUTO) || image_mode_is(image_sa, MODE_AUTO)) {
+    enl_ipc_sync();
+  }
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 
+  scrollBar.init = 1;
   return 1;
 }

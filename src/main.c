@@ -106,7 +106,7 @@ main(int argc, char *argv[])
 #endif
 
   /* Security enhancements -- mej */
-  putenv("IFS= \t");
+  putenv("IFS= \t\n");
   my_ruid = getuid();
   my_euid = geteuid();
   my_rgid = getgid();

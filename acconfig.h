@@ -312,6 +312,16 @@
 #undef GREEK_SUPPORT
 #undef CONFIG_SEARCH_PATH
 #undef AUTHORS
+#undef MFONT0
+#undef MFONT1
+#undef MFONT2
+#undef MFONT3
+#undef MFONT4
+#undef FONT0
+#undef FONT1
+#undef FONT2
+#undef FONT3
+#undef FONT4
 
 
 /* Leave that blank line there!!  Autoheader needs it.

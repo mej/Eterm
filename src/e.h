@@ -29,10 +29,11 @@
 /* includes */
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
-#include "pixmap.h"  /* For simage_t */
 
 /************ Macros and Definitions ************/
 #define IPC_TIMEOUT    ((char *) 1)
+
+#define enl_ipc_sync()  do {if (check_image_ipc(0)) {char *reply = enl_send_and_wait("nop"); FREE(reply);}} while (0)
 
 /************ Variables ************/
 extern Window ipc_win;

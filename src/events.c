@@ -259,16 +259,6 @@ handle_property_notify(event_t * ev)
       }
     }
   }
-  if ((ev->xany.window == Xroot) || (ev->xany.window == ipc_win)) {
-    prop = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
-    D_EVENTS(("handle_property_notify():  On 0x%08x.  prop == 0x%08x, ev->xproperty.atom == 0x%08x\n", (int) ev->xany.window, (int) prop, (int) ev->xproperty.atom));
-    if (ev->xproperty.atom == prop) {
-      D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
-      XSelectInput(Xdisplay, ipc_win, None);
-      ipc_win = None;
-      return 1;
-    }
-  }
   return 1;
 }
 
@@ -278,10 +268,11 @@ handle_destroy_notify(event_t * ev)
 
   D_EVENTS(("handle_destroy_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
 
-  if (ev->xany.window == ipc_win) {
+  if (ev->xdestroywindow.window == ipc_win) {
     D_EVENTS((" -> IPC window 0x%08x changed/destroyed.  Clearing ipc_win.\n", ipc_win));
     XSelectInput(Xdisplay, ipc_win, None);
     ipc_win = None;
+    check_image_ipc(1);
   }
   return 1;
 }
@@ -669,6 +660,7 @@ process_x_event(event_t * ev)
 #endif
 
   COUNT_EVENT(event_cnt);
+  D_EVENTS(("process_x_event(ev [0x%08x] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
   if (primary_data.handlers[ev->type] != NULL) {
     return ((primary_data.handlers[ev->type]) (ev));
   }

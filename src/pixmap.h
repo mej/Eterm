@@ -65,10 +65,8 @@ enum {
   image_sb,
   image_sa,
 #endif
-#ifdef PIXMAP_MENUBAR
   image_menu,
   image_submenu,
-#endif
   image_max
 };
 
@@ -97,11 +95,12 @@ enum {
 /* Helper macros */
 #define FOREACH_IMAGE(x)                  do {unsigned char idx; for (idx = 0; idx < image_max; idx++) { x } } while (0)
 #define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
-                                              scr_touch(); scrollbar_show(0);} while (0)
+                                              scr_touch(); scrollbar_show(0); enl_ipc_sync();} while (0)
 #define image_set_mode(which, bit)        do {images[which].mode &= ~(MODE_MASK); images[which].mode |= (bit);} while (0)
 #define image_allow_mode(which, bit)      (images[which].mode |= (bit))
 #define image_disallow_mode(which, bit)   (images[which].mode &= ~(bit))
 #define image_mode_is(which, bit)         (images[which].mode & (bit))
+#define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
@@ -161,6 +160,7 @@ _XFUNCPROTOBEGIN
 extern const char *get_image_type(unsigned short);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
+extern unsigned char check_image_ipc(unsigned char);
 extern void reset_simage(simage_t *, unsigned long);
 extern void paste_simage(simage_t *, unsigned char, Window, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);

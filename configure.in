@@ -257,12 +257,45 @@ AC_ARG_WITH(delete,
 AC_MSG_CHECKING(for multi-charset support)
 AC_ARG_ENABLE(multi-charset,
 [  --enable-multi-charset  compile with multi-charset support],
-            if test "$enableval" = "yes"; then 
-              AC_MSG_RESULT(yes)
+            if test "$enableval" = "yes" -o "$enableval" = "kanji"; then 
+              AC_MSG_RESULT(kanji)
               AC_DEFINE(MULTI_CHARSET)
+              AC_DEFINE_UNQUOTED(MFONT0, "k14")
+              AC_DEFINE_UNQUOTED(MFONT1, "jiskan16")
+              AC_DEFINE_UNQUOTED(MFONT2, "jiskan18")
+              AC_DEFINE_UNQUOTED(MFONT3, "jiskan24")
+              AC_DEFINE_UNQUOTED(MFONT4, "jiskan26")
+              AC_DEFINE_UNQUOTED(FONT0, "fixed")
+              AC_DEFINE_UNQUOTED(FONT1, "8x16")
+              AC_DEFINE_UNQUOTED(FONT2, "9x18")
+              AC_DEFINE_UNQUOTED(FONT3, "12x24")
+              AC_DEFINE_UNQUOTED(FONT4, "13x26")
+            elif test "$enableval" = "utf-8"; then 
+              AC_MSG_RESULT(utf-8)
+              AC_DEFINE(MULTI_CHARSET)
+              AC_DEFINE_UNQUOTED(MFONT0, "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1")
+              AC_DEFINE_UNQUOTED(MFONT1, "-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso10646-1")
+              AC_DEFINE_UNQUOTED(MFONT2, "-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1")
+              AC_DEFINE_UNQUOTED(MFONT3, "-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso10646-1")
+              AC_DEFINE_UNQUOTED(MFONT4, "-misc-fixed-medium-r-normal--13-120-75-75-c-80-iso10646-1")
+              AC_DEFINE_UNQUOTED(FONT0, "fixed")
+              AC_DEFINE_UNQUOTED(FONT1, "5x7")
+              AC_DEFINE_UNQUOTED(FONT2, "6x10")
+              AC_DEFINE_UNQUOTED(FONT3, "7x14")
+              AC_DEFINE_UNQUOTED(FONT4, "8x13")
             else
               AC_MSG_RESULT(no)
+              AC_DEFINE_UNQUOTED(FONT0, "fixed")
+              AC_DEFINE_UNQUOTED(FONT1, "5x7")
+              AC_DEFINE_UNQUOTED(FONT2, "6x10")
+              AC_DEFINE_UNQUOTED(FONT3, "7x14")
+              AC_DEFINE_UNQUOTED(FONT4, "8x13")
             fi, AC_MSG_RESULT(no)
+                AC_DEFINE_UNQUOTED(FONT0, "fixed")
+                AC_DEFINE_UNQUOTED(FONT1, "5x7")
+                AC_DEFINE_UNQUOTED(FONT2, "6x10")
+                AC_DEFINE_UNQUOTED(FONT3, "7x14")
+                AC_DEFINE_UNQUOTED(FONT4, "8x13")
 )
 AC_MSG_CHECKING(for XIM support)
 AC_ARG_ENABLE(xim,
@@ -286,26 +319,26 @@ AC_ARG_ENABLE(greek,
               AC_MSG_RESULT(no)
             fi, AC_MSG_RESULT(no)
 )
-AC_MSG_CHECKING(which threads library to use)
-AC_ARG_WITH(threads,
-[  --with-threads[=STYLE]  compile with threads support, STYLE is either "posix" or blank
-                          (disabled by default)],
-            case $withval in
-              [yes | posix )]
-                AC_MSG_RESULT(POSIX)
-                THREADS_LIB=posix
-                ;;
-              [* )]
-                AC_MSG_RESULT(none)
-                ;;
-            esac
- , AC_MSG_RESULT(none))
-if test "$THREADS_LIB" = "posix"; then
-  AC_CHECK_LIB(pthread, pthread_create, CFLAGS="$CFLAGS -D_REENTRANT" ; THREADLIBS="-lpthread"
-                                       AC_DEFINE(USE_POSIX_THREADS)
-                                       AC_DEFINE(MUTEX_SYNCH)
-               , , -D_REENTRANT -L/usr/lib -L/lib -L/usr/local/lib)
-fi
+dnl# AC_MSG_CHECKING(which threads library to use)
+dnl# AC_ARG_WITH(threads,
+dnl# [  --with-threads[=STYLE]  compile with threads support, STYLE is either "posix" or blank
+dnl#                           (disabled by default)],
+dnl#             case $withval in
+dnl#               [yes | posix )]
+dnl#                 AC_MSG_RESULT(POSIX)
+dnl#                 THREADS_LIB=posix
+dnl#                 ;;
+dnl#               [* )]
+dnl#                 AC_MSG_RESULT(none)
+dnl#                 ;;
+dnl#             esac
+dnl#  , AC_MSG_RESULT(none))
+dnl# if test "$THREADS_LIB" = "posix"; then
+dnl#   AC_CHECK_LIB(pthread, pthread_create, CFLAGS="$CFLAGS -D_REENTRANT" ; THREADLIBS="-lpthread"
+dnl#                                        AC_DEFINE(USE_POSIX_THREADS)
+dnl#                                        AC_DEFINE(MUTEX_SYNCH)
+dnl#                , , -D_REENTRANT -L/usr/lib -L/lib -L/usr/local/lib)
+dnl# fi
 
 dnl#
 dnl# X LIBRARIES

@@ -68,18 +68,17 @@ image_t images[image_max] =
   {None, 0, NULL, NULL, NULL, NULL},
 # ifdef PIXMAP_SCROLLBAR
   {None, 0, NULL, NULL, NULL, NULL},
-  {None, 0, NULL, NULL, NULL, NULL}
+  {None, 0, NULL, NULL, NULL, NULL},
 # endif
-# ifdef PIXMAP_MENUBAR
-  ,
   {None, 0, NULL, NULL, NULL, NULL},
   {None, 0, NULL, NULL, NULL, NULL}
-# endif
 };
 
 #endif
 
 #ifdef PIXMAP_SUPPORT
+static const char *get_iclass_name(unsigned char);
+
 const char *
 get_image_type(unsigned short type)
 {
@@ -108,14 +107,12 @@ get_image_type(unsigned short type)
       return "image_sa";
       break;
 # endif
-# ifdef PIXMAP_MENUBAR
     case image_menu:
       return "image_menu";
       break;
     case image_submenu:
       return "image_submenu";
       break;
-# endif
     case image_max:
       return "image_max";
       break;
@@ -312,6 +309,65 @@ reset_simage(simage_t * simg, unsigned long mask)
   }
 }
 
+static const char *
+get_iclass_name(unsigned char which)
+{
+  switch (which) {
+  case image_bg: return "ETERM_BG"; break;
+  case image_up: return "ETERM_ARROW_UP"; break;
+  case image_down: return "ETERM_ARROW_DOWN"; break;
+  case image_left: return "ETERM_ARROW_LEFT"; break;
+  case image_right: return "ETERM_ARROW_RIGHT"; break;
+# ifdef PIXMAP_SCROLLBAR
+  case image_sb: return "ETERM_TROUGH"; break;
+  case image_sa: return "ETERM_ANCHOR"; break;
+# endif
+  case image_menu: return "ETERM_MENU_ITEM"; break;
+  case image_submenu: return "ETERM_MENU_SUBMENU"; break;
+  default:
+    ASSERT_NOTREACHED_RVAL(NULL);
+    break;
+  }
+}
+
+unsigned char
+check_image_ipc(unsigned char reset)
+{
+  static unsigned char checked = 0;
+  register unsigned short i;
+  char buff[255], *reply;
+  const char *iclass;
+
+  if (reset) {
+    checked = 0;
+  }
+  if (checked) {
+    return ((checked == 1) ? 1 : 0);
+  }
+  for (i=0; i < image_max; i++) {
+    if (!image_mode_is(i, MODE_AUTO)) {
+      continue;
+    }
+    iclass = get_iclass_name(i);
+    snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
+    reply = enl_send_and_wait(buff);
+    if (strstr(reply, "not")) {
+      print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
+      image_mode_fallback(i);
+    } else if (strstr(reply, "Error")) {
+      print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
+      FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
+                    if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
+      FREE(reply);
+      checked = 2;
+      return 0;
+    }
+    FREE(reply);
+  }
+  checked = 1;
+  return 1;
+}
+
 void
 paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
@@ -322,59 +378,28 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
   D_PIXMAP(("paste_simage(0x%08x, %s, 0x%08x, %hd, %hd, %hd, %hd) called.\n", (int) simg, get_image_type(which), (int) win, x, y, w, h));
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
-    char buff[255], *iclass = NULL, *state = NULL, *reply;
+    char buff[255], *reply;
+    const char *iclass, *state;
     Pixmap pmap, mask;
 
-    switch (which) {
-    case image_bg: iclass = "ETERM_BG"; break;
-    case image_up: iclass = "ETERM_ARROW_UP"; break;
-    case image_down: iclass = "ETERM_ARROW_DOWN"; break;
-    case image_left: iclass = "ETERM_ARROW_LEFT"; break;
-    case image_right: iclass = "ETERM_ARROW_RIGHT"; break;
-# ifdef PIXMAP_SCROLLBAR
-    case image_sb: iclass = "ETERM_TROUGH"; break;
-    case image_sa: iclass = "ETERM_ANCHOR"; break;
-# endif
-    case image_menu: iclass = "ETERM_MENU_ITEM"; break;
-    case image_submenu: iclass = "ETERM_MENU_SUBMENU"; break;
-    default: break;
-    }
-    if (simg == images[which].selected) {
-      state = "hilited";
-    } else if (simg == images[which].clicked) {
-      state = "clicked";
-    } else {
-      state = "normal";
-    }
-    D_PIXMAP((" -> iclass == \"%s\", state == \"%s\"\n", NONULL(iclass), NONULL(state)));
-
-    if (iclass) {
-      snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
-      reply = enl_send_and_wait(buff);
-      if (strstr(reply, "not")) {
-        print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
-        if (image_mode_is(which, ALLOW_IMAGE)) {
-          image_set_mode(which, MODE_IMAGE);
-        } else {
-          image_set_mode(which, MODE_SOLID);
-        }
-        FREE(reply);
-      } else if (strstr(reply, "Error")) {
-        print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
-        FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
-                      if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
-        FREE(reply);
+    check_image_ipc(0);
+    if (image_mode_is(which, MODE_AUTO)) {
+      iclass = get_iclass_name(which);
+      if (simg == images[which].selected) {
+        state = "hilited";
+      } else if (simg == images[which].clicked) {
+        state = "clicked";
       } else {
-        FREE(reply);
+        state = "normal";
+      }
+      D_PIXMAP((" -> iclass == \"%s\", state == \"%s\"\n", NONULL(iclass), NONULL(state)));
+
+      if (iclass) {
         snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, w, h);
         reply = enl_send_and_wait(buff);
         if (strstr(reply, "Error")) {
           print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
-          if (image_mode_is(which, ALLOW_IMAGE)) {
-            image_set_mode(which, MODE_IMAGE);
-          } else {
-            image_set_mode(which, MODE_SOLID);
-          }
+          image_mode_fallback(which);
           FREE(reply);
         } else {
           GC gc;
@@ -384,6 +409,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
           pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
           mask = (Pixmap) strtoul(PWord(2, reply), (char **) NULL, 0);
           FREE(reply);
+          enl_ipc_sync();
           if (pmap) {
             if (mask) {
               shaped_window_apply_mask(pmap, mask);
@@ -391,18 +417,14 @@ paste_simage(simage_t *simg, unsigned char which, Window win, unsigned short x, 
             XSetClipMask(Xdisplay, gc, mask);
             XSetClipOrigin(Xdisplay, gc, x, y);
             XCopyArea(Xdisplay, pmap, win, gc, 0, 0, w, h, x, y);
-            XFreePixmap(Xdisplay, pmap);
-            XFreePixmap(Xdisplay, mask);
+            snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
+            enl_ipc_send(buff);
             XFreeGC(Xdisplay, gc);
             return;
           } else {
             print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
             FREE(reply);
-            if (image_mode_is(which, ALLOW_IMAGE)) {
-              image_set_mode(which, MODE_IMAGE);
-            } else {
-              image_set_mode(which, MODE_SOLID);
-            }
+            image_mode_fallback(which);
           }
         }
       }
@@ -503,50 +525,22 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   pixmap = simg->pmap->pixmap;	/* Save this for later */
 
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
-    char buff[255], *iclass = NULL, *state = NULL, *reply;
+    char buff[255];
+    const char *iclass, *state;
 
-    switch (which) {
-    case image_bg: iclass = "ETERM_BG"; break;
-    case image_up: iclass = "ETERM_ARROW_UP"; break;
-    case image_down: iclass = "ETERM_ARROW_DOWN"; break;
-    case image_left: iclass = "ETERM_ARROW_LEFT"; break;
-    case image_right: iclass = "ETERM_ARROW_RIGHT"; break;
-# ifdef PIXMAP_SCROLLBAR
-    case image_sb: iclass = "ETERM_TROUGH"; break;
-    case image_sa: iclass = "ETERM_ANCHOR"; break;
-# endif
-    case image_menu: iclass = "ETERM_MENU_ITEM"; break;
-    case image_submenu: iclass = "ETERM_MENU_SUBMENU"; break;
-    default: break;
-    }
-    if (images[which].current == images[which].selected) {
-      state = "hilited";
-    } else if (images[which].current == images[which].clicked) {
-      state = "clicked";
-    } else {
-      state = "normal";
-    }
-    if (iclass) {
-      snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
-      reply = enl_send_and_wait(buff);
-      if (strstr(reply, "not")) {
-        print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
-        if (image_mode_is(which, ALLOW_IMAGE)) {
-          image_set_mode(which, MODE_IMAGE);
-        } else {
-          image_set_mode(which, MODE_SOLID);
-        }
-        FREE(reply);
-      } else if (strstr(reply, "Error")) {
-        print_error("Looks like this version of Enlightenment doesn't support the IPC commands I need.  Disallowing \"auto\" mode for all images.\n");
-        FOREACH_IMAGE(if (image_mode_is(idx, MODE_AUTO)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}} \
-                      if (image_mode_is(idx, ALLOW_AUTO)) {image_disallow_mode(idx, ALLOW_AUTO);});
-        FREE(reply);
+    check_image_ipc(0);
+    if (image_mode_is(which, MODE_AUTO)) {
+      iclass = get_iclass_name(which);
+      if (images[which].current == images[which].selected) {
+        state = "hilited";
+      } else if (images[which].current == images[which].clicked) {
+        state = "clicked";
       } else {
-        FREE(reply);
+        state = "normal";
+      }
+      if (iclass) {
         snprintf(buff, sizeof(buff), "imageclass %s apply 0x%x %s", iclass, (int) win, state);
-        reply = enl_send_and_wait(buff);
-        FREE(reply);
+        enl_ipc_send(buff);
         return;
       }
     }

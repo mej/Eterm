@@ -632,11 +632,6 @@ version(void)
 #else
   printf(" -PIXMAP_SCROLLBAR");
 #endif
-#ifdef PIXMAP_MENUBAR
-  printf(" +PIXMAP_MENUBAR");
-#else
-  printf(" -PIXMAP_MENUBAR");
-#endif
 #ifdef BACKING_STORE
   printf(" +BACKING_STORE");
 #else

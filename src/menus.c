@@ -34,6 +34,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "command.h"
+#include "e.h"
 #include "events.h"
 #include "font.h"
 #include "main.h"
@@ -772,6 +773,9 @@ menuitem_select(menu_t * menu, menuitem_t * item)
     paste_simage(images[image_submenu].selected, image_submenu, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
   } else {
     render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
+    if (image_mode_is(image_menu, MODE_AUTO)) {
+      enl_ipc_sync();
+    }
   }
   draw_string(menu->swin, menu->gc, MENU_HGAP, item->h - MENU_VGAP, item->text, item->len);
   if (item->rtext) {
@@ -876,10 +880,16 @@ menu_draw(menu_t * menu)
     D_MENU((" -> width %hu, height %hu\n", menu->w, menu->h));
     XResizeWindow(Xdisplay, menu->win, menu->w, menu->h);
     render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
+    if (image_mode_is(image_menu, MODE_AUTO)) {
+      enl_ipc_sync();
+    }
 
     /* Size and render selected item window */
     XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
     render_simage(images[image_menu].selected, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP, image_menu, 0);
+    if (image_mode_is(image_menu, MODE_AUTO)) {
+      enl_ipc_sync();
+    }
   }
   if (menu->w + menu->x > scr->width) {
     menu->x = scr->width - menu->w;

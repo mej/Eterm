@@ -2522,3 +2522,24 @@ Mon Oct  4 18:20:15 PDT 1999	Michael Jennings <mej@eterm.org>
 	A few touch-ups.
 	
 -------------------------------------------------------------------------------
+Thu Oct  7 16:12:38 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	Auto mode has been fixed to work with the newest E.  If you don't have
+	the newest E, it won't work.  So don't bug me about it; just upgrade.
+	Your version of E must be dated October 7th or later, or all bets are
+	off.
+
+	I also cleaned up some stuff to save lots of unnecessary redraws and
+	(if you're in auto mode) E IPC transactions.
+
+	A bug in the value set for $IFS was also fixed.  Thanks to Kimball
+	Thurston <kimball@sgrail.com> for pointing out my oversight.
+
+	Furthermore, I added a parameter to the --enable-multi-charset option
+	for configure.  You can now specify =utf-8 to get UTF-8 fonts for the
+	multi-byte mode stuff.  If you pass =kanji (or no value at all), you
+	will still get the old Kanji fonts.  If you use multi-byte Eterm and
+	have a set of fonts for other setups (Big 5, Cyrillic, etc.), please
+	let me know and I'll add a parameter for those too.
+	
+-------------------------------------------------------------------------------

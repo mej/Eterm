@@ -269,29 +269,11 @@
 # undef GREEK_SUPPORT
 # undef XTERM_FONT_CHANGE
 # undef DEFINE_XTERM_COLOR
-# define MFONT0 "k14"
-# define MFONT1 "jiskan16"
-# define MFONT2 "jiskan18"
-# define MFONT3 "jiskan24"
-# define MFONT4 "jiskan26"
-/* sizes matched to multichar fonts */
-# define FONT0 "fixed"
-# define FONT1 "8x16"
-# define FONT2 "9x18"
-# define FONT3 "12x24"
-# define FONT4 "13x26"
-#else	/* MULTI_CHARSET */
-# define FONT0 "fixed"
-# define FONT1 "5x7"
-# define FONT2 "6x10"
-# define FONT3 "7x14"
-# define FONT4 "8x13"
 #endif	/* MULTI_CHARSET */
 #define FONT0_IDX 2
 
 #ifndef PIXMAP_SUPPORT
 # undef PIXMAP_SCROLLBAR
-# undef PIXMAP_MENUBAR
 # undef BACKING_STORE
 # undef PIXMAP_OFFSET
 # undef IMLIB_TRANS
