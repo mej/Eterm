@@ -10,7 +10,7 @@ Contributors:
 mej - Michael Jennings ("KainX") <mej@eterm.org>
 raster - Carsten Haitzler <raster@rasterman.com>
 mandrake - Geoff Harrison <mandrake@mandrake.net>
-namsh - Sung-Hyun Nam <namsh@lgic.co.kr>
+namsh - Sung-Hyun Nam <namsh@kldp.org>
 gbritton - Gerald Britton <gbritton@mit.edu>
 yosh - Manish Singh <yosh@gimp.org>
 sdh - Scott D. Heavner <sdh@po.cwru.edu>
@@ -4426,4 +4426,8 @@ Fixes for mouse wheel reporting and reset handling (Paul), Solaris
 portability (Klaus), and XIM (Derrick).
 
 Getting ready to release 0.9.2 soonish.
+----------------------------------------------------------------------
+Tue Dec  4 16:38:15 2001                        Michael Jennings (mej)
+
+Updated e-mail address for namsh at his request.
 ----------------------------------------------------------------------
