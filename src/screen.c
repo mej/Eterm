@@ -1581,10 +1581,6 @@ scr_expose(int x, int y, int width, int height)
     XCopyArea(Xdisplay, images[image_bg].current->pmap->pixmap, buffer_pixmap, TermWin.gc, x, y, Width2Pixel(full_end.col - full_beg.col + 1),
               Height2Pixel(full_end.row - full_beg.row + 1), x, y);
   }
-
-#ifdef USE_XIM
-  scr_refresh(FAST_REFRESH);
-#endif
 }
 
 /* ------------------------------------------------------------------------- */
