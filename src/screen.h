@@ -42,10 +42,6 @@
  * CLEAR_CHARS: clear <num> chars starting from pixel position <x,y>
  * ERASE_ROWS : set <num> rows starting from row <row> to the foreground color
  */
-#ifndef PIXMAP_SUPPORT
-# define buffer_pixmap  (0)
-# define draw_buffer    (TermWin.vt)
-#endif
 #define CLEAR_ROWS(row, num)  do {if (buffer_pixmap) {XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), \
                                   Col2Pixel(0), Row2Pixel(row));} XClearArea(Xdisplay, TermWin.vt, Col2Pixel(0), Row2Pixel(row), TermWin.width, Height2Pixel(num), 0);} while (0)
 #define CLEAR_CHARS(x, y, num) ((buffer_pixmap) \

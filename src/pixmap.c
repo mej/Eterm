@@ -58,16 +58,14 @@ extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int g
 extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_32_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 
-#ifdef PIXMAP_SUPPORT
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
 static colormod_t cmod_none = { 256, 256, 256 };
 
-# ifdef PIXMAP_OFFSET
-Pixmap desktop_pixmap = None, viewport_pixmap = None;
 Pixmap buffer_pixmap = None;
+#ifdef PIXMAP_OFFSET
+Pixmap desktop_pixmap = None, viewport_pixmap = None;
 Window desktop_window = None;
 unsigned char desktop_pixmap_is_mine = 0;
-# endif
 #endif
 
 image_t images[image_max] =
@@ -800,6 +798,7 @@ redraw_images_by_mode(unsigned char mode) {
     scrollbar_draw(IMAGE_STATE_CURRENT, mode);
   }
 }
+#endif  /* PIXMAP_SUPPORT */
 
 static void
 copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height)
@@ -849,14 +848,17 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   ASSERT(simg != NULL);
   ASSERT(simg->iml != NULL);
   ASSERT(simg->pmap != NULL);
+  REQUIRE(win != None);
 
   D_PIXMAP(("Rendering simg->iml->im %8p (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width, height, win));
   D_PIXMAP(("Image mode is 0x%02x\n", images[which].mode));
 
+#ifdef PIXMAP_SUPPORT
   if ((which == image_bg) && image_mode_is(image_bg, MODE_VIEWPORT)) {
     width = scr->width;
     height = scr->height;
   }
+#endif
   if (!(width) || !(height))
     return;
 
@@ -869,6 +871,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     buffer_pixmap = None;
   }
 
+#ifdef PIXMAP_SUPPORT
   if ((images[which].mode & MODE_AUTO) && (images[which].mode & ALLOW_AUTO)) {
     char buff[255];
     const char *iclass, *state;
@@ -1115,6 +1118,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       reset_simage(simg, RESET_ALL_SIMG);
     }
   }
+#endif
 
   /* Fall back to solid mode if all else fails. */
   if (!image_mode_is(which, MODE_MASK)) {
@@ -1145,6 +1149,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
   return;
 }
 
+#ifdef PIXMAP_SUPPORT
 const char *
 search_path(const char *pathlist, const char *file, const char *ext)
 {
@@ -1544,6 +1549,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
   int real_depth = 0;
 
   D_PIXMAP(("colormod_trans(p == 0x%08x, gc, w == %hu, h == %hu) called.\n", p, w, h));
+  REQUIRE(p != None);
 
   if (iml->mod) {
     shade = iml->mod->brightness;
@@ -1909,7 +1915,8 @@ shaped_window_apply_mask(Drawable d, Pixmap mask)
 
   static signed char have_shape = -1;
 
-  REQUIRE(d != None && mask != None);
+  REQUIRE(d != None);
+  REQUIRE(mask != None);
 
   D_PIXMAP(("shaped_window_apply_mask(d [0x%08x], mask [0x%08x]) called.\n", d, mask));
 

@@ -56,6 +56,9 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
 {
 
   D_BBAR(("Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
+  REQUIRE(bbar != NULL);
+  REQUIRE(d != None);
+  REQUIRE(gc != None);
 
 #ifdef MULTI_CHARSET
   if (bbar->fontset)
@@ -64,7 +67,6 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
 #endif
     XDrawString(Xdisplay, d, gc, x, y, str, len);
   return;
-  bbar = NULL;
 }
 
 buttonbar_t *
@@ -274,14 +276,30 @@ unsigned short
 bbar_calc_height(buttonbar_t *bbar)
 {
   button_t *b;
-  Imlib_Border *bbord = images[image_bbar].norm->iml->border, *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bbord, *bord;
 
   D_BBAR(("bbar_calc_height(%8p):  fascent == %d, fdescent == %d, h == %d\n", bbar, bbar->fascent, bbar->fdescent, bbar->h));
+
+  if (image_mode_is(image_bbar, MODE_MASK)) {
+    bbord = images[image_bbar].norm->iml->border;
+  } else if (images[image_bbar].norm->iml->bevel) {
+    bbord = images[image_bbar].norm->iml->bevel->edges;
+  } else {
+    bbord = NULL;
+  }
+  if (image_mode_is(image_button, MODE_MASK)) {
+    bord = images[image_button].norm->iml->border;
+  } else if (images[image_button].norm->iml->bevel) {
+    bord = images[image_button].norm->iml->bevel->edges;
+  } else {
+    bord = NULL;
+  }
 
   bbar->h = bbar->fascent + bbar->fdescent + 1;
   if (bord) {
     bbar->h += bord->top + bord->bottom;
   }
+
   for (b = bbar->buttons; b; b = b->next) {
     if (b->h != bbar->h) {
       b->h = bbar->h;
@@ -321,9 +339,17 @@ bbar_calc_positions(buttonbar_t *bbar)
 {
   button_t *b;
   unsigned short x, y;
-  Imlib_Border *border = images[image_bbar].norm->iml->border;
+  Imlib_Border *border;
 
   D_BBAR(("bbar == %8p\n", bbar));
+
+  if (image_mode_is(image_bbar, MODE_MASK)) {
+    border = images[image_bbar].norm->iml->border;
+  } else if (images[image_bbar].norm->iml->bevel) {
+    border = images[image_bbar].norm->iml->bevel->edges;
+  } else {
+    border = NULL;
+  }
 
   y = ((border) ? (border->top) : 0);
   if (bbar->buttons) {
@@ -351,11 +377,19 @@ bbar_calc_positions(buttonbar_t *bbar)
 void
 button_calc_size(buttonbar_t *bbar, button_t *button)
 {
-  Imlib_Border *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bord;
   int ascent, descent, direction;
   XCharStruct chars;
 
   D_BBAR(("button_calc_size(%8p, %8p):  XTextExtents(%8p, %s, %d, ...)\n", bbar, button, bbar->font, button->text, button->len));
+
+  if (image_mode_is(image_button, MODE_MASK)) {
+    bord = images[image_button].norm->iml->border;
+  } else if (images[image_button].norm->iml->bevel) {
+    bord = images[image_button].norm->iml->bevel->edges;
+  } else {
+    bord = NULL;
+  }
 
   button->w = 0;
   if (button->len) {
@@ -401,10 +435,19 @@ button_calc_size(buttonbar_t *bbar, button_t *button)
 void
 button_calc_rel_coords(buttonbar_t *bbar, button_t *button)
 {
-  Imlib_Border *bord = images[image_button].norm->iml->border;
+  Imlib_Border *bord;
 
   D_BBAR(("bbar == %8p, button == %8p\n", bbar, button));
 
+  if (image_mode_is(image_button, MODE_MASK)) {
+    bord = images[image_button].norm->iml->border;
+  } else if (images[image_button].norm->iml->bevel) {
+    bord = images[image_button].norm->iml->bevel->edges;
+  } else {
+    bord = NULL;
+  }
+
+#ifdef PIXMAP_SUPPORT
   if (button->icon) {
     unsigned short b = 0;
 
@@ -418,6 +461,8 @@ button_calc_rel_coords(buttonbar_t *bbar, button_t *button)
     }
     button->icon_x = button->x + ((bord) ? (bord->left) : 0);
   }
+#endif
+
   if (button->len) {
     button->text_x = button->x + ((button->icon_w) ? (button->icon_w + MENU_HGAP) : 0) + ((bord) ? (bord->left) : (0));
     button->text_y = button->y + button->h - ((bord) ? (bord->bottom) : (0)) - bbar->fdescent;
@@ -645,6 +690,10 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
         tt_write((unsigned char *) button->action.string, strlen(button->action.string));
       }
       break;
+    case ACTION_FUNCTION:
+      if (!press) {
+      }
+      break;
     default:
       break;
   }
@@ -744,6 +793,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
   } else {
     render_simage(images[image_bbar].current, bbar->win, bbar->w, bbar->h, image_bbar, RENDER_FORCE_PIXMAP);
     bbar->bg = images[image_bbar].current->pmap->pixmap;
+    REQUIRE(bbar->bg != None);
   }
   XSetForeground(Xdisplay, bbar->gc, images[image_bbar].current->fg);
   for (button = bbar->buttons; button; button = button->next) {

@@ -207,7 +207,6 @@ extern Window desktop_window;
 
 /************ Function Prototypes ************/
 #ifndef PIXMAP_SUPPORT
-# define render_simage(s, win, w, h, which, r)  NOP
 # define free_simage(s)                         NOP
 # define create_simage()                        ((simage_t *) NULL)
 # define load_image(f, s)                       ((unsigned char) 0)
@@ -237,7 +236,9 @@ extern Pixmap create_viewport_pixmap(simage_t *, Drawable, int, int, unsigned sh
 extern void paste_simage(simage_t *, unsigned char, Drawable, unsigned short, unsigned short, unsigned short, unsigned short);
 extern void redraw_image(unsigned char);
 extern void redraw_images_by_mode(unsigned char);
+#endif
 extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
+#ifdef PIXMAP_SUPPORT
 extern const char *search_path(const char *, const char *, const char *);
 extern unsigned char load_image(const char *, simage_t *);
 extern void free_desktop_pixmap(void);

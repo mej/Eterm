@@ -3782,3 +3782,9 @@ Wed Jul  5 20:48:10 PDT 2000	Michael Jennings <mej@eterm.org>
 	Dammit.  I missed an occurance of XA_COMPOUND_TEXT().
 	
 -------------------------------------------------------------------------------
+Thu Jul  6 23:56:54 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	I think I've finally fixed all those XPolyText8() errors with pixmap
+	support disabled.  Solid color mode buttonbars seem to work now also.
+	
+-------------------------------------------------------------------------------

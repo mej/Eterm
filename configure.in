@@ -143,6 +143,7 @@ dnl# Checks for library functions.
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(atexit _exit unsetenv setutent seteuid memmove putenv strsep setresuid setresgid memmem usleep snprintf)
 dps_snprintf_oflow()
+AC_CHECK_LIB(m, pow, LIBS="$LIBS -lm", , $SUBLIBS)
 
 dnl# Check for the need for -lutil on BSD systems
 AC_CHECK_FUNC(login, 
@@ -295,8 +296,7 @@ AC_ARG_WITH(imlib,
                 USE_IMLIB=1
 )
 if test $USE_IMLIB -eq 1 ; then
-  AC_CHECK_LIB(m, pow, GRLIBS="-lm", , $SUBLIBS $X_LIBS $GRLIBS)
-  AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl $GRLIBS", , $SUBLIBS $X_LIBS $GRLIBS)
+  AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl", , $SUBLIBS $X_LIBS $GRLIBS)
   AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $SUBLIBS $X_LIBS $GRLIBS)
   AC_CHECK_LIB(Imlib2, imlib_create_image,
                GRLIBS="-lImlib2 $GRLIBS"
