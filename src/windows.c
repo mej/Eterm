@@ -287,7 +287,7 @@ Create_Windows(int argc, char *argv[])
 #endif /* NO_BOLDUNDERLINE */
 
   /*
-   * get scrollBar/menu shadow colors
+   * get scrollbar/menu shadow colors
    *
    * The calculations of topShadow/bottomShadow values are adapted
    * from the fvwm window manager.
@@ -320,7 +320,7 @@ Create_Windows(int argc, char *argv[])
     PixColors[unfocusedMenuTopShadowColor] = get_top_shadow_color(PixColors[unfocusedMenuColor], "unfocusedMenuTopShadowColor");
   }
 
-  szHint.base_width = (2 * TermWin.internalBorder + (Options & Opt_scrollBar ? scrollbar_trough_width() : 0));
+  szHint.base_width = (2 * TermWin.internalBorder + ((Options & Opt_scrollbar) ? scrollbar_trough_width() : 0));
   szHint.base_height = (2 * TermWin.internalBorder);
 
   flags = (rs_geometry ? XParseGeometry(rs_geometry, &x, &y, &width, &height) : 0);
@@ -416,12 +416,12 @@ Create_Windows(int argc, char *argv[])
   /* the vt window */
   if ((!(Options & Opt_borderless)) && (Options & Opt_backing_store)) {
     D_X11(("Creating term window with save_under = TRUE\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollBar) && !(Options & Opt_scrollBar_right)) ? scrollbar_trough_width() : 0), 0,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? scrollbar_trough_width() : 0), 0,
                                szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWBackingStore | CWColormap, &Attributes);
   } else {
     D_X11(("Creating term window with no backing store\n"));
-    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollBar) && !(Options & Opt_scrollBar_right)) ? scrollbar_trough_width() : 0), 0,
+    TermWin.vt = XCreateWindow(Xdisplay, TermWin.parent, (((Options & Opt_scrollbar) && !(Options & Opt_scrollbar_right)) ? scrollbar_trough_width() : 0), 0,
                                szHint.width, szHint.height, 0, Xdepth, InputOutput, CopyFromParent,
 			       CWBackPixel | CWBorderPixel | CWOverrideRedirect | CWColormap, &Attributes);
   }
@@ -441,12 +441,6 @@ Create_Windows(int argc, char *argv[])
 
   /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */
   event_init_subsystem((event_dispatcher_t) process_x_event, (event_dispatcher_init_t) event_init_primary_dispatcher);
-
-  /* Time for the scrollbar to create its windows and add itself to the event subsystem. */
-  scrollbar_init();
-
-  /* Same for the menu subsystem. */
-  menu_init();
 
   XMapWindow(Xdisplay, TermWin.vt);
   XMapWindow(Xdisplay, TermWin.parent);
@@ -496,7 +490,7 @@ update_size_hints(void)
   D_X11(("update_size_hints() called.\n"));
   szHint.base_width = (2 * TermWin.internalBorder);
   szHint.base_height = (2 * TermWin.internalBorder);
-  szHint.base_width += ((scrollbar_visible()) ? (scrollbar_trough_width()) : (0));
+  szHint.base_width += ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
   D_X11(("Size Hints:  base width/height == %lux%lu\n", szHint.base_width, szHint.base_height));
 
   szHint.min_width = szHint.base_width + szHint.width_inc;
@@ -518,7 +512,7 @@ term_resize(int width, int height)
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
   D_X11((" -> New TermWin width/height == %lux%lu\n", TermWin.width, TermWin.height));
-  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollBar_right) ? (0) : ((scrollbar_visible()) ? (scrollbar_trough_width()) : (0))), 0, width, height + 1);
+  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollbar_right) ? (0) : ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0))), 0, width, height + 1);
   render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
   if (image_mode_is(image_bg, MODE_AUTO)) {
     enl_ipc_sync();

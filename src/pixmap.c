@@ -1,26 +1,24 @@
-/*  pixmap.c -- Eterm pixmap handling routines
-
- * This file is original work by Michael Jennings <mej@eterm.org> and
- * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
- * bearing this same message or a similar one, is distributed under
- * the GNU Public License (GPL) as outlined in the COPYING file.
+/*
+ * Copyright (C) 1999-1997, Michael Jennings
  *
- * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 static const char cvs_ident[] = "$Id$";
@@ -39,16 +37,14 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "e.h"
+#include "icon.h"
 #include "startup.h"
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
-#ifdef PIXMAP_SCROLLBAR
-# include "scrollbar.h"
-#endif
+#include "scrollbar.h"
 #include "term.h"
-#include "Eterm.xpm"		/* Icon pixmap */
 
 #ifdef PIXMAP_SUPPORT
 Pixmap desktop_pixmap = None;
@@ -63,10 +59,8 @@ image_t images[image_max] =
   {None, 0, NULL, NULL, NULL, NULL},
   {None, 0, NULL, NULL, NULL, NULL},
   {None, 0, NULL, NULL, NULL, NULL},
-# ifdef PIXMAP_SCROLLBAR
   {None, 0, NULL, NULL, NULL, NULL},
   {None, 0, NULL, NULL, NULL, NULL},
-# endif
   {None, 0, NULL, NULL, NULL, NULL},
   {None, 0, NULL, NULL, NULL, NULL}
 };
@@ -96,14 +90,12 @@ get_image_type(unsigned short type)
     case image_right:
       return "image_right";
       break;
-# ifdef PIXMAP_SCROLLBAR
     case image_sb:
       return "image_sb";
       break;
     case image_sa:
       return "image_sa";
       break;
-# endif
     case image_menu:
       return "image_menu";
       break;
@@ -327,10 +319,8 @@ get_iclass_name(unsigned char which)
   case image_down: return "ETERM_ARROW_DOWN"; break;
   case image_left: return "ETERM_ARROW_LEFT"; break;
   case image_right: return "ETERM_ARROW_RIGHT"; break;
-# ifdef PIXMAP_SCROLLBAR
   case image_sb: return "ETERM_TROUGH"; break;
   case image_sa: return "ETERM_ANCHOR"; break;
-# endif
   case image_menu: return "ETERM_MENU_ITEM"; break;
   case image_submenu: return "ETERM_MENU_SUBMENU"; break;
   default:
@@ -475,7 +465,6 @@ redraw_image(unsigned char which) {
     render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
     scrollbar_show(0);
     break;
-# ifdef PIXMAP_SCROLLBAR
   case image_sb:
     render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
     scrollbar_show(0);
@@ -484,7 +473,6 @@ redraw_image(unsigned char which) {
     render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
     scrollbar_show(0);
     break;
-# endif
   default:
     D_PIXMAP(("redraw_image():  Bad value %u\n", which));
     break;
@@ -800,10 +788,8 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     case image_down:
     case image_left:
     case image_right:
-# ifdef PIXMAP_SCROLLBAR
     case image_sb:
     case image_sa:
-# endif
       cidx = (TermWin.focus ? scrollColor : unfocusedScrollColor);
       break;
     case image_menu:

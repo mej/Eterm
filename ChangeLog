@@ -2799,3 +2799,11 @@ Wed Nov 17 18:34:43 PST 1999	Michael Jennings <mej@eterm.org>
 	You can also remove any existing color modifiers using "clear".
 	
 -------------------------------------------------------------------------------
+Thu Nov 18 21:47:02 PST 1999	Michael Jennings <mej@eterm.org>
+
+	I've rewritten almost the entire scrollbar.  It mostly works, but it
+	still has issues.  I've put an #error directive in so that it won't
+	compile; take it out if you *really* wanna try it.  It's much more
+	efficient than before.
+	
+-------------------------------------------------------------------------------

@@ -53,7 +53,7 @@
 # define DndLink	7
 #endif
 
-# define scrollBar_esc	30
+# define scrollbar_esc	30
 
 /* Motif window hints */
 #define MWM_HINTS_FUNCTIONS           (1L << 0)
@@ -98,7 +98,7 @@
 # define PrivMode_MouseX11	(1LU<<12)
 /* too annoying to implement X11 highlight tracking */
 /* #define PrivMode_MouseX11Track	(1LU<<13) */
-# define PrivMode_scrollBar	(1LU<<14)
+# define PrivMode_scrollbar	(1LU<<14)
 # define PrivMode_menuBar	(1LU<<15)
 
 #define PrivMode_mouse_report	(PrivMode_MouseX10|PrivMode_MouseX11)

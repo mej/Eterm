@@ -2,8 +2,14 @@
 
 lib_LTLIBRARIES = libEterm.la
 
-libEterm_la_SOURCES = actions.c command.c e.c events.c font.c grkelot.c menus.c misc.c netdisp.c \
-                      options.c pixmap.c screen.c scrollbar.c startup.c system.c term.c timer.c utmp.c windows.c
+libEterm_la_SOURCES = actions.c actions.h command.c command.h debug.h draw.c   \
+                      draw.h e.c e.h eterm_utmp.h events.c events.h feature.h  \
+                      font.c font.h grkelot.c grkelot.h icon.h menus.c menus.h \
+                      misc.c misc.h netdisp.c options.c options.h pixmap.c     \
+                      pixmap.h profile.h screen.c screen.h scrollbar.c         \
+                      scrollbar.h startup.c startup.h system.c system.h term.c \
+                      term.h timer.c timer.h utmp.c windows.c windows.h
+
 libEterm_la_DEPENDENCIES = $(top_builddir)/libmej/libmej.la feature.h
 libEterm_la_LDFLAGS = -release $(VERSION)
 
@@ -14,6 +20,3 @@ Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 
 INCLUDES = -I. -I$(top_srcdir) -I$(top_srcdir)/libmej -I.. -I$(includedir) -I$(prefix)/include $(X_CFLAGS)
 LDADD = libEterm.la $(top_builddir)/libmej/libmej.la -L$(libdir) -L$(prefix)/lib $(LIBS) $(GRLIBS) $(X_LIBS)
-
-EXTRA_DIST = actions.h command.h debug.h e.h eterm_utmp.h events.h feature.h font.h grkelot.h menus.h misc.h options.h \
-             pixmap.h profile.h screen.h scrollbar.h startup.h system.h term.h timer.h windows.h Eterm.xpm

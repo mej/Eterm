@@ -3163,7 +3163,7 @@ debug_colors(void)
 void xim_get_position(XPoint *pos)
 {
    pos->x = Col2Pixel(screen.col);
-   if (scrollbar_visible() && !(Options & Opt_scrollBar_right))
+   if (scrollbar_is_visible() && !(Options & Opt_scrollbar_right))
      pos->x += scrollbar_trough_width();
    pos->y = Height2Pixel(screen.row) + TermWin.font->ascent
             + TermWin.internalBorder;

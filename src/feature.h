@@ -266,7 +266,6 @@
 #define FONT0_IDX 2
 
 #ifndef PIXMAP_SUPPORT
-# undef PIXMAP_SCROLLBAR
 # undef BACKING_STORE
 # undef PIXMAP_OFFSET
 # undef IMLIB_TRANS

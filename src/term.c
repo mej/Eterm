@@ -151,6 +151,7 @@ lookup_key(XEvent * ev)
     valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
   } else {
     len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
+    valid_keysym = 1;
   }
 #else /* USE_XIM */
   len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
@@ -1181,7 +1182,7 @@ process_window_mode(unsigned int nargs, int args[])
 	y = args[++i];
 	x = args[++i];
 	XResizeWindow(Xdisplay, TermWin.parent,
-		      Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_visible()? scrollbar_trough_width() : 0),
+		      Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
 		      Height2Pixel(y) + 2 * TermWin.internalBorder);
 	break;
       case 11:
@@ -1299,9 +1300,9 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 	      PrivateModes &= ~(PrivMode_MouseX11);
 	    break;
 
-#ifdef scrollBar_esc
-	  case scrollBar_esc:
-	    PrivCases(PrivMode_scrollBar);
+#ifdef scrollbar_esc
+	  case scrollbar_esc:
+	    PrivCases(PrivMode_scrollbar);
 	    map_scrollbar(state);
 	    break;
 #endif
@@ -1879,7 +1880,7 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 11:
 	  nstr = (char *) strsep(&tnstr, ";");
-	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollBar_right);
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_right);
 	  scrollbar_reset();
 	  map_scrollbar(0);
 	  map_scrollbar(1);
@@ -1887,7 +1888,7 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 12:
 	  nstr = (char *) strsep(&tnstr, ";");
-	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollBar_floating);
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_floating);
 	  scrollbar_reset();
 	  map_scrollbar(0);
 	  map_scrollbar(1);

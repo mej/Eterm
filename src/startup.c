@@ -205,8 +205,12 @@ eterm_bootstrap(int argc, char *argv[])
   Create_Windows(argc, argv);
   scr_reset();			/* initialize screen */
 
-  scrollbar_mapping(Options & Opt_scrollBar);
-  scrollbar_resize(szHint.width, szHint.height);
+  /* Initialize the scrollbar */
+  scrollbar_init(szHint.width, szHint.height);
+  scrollbar_mapping(Options & Opt_scrollbar);
+
+  /* Initialize the menu subsystem. */
+  menu_init();
 
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {

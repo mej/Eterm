@@ -1,26 +1,24 @@
-/* menus.c -- Eterm popup menu module
-
- * This file is original work by Michael Jennings <mej@eterm.org> and
- * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
- * bearing this same message or a similar one, is distributed under
- * the GNU Public License (GPL) as outlined in the COPYING file.
+/*
+ * Copyright (C) 1999-1997, Michael Jennings
  *
- * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 static const char cvs_ident[] = "$Id$";
@@ -34,6 +32,7 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/mem.h"
 #include "../libmej/strings.h"
 #include "command.h"
+#include "draw.h"
 #include "e.h"
 #include "events.h"
 #include "font.h"
@@ -906,7 +905,7 @@ menu_draw(menu_t * menu)
   XTextExtents(menu->font, menu->title, len, &direction, &ascent, &descent, &chars);
   draw_string(menu->win, menu->gc, center_coords(2 * MENU_HGAP, menu->w - 2 * MENU_HGAP) - (chars.width >> 1),
 	      str_y - chars.descent - MENU_VGAP / 2, menu->title, len);
-  Draw_Shadow(menu->win, topShadowGC, botShadowGC, str_x, str_y - chars.descent - MENU_VGAP / 2 + 1, menu->w - (4 * MENU_HGAP), MENU_VGAP);
+  draw_shadow(menu->win, topShadowGC, botShadowGC, str_x, str_y - chars.descent - MENU_VGAP / 2 + 1, menu->w - (4 * MENU_HGAP), MENU_VGAP, 2);
   str_y += MENU_VGAP;
 
   for (i = 0; i < menu->numitems; i++) {
@@ -923,7 +922,7 @@ menu_draw(menu_t * menu)
 	D_MENU(("   -> Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
 		item->w, item->h));
       }
-      Draw_Shadow(menu->win, botShadowGC, topShadowGC, str_x, str_y - MENU_VGAP - MENU_VGAP / 2, menu->w - 4 * MENU_HGAP, MENU_VGAP);
+      draw_shadow(menu->win, botShadowGC, topShadowGC, str_x, str_y - MENU_VGAP - MENU_VGAP / 2, menu->w - 4 * MENU_HGAP, MENU_VGAP, 2);
 
     } else {
       str_y += menu->fheight + MENU_VGAP;

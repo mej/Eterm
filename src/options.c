@@ -1,27 +1,24 @@
-/*  options.c -- Eterm options module
- *            -- 25 July 1997, mej
+/*
+ * Copyright (C) 1999-1997, Michael Jennings
  *
- * This file is original work by Michael Jennings <mej@eterm.org> and
- * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
- * bearing this same message or a similar one, is distributed under
- * the GNU Public License (GPL) as outlined in the COPYING file.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 static const char cvs_ident[] = "$Id$";
@@ -184,7 +181,7 @@ eterm_func builtins[] =
   {"appname", builtin_appname, 0},
   {(char *) NULL, (eterm_function_ptr) NULL, 0}
 };
-unsigned long Options = (Opt_scrollBar), image_toggles = 0;
+unsigned long Options = (Opt_scrollbar), image_toggles = 0;
 static menu_t *curmenu;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_execArgs = NULL;	/* Args to exec (-e or --exec) */
@@ -377,14 +374,14 @@ static const struct {
 
 /* =======[ Toggles ]======= */
       OPT_BOOL('l', "login-shell", "login shell, prepend - to shell name", &Options, Opt_loginShell),
-      OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollBar),
+      OPT_BOOL('s', "scrollbar", "display scrollbar", &Options, Opt_scrollbar),
       OPT_BOOL('u', "utmp-logging", "make a utmp entry", &Options, Opt_utmpLogging),
       OPT_BOOL('v', "visual-bell", "visual bell", &Options, Opt_visualBell),
       OPT_BOOL('H', "home-on-echo", "jump to bottom on output", &Options, Opt_homeOnEcho),
       OPT_BLONG("home-on-input", "jump to bottom on input", &Options, Opt_homeOnInput),
       OPT_BOOL('E', "home-on-refresh", "jump to bottom on refresh (^L)", &Options, Opt_homeOnRefresh),
-      OPT_BLONG("scrollbar-right", "display the scrollbar on the right", &Options, Opt_scrollBar_right),
-      OPT_BLONG("scrollbar-floating", "display the scrollbar with no trough", &Options, Opt_scrollBar_floating),
+      OPT_BLONG("scrollbar-right", "display the scrollbar on the right", &Options, Opt_scrollbar_right),
+      OPT_BLONG("scrollbar-floating", "display the scrollbar with no trough", &Options, Opt_scrollbar_floating),
       OPT_BLONG("scrollbar-popup", "popup the scrollbar only when focused", &Options, Opt_scrollbar_popup),
       OPT_BOOL('x', "borderless", "force Eterm to have no borders", &Options, Opt_borderless),
 #ifndef NO_MAPALERT
@@ -584,11 +581,6 @@ version(void)
   printf(" +BACKGROUND_CYCLING_SUPPORT");
 #else
   printf(" -BACKGROUND_CYCLING_SUPPORT");
-#endif
-#ifdef PIXMAP_SCROLLBAR
-  printf(" +PIXMAP_SCROLLBAR");
-#else
-  printf(" -PIXMAP_SCROLLBAR");
 #endif
 #ifdef BACKING_STORE
   printf(" +BACKING_STORE");
@@ -1875,9 +1867,9 @@ parse_toggles(char *buff)
     }
   } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
     if (bool_val) {
-      Options |= Opt_scrollBar;
+      Options |= Opt_scrollbar;
     } else {
-      Options &= ~(Opt_scrollBar);
+      Options &= ~(Opt_scrollbar);
     }
 
   } else if (!BEG_STRCASECMP(buff, "utmp_logging ")) {
@@ -1932,16 +1924,16 @@ parse_toggles(char *buff)
 
   } else if (!BEG_STRCASECMP(buff, "scrollbar_floating ")) {
     if (bool_val) {
-      Options |= Opt_scrollBar_floating;
+      Options |= Opt_scrollbar_floating;
     } else {
-      Options &= ~(Opt_scrollBar_floating);
+      Options &= ~(Opt_scrollbar_floating);
     }
 
   } else if (!BEG_STRCASECMP(buff, "scrollbar_right ")) {
     if (bool_val) {
-      Options |= Opt_scrollBar_right;
+      Options |= Opt_scrollbar_right;
     } else {
-      Options &= ~(Opt_scrollBar_right);
+      Options &= ~(Opt_scrollbar_right);
     }
   } else if (!BEG_STRCASECMP(buff, "scrollbar_popup ")) {
     if (bool_val) {
@@ -3092,7 +3084,7 @@ init_defaults(void)
   }
 #endif
 
-  Options = (Opt_scrollBar | Opt_select_trailing_spaces);
+  Options = (Opt_scrollbar | Opt_select_trailing_spaces);
   Xdisplay = NULL;
   display_name = NULL;
   rs_term_name = NULL;
@@ -3129,19 +3121,19 @@ post_parse(void)
   if (rs_scrollbar_type) {
     if (!strcasecmp(rs_scrollbar_type, "xterm")) {
 #ifdef XTERM_SCROLLBAR
-      scrollBar.type = SCROLLBAR_XTERM;
+      scrollbar_set_type(SCROLLBAR_XTERM);
 #else
       print_error("Support for xterm scrollbars was not compiled in.  Sorry.");
 #endif
     } else if (!strcasecmp(rs_scrollbar_type, "next")) {
 #ifdef NEXT_SCROLLBAR
-      scrollBar.type = SCROLLBAR_NEXT;
+      scrollbar_set_type(SCROLLBAR_NEXT);
 #else
       print_error("Support for NeXT scrollbars was not compiled in.  Sorry.");
 #endif
     } else if (!strcasecmp(rs_scrollbar_type, "motif")) {
 #ifdef MOTIF_SCROLLBAR
-      scrollBar.type = SCROLLBAR_MOTIF;
+      scrollbar_set_type(SCROLLBAR_MOTIF);
 #else
       print_error("Support for motif scrollbars was not compiled in.  Sorry.");
 #endif
@@ -3150,12 +3142,7 @@ post_parse(void)
     }
   }
   if (rs_scrollbar_width) {
-    scrollBar.width = rs_scrollbar_width;
-  }
-  if (scrollBar.type == SCROLLBAR_XTERM) {
-    scrollbar_set_shadow(0);
-  } else {
-    scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
+    scrollbar_set_width(rs_scrollbar_width);
   }
 
   /* set any defaults not already set */
@@ -3168,7 +3155,7 @@ post_parse(void)
   }
   /* no point having a scrollbar without having any scrollback! */
   if (!TermWin.saveLines)
-    Options &= ~Opt_scrollBar;
+    Options &= ~Opt_scrollbar;
 
 #ifdef PRINTPIPE
   if (!rs_print_pipe)
@@ -3468,7 +3455,7 @@ save_config(char *path)
   if (rs_desktop != -1) {
     fprintf(fp, "    desktop %d\n", rs_desktop);
   }
-  fprintf(fp, "    scrollbar_type %s\n", (scrollBar.type == SCROLLBAR_XTERM ? "xterm" : (scrollBar.type == SCROLLBAR_MOTIF ? "motif" : "next")));
+  fprintf(fp, "    scrollbar_type %s\n", (scrollbar_get_type() == SCROLLBAR_XTERM ? "xterm" : (scrollbar_get_type() == SCROLLBAR_MOTIF ? "motif" : "next")));
   fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
   for (i = 0; i < 5; i++) {
     fprintf(fp, "    font %d %s\n", i, rs_font[i]);
@@ -3786,15 +3773,15 @@ save_config(char *path)
   fprintf(fp, "    map_alert %d\n", (Options & Opt_mapAlert ? 1 : 0));
   fprintf(fp, "    visual_bell %d\n", (Options & Opt_visualBell ? 1 : 0));
   fprintf(fp, "    login_shell %d\n", (Options & Opt_loginShell ? 1 : 0));
-  fprintf(fp, "    scrollbar %d\n", (Options & Opt_scrollBar ? 1 : 0));
+  fprintf(fp, "    scrollbar %d\n", (Options & Opt_scrollbar ? 1 : 0));
   fprintf(fp, "    utmp_logging %d\n", (Options & Opt_utmpLogging ? 1 : 0));
   fprintf(fp, "    meta8 %d\n", (Options & Opt_meta8 ? 1 : 0));
   fprintf(fp, "    iconic %d\n", (Options & Opt_iconic ? 1 : 0));
   fprintf(fp, "    home_on_echo %d\n", (Options & Opt_homeOnEcho ? 1 : 0));
   fprintf(fp, "    home_on_input %d\n", (Options & Opt_homeOnInput ? 1 : 0));
   fprintf(fp, "    home_on_refresh %d\n", (Options & Opt_homeOnRefresh ? 1 : 0));
-  fprintf(fp, "    scrollbar_floating %d\n", (Options & Opt_scrollBar_floating ? 1 : 0));
-  fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollBar_right ? 1 : 0));
+  fprintf(fp, "    scrollbar_floating %d\n", (Options & Opt_scrollbar_floating ? 1 : 0));
+  fprintf(fp, "    scrollbar_right %d\n", (Options & Opt_scrollbar_right ? 1 : 0));
   fprintf(fp, "    scrollbar_popup %d\n", (Options & Opt_scrollbar_popup ? 1 : 0));
   fprintf(fp, "    borderless %d\n", (Options & Opt_borderless ? 1 : 0));
   fprintf(fp, "    backing_store %d\n", (Options & Opt_backing_store ? 1 : 0));

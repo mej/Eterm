@@ -302,8 +302,6 @@
 #undef KS_DELETE
 #undef NO_DELETE_KEY
 #undef NO_XLOCALE
-#undef PIXMAP_MENUBAR
-#undef PIXMAP_SCROLLBAR
 #undef UTMP_SUPPORT
 #undef MULTI_CHARSET
 #undef USE_XIM

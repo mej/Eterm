@@ -21,69 +21,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _ACTIONS_H_
-#define _ACTIONS_H_
+#ifndef _DRAW_H_
+#define _DRAW_H_
 
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
 
-#include "events.h"
-#include "menus.h"
-
 /************ Macros and Definitions ************/
-typedef enum {
-  ACTION_NONE = 0,
-  ACTION_STRING,
-  ACTION_ECHO,
-  ACTION_MENU
-} action_type_t;
+#define DRAW_ARROW_UP    (1UL << 0)
+#define DRAW_ARROW_DOWN  (1UL << 1)
+#define DRAW_ARROW_LEFT  (1UL << 2)
+#define DRAW_ARROW_RIGHT (1UL << 3)
 
-#define KEYSYM_NONE    (0UL)
-
-#define MOD_NONE       (0UL)
-#define MOD_CTRL       (1UL << 0)
-#define MOD_SHIFT      (1UL << 1)
-#define MOD_LOCK       (1UL << 2)
-#define MOD_MOD1       (1UL << 3)
-#define MOD_MOD2       (1UL << 4)
-#define MOD_MOD3       (1UL << 5)
-#define MOD_MOD4       (1UL << 6)
-#define MOD_MOD5       (1UL << 7)
-#define MOD_ANY        (1UL << 8)
-
-#define BUTTON_NONE    (0)
-#define BUTTON_ANY     (0xff)
-
-#define LOGICAL_XOR(a, b)  !(((a) && (b)) || (!(a) && !(b)))
+#define draw_uparrow_raised(win, g1, g2, x, y, w, s)      draw_arrow(win, g1, g2, x, y, w, s, DRAW_ARROW_UP)
+#define draw_uparrow_clicked(win, g1, g2, x, y, w, s)     draw_arrow(win, g2, g1, x, y, w, s, DRAW_ARROW_UP)
+#define draw_downarrow_raised(win, g1, g2, x, y, w, s)    draw_arrow(win, g1, g2, x, y, w, s, DRAW_ARROW_DOWN)
+#define draw_downarrow_clicked(win, g1, g2, x, y, w, s)   draw_arrow(win, g2, g1, x, y, w, s, DRAW_ARROW_DOWN)
 
 /************ Structures ************/
-typedef struct action_struct action_t;
-typedef unsigned char (*action_handler_t) (event_t *, action_t *);
-struct action_struct {
-  unsigned short mod;
-  unsigned char button; 
-  KeySym keysym;
-  action_type_t type;
-  action_handler_t handler;
-  union {
-    char *string;
-    menu_t *menu;
-  } param;
-  struct action_struct *next;
-};
 
 /************ Variables ************/
-extern action_t *action_list;
 
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern unsigned char action_handle_string(event_t *ev, action_t *action);
-extern unsigned char action_handle_echo(event_t *ev, action_t *action);
-extern unsigned char action_handle_menu(event_t *ev, action_t *action);
-extern unsigned char action_dispatch(event_t *ev, KeySym keysym);
-extern void action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_t type, void *param);
+extern void draw_shadow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h, int shadow);
+extern void draw_arrow(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow, unsigned char type);
+extern void draw_box(Window win, GC gc_top, GC gc_bottom, int x, int y, int w, int h);
 
 _XFUNCPROTOEND
 
-#endif	/* _ACTIONS_H_ */
+#endif	/* _DRAW_H_ */

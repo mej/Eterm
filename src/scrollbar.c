@@ -1,26 +1,24 @@
-/* scrollbar.c -- Eterm scrollbar module
-
- * This file is original work by Michael Jennings <mej@eterm.org> and
- * Tuomo Venalainen <vendu@cc.hut.fi>.  This file, and any other file
- * bearing this same message or a similar one, is distributed under
- * the GNU Public License (GPL) as outlined in the COPYING file.
+/*
+ * Copyright (C) 1999-1997, Michael Jennings
  *
- * Copyright (C) 1997-1999, Michael Jennings and Tuomo Venalainen
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 static const char cvs_ident[] = "$Id$";
@@ -33,220 +31,44 @@ static const char cvs_ident[] = "$Id$";
 #include "../libmej/debug.h"
 #include "../libmej/mem.h"
 #include "command.h"
+#include "draw.h"
 #include "e.h"
 #include "events.h"
 #include "startup.h"
 #include "options.h"
-#ifdef PIXMAP_SCROLLBAR
-# include "pixmap.h"
-#endif
+#include "pixmap.h"
 #include "screen.h"
 #include "scrollbar.h"
 #include "term.h"
 #include "windows.h"
 
+#error This code is broken.  Try back tomorrow.
+
 event_dispatcher_data_t scrollbar_event_data;
-#ifdef PIXMAP_SCROLLBAR
-scrollbar_t scrollBar =
-{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, 0, 0, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, None, None, None, None};
-#else                                             
-scrollbar_t scrollBar =
-{0, 1, 0, 1, 0, SCROLLBAR_DEFAULT_TYPE, 0, 0, SB_WIDTH, 0, 0, 0, 0, 0, 0, 0, None};
-#endif
+scrollbar_t scrollbar = {
+  None, None, None, None,
+  0, 1,
+  0, 1,
+  0,
+  SCROLLBAR_DEFAULT_TYPE,
+  0,
+  SHADOW,
+  SB_WIDTH, 0,
+  0, 0,
+  0, 0
+};
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
 short scroll_arrow_delay;
 #endif
-static GC scrollbarGC;
-static short last_top = 0, last_bot = 0;	/* old (drawn) values */
-#ifdef XTERM_SCROLLBAR		/* bitmap scrollbar */
-static GC shadowGC;
-static unsigned char xterm_sb_bits[] =
-{0xaa, 0x0a, 0x55, 0x05};	/* 12x2 bitmap */
+static GC gc_scrollbar;
+static short last_top = 0, last_bot = 0;
+#ifdef XTERM_SCROLLBAR
+static GC gc_stipple;
+static unsigned char xterm_sb_bits[] = {0xaa, 0x0a, 0x55, 0x05};  /* 12x2 bitmap */
 #endif
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-static GC topShadowGC, botShadowGC;
-
-/* draw triangular up button with a shadow of SHADOW (1 or 2) pixels */
-void
-Draw_up_button(int x, int y, int state)
-{
-
-  const unsigned int sz = (scrollBar.width), sz2 = (scrollBar.width / 2);
-  XPoint pt[3];
-  GC top = None, bot = None;
-
-  D_SCROLLBAR(("Draw_up_button(%d, %d, %d)\n", x, y, state));
-
-  switch (state) {
-    case +1:
-      top = topShadowGC;
-      bot = botShadowGC;
-      break;
-    case -1:
-      top = botShadowGC;
-      bot = topShadowGC;
-      break;
-    case 0:
-    default:
-      top = bot = scrollbarGC;
-      break;
-  }
-
-  /* fill triangle */
-  pt[0].x = x;
-  pt[0].y = y + sz - 1;
-  pt[1].x = x + sz - 1;
-  pt[1].y = y + sz - 1;
-  pt[2].x = x + sz2;
-  pt[2].y = y;
-  XFillPolygon(Xdisplay, scrollBar.win, scrollbarGC, pt, 3, Convex, CoordModeOrigin);
-
-  /* draw base */
-  XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-
-  /* draw shadow */
-  pt[1].x = x + sz2 - 1;
-  pt[1].y = y;
-  XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  if (scrollbar_get_shadow() > 1) {
-    pt[0].x++;
-    pt[0].y--;
-    pt[1].y++;
-    XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  }
-  /* draw shadow */
-  pt[0].x = x + sz2;
-  pt[0].y = y;
-  pt[1].x = x + sz - 1;
-  pt[1].y = y + sz - 1;
-  XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  if (scrollbar_get_shadow() > 1) {
-    /* doubled */
-    pt[0].y++;
-    pt[1].x--;
-    pt[1].y--;
-    XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  }
-}
-
-/* draw triangular down button with a shadow of SHADOW (1 or 2) pixels */
-void
-Draw_dn_button(int x, int y, int state)
-{
-
-  const unsigned int sz = (scrollBar.width), sz2 = (scrollBar.width / 2);
-  XPoint pt[3];
-  GC top = None, bot = None;
-
-  D_SCROLLBAR(("Draw_dn_button(%d, %d, %d)\n", x, y, state));
-
-  switch (state) {
-    case +1:
-      top = topShadowGC;
-      bot = botShadowGC;
-      break;
-    case -1:
-      top = botShadowGC;
-      bot = topShadowGC;
-      break;
-    case 0:
-    default:
-      top = bot = scrollbarGC;
-      break;
-  }
-
-  /* fill triangle */
-  pt[0].x = x;
-  pt[0].y = y;
-  pt[1].x = x + sz - 1;
-  pt[1].y = y;
-  pt[2].x = x + sz2;
-  pt[2].y = y + sz;
-  XFillPolygon(Xdisplay, scrollBar.win, scrollbarGC, pt, 3, Convex, CoordModeOrigin);
-
-  /* draw base */
-  XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-
-  /* draw shadow */
-  pt[1].x = x + sz2 - 1;
-  pt[1].y = y + sz - 1;
-  XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  if (scrollbar_get_shadow() > 1) {
-    /* doubled */
-    pt[0].x++;
-    pt[0].y++;
-    pt[1].y--;
-    XDrawLine(Xdisplay, scrollBar.win, top, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  }
-  /* draw shadow */
-  pt[0].x = x + sz2;
-  pt[0].y = y + sz - 1;
-  pt[1].x = x + sz - 1;
-  pt[1].y = y;
-  XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  if (scrollbar_get_shadow() > 1) {
-    /* doubled */
-    pt[0].y--;
-    pt[1].x--;
-    pt[1].y++;
-    XDrawLine(Xdisplay, scrollBar.win, bot, pt[0].x, pt[0].y, pt[1].x, pt[1].y);
-  }
-}
+static GC gc_top, gc_bottom;
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
-
-void
-scrollbar_init(void)
-{
-
-  Cursor cursor;
-  long mask;
-
-  D_SCROLLBAR(("scrollbar_init():  Initializing all scrollbar elements.\n"));
-
-  Attributes.background_pixel = PixColors[scrollColor];
-  Attributes.border_pixel = PixColors[bgColor];
-  Attributes.override_redirect = TRUE;
-  Attributes.save_under = TRUE;
-  cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-  mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask
-      | Button1MotionMask | Button2MotionMask | Button3MotionMask;
-
-  scrollBar.win = XCreateWindow(Xdisplay, TermWin.parent, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-				CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
-  XDefineCursor(Xdisplay, scrollBar.win, cursor);
-  XSelectInput(Xdisplay, scrollBar.win, mask);
-  D_SCROLLBAR(("scrollbar_init():  Created scrollbar window 0x%08x\n", scrollBar.win));
-
-#ifdef PIXMAP_SCROLLBAR
-  if (scrollbar_uparrow_is_pixmapped()) {
-    scrollBar.up_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
-    XSelectInput(Xdisplay, scrollBar.up_win, mask);
-    D_SCROLLBAR(("scrollbar_init():  Created scrollbar up arrow window 0x%08x\n", scrollBar.up_win));
-  }
-  if (scrollbar_downarrow_is_pixmapped()) {
-    scrollBar.dn_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
-    XSelectInput(Xdisplay, scrollBar.dn_win, mask);
-    D_SCROLLBAR(("scrollbar_init():  Created scrollbar down arrow window 0x%08x\n", scrollBar.dn_win));
-  }
-  if (scrollbar_anchor_is_pixmapped()) {
-    scrollBar.sa_win = XCreateWindow(Xdisplay, scrollBar.win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
-				     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
-    XSelectInput(Xdisplay, scrollBar.sa_win, mask);
-    D_SCROLLBAR(("scrollbar_init():  Created scrollbar anchor window 0x%08x\n", scrollBar.sa_win));
-  }
-#endif
-
-  if (scrollBar.type == SCROLLBAR_XTERM) {
-    scrollbar_set_shadow(0);
-  } else {
-    scrollbar_set_shadow((Options & Opt_scrollBar_floating) ? 0 : SHADOW);
-  }
-  D_SCROLLBAR(("scrollbar_init():  Set scrollbar shadow to %d\n", scrollbar_get_shadow()));
-  event_register_dispatcher(scrollbar_dispatch_event, scrollbar_event_init_dispatcher);
-
-}
 
 void
 scrollbar_event_init_dispatcher(void)
@@ -254,9 +76,6 @@ scrollbar_event_init_dispatcher(void)
 
   MEMSET(&scrollbar_event_data, 0, sizeof(event_dispatcher_data_t));
 
-#if 0
-  EVENT_DATA_ADD_HANDLER(scrollbar_event_data, ConfigureNotify, sb_handle_configure_notify);
-#endif
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, EnterNotify, sb_handle_enter_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, LeaveNotify, sb_handle_leave_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, FocusIn, sb_handle_focus_in);
@@ -267,33 +86,15 @@ scrollbar_event_init_dispatcher(void)
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, ButtonRelease, sb_handle_button_release);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, MotionNotify, sb_handle_motion_notify);
 
-  event_data_add_mywin(&scrollbar_event_data, scrollBar.win);
-#ifdef PIXMAP_SCROLLBAR
-  if (scrollbar_is_pixmapped()) {
-    event_data_add_mywin(&scrollbar_event_data, scrollBar.up_win);
-    event_data_add_mywin(&scrollbar_event_data, scrollBar.dn_win);
-    event_data_add_mywin(&scrollbar_event_data, scrollBar.sa_win);
-  }
-#endif
+  event_data_add_mywin(&scrollbar_event_data, scrollbar.win);
+  event_data_add_mywin(&scrollbar_event_data, scrollbar.up_win);
+  event_data_add_mywin(&scrollbar_event_data, scrollbar.dn_win);
+  event_data_add_mywin(&scrollbar_event_data, scrollbar.sa_win);
 
   event_data_add_parent(&scrollbar_event_data, TermWin.vt);
   event_data_add_parent(&scrollbar_event_data, TermWin.parent);
 
 }
-
-#if 0
-unsigned char
-sb_handle_configure_notify(event_t * ev)
-{
-
-  D_EVENTS(("sb_handle_configure_notify(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
-
-  REQUIRE_RVAL(XEVENT_IS_PARENT(ev, &scrollbar_event_data), 0);
-
-  redraw_image(image_sb);
-  return 1;
-}
-#endif
 
 unsigned char
 sb_handle_enter_notify(event_t * ev)
@@ -303,21 +104,14 @@ sb_handle_enter_notify(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
-  if (scrollbar_uparrow_is_pixmapped() && scrollbar_win_is_uparrow(ev->xany.window)) {
-    images[image_up].current = images[image_up].selected;
-    render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-  }
-  if (scrollbar_downarrow_is_pixmapped() && scrollbar_win_is_downarrow(ev->xany.window)) {
-    images[image_down].current = images[image_down].selected;
-    render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-  }
-  if (scrollbar_anchor_is_pixmapped() && scrollbar_win_is_anchor(ev->xany.window)) {
-    images[image_sa].current = images[image_sa].selected;
-    render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-  }
-  if (scrollbar_is_pixmapped() && scrollbar_win_is_scrollbar(ev->xany.window)) {
-    images[image_sb].current = images[image_sb].selected;
-    render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+  if (scrollbar_win_is_uparrow(ev->xany.window)) {
+    scrollbar_draw_uparrow(IMAGE_STATE_SELECTED, 0);
+  } else if (scrollbar_win_is_downarrow(ev->xany.window)) {
+    scrollbar_draw_downarrow(IMAGE_STATE_SELECTED, 0);
+  } else if (scrollbar_win_is_anchor(ev->xany.window)) {
+    scrollbar_draw_anchor(IMAGE_STATE_SELECTED, 0);
+  } else if (scrollbar_win_is_trough(ev->xany.window)) {
+    scrollbar_draw_trough(IMAGE_STATE_SELECTED, 0);
   }
   return 1;
 }
@@ -330,21 +124,14 @@ sb_handle_leave_notify(event_t * ev)
 
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &scrollbar_event_data), 0);
 
-  if (scrollbar_uparrow_is_pixmapped() && scrollbar_win_is_uparrow(ev->xany.window)) {
-    images[image_up].current = images[image_up].norm;
-    render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-  }
-  if (scrollbar_downarrow_is_pixmapped() && scrollbar_win_is_downarrow(ev->xany.window)) {
-    images[image_down].current = images[image_down].norm;
-    render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-  }
-  if (scrollbar_anchor_is_pixmapped() && scrollbar_win_is_anchor(ev->xany.window)) {
-    images[image_sa].current = images[image_sa].norm;
-    render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-  }
-  if (scrollbar_is_pixmapped() && scrollbar_win_is_scrollbar(ev->xany.window)) {
-    images[image_sb].current = images[image_sb].norm;
-    render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+  if (scrollbar_win_is_uparrow(ev->xany.window)) {
+    scrollbar_draw_uparrow(IMAGE_STATE_NORMAL, 0);
+  } else if (scrollbar_win_is_downarrow(ev->xany.window)) {
+    scrollbar_draw_downarrow(IMAGE_STATE_NORMAL, 0);
+  } else if (scrollbar_win_is_anchor(ev->xany.window)) {
+    scrollbar_draw_anchor(IMAGE_STATE_NORMAL, 0);
+  } else if (scrollbar_win_is_trough(ev->xany.window)) {
+    scrollbar_draw_trough(IMAGE_STATE_NORMAL, 0);
   }
   return 1;
 }
@@ -383,6 +170,16 @@ sb_handle_expose(event_t * ev)
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, Expose, &unused_xevent));
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, GraphicsExpose, &unused_xevent));
+
+  if (scrollbar_win_is_uparrow(ev->xany.window)) {
+    scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, 0);
+  } else if (scrollbar_win_is_downarrow(ev->xany.window)) {
+    scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, 0);
+  } else if (scrollbar_win_is_anchor(ev->xany.window)) {
+    scrollbar_draw_anchor(IMAGE_STATE_CURRENT, 0);
+  } else if (scrollbar_win_is_trough(ev->xany.window)) {
+    scrollbar_draw_trough(IMAGE_STATE_CURRENT, 0);
+  }
   return 1;
 }
 
@@ -396,16 +193,16 @@ sb_handle_button_press(event_t * ev)
 
   button_state.bypass_keystate = (ev->xbutton.state & (Mod1Mask | ShiftMask));
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
+  scrollbar_cancel_motion();
 
-  scrollbar_setNone();
 #ifndef NO_SCROLLBAR_REPORT
   if (button_state.report_mode) {
     /* Mouse report disabled scrollbar.  Arrows send cursor key up/down, trough sends pageup/pagedown */
-    if (scrollbar_upButton(ev->xany.window, ev->xbutton.y))
+    if (scrollbar_win_is_uparrow(ev->xany.window))
       tt_printf((unsigned char *) "\033[A");
-    else if (scrollbar_dnButton(ev->xany.window, ev->xbutton.y))
+    else if (scrollbar_win_is_downarrow(ev->xany.window))
       tt_printf((unsigned char *) "\033[B");
-    else
+    else {
       switch (ev->xbutton.button) {
 	case Button2:
 	  tt_printf((unsigned char *) "\014");
@@ -417,84 +214,67 @@ sb_handle_button_press(event_t * ev)
 	  tt_printf((unsigned char *) "\033[5~");
 	  break;
       }
+    }
   } else
 #endif /* NO_SCROLLBAR_REPORT */
   {
     D_EVENTS(("ButtonPress event for window 0x%08x at %d, %d\n", ev->xany.window, ev->xbutton.x, ev->xbutton.y));
-    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollBar.up_win, scrollBar.dn_win, scrollBar.sa_win, scrollBar.win));
+    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
 
-    if (scrollbar_upButton(ev->xany.window, ev->xbutton.y)) {
-
-      if (scrollbar_uparrow_is_pixmapped() && images[image_up].current != images[image_up].clicked) {
-	images[image_up].current = images[image_up].clicked;
-	render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-      }
+    if (scrollbar_win_is_uparrow(ev->xany.window)) {
+      scrollbar_draw_uparrow(IMAGE_STATE_CLICKED, 0);
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
       scroll_arrow_delay = SCROLLBAR_INITIAL_DELAY;
 #endif
       if (scr_page(UP, 1)) {
-	scrollbar_setUp();
+	scrollbar_set_uparrow_pressed(1);
       }
-    } else if (scrollbar_dnButton(ev->xany.window, ev->xbutton.y)) {
-
-      if (scrollbar_downarrow_is_pixmapped() && images[image_down].current != images[image_down].clicked) {
-	images[image_down].current = images[image_down].clicked;
-	render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-      }
+    } else if (scrollbar_win_is_downarrow(ev->xany.window)) {
+      scrollbar_draw_downarrow(IMAGE_STATE_CLICKED, 0);
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
       scroll_arrow_delay = SCROLLBAR_INITIAL_DELAY;
 #endif
       if (scr_page(DN, 1)) {
-	scrollbar_setDn();
+	scrollbar_set_downarrow_pressed(1);
       }
     } else {
-      if (scrollbar_anchor_is_pixmapped() && images[image_sa].current != images[image_sa].clicked) {
-        images[image_sa].current = images[image_sa].clicked;
-        render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+      if (scrollbar_win_is_anchor(ev->xany.window)) {
+        scrollbar_draw_anchor(IMAGE_STATE_CLICKED, 0);
       }
       switch (ev->xbutton.button) {
 	case Button2:
 	  button_state.mouse_offset = scrollbar_anchor_height() / 2;	/* Align to center */
-	  if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)
-	      || scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)
-	      || scrollBar.type == SCROLLBAR_XTERM) {
+	  if (!scrollbar_win_is_anchor(ev->xany.window)) {
 	    scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
-	  }
-	  scrollbar_setMotion();
+	  } else if (scrollbar.type == SCROLLBAR_XTERM) {
+	    scr_move_to(scrollbar.anchor_top + ev->xbutton.y - button_state.mouse_offset, scrollbar_scrollarea_height());
+          }
+	  scrollbar_set_motion(1);
 	  break;
 
 	case Button1:
-	  button_state.mouse_offset = ev->xbutton.y - (scrollbar_anchor_is_pixmapped()? 0 : scrollBar.top);
-	  MAX_IT(button_state.mouse_offset, 1);
+	  button_state.mouse_offset = MAX(ev->xbutton.y, 1);
 	  /* drop */
 	case Button3:
+          D_SCROLLBAR((" -> Scrollbar type is %u\n", scrollbar_get_type()));
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-	  if (scrollBar.type == SCROLLBAR_MOTIF || scrollBar.type == SCROLLBAR_NEXT) {
+	  if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
 	    if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)) {
-	      if (images[image_sb].current != images[image_sb].clicked) {
-		images[image_sb].current = images[image_sb].clicked;
-		render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-	      }
+              scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
 	      scr_page(UP, TermWin.nrow - 1);
 	    } else if (scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)) {
-	      if (images[image_sb].current != images[image_sb].clicked) {
-		images[image_sb].current = images[image_sb].clicked;
-		render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-	      }
+              scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
 	      scr_page(DN, TermWin.nrow - 1);
 	    } else {
-	      if (scrollbar_anchor_is_pixmapped() && images[image_sa].current != images[image_sa].clicked) {
-		images[image_sa].current = images[image_sa].clicked;
-		render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-	      }
-	      scrollbar_setMotion();
+              scrollbar_draw_anchor(IMAGE_STATE_CLICKED, 0);
+	      scrollbar_set_motion(1);
 	    }
 	  }
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 
 #ifdef XTERM_SCROLLBAR
-	  if (scrollBar.type == SCROLLBAR_XTERM) {
-	    scr_page((ev->xbutton.button == Button1 ? DN : UP), (TermWin.nrow * scrollbar_position(ev->xbutton.y) / scrollbar_scrollarea_height()));
+	  if (scrollbar.type == SCROLLBAR_XTERM) {
+            scr_page((ev->xbutton.button == Button1 ? DN : UP), TermWin.nrow - 1);
 	  }
 #endif /* XTERM_SCROLLBAR */
 	  break;
@@ -519,49 +299,34 @@ sb_handle_button_release(event_t * ev)
   button_state.mouse_offset = 0;
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
 
-#ifdef PIXMAP_SCROLLBAR
   XQueryPointer(Xdisplay, scrollbar_get_win(), &root, &child, &root_x, &root_y, &win_x, &win_y, &mask);
-  if (scrollbar_uparrow_is_pixmapped()) {
-    if (scrollbar_win_is_uparrow(child)) {
-      images[image_up].current = images[image_up].selected;
-      render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-    } else if (images[image_up].current != images[image_up].norm) {
-      images[image_up].current = images[image_up].norm;
-      render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-    }
+  if (scrollbar_win_is_uparrow(child)) {
+    scrollbar_draw_uparrow(IMAGE_STATE_SELECTED, 0);
+  } else {
+    scrollbar_draw_uparrow(IMAGE_STATE_NORMAL, 0);
   }
-  if (scrollbar_downarrow_is_pixmapped()) {
-    if (scrollbar_win_is_downarrow(child)) {
-      images[image_down].current = images[image_down].selected;
-      render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-    } else if (images[image_down].current != images[image_down].norm) {
-      images[image_down].current = images[image_down].norm;
-      render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-    }
+  if (scrollbar_win_is_downarrow(child)) {
+    scrollbar_draw_downarrow(IMAGE_STATE_SELECTED, 0);
+  } else {
+    scrollbar_draw_downarrow(IMAGE_STATE_NORMAL, 0);
   }
-  if (scrollbar_anchor_is_pixmapped()) {
-    if (scrollbar_win_is_anchor(child)) {
-      images[image_sa].current = images[image_sa].selected;
-      render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-    } else if (images[image_sa].current != images[image_sa].norm) {
-      images[image_sa].current = images[image_sa].norm;
-      render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-    }
+  if (scrollbar_win_is_anchor(child)) {
+    scrollbar_draw_anchor(IMAGE_STATE_SELECTED, 0);
+  } else {
+    scrollbar_draw_anchor(IMAGE_STATE_NORMAL, 0);
   }
-  if (scrollbar_is_pixmapped()) {
-    if (scrollbar_win_is_scrollbar(child)) {
-      images[image_sb].current = images[image_sb].selected;
-      render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-    } else if (images[image_sb].current != images[image_sb].norm) {
-      images[image_sb].current = images[image_sb].norm;
-      render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-    }
+  if (scrollbar_win_is_trough(child)) {
+    scrollbar_draw_trough(IMAGE_STATE_SELECTED, 0);
+  } else {
+    scrollbar_draw_trough(IMAGE_STATE_NORMAL, 0);
   }
-#endif
-
-  if (scrollbar_isUpDn()) {
-    scrollbar_setNone();
-    scrollbar_show(0);
+  if (scrollbar_arrow_is_pressed()) {
+    if (scrollbar_uparrow_is_pressed()) {
+      scrollbar_set_uparrow_pressed(0);
+    } else {
+      scrollbar_set_downarrow_pressed(0);
+    }
+    scrollbar_set_motion(0);
   }
   return 1;
 }
@@ -577,24 +342,19 @@ sb_handle_motion_notify(event_t * ev)
     return 1;
 
   D_EVENTS(("MotionNotify event for window 0x%08x\n", ev->xany.window));
-  D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollBar.up_win, scrollBar.dn_win, scrollBar.sa_win, scrollBar.win));
+  D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
 
-  if ((scrollbar_win_is_scrollbar(ev->xany.window)
-#ifdef PIXMAP_SCROLLBAR
-       || (scrollbar_anchor_is_pixmapped() && scrollbar_win_is_anchor(ev->xany.window))
-#endif
-      ) && scrollbar_isMotion()) {
-
+  if ((scrollbar_win_is_trough(ev->xany.window) || scrollbar_win_is_anchor(ev->xany.window)) && scrollbar_is_moving()) {
     Window unused_root, unused_child;
     int unused_root_x, unused_root_y;
     unsigned int unused_mask;
 
-    while (XCheckTypedWindowEvent(Xdisplay, scrollBar.win, MotionNotify, ev));
-    XQueryPointer(Xdisplay, scrollBar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+    while (XCheckTypedWindowEvent(Xdisplay, scrollbar.win, MotionNotify, ev));
+    XQueryPointer(Xdisplay, scrollbar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
     scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
     refresh_count = refresh_limit = 0;
     scr_refresh(refresh_type);
-    scrollbar_show(button_state.mouse_offset);
+    scrollbar_anchor_update_position(button_state.mouse_offset);
   }
   return 1;
 }
@@ -608,6 +368,268 @@ scrollbar_dispatch_event(event_t * ev)
   return (0);
 }
 
+/******************************************************************************/
+
+void
+scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes) {
+
+  D_SCROLLBAR(("scrollbar_draw_uparrow(%u, 0x%02x)\n", (unsigned int) image_state, (unsigned int) force_modes));
+  if (image_state != IMAGE_STATE_CURRENT) {
+    if ((image_state == IMAGE_STATE_NORMAL) && (images[image_up].current != images[image_up].norm)) {
+      images[image_up].current = images[image_up].norm;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_SELECTED) && (images[image_up].current != images[image_up].selected)) {
+      images[image_up].current = images[image_up].selected;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_up].current != images[image_up].clicked)) {
+      images[image_up].current = images[image_up].clicked;
+      force_modes = MODE_MASK;
+    }
+  }
+  if (!image_mode_is(image_up, MODE_MASK)) {
+    /* Solid mode.  Redraw every time since it's cheap. */
+    XFillRectangle(Xdisplay, scrollbar.up_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    if (scrollbar_uparrow_is_pressed()) {
+      draw_uparrow_clicked(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
+    } else {
+      draw_uparrow_raised(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
+    }
+    return;
+  }
+  if (!((images[image_up].mode & MODE_MASK) & (force_modes))) {
+    return;
+  }
+  render_simage(images[image_up].current, scrollbar.up_win, scrollbar_arrow_width(), scrollbar_arrow_height(), image_up, 0);
+}
+
+unsigned char
+scrollbar_move_uparrow(void) {
+  static int last_x = -1, last_y = -1, last_w = -1, last_h = -1;
+  int x, y, w, h;
+
+  D_SCROLLBAR(("scrollbar_move_uparrow()\n"));
+  x = scrollbar_get_shadow();
+  y = scrollbar_up_loc();
+  w = scrollbar_arrow_width();
+  h = scrollbar_arrow_height();
+  if ((last_x == x) && (last_y == y) && (last_w == w) && (last_h == h)) {
+    D_SCROLLBAR((" -> No move required, returning 0.\n"));
+    return 0;
+  }
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.up_win, x, y, w, h));
+  XMoveResizeWindow(Xdisplay, scrollbar.up_win, x, y, w, h);
+  last_x = x;
+  last_y = y;
+  last_w = w;
+  last_h = h;
+  return 1;
+}
+
+void
+scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes) {
+
+  D_SCROLLBAR(("scrollbar_draw_downarrow(%u, 0x%02x)\n", (unsigned int) image_state, (unsigned int) force_modes));
+  if (image_state != IMAGE_STATE_CURRENT) {
+    if ((image_state == IMAGE_STATE_NORMAL) && (images[image_down].current != images[image_down].norm)) {
+      images[image_down].current = images[image_down].norm;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_SELECTED) && (images[image_down].current != images[image_down].selected)) {
+      images[image_down].current = images[image_down].selected;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_down].current != images[image_down].clicked)) {
+      images[image_down].current = images[image_down].clicked;
+      force_modes = MODE_MASK;
+    }
+  }
+  if (!image_mode_is(image_down, MODE_MASK)) {
+    /* Solid mode.  Redraw every time since it's cheap. */
+    XFillRectangle(Xdisplay, scrollbar.dn_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    if (scrollbar_downarrow_is_pressed()) {
+      draw_downarrow_clicked(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
+    } else {
+      draw_downarrow_raised(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
+    }
+    return;
+  }
+  if (!((images[image_down].mode & MODE_MASK) & (force_modes))) {
+    return;
+  }
+  render_simage(images[image_down].current, scrollbar.dn_win, scrollbar_arrow_width(), scrollbar_arrow_height(), image_down, 0);
+}
+
+unsigned char
+scrollbar_move_downarrow(void) {
+  static int last_x = -1, last_y = -1, last_w = -1, last_h = -1;
+  int x, y, w, h;
+
+  D_SCROLLBAR(("scrollbar_move_downarrow()\n"));
+  x = scrollbar_get_shadow();
+  y = scrollbar_dn_loc();
+  w = scrollbar_arrow_width();
+  h = scrollbar_arrow_height();
+  if ((last_x == x) && (last_y == y) && (last_w == w) && (last_h == h)) {
+    D_SCROLLBAR((" -> No move required, returning 0.\n"));
+    return 0;
+  }
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.dn_win, x, y, w, h));
+  XMoveResizeWindow(Xdisplay, scrollbar.dn_win, x, y, w, h);
+  last_x = x;
+  last_y = y;
+  last_w = w;
+  last_h = h;
+  return 1;
+}
+
+void
+scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
+
+  D_SCROLLBAR(("scrollbar_draw_anchor(%u, 0x%02x)\n", (unsigned int) image_state, (unsigned int) force_modes));
+  if (image_state != IMAGE_STATE_CURRENT) {
+    if ((image_state == IMAGE_STATE_NORMAL) && (images[image_sa].current != images[image_sa].norm)) {
+      images[image_sa].current = images[image_sa].norm;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_SELECTED) && (images[image_sa].current != images[image_sa].selected)) {
+      images[image_sa].current = images[image_sa].selected;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_sa].current != images[image_sa].clicked)) {
+      images[image_sa].current = images[image_sa].clicked;
+      force_modes = MODE_MASK;
+    }
+  }
+  if (!image_mode_is(image_sa, MODE_MASK)) {
+    /* Solid mode.  Redraw every time since it's cheap. */
+#ifdef XTERM_SCROLLBAR
+    if (scrollbar.type == SCROLLBAR_XTERM) {
+      XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
+    }
+#endif /* XTERM_SCROLLBAR */
+#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
+    if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
+      XFillRectangle(Xdisplay, scrollbar.sa_win, gc_scrollbar, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
+      draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+    }
+#endif
+    return;
+  }
+  if (!((images[image_sa].mode & MODE_MASK) & (force_modes))) {
+    return;
+  }
+  if (scrollbar_anchor_height() > 1) {
+    render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
+  }
+}
+
+unsigned char
+scrollbar_move_anchor(void) {
+  static int last_x = -1, last_y = -1, last_w = -1, last_h = -1;
+  int x, y, w, h;
+
+  D_SCROLLBAR(("scrollbar_move_anchor()\n"));
+  x = scrollbar_get_shadow();
+  y = scrollbar.anchor_top;
+  w = scrollbar_anchor_width();
+  h = scrollbar_anchor_height();
+  if ((last_x == x) && (last_y == y) && (last_w == w) && (last_h == h)) {
+    D_SCROLLBAR((" -> No move required, returning 0.\n"));
+    return 0;
+  }
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.sa_win, x, y, w, h));
+  XMoveResizeWindow(Xdisplay, scrollbar.sa_win, x, y, w, h);
+  last_x = x;
+  last_y = y;
+  last_w = w;
+  last_h = h;
+  return 1;
+}
+
+void
+scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes) {
+
+  D_SCROLLBAR(("scrollbar_draw_trough(%u, 0x%02x)\n", (unsigned int) image_state, (unsigned int) force_modes));
+  if (image_state != IMAGE_STATE_CURRENT) {
+    if ((image_state == IMAGE_STATE_NORMAL) && (images[image_sb].current != images[image_sb].norm)) {
+      images[image_sb].current = images[image_sb].norm;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_SELECTED) && (images[image_sb].current != images[image_sb].selected)) {
+      images[image_sb].current = images[image_sb].selected;
+      force_modes = MODE_MASK;
+    } else if ((image_state == IMAGE_STATE_CLICKED) && (images[image_sb].current != images[image_sb].clicked)) {
+      images[image_sb].current = images[image_sb].clicked;
+      force_modes = MODE_MASK;
+    }
+  }
+  if (!image_mode_is(image_sb, MODE_MASK)) {
+    /* Solid mode.  Redraw every time since it's cheap. */
+    if (Options & Opt_scrollbar_floating) {
+      XSetWindowBackground(Xdisplay, scrollbar.win, PixColors[bgColor]);
+      XClearWindow(Xdisplay, scrollbar.win);
+    } else {
+      XFillRectangle(Xdisplay, scrollbar.win, gc_scrollbar, 0, 0, scrollbar_trough_width(), scrollbar_trough_height());
+      draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(), scrollbar_get_shadow());
+    }
+    return;
+  }
+  if (!((images[image_sb].mode & MODE_MASK) & (force_modes))) {
+    return;
+  }
+  render_simage(images[image_sb].current, scrollbar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+}
+
+void
+scrollbar_init(int width, int height)
+{
+
+  Cursor cursor;
+  long mask;
+
+  D_SCROLLBAR(("scrollbar_init():  Initializing all scrollbar elements.\n"));
+
+  Attributes.background_pixel = PixColors[scrollColor];
+  Attributes.border_pixel = PixColors[bgColor];
+  Attributes.override_redirect = TRUE;
+  Attributes.save_under = TRUE;
+  cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
+  mask = ExposureMask | EnterWindowMask | LeaveWindowMask | ButtonPressMask | ButtonReleaseMask
+      | Button1MotionMask | Button2MotionMask | Button3MotionMask;
+  scrollbar_calc_size(width, height);
+  scrollbar.anchor_top = scrollbar.scrollarea_start;
+  scrollbar.anchor_bottom = scrollbar.scrollarea_end;
+
+  /* Create the scrollbar trough window.  It will be the parent to the other windows. */
+  scrollbar.win = XCreateWindow(Xdisplay, TermWin.parent, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height,
+                                0, Xdepth, InputOutput, CopyFromParent,	CWOverrideRedirect | CWBackingStore | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
+  XDefineCursor(Xdisplay, scrollbar.win, cursor);
+  XSelectInput(Xdisplay, scrollbar.win, mask);
+  D_SCROLLBAR(("scrollbar_init():  Created scrollbar window 0x%08x\n", scrollbar.win));
+
+  /* Now the up arrow window. */
+  scrollbar.up_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+  XSelectInput(Xdisplay, scrollbar.up_win, mask);
+  D_SCROLLBAR(("scrollbar_init():  Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
+
+  /* The down arrow window */
+  scrollbar.dn_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height(),
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+  XSelectInput(Xdisplay, scrollbar.dn_win, mask);
+  D_SCROLLBAR(("scrollbar_init():  Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
+
+  /* The anchor window */
+  scrollbar.sa_win = XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar.anchor_top, scrollbar_anchor_width(), scrollbar_anchor_height(),
+                                   0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWColormap, &Attributes);
+  XSelectInput(Xdisplay, scrollbar.sa_win, mask);
+  XMapWindow(Xdisplay, scrollbar.sa_win);
+  D_SCROLLBAR(("scrollbar_init():  Created scrollbar anchor window 0x%08x\n", scrollbar.sa_win));
+
+  if (scrollbar_get_type() != SCROLLBAR_XTERM) {
+    scrollbar_map_arrows();
+  }
+  event_register_dispatcher(scrollbar_dispatch_event, scrollbar_event_init_dispatcher);
+
+  scrollbar_drawing_init();
+  scrollbar_draw(MODE_MASK);
+}
+
 unsigned char
 scrollbar_mapping(unsigned char show)
 {
@@ -616,37 +638,15 @@ scrollbar_mapping(unsigned char show)
 
   D_SCROLLBAR(("scrollbar_mapping(%d)\n", show));
 
-  if (show && !scrollbar_visible()) {
-    D_SCROLLBAR((" -> Mapping all scrollbar windows.  Returning 1.\n"));
-    scrollBar.state = 1;
-    XMapWindow(Xdisplay, scrollBar.win);
-#ifdef PIXMAP_SCROLLBAR
-    if (scrollbar_uparrow_is_pixmapped()) {
-      XMapWindow(Xdisplay, scrollBar.up_win);
-    }
-    if (scrollbar_downarrow_is_pixmapped()) {
-      XMapWindow(Xdisplay, scrollBar.dn_win);
-    }
-    if (scrollbar_anchor_is_pixmapped()) {
-      XMapWindow(Xdisplay, scrollBar.sa_win);
-    }
-#endif
+  if (show && !scrollbar_is_visible()) {
+    D_SCROLLBAR((" -> Mapping scrollbar window.  Returning 1.\n"));
+    scrollbar_set_visible(1);
+    XMapWindow(Xdisplay, scrollbar.win);
     change = 1;
-  } else if (!show && scrollbar_visible()) {
-    D_SCROLLBAR((" -> Unmapping all scrollbar windows.  Returning 1.\n"));
-    scrollBar.state = 0;
-#ifdef PIXMAP_SCROLLBAR
-    if (scrollbar_uparrow_is_pixmapped()) {
-      XUnmapWindow(Xdisplay, scrollBar.up_win);
-    }
-    if (scrollbar_downarrow_is_pixmapped()) {
-      XUnmapWindow(Xdisplay, scrollBar.dn_win);
-    }
-    if (scrollbar_anchor_is_pixmapped()) {
-      XUnmapWindow(Xdisplay, scrollBar.sa_win);
-    }
-#endif
-    XUnmapWindow(Xdisplay, scrollBar.win);
+  } else if (!show && scrollbar_is_visible()) {
+    D_SCROLLBAR((" -> Unmapping scrollbar window.  Returning 1.\n"));
+    scrollbar_set_visible(0);
+    XUnmapWindow(Xdisplay, scrollbar.win);
     change = 1;
   } else {
     D_SCROLLBAR((" -> No action required.  Returning 0.\n"));
@@ -657,302 +657,297 @@ scrollbar_mapping(unsigned char show)
 void
 scrollbar_reset(void)
 {
-
-  if (scrollbarGC != None) {
-    XFreeGC(Xdisplay, scrollbarGC);
-    scrollbarGC = None;
+  D_SCROLLBAR(("scrollbar_reset()\n"));
+#if 0
+  if (gc_scrollbar != None) {
+    XFreeGC(Xdisplay, gc_scrollbar);
+    gc_scrollbar = None;
   }
-#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-  if (topShadowGC != None) {
-    XFreeGC(Xdisplay, topShadowGC);
-    topShadowGC = None;
+# if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
+  if (gc_top != None) {
+    XFreeGC(Xdisplay, gc_top);
+    gc_top = None;
   }
-  if (botShadowGC != None) {
-    XFreeGC(Xdisplay, botShadowGC);
-    botShadowGC = None;
+  if (gc_bottom != None) {
+    XFreeGC(Xdisplay, gc_bottom);
+    gc_bottom = None;
   }
-#endif
-#ifdef XTERM_SCROLLBAR
-  if (shadowGC != None) {
-    XFreeGC(Xdisplay, shadowGC);
-    shadowGC = None;
+# endif
+# ifdef XTERM_SCROLLBAR
+  if (gc_stipple != None) {
+    XFreeGC(Xdisplay, gc_stipple);
+    gc_stipple = None;
   }
-#endif
+# endif
+#endif /* 0 */
   last_top = last_bot = 0;
-  scrollBar.init = 0;
+  scrollbar.init = 0;
+}
+
+void
+scrollbar_calc_size(int width, int height)
+{
+  D_SCROLLBAR(("scrollbar_calc_size(%d, %d), type == %u\n", width, height, scrollbar_get_type()));
+  scrollbar.scrollarea_start = 0;
+  scrollbar.scrollarea_end = height;
+  scrollbar.up_arrow_loc = 0;
+  scrollbar.down_arrow_loc = 0;
+#ifdef MOTIF_SCROLLBAR
+  if (scrollbar.type == SCROLLBAR_MOTIF) {
+    /* arrows are as high as wide - leave 1 pixel gap */
+    scrollbar.scrollarea_start += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.scrollarea_end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.up_arrow_loc = scrollbar_get_shadow();
+    scrollbar.down_arrow_loc = scrollbar.scrollarea_end + 1;
+  }
+#endif
+#ifdef NEXT_SCROLLBAR
+  if (scrollbar.type == SCROLLBAR_NEXT) {
+    scrollbar.scrollarea_start = scrollbar_get_shadow();
+    scrollbar.scrollarea_end -= (scrollbar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
+    scrollbar.up_arrow_loc = scrollbar.scrollarea_end + 1;
+    scrollbar.down_arrow_loc = scrollbar.scrollarea_end + scrollbar.width + 2;
+  }
+#endif
+  scrollbar.height = height - (2 * scrollbar_get_shadow());
+  scrollbar.win_width = scrollbar.width + (2 * scrollbar_get_shadow());
+  scrollbar.win_height = height;
+  D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollbar.width, scrollbar.height, scrollbar.win_width, scrollbar.win_height));
+  D_X11((" -> New scroll area start/end == %hu - %hu, up_arrow_loc == %hu, down_arrow_loc == %hu\n", scrollbar.scrollarea_start, scrollbar.scrollarea_end,
+         scrollbar.up_arrow_loc, scrollbar.down_arrow_loc));
 }
 
 void
 scrollbar_resize(int width, int height)
 {
-
-  if (!scrollbar_visible()) {
+  if (!scrollbar_is_visible()) {
     return;
   }
 
   D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
-  scrollBar.beg = 0;
-  scrollBar.end = height;
-#ifdef MOTIF_SCROLLBAR
-  if (scrollBar.type == SCROLLBAR_MOTIF) {
-    /* arrows are as high as wide - leave 1 pixel gap */
-    scrollBar.beg += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-    scrollBar.end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-  }
-#endif
-#ifdef NEXT_SCROLLBAR
-  if (scrollBar.type == SCROLLBAR_NEXT) {
-    scrollBar.beg = scrollbar_get_shadow();
-    scrollBar.end -= (scrollBar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
-  }
-#endif
-  width -= scrollbar_trough_width();
-  XMoveResizeWindow(Xdisplay, scrollBar.win, ((Options & Opt_scrollBar_right) ? (width) : (0)), 0, scrollbar_trough_width(), height);
-  scrollBar.init = 0;
-  scrollBar.height = height - (2 * scrollbar_get_shadow());
-  scrollBar.win_width = scrollbar_trough_width();
-  scrollBar.win_height = height;
-  D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollBar.width, scrollBar.height, scrollBar.win_width, scrollBar.win_height));
-  scrollbar_show(0);
+  scrollbar_calc_size(width, height);
+  D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, %d, %d, %d)\n", scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height));
+  XMoveResizeWindow(Xdisplay, scrollbar.win, ((Options & Opt_scrollbar_right) ? (width - scrollbar_trough_width()) : (0)), 0, scrollbar_trough_width(), height);
+  scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
+  scrollbar_reposition_and_draw(MODE_MASK);
+  scrollbar.init = 0;
 }
 
 void
 scrollbar_change_type(unsigned int type)
 {
+  D_SCROLLBAR(("scrollbar_change_type(0x%02x):  Current scrollbar type is 0x%02x\n", type, scrollbar_get_type()));
+  if (scrollbar_get_type() == type) {
+    /* Nothing to do. */
+    return;
+  }
+#ifdef XTERM_SCROLLBAR
+  if (scrollbar.type == SCROLLBAR_XTERM) {
+    scrollbar_map_arrows();
+  }
+#endif
 #ifdef MOTIF_SCROLLBAR
-  if (scrollBar.type == SCROLLBAR_MOTIF) {
+  if (scrollbar.type == SCROLLBAR_MOTIF) {
     /* arrows are as high as wide - leave 1 pixel gap */
-    scrollBar.beg -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-    scrollBar.end += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.scrollarea_start -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.scrollarea_end += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
   }
 #endif
 #ifdef NEXT_SCROLLBAR
-  if (scrollBar.type == SCROLLBAR_NEXT) {
-    scrollBar.beg = 0;
-    scrollBar.end += (scrollBar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
+  if (scrollbar.type == SCROLLBAR_NEXT) {
+    scrollbar.scrollarea_start = 0;
+    scrollbar.scrollarea_end += (scrollbar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
   }
 #endif
 
   scrollbar_reset();
-  scrollBar.type = type;
+  scrollbar.type = type;
 
+#ifdef XTERM_SCROLLBAR
+  if (scrollbar.type == SCROLLBAR_XTERM) {
+    scrollbar_unmap_arrows();
+  }
+#endif
 #ifdef MOTIF_SCROLLBAR
   if (type == SCROLLBAR_MOTIF) {
-    /* arrows are as high as wide - leave 1 pixel gap */
-    scrollBar.beg += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-    scrollBar.end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.scrollarea_start += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.scrollarea_end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollbar.up_arrow_loc = scrollbar_get_shadow();
+    scrollbar.down_arrow_loc = scrollbar.scrollarea_end + 1;
   }
 #endif
 #ifdef NEXT_SCROLLBAR
   if (type == SCROLLBAR_NEXT) {
-    scrollBar.beg = scrollbar_get_shadow();
-    scrollBar.end -= (scrollBar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
+    scrollbar.scrollarea_start = scrollbar_get_shadow();
+    scrollbar.scrollarea_end -= (scrollbar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
+    scrollbar.up_arrow_loc = scrollbar.scrollarea_end + 1;
+    scrollbar.down_arrow_loc = scrollbar.scrollarea_end + scrollbar.width + 2;
   }
 #endif
-  scrollbar_show(1);
+  scrollbar_reposition_and_draw(MODE_MASK);
 }
 
 void
 scrollbar_change_width(unsigned short width)
 {
+  D_SCROLLBAR(("scrollbar_change_width(%hu):  Current width is %hu\n", width, scrollbar_get_width()));
   if (width == 0) {
     width = SB_WIDTH;
   }
-  if (width == scrollBar.width) {
+  if (width == scrollbar.width) {
     /* Nothing to do, so return. */
     return;
   }
   scrollbar_reset();
-  scrollBar.width = width;
+  scrollbar.width = width;
   parent_resize();
-  scrollbar_show(1);
+}
+
+void
+scrollbar_drawing_init(void) {
+
+  XGCValues gcvalue;
+
+  D_SCROLLBAR(("scrollbar_drawing_init()\n"));
+#ifdef XTERM_SCROLLBAR
+  gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollbar.win, (char *) xterm_sb_bits, 12, 2);
+  if (!gcvalue.stipple) {
+    print_error("Unable to create xterm scrollbar bitmap.");
+    if (scrollbar_get_type() == SCROLLBAR_XTERM) {
+      scrollbar_set_type(SCROLLBAR_MOTIF);
+    }
+  } else {
+    gcvalue.fill_style = FillOpaqueStippled;
+    gcvalue.foreground = PixColors[fgColor];
+    gcvalue.background = PixColors[bgColor];
+    gc_scrollbar = XCreateGC(Xdisplay, scrollbar.win, GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
+    gcvalue.foreground = PixColors[borderColor];
+    gc_stipple = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
+  }
+#endif /* XTERM_SCROLLBAR */
+
+#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
+  gcvalue.foreground = PixColors[scrollColor];
+  gc_scrollbar = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
+  gcvalue.foreground = PixColors[topShadowColor];
+  gc_top = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
+  gcvalue.foreground = PixColors[bottomShadowColor];
+  gc_bottom = XCreateGC(Xdisplay, scrollbar.win, GCForeground, &gcvalue);
+#endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
+}
+
+unsigned char
+scrollbar_set_focus(short has_focus) {
+
+  static short focus = -1;
+  XGCValues gcvalue;
+
+  D_SCROLLBAR(("scrollbar_set_focus(%hd):  focus == %hd\n", has_focus, focus));
+  if (focus != has_focus) {
+    focus = has_focus;
+    gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
+    XChangeGC(Xdisplay, gc_scrollbar, GCForeground, &gcvalue);
+    gcvalue.foreground = PixColors[focus ? topShadowColor : unfocusedTopShadowColor];
+    XChangeGC(Xdisplay, gc_top, GCForeground, &gcvalue);
+    gcvalue.foreground = PixColors[focus ? bottomShadowColor : unfocusedBottomShadowColor];
+    XChangeGC(Xdisplay, gc_bottom, GCForeground, &gcvalue);
+    return (1);
+  }
+  return (0);
+}
+
+unsigned char
+scrollbar_anchor_update_position(short mouseoffset) {
+
+  int top = (TermWin.nscrolled - TermWin.view_start);
+  int bot = top + (TermWin.nrow - 1);
+  int len = MAX((TermWin.nscrolled + (TermWin.nrow - 1)), 1);
+
+  D_SCROLLBAR(("scrollbar_anchor_update_position(%hd):  top == %d, bot == %d, len == %d\n", mouseoffset, top, bot, len));
+  scrollbar.anchor_top = (scrollbar.scrollarea_start + (top * scrollbar_scrollarea_height()) / len);
+  scrollbar.anchor_bottom = (scrollbar.scrollarea_start + (bot * scrollbar_scrollarea_height()) / len);
+
+  if (rs_min_anchor_size && scrollbar.type != SCROLLBAR_XTERM) {
+    if ((scrollbar_scrollarea_height() > rs_min_anchor_size) && (scrollbar_anchor_height() < rs_min_anchor_size)) {
+
+      int grab_point = scrollbar.anchor_top + mouseoffset;
+
+      if (grab_point - mouseoffset < scrollbar.scrollarea_start) {
+        scrollbar.anchor_top = scrollbar.scrollarea_start;
+        scrollbar.anchor_bottom = rs_min_anchor_size + scrollbar.scrollarea_start;
+      } else if (scrollbar.anchor_top + rs_min_anchor_size > scrollbar.scrollarea_end) {
+        scrollbar.anchor_top = scrollbar.scrollarea_end - rs_min_anchor_size;
+        scrollbar.anchor_bottom = scrollbar.scrollarea_end;
+      } else {
+        scrollbar.anchor_top = grab_point - mouseoffset;
+        scrollbar.anchor_bottom = scrollbar.anchor_top + rs_min_anchor_size;
+      }
+      if (scrollbar.anchor_bottom == scrollbar.scrollarea_end) {
+        scr_move_to(scrollbar.scrollarea_end, scrollbar_scrollarea_height());
+        scr_refresh(DEFAULT_REFRESH);
+      }
+    }
+  }
+  if ((scrollbar.anchor_top == last_top) && (scrollbar.anchor_bottom == last_bot) && (scrollbar.init)) {
+    return 0;
+  }
+  if (scrollbar_move_anchor()) {
+    scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
+  }
+
+  last_top = scrollbar.anchor_top;
+  last_bot = scrollbar.anchor_bottom;
+  return 1;
+}
+
+void
+scrollbar_draw(unsigned char force_modes)
+{
+  D_SCROLLBAR(("scrollbar_draw(0x%02x)\n", force_modes));
+  scrollbar_draw_trough(IMAGE_STATE_CURRENT, force_modes);
+  scrollbar_draw_anchor(IMAGE_STATE_CURRENT, force_modes);
+  scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, force_modes);
+  scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, force_modes);
+  scrollbar.init = 1;
+}
+
+void
+scrollbar_reposition_and_draw(unsigned char force_modes)
+{
+  D_SCROLLBAR(("scrollbar_reposition_and_draw(0x%02x)\n", force_modes));
+  if (scrollbar_move_uparrow()) {
+    scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, force_modes);
+  }
+  if (scrollbar_move_downarrow()) {
+    scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, force_modes);
+  }
+  if (!scrollbar_anchor_update_position(1)) {
+    scrollbar_draw_anchor(IMAGE_STATE_CURRENT, force_modes);
+  }
+  scrollbar.init = 1;
 }
 
 unsigned char
 scrollbar_show(short mouseoffset)
 {
+  unsigned char force_update = 0;
 
-  unsigned char xsb = 0, force_update = 0;
-  static int focus = -1;
-
-  if (!scrollbar_visible()) {
+  if (!scrollbar_is_visible()) {
     return 0;
   }
 
-  D_SCROLLBAR(("scrollbar_show(%d)\n", mouseoffset));
+  D_SCROLLBAR(("scrollbar_show(%hd)\n", mouseoffset));
 
-  if (scrollbarGC == None) {
-
-    XGCValues gcvalue;
-
-#ifdef XTERM_SCROLLBAR
-    if (scrollBar.type == SCROLLBAR_XTERM) {
-      gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollBar.win, (char *) xterm_sb_bits, 12, 2);
-      if (!gcvalue.stipple) {
-	print_error("Unable to create xterm scrollbar bitmap.  Reverting to default scrollbar.");
-	scrollBar.type = SCROLLBAR_MOTIF;
-      } else {
-	gcvalue.fill_style = FillOpaqueStippled;
-	gcvalue.foreground = PixColors[fgColor];
-	gcvalue.background = PixColors[bgColor];
-	scrollbarGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
-	gcvalue.foreground = PixColors[borderColor];
-	shadowGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
-      }
-    }
-#endif /* XTERM_SCROLLBAR */
-
-#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-    if (scrollBar.type == SCROLLBAR_MOTIF || scrollBar.type == SCROLLBAR_NEXT) {
-
-      gcvalue.foreground = (Xdepth <= 2 ? PixColors[fgColor] : PixColors[scrollColor]);
-      scrollbarGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
-
-      if ((Options & Opt_scrollBar_floating) && !scrollbar_is_pixmapped() && !background_is_pixmap()) {
-        XSetWindowBackground(Xdisplay, scrollBar.win, PixColors[bgColor]);
-      } else {
-	render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-        if (image_mode_is(image_sb, MODE_AUTO)) {
-          enl_ipc_sync();
-          XClearWindow(Xdisplay, scrollBar.win);
-        }
-      }
-      gcvalue.foreground = PixColors[topShadowColor];
-      topShadowGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
-
-      gcvalue.foreground = PixColors[bottomShadowColor];
-      botShadowGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
-    }
-#endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
+  force_update = scrollbar_set_focus(TermWin.focus);
+  if (!(scrollbar.init)) {
+    force_update++;
   }
-#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-  else if (image_mode_is(image_sb, (MODE_TRANS | MODE_VIEWPORT)) || (scrollBar.init == 0)) {
-    render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-  }
-  if (scrollBar.type == SCROLLBAR_MOTIF || scrollBar.type == SCROLLBAR_NEXT) {
-    if (focus != TermWin.focus) {
-      XGCValues gcvalue;
-
-      focus = TermWin.focus;
-      gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
-      XChangeGC(Xdisplay, scrollbarGC, GCForeground, &gcvalue);
-
-      gcvalue.foreground = PixColors[focus ? topShadowColor : unfocusedTopShadowColor];
-      XChangeGC(Xdisplay, topShadowGC, GCForeground, &gcvalue);
-
-      gcvalue.foreground = PixColors[focus ? bottomShadowColor : unfocusedBottomShadowColor];
-      XChangeGC(Xdisplay, botShadowGC, GCForeground, &gcvalue);
-      force_update = 1;
-    }
-  }
-#endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
-
   if (mouseoffset) {
-    int top = (TermWin.nscrolled - TermWin.view_start);
-    int bot = top + (TermWin.nrow - 1);
-    int len = max((TermWin.nscrolled + (TermWin.nrow - 1)), 1);
-
-    scrollBar.top = (scrollBar.beg + (top * scrollbar_scrollarea_height()) / len);
-    scrollBar.bot = (scrollBar.beg + (bot * scrollbar_scrollarea_height()) / len);
-
-    if (rs_min_anchor_size && scrollBar.type != SCROLLBAR_XTERM) {
-      if ((scrollbar_scrollarea_height() > rs_min_anchor_size) && (scrollbar_anchor_height() < rs_min_anchor_size)) {
-
-	int grab_point = scrollBar.top + mouseoffset;
-
-	if (grab_point - mouseoffset < scrollBar.beg) {
-	  scrollBar.top = scrollBar.beg;
-	  scrollBar.bot = rs_min_anchor_size + scrollBar.beg;
-	} else if (scrollBar.top + rs_min_anchor_size > scrollBar.end) {
-	  scrollBar.top = scrollBar.end - rs_min_anchor_size;
-	  scrollBar.bot = scrollBar.end;
-	} else {
-	  scrollBar.top = grab_point - mouseoffset;
-	  scrollBar.bot = scrollBar.top + rs_min_anchor_size;
-	}
-	if (scrollBar.bot == scrollBar.end) {
-	  scr_move_to(scrollBar.end, scrollbar_scrollarea_height());
-	  scr_refresh(DEFAULT_REFRESH);
-	}
-      }
-    }
-    /* no change */
-    if (!force_update && (scrollBar.top == last_top) && (scrollBar.bot == last_bot))
-      return 0;
+    force_update += scrollbar_anchor_update_position(mouseoffset);
   }
-#ifdef XTERM_SCROLLBAR
-  xsb = ((scrollBar.type == SCROLLBAR_XTERM) && (Options & Opt_scrollBar_right)) ? 1 : 0;
-#endif
-  if (last_top < scrollBar.top) {
-    XClearArea(Xdisplay, scrollBar.win, scrollbar_get_shadow() + xsb, last_top, scrollBar.width, (scrollBar.top - last_top), False);
-  }
-  if (scrollBar.bot < last_bot) {
-    XClearArea(Xdisplay, scrollBar.win, scrollbar_get_shadow() + xsb, scrollBar.bot, scrollBar.width, (last_bot - scrollBar.bot), False);
-  }
-#ifdef PIXMAP_SCROLLBAR
-  if (scrollbar_anchor_is_pixmapped()) {
-    if ((last_top != scrollBar.top) || (scrollBar.bot != last_bot) || (scrollBar.init == 0)) {
-      XMoveResizeWindow(Xdisplay, scrollBar.sa_win, scrollbar_get_shadow(), scrollBar.top, scrollBar.width, scrollbar_anchor_height());
-    }
-    if (scrollbar_anchor_height() > 1) {
-      render_simage(images[image_sa].current, scrollBar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-    }
-  }
-#endif
-  last_top = scrollBar.top;
-  last_bot = scrollBar.bot;
-
-  /* scrollbar anchor */
-#ifdef XTERM_SCROLLBAR
-  if (scrollBar.type == SCROLLBAR_XTERM) {
-    XFillRectangle(Xdisplay, scrollBar.win, scrollbarGC, xsb + 1, scrollBar.top, scrollBar.width - 2, scrollbar_anchor_height());
-    XDrawLine(Xdisplay, scrollBar.win, shadowGC, xsb ? 0 : scrollBar.width, scrollBar.beg, xsb ? 0 : scrollBar.width, scrollBar.end);
-  }
-#endif /* XTERM_SCROLLBAR */
-
-#if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-  if (scrollBar.type == SCROLLBAR_MOTIF || scrollBar.type == SCROLLBAR_NEXT) {
-    if (!scrollbar_anchor_is_pixmapped()) {
-      /* Draw the scrollbar anchor in if it's not pixmapped. */
-      if (scrollbar_is_pixmapped()) {
-	XSetTSOrigin(Xdisplay, scrollbarGC, scrollbar_get_shadow(), scrollBar.top);
-	XFillRectangle(Xdisplay, scrollBar.win, scrollbarGC, scrollbar_get_shadow(), scrollBar.top, scrollBar.width, scrollbar_anchor_height());
-	XSetTSOrigin(Xdisplay, scrollbarGC, 0, 0);
-      } else {
-	XFillRectangle(Xdisplay, scrollBar.win, scrollbarGC, scrollbar_get_shadow(), scrollBar.top, scrollBar.width, scrollbar_anchor_height());
-      }
-    }
-    /* Draw trough shadow */
-    if (scrollbar_get_shadow() && !scrollbar_is_pixmapped()) {
-      Draw_Shadow(scrollBar.win, botShadowGC, topShadowGC, 0, 0, scrollbar_trough_width(), scrollbar_trough_height());
-    }
-    /* Draw anchor shadow */
-    if (!scrollbar_anchor_is_pixmapped()) {
-      Draw_Shadow(scrollBar.win, topShadowGC, botShadowGC, scrollbar_get_shadow(), scrollBar.top, scrollBar.width, scrollbar_anchor_height());
-    }
-    /* Draw scrollbar arrows */
-    if (scrollbar_uparrow_is_pixmapped()) {
-      if (scrollBar.init == 0) {
-        XMoveResizeWindow(Xdisplay, scrollBar.up_win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
-        render_simage(images[image_up].current, scrollBar.up_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-      }
-    } else {
-      Draw_up_button(scrollbar_get_shadow(), scrollbar_up_loc(), (scrollbar_isUp()? -1 : +1));
-    }
-    if (scrollbar_downarrow_is_pixmapped()) {
-      if (scrollBar.init == 0) {
-        XMoveResizeWindow(Xdisplay, scrollBar.dn_win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(), scrollbar_arrow_height());
-        render_simage(images[image_down].current, scrollBar.dn_win, scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-      }
-    } else {
-      Draw_dn_button(scrollbar_get_shadow(), scrollbar_dn_loc(), (scrollbar_isDn()? -1 : +1));
-    }
-  }
-  if (image_mode_is(image_up, MODE_AUTO) || image_mode_is(image_down, MODE_AUTO) || image_mode_is(image_sb, MODE_AUTO) || image_mode_is(image_sa, MODE_AUTO)) {
-    //    enl_ipc_sync();
-  }
-#endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
-
-  scrollBar.init = 1;
+  scrollbar_draw_trough(IMAGE_STATE_CURRENT, (force_update) ? (MODE_TRANS | MODE_VIEWPORT) : (MODE_MASK));
+  scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, (force_update) ? (MODE_TRANS | MODE_VIEWPORT) : (MODE_MASK));
+  scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, (force_update) ? (MODE_TRANS | MODE_VIEWPORT) : (MODE_MASK));
+  scrollbar.init = 1;
   return 1;
 }

@@ -216,7 +216,6 @@ AC_ARG_WITH(imlib,
               CFLAGS="$CFLAGS -I${withval}/include -L${withval}/lib"
               GRLIBS="-lImlib"
               AC_DEFINE(PIXMAP_SUPPORT)
-              AC_DEFINE(PIXMAP_SCROLLBAR)
               AC_DEFINE(BACKING_STORE)
             else
               AC_MSG_RESULT(no)
@@ -224,7 +223,6 @@ AC_ARG_WITH(imlib,
             fi, AC_MSG_RESULT(yes)
                 GRLIBS="-lImlib"
                 AC_DEFINE(PIXMAP_SUPPORT)
-                AC_DEFINE(PIXMAP_SCROLLBAR)
                 AC_DEFINE(BACKING_STORE)
 )
 AC_MSG_CHECKING(for transparency support)

@@ -1766,13 +1766,13 @@ static void
 xim_get_area(XRectangle *preedit_rect, XRectangle *status_rect,
 	     XRectangle *needed_rect)
 {
-  preedit_rect->x = needed_rect->width + (scrollbar_visible() && !(Options & Opt_scrollBar_right) ? (scrollbar_trough_width()) : 0);
+  preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
   preedit_rect->y = Height2Pixel(TermWin.nrow - 1);
 
-  preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollBar_right) ? (scrollbar_trough_width()) : 0);
+  preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollbar_right) ? (scrollbar_trough_width()) : 0);
   preedit_rect->height = Height2Pixel(1);
 
-  status_rect->x = (scrollbar_visible() && !(Options & Opt_scrollBar_right)) ? (scrollbar_trough_width()) : 0;
+  status_rect->x = (scrollbar_is_visible() && !(Options & Opt_scrollbar_right)) ? (scrollbar_trough_width()) : 0;
   status_rect->y = Height2Pixel(TermWin.nrow - 1);
 
   status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TermWin.ncol + 1);
@@ -2035,10 +2035,10 @@ run_command(char *argv[])
   /* add Backspace value */
   SavedModes |= (PrivateModes & PrivMode_BackSpace);
 
-  /* add value for scrollBar */
-  if (scrollbar_visible()) {
-    PrivateModes |= PrivMode_scrollBar;
-    SavedModes |= PrivMode_scrollBar;
+  /* add value for scrollbar */
+  if (scrollbar_is_visible()) {
+    PrivateModes |= PrivMode_scrollbar;
+    SavedModes |= PrivMode_scrollbar;
   }
 #if DEBUG >= DEBUG_TTYMODE && defined(HAVE_TERMIOS_H)
   if (debug_level >= DEBUG_TTYMODE) {
@@ -2407,12 +2407,13 @@ cmd_getc(void)
       XNextEvent(Xdisplay, &ev);
 
 #ifdef USE_XIM
-      if (!XFilterEvent(&ev, ev.xkey.window)) {
-	event_dispatch(&ev);
-      }
-#else
-      event_dispatch(&ev);
+      if (Input_Context != NULL) {
+        if (!XFilterEvent(&ev, ev.xkey.window)) {
+          event_dispatch(&ev);
+        }
+      } else
 #endif
+        event_dispatch(&ev);
 
       /* in case button actions pushed chars to cmdbuf */
       if (CHARS_READ()) {
@@ -2421,12 +2422,12 @@ cmd_getc(void)
     }
 
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
-    if (scrollbar_isUp()) {
+    if (scrollbar_uparrow_is_pressed()) {
       if (!scroll_arrow_delay-- && scr_page(UP, 1)) {
 	scroll_arrow_delay = SCROLLBAR_CONTINUOUS_DELAY;
 	refreshed = 0;
       }
-    } else if (scrollbar_isDn()) {
+    } else if (scrollbar_downarrow_is_pressed()) {
       if (!scroll_arrow_delay-- && scr_page(DN, 1)) {
 	scroll_arrow_delay = SCROLLBAR_CONTINUOUS_DELAY;
 	refreshed = 0;
@@ -2443,7 +2444,7 @@ cmd_getc(void)
 
     if (refreshed
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
-	&& !(scrollbar_isUpDn())
+	&& !(scrollbar_arrow_is_pressed())
 #endif
 	) {
       delay = NULL;
@@ -2483,11 +2484,8 @@ cmd_getc(void)
 	refreshed = 1;
 	D_CMD(("cmd_getc(): select() timed out, time to update the screen.\n"));
 	scr_refresh(refresh_type);
-        /* FIXME:  This call is only here to update the anchor size/position.
-           It should be replaced with a call to a function that does just that
-           rather than calling a function that updates the background also. */
-	if (scrollbar_visible()) {
-	  scrollbar_show(1);
+	if (scrollbar_is_visible()) {
+	  scrollbar_anchor_update_position(1);
         }
 #ifdef USE_XIM
 	xim_send_spot();

@@ -64,9 +64,11 @@
 # define UPPER_BOUND(current, other)    (((current) > (other)) ? ((current) = (other)) : (current))
 # define AT_MOST(current, other)        UPPER_BOUND(current, other)
 # define MIN_IT(current, other)         UPPER_BOUND(current, other)
+# define BOUND(val, min, max)           (((val) < (min)) ? ((val) = (min)) : (((val) > (max)) ? ((val) = (max)) : (val)))
+# define CONTAIN(val, min, max)         BOUND(val, min, max)
 # define SWAP_IT(one, two, tmp)         do {(tmp) = (one); (one) = (two); (two) = (tmp);} while (0)
 
-/* width of scrollBar, menuBar shadow ... don't change! */
+/* width of scrollbar, menuBar shadow ... don't change! */
 # define SHADOW	2
 
 /* convert pixel dimensions to row/column values */
