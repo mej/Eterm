@@ -13,7 +13,7 @@ config.h
 libtool
 stamp-h
 move-themes
-Eterm.spec
+*.spec
 config.h.in
 missing
 mkinstalldirs
