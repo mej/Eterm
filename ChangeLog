@@ -4794,3 +4794,8 @@ Sun Sep 22 00:34:42 2002                        Michael Jennings (mej)
 Added an option to disable the secondary screen as requested by Marc
 Merlin <marc@merlins.org>.
 ----------------------------------------------------------------------
+Sun Sep 29 21:48:10 2002                        Michael Jennings (mej)
+
+Fixed Debian Bug #155960.  WM_COMMAND was being set improperly because
+equals signs in the arg list were being NUL'd out for no reason.
+----------------------------------------------------------------------

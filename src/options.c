@@ -856,7 +856,6 @@ get_options(int argc, char *argv[])
 #endif
 
             if ((val_ptr = strchr(opt, '=')) != NULL) {
-                *val_ptr = 0;
                 val_ptr++;
                 hasequal = 1;
             } else {
@@ -875,7 +874,7 @@ get_options(int argc, char *argv[])
                 CHECK_BAD();
                 continue;
             }
-            if (!strcasecmp(opt, "exec")) {
+            if (!BEG_STRCASECMP(opt, "exec")) {
                 D_OPTIONS(("--exec option detected\n"));
                 if (!hasequal) {
 
@@ -902,11 +901,11 @@ get_options(int argc, char *argv[])
                     }
                     rs_exec_args[k] = (char *) NULL;
                 }
-            } else if (!strcasecmp(opt, "help")) {
+            } else if (!BEG_STRCASECMP(opt, "help")) {
                 usage();
-            } else if (!strcasecmp(opt, "version")) {
+            } else if (!BEG_STRCASECMP(opt, "version")) {
                 version();
-            } else if (!strcasecmp(opt, "attribute")) {
+            } else if (!BEG_STRCASECMP(opt, "attribute")) {
                 conf_parse_line(NULL, val_ptr);
             } else {            /* It's not --exec */
                 if (optList[j].flag & OPT_BOOLEAN) {    /* Boolean value */
@@ -1083,7 +1082,6 @@ get_initial_options(int argc, char *argv[])
                 continue;
 
             if ((val_ptr = strchr(opt, '=')) != NULL) {
-                *val_ptr = 0;
                 val_ptr++;
                 hasequal = 1;
             } else {
