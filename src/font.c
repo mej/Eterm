@@ -458,8 +458,12 @@ change_font(int init, const char *fontname)
     D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx, (unsigned int) font_idx));
 
     if (init) {
-        font_idx = def_font_idx;
         ASSERT(etfonts != NULL);
+        if ((def_font_idx >= font_cnt) || (etfonts[def_font_idx] == NULL)) {
+            def_font_idx = font_idx;
+        } else {
+            font_idx = def_font_idx;
+        }
         ASSERT(etfonts[font_idx] != NULL);
 #ifdef MULTI_CHARSET
         ASSERT(etmfonts != NULL);

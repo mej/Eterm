@@ -4927,3 +4927,7 @@ Hopefully improve exit handling.
 Change "export TERM=vt100" to the portable "TERM=vt100; export TERM"
 syntax.
 ----------------------------------------------------------------------
+Thu Nov 21 14:03:23 2002                        Michael Jennings (mej)
+
+Fix for Debian Bug #169933, seg fault with invalid default font index.
+----------------------------------------------------------------------
