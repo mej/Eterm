@@ -96,19 +96,19 @@ int
 main(int argc, char *argv[])
 {
 #ifdef PIXMAP_SUPPORT
-  unsigned char scale = 0, center = 0, fit = 0;
+  unsigned char scale = 0, center = 0, fit = 0, mirror = 0;
   char *displayname = NULL;
   char *fname = NULL;
   Imlib_Image im;
-  Pixmap p, temp_pmap, m;
+  Pixmap p = None, temp_pmap = None, m = None;
   register unsigned char i;
   GC gc;
   XGCValues gcv;
   int w, h, x, y;
 
   if (argc < 2) {
-    fprintf(stderr, "%s [-display <display_name>] [-scale] [-center] [-fit] pixmap\n", *argv);
-    fprintf(stderr, "\t Short options are also recognized (-d, -s, -c, and -f)\n");
+    fprintf(stderr, "%s [-display <display_name>] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
+    fprintf(stderr, "\t Short options are also recognized (-d, -s, -c, -f, and -m)\n");
     exit(0);
   }
   for (i = 1; i < argc; i++) {
@@ -123,20 +123,24 @@ main(int argc, char *argv[])
       center = 1;
     } else if (argv[i][1] == 'f') {
       fit = 1;
+    } else if (argv[i][1] == 'm') {
+      mirror = 1;
     } else if (argv[i][1] == 'x') {
       fprintf(stderr, "Debugging activated.\n");
       debug = 1;
     } else {
       fprintf(stderr, "%s:  Unrecognized option \'%c\'\n\n", *argv, argv[i][1]);
-      fprintf(stderr, "%s [-display display] [-scale] pixmap\n", *argv);
-      fprintf(stderr, "\t Short options are also recognized (-d and -s)\n");
+      fprintf(stderr, "%s [-display display] [-scale] [-center] [-fit] [-mirror] pixmap\n", *argv);
+      fprintf(stderr, "\t Short options are also recognized (-d, -s, -c, -f, and -m)\n");
       exit(2);
     }
   }
 
   fname = argv[i];
-  if (scale)
+  if (scale) {
     center = 0;
+    mirror=0;
+  }
 
   if (debug) {
     fprintf(stderr, "%s:%d:  Display name is \"%s\"\n", __FILE__, __LINE__, displayname ? displayname : "(nil)");
@@ -180,6 +184,9 @@ main(int argc, char *argv[])
   if (scale) {
     w = scr->width;
     h = scr->height;
+  } else if (mirror) {
+    w = imlib_image_get_width() * 2;
+    h = imlib_image_get_height() * 2;
   } else {
     w = imlib_image_get_width();
     h = imlib_image_get_height();
@@ -217,12 +224,28 @@ main(int argc, char *argv[])
   imlib_context_set_anti_alias(1);
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
-  imlib_context_set_drawable(Xroot);
-  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, &m, w, h);
+  if (mirror) {
+    temp_pmap = XCreatePixmap(Xdisplay, Xroot, w, h, Xdepth);
+    imlib_context_set_drawable(temp_pmap);
+    imlib_render_image_on_drawable(0, 0);
+    imlib_image_flip_horizontal();
+    imlib_render_image_on_drawable(imlib_image_get_width(), 0);
+    imlib_image_flip_vertical();
+    imlib_render_image_on_drawable(imlib_image_get_width(), imlib_image_get_height());
+    imlib_image_flip_horizontal();
+    imlib_render_image_on_drawable(0, imlib_image_get_height());
+  } else {
+    imlib_context_set_drawable(Xroot);
+    imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, &m, w, h);
+  }
   if (debug) {
     fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, (unsigned int) temp_pmap);
   }
   if (temp_pmap != None) {
+    if (m) {
+      XFreePixmap(Xdisplay, m);
+      m = None;
+    }
     XSetTile(Xdisplay, gc, temp_pmap);
     XSetTSOrigin(Xdisplay, gc, x, y);
     XSetFillStyle(Xdisplay, gc, FillTiled);

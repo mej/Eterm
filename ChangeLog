@@ -3686,3 +3686,9 @@ Mon Jun 12 19:18:56 PDT 2000	Michael Jennings <mej@eterm.org>
 	again to Marius Gedminas <mgedmin@takas.lt> for pointing it out.
 	
 -------------------------------------------------------------------------------
+Fri Jun 16 13:29:59 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Merged in a patch from Ariel Glenn <ariel@columbia.edu> to do mirrored
+	image tiling in Esetroot.
+	
+-------------------------------------------------------------------------------
