@@ -63,6 +63,6 @@ cd ../themes
 for i in `ls -1` ; do
   if [ -f $i/theme.cfg -a ! -e $i/$LISTFILE ]; then
     echo "Creating symlink to $LISTFILE for theme $i"
-    (cd $i && ln -sf ../../pix/$LISTFILE $LISTFILE)
+    (cd $i && ln -f -s ../../pix/$LISTFILE $LISTFILE)
   fi
 done

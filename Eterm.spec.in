@@ -47,7 +47,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 ( cd $RPM_BUILD_ROOT
   mv .%{_bindir}/%{name} .%{_bindir}/%{name}-%{version}
   cd $RPM_BUILD_ROOT%{_bindir}
-  ln -sf %{name}-%{version} %{name}
+  ln -f -s %{name}-%{version} %{name}
   cd $RPM_BUILD_ROOT
   chmod +x .%{_libdir}/lib*so* ||:
 )

@@ -4392,3 +4392,7 @@ While I'm at it, here's a patch to fix some escape sequence handling
 under vim from Paul W Brannan <pbranna@clemson.edu>.  This patch is
 reported to fix problems where vim would come up with underlines.
 ----------------------------------------------------------------------
+Sat Sep 22 09:41:26 2001                        Michael Jennings (mej)
+
+Fixes for Solaris where ln requires a certain argument order.
+----------------------------------------------------------------------
