@@ -3897,3 +3897,10 @@ Sun Sep 17 11:51:16 PDT 2000	Michael Jennings <mej@eterm.org>
 	Added ability to track Imlib2-created pixmaps via libmej.
 	
 -------------------------------------------------------------------------------
+Sun Sep 17 13:05:13 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	When shaded, rely on Enlightenment rather than X for accurate x/y
+	position information.  This fixes a bug pointed out by Gnea
+	<gnea@rochester.rr.com>.
+	
+-------------------------------------------------------------------------------

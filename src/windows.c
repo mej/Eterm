@@ -605,11 +605,11 @@ void
 handle_move(int x, int y)
 {
   if ((TermWin.x != x) || (TermWin.y != y)) {
+    TermWin.x = x;
+    TermWin.y = y;
     if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
       redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
     }
-    TermWin.x = x;
-    TermWin.y = y;
   }
 }
 

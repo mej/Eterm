@@ -38,15 +38,16 @@ static const char cvs_ident[] = "$Id$";
 # include <X11/extensions/shape.h>
 #endif
 
+#include "command.h"
 #include "draw.h"
 #include "e.h"
 #include "icon.h"
-#include "startup.h"
 #include "menus.h"
 #include "options.h"
 #include "pixmap.h"
 #include "screen.h"
 #include "scrollbar.h"
+#include "startup.h"
 #include "term.h"
 #include "windows.h"
 
@@ -511,7 +512,15 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     D_PIXMAP(("update_desktop_info() failed.\n"));
     return None;
   }
-  XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
+  if (refresh_type == NO_REFRESH) {
+    /* If we're hidden/shaded, translated coordinates to be parent relative, then use the
+       internal cache data to tell where we are on the desktop.  Otherwise, just ask X. */
+    XTranslateCoordinates(Xdisplay, d, TermWin.parent, x, y, &x, &y, &dummy);
+    x += TermWin.x;
+    y += TermWin.y;
+  } else {
+    XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
+  }
   p = LIBMEJ_X_CREATE_PIXMAP(width, height);
   gc = LIBMEJ_X_CREATE_GC(0, NULL);
   D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y, desktop_window));
