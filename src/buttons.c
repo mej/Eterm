@@ -108,6 +108,7 @@ bbar_create(void)
   bbar_set_docked(bbar, BBAR_DOCKED_TOP);
   bbar_set_visible(bbar, 1);
 
+  D_BBAR(("bbar created:  Window 0x%08x, dimensions %dx%d\n", bbar->win, bbar->w, bbar->h));
   return bbar;
 }
 

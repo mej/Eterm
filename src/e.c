@@ -267,7 +267,7 @@ enl_send_and_wait(char *msg)
       D_ENL(("IPC timed out.  IPC window 0x%08x has gone AWOL.  Clearing ipc_win.\n", ipc_win));
       XSelectInput(Xdisplay, ipc_win, None);
       ipc_win = None;
-      check_image_ipc(1);
+      (void) check_image_ipc(1);
     }
   }
   signal(SIGALRM, old_alrm);

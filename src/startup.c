@@ -113,15 +113,7 @@ eterm_bootstrap(int argc, char *argv[])
     print_error("can't open display %s", display_name);
     exit(EXIT_FAILURE);
   }
-#if DEBUG >= DEBUG_X
-  if (debug_level >= DEBUG_X) {
-    XSetErrorHandler((XErrorHandler) abort);
-  } else {
-    XSetErrorHandler((XErrorHandler) xerror_handler);
-  }
-#else
   XSetErrorHandler((XErrorHandler) xerror_handler);
-#endif
 
   if (Options & Opt_install) {
     cmap = XCreateColormap(Xdisplay, Xroot, Xvisual, AllocNone);
@@ -226,6 +218,7 @@ eterm_bootstrap(int argc, char *argv[])
 
 #if DEBUG >= DEBUG_X
   if (debug_level >= DEBUG_X) {
+    XSync(Xdisplay, False);
     XSynchronize(Xdisplay, True);
   }
 #endif

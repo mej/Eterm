@@ -3784,7 +3784,12 @@ Wed Jul  5 20:48:10 PDT 2000	Michael Jennings <mej@eterm.org>
 -------------------------------------------------------------------------------
 Thu Jul  6 23:56:54 PDT 2000	Michael Jennings <mej@eterm.org>
 
-	I think I've finally fixed all those XPolyText8() errors with pixmap
+	I think I've finally fixed all those XPolyText8 errors with pixmap
 	support disabled.  Solid color mode buttonbars seem to work now also.
+	
+-------------------------------------------------------------------------------
+Fri Jul  7 11:45:49 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Some more bits from last night's work.
 	
 -------------------------------------------------------------------------------
