@@ -4869,3 +4869,9 @@ Sun Oct 13 01:27:51 2002                        Michael Jennings (mej)
 Make sure it builds without Imlib2 so we don't have a repeat of last
 time.
 ----------------------------------------------------------------------
+Sun Oct 20 21:07:43 2002                        Michael Jennings (mej)
+
+Fixed a double-free in libscream.c.  Also some cleanups to the spec
+file, and I fixed some missing return statements in non-void
+functions.
+----------------------------------------------------------------------

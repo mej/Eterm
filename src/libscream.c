@@ -1674,7 +1674,7 @@ ns_rel_disp(_ns_sess * s, int d)
                 x = s->dsps;
         }
     }
-    ns_go2_disp(s, x->index);
+    return ns_go2_disp(s, x->index);
 }
 
 
@@ -1869,9 +1869,6 @@ ns_ren_disp(_ns_sess * s, int d, char *name)
 #endif
     }
 
-    if (i)
-        FREE(i);
-
     return ret;
 }
 
@@ -1899,15 +1896,13 @@ ns_log_disp(_ns_sess * s, int d, char *logfile)
 int
 ns_tog_region(_ns_sess * s, _ns_disp * d)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
 ns_go2_region(_ns_sess * s, _ns_disp * d, int n)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 
@@ -1962,8 +1957,7 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 int
 ns_rsz_region(_ns_sess * s, _ns_disp * d, int r, int w, int h)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
@@ -2009,36 +2003,31 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 int
 ns_mov_region(_ns_sess * s, _ns_disp * d, int fm, int to)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
 ns_ren_region(_ns_sess * s, _ns_disp * d, int r, char *name)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
 ns_log_region(_ns_sess * s, _ns_disp * d, int r, char *logfile)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
 ns_mon_region(_ns_sess * s, _ns_disp * d, int r)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 int
 ns_sbb_region(_ns_sess * s, _ns_disp * d, int r)
 {
-    if (ns_magic_disp(&s, &d) == NS_FAIL)
-        return NS_FAIL;
+    return ns_magic_disp(&s, &d);
 }
 
 
@@ -2170,7 +2159,7 @@ ns_get_url(_ns_sess * s, int d)
     l = ((s->proto) ? strlen(s->proto) + 3 : 0) + strlen(s->user) + 1 + strlen(s->host) + 1 + 5 + 1 + ((s->rsrc) ? strlen(s->rsrc) : 0) + 7 + (s->name ? strlen(s->name) + 4 : 0) +
         1;
 
-    if ((u = malloc(l + 1))) {
+    if ((u = MALLOC(l + 1))) {
         if (!s->escape) {
             esc[0] = '\0';
         } else if (s->escape < ' ') {
@@ -2449,6 +2438,7 @@ ns_mov_screen_disp(_ns_sess * s, int fm, int to)
         efuns->expire_buttons(s->userdef, n);
 
     ns_upd_stat(s);
+    return NS_SUCC;
 }
 
 
@@ -3062,10 +3052,14 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
         _ns_parse pd[NS_MAX_DISPS];
 
         p2 = &p[width - 1];
-        while (p2 > p && *p2 == ' ') {
-            status_blanks++;
-            *(p2--) = '\0';
-        }                       /* p2 now points behind last item */
+        if (*p2 == ' ') {
+            while (p2 > p && *p2 == ' ') {
+                status_blanks++;
+                *(p2--) = '\0';
+            }                       /* p2 now points behind last item */
+        } else {
+            *p2 = 0;                /* make darn sure it's NUL-terminated */
+        }
 
         D_ESCREEN(("parse_screen: screen sends (%d) ::%s::\n", strlen(p), p));
 
@@ -3186,7 +3180,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                     if ((tmp = strcmp(disp->name, pd[r].name)) ||       /* upd display */
                         (disp->flags != fl)) {
                         if (tmp) {
-                            FREE(disp->name);
+                            /* Don't free disp->name; ns_inp_dial() already did! */
                             if (!(disp->name = STRDUP(pd[r].name))) {
                                 FREE(p);
                                 return NS_FAIL;
