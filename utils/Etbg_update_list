@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # Eterm backgrounds list file update utility
 #
