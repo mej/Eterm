@@ -280,6 +280,7 @@
 #undef NO_STACK_TRACE
 #undef DBX
 #undef GDB
+#undef GDB_CMD_FILE
 #undef PSTACK
 
 /* *BSD utmp stuff */

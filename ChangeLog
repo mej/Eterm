@@ -3846,3 +3846,9 @@ Thu Aug 31 11:22:30 PDT 2000	Michael Jennings <mej@eterm.org>
 	Crap.  That was not supposed to be committed.
 	
 -------------------------------------------------------------------------------
+Thu Aug 31 23:02:10 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Still more big changes.  Working on adding pixmap and GC tracking to
+	libmej using the existing allocation tracking routines.
+	
+-------------------------------------------------------------------------------

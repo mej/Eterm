@@ -972,10 +972,10 @@ hard_exit(void) {
   _exit(-1);
 #elif defined(SIGKILL)
   kill(cmd_pid, SIGKILL);
-  raise(SIGKILL);
+  abort();
 #else
   kill(cmd_pid, 9);
-  raise(9);
+  abort();
 #endif
 
 }
@@ -984,8 +984,8 @@ hard_exit(void) {
 void
 dump_stack_trace(void)
 {
-
   char cmd[256];
+  struct stat st;
 
 #ifdef NO_STACK_TRACE
   return;
@@ -998,7 +998,10 @@ dump_stack_trace(void)
   U_STACK_TRACE();
   return;
 #elif defined(GDB)
-  snprintf(cmd, sizeof(cmd), "/bin/echo '\n\nbacktrace' | " GDB " " APL_NAME " %d", getpid());
+  if (((stat(GDB_CMD_FILE, &st)) != 0) || (!S_ISREG(st.st_mode))) {
+    return;
+  }
+  snprintf(cmd, sizeof(cmd), GDB " -x " GDB_CMD_FILE " " APL_NAME " %d", getpid());
 #elif defined(PSTACK)
   snprintf(cmd, sizeof(cmd), PSTACK " %d", getpid());
 #elif defined(DBX)
@@ -1014,7 +1017,7 @@ dump_stack_trace(void)
   return;
 #endif
   signal(SIGALRM, (eterm_sighandler_t) hard_exit);
-  alarm(10);
+  alarm(3);
   system(cmd);
 }
 
@@ -1138,7 +1141,9 @@ clean_exit(void)
   privileges(REVERT);
 #if DEBUG >= DEBUG_MEM
   if (DEBUG_LEVEL >= DEBUG_MEM) {
-    memrec_dump();
+    MALLOC_DUMP();
+    PIXMAP_DUMP();
+    GC_DUMP();
   }
 #endif
   PABLO_STOP_TRACING();

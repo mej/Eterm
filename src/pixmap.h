@@ -44,17 +44,17 @@ typedef void *Imlib_Color_Modifier;
 # define background_is_viewport() (images[image_bg].mode & MODE_VIEWPORT)
 # define background_is_auto()     (images[image_bg].mode & MODE_AUTO)
 # define background_is_pixmap()   (background_is_image() || (images[image_bg].mode & (MODE_TRANS | MODE_VIEWPORT | MODE_AUTO)))
-# define delete_simage(simg) do { \
-                               imlib_free_pixmap_and_mask((simg)->pmap->pixmap); \
-                               imlib_context_set_image((simg)->iml->im); \
-                               imlib_free_image_and_decache(); \
-                               (simg)->pmap->pixmap = None; (simg)->iml->im = NULL; \
-                             } while (0)
-# define CONVERT_SHADE(s)      (0xff - (((s) * 0xff) / 100))
-# define CONVERT_TINT_RED(t)   (((t) & 0xff0000) >> 16)
-# define CONVERT_TINT_GREEN(t) (((t) & 0x00ff00) >> 8)
-# define CONVERT_TINT_BLUE(t)  ((t) & 0x0000ff)
-# define IMLIB_FREE_PIXMAP(p)  do {D_PIXMAP(("libmej_freeing pixmap:  imlib_free_pixmap_and_mask(0x%08x)\n", (p))); imlib_free_pixmap_and_mask(p);} while (0)
+# define delete_simage(simg)      do { \
+                                    imlib_free_pixmap_and_mask((simg)->pmap->pixmap); \
+                                    imlib_context_set_image((simg)->iml->im); \
+                                    imlib_free_image_and_decache(); \
+                                    (simg)->pmap->pixmap = None; (simg)->iml->im = NULL; \
+                                  } while (0)
+# define CONVERT_SHADE(s)         (0xff - (((s) * 0xff) / 100))
+# define CONVERT_TINT_RED(t)      (((t) & 0xff0000) >> 16)
+# define CONVERT_TINT_GREEN(t)    (((t) & 0x00ff00) >> 8)
+# define CONVERT_TINT_BLUE(t)     ((t) & 0x0000ff)
+# define IMLIB_FREE_PIXMAP(p)     do {D_PIXMAP(("Freeing pixmap:  imlib_free_pixmap_and_mask(0x%08x)\n", (p))); imlib_free_pixmap_and_mask(p);} while (0)
 #else
 # define background_is_image()    (0)
 # define background_is_trans()    (0)
@@ -65,19 +65,10 @@ typedef void *Imlib_Color_Modifier;
 # define delete_simage(simg)      NOP
 # define IMLIB_FREE_PIXMAP(p)     NOP
 #endif
-#ifdef __GNUC__
-# define X_CREATE_PIXMAP(w, h)    __extension__ ({Pixmap __my_tmp_pmap = XCreatePixmap(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (w), (h), Xdepth); \
-                                                  D_PIXMAP(("Created pixmap 0x%08x (width %d, height %d)\n", (__my_tmp_pmap), (w), (h))); \
-                                                  (__my_tmp_pmap);})
-# define X_CREATE_GC(flags, gcv)  __extension__ ({GC __my_tmp_gc = XCreateGC(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (flags), (gcv)); \
-                                                  D_PIXMAP(("Created GC 0x%08x\n", (__my_tmp_gc))); (__my_tmp_gc);})
-#else
-# define X_CREATE_PIXMAP(w, h)    (XCreatePixmap(Xdisplay, TermWin.parent, (w), (h), Xdepth))
-# define X_CREATE_GC(flags, gcv)  (XCreateGC(Xdisplay, TermWin.parent, (flags), (gcv)))
-#endif
-#define X_FREE_PIXMAP(p)          do {D_PIXMAP(("libmej_freeing pixmap:  XFreePixmap(Xdisplay, 0x%08x)\n", (p))); XFreePixmap(Xdisplay, (p));} while (0)
-#define X_FREE_GC(gc)             do {D_PIXMAP(("libmej_freeing GC:  XFreeGC(Xdisplay, 0x%08x)\n", (gc))); XFreeGC(Xdisplay, (gc));} while (0)
-#define PIXMAP_EXT NULL
+#define LIBMEJ_X_CREATE_PIXMAP(w, h)  X_CREATE_PIXMAP(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (w), (h), Xdepth)
+#define LIBMEJ_X_FREE_PIXMAP(p)       X_FREE_PIXMAP(Xdisplay, (p))
+#define LIBMEJ_X_CREATE_GC(f, gcv)    X_CREATE_GC(Xdisplay, (TermWin.parent ? TermWin.parent : Xroot), (f), (gcv))
+#define LIBMEJ_X_FREE_GC(gc)          X_FREE_GC(Xdisplay, (gc))
 
 #define GEOM_LEN 19
 
@@ -244,7 +235,7 @@ extern void redraw_images_by_mode(unsigned char);
 #endif
 extern void render_simage(simage_t *, Window, unsigned short, unsigned short, unsigned char, renderop_t);
 #ifdef PIXMAP_SUPPORT
-extern const char *search_path(const char *, const char *, const char *);
+extern const char *search_path(const char *, const char *);
 extern unsigned char load_image(const char *, simage_t *);
 extern void update_cmod(colormod_t *);
 extern void update_cmod_tables(imlib_t *);

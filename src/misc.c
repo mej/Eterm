@@ -226,26 +226,6 @@ parse_escaped_string(char *str)
   return (pnew - str);
 }
 
-const char *
-find_file(const char *file, const char *ext)
-{
-
-  const char *f;
-
-#if defined(PIXMAP_SUPPORT)
-  if ((f = search_path(rs_path, file, ext)) != NULL) {
-    return (f);
-  } else if ((f = search_path(getenv(PATH_ENV), file, ext)) != NULL) {
-    return (f);
-  } else {
-    return (search_path(initial_dir, file, ext));
-  }
-#else
-  return ((const char *) NULL);
-#endif
-
-}
-
 char *
 safe_print_string(char *str, unsigned long len)
 {

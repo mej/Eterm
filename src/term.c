@@ -1869,7 +1869,7 @@ xterm_seq(int op, const char *str)
               if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
                 free_desktop_pixmap();
               } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
-                X_FREE_PIXMAP(viewport_pixmap);
+                LIBMEJ_X_FREE_PIXMAP(viewport_pixmap);
                 viewport_pixmap = None;	/* Force the re-read */
               }
 # endif
@@ -1885,7 +1885,7 @@ xterm_seq(int op, const char *str)
             if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
               free_desktop_pixmap();
             } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
-              X_FREE_PIXMAP(viewport_pixmap);
+              LIBMEJ_X_FREE_PIXMAP(viewport_pixmap);
               viewport_pixmap = None;	/* Force the re-read */
             }
 # endif

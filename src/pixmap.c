@@ -512,8 +512,8 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     return None;
   }
   XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
-  p = X_CREATE_PIXMAP(width, height);
-  gc = X_CREATE_GC(0, NULL);
+  p = LIBMEJ_X_CREATE_PIXMAP(width, height);
+  gc = LIBMEJ_X_CREATE_GC(0, NULL);
   D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y, desktop_window));
   if (p != None) {
     if (pw < scr->width || ph < scr->height) {
@@ -535,7 +535,7 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
       bevel_pixmap(p, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
     }
   }
-  X_FREE_GC(gc);
+  LIBMEJ_X_FREE_GC(gc);
   return p;
 }
 
@@ -609,10 +609,10 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
     }
   }
   if (p == None) {
-    p = X_CREATE_PIXMAP(width, height);
+    p = LIBMEJ_X_CREATE_PIXMAP(width, height);
     D_PIXMAP(("Created p == 0x%08x\n", p));
   }
-  gc = X_CREATE_GC(0, NULL);
+  gc = LIBMEJ_X_CREATE_GC(0, NULL);
   XTranslateCoordinates(Xdisplay, d, desktop_window, x, y, &x, &y, &dummy);
   D_PIXMAP(("Translated coords are %d, %d\n", x, y));
   if ((images[image_bg].current->pmap->w > 0) || (images[image_bg].current->pmap->op & OP_SCALE)) {
@@ -623,7 +623,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
     XSetFillStyle(Xdisplay, gc, FillTiled);
     XFillRectangle(Xdisplay, p, gc, 0, 0, width, height);
   }
-  X_FREE_GC(gc);
+  LIBMEJ_X_FREE_GC(gc);
   return p;
 }
 
@@ -668,13 +668,13 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
             FREE(reply);
             enl_ipc_sync();
             if (pmap) {
-              gc = X_CREATE_GC(0, NULL);
+              gc = LIBMEJ_X_CREATE_GC(0, NULL);
               XSetClipMask(Xdisplay, gc, mask);
               XSetClipOrigin(Xdisplay, gc, x, y);
               XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
               snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
               enl_ipc_send(buff);
-              X_FREE_GC(gc);
+              LIBMEJ_X_FREE_GC(gc);
               return;
             } else {
               print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
@@ -687,23 +687,23 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     } else if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
       Pixmap p;
 
-      gc = X_CREATE_GC(0, NULL);
+      gc = LIBMEJ_X_CREATE_GC(0, NULL);
       /* FIXME:  The conditional on the next line works, but it's a hack.  Worth fixing?  :-) */
       p = create_trans_pixmap(simg, which, ((which == image_st) ? scrollbar.sa_win : d), x, y, w, h);
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
-      X_FREE_PIXMAP(p);
-      X_FREE_GC(gc);
+      LIBMEJ_X_FREE_PIXMAP(p);
+      LIBMEJ_X_FREE_GC(gc);
     } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
       Pixmap p;
 
-      gc = X_CREATE_GC(0, NULL);
+      gc = LIBMEJ_X_CREATE_GC(0, NULL);
       p = create_viewport_pixmap(simg, d, x, y, w, h);
       if (simg->iml->bevel != NULL) {
         bevel_pixmap(p, w, h, simg->iml->bevel->edges, simg->iml->bevel->up);
       }
       XCopyArea(Xdisplay, p, d, gc, 0, 0, w, h, x, y);
-      X_FREE_PIXMAP(p);
-      X_FREE_GC(gc);
+      LIBMEJ_X_FREE_PIXMAP(p);
+      LIBMEJ_X_FREE_GC(gc);
     }
   }
 
@@ -730,14 +730,14 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
       reset_simage(simg, RESET_ALL_SIMG);
       return;
     }
-    gc = X_CREATE_GC(0, NULL);
+    gc = LIBMEJ_X_CREATE_GC(0, NULL);
     if (mask) {
       XSetClipMask(Xdisplay, gc, mask);
       XSetClipOrigin(Xdisplay, gc, x, y);
     }
     XCopyArea(Xdisplay, pmap, d, gc, 0, 0, w, h, x, y);
     IMLIB_FREE_PIXMAP(pmap);
-    X_FREE_GC(gc);
+    LIBMEJ_X_FREE_GC(gc);
   }
 }
 
@@ -796,9 +796,9 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
   XGCValues gcvalue;
 
   ASSERT(buffer_pixmap == None);
-  buffer_pixmap = X_CREATE_PIXMAP(width, height);
+  buffer_pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
   gcvalue.foreground = (Pixel) fill;
-  gc = X_CREATE_GC(GCForeground, &gcvalue);
+  gc = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
   XSetGraphicsExposures(Xdisplay, gc, False);
 
   if (mode == MODE_SOLID) {
@@ -806,15 +806,15 @@ copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width,
 
     simg = images[image_bg].current;
     if (simg->pmap->pixmap) {
-      X_FREE_PIXMAP(simg->pmap->pixmap);
+      LIBMEJ_X_FREE_PIXMAP(simg->pmap->pixmap);
     }
-    simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+    simg->pmap->pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
     XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
     XCopyArea(Xdisplay, simg->pmap->pixmap, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
   } else {
     XCopyArea(Xdisplay, (Pixmap) fill, buffer_pixmap, gc, 0, 0, width, height, 0, 0);
   }
-  X_FREE_GC(gc);
+  LIBMEJ_X_FREE_GC(gc);
 }
 
 void
@@ -852,11 +852,11 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     return;
 
   gcvalue.foreground = gcvalue.background = PixColors[bgColor];
-  gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
+  gc = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
   pixmap = simg->pmap->pixmap;	/* Save this for later */
 
   if ((which == image_bg) && (buffer_pixmap != None)) {
-    X_FREE_PIXMAP(buffer_pixmap);
+    LIBMEJ_X_FREE_PIXMAP(buffer_pixmap);
     buffer_pixmap = None;
   }
 
@@ -898,9 +898,9 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
                 XSetClipOrigin(Xdisplay, gc, 0, 0);
               }
               if (simg->pmap->pixmap) {
-                X_FREE_PIXMAP(simg->pmap->pixmap);
+                LIBMEJ_X_FREE_PIXMAP(simg->pmap->pixmap);
               }
-              simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+              simg->pmap->pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
               XCopyArea(Xdisplay, pmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
               XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
               snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
@@ -914,7 +914,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
         } else {
           snprintf(buff, sizeof(buff), "imageclass %s apply 0x%x %s", iclass, (int) win, state);
           enl_ipc_send(buff);
-          X_FREE_GC(gc);
+          LIBMEJ_X_FREE_GC(gc);
           return;
         }
       }
@@ -924,7 +924,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
 # ifdef PIXMAP_OFFSET
   if (image_mode_is(which, MODE_TRANS) && image_mode_is(which, ALLOW_TRANS)) {
     if (simg->pmap->pixmap != None) {
-      X_FREE_PIXMAP(simg->pmap->pixmap);
+      LIBMEJ_X_FREE_PIXMAP(simg->pmap->pixmap);
     }
     simg->pmap->pixmap = create_trans_pixmap(simg, which, win, 0, 0, width, height);
     if (simg->pmap->pixmap != None) {
@@ -944,7 +944,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     p = create_viewport_pixmap(simg, win, 0, 0, width, height);
     if (p && (p != simg->pmap->pixmap)) {
       if (simg->pmap->pixmap != None) {
-        X_FREE_PIXMAP(simg->pmap->pixmap);
+        LIBMEJ_X_FREE_PIXMAP(simg->pmap->pixmap);
       }
       simg->pmap->pixmap = p;
     }
@@ -1038,7 +1038,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           single = ((xscaled < width || yscaled < height) && !(simg->pmap->op & OP_TILE)) ? 1 : 0;
 
           pixmap = simg->pmap->pixmap;
-          simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+          simg->pmap->pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
           if (single) {
             XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
           }
@@ -1053,7 +1053,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
           IMLIB_FREE_PIXMAP(pixmap);
         } else if (renderop & RENDER_FORCE_PIXMAP) {
 	  pixmap = simg->pmap->pixmap;
-	  simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+	  simg->pmap->pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
 	  XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
 	  IMLIB_FREE_PIXMAP(pixmap);
 	}
@@ -1089,9 +1089,9 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     } else {
       if ((renderop & RENDER_FORCE_PIXMAP) || (simg->iml->bevel != NULL)) {
         if (simg->pmap->pixmap) {
-          X_FREE_PIXMAP(simg->pmap->pixmap);
+          LIBMEJ_X_FREE_PIXMAP(simg->pmap->pixmap);
         }
-        simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
+        simg->pmap->pixmap = LIBMEJ_X_CREATE_PIXMAP(width, height);
         XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
         XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
         if (simg->iml->bevel != NULL && simg->iml->bevel->edges != NULL) {
@@ -1106,13 +1106,13 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
     }
   }
   XClearWindow(Xdisplay, win);
-  X_FREE_GC(gc);
+  LIBMEJ_X_FREE_GC(gc);
   return;
 }
 
 #ifdef PIXMAP_SUPPORT
 const char *
-search_path(const char *pathlist, const char *file, const char *ext)
+search_path(const char *pathlist, const char *file)
 {
   static char name[PATH_MAX];
   char *p;
@@ -1123,12 +1123,9 @@ search_path(const char *pathlist, const char *file, const char *ext)
   if (!pathlist || !file) {	/* If either one is NULL, there really isn't much point in going on.... */
     return ((const char *) NULL);
   }
-  if (!ext) {
-    ext = "";
-  }
   getcwd(name, PATH_MAX);
   len = strlen(name);
-  D_OPTIONS(("search_path(\"%s\", \"%s\", \"%s\") called from \"%s\".\n", pathlist, file, ext, name));
+  D_OPTIONS(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
   if (len < PATH_MAX - 1) {
     strcat(name, "/");
     strncat(name, file, PATH_MAX - len - 1);
@@ -1148,18 +1145,8 @@ search_path(const char *pathlist, const char *file, const char *ext)
     p = strchr(file, '\0');
   len = (p - file);
 
-  /* check about adding a trailing extension */
-  if (ext != NULL) {
-
-    char *dot;
-
-    dot = strrchr(p, '.');
-    path = strrchr(p, '/');
-    if (dot != NULL || (path != NULL && dot <= path))
-      ext = NULL;
-  }
   /* leave room for an extra '/' and trailing '\0' */
-  maxpath = sizeof(name) - (len + (ext ? strlen(ext) : 0) + 2);
+  maxpath = sizeof(name) - (len + 2);
   if (maxpath <= 0)
     return NULL;
 
@@ -1172,15 +1159,6 @@ search_path(const char *pathlist, const char *file, const char *ext)
     stat(name, &fst);
     if (!S_ISDIR(fst.st_mode))
       return name;
-  }
-  if (ext) {
-    strcat(name, ext);
-    D_OPTIONS(("Checking for file \"%s\"\n", name));
-    if (!access(name, R_OK)) {
-      stat(name, &fst);
-      if (!S_ISDIR(fst.st_mode))
-	return name;
-    }
   }
   for (path = pathlist; path != NULL && *path != '\0'; path = p) {
 
@@ -1207,15 +1185,6 @@ search_path(const char *pathlist, const char *file, const char *ext)
 	stat(name, &fst);
 	if (!S_ISDIR(fst.st_mode))
 	  return name;
-      }
-      if (ext) {
-	strcat(name, ext);
-	D_OPTIONS(("Checking for file \"%s\"\n", name));
-	if (!access(name, R_OK)) {
-	  stat(name, &fst);
-	  if (!S_ISDIR(fst.st_mode))
-	    return name;
-	}
       }
     }
   }
@@ -1244,8 +1213,8 @@ load_image(const char *file, simage_t *simg)
     if (geom != NULL) {
       set_pixmap_scale(geom, simg->pmap);
     }
-    if ((f = search_path(rs_path, file, PIXMAP_EXT)) == NULL) {
-      f = search_path(getenv(PATH_ENV), file, PIXMAP_EXT);
+    if ((f = search_path(rs_path, file)) == NULL) {
+      f = search_path(getenv(PATH_ENV), file);
     }
     if (f != NULL) {
       im = imlib_load_image_immediately(f);
@@ -1850,7 +1819,7 @@ get_desktop_pixmap(void)
   }
   if (color_pixmap != None) {
     D_PIXMAP(("Removing old solid color pixmap 0x%08x.\n", color_pixmap));
-    X_FREE_PIXMAP(color_pixmap);
+    LIBMEJ_X_FREE_PIXMAP(color_pixmap);
     color_pixmap = None;
   }
   if (prop != None) {
@@ -1875,19 +1844,19 @@ get_desktop_pixmap(void)
             Screen *scr = ScreenOfDisplay(Xdisplay, Xscreen);
 
             gcvalue.foreground = gcvalue.background = PixColors[bgColor];
-            gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
+            gc = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
             XGetGeometry(Xdisplay, p, &w, &px, &py, &pw, &ph, &pb, &pd);
             D_PIXMAP(("XGetGeometry() returned w = 0x%08x, pw == %u, ph == %u\n", w, pw, ph));
             if (pw < (unsigned int) scr->width || ph < (unsigned int) scr->height) {
-              desktop_pixmap = X_CREATE_PIXMAP(pw, ph);
+              desktop_pixmap = LIBMEJ_X_CREATE_PIXMAP(pw, ph);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, pw, ph, 0, 0);
               colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, pw, ph);
             } else {
-              desktop_pixmap = X_CREATE_PIXMAP(scr->width, scr->height);
+              desktop_pixmap = LIBMEJ_X_CREATE_PIXMAP(scr->width, scr->height);
               XCopyArea(Xdisplay, p, desktop_pixmap, gc, 0, 0, scr->width, scr->height, 0, 0);
               colormod_trans(desktop_pixmap, images[image_bg].current->iml, gc, scr->width, scr->height);
             }
-            X_FREE_GC(gc);
+            LIBMEJ_X_FREE_GC(gc);
             desktop_pixmap_is_mine = 1;
             D_PIXMAP(("Returning 0x%08x\n", (unsigned int) desktop_pixmap));
             return (desktop_pixmap);
@@ -1913,12 +1882,12 @@ get_desktop_pixmap(void)
       D_PIXMAP(("  Found solid color 0x%08x\n", pix));
       gcvalue.foreground = pix;
       gcvalue.background = pix;
-      gc = X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
+      gc = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground, &gcvalue);
 
-      color_pixmap = X_CREATE_PIXMAP(16, 16);
+      color_pixmap = LIBMEJ_X_CREATE_PIXMAP(16, 16);
       XFillRectangle(Xdisplay, color_pixmap, gc, 0, 0, 16, 16);
       D_PIXMAP(("Created solid color pixmap 0x%08x for desktop_pixmap.\n", color_pixmap));
-      X_FREE_GC(gc);
+      LIBMEJ_X_FREE_GC(gc);
       return (desktop_pixmap = color_pixmap);
     }
   }
@@ -1933,7 +1902,7 @@ free_desktop_pixmap(void)
 {
 
   if (desktop_pixmap_is_mine && desktop_pixmap != None) {
-    X_FREE_PIXMAP(desktop_pixmap);
+    LIBMEJ_X_FREE_PIXMAP(desktop_pixmap);
     desktop_pixmap_is_mine = 0;
   }
   desktop_pixmap = None;
@@ -1990,8 +1959,8 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   }
 
   if (filename && *filename) {
-    if ((icon_path = search_path(rs_path, filename, NULL)) == NULL)
-      icon_path = search_path(getenv(PATH_ENV), filename, NULL);
+    if ((icon_path = search_path(rs_path, filename)) == NULL)
+      icon_path = search_path(getenv(PATH_ENV), filename);
 
     if (icon_path != NULL) {
       XIconSize *icon_sizes;

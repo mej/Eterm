@@ -885,19 +885,19 @@ scrollbar_drawing_init(void) {
     gcvalue.fill_style = FillOpaqueStippled;
     gcvalue.foreground = PixColors[fgColor];
     gcvalue.background = PixColors[bgColor];
-    gc_stipple = X_CREATE_GC(GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
+    gc_stipple = LIBMEJ_X_CREATE_GC(GCForeground | GCBackground | GCFillStyle | GCStipple, &gcvalue);
     gcvalue.foreground = PixColors[borderColor];
-    gc_border = X_CREATE_GC(GCForeground, &gcvalue);
+    gc_border = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
   }
 #endif /* XTERM_SCROLLBAR */
 
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
   gcvalue.foreground = images[image_sb].norm->bg;
-  gc_scrollbar = X_CREATE_GC(GCForeground, &gcvalue);
+  gc_scrollbar = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[topShadowColor];
-  gc_top = X_CREATE_GC(GCForeground, &gcvalue);
+  gc_top = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[bottomShadowColor];
-  gc_bottom = X_CREATE_GC(GCForeground, &gcvalue);
+  gc_bottom = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 }
 

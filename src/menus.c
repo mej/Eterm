@@ -124,9 +124,9 @@ menu_init(void)
     return;
   }
   gcvalue.foreground = PixColors[menuTopShadowColor];
-  topShadowGC = X_CREATE_GC(GCForeground, &gcvalue);
+  topShadowGC = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
   gcvalue.foreground = PixColors[menuBottomShadowColor];
-  botShadowGC = X_CREATE_GC(GCForeground, &gcvalue);
+  botShadowGC = LIBMEJ_X_CREATE_GC(GCForeground, &gcvalue);
 
   event_register_dispatcher(menu_dispatch_event, menu_event_init_dispatcher);
 }
@@ -450,7 +450,7 @@ menu_create(char *title)
   menu->swin = XCreateWindow(Xdisplay, menu->win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 			     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
 
-  menu->gc = X_CREATE_GC(0, NULL);
+  menu->gc = LIBMEJ_X_CREATE_GC(0, NULL);
   menuitem_clear_current(menu);
 
   return menu;

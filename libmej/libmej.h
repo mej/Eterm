@@ -61,6 +61,13 @@
 # include <malloc.h>
 #endif
 
+#include <X11/Xatom.h>
+#include <X11/X.h>
+#include <X11/Intrinsic.h>
+#ifdef HAVE_LIBIMLIB2
+# include <Imlib2.h>
+#endif
+
 /******************************* GENERIC GOOP *********************************/
 #ifndef TRUE
 # define TRUE    ((unsigned char)(1))
@@ -193,27 +200,40 @@ typedef struct ptr_struct {
   size_t size;
 } ptr_t;
 typedef struct memrec_struct {
-  unsigned char init;
   unsigned long cnt;
   ptr_t *ptrs;
 } memrec_t;
 
 #if (DEBUG >= DEBUG_MEM)
-# define MALLOC(sz)             libmej_malloc(__FILE__, __LINE__, (sz))
-# define CALLOC(type,n)         libmej_calloc(__FILE__, __LINE__, (n), (sizeof(type)))
-# define REALLOC(mem,sz)        libmej_realloc(#mem, __FILE__, __LINE__, (mem), (sz))
-# define FREE(ptr)              do { libmej_free(#ptr, __FILE__, __LINE__, (ptr)); (ptr) = NULL; } while (0)
-# define STRDUP(s)              libmej_strdup(#s, __FILE__, __LINE__, (s))
+# define MALLOC(sz)                             libmej_malloc(__FILE__, __LINE__, (sz))
+# define CALLOC(type,n)                         libmej_calloc(__FILE__, __LINE__, (n), (sizeof(type)))
+# define REALLOC(mem,sz)                        libmej_realloc(#mem, __FILE__, __LINE__, (mem), (sz))
+# define FREE(ptr)                              do { libmej_free(#ptr, __FILE__, __LINE__, (ptr)); (ptr) = NULL; } while (0)
+# define STRDUP(s)                              libmej_strdup(#s, __FILE__, __LINE__, (s))
+# define MALLOC_DUMP()                          libmej_dump_mem_tables()
+# define X_CREATE_PIXMAP(d, win, w, h, depth)   libmej_x_create_pixmap(__FILE__, __LINE__, (d), (win), (w), (h), (depth))
+# define X_FREE_PIXMAP(d, p)                    libmej_x_free_pixmap(#p, __FILE__, __LINE__, (d), (p))
+# define PIXMAP_DUMP()                          libmej_dump_pixmap_tables()
+# define X_CREATE_GC(d, win, f, gcv)            libmej_x_create_gc(__FILE__, __LINE__, (d), (win), (f), (gcv))
+# define X_FREE_GC(d, gc)                       libmej_x_free_gc(#gc, __FILE__, __LINE__, (d), (gc))
+# define GC_DUMP()                              libmej_dump_gc_tables()
 # define MALLOC_MOD 25
 # define REALLOC_MOD 25
 # define CALLOC_MOD 25
 # define FREE_MOD 25
 #else
-# define MALLOC(sz)             malloc(sz)
-# define CALLOC(type,n)         calloc((n),(sizeof(type)))
-# define REALLOC(mem,sz)        ((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem), NULL) : (NULL)))
-# define FREE(ptr)              do { free(ptr); (ptr) = NULL; } while (0)
-# define STRDUP(s)              strdup(s)
+# define MALLOC(sz)                             malloc(sz)
+# define CALLOC(type,n)                         calloc((n),(sizeof(type)))
+# define REALLOC(mem,sz)                        ((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem), NULL) : (NULL)))
+# define FREE(ptr)                              do { free(ptr); (ptr) = NULL; } while (0)
+# define STRDUP(s)                              strdup(s)
+# define MALLOC_DUMP()                          NOP
+# define X_CREATE_PIXMAP(d, win, w, h, depth)   XCreatePixmap((d), (win), (w), (h), (depth))
+# define X_FREE_PIXMAP(d, p)                    XFreePixmap((d), (p))
+# define PIXMAP_DUMP()                          NOP
+# define X_CREATE_GC(d, win, f, gcv)            XCreateGC((d), (win), (f), (gcv))
+# define X_FREE_GC(d, gc)                       XFreeGC((d), (gc))
+# define GC_DUMP()                              NOP
 #endif
 
 /* Fast memset() macro contributed by vendu */
@@ -289,16 +309,18 @@ extern unsigned int DEBUG_LEVEL;
 
 /* mem.c */
 extern void memrec_init(void);
-extern void memrec_add_var(void *, size_t);
-extern void memrec_rem_var(const char *, const char *, unsigned long, void *);
-extern void memrec_chg_var(const char *, const char *, unsigned long, void *, void *, size_t);
-extern void memrec_dump(void);
 extern void *libmej_malloc(const char *, unsigned long, size_t);
 extern void *libmej_realloc(const char *, const char *, unsigned long, void *, size_t);
 extern void *libmej_calloc(const char *, unsigned long, size_t, size_t);
 extern void libmej_free(const char *, const char *, unsigned long, void *);
 extern char *libmej_strdup(const char *, const char *, unsigned long, const char *);
-extern void libmej_handle_sigsegv(int);
+extern void libmej_dump_mem_tables(void);
+extern Pixmap libmej_x_create_pixmap(const char *, unsigned long, Display *, Drawable, unsigned int, unsigned int, unsigned int);
+extern void libmej_x_free_pixmap(const char *, const char *, unsigned long, Display *, Pixmap);
+extern void libmej_dump_pixmap_tables(void);
+extern GC libmej_x_create_gc(const char *, unsigned long, Display *, Drawable, unsigned long, XGCValues *);
+extern void libmej_x_free_gc(const char *, const char *, unsigned long, Display *, GC);
+extern void libmej_dump_gc_tables(void);
 
 /* strings.c */
 extern char *left_str(const char *, unsigned long);

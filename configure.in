@@ -117,11 +117,19 @@ AC_C_CONST
 AC_C_INLINE
 AC_PATH_XTRA
 
-if test "$ac_cv_lib_socket_connect" = "yes" ; then
-  SUBLIBS="-lsocket"
+if test ! -z "$X_CFLAGS"; then
+  if test -z "$CPPFLAGS"; then
+    CPPFLAGS="$X_CFLAGS"
+  else
+    CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+  fi
 fi
-if test "$ac_cv_lib_nsl_gethostbyname" = "yes" ; then
-  SUBLIBS="$SUBLIBS -lnsl"
+if test ! -z "$X_LIBS"; then
+  if test -z "$LDFLAGS"; then
+    LDFLAGS="$X_LIBS"
+  else
+    LDFLAGS="$LDFLAGS $X_LIBS"
+  fi
 fi
 
 dnl# Checks for header files.
@@ -146,20 +154,12 @@ seteuid memmove putenv strsep setresuid setresgid \
 memmem usleep snprintf strcasestr strcasechr \
 strcasepbrk strrev)
 dps_snprintf_oflow()
-AC_CHECK_LIB(m, pow, LIBS="$LIBS -lm", , $SUBLIBS)
+AC_CHECK_LIB(m, pow)
 
-dnl# Check for the need for -lutil on BSD systems
-AC_CHECK_FUNC(login, 
-  AC_DEFINE(HAVE_LOGIN)
-, AC_CHECK_LIB(util, login, LIBS="$LIBS -lutil" ;
-  AC_DEFINE(HAVE_LOGIN)
-))
-AC_CHECK_FUNC(logout, 
-  AC_DEFINE(HAVE_LOGOUT)
-, AC_CHECK_LIB(util, logout, LIBS="$LIBS -lutil" ;
-  AC_DEFINE(HAVE_LOGOUT)
-))
-AC_CHECK_FUNC(getpwuid, , AC_CHECK_LIB(sun, getpwuid, LIBS="$LIBS -lsun"))
+dnl# Portability checks for various functions
+AC_SEARCH_LIBS(login, bsd ucb util)
+AC_SEARCH_LIBS(logout, util)
+AC_SEARCH_LIBS(getpwuid, sun)
 
 dnl#
 dnl# Utility stuff
@@ -238,6 +238,37 @@ AC_ARG_WITH(pty-group,
 )
 
 dnl#
+dnl# X LIBRARIES
+dnl#
+AC_CHECK_LIB(X11, XOpenDisplay, , [
+echo "ERROR:  You need libX11 to build Eterm.  Verify that you have libX11.a or";
+echo "        libX11.so installed and that it is located in the X libraries";
+echo "        directory shown above.  If it is in a different directory, try using";
+echo "        the --x-libraries parameter to configure.";
+             AC_MSG_ERROR([Fatal:  libX11 not found.])])
+AC_CHECK_LIB(Xext, XextAddDisplay, , [
+echo "ERROR:  You need libXext to build Eterm.  Verify that you have libXext.a or";
+echo "        libXext.so installed and that it is located in the X libraries";
+echo "        directory shown above.  If it is in a different directory, try using";
+echo "        the --x-libraries parameter to configure.";
+             AC_MSG_ERROR([Fatal:  libXext not found.])])
+
+AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT))
+
+# check if we need X_LOCALE definition
+AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE))
+
+# For multibyte selection handling
+if test "$MULTICHAR_ENCODING" != "none"; then
+  AC_CHECK_LIB(Xmu, XmuInternAtom)
+fi
+
+# check X11R6 for XIM
+if test "$XIM" = "TRUE"; then
+  AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM))
+fi
+
+dnl#
 dnl# FEATURES
 dnl#
 AC_MSG_CHECKING(if Pablo support is wanted)
@@ -283,7 +314,7 @@ AC_ARG_WITH(imlib,
             if test "$withval" != "no"; then 
               AC_MSG_RESULT(yes)
               if test "$withval" != "yes"; then
-                CFLAGS="$CFLAGS -I${withval}/include"
+                CPPFLAGS="$CPPFLAGS -I${withval}/include"
                 LDFLAGS="$LDFLAGS -L${withval}/lib"
               fi
               USE_IMLIB=1
@@ -299,10 +330,11 @@ AC_ARG_WITH(imlib,
                 USE_IMLIB=1
 )
 if test $USE_IMLIB -eq 1 ; then
-  AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl", , $SUBLIBS $X_LIBS $GRLIBS)
-  AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $SUBLIBS $X_LIBS $GRLIBS)
+  AC_CHECK_LIB(dl, dlopen, GRLIBS="-ldl", , $GRLIBS)
+  AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="-lttf $GRLIBS", , $GRLIBS)
   AC_CHECK_LIB(Imlib2, imlib_create_image,
                GRLIBS="-lImlib2 $GRLIBS"
+               AC_DEFINE(HAVE_LIBIMLIB2)
                AC_DEFINE(PIXMAP_SUPPORT)
                AC_DEFINE(BACKING_STORE)
               ,
@@ -310,7 +342,7 @@ if test $USE_IMLIB -eq 1 ; then
                AC_WARN(*** or could not be linked.  Eterm should still work, but it will ***)
                AC_WARN(*** not be very happy.  Check config.log for more detailed        ***)
                AC_WARN(*** information on why my attempt to link with Imlib2 failed.     ***)
-              , $SUBLIBS $X_LIBS $GRLIBS)
+              , $GRLIBS)
 
 fi
 
@@ -357,10 +389,7 @@ AC_ARG_ENABLE(utmp,
                 UTMP=1
 )
 if test $UTMP -eq 1; then
-  AC_CHECK_LIB(utempter, addToUtmp,
-               AC_DEFINE(HAVE_UTEMPTER)
-               LIBS="$LIBS -lutempter"
-              )
+  AC_CHECK_LIB(utempter, addToUtmp)
 fi
 AC_MSG_CHECKING(for backspace key configuration)
 AC_ARG_WITH(backspace,
@@ -602,42 +631,11 @@ dnl#                 ;;
 dnl#             esac
 dnl#  , AC_MSG_RESULT(none))
 dnl# if test "$THREADS_LIB" = "posix"; then
-dnl#   AC_CHECK_LIB(pthread, pthread_create, CFLAGS="$CFLAGS -D_REENTRANT" ; THREADLIBS="-lpthread"
+dnl#   AC_CHECK_LIB(pthread, pthread_create, CPPFLAGS="$CPPFLAGS -D_REENTRANT" ; THREADLIBS="-lpthread"
 dnl#                                        AC_DEFINE(USE_POSIX_THREADS)
 dnl#                                        AC_DEFINE(MUTEX_SYNCH)
 dnl#                , , -D_REENTRANT -L/usr/lib -L/lib -L/usr/local/lib)
 dnl# fi
-
-dnl#
-dnl# X LIBRARIES
-dnl#
-AC_CHECK_LIB(X11, XOpenDisplay, X_LIBS="$X_LIBS -lX11", [
-echo "ERROR:  You need libX11 to build Eterm.  Verify that you have libX11.a or";
-echo "        libX11.so installed and that it is located in the X libraries";
-echo "        directory shown above.  If it is in a different directory, try using";
-echo "        the --x-libraries parameter to configure.";
-             AC_MSG_ERROR([Fatal:  libX11 not found.])], $X_LIBS $SUBLIBS)
-AC_CHECK_LIB(Xext, XextAddDisplay, X_LIBS="-lXext $X_LIBS", [
-echo "ERROR:  You need libXext to build Eterm.  Verify that you have libXext.a or";
-echo "        libXext.so installed and that it is located in the X libraries";
-echo "        directory shown above.  If it is in a different directory, try using";
-echo "        the --x-libraries parameter to configure.";
-             AC_MSG_ERROR([Fatal:  libXext not found.])], $X_LIBS $SUBLIBS)
-
-AC_CHECK_LIB(Xext, XShapeQueryExtension, AC_DEFINE(HAVE_X_SHAPE_EXT), , $X_LIBS $SUBLIBS)
-
-# check if we need X_LOCALE definition
-AC_CHECK_LIB(X11, _Xsetlocale, , AC_DEFINE(NO_XLOCALE), $X_LIBS $SUBLIBS)
-
-# For multibyte selection handling
-if test "$MULTICHAR_ENCODING" != "none"; then
-  AC_CHECK_LIB(Xmu, XmuInternAtom, X_LIBS="-lXmu $X_LIBS", , $X_LIBS $SUBLIBS)
-fi
-
-# check X11R6 for XIM
-if test "$XIM" = "TRUE"; then
-  AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM), , $X_LIBS $SUBLIBS)
-fi
 
 AC_PREFIX(Eterm)
 AC_PREFIX(gcc)
@@ -709,18 +707,27 @@ if test "X$PKGDATADIR" = "X" ; then
 fi
 export PKGDATADIR
 AC_DEFINE_UNQUOTED(PKGDATADIR, "$PKGDATADIR")
+if test "$GDB" != "no"; then
+  GDB_CMD_FILE="$PKGDATADIR/gdb.scr"
+  AC_DEFINE_UNQUOTED(GDB_CMD_FILE, "$GDB_CMD_FILE")
+else
+  GDB_CMD_FILE=""
+fi
+AC_SUBST(GDB_CMD_FILE)
 
+CPPFLAGS=`eval eval eval eval eval echo "-I$includedir -I$prefix/include $CPPFLAGS"`
+CPPFLAGS=`echo $CPPFLAGS | tr ' ' '\n' | uniq | tr '\n' ' '`
 CFLAGS=${CFLAGS--O}
-LDFLAGS=${LDFLAGS--O}
+LDFLAGS=`eval eval eval eval eval echo "-L$libdir -L$prefix/lib ${LDFLAGS--O}"`
+LDFLAGS=`echo $LDFLAGS | tr ' ' '\n' | uniq | tr '\n' ' '`
+LIBS="$GRLIBS $X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 
-CPPFLAGS="$CPPFLAGS"
 AC_SUBST(CC)
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(LIBS)
 AC_SUBST(THREADLIBS)
-AC_SUBST(GRLIBS)
 
 basedir=.
 
@@ -733,6 +740,8 @@ AC_OUTPUT(Makefile bg/Makefile doc/Makefile utils/Makefile libmej/Makefile
 BINDIR=`eval eval eval eval echo ${bindir}`
 export BINDIR bindir prefix exec_prefix datadir PACKAGE
 
+# The awk-fu below replaces @VAR@ in theme config files with the corresponding
+# environment variables, kinda like AC_OUTPUT above.
 changequote(%&, &%)dnl
 %&
 for i in utils/kEsetroot themes/Eterm/theme.cfg themes/auto/theme.cfg themes/cEterm/theme.cfg \
@@ -758,19 +767,17 @@ if test -z "$GRLIBS"; then
   mv doc/Makefile.new doc/Makefile
 fi
 
-test $USE_IMLIB = 0 && GRLIBS="*** WARNING:  Pixmap support disabled! ***"
-
 echo "
 $PACKAGE $VERSION
 Configuration:
 --------------
 
-  Source code location:       ${srcdir}
-  Compiler:	              ${CC} ${CFLAGS}
-  Host System Type:           ${host}
-  Graphics libraries:         ${GRLIBS}
-  X libraries/paths:          ${X_LIBS}
-  Install path:		      ${prefix}
+  Source code location:       $srcdir
+  Host System Type:           $host
+  Preprocessor:               $CC $CPPFLAGS
+  Compiler:	              $CC $CFLAGS
+  Linker:                     $CC $LDFLAGS $LIBS
+  Install path:		      $prefix
 
   See src/feature.h for further configuration information.
 

@@ -1,5 +1,7 @@
 # $Id$
 
+INCLUDES = -I$(top_srcdir)/libmej
+
 lib_LTLIBRARIES = libEterm.la
 bin_PROGRAMS = Eterm
 
@@ -17,6 +19,8 @@ libEterm_la_LDFLAGS = -release $(VERSION)
 Eterm_SOURCES = main.c
 Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
-Eterm_LDADD = libEterm.la $(top_builddir)/libmej/libmej.la -L$(libdir) -L$(prefix)/lib $(X_LIBS) $(GRLIBS) $(LIBS)
+Eterm_LDADD = libEterm.la $(top_builddir)/libmej/libmej.la
 
-INCLUDES = -I. -I$(top_srcdir) -I$(top_srcdir)/libmej -I.. -I$(includedir) -I$(prefix)/include $(X_CFLAGS)
+install-exec-hook:
+	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) gdb.scr $(DESTDIR)$(pkgdatadir)/
