@@ -23,4 +23,4 @@ Eterm_LDADD = libEterm.la $(top_builddir)/libmej/libmej.la
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) gdb.scr $(DESTDIR)$(pkgdatadir)/
+	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) gdb.scr $(DESTDIR)$(pkgdatadir)/ || :
