@@ -150,7 +150,6 @@ extern KeySym ks_smallfont;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-unsigned long num_words(const char *str);
 extern char *conf_parse_theme(char **theme, char *conf_name, unsigned char fallback);
 extern void init_libast(void);
 extern void init_defaults(void);
