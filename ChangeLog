@@ -5136,3 +5136,7 @@ Add libast libs to GRLIBS.
 
 Hopefully fixed Etbg_update_list to be Solaris /bin/sh-friendly.
 ----------------------------------------------------------------------
+Sun Dec 21 21:43:58 2003                        Michael Jennings (mej)
+
+Fix :hscale and :vscale to work properly.
+----------------------------------------------------------------------

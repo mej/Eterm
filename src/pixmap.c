@@ -1166,6 +1166,12 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                 xscaled = (unsigned short) ((xsize * x_ratio) * ((float) w / 100.0));
                 yscaled = (unsigned short) ((ysize * x_ratio) * ((float) h / 100.0));
             } else {
+                if (!w && BITFIELD_IS_SET(simg->pmap->op, OP_HSCALE)) {
+                    w = 100;
+                }
+                if (!h && BITFIELD_IS_SET(simg->pmap->op, OP_VSCALE)) {
+                    h = 100;
+                }
                 if (w > 0) {
                     xscaled = width * ((float) w / 100.0);
                 } else {
