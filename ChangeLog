@@ -4048,3 +4048,9 @@ Wed Jan 10 12:58:31 PST 2001	Michael Jennings <mej@eterm.org>
 	Jonathan S. Keim <jonkeim@princeton.edu>.
 	
 -------------------------------------------------------------------------------
+Thu Jan 18 14:56:03 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Just noticed that the preprocessing files weren't getting removed
+	properly.  Oops. :-)
+	
+-------------------------------------------------------------------------------

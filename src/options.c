@@ -3529,6 +3529,7 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
 	    }
             strcpy(fname, "Eterm-preproc-");
             fd = libast_temp_file(fname, PATH_MAX);
+            outfile = STRDUP(fname);
 	    snprintf(cmd, PATH_MAX, "%s < %s > %s", get_pword(2, buff), file_peek_path(), fname);
 	    system(cmd);
 	    fp = fdopen(fd, "rt");
@@ -3592,6 +3593,7 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
     fclose(file_peek_fp());
     if (file_peek_preproc()) {
       remove(file_peek_outfile());
+      FREE(file_peek_outfile());
     }
     file_pop();
   }
