@@ -3072,3 +3072,9 @@ Tue Jan 18 21:17:24 PST 2000	Michael Jennings <mej@eterm.org>
 	menus.  Also added arrows for submenus.
 	
 -------------------------------------------------------------------------------
+Fri Jan 21 12:52:26 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed an off-by-one error in the scrollbar click-handling pointed out
+	by Malcolm Tredinnick <malcolmt@smart.net.au>.
+	
+-------------------------------------------------------------------------------

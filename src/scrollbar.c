@@ -252,10 +252,9 @@ sb_handle_button_press(event_t * ev)
 	  break;
 
 	case Button1:
-	  button_state.mouse_offset = MAX(ev->xbutton.y, 1);
+	  button_state.mouse_offset = ((scrollbar_win_is_anchor(ev->xany.window)) ? (MAX(ev->xbutton.y, 1)) : (1));
 	  /* drop */
 	case Button3:
-          D_SCROLLBAR((" -> Scrollbar type is %u\n", scrollbar_get_type()));
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
 	  if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
 	    if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)) {

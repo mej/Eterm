@@ -76,8 +76,8 @@
 #define scrollbar_arrow_height()              (scrollbar.width)
 
 /* Scrollbar positions */
-#define scrollbar_is_above_anchor(w, y)       (!scrollbar_win_is_anchor(w) && ((y) < scrollbar.anchor_top))
-#define scrollbar_is_below_anchor(w, y)       (!scrollbar_win_is_anchor(w) && ((y) > scrollbar.anchor_bottom))
+#define scrollbar_is_above_anchor(w, y)       (!scrollbar_win_is_anchor(w) && ((y) <= scrollbar.anchor_top))
+#define scrollbar_is_below_anchor(w, y)       (!scrollbar_win_is_anchor(w) && ((y) >= scrollbar.anchor_bottom))
 #define scrollbar_position(y)                 ((y) - scrollbar.scrollarea_start)
 #define scrollbar_up_loc()                    (scrollbar.up_arrow_loc)
 #define scrollbar_dn_loc()                    (scrollbar.down_arrow_loc)
