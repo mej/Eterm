@@ -4981,3 +4981,11 @@ Patch from Paul Brannan <pbrannan@atdesk.com> to fix a conflict
 between twin's non-standard mouse drag reporting and vim when twin
 support is not enabled.
 ----------------------------------------------------------------------
+Mon Feb 24 19:34:56 2003                        Michael Jennings (mej)
+
+This fixes the title answer bug reported on BUGTRAQ (and other lists)
+by HD Moore <termulation@digitaloffense.net>.  It does so by removing
+all non-printable characters from the title upon setting it, and
+blanking out all non-printable characters when fetching it to display
+using the aforementioned escape sequence.
+----------------------------------------------------------------------
