@@ -310,6 +310,7 @@
 #undef NO_XLOCALE
 #undef GREEK_SUPPORT
 #undef CONFIG_SEARCH_PATH
+#undef BUILD_DATE
 #undef AUTHORS
 #undef MFONT0
 #undef MFONT1
@@ -337,6 +338,28 @@
 #undef LIBAST_X11_SUPPORT
 #undef LIBAST_IMLIB2_SUPPORT
 #undef LIBAST_MMX_SUPPORT
+#undef ACTIONS_IDENT
+#undef BUTTONS_IDENT
+#undef COMMAND_IDENT
+#undef DRAW_IDENT
+#undef E_IDENT
+#undef EVENTS_IDENT
+#undef FONT_IDENT
+#undef GRKELOT_IDENT
+#undef MAIN_IDENT
+#undef MENUS_IDENT
+#undef MISC_IDENT
+#undef NETDISP_IDENT
+#undef OPTIONS_IDENT
+#undef PIXMAP_IDENT
+#undef SCREEN_IDENT
+#undef SCROLLBAR_IDENT
+#undef STARTUP_IDENT
+#undef SYSTEM_IDENT
+#undef TERM_IDENT
+#undef TIMER_IDENT
+#undef UTMP_IDENT
+#undef WINDOWS_IDENT
 
 
 /* Leave that blank line there!!  Autoheader needs it.

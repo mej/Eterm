@@ -6,9 +6,35 @@ AM_INIT_AUTOMAKE(Eterm, 0.9.1)
 dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"
 AC_SUBST(DATE)
+BUILD_DATE="`date`"
+AC_DEFINE_UNQUOTED(BUILD_DATE, "$BUILD_DATE")
 AUTHORS="Michael Jennings (mej@eterm.org) "
 AC_SUBST(AUTHORS)
 AC_DEFINE_UNQUOTED(AUTHORS, "$AUTHORS")
+
+dnl# Find RCS Ident info from source files
+AC_DEFINE_UNQUOTED(ACTIONS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(BUTTONS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(COMMAND_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(DRAW_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(E_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(EVENTS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(FONT_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SCROLLBAR_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(STARTUP_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(SYSTEM_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(TERM_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(TIMER_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(UTMP_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
+AC_DEFINE_UNQUOTED(WINDOWS_IDENT, "`grep '$Id$Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`")
 
 dnl# Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
 if test ! -z "${CFLAGS}" -o ! -z "${CCOPTS}"; then

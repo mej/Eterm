@@ -365,7 +365,7 @@ usage(void)
 
   unsigned short i, col;
 
-  printf("Eterm Enlightened Terminal Emulator for X Windows\n");
+  printf("Eterm Enlightened Terminal Emulator for the X Window System\n");
   printf("Copyright (c) 1997-2000, " AUTHORS "\n\n");
   printf("Usage for " APL_NAME " " VERSION ":\n\n");
   printf("%7s %17s %40s\n", "POSIX", "GNU", "Description");
@@ -407,6 +407,32 @@ version(void)
 
   printf("Eterm " VERSION "\n");
   printf("Copyright (c) 1997-2000, " AUTHORS "\n\n");
+
+  printf("Build info:\n");
+  printf("    Built on " BUILD_DATE "\n");
+  printf("    " ACTIONS_IDENT "\n"
+         "    " BUTTONS_IDENT "\n"
+         "    " COMMAND_IDENT "\n"
+         "    " DRAW_IDENT "\n"
+         "    " E_IDENT "\n"
+         "    " EVENTS_IDENT "\n"
+         "    " FONT_IDENT "\n"
+         "    " GRKELOT_IDENT "\n"
+         "    " MAIN_IDENT "\n"
+         "    " MENUS_IDENT "\n"
+         "    " MISC_IDENT "\n"
+         "    " NETDISP_IDENT "\n"
+         "    " OPTIONS_IDENT "\n"
+         "    " PIXMAP_IDENT "\n"
+         "    " SCREEN_IDENT "\n"
+         "    " SCROLLBAR_IDENT "\n"
+         "    " STARTUP_IDENT "\n"
+         "    " SYSTEM_IDENT "\n"
+         "    " TERM_IDENT "\n"
+         "    " TIMER_IDENT "\n"
+         "    " UTMP_IDENT "\n"
+         "    " WINDOWS_IDENT "\n"
+         "\n");
 
   printf("Debugging configuration:  ");
 #ifdef DEBUG
@@ -2307,7 +2333,7 @@ parse_keyboard(char *buff, void *state)
       return NULL;
     }
     rs_meta_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
-    
+
   } else if (!BEG_STRCASECMP(buff, "alt_mod ")) {
     char *tmp = get_pword(2, buff);
 

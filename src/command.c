@@ -1141,6 +1141,10 @@ clean_exit(void)
   }
 #endif
 #ifdef USE_XIM
+  if (xim_input_context) {
+    XUnsetICFocus(xim_input_context);
+    XDestroyIC(xim_input_context);
+  }
   if (xim_input_method) {
     XCloseIM(xim_input_method);
   }
@@ -1767,6 +1771,11 @@ init_locale(void)
     if (strcmp(locale, "C"))
 # endif
       {
+#ifdef MULTI_CHARSET
+	TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
+#else
+	TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
+#endif
         if (xim_real_init() != -1) {
           return;
         }
@@ -1775,11 +1784,6 @@ init_locale(void)
         XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
 # endif
       }
-#endif
-#ifdef MULTI_CHARSET
-    TermWin.fontset = create_fontset(etfonts[def_font_idx], etmfonts[def_font_idx]);
-#else
-    TermWin.fontset = create_fontset(etfonts[def_font_idx], "-misc-fixed-medium-r-semicondensed--13-*-75-*-c-*-iso10646-1");
 #endif
     /* Reset locale to NULL since the call to create_fontset() has freed that memory. */
     locale = NULL;

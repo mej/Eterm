@@ -4000,3 +4000,13 @@ Thu Nov 16 16:27:09 PST 2000	Michael Jennings <mej@eterm.org>
 	This time it really works.  No, I mean it this time.  Seriously.
 	
 -------------------------------------------------------------------------------
+Fri Nov 24 18:53:13 PST 2000	Michael Jennings <mej@eterm.org>
+
+	At the request of Snow-Man <sfrost@snowman.net>, I added the build
+	date to the output of --version.  While I was at it, I also added the
+	RCS ident strings.
+
+	I also applied a patch from Sung-Hyun Nam <namsh@lgic.co.kr> that
+	fixes XIM-related seg faults during clean-up.
+	
+-------------------------------------------------------------------------------
