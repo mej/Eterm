@@ -105,7 +105,7 @@
 /* #define NO_SECONDARY_SCREEN */
 
 /* The number of screenfuls between refreshes. */
-# define REFRESH_PERIOD  5
+# define REFRESH_PERIOD  3
 
 /* This will force clearing of characters before writing new ones on top of
  * them. This is experimental - added in order to try and fix pixel dropping

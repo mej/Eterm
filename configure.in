@@ -22,7 +22,7 @@ SAVE_AUTOMAKE="$AUTOMAKE"
 SAVE_AUTOCONF="$AUTOCONF"
 
 AC_INIT(src/feature.h)
-AM_INIT_AUTOMAKE(Eterm, 0.9.3)
+AM_INIT_AUTOMAKE(Eterm, 0.10)
 
 dnl# Set some basic variables
 DATE="`date '+%d %B %Y'`"
