@@ -12,13 +12,11 @@ all: Makefile
 	@true > $(srcdir)/pixmaps.list
 	@true > $(srcdir)/tile/tiled-pixmaps.list
 	@true > $(srcdir)/scale/scaled-pixmaps.list
-	@cd $(srcdir)/tile ; \
-	for i in `ls -1 | grep -v CVS | grep -v \.cvsignore | grep -v pixmaps.list` ; do \
+	@for i in `(cd $(srcdir)/tile && ls -1 | grep -v CVS | grep -v \.cvsignore | grep -v pixmaps.list)` ; do \
 	  echo $$i >> $(srcdir)/tile/tiled-pixmaps.list ; \
 	  echo '"'$$i'@0x0+0+0:tile"' >> $(srcdir)/pixmaps.list ; \
-	done ; \
-	cd $(srcdir)/scale ; \
-	for i in `ls -1 | grep -v CVS | grep -v \.cvsignore | grep -v pixmaps.list` ; do \
+	done
+	@for i in `(cd $(srcdir)/scale && ls -1 | grep -v CVS | grep -v \.cvsignore | grep -v pixmaps.list)` ; do \
 	  echo $$i >> $(srcdir)/scale/scaled-pixmaps.list ; \
 	  echo '"'$$i'@100x100"' >> $(srcdir)/pixmaps.list ; \
 	done
