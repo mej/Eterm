@@ -3915,3 +3915,9 @@ Sun Sep 17 18:54:26 PDT 2000	Michael Jennings <mej@eterm.org>
 	This was visible using the glass theme.
 	
 -------------------------------------------------------------------------------
+Tue Oct 17 10:24:43 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed a typo which caused Makefile.am to break.  Found by José Romildo
+	Malaquias <romildo@urano.iceb.ufop.br>.
+	
+-------------------------------------------------------------------------------
