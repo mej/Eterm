@@ -42,6 +42,7 @@ extern char *str_trim(char *str);
 extern int parse_escaped_string(char *str);
 extern const char *search_path(const char *pathlist, const char *file, const char *ext);
 extern const char *find_file(const char *file, const char *ext);
+extern unsigned long add_carriage_returns(unsigned char *buff, unsigned long cnt);
 
 _XFUNCPROTOEND
 

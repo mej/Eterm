@@ -3331,3 +3331,11 @@ Mon Mar  6 21:11:13 PST 2000	Michael Jennings <mej@eterm.org>
 	desktop pixmap to save memory.
 	
 -------------------------------------------------------------------------------
+Wed Mar  8 19:35:36 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Added a new --pipe-name option to allow Eterm to read from a console
+	device/tty/pipe other than /dev/console.  This is useful for folks on
+	Debian, where "console" messages actually go to the /dev/xconsole
+	named pipe rather than to /dev/tty0.
+	
+-------------------------------------------------------------------------------

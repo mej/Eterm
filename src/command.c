@@ -139,6 +139,7 @@ int my_ruid, my_euid, my_rgid, my_egid;
 char initial_dir[PATH_MAX + 1];
 static char *ptydev = NULL, *ttydev = NULL;	/* pty/tty name */
 int cmd_fd = -1;		/* file descriptor connected to the command */
+int pipe_fd = -1;
 pid_t cmd_pid = -1;		/* process id if child */
 int Xfd = -1;			/* file descriptor of X server connection */
 unsigned int num_fds = 0;	/* number of file descriptors being used */
@@ -2447,6 +2448,9 @@ cmd_getc(void)
     FD_ZERO(&readfds);
     FD_SET(cmd_fd, &readfds);
     FD_SET(Xfd, &readfds);
+    if (pipe_fd >= 0) {
+      FD_SET(pipe_fd, &readfds);
+    }
     value.tv_usec = TIMEOUT_USEC;
     value.tv_sec = 0;
 
@@ -2463,20 +2467,33 @@ cmd_getc(void)
 
     /* See if we can read from the application */
     if (FD_ISSET(cmd_fd, &readfds)) {
-
-      /*      unsigned int count = BUFSIZ; */
       register unsigned int count = CMD_BUF_SIZE;
 
       cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-
-      /* while (count > sizeof(cmdbuf_base) / 2) */
       while (count) {
 
-	/*      int n = read(cmd_fd, cmdbuf_endp, count); */
 	register int n = read(cmd_fd, cmdbuf_endp, count);
 
 	if (n <= 0)
 	  break;
+	cmdbuf_endp += n;
+	count -= n;
+      }
+      /* some characters read in */
+      if (CHARS_BUFFERED()) {
+	RETURN_CHAR();
+      }
+    } else if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
+      register unsigned int count = CMD_BUF_SIZE / 2;
+
+      cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
+      while (count) {
+
+	register int n = read(pipe_fd, cmdbuf_endp, count);
+
+	if (n <= 0)
+	  break;
+        n = add_carriage_returns(cmdbuf_endp, n);
 	cmdbuf_endp += n;
 	count -= n;
       }

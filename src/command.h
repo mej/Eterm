@@ -321,6 +321,7 @@ typedef struct {  /* sgtty interface */
 
 /************ Variables ************/
 extern int my_ruid, my_rgid, my_euid, my_egid;
+extern int pipe_fd;
 extern char initial_dir[PATH_MAX+1];
 extern unsigned long PrivateModes;
 extern Atom wmDeleteWindow;

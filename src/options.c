@@ -90,6 +90,7 @@ static ctx_state_t *ctx_state;
 static eterm_func_t *builtins;
 static unsigned char ctx_cnt, ctx_idx, ctx_state_idx, ctx_state_cnt, fstate_cnt, builtin_cnt, builtin_idx;
 static conf_var_t *conf_vars = NULL;
+static char *rs_pipe_name = NULL;
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -342,6 +343,7 @@ static const struct {
       OPT_LONG("cut-chars", "seperators for double-click selection", &rs_cutchars),
 #endif /* CUTCHAR_OPTION */
       OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
+      OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
       OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
       OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_execArgs)
 };
@@ -3920,6 +3922,22 @@ post_parse(void)
   }
 #endif
 
+  if (rs_pipe_name) {
+    struct stat fst;
+
+    if (lstat(rs_pipe_name, &fst) != 0) {
+      print_error("Unable to stat console pipe \"%s\" -- %s", rs_pipe_name, strerror(errno));
+    } else {
+      if (S_ISREG(fst.st_mode) || S_ISDIR(fst.st_mode)) {
+        print_error("Directories and regular files are not valid console pipes.  Sorry.");
+      } else {
+        pipe_fd = open(rs_pipe_name, O_RDONLY | O_NDELAY | O_NOCTTY);
+        if (pipe_fd < 0) {
+          print_error("Unable to open console pipe -- %s", strerror(errno));
+        }
+      }      
+    }
+  }
 }
 
 unsigned char
