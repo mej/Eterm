@@ -169,7 +169,11 @@ scr_reset(void)
     return;
 
   if (current_screen != PRIMARY) {
+    short tmp = TermWin.nrow;
+
+    TermWin.nrow = prev_nrow;
     chscr = scr_change_screen(PRIMARY);
+    TermWin.nrow = tmp;
   }
   if (TermWin.ncol <= 0)
     TermWin.ncol = 80;
@@ -197,6 +201,7 @@ scr_reset(void)
     buf_rend    = CALLOC(rend_t *, total_rows);
     drawn_rend  = CALLOC(rend_t *, TermWin.nrow);
     swap.rend   = CALLOC(rend_t *, TermWin.nrow);
+    D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
     for (i = 0; i < TermWin.nrow; i++) {
       j = i + TermWin.saveLines;
@@ -208,8 +213,8 @@ scr_reset(void)
 
   } else {
     /*
- * B1: add or delete rows as appropriate
- */
+     * B1: add or delete rows as appropriate
+     */
     if (TermWin.nrow < prev_nrow) {
       /* delete rows */
       k = MIN(TermWin.nscrolled, prev_nrow - TermWin.nrow);
@@ -239,6 +244,7 @@ scr_reset(void)
       buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
       drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
       swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
+      D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
       /* we have fewer rows so fix up number of scrolled lines */
       MIN_IT(screen.row, TermWin.nrow - 1);
@@ -254,6 +260,7 @@ scr_reset(void)
       buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
       drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
       swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
+      D_SCREEN(("screen.text == %8p, screen.rend == %8p, swap.text == %8p, swap.rend == %8p\n", screen.text, screen.rend, swap.text, swap.rend));
 
       k = MIN(TermWin.nscrolled, TermWin.nrow - prev_nrow);
       for (i = prev_total_rows; i < total_rows - k; i++) {

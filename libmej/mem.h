@@ -39,11 +39,8 @@ typedef struct memrec_struct {
 
 #ifdef WITH_DMALLOC
 #  include <dmalloc.h>
-#  define MALLOC(sz)		malloc(sz)
-#  define CALLOC(type,n)	calloc((n),(sizeof(type)))
-#  define REALLOC(mem,sz)	realloc((mem), (sz))
-#  define FREE(ptr)		do { free(ptr); (ptr) = NULL; } while (0)
-#elif (DEBUG >= DEBUG_MALLOC)
+#endif
+#if (DEBUG >= DEBUG_MALLOC)
 #  define MALLOC(sz)		Malloc(__FILE__, __LINE__, (sz))
 #  define CALLOC(type,n)	Calloc(__FILE__, __LINE__, (n),(sizeof(type)))
 #  define REALLOC(mem,sz)	Realloc(#mem, __FILE__, __LINE__, (mem),(sz))

@@ -3265,3 +3265,14 @@ Thu Mar  2 09:47:30 PST 2000	Michael Jennings <mej@eterm.org>
 	Right.  How the hell did I miss that?!  Thanks again Valdis.
 	
 -------------------------------------------------------------------------------
+Thu Mar  2 21:40:09 PST 2000	Michael Jennings <mej@eterm.org>
+
+	This fixes yet another resize-to-crash bug, this time with various
+	applications which use the secondary screen (mutt, mc, vim, etc.).
+	The fix is deceptively simple and does not convey the fact that it
+	took around 3 hours to track this bastard down.  Credit to Marc Merlin
+	<marc@merlins.org> for first pointing this out and for helping me
+	track it down.  And credit to Gray Watson for dmalloc, which has saved
+	my ass once again.
+	
+-------------------------------------------------------------------------------
