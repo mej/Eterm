@@ -379,7 +379,12 @@ scrollbar_draw_uparrow(unsigned char image_state, unsigned char force_modes) {
   }
   if (!image_mode_is(image_up, MODE_MASK)) {
     /* Solid mode.  Redraw every time since it's cheap. */
-    XFillRectangle(Xdisplay, scrollbar.up_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    if (Options & Opt_scrollbar_floating) {
+      XSetWindowBackground(Xdisplay, scrollbar.up_win, PixColors[bgColor]);
+      XClearWindow(Xdisplay, scrollbar.up_win);
+    } else {
+      XFillRectangle(Xdisplay, scrollbar.up_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    }
     if (image_state == IMAGE_STATE_CLICKED) {
       scrollbar_set_uparrow_pressed(1);
       draw_uparrow_clicked(scrollbar.up_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
@@ -436,7 +441,12 @@ scrollbar_draw_downarrow(unsigned char image_state, unsigned char force_modes) {
   }
   if (!image_mode_is(image_down, MODE_MASK)) {
     /* Solid mode.  Redraw every time since it's cheap. */
-    XFillRectangle(Xdisplay, scrollbar.dn_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    if (Options & Opt_scrollbar_floating) {
+      XSetWindowBackground(Xdisplay, scrollbar.dn_win, PixColors[bgColor]);
+      XClearWindow(Xdisplay, scrollbar.dn_win);
+    } else {
+      XFillRectangle(Xdisplay, scrollbar.dn_win, gc_scrollbar, 0, 0, scrollbar_arrow_width(), scrollbar_arrow_height());
+    }
     if (image_state == IMAGE_STATE_CLICKED) {
       scrollbar_set_downarrow_pressed(1);
       draw_downarrow_clicked(scrollbar.dn_win, gc_top, gc_bottom, 0, 0, scrollbar_arrow_width() - 1, scrollbar_get_shadow());
@@ -503,7 +513,12 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes) {
 #endif /* XTERM_SCROLLBAR */
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
     if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
-      XFillRectangle(Xdisplay, scrollbar.sa_win, gc_scrollbar, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
+      if (Options & Opt_scrollbar_floating) {
+        XSetWindowBackground(Xdisplay, scrollbar.sa_win, PixColors[bgColor]);
+        XClearWindow(Xdisplay, scrollbar.sa_win);
+      } else {
+        XFillRectangle(Xdisplay, scrollbar.sa_win, gc_scrollbar, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height());
+      }
       if (scrollbar_anchor_is_pressed()) {
         draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
       } else {
@@ -926,6 +941,20 @@ scrollbar_reposition_and_draw(unsigned char force_modes)
   if (!scrollbar_anchor_update_position(1)) {
     scrollbar_draw_anchor(IMAGE_STATE_CURRENT, force_modes);
   }
+  scrollbar.init = 1;
+}
+
+void
+scrollbar_reposition_and_always_draw(void)
+{
+  D_SCROLLBAR(("scrollbar_reposition_and_always_draw()\n"));
+  scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
+  scrollbar_move_uparrow();
+  scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, MODE_MASK);
+  scrollbar_move_downarrow();
+  scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, MODE_MASK);
+  scrollbar_anchor_update_position(1);
+  scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
   scrollbar.init = 1;
 }
 

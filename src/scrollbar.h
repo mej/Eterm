@@ -86,7 +86,7 @@
 #define map_scrollbar(show)                   do {PrivMode(show, PrivMode_scrollbar); if (scrollbar_mapping(show)) {scr_touch(); parent_resize();} } while (0)
 #define scrollbar_map_arrows()                do {XMapWindow(Xdisplay, scrollbar.up_win); XMapWindow(Xdisplay, scrollbar.dn_win);} while (0)
 #define scrollbar_unmap_arrows()              do {XUnmapWindow(Xdisplay, scrollbar.up_win); XUnmapWindow(Xdisplay, scrollbar.dn_win);} while (0)
-#define scrollbar_get_shadow()                (((scrollbar.type == SCROLLBAR_XTERM) || (Options & Opt_scrollbar_floating)) ? (0) : (scrollbar.shadow))
+#define scrollbar_get_shadow()                ((scrollbar.type == SCROLLBAR_XTERM) ? (0) : (scrollbar.shadow))
 #define scrollbar_set_shadow(s)               (scrollbar.shadow = (s))
 #define scrollbar_get_type()                  (scrollbar.type)
 #define scrollbar_set_type(t)                 (scrollbar.type = (t))
@@ -150,6 +150,7 @@ extern unsigned char scrollbar_set_focus(short has_focus);
 extern unsigned char scrollbar_anchor_update_position(short mouseoffset);
 extern void scrollbar_draw(unsigned char force_modes);
 extern void scrollbar_reposition_and_draw(unsigned char force_modes);
+extern void scrollbar_reposition_and_always_draw(void);
 extern unsigned char scrollbar_show(short);
 
 _XFUNCPROTOEND

@@ -1881,18 +1881,13 @@ xterm_seq(int op, const char *str)
 	case 11:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_right);
-	  scrollbar_reset();
-	  map_scrollbar(0);
-	  map_scrollbar(1);
-	  scrollbar_show(0);
+          scr_touch();
+          parent_resize();
 	  break;
 	case 12:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_scrollbar_floating);
-	  scrollbar_reset();
-	  map_scrollbar(0);
-	  map_scrollbar(1);
-	  scrollbar_show(0);
+	  scrollbar_reposition_and_always_draw();
 	  break;
 	case 13:
 	  nstr = (char *) strsep(&tnstr, ";");

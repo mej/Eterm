@@ -458,20 +458,16 @@ redraw_image(unsigned char which) {
     scr_touch();
     break;
   case image_up:
-    render_simage(images[image_up].current, scrollbar_get_uparrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_up, 0);
-    scrollbar_show(0);
+    scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   case image_down:
-    render_simage(images[image_down].current, scrollbar_get_downarrow_win(), scrollbar_arrow_width(), scrollbar_arrow_width(), image_down, 0);
-    scrollbar_show(0);
+    scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   case image_sb:
-    render_simage(images[image_sb].current, scrollbar_get_win(), scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
-    scrollbar_show(0);
+    scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   case image_sa:
-    render_simage(images[image_sa].current, scrollbar_get_anchor_win(), scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, 0);
-    scrollbar_show(0);
+    scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
     break;
   default:
     D_PIXMAP(("redraw_image():  Bad value %u\n", which));

@@ -2814,3 +2814,9 @@ Fri Nov 19 16:55:22 PST 1999	Michael Jennings <mej@eterm.org>
 	broke. :)
 	
 -------------------------------------------------------------------------------
+Fri Nov 19 18:43:58 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Fixed some other stuff I found, and cleaned up the remaining
+	occurances of calls to the old scrollbar_show() function.
+	
+-------------------------------------------------------------------------------

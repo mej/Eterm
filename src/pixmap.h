@@ -102,7 +102,7 @@ enum {
 #define image_mode_is(which, bit)         (images[which].mode & (bit))
 #define image_mode_fallback(which)        do {if (image_mode_is((which), ALLOW_IMAGE)) {image_set_mode((which), MODE_IMAGE);} else {image_set_mode((which), MODE_SOLID);}} while (0)
 #define redraw_all_images()               do {render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0); \
-                                              scr_touch(); scrollbar_show(0); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
+                                              scr_touch(); scrollbar_draw(MODE_MASK); if (image_mode_any(MODE_AUTO)) enl_ipc_sync();} while (0)
 
 /* Elements of an simage to be reset */
 #define RESET_NONE		(0UL)
