@@ -4970,3 +4970,8 @@ Wed Jan 22 15:12:36 2003                        Michael Jennings (mej)
 Yasufumi Haga <yasufumi.haga@nifty.com> found another typo in the man
 page, this one concerning the non-existent "bold multichar" font.
 ----------------------------------------------------------------------
+Mon Jan 27 17:31:41 2003                        Michael Jennings (mej)
+
+Support for xterm's cursor color change sequence (\e]12;<color>\a) as
+requested by Thomas <arnognul@tiscali.se>.
+----------------------------------------------------------------------

@@ -2365,6 +2365,19 @@ xterm_seq(int op, const char *str)
           }
           break;
 
+      case XTerm_ccolor:
+          /* Change cursor color */
+#ifndef NO_CURSORCOLOR
+          nstr = (char *) strsep(&tnstr, ";");
+          if (nstr) {
+              if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
+                  PixColors[cursorColor] = xcol.pixel;
+                  scr_refresh(DEFAULT_REFRESH);
+              }
+          }
+#endif
+          break;
+
       case XTerm_Pixmap:
 #ifdef PIXMAP_SUPPORT
           FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {
