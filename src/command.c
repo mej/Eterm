@@ -133,9 +133,6 @@ static const char cvs_ident[] = "$Id$";
 #include "scrollbar.h"
 #include "string.h"
 #include "term.h"
-#ifdef USE_POSIX_THREADS
-# include "threads.h"
-#endif
 #ifdef UTMP_SUPPORT
 # include "eterm_utmp.h"
 #endif
@@ -1117,14 +1114,6 @@ clean_exit(void)
   cleanutent();
 #endif
   privileges(REVERT);
-#ifdef USE_POSIX_THREADS
-  /* Get rid of threads if there are any running. Doesn't work yet. */
-# if 0
-  D_THREADS(("pthread_kill_other_threads_np();\n"));
-  pthread_kill_other_threads_np();
-  D_THREADS(("pthread_exit();\n"));
-# endif
-#endif
 }
 
 /* Acquire a pseudo-teletype from the system. */
@@ -1149,7 +1138,7 @@ sgi_get_pty(void)
 }
 #endif
 
-#ifdef _AIX
+#ifdef HAVE_DEV_PTC
 inline int
 aix_get_pty(void)
 {
@@ -1164,7 +1153,7 @@ aix_get_pty(void)
 }
 #endif
 
-#ifdef ALL_NUMERIC_PTYS
+#ifdef HAVE_SCO_PTYS
 inline int
 sco_get_pty(void)
 {
@@ -1196,7 +1185,7 @@ sco_get_pty(void)
 }
 #endif
 
-#if defined (__svr4__) || defined(__CYGWIN32__) || ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
+#ifdef HAVE_DEV_PTMX
 inline int
 svr_get_pty(void)
 {
@@ -1263,13 +1252,11 @@ get_pty(void)
 
 #if defined(__sgi)
   fd = sgi_get_pty();
-#elif defined(_AIX)
+#elif defined(HAVE_DEV_PTC)
   fd = aix_get_pty();
-#elif defined(__svr4__) || defined(__CYGWIN32__)
+#elif defined(HAVE_DEV_PTMX)
   fd = svr_get_pty();
-#elif ((__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1))
-  fd = svr_get_pty();
-#elif defined(ALL_NUMERIC_PTYS)	/* SCO OSr5 */
+#elif defined(HAVE_SCO_PTYS)
   fd = sco_get_pty();
 #endif
 
@@ -2192,11 +2179,6 @@ run_command(char *argv[])
   privileges(IGNORE);
 #endif
 
-#if 0
-  D_THREADS(("run_command(): pthread_join(resize_sub_thr)\n"));
-  pthread_join(resize_sub_thr, NULL);
-#endif
-
   D_CMD(("run_command() returning\n"));
   return (ptyfd);
 }
@@ -2541,9 +2523,7 @@ tt_printf(const unsigned char *fmt,...)
   tt_write(buf, strlen(buf));
 }
 
-#ifndef USE_POSIX_THREADS
 /* Read and process output from the application */
-
 void
 main_loop(void)
 {
@@ -2623,7 +2603,6 @@ main_loop(void)
     }
   } while (ch != EOF);
 }
-#endif
 
 /* output a burst of any pending data from a paste... */
 int

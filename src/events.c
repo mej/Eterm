@@ -410,7 +410,7 @@ handle_configure_notify(event_t * ev)
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
   while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, &unused_xevent));
-  resize_window();
+  handle_external_resize();
 #ifdef USE_XIM
   xim_set_status_position();
 #endif

@@ -58,9 +58,6 @@ static const char cvs_ident[] = "$Id$";
 #include "screen.h"
 #include "scrollbar.h"
 #include "term.h"
-#ifdef USE_POSIX_THREADS
-# include "threads.h"
-#endif
 #include "windows.h"
 
 char *orig_argv0;
@@ -70,15 +67,6 @@ char *orig_argv0;
    that doesn't send the right events (*cough*
    Window Maker *cough*) -- mej */
 short bg_needs_update = 1;
-#endif
-#ifdef USE_POSIX_THREADS
-static void **retval;
-static int join_value;
-static pthread_t main_loop_thr;
-static pthread_attr_t main_loop_attr;
-# ifdef MUTEX_SYNCH
-pthread_mutex_t mutex;
-# endif
 #endif
 TermWin_t TermWin;
 Display *Xdisplay;		/* display */
@@ -98,12 +86,6 @@ eterm_bootstrap(int argc, char *argv[])
 
   orig_argv0 = argv[0];
 
-#ifdef USE_POSIX_THREADS
-# ifdef MUTEX_SYNCH
-  pthread_atfork((void *) &prepare, (void *) &parent, (void *) &child);
-# endif
-#endif
-
   /* Security enhancements -- mej */
   putenv("IFS= \t\n");
   my_ruid = getuid();
@@ -120,14 +102,6 @@ eterm_bootstrap(int argc, char *argv[])
     display_name = ":0";
 
   /* This MUST be called before any other Xlib functions */
-
-#ifdef USE_POSIX_THREADS
-  if (XInitThreads()) {
-    D_THREADS(("XInitThreads() succesful\n"));
-  } else {
-    D_THREADS(("XInitThreads() failed, I'm outta here\n"));
-  }
-#endif
 
   get_initial_options(argc, argv);
 #ifdef NEED_LINUX_HACK
@@ -304,24 +278,11 @@ eterm_bootstrap(int argc, char *argv[])
 
   D_CMD(("init_command()\n"));
   init_command(rs_execArgs);
-#ifndef USE_POSIX_THREADS
   if (Options & Opt_borderless) {
-    resize_window();
+    handle_external_resize();
   }
-#endif
 
-#ifdef USE_POSIX_THREADS
-  D_THREADS(("main_thread:"));
-  pthread_attr_init(&main_loop_attr);
-  pthread_create(&main_loop_thr, &main_loop_attr,
-		 (void *) &main_thread, NULL);
-  D_THREADS(("done? :)\n"));
-  while (1);
-  /*  main_loop(); */
-#else
-  main_loop();			/* main processing loop */
-#endif
+  main_loop();
 
   return (EXIT_SUCCESS);
 }
-/* EOF */

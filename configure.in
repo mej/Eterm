@@ -155,6 +155,9 @@ AC_CHECK_FUNC(logout,
 ))
 AC_CHECK_FUNC(getpwuid, , AC_CHECK_LIB(sun, getpwuid, LIBS="$LIBS -lsun"))
 
+dnl#
+dnl# Utility stuff
+dnl#
 dnl# Did they want debugging?
 AC_MSG_CHECKING(for debugging level)
 AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num is an optional level],
@@ -172,6 +175,27 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
                   AC_DEFINE_UNQUOTED(DEBUG, 4)
 )
 
+dnl# Check for the appropriate pty mechanism
+AC_MSG_CHECKING(for pty mechanism)
+PTY_MECH=""
+if test -e /dev/ptc ; then
+  AC_DEFINE(HAVE_DEV_PTC)
+  PTY_MECH="AIX $PTY_MECH"
+fi
+if test -e /dev/ptmx ; then
+  AC_DEFINE(HAVE_DEV_PTMX)
+  PTY_MECH="SVR4 $PTY_MECH"
+fi
+if test -e /dev/ptyp128 ; then
+  AC_DEFINE(HAVE_SCO_PTYS)
+  PTY_MECH="SCO $PTY_MECH"
+fi
+if test "X$PTY_MECH" = "X"; then
+  AC_MSG_RESULT(generic pty's only)
+else
+  AC_MSG_RESULT($PTY_MECH)
+fi
+
 dnl#
 dnl# FEATURES
 dnl#
@@ -184,7 +208,6 @@ AC_ARG_WITH(imlib,
               GRLIBS="-lImlib"
               AC_DEFINE(PIXMAP_SUPPORT)
               AC_DEFINE(PIXMAP_SCROLLBAR)
-              AC_DEFINE(PIXMAP_MENUBAR)
               AC_DEFINE(BACKING_STORE)
             else
               AC_MSG_RESULT(no)
@@ -193,7 +216,6 @@ AC_ARG_WITH(imlib,
                 GRLIBS="-lImlib"
                 AC_DEFINE(PIXMAP_SUPPORT)
                 AC_DEFINE(PIXMAP_SCROLLBAR)
-                AC_DEFINE(PIXMAP_MENUBAR)
                 AC_DEFINE(BACKING_STORE)
 )
 AC_MSG_CHECKING(for transparency support)

@@ -328,15 +328,6 @@ extern char initial_dir[PATH_MAX+1];
 extern unsigned long PrivateModes;
 extern Atom wmDeleteWindow;
 extern int refresh_count, refresh_limit, refresh_type;
-#ifdef USE_POSIX_THREADS
-extern static void **retval;
-extern static int join_value;
-extern static pthread_t main_loop_thr;
-extern static pthread_attr_t main_loop_attr;
-# ifdef MUTEX_SYNCH
-extern pthread_mutex_t mutex;
-# endif
-#endif
 #ifdef USE_XIM
 extern XIC Input_Context;	/* input context */
 #endif

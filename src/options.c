@@ -525,9 +525,6 @@ version(void)
 #if DEBUG >= DEBUG_SCROLLBAR
   printf(" +DEBUG_SCROLLBAR");
 #endif
-#if DEBUG >= DEBUG_THREADS
-  printf(" +DEBUG_THREADS");
-#endif
 #if DEBUG >= DEBUG_MENU
   printf(" +DEBUG_MENU");
 #endif
@@ -572,16 +569,6 @@ version(void)
   printf(" +PIXMAP_SUPPORT");
 #else
   printf(" -PIXMAP_SUPPORT");
-#endif
-#ifdef USE_POSIX_THREADS
-  printf(" +USE_POSIX_THREADS");
-#else
-  printf(" -USE_POSIX_THREADS");
-#endif
-#ifdef MUTEX_SYNCH
-  printf(" +MUTEX_SYNCH");
-#else
-  printf(" -MUTEX_SYNCH");
 #endif
 #ifdef PIXMAP_OFFSET
   printf(" +PIXMAP_OFFSET");

@@ -46,11 +46,12 @@ extern void set_text_property(Window, char *, char *);
 extern Pixel get_bottom_shadow_color(Pixel, const char *);
 extern Pixel get_top_shadow_color(Pixel, const char *);
 extern void Create_Windows(int, char * []);
-extern void resize_subwindows(int, int);
-extern void resize(void);
-extern void resize_window1(unsigned int, unsigned int);
 extern void set_width(unsigned short);
-extern void resize_window(void);
+extern void update_size_hints(void);
+extern void term_resize(int, int);
+extern void parent_resize(void);
+extern void handle_resize(unsigned int, unsigned int);
+extern void handle_external_resize(void);
 #ifdef XTERM_COLOR_CHANGE
 extern void set_window_color(int, const char *);
 #else

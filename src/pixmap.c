@@ -48,9 +48,6 @@ static const char cvs_ident[] = "$Id$";
 # include "scrollbar.h"
 #endif
 #include "term.h"
-#ifdef USE_POSIX_THREADS
-# include "threads.h"
-#endif
 #include "Eterm.xpm"		/* Icon pixmap */
 
 #ifdef PIXMAP_SUPPORT

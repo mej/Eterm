@@ -104,8 +104,6 @@ extern unsigned int debug_level;
 #  define D_ENL(x)			DPRINTF2(x)
 #  define DEBUG_SCROLLBAR		2
 #  define D_SCROLLBAR(x)		DPRINTF2(x)
-#  define DEBUG_THREADS			2
-#  define D_THREADS(x)			DPRINTF2(x)
 #  define DEBUG_TIMER			2
 #  define D_TIMER(x)			DPRINTF2(x)
  

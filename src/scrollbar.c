@@ -670,6 +670,36 @@ scrollbar_reset(void)
   scrollBar.init = 0;
 }
 
+void
+scrollbar_resize(int width, int height)
+{
+
+  if (!scrollbar_visible()) {
+    return;
+  }
+
+  D_SCROLLBAR(("scrollbar_resize(%d, %d)\n", width, height));
+  scrollBar.beg = 0;
+  scrollBar.end = height;
+#ifdef MOTIF_SCROLLBAR
+  if (scrollBar.type == SCROLLBAR_MOTIF) {
+    /* arrows are as high as wide - leave 1 pixel gap */
+    scrollBar.beg += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+    scrollBar.end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
+  }
+#endif
+#ifdef NEXT_SCROLLBAR
+  if (scrollBar.type == SCROLLBAR_NEXT) {
+    scrollBar.beg = scrollbar_get_shadow();
+    scrollBar.end -= (scrollBar.width * 2 + (scrollbar_get_shadow() ? scrollbar_get_shadow() : 1) + 2);
+  }
+#endif
+  width -= scrollbar_trough_width();
+  XMoveResizeWindow(Xdisplay, scrollBar.win, ((Options & Opt_scrollBar_right) ? (width) : (0)), 0, scrollbar_trough_width(), height);
+  scrollBar.init = 0;
+  scrollbar_show(0);
+}
+
 unsigned char
 scrollbar_show(short mouseoffset)
 {
@@ -677,8 +707,9 @@ scrollbar_show(short mouseoffset)
   unsigned char xsb = 0, force_update = 0;
   static int focus = -1;
 
-  if (!scrollbar_visible())
+  if (!scrollbar_visible()) {
     return 0;
+  }
 
   D_SCROLLBAR(("scrollbar_show(%d)\n", mouseoffset));
 
@@ -733,20 +764,6 @@ scrollbar_show(short mouseoffset)
 
       focus = TermWin.focus;
       gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
-#if 0
-# ifdef PIXMAP_OFFSET
-      if (!((Options & Opt_scrollBar_floating) && image_mode_is(image_sb, (MODE_TRANS | MODE_VIEWPORT)))) {
-# endif
-	if (scrollbar_is_pixmapped()) {
-	  XSetWindowBackgroundPixmap(Xdisplay, scrollBar.win, images[image_sb].current->pmap->pixmap);
-	} else {
-	  XSetWindowBackground(Xdisplay, scrollBar.win, gcvalue.foreground);
-	}
-	XClearWindow(Xdisplay, scrollBar.win);
-# ifdef PIXMAP_OFFSET
-      }
-# endif				/* PIXMAP_OFFSET */
-#endif
       XChangeGC(Xdisplay, scrollbarGC, GCForeground, &gcvalue);
 
       gcvalue.foreground = PixColors[focus ? topShadowColor : unfocusedTopShadowColor];

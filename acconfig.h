@@ -290,9 +290,9 @@
 #undef HAVE_X_SHAPE_EXT
 
 /* Support for various features */
-#undef USE_ACTIVE_TAGS
-#undef USE_POSIX_THREADS
-#undef MUTEX_SYNCH
+#undef HAVE_DEV_PTC
+#undef HAVE_DEV_PTMX
+#undef HAVE_SCO_PTYS
 #undef PIXMAP_SUPPORT
 #undef PIXMAP_OFFSET
 #undef BACKING_STORE

@@ -102,7 +102,7 @@
                                  : ((scrollBar.type == SCROLLBAR_NEXT) ? (scrollBar.end + scrollBar.width + 2) : (scrollBar.end + 1)))
 
 /* Scrollbar operations */
-#define map_scrollbar(show) do {if (scrollbar_mapping(show)) {scr_touch(); resize();} PrivMode(show, PrivMode_scrollBar); } while (0)
+#define map_scrollbar(show) do {if (scrollbar_mapping(show)) {scr_touch(); parent_resize();} PrivMode(show, PrivMode_scrollBar); } while (0)
 #define scrollbar_get_shadow()		(scrollBar.shadow)
 #define scrollbar_set_shadow(s)		do { scrollBar.shadow = (s); } while (0)
 #define scrollbar_get_win() (scrollBar.win)
@@ -155,6 +155,7 @@ extern unsigned char sb_handle_motion_notify(event_t *);
 extern unsigned char scrollbar_dispatch_event(event_t *);
 extern unsigned char scrollbar_mapping(unsigned char);
 extern void scrollbar_reset(void);
+extern void scrollbar_resize(int, int);
 extern unsigned char scrollbar_show(short);
 
 _XFUNCPROTOEND

@@ -38,9 +38,6 @@ static const char cvs_ident[] = "$Id$";
 # include "profile.h"
 #endif
 #include "term.h"
-#ifdef USE_POSIX_THREADS
-# include "threads.h"
-#endif
 
 /* This tells what's actually on the screen */
 static text_t **drawn_text = NULL;
@@ -1822,9 +1819,6 @@ scr_refresh(int type)
   P_SETTIMEVAL(cnt.start);
 #endif
 
-#ifdef USE_POSIX_THREADS
-  check_bg_pixmap();
-#endif
   row_offset = TermWin.saveLines - TermWin.view_start;
   fprop = TermWin.fprop;
 

@@ -474,130 +474,12 @@ Create_Windows(int argc, char *argv[])
     TermWin.gc = XCreateGC(Xdisplay, TermWin.vt, GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
   }
 
-  if (Options & Opt_noCursor)
+  if (Options & Opt_noCursor) {
     scr_cursor_visible(0);
-
-}
-
-/* window resizing - assuming the parent window is the correct size */
-void
-resize_subwindows(int width, int height)
-{
-
-  int x = 0, y = 0;
-
-#ifdef RXVT_GRAPHICS
-  int old_width = TermWin.width;
-  int old_height = TermWin.height;
-
-#endif
-
-  D_SCREEN(("resize_subwindows(%d, %d)\n", width, height));
-  TermWin.width = TermWin.ncol * TermWin.fwidth;
-  TermWin.height = TermWin.nrow * TermWin.fheight;
-
-  /* size and placement */
-  if (scrollbar_visible()) {
-    scrollBar.beg = 0;
-    scrollBar.end = height;
-#ifdef MOTIF_SCROLLBAR
-    if (scrollBar.type == SCROLLBAR_MOTIF) {
-      /* arrows are as high as wide - leave 1 pixel gap */
-      scrollBar.beg += scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-      scrollBar.end -= scrollbar_arrow_height() + scrollbar_get_shadow() + 1;
-    }
-#endif
-#ifdef NEXT_SCROLLBAR
-    if (scrollBar.type == SCROLLBAR_NEXT) {
-      scrollBar.beg = scrollbar_get_shadow();
-      scrollBar.end -= (scrollBar.width * 2 + (scrollbar_get_shadow()? scrollbar_get_shadow() : 1) + 2);
-    }
-#endif
-    width -= scrollbar_trough_width();
-    XMoveResizeWindow(Xdisplay, scrollBar.win, ((Options & Opt_scrollBar_right) ? (width) : (x)), 0, scrollbar_trough_width(), height);
-    if (scrollbar_is_pixmapped()) {
-      scrollbar_show(0);
-    }
-    if (!(Options & Opt_scrollBar_right)) {
-      x = scrollbar_trough_width();
-    }
-  }
-  XMoveResizeWindow(Xdisplay, TermWin.vt, x, y, width, height + 1);
-
-#ifdef RXVT_GRAPHICS
-  if (old_width)
-    Gr_Resize(old_width, old_height);
-#endif
-  if (!(background_is_pixmap())) {
-    XSetWindowBackground(Xdisplay, TermWin.vt, PixColors[bgColor]);
-    XClearWindow(Xdisplay, TermWin.vt);
-  } else {
-#ifdef PIXMAP_SUPPORT
-    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
-#endif
   }
 }
 
-void
-resize(void)
-{
-  szHint.base_width = (2 * TermWin.internalBorder);
-  szHint.base_height = (2 * TermWin.internalBorder);
-
-  szHint.base_width += (scrollbar_visible()? scrollbar_trough_width() : 0);
-
-  szHint.min_width = szHint.base_width + szHint.width_inc;
-  szHint.min_height = szHint.base_height + szHint.height_inc;
-
-  szHint.width = szHint.base_width + TermWin.width;
-  szHint.height = szHint.base_height + TermWin.height;
-
-  szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
-
-  XSetWMNormalHints(Xdisplay, TermWin.parent, &szHint);
-  XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
-
-  resize_subwindows(szHint.width, szHint.height);
-}
-
-/*
- * Redraw window after exposure or size change
- */
-void
-resize_window1(unsigned int width, unsigned int height)
-{
-  static short first_time = 1;
-  int new_ncol = (width - szHint.base_width) / TermWin.fwidth;
-  int new_nrow = (height - szHint.base_height) / TermWin.fheight;
-
-  if (first_time ||
-      (new_ncol != TermWin.ncol) ||
-      (new_nrow != TermWin.nrow)) {
-    int curr_screen = -1;
-
-    /* scr_reset only works on the primary screen */
-    if (!first_time) {		/* this is not the first time thru */
-      selection_clear();
-      curr_screen = scr_change_screen(PRIMARY);
-    }
-    TermWin.ncol = new_ncol;
-    TermWin.nrow = new_nrow;
-
-    resize_subwindows(width, height);
-    scr_reset();
-
-    if (curr_screen >= 0)	/* this is not the first time thru */
-      scr_change_screen(curr_screen);
-    first_time = 0;
-  } else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
-    resize_subwindows(width, height);
-    scr_touch();
-  }
-}
-
-/*
- * good for toggling 80/132 columns
- */
+/* good for toggling 80/132 columns */
 void
 set_width(unsigned short width)
 {
@@ -608,28 +490,96 @@ set_width(unsigned short width)
     height = szHint.base_height + height * TermWin.fheight;
 
     XResizeWindow(Xdisplay, TermWin.parent, width, height);
-    resize_window1(width, height);
+    handle_resize(width, height);
   }
 }
 
-/*
- * Redraw window after exposure or size change
- */
 void
-resize_window(void)
+update_size_hints(void)
+{
+  szHint.base_width = (2 * TermWin.internalBorder);
+  szHint.base_height = (2 * TermWin.internalBorder);
+  szHint.base_width += ((scrollbar_visible()) ? (scrollbar_trough_width()) : (0));
+
+  szHint.min_width = szHint.base_width + szHint.width_inc;
+  szHint.min_height = szHint.base_height + szHint.height_inc;
+  szHint.width = szHint.base_width + TermWin.width;
+  szHint.height = szHint.base_height + TermWin.height;
+
+  szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
+  XSetWMNormalHints(Xdisplay, TermWin.parent, &szHint);
+}
+
+/* Resize terminal window and scrollbar window */
+void
+term_resize(int width, int height)
+{
+  D_SCREEN(("term_resize(%d, %d)\n", width, height));
+  TermWin.width = TermWin.ncol * TermWin.fwidth;
+  TermWin.height = TermWin.nrow * TermWin.fheight;
+  XMoveResizeWindow(Xdisplay, TermWin.vt, ((Options & Opt_scrollBar_right) ? (0) : (scrollbar_trough_width())), 0, width, height + 1);
+  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+}
+
+/* Resize due to font change; update size hints and child windows */
+void
+parent_resize(void)
+{
+  update_size_hints();
+  XResizeWindow(Xdisplay, TermWin.parent, szHint.width, szHint.height);
+  term_resize(szHint.width, szHint.height);
+  scrollbar_resize(szHint.width, szHint.height);
+}
+
+void
+handle_resize(unsigned int width, unsigned int height)
+{
+  static short first_time = 1;
+  int new_ncol = (width - szHint.base_width) / TermWin.fwidth;
+  int new_nrow = (height - szHint.base_height) / TermWin.fheight;
+
+  if (first_time || (new_ncol != TermWin.ncol) || (new_nrow != TermWin.nrow)) {
+    int curr_screen = -1;
+
+    /* scr_reset only works on the primary screen */
+    if (!first_time) {
+      selection_clear();
+      curr_screen = scr_change_screen(PRIMARY);
+    }
+    TermWin.ncol = new_ncol;
+    TermWin.nrow = new_nrow;
+
+    term_resize(width, height);
+    scrollbar_resize(width, height);
+    scr_reset();
+
+    if (curr_screen >= 0) {
+      scr_change_screen(curr_screen);
+    }
+    first_time = 0;
+  } else if (image_mode_is(image_bg, MODE_TRANS) || image_mode_is(image_bg, MODE_VIEWPORT)) {
+    term_resize(width, height);
+    scrollbar_resize(width, height);
+    scr_touch();
+  }
+}
+
+/* Handle configure notify events telling us we've been resized */
+void
+handle_external_resize(void)
 {
   Window root;
   int x, y;
   unsigned int border, depth, width, height;
 
-  /* do we come from an fontchange? */
+  /* If the font change count is non-zero, this event
+     is telling us we resized ourselves.  Ignore it. */
   if (font_change_count > 0) {
     font_change_count--;
     return;
   }
   XGetGeometry(Xdisplay, TermWin.parent, &root, &x, &y, &width, &height, &border, &depth);
-  /* parent already resized */
-  resize_window1(width, height);
+  handle_resize(width, height);
 }
 
 #ifdef XTERM_COLOR_CHANGE

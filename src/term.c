@@ -1579,33 +1579,36 @@ set_title(const char *str)
 
   char *name;
 
-  if (XFetchName(Xdisplay, TermWin.parent, &name))
+  if (XFetchName(Xdisplay, TermWin.parent, &name) == 0) {
     name = NULL;
-  if (name == NULL || strcmp(name, str))
+  }
+  if (name == NULL || strcmp(name, str)) {
     XStoreName(Xdisplay, TermWin.parent, str);
-  if (name)
+  }
+  if (name) {
     XFree(name);
+  }
 }
-#else
-# define set_title(str) XStoreName(Xdisplay, TermWin.parent, str)
-#endif
 
-#ifdef SMART_WINDOW_TITLE
 static void
-set_iconName(const char *str)
+set_icon_name(const char *str)
 {
 
   char *name;
 
-  if (XGetIconName(Xdisplay, TermWin.parent, &name))
+  if (XGetIconName(Xdisplay, TermWin.parent, &name) == 0) {
     name = NULL;
-  if (name == NULL || strcmp(name, str))
+  }
+  if (name == NULL || strcmp(name, str)) {
     XSetIconName(Xdisplay, TermWin.parent, str);
-  if (name)
+  }
+  if (name) {
     XFree(name);
+  }
 }
 #else
-# define set_iconName(str) XSetIconName(Xdisplay, TermWin.parent, str)
+# define set_title(str) XStoreName(Xdisplay, TermWin.parent, str)
+# define set_icon_name(str) XSetIconName(Xdisplay, TermWin.parent, str)
 #endif
 
 /*
@@ -1659,7 +1662,7 @@ xterm_seq(int op, const char *str)
     case XTerm_name:
       set_title(str);		/* drop */
     case XTerm_iconName:
-      set_iconName(str);
+      set_icon_name(str);
       break;
     case XTerm_Takeover:
       XSetInputFocus(Xdisplay, TermWin.parent, RevertToParent, CurrentTime);
@@ -1673,8 +1676,8 @@ xterm_seq(int op, const char *str)
          Syntax:  ESC ] 6 ; <op> ; <arg> BEL
 
          where <op> is:  0    Set/toggle transparency
-         1    Set color modifiers
-         3    Force update of pseudo-transparent background
+         1     Set color modifiers
+         3     Force update of pseudo-transparent background
          10    Set scrollbar type/width
          11    Set/toggle right-side scrollbar
          12    Set/toggle floating scrollbar

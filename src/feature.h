@@ -64,10 +64,6 @@
 #  undef HAVE_SYS_IOCTL_H
 # endif
 
-# ifdef _SCO_DS     /* SCO Osr5 */
-#  define ALL_NUMERIC_PTYS    /* Scos pty naming is /dev/[pt]typ0 - /dev/[pt]ty256 */
-# endif 
-
 /********************* Debugging stuff *********************/
 /* As Keith Bunge would say, don't crap with the debugging stuff below
  * unless you develop this mess. :^)   -- mej

@@ -405,7 +405,7 @@ change_font(int init, const char *fontname)
 
   if (!init) {
     font_change_count++;
-    resize();
+    parent_resize();
   }
   return;
 }
