@@ -568,10 +568,10 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
 #endif
     if ((images[image_bg].current->pmap->w > 0) || (images[image_bg].current->pmap->op & OP_SCALE)) {
       D_PIXMAP(("Scaling image to %dx%d\n", scr->width, scr->height));
-      imlib_render_pixmaps_for_whole_image_at_size(&viewport_pixmap, &mask, 0, scr->width, scr->height);
+      imlib_render_pixmaps_for_whole_image_at_size(&viewport_pixmap, &mask, scr->width, scr->height);
     } else {
       D_PIXMAP(("Tiling image at %dx%d\n", xsize, ysize));
-      imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask, 0);
+      imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask);
     }
     if (viewport_pixmap == None) {
       print_error("Delayed image load failure for \"%s\".  Using solid color mode.", imlib_image_get_filename());
@@ -727,9 +727,9 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
     }
 #endif
     if (w == imlib_image_get_width() && h == imlib_image_get_height()) {
-      imlib_render_pixmaps_for_whole_image(&pmap, &mask, 0);
+      imlib_render_pixmaps_for_whole_image(&pmap, &mask);
     } else {
-      imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, 0, w, h);
+      imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, w, h);
     }
     if (pmap == None) {
       print_error("Delayed image load failure for \"%s\".", imlib_image_get_filename());
@@ -1051,7 +1051,7 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       }
 #endif
       D_PIXMAP(("Rendering image simg->iml->im [%8p] to %hdx%hd pixmap\n", simg->iml->im, xscaled, yscaled));
-      imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, 0, xscaled, yscaled);
+      imlib_render_pixmaps_for_whole_image_at_size(&simg->pmap->pixmap, &simg->pmap->mask, xscaled, yscaled);
       rendered = 1;
       if (simg->pmap->mask != None) {
         shaped_window_apply_mask(win, simg->pmap->mask);
@@ -1762,7 +1762,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
   imlib_context_set_anti_alias(1);
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
-  imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, 0, w, h);
+  imlib_render_pixmaps_for_whole_image_at_size(&wm_hints->icon_pixmap, &wm_hints->icon_mask, w, h);
   if (check_for_enlightenment()) {
     wm_hints->flags |= IconPixmapHint | IconMaskHint;
   } else {

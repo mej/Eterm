@@ -215,7 +215,7 @@ main(int argc, char *argv[])
   imlib_context_set_dither(1);
   imlib_context_set_blend(0);
   imlib_context_set_drawable(Xroot);
-  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, &m, 0, w, h);
+  imlib_render_pixmaps_for_whole_image_at_size(&temp_pmap, &m, w, h);
   if (debug) {
     fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, (unsigned int) temp_pmap);
   }
