@@ -450,10 +450,7 @@ script_handler_dialog(char **params)
     }
 }
 
-
-
 #ifdef ESCREEN
-
 void
 script_handler_display(char **params)
 {
@@ -471,47 +468,53 @@ script_handler_display(char **params)
     if (a && isdigit(*a)) {
         no = atoi(a);
         a = params[inx++];
-        D_SCRIPT(("disp #%d\n", no));
+        D_ESCREEN(("disp #%d\n", no));
     }
 
     if (!strcmp(p, "goto") || !strcmp(p, "go") || !strcmp(p, "focus") || !strcmp(p, "raise")) {
+        D_ESCREEN(("Go to display %d\n", no));
         ns_go2_disp(sess, no);
     } else if (!strcmp(p, "prvs") || !strcmp(p, "prev") || !strcmp(p, "previous")) {
+        D_ESCREEN(("Go to previous display\n"));
         ns_rel_disp(sess, -1);
     } else if (!strcmp(p, "next")) {
+        D_ESCREEN(("Go to next display\n"));
         ns_rel_disp(sess, 1);
     } else if (!strcmp(p, "toggle")) {
+        D_ESCREEN(("Toggle display\n"));
         ns_tog_disp(sess);
     } else if (!strcmp(p, "new")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("disp new ask\n"));
+            D_ESCREEN(("disp new ask\n"));
             ns_add_disp(sess, no, NULL);
         } else {
-            D_SCRIPT(("disp new \"%s\"\n", a));
+            D_ESCREEN(("disp new \"%s\"\n", a));
             ns_ren_disp(sess, no, a);
         }
     } else if (!strcmp(p, "title") || !strcmp(p, "name") || !strcmp(p, "rename")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("disp name ask\n"));
+            D_ESCREEN(("disp name ask\n"));
             ns_ren_disp(sess, no, NULL);
         } else {
-            D_SCRIPT(("disp name \"%s\"\n", a));
+            D_ESCREEN(("disp name \"%s\"\n", a));
             ns_ren_disp(sess, no, a);
         }
     } else if (!strcmp(p, "kill") || !strcmp(p, "close")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("disp kill ask\n"));
+            D_ESCREEN(("disp kill ask\n"));
             ns_rem_disp(sess, no, TRUE);
         } else {
-            D_SCRIPT(("disp kill \"%s\"\n", a));
+            D_ESCREEN(("disp kill \"%s\"\n", a));
             ns_rem_disp(sess, no, FALSE);
         }
     } else if (!strcmp(p, "watch") || !strcmp(p, "monitor")) {
+        D_ESCREEN(("Monitor display %d\n", no));
         ns_mon_disp(sess, no);
     } else if (!strcmp(p, "back") || !strcmp(p, "backlog") || !strcmp(p, "scrollback")) {
+        D_ESCREEN(("View scrollback on display %d\n", no));
         ns_sbb_disp(sess, no);
     } else {
-        print_error("Error in script:  \"%s\" has no sub-function \"%s\".\n", "display", p);
+        print_error("Error in script:  \"display\" has no sub-function \"%s\".\n", p);
     }
 }
 
@@ -539,49 +542,56 @@ script_handler_region(char **params)
     if (a && isdigit(*a)) {
         no = atoi(a);
         a = params[inx++];
-        D_SCRIPT(("region #%d\n", no));
+        D_ESCREEN(("region #%d\n", no));
     }
 
     if (!strcmp(p, "goto") || !strcmp(p, "go") || !strcmp(p, "focus") || !strcmp(p, "raise")) {
+        D_ESCREEN(("Go to region %d of display %8p\n", no, disp));
         ns_go2_region(sess, disp, no);
     } else if (!strcmp(p, "prvs") || !strcmp(p, "prev") || !strcmp(p, "previous")) {
+        D_ESCREEN(("Go to previous region of display %8p\n", disp));
         ns_rel_region(sess, disp, -1);
     } else if (!strcmp(p, "next")) {
+        D_ESCREEN(("Go to next region of display %8p\n", disp));
         ns_rel_region(sess, disp, 1);
     } else if (!strcmp(p, "toggle")) {
+        D_ESCREEN(("Toggle region of display %8p\n", disp));
         ns_tog_region(sess, disp);
     } else if (!strcmp(p, "new") || !strcmp(p, "split")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("region new ask\n"));
+            D_ESCREEN(("region new ask\n"));
             ns_add_region(sess, disp, no, NULL);
         } else {
-            D_SCRIPT(("region new \"%s\"\n", a));
+            D_ESCREEN(("region new \"%s\"\n", a));
             ns_add_region(sess, disp, no, a);
         }
     } else if (!strcmp(p, "title") || !strcmp(p, "name") || !strcmp(p, "rename")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("region name ask\n"));
+            D_ESCREEN(("region name ask\n"));
             ns_ren_region(sess, disp, no, NULL);
         } else {
-            D_SCRIPT(("region name \"%s\"\n", a));
+            D_ESCREEN(("region name \"%s\"\n", a));
             ns_ren_region(sess, disp, no, a);
         }
     } else if (!strcmp(p, "kill") || !strcmp(p, "close")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
-            D_SCRIPT(("region kill ask\n"));
+            D_ESCREEN(("region kill ask\n"));
             ns_rem_region(sess, disp, no, TRUE);
         } else {
-            D_SCRIPT(("disp kill \"%s\"\n", a));
+            D_ESCREEN(("disp kill \"%s\"\n", a));
             ns_rem_region(sess, disp, no, FALSE);
         }
     } else if (!strcmp(p, "only") || !strcmp(p, "unsplit") || !strcmp(p, "full") || !strcmp(p, "fullscreen")) {
+        D_ESCREEN(("Maximizing region %d of display %8p\n", no, disp));
         ns_one_region(sess, disp, no);
     } else if (!strcmp(p, "watch") || !strcmp(p, "monitor")) {
+        D_ESCREEN(("Monitor region %d of display %8p\n", no, disp));
         ns_mon_region(sess, disp, no);
     } else if (!strcmp(p, "back") || !strcmp(p, "backlog") || !strcmp(p, "scrollback")) {
+        D_ESCREEN(("View scrollback for region %d of display %8p\n", no, disp));
         ns_sbb_region(sess, disp, no);
     } else {
-        print_error("Error in script:  \"%s\" has no sub-function \"%s\".\n", "region", p);
+        print_error("Error in script:  \"region\" has no sub-function \"%s\".\n", p);
     }
 }
 

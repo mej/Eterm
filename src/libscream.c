@@ -2237,25 +2237,29 @@ ns_screen_command(_ns_sess * sess, char *cmd)
     char *c;
     int ret = NS_SUCC;
 
+    D_ESCREEN(("sess %8p, cmd %8p\n", sess, cmd));
     if (!cmd || !*cmd)
         return NS_FAIL;
 
+    D_ESCREEN(("Sending screen command %s\n", safe_print_string(cmd, strlen(cmd))));
     if (NS_EFUN_EXISTS(efuns, sess, NULL, inp_text)) {
+        D_ESCREEN((" -> inp_text is set\n"));
         if ((c = strdup(cmd))) {
-            {
-                char *p = c;    /* replace default escape-char with that */
+            char *p = c;    /* replace default escape-char with that */
 
-                while (*p) {    /* actually used in this session */
-                    if (*p == NS_SCREEN_ESCAPE)
-                        *p = sess->escape;
-                    p++;
-                }
+            D_ESCREEN((" -> translating escapes\n"));
+            while (*p) {    /* actually used in this session */
+                if (*p == NS_SCREEN_ESCAPE)
+                    *p = sess->escape;
+                p++;
             }
             ns_desc_string(c, "ns_screen_command: xlated string");
             efuns->inp_text(NULL, sess->fd, c);
             FREE(c);
-        } else
+        } else {
+            D_ESCREEN((" -> out of memory\n"));
             ret = NS_OOM;
+        }
     } /* out of memory */
     else {
         ret = NS_EFUN_NOT_SET;

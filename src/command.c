@@ -2344,6 +2344,7 @@ static button_t *screen_button_create(char *text, char code)
     p[0] = NS_SCREEN_ESCAPE;
     p[1] = code;
     p[2] = '\0';
+    D_ESCREEN(("Creating button \"%s\" for display %c (%s)\n", NONULL(text), code, safe_print_string(p, 2)));
     button_set_action(b, ACTION_ECHO, p);
     b->flags |= NS_SCREAM_BUTTON;
 
@@ -2531,6 +2532,7 @@ inp_text(void *xd, int id, char *txt)
     USE_VAR(xd);
     USE_VAR(id);
 
+    D_ESCREEN(("Writing \"%s\" to subprocess.\n", safe_print_string(txt, strlen(txt))));
     tt_write(txt, strlen(txt));
     return NS_SUCC;
 }

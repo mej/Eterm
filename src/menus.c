@@ -54,7 +54,7 @@ static int button_press_x = 0, button_press_y = 0;
 #ifndef ESCREEN
 static
 #endif
-menu_t *current_menu;
+menu_t *current_menu = NULL;
 menulist_t *menu_list = NULL;
 event_dispatcher_data_t menu_event_data;
 
@@ -324,8 +324,11 @@ menu_handle_button_release(event_t *ev)
                     menu_display_submenu(current_menu, item);
                 } else {
                     menu_action(item);
-                    menuitem_deselect(current_menu);
-                    menu_reset_all(menu_list);
+                    if (current_menu) {
+                        /* menu_action() *could* clear current_menu and reset the list */
+                        menuitem_deselect(current_menu);
+                        menu_reset_all(menu_list);
+                    }
                 }
             }
         } else if (!(button_press_time && (ev->xbutton.time - button_press_time < MENU_CLICK_TIME)) || (button_press_x && button_press_y)) {
@@ -1425,6 +1428,9 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
 #ifdef MULTI_CHARSET
         m->fontset = NULL;
 #endif
+        if (current_menu == m) {
+            current_menu = NULL;
+        }
         menu_delete(m);
     }
     FREE(b);

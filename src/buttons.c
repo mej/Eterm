@@ -634,7 +634,7 @@ bbar_add_rbutton(buttonbar_t *bbar, button_t *button)
 {
     button_t *b;
 
-    D_BBAR(("bbar_add_rbutton(%8p, %8p):  Adding button \"%s\".\n", bbar, button, button->text));
+    D_BBAR(("bbar_add_rbutton(%8p, %8p):  Adding right-justified button \"%s\".\n", bbar, button, button->text));
 
     b = ((bbar->rbuttons) ? (bbar->rbuttons) : NULL);
     bbar->rbuttons = button;
@@ -943,13 +943,16 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
 
                           if (prvs == 2) {
                               /* middle button -- kill */
-                              (void) ns_rem_disp(TermWin.screen, n, TRUE);
+                              D_ESCREEN((" -> Remove display %d\n", n));
+                              ns_rem_disp(TermWin.screen, n, TRUE);
                           } else {
                               /* right button -- rename */
-                              (void) ns_ren_disp(TermWin.screen, n, NULL);
+                              D_ESCREEN((" -> Rename display %d\n", n));
+                              ns_ren_disp(TermWin.screen, n, NULL);
                           }
                       } else {
                           /* left button -- select */
+                          D_ESCREEN((" -> Go to display %d\n", n));
                           ns_go2_disp(TermWin.screen, n);
                       }
                       break;
@@ -1085,13 +1088,13 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
         if (button->len) {
 #ifdef ESCREEN
             GC gc;              /* evil temporary hack */
-            XGCValues gcvalue;
             int f = button->flags & ~NS_SCREAM_BUTTON;
 
-            gcvalue.foreground = PixColors[f + 2];
-            gcvalue.font = bbar->font->fid;
+            gc = LIBAST_X_CREATE_GC(0, NULL);
+            XCopyGC(Xdisplay, bbar->gc, GCFont, gc);
+            XSetForeground(Xdisplay, gc, PixColors[minBright + f + 2]);
 
-            if (f && (gc = LIBAST_X_CREATE_GC(GCForeground | GCFont, &gcvalue))) {
+            if (f) {
                 draw_string(bbar, bbar->bg, gc, button->text_x, button->text_y, button->text, button->len);
                 LIBAST_X_FREE_GC(gc);
             } else
