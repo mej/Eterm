@@ -27,3 +27,7 @@ install-data-hook:
 	    echo "ALERT!  Not overwriting $$i theme in $(DESTDIR)$(pkgdatadir)/themes.  You will need to update this theme manually." ; \
 	  fi ; \
 	done
+
+uninstall-hook:
+	rm -rf $(DESTDIR)$(pkgdatadir)/themes
+MAINTAINERCLEANFILES=Makefile.in

@@ -16,3 +16,4 @@ install-data-hook:
 	  done) ; \
 	done)
 	$(UPDATE_SCRIPT) $(DESTDIR)${pixmapdir}
+MAINTAINERCLEANFILES=Makefile.in

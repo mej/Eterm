@@ -2567,6 +2567,15 @@ post_parse(void)
 {
     register int i;
 
+#if DEBUG > 0
+    if (DEBUG_LEVEL > DEBUG) {
+        print_warning("Requested debug level of %d exceeds compile-time maximum of %d\n",
+                      DEBUG_LEVEL, DEBUG);
+    } else if (DEBUG_LEVEL > 0) {
+        DPRINTF1(("Now running with debugging level of %d\n", DEBUG_LEVEL));
+    }
+#endif
+
     if (rs_scrollbar_type) {
         if (!strcasecmp(rs_scrollbar_type, "xterm")) {
 #ifdef XTERM_SCROLLBAR
@@ -3839,7 +3848,11 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    min_anchor_size %d\n", rs_min_anchor_size);
     fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
     fprintf(fp, "    term_name %s\n", getenv("TERM"));
-    fprintf(fp, "    beep_command \"%s\"\n", rs_beep_command);
+    fprintf(fp, "    beep_command \"%s\"\n", SPIF_CAST_PTR(char) (
+                                                                  (rs_beep_command)
+                                                                  ? (SPIF_CAST_PTR(char) rs_beep_command)
+                                                                  : (SPIF_CAST_PTR(char) "")
+                                                                 ));
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
     if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
         fprintf(fp, "    exec ");
@@ -3850,7 +3863,10 @@ save_config(char *path, unsigned char save_theme)
     }
 #ifdef CUTCHAR_OPTION
     if (rs_cutchars) {
-        fprintf(fp, "    cut_chars '%s'\n", rs_cutchars);
+        spif_charptr_t cut_chars_escaped;
+
+        cut_chars_escaped = escape_string(SPIF_CAST(charptr) rs_cutchars, '\"', 0);
+        fprintf(fp, "    cut_chars \"%s\"\n", (char *) cut_chars_escaped);
     }
 #endif
     fprintf(fp, "end misc\n\n");

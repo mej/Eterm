@@ -13,3 +13,7 @@ install-data-hook:
 	  echo $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)${pixmapdir} ; \
 	  $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)${pixmapdir} ; \
 	done
+
+uninstall-hook:
+	rm -rf $(DESTDIR)$(pkgdatadir)/pix
+MAINTAINERCLEANFILES=Makefile.in

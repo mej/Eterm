@@ -1011,7 +1011,7 @@ for i in utils/kEsetroot themes/Eterm/theme.cfg themes/auto/theme.cfg themes/Esc
          } else {
            print $0;
          }
-        }' $srcdir/$i.in > $srcdir/$i
+        }' $i.in > $i
 done
 &%
 changequote([, ])dnl
@@ -1029,7 +1029,7 @@ Configuration:
 
   Source code location:       $srcdir
   Host System Type:           $host
-  Preprocessor:               $CC $CPPFLAGS
+  Preprocessor:               $CPP $CPPFLAGS
   Compiler:	              $CC $CFLAGS
   Linker:                     $CC $LDFLAGS $LIBS
   Install path:		      $prefix

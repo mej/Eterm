@@ -5300,3 +5300,16 @@ Merged in previous autoFUCK changes from libast.
 Added a feature to specify a command to be run in place of the normal
 PC speaker beep.
 ----------------------------------------------------------------------
+Tue Mar 15 16:44:09 2005                        Michael Jennings (mej)
+
+Reverted part of a patch from Chris Schoeneman <crs23@bigfoot.com>
+(changelog entry "Fri Jun 25 17:48:24 2004") which broke dead keys and
+compose-key sequences.
+
+Fixed autoSHIT for dist/distcheck/distclean/maintainer-clean and newer
+autoSHIT versions.
+
+Fixed error in saving of cut_chars attribute.
+
+Fixed saving/handling of beep_command attribute.
+----------------------------------------------------------------------
