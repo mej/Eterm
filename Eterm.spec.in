@@ -44,7 +44,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/X11/wmconfig/
 
 cat > $RPM_BUILD_ROOT/etc/X11/wmconfig/Eterm <<EOF
 Eterm name "Eterm"
-Eterm description "An xterm replacement for Enlightenment users."
+Eterm description "A featureful, themeable X11 terminal emulator."
 Eterm exec "Eterm &"
 Eterm group Utilities/Shells
 EOF
@@ -84,9 +84,9 @@ cat > rpm-Eterm-bg-files <<EOF
 %{prefix}/share/Eterm/pix/pixmaps.list
 EOF
 find ./bg/ -type f -not -name '*.list' -not -name 'Makefile*' \
-       -not -name 'README*' -not -name 014.png \
-        -not -name 40.png -not -name blackstone.png -not -name backwave.jpg \
-        -not -name circuit.png -not -name nebula.jpg \
+       -not -name 'README*' -not -name 014.jpg \
+        -not -name 40.jpg -not -name blackstone.jpg -not -name backwave.jpg \
+        -not -name circuit.jpg -not -name nebula.jpg \
         -not -name fourthday.jpg -not -name gaia.jpg \
         -not -name galleon.jpg -not -name night_of_the_dragon.jpg \
         | sed "s#^\./bg/[scati]*le#%{prefix}/share/Eterm/pix#g" >> rpm-Eterm-bg-files
@@ -122,11 +122,11 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/lib/*
 %{prefix}/man/man1/*
 %{prefix}/share/Eterm/themes
-%{prefix}/share/Eterm/pix/014.png
-%{prefix}/share/Eterm/pix/40.png
-%{prefix}/share/Eterm/pix/blackstone.png
+%{prefix}/share/Eterm/pix/014.jpg
+%{prefix}/share/Eterm/pix/40.jpg
+%{prefix}/share/Eterm/pix/blackstone.jpg
 %{prefix}/share/Eterm/pix/backwave.jpg
-%{prefix}/share/Eterm/pix/circuit.png
+%{prefix}/share/Eterm/pix/circuit.jpg
 %{prefix}/share/Eterm/pix/nebula.jpg
 %{prefix}/share/Eterm/pix/fourthday.jpg
 %{prefix}/share/Eterm/pix/gaia.jpg
