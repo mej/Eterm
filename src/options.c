@@ -784,11 +784,6 @@ version(void)
 #else
   printf(" -HAVE_SAVED_UIDS");
 #endif
-#ifdef USE_GETGRNAME
-  printf(" +USE_GETGRNAME");
-#else
-  printf(" -USE_GETGRNAME");
-#endif
 #ifdef ALLOW_BACKQUOTE_EXEC
   printf(" +ALLOW_BACKQUOTE_EXEC");
 #else
@@ -862,10 +857,10 @@ version(void)
 #else
   printf(" -ESCZ_ANSWER\n");
 #endif
-#ifdef TTY_GRP_NAME
-  printf(" TTY_GRP_NAME=\"%s\"\n", TTY_GRP_NAME);
+#ifdef PTY_GRP_NAME
+  printf(" PTY_GRP_NAME=\"%s\"\n", PTY_GRP_NAME);
 #else
-  printf(" -TTY_GRP_NAME\n");
+  printf(" -PTY_GRP_NAME\n");
 #endif
 #ifdef CONFIG_SEARCH_PATH
   printf(" CONFIG_SEARCH_PATH=\"%s\"\n", CONFIG_SEARCH_PATH);

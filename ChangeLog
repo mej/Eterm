@@ -2964,3 +2964,15 @@ Wed Dec 29 12:32:19 PST 1999	Michael Jennings <mej@eterm.org>
 	move themselves if needed, and exposes are now handled properly.
 	
 -------------------------------------------------------------------------------
+Thu Dec 30 14:55:59 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Finally fixed the seg fault pointed out by Tom Gilbert
+	<gilbertt@tomgilbert.freeserve.co.uk> back in mid-September where
+	small Eterms with little or no scrollback would crash when receiving
+	large amounts of data all at once.
+
+	I also fixed a clearing issue with double buffering, and I worked
+	around a really lame gdb/glibc2 bug that has prevented me from using
+	gdb with Eterm for ages.
+	
+-------------------------------------------------------------------------------

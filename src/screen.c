@@ -89,6 +89,7 @@ static enum {
   SBYTE, WBYTE
 } chstat = SBYTE;
 static short lost_multi = 0;
+unsigned char refresh_all = 0;
 
 #define RESET_CHSTAT	if (chstat == WBYTE) chstat = SBYTE, lost_multi = 1
 #else
@@ -110,6 +111,24 @@ blank_line(text_t * et, rend_t * er, int width, rend_t efs)
 
   MEMSET(et, ' ', i);
   for (; i--;)
+    *r++ = fs;
+}
+
+inline void blank_screen_mem(text_t **, rend_t **, int, rend_t);
+
+inline void
+blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
+{
+  register unsigned int i = TermWin.ncol;
+  rend_t *r, fs = efs;
+
+  if (tp[row] == NULL) {
+    tp[row] = MALLOC(sizeof(text_t) * (TermWin.ncol + 1));
+    rp[row] = MALLOC(sizeof(rend_t) * TermWin.ncol);
+  }
+  MEMSET(tp[row], ' ', i);
+  tp[row][i] = 0;
+  for (r = rp[row]; i--;)
     *r++ = fs;
 }
 
@@ -153,183 +172,148 @@ scr_reset(void)
 
   screen.tscroll = 0;
   screen.bscroll = (TermWin.nrow - 1);
-/* *INDENT-OFF* */
-    if (prev_nrow == -1) {
-/*
- * A: first time called so just malloc everything : don't rely on realloc
- *    Note: this is still needed so that all the scrollback lines are NULL
- */
-	screen.text = CALLOC(text_t *, total_rows  );
-	buf_text    = CALLOC(text_t *, total_rows  );
-	drawn_text  = CALLOC(text_t *, TermWin.nrow);
-	swap.text   = CALLOC(text_t *, TermWin.nrow);
+  if (prev_nrow == -1) {
+    /*
+     * A: first time called so just malloc everything : don't rely on realloc
+     *    Note: this is still needed so that all the scrollback lines are NULL
+     */
+    screen.text = CALLOC(text_t *, total_rows);
+    buf_text    = CALLOC(text_t *, total_rows);
+    drawn_text  = CALLOC(text_t *, TermWin.nrow);
+    swap.text   = CALLOC(text_t *, TermWin.nrow);
 
-	screen.rend = CALLOC(rend_t *, total_rows  );
-	buf_rend    = CALLOC(rend_t *, total_rows  );
-	drawn_rend  = CALLOC(rend_t *, TermWin.nrow);
-	swap.rend   = CALLOC(rend_t *, TermWin.nrow);
+    screen.rend = CALLOC(rend_t *, total_rows);
+    buf_rend    = CALLOC(rend_t *, total_rows);
+    drawn_rend  = CALLOC(rend_t *, TermWin.nrow);
+    swap.rend   = CALLOC(rend_t *, TermWin.nrow);
 
-	for (i = 0; i < TermWin.nrow; i++) {
-	    j = i + TermWin.saveLines;
-	    make_screen_mem(screen.text, screen.rend, j);
-	    make_screen_mem(swap.text, swap.rend, i);
-	    drawn_text[i] = MALLOC(TermWin.ncol * sizeof(text_t));
-	    drawn_rend[i] = CALLOC(rend_t, TermWin.ncol * sizeof(rend_t));
+    for (i = 0; i < TermWin.nrow; i++) {
+      j = i + TermWin.saveLines;
+      blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE);
+      blank_screen_mem(swap.text, swap.rend, i, DEFAULT_RSTYLE);
+      blank_screen_mem(drawn_text, drawn_rend, i, DEFAULT_RSTYLE);
+    }
+    TermWin.nscrolled = 0;	/* no saved lines */
 
-	    blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
-		       DEFAULT_RSTYLE);
-	    blank_line(swap.text[i], swap.rend[i], TermWin.ncol,
-		       DEFAULT_RSTYLE);
-	    screen.text[j][TermWin.ncol] = 0;
-	    swap.text[i][TermWin.ncol] = 0;
-	    blank_line(drawn_text[i], drawn_rend[i], TermWin.ncol,
-		       DEFAULT_RSTYLE);
-	}
-	TermWin.nscrolled = 0;	/* no saved lines */
-
-    } else {
-/*
+  } else {
+    /*
  * B1: add or delete rows as appropriate
  */
-	if (TermWin.nrow < prev_nrow) {
-	/* delete rows */
-	    k = min(TermWin.nscrolled, prev_nrow - TermWin.nrow);
-	    scroll_text(0, prev_nrow - 1, k, 1);
+    if (TermWin.nrow < prev_nrow) {
+      /* delete rows */
+      k = MIN(TermWin.nscrolled, prev_nrow - TermWin.nrow);
+      scroll_text(0, prev_nrow - 1, k, 1);
 	    
-	    /* FIXME: Looks like one of these FREEs can crash Eterm at
-	     * times :( -vendu.
-	     */
-	    for (i = TermWin.nrow; i < prev_nrow; i++) {
-		j = i + TermWin.saveLines;
-		if (screen.text[j])
-		    FREE(screen.text[j]);
-		if (screen.rend[j])
-		    FREE(screen.rend[j]);
-		if (swap.text[i])
-		    FREE(swap.text[i]);
-		if (swap.rend[i])
-		    FREE(swap.rend[i]);
-#if 0
-		FREE(drawn_text[i]);
-		FREE(drawn_rend[i]);
-#endif
-		/* Added checks. -vendu */
-		if (drawn_text[i])
-		  FREE(drawn_text[i]);
-		if (drawn_rend[i])
-		  FREE(drawn_rend[i]);
-	    }
-	    screen.text = REALLOC(screen.text, total_rows   * sizeof(text_t*));
-	    buf_text =    REALLOC(buf_text   , total_rows   * sizeof(text_t*));
-	    drawn_text =  REALLOC(drawn_text , TermWin.nrow * sizeof(text_t*));
-	    swap.text =   REALLOC(swap.text  , TermWin.nrow * sizeof(text_t*));
+      /* FIXME: Looks like one of these FREEs can crash Eterm at
+       * times :( -vendu.
+       */
+      for (i = TermWin.nrow; i < prev_nrow; i++) {
+        j = i + TermWin.saveLines;
+        if (screen.text[j])
+          FREE(screen.text[j]);
+        if (screen.rend[j])
+          FREE(screen.rend[j]);
+        if (swap.text[i])
+          FREE(swap.text[i]);
+        if (swap.rend[i])
+          FREE(swap.rend[i]);
+        if (drawn_text[i])
+          FREE(drawn_text[i]);
+        if (drawn_rend[i])
+          FREE(drawn_rend[i]);
+      }
+      screen.text = REALLOC(screen.text, total_rows   * sizeof(text_t*));
+      buf_text =    REALLOC(buf_text   , total_rows   * sizeof(text_t*));
+      drawn_text =  REALLOC(drawn_text , TermWin.nrow * sizeof(text_t*));
+      swap.text =   REALLOC(swap.text  , TermWin.nrow * sizeof(text_t*));
 
-	    screen.rend = REALLOC(screen.rend, total_rows   * sizeof(rend_t*));
-	    buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
-	    drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
-	    swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
+      screen.rend = REALLOC(screen.rend, total_rows   * sizeof(rend_t*));
+      buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
+      drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
+      swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
 
-	/* we have fewer rows so fix up number of scrolled lines */
-	    MIN_IT(screen.row, TermWin.nrow - 1);
+      /* we have fewer rows so fix up number of scrolled lines */
+      MIN_IT(screen.row, TermWin.nrow - 1);
 
-	} else if (TermWin.nrow > prev_nrow) {
-	/* add rows */
-	    screen.text = REALLOC(screen.text, total_rows   * sizeof(text_t*));
-	    buf_text =    REALLOC(buf_text   , total_rows   * sizeof(text_t*));
-	    drawn_text =  REALLOC(drawn_text , TermWin.nrow * sizeof(text_t*));
-	    swap.text =   REALLOC(swap.text  , TermWin.nrow * sizeof(text_t*));
+    } else if (TermWin.nrow > prev_nrow) {
+      /* add rows */
+      screen.text = REALLOC(screen.text, total_rows   * sizeof(text_t*));
+      buf_text =    REALLOC(buf_text   , total_rows   * sizeof(text_t*));
+      drawn_text =  REALLOC(drawn_text , TermWin.nrow * sizeof(text_t*));
+      swap.text =   REALLOC(swap.text  , TermWin.nrow * sizeof(text_t*));
                           
-	    screen.rend = REALLOC(screen.rend, total_rows   * sizeof(rend_t*));
-	    buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
-	    drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
-	    swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
+      screen.rend = REALLOC(screen.rend, total_rows   * sizeof(rend_t*));
+      buf_rend =    REALLOC(buf_rend   , total_rows   * sizeof(rend_t*));
+      drawn_rend =  REALLOC(drawn_rend , TermWin.nrow * sizeof(rend_t*));
+      swap.rend =   REALLOC(swap.rend  , TermWin.nrow * sizeof(rend_t*));
 
-	    k = min(TermWin.nscrolled, TermWin.nrow - prev_nrow);
-	    for (i = prev_total_rows; i < total_rows - k; i++) {
-	        make_screen_mem(screen.text, screen.rend, i);
-		blank_line(screen.text[i], screen.rend[i], TermWin.ncol,
-			   DEFAULT_RSTYLE);
-		screen.text[i][TermWin.ncol] = 0;
-	    }
-	    for (i = total_rows - k; i < total_rows; i++)
-		screen.text[i] = NULL, screen.rend[i] = NULL;
-	    for (i = prev_nrow; i < TermWin.nrow; i++) {
-	        make_screen_mem(swap.text, swap.rend, i);
-		blank_line(swap.text[i], swap.rend[i], TermWin.ncol,
-			   DEFAULT_RSTYLE);
-		swap.text[i][TermWin.ncol] = 0;
-	    }
-	    for (i = prev_nrow; i < TermWin.nrow; i++) {
-		drawn_text[i]  = MALLOC(TermWin.ncol         * sizeof(text_t));
-		drawn_rend[i]  = CALLOC(rend_t, TermWin.ncol * sizeof(rend_t));
-		blank_line(drawn_text[i], drawn_rend[i], TermWin.ncol,
-			   DEFAULT_RSTYLE);
-	    }
-	    if (k > 0) {
-		scroll_text(0, TermWin.nrow - 1, -k, 1);
-		screen.row += k;
-		TermWin.nscrolled -= k;
-		for (i = TermWin.saveLines - TermWin.nscrolled; k--; i--) {
-		    if (screen.text[i] == NULL) {
-	    		make_screen_mem(screen.text, screen.rend, i);
-			blank_line(screen.text[i], screen.rend[i],
-				   TermWin.ncol, DEFAULT_RSTYLE);
-			screen.text[i][TermWin.ncol] = 0;
-		    }
-		}
-	    }
-	}
-/* B2: resize columns */
-	if (TermWin.ncol != prev_ncol) {
-	    for (i = 0; i < total_rows; i++) {
-		if (screen.text[i]) {
-		    tc = screen.text[i][prev_ncol];
-  		    screen.text[i] = REALLOC(screen.text[i],
-  					      (TermWin.ncol+1)*sizeof(text_t));
-  		    screen.rend[i] = REALLOC(screen.rend[i],
-					      TermWin.ncol*sizeof(rend_t));
-		    screen.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
-		    if (TermWin.ncol > prev_ncol)
-			blank_line(&(screen.text[i][prev_ncol]),
-				   &(screen.rend[i][prev_ncol]),
-				   TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
-		}
-	    }
-	    for (i = 0; i < TermWin.nrow; i++) {
-		drawn_text[i] = REALLOC(drawn_text[i],
-					 TermWin.ncol*sizeof(text_t));
-		drawn_rend[i] = REALLOC(drawn_rend[i],
-					 TermWin.ncol*sizeof(rend_t));
-		if (swap.text[i]) {
-		    tc = swap.text[i][prev_ncol];
-		    swap.text[i] = REALLOC(swap.text[i],
-					    (TermWin.ncol+1)*sizeof(text_t));
-		    swap.rend[i] = REALLOC(swap.rend[i],
-					    TermWin.ncol*sizeof(rend_t));
-		    swap.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
-		    if (TermWin.ncol > prev_ncol)
-			blank_line(&(swap.text[i][prev_ncol]),
-				   &(swap.rend[i][prev_ncol]),
-				   TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
-		}
-		if (TermWin.ncol > prev_ncol)
-		    blank_line(&(drawn_text[i][prev_ncol]),
-  			       &(drawn_rend[i][prev_ncol]),
-  			       TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
-  	    }
-	}
-	if (tabs)
-	    FREE(tabs);
+      k = min(TermWin.nscrolled, TermWin.nrow - prev_nrow);
+      for (i = prev_total_rows; i < total_rows - k; i++) {
+        blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
+      }
+      for (i = total_rows - k; i < total_rows; i++) {
+        screen.text[i] = NULL;
+        screen.rend[i] = NULL;
+      }
+      for (i = prev_nrow; i < TermWin.nrow; i++) {
+        blank_screen_mem(swap.text, swap.rend, i, DEFAULT_RSTYLE);
+      }
+      for (i = prev_nrow; i < TermWin.nrow; i++) {
+        blank_screen_mem(drawn_text, drawn_rend, i, DEFAULT_RSTYLE);
+      }
+      if (k > 0) {
+        scroll_text(0, TermWin.nrow - 1, -k, 1);
+        screen.row += k;
+        TermWin.nscrolled -= k;
+        for (i = TermWin.saveLines - TermWin.nscrolled; k--; i--) {
+          if (screen.text[i] == NULL) {
+            blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
+          }
+        }
+      }
     }
-/* *INDENT-ON* */
-
-
-
-
-
-
-
-
+    /* B2: resize columns */
+    if (TermWin.ncol != prev_ncol) {
+      for (i = 0; i < total_rows; i++) {
+        if (screen.text[i]) {
+          tc = screen.text[i][prev_ncol];
+          screen.text[i] = REALLOC(screen.text[i],
+                                   (TermWin.ncol+1)*sizeof(text_t));
+          screen.rend[i] = REALLOC(screen.rend[i],
+                                   TermWin.ncol*sizeof(rend_t));
+          screen.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
+          if (TermWin.ncol > prev_ncol)
+            blank_line(&(screen.text[i][prev_ncol]),
+                       &(screen.rend[i][prev_ncol]),
+                       TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+        }
+      }
+      for (i = 0; i < TermWin.nrow; i++) {
+        drawn_text[i] = REALLOC(drawn_text[i],
+                                TermWin.ncol*sizeof(text_t));
+        drawn_rend[i] = REALLOC(drawn_rend[i],
+                                TermWin.ncol*sizeof(rend_t));
+        if (swap.text[i]) {
+          tc = swap.text[i][prev_ncol];
+          swap.text[i] = REALLOC(swap.text[i],
+                                 (TermWin.ncol+1)*sizeof(text_t));
+          swap.rend[i] = REALLOC(swap.rend[i],
+                                 TermWin.ncol*sizeof(rend_t));
+          swap.text[i][TermWin.ncol] = min(tc,TermWin.ncol);
+          if (TermWin.ncol > prev_ncol)
+            blank_line(&(swap.text[i][prev_ncol]),
+                       &(swap.rend[i][prev_ncol]),
+                       TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+        }
+        if (TermWin.ncol > prev_ncol)
+          blank_line(&(drawn_text[i][prev_ncol]),
+                     &(drawn_rend[i][prev_ncol]),
+                     TermWin.ncol - prev_ncol, DEFAULT_RSTYLE);
+      }
+    }
+    if (tabs)
+      FREE(tabs);
+  }
   tabs = MALLOC(TermWin.ncol * sizeof(char));
 
   for (i = 0; i < TermWin.ncol; i++)
@@ -489,9 +473,7 @@ scr_change_screen(int scrn)
       scroll_text(0, (TermWin.nrow - 1), TermWin.nrow, 0);
       for (i = TermWin.saveLines; i < TermWin.nrow + TermWin.saveLines; i++)
 	if (screen.text[i] == NULL) {
-	  make_screen_mem(screen.text, screen.rend, i);
-	  blank_line(screen.text[i], screen.rend[i], TermWin.ncol, DEFAULT_RSTYLE);
-	  screen.text[i][TermWin.ncol] = 0;
+	  blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
 	}
     }
 # endif
@@ -753,19 +735,14 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
   ZERO_SCROLLBACK;
   if (nlines > 0) {
     nlines += (screen.row - screen.bscroll);
-    if ((nlines > 0)
-	&& (screen.tscroll == 0)
-	&& (screen.bscroll == (TermWin.nrow - 1))) {
+    D_SCREEN((" -> screen.row == %d, screen.bscroll == %d, new nlines == %d\n", screen.row, screen.bscroll, nlines));
+    if ((nlines > 0) && (screen.tscroll == 0) && (screen.bscroll == (TermWin.nrow - 1))) {
       /* _at least_ this many lines need to be scrolled */
       scroll_text(screen.tscroll, screen.bscroll, nlines, 0);
-      for (i = nlines, row = screen.bscroll + TermWin.saveLines + 1; i--;) {
+      for (i = nlines, row = screen.bscroll + TermWin.saveLines + 1; row > 0 && i--;) {
 	/* Move row-- to beginning of loop to avoid segfault. -- added by Sebastien van K */
 	row--;
-	if (screen.text[row] == NULL) {
-	  make_screen_mem(screen.text, screen.rend, row);
-	}
-	blank_line(screen.text[row], screen.rend[row], TermWin.ncol, rstyle);
-	screen.text[row][TermWin.ncol] = 0;
+        blank_screen_mem(screen.text, screen.rend, row, rstyle);
       }
       screen.row -= nlines;
     }
@@ -777,7 +754,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 
   row = screen.row + TermWin.saveLines;
   if (screen.text[row] == NULL) {
-    make_screen_mem(screen.text, screen.rend, row);
+    blank_screen_mem(screen.text, screen.rend, row, DEFAULT_RSTYLE);
   }				/* avoid segfault -- added by Sebastien van K */
   beg.row = screen.row;
   beg.col = screen.col;
@@ -820,11 +797,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	    if (screen.row == screen.bscroll) {
 	      scroll_text(screen.tscroll, screen.bscroll, 1, 0);
 	      j = screen.bscroll + TermWin.saveLines;
-	      if (screen.text[j] == NULL)
-		make_screen_mem(screen.text, screen.rend, j);
-	      blank_line(screen.text[j], screen.rend[j],
-			 TermWin.ncol, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
-	      screen.text[j][TermWin.ncol] = 0;
+              blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
 	    } else if (screen.row < (TermWin.nrow - 1)) {
 	      screen.row++;
 	      row = screen.row + TermWin.saveLines;
@@ -848,14 +821,9 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
       if (screen.row == screen.bscroll) {
 	scroll_text(screen.tscroll, screen.bscroll, 1, 0);
 	j = screen.bscroll + TermWin.saveLines;
-	if (screen.text[j] == NULL)
-	  make_screen_mem(screen.text, screen.rend, j);
-	/*
-	   blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
+	/* blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
 	   rstyle);    Bug fix from John Ellison - need to reset rstyle */
-	blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
-		   DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
-	screen.text[j][TermWin.ncol] = 0;
+        blank_screen_mem(screen.text, screen.rend, j, DEFAULT_RSTYLE | ((rstyle & RS_RVid) ? (RS_RVid) : (0)));
       } else if (screen.row < (TermWin.nrow - 1)) {
 	screen.row++;
 	row = screen.row + TermWin.saveLines;
@@ -892,9 +860,6 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 	   && selection.end.col >= beg.col))
       && ((selection.beg.row < end.row)
 	  || (selection.beg.row == end.row
-  /* FIXME: Changing this to < end.col might fix the no
-   * whole line selection at the bottom line bug :) -vendu
-   */
 	      && selection.beg.col <= end.col)))
     selection_reset();
 }
@@ -1023,10 +988,7 @@ scr_index(int direction)
       dirn = screen.bscroll + TermWin.saveLines;
     else
       dirn = screen.tscroll + TermWin.saveLines;
-    if (screen.text[dirn] == NULL)	/* then so is screen.rend[dirn] */
-      make_screen_mem(screen.text, screen.rend, dirn);
-    blank_line(screen.text[dirn], screen.rend[dirn], TermWin.ncol, rstyle);
-    screen.text[dirn][TermWin.ncol] = 0;
+    blank_screen_mem(screen.text, screen.rend, dirn, rstyle);
   } else
     screen.row += dirn;
   MAX_IT(screen.row, 0);
@@ -1142,11 +1104,8 @@ scr_erase_screen(int mode)
       }
     }
     for (; num--; row++) {
-      blank_line(screen.text[row + row_offset],
-		 screen.rend[row + row_offset], TermWin.ncol,
-		 rstyle & ~(RS_RVid | RS_Uline));
-      screen.text[row + row_offset][TermWin.ncol] = 0;
-      blank_line(drawn_text[row], drawn_rend[row], TermWin.ncol, ren);
+      blank_screen_mem(screen.text, screen.rend, row + row_offset, rstyle & ~(RS_RVid | RS_Uline));
+      blank_screen_mem(drawn_text, drawn_rend, row, ren);
     }
   }
 }
@@ -1212,10 +1171,7 @@ scr_insdel_lines(int count, int insdel)
     end = screen.row + count - 1 + TermWin.saveLines;
   }
   for (; count--; end--) {
-    if (screen.text[end] == NULL)	/* then so is screen.rend[end] */
-      make_screen_mem(screen.text, screen.rend, end);
-    blank_line(screen.text[end], screen.rend[end], TermWin.ncol, rstyle);
-    screen.text[end][TermWin.ncol] = 0;
+    blank_screen_mem(screen.text, screen.rend, end, rstyle);
   }
 }
 

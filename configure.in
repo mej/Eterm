@@ -204,6 +204,32 @@ if test "X$PTY_MECH" = "X"; then
 else
   AC_MSG_RESULT($PTY_MECH)
 fi
+AC_MSG_CHECKING(for pty group)
+AC_ARG_WITH(pty-group,
+[  --with-pty-group[=gid]  specify the group that should own pty files],
+            if test "$withval" = "yes"; then 
+              PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
+              if test ! -z "$PTY_GRP_NAME"; then
+                AC_MSG_RESULT($PTY_GRP_NAME)
+                AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME")
+              else
+                AC_MSG_RESULT(unable to determine.  This feature will not be enabled.)
+              fi
+            elif test "$withval" = "no"; then
+              AC_MSG_RESULT(none)
+            else
+              AC_MSG_RESULT($withval)
+              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$withval")
+            fi
+            ,
+            PTY_GRP_NAME=`ls -1l /dev/pty* 2>/dev/null | head -n 1 | awk '{print $4}'`
+            if test ! -z "$PTY_GRP_NAME"; then
+              AC_MSG_RESULT($PTY_GRP_NAME)
+              AC_DEFINE_UNQUOTED(PTY_GRP_NAME, "$PTY_GRP_NAME")
+            else
+              AC_MSG_RESULT(none)
+            fi
+)
 
 dnl#
 dnl# FEATURES

@@ -243,13 +243,6 @@
  * wrong!  */
 #define HAVE_SAVED_UIDS
 
-/* Use getgrnam() to determine the group id of TTY_GRP_NAME, and chgrp tty
- * device files to that group.  This should be ok on SVR4 and Linux systems
- * with group "tty" and on BSD systems with group "wheel"
- */
-#define USE_GETGRNAME
-#define TTY_GRP_NAME "tty"
-
 /********************* Config file parser options *********************/
 
 /* Allow evaluation of expressions like `echo hello` in config files.  The
@@ -284,10 +277,6 @@
 
 #ifndef PIXMAP_OFFSET
 # undef WATCH_DESKTOP_OPTION
-#endif
-
-#ifndef TTY_GRP_NAME
-# undef USE_GETGRNAME
 #endif
 
 #ifndef HAVE_MEMMOVE

@@ -40,13 +40,13 @@ typedef struct memrec_struct {
 #  define MALLOC(sz)		malloc(sz)
 #  define CALLOC(type,n)	calloc((n),(sizeof(type)))
 #  define REALLOC(mem,sz)	realloc((mem), (sz))
-#  define FREE(ptr)		free(ptr)
+#  define FREE(ptr)		do { free(ptr); ptr = NULL; } while (0)
 #elif (DEBUG >= DEBUG_MALLOC)
 #  define MALLOC(sz)		Malloc(sz)
 #  define CALLOC(type,n)	Calloc((n),(sizeof(type)))
 #  define REALLOC(mem,sz)	Realloc((mem),(sz))
 /* #  define FREE(ptr)		Free(ptr) */
-#  define FREE(ptr)		do { Free(ptr); ptr = NULL; } while(0)
+#  define FREE(ptr)		do { Free(ptr); ptr = NULL; } while (0)
 #  define MALLOC_MOD 25
 #  define REALLOC_MOD 25
 #  define CALLOC_MOD 25
@@ -55,7 +55,7 @@ typedef struct memrec_struct {
 #  define MALLOC(sz)		malloc(sz)
 #  define CALLOC(type,n)	calloc((n),(sizeof(type)))
 #  define REALLOC(mem,sz)	((sz) ? ((mem) ? (realloc((mem), (sz))) : (malloc(sz))) : ((mem) ? (free(mem)) : (NULL)))
-#  define FREE(ptr)		do { free(ptr); ptr = NULL; } while(0)
+#  define FREE(ptr)		do { free(ptr); ptr = NULL; } while (0)
 #endif
 
 extern char *SafeStr(char *, unsigned short);

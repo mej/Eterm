@@ -66,7 +66,7 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xos.h>
 #include <X11/Xproto.h>
 #include <X11/IntrinsicP.h>
-#ifdef USE_GETGRNAME
+#ifdef PTY_GRP_NAME
 # include <grp.h>
 #endif
 #ifdef TIME_WITH_SYS_TIME
@@ -1297,6 +1297,7 @@ get_tty(void)
   int fd;
   pid_t pid;
 
+  D_TTY(("get_tty() called.\n"));
   /*
    * setsid() [or setpgrp] must be before open of the terminal,
    * otherwise there is no controlling terminal (Solaris 2.4, HP-UX 9)
@@ -1336,21 +1337,19 @@ get_tty(void)
   ioctl(fd, I_PUSH, "ttcompat");
 #else /* __svr4__ */
   {
-    /* change ownership of tty to real uid and real group */
     unsigned int mode = 0620;
     gid_t gid = my_rgid;
 
-# ifdef USE_GETGRNAME
+# ifdef PTY_GRP_NAME
     {
-      struct group *gr = getgrnam(TTY_GRP_NAME);
+      struct group *gr = getgrnam(PTY_GRP_NAME);
 
       if (gr) {
-	/* change ownership of tty to real uid, "tty" gid */
 	gid = gr->gr_gid;
 	mode = 0620;
       }
     }
-# endif				/* USE_GETGRNAME */
+# endif
 
     privileges(INVOKE);
 # ifndef __CYGWIN32__
@@ -1368,10 +1367,12 @@ get_tty(void)
   {
     unsigned short i;
 
+    D_TTY(("get_tty() closing file descriptors 0-%d.\n", num_fds));
     for (i = 0; i < num_fds; i++) {
       if (i != fd)
 	close(i);
     }
+    D_TTY(("...closed.\n"));
   }
 
   /* Reopen stdin, stdout and stderr over the tty file descriptor */
@@ -1422,6 +1423,7 @@ get_tty(void)
 
   privileges(REVERT);
 
+  D_TTY(("get_tty() done, fd is %d\n", fd));
   return (fd);
 }
 
@@ -2084,21 +2086,31 @@ run_command(char *argv[])
     print_error("fork(): %s", strerror(errno));
     return (-1);
   }
-  if (cmd_pid == 0) {		/* child */
+  if (cmd_pid == 0) {
 
-    /* signal (SIGHUP, Exit_signal); */
-    /* signal (SIGINT, Exit_signal); */
+    /* Child process.  Reset the signal handlers right away. */
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
+    signal(SIGCHLD, SIG_DFL);
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGBUS, SIG_DFL);
+    signal(SIGABRT, SIG_DFL);
+    signal(SIGFPE, SIG_DFL);
+    signal(SIGILL, SIG_DFL);
+    signal(SIGSYS, SIG_DFL);
+    signal(SIGALRM, SIG_DFL);
+#ifdef SIGTSTP
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+#endif
+
 #ifdef HAVE_UNSETENV
-    /* avoid passing old settings and confusing term size */
     unsetenv("LINES");
     unsetenv("COLUMNS");
-    /* avoid passing termcap since terminfo should be okay */
     unsetenv("TERMCAP");
-#endif /* HAVE_UNSETENV */
-    /* establish a controlling teletype for the new session */
+#endif
     get_tty();
-
-    /* initialize terminal attributes */
     SET_TTYMODE(0, &tio);
 
     /* become virtual console, fail silently */
@@ -2137,28 +2149,6 @@ run_command(char *argv[])
     D_UTMP(("Child process reset\n"));
     my_euid = my_ruid;
     my_egid = my_rgid;
-
-    /* reset signals and spin off the command interpreter */
-    signal(SIGINT, SIG_DFL);
-    signal(SIGQUIT, SIG_DFL);
-    signal(SIGCHLD, SIG_DFL);
-    signal(SIGSEGV, SIG_DFL);
-    signal(SIGBUS, SIG_DFL);
-    signal(SIGABRT, SIG_DFL);
-    signal(SIGFPE, SIG_DFL);
-    signal(SIGILL, SIG_DFL);
-    signal(SIGSYS, SIG_DFL);
-    signal(SIGALRM, SIG_DFL);
-
-    /*
-     * mimick login's behavior by disabling the job control signals
-     * a shell that wants them can turn them back on
-     */
-#ifdef SIGTSTP
-    signal(SIGTSTP, SIG_IGN);
-    signal(SIGTTIN, SIG_IGN);
-    signal(SIGTTOU, SIG_IGN);
-#endif /* SIGTSTP */
 
     /* command interpreter path */
     D_CMD(("[%d] About to spawn shell\n", getpid()));
