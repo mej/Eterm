@@ -39,6 +39,10 @@
 #define draw_downarrow_raised(d, g1, g2, x, y, w, s)    draw_arrow(d, g1, g2, x, y, w, s, DRAW_ARROW_DOWN)
 #define draw_downarrow_clicked(d, g1, g2, x, y, w, s)   draw_arrow(d, g2, g1, x, y, w, s, DRAW_ARROW_DOWN)
 
+#define DRAW_SOLID_BEVEL(d, w, h, p, u, s)  draw_shadow_from_colors((d), ((u) ? get_top_shadow_color(p, "") : get_bottom_shadow_color(p, "")), \
+                                                                    ((u) ? get_bottom_shadow_color(p, "") : get_top_shadow_color(p, "")), \
+                                                                    0, 0, (w), (h), (s));
+
 /************ Structures ************/
 
 /************ Variables ************/

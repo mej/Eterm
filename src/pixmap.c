@@ -1126,15 +1126,15 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       copy_buffer_pixmap(MODE_SOLID, (unsigned long) PixColors[bgColor], width, height);
       XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
     } else {
-      if (renderop & RENDER_FORCE_PIXMAP) {
+      if ((renderop & RENDER_FORCE_PIXMAP) || (simg->iml->bevel != NULL)) {
         if (simg->pmap->pixmap) {
           X_FREE_PIXMAP(simg->pmap->pixmap);
         }
         simg->pmap->pixmap = X_CREATE_PIXMAP(width, height);
         XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
         XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
-        if (simg->iml->bevel != NULL) {
-          bevel_pixmap(simg->pmap->pixmap, width, height, simg->iml->bevel->edges, simg->iml->bevel->up);
+        if (simg->iml->bevel != NULL && simg->iml->bevel->edges != NULL) {
+          DRAW_SOLID_BEVEL(simg->pmap->pixmap, width, height, simg->bg, simg->iml->bevel->up, simg->iml->bevel->edges->left);
         }
         /* FIXME:  For efficiency, just fill the window with the pixmap
            and handle exposes by copying from simg->pmap->pixmap. */

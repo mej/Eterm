@@ -801,9 +801,15 @@ menu_reset_submenus(menu_t * menu)
 void
 menuitem_select(menu_t * menu)
 {
+  static Pixel top = 0, bottom = 0;
   menuitem_t *item;
 
   ASSERT(menu != NULL);
+
+  if (top == 0) {
+    top = get_top_shadow_color(images[image_submenu].selected->bg, "submenu top shadow color");
+    bottom = get_bottom_shadow_color(images[image_submenu].selected->bg, "submenu bottom shadow color");
+  }
 
   item = menuitem_get_current(menu);
   REQUIRE(item != NULL);
@@ -816,10 +822,8 @@ menuitem_select(menu_t * menu)
     if (image_mode_is(image_submenu, MODE_AUTO)) {
       enl_ipc_sync();
     } else if (!image_mode_is(image_submenu, MODE_MASK)) {
-      draw_shadow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
-                              0, 0, item->w - MENU_VGAP, item->h, 2);
-      draw_arrow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor],
-                             item->w - 3 * MENU_HGAP, (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
+      draw_shadow_from_colors(menu->swin, top, bottom, 0, 0, item->w - MENU_VGAP, item->h, 2);
+      draw_arrow_from_colors(menu->swin, top, bottom, item->w - 3 * MENU_HGAP, (item->h - MENU_VGAP) / 2, MENU_VGAP, 2, DRAW_ARROW_RIGHT);
     }
 #if 0
     paste_simage(images[image_submenu].selected, image_submenu, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
@@ -828,7 +832,7 @@ menuitem_select(menu_t * menu)
     if (image_mode_is(image_menu, MODE_MASK)) {
       render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
     } else {
-      draw_shadow_from_colors(menu->swin, PixColors[menuTopShadowColor], PixColors[menuBottomShadowColor], 0, 0, item->w - MENU_VGAP, item->h, 2);
+      draw_shadow_from_colors(menu->swin, top, bottom, 0, 0, item->w - MENU_VGAP, item->h, 2);
     }
     if (image_mode_is(image_menu, MODE_AUTO)) {
       enl_ipc_sync();
