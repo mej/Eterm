@@ -3149,6 +3149,9 @@ init_defaults(void)
   MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
   for (i = 0; i < NFONTS; i++) {
     eterm_font_add(&etfonts, def_fontName[i], i);
+#ifdef MULTI_CHARSET
+    eterm_font_add(&etmfonts, def_mfontName[i], i);
+#endif
   }
   TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 }
