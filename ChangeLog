@@ -4402,3 +4402,8 @@ Wed Sep 26 23:19:37 2001                        Michael Jennings (mej)
 Oops.  Let's get rid of that useless code. :P  Problem pointed out by
 Andre Pang <ozone@algorithm.com.au>.
 ----------------------------------------------------------------------
+Thu Oct 11 05:32:57 2001                        Michael Jennings (mej)
+
+Jerome De Greef <jdegreef@brutele.be> contributed a configure.ac file
+for those who are using autoconf 2.50 or higher.
+----------------------------------------------------------------------
