@@ -2070,7 +2070,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
       XIconSize *icon_sizes;
       int count, i;
 
-      temp_im = imlib_load_image_with_error_return(f, &im_err);
+      temp_im = imlib_load_image_with_error_return(filename, &im_err);
       if (temp_im == NULL) {
 	print_error("Unable to load icon file \"%s\" -- %s\n", filename, imlib_strerror(im_err));
       } else {
