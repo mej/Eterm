@@ -45,9 +45,6 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-#undef D_FONT
-#define D_FONT(x) do {__DEBUG(); real_dprintf x;} while (0)
-
 unsigned char font_change_count = 0;
 #ifdef MULTI_CHARSET
 const char *def_mfontName[] = {MFONT0, MFONT1, MFONT2, MFONT3, MFONT4};
@@ -58,6 +55,7 @@ static etfont_t *font_cache = NULL, *cur_font = NULL;
 static void font_cache_add(const char *name, unsigned char type, void *info);
 static void font_cache_del(const void *info);
 static etfont_t *font_cache_find(const char *name, unsigned char type);
+static void *font_cache_find_info(const char *name, unsigned char type);
 
 static void
 font_cache_add(const char *name, unsigned char type, void *info) {
@@ -98,7 +96,7 @@ font_cache_del(const void *info) {
     return;
   }
   if (((font_cache->type == FONT_TYPE_X) && (font_cache->fontinfo.xfontinfo == (XFontStruct *) info))) {
-    D_FONT((" -> Match found at font_cache (0x%08x).\n", (int) font_cache));
+    D_FONT((" -> Match found at font_cache (0x%08x).  Font name is \"%s\"\n", (int) font_cache, NONULL(font_cache->name)));
     if (--(font_cache->ref_cnt) == 0) {
       D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
       current = font_cache;
@@ -115,7 +113,7 @@ font_cache_del(const void *info) {
   } else {
     for (current = font_cache; current->next; current = current->next) {
       if (((current->next->type == FONT_TYPE_X) && (current->next->fontinfo.xfontinfo == (XFontStruct *) info))) {
-        D_FONT((" -> Match found at current->next (0x%08x, current == 0x%08x).\n", (int) current->next, (int) current));
+        D_FONT((" -> Match found at current->next (0x%08x, current == 0x%08x).  Font name is \"%s\"\n", (int) current->next, (int) current, NONULL(current->next->name)));
         if (--(current->next->ref_cnt) == 0) {
           D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
           tmp = current->next;
@@ -144,7 +142,7 @@ font_cache_find(const char *name, unsigned char type) {
   D_FONT(("font_cache_find(%s, %d) called.\n", NONULL(name), type));
 
   for (current = font_cache; current; current = current->next) {
-    D_FONT((" -> Checking current (0x%08x), type == %d, name == %s\n", current, type, NONULL(name)));
+    D_FONT((" -> Checking current (0x%08x), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
     if ((current->type == type) && !strcasecmp(current->name, name)) {
       D_FONT(("    -> Match!\n"));
       return (current);
@@ -153,13 +151,40 @@ font_cache_find(const char *name, unsigned char type) {
   D_FONT(("font_cache_find():  No matches found. =(\n"));
   return ((etfont_t *) NULL);
 }
-#error This code is broken.  Try again tomorrow.
+
+static void *
+font_cache_find_info(const char *name, unsigned char type) {
+
+  etfont_t *current;
+
+  ASSERT_RVAL(name != NULL, NULL);
+
+  D_FONT(("font_cache_find_info(%s, %d) called.\n", NONULL(name), type));
+
+  for (current = font_cache; current; current = current->next) {
+    D_FONT((" -> Checking current (0x%08x), type == %d, name == %s\n", current, current->type, NONULL(current->name)));
+    if ((current->type == type) && !strcasecmp(current->name, name)) {
+      D_FONT(("    -> Match!\n"));
+      switch (type) {
+      case FONT_TYPE_X: return ((void *) current->fontinfo.xfontinfo); break;
+      case FONT_TYPE_TTF: return (NULL); break;
+      case FONT_TYPE_FNLIB: return (NULL); break;
+      default: return (NULL); break;
+      }
+    }
+  }
+  D_FONT(("font_cache_find_info():  No matches found. =(\n"));
+  return (NULL);
+}
+
 void *
 load_font(const char *name, const char *fallback, unsigned char type)
 {
 
   etfont_t *font;
   XFontStruct *xfont;
+
+  D_FONT(("load_font(%s, %s, %d) called.\n", NONULL(name), NONULL(fallback), type));
 
   if (type == 0) {
     type = FONT_TYPE_X;
@@ -175,8 +200,11 @@ load_font(const char *name, const char *fallback, unsigned char type)
   } else if (fallback == NULL) {
     fallback = "fixed";
   }
+  D_FONT((" -> Using name == \"%s\" and fallback == \"%s\"\n", name, fallback));
+
   if ((font = font_cache_find(name, type)) != NULL) {
     font_cache_add_ref(font);
+    D_FONT((" -> Font found in cache.  Incrementing reference count to %d and returning existing data.\n", font->ref_cnt));
     switch (type) {
     case FONT_TYPE_X: return ((void *) font->fontinfo.xfontinfo); break;
     case FONT_TYPE_TTF: return (NULL); break;
@@ -216,12 +244,14 @@ free_font(const void *info)
 void
 change_font(int init, const char *fontname)
 {
-  XFontStruct *xfont;
 #ifndef NO_BOLDFONT
   static XFontStruct *boldFont = NULL;
 #endif
   static short fnum = FONT0_IDX;
   short idx = 0;
+  int fh, fw = 0;
+  register unsigned long i;
+  register int cw;
 
   if (!init) {
     ASSERT(fontname != NULL);
@@ -258,27 +288,29 @@ change_font(int init, const char *fontname)
 	break;
 
       default:
-	if (fontname != NULL) {
-	  /* search for existing fontname */
-	  for (idx = 0; idx < NFONTS; idx++) {
-	    if (!strcmp(rs_font[idx], fontname)) {
-	      fnum = IDX2FNUM(idx);
-	      fontname = NULL;
-	      break;
-	    }
+        for (idx = 0; idx < NFONTS; idx++) {
+          if (!strcmp(rs_font[idx], fontname)) {
+            fnum = IDX2FNUM(idx);
+            fontname = NULL;
+            break;
 	  }
-	} else
-	  return;
+	}
 	break;
     }
     idx = FNUM2IDX(fnum);
 
-    RESET_AND_ASSIGN(rs_font[idx], fontname);
+    if ((fontname != NULL) && strcasecmp(rs_font[idx], fontname)) {
+      RESET_AND_ASSIGN(rs_font[idx], StrDup(fontname));
+    }
   }
   if (TermWin.font) {
-    free_font(TermWin.font);
+    if (font_cache_find_info(rs_font[idx], FONT_TYPE_X) != TermWin.font) {
+      free_font(TermWin.font);
+      TermWin.font = load_font(rs_font[idx], "fixed", FONT_TYPE_X);
+    }
+  } else {
+    TermWin.font = load_font(rs_font[idx], "fixed", FONT_TYPE_X);
   }
-  TermWin.font = load_font(rs_font[idx], "fixed", FONT_TYPE_X);
 
 #ifndef NO_BOLDFONT
   if (init && rs_boldFont != NULL) {
@@ -288,9 +320,13 @@ change_font(int init, const char *fontname)
 
 #ifdef MULTI_CHARSET
   if (TermWin.mfont) {
-    free_font(TermWin.mfont);
+    if (font_cache_find_info(rs_mfont[idx], FONT_TYPE_X) != TermWin.mfont) {
+      free_font(TermWin.mfont);
+      TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
+    }
+  } else {
+    TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
   }
-  TermWin.mfont = load_font(rs_mfont[idx], "k14", FONT_TYPE_X);
 # ifdef USE_XIM
   if (Input_Context) {
     if (TermWin.fontset) {
@@ -302,43 +338,34 @@ change_font(int init, const char *fontname)
 # endif
 #endif /* MULTI_CHARSET */
 
-  /* alter existing GC */
   if (!init) {
     XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
   }
-  /* set the sizes */
-  {
 
-    int cw, fh, fw = 0;
-    unsigned long i;
+  fw = TermWin.font->min_bounds.width;
+  fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
 
-    fw = TermWin.font->min_bounds.width;
-    fh = TermWin.font->ascent + TermWin.font->descent + rs_line_space;
+  D_FONT(("Font information:  Ascent == %hd, Descent == %hd\n", TermWin.font->ascent, TermWin.font->descent));
+  if (TermWin.font->min_bounds.width == TermWin.font->max_bounds.width)
+    TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
+  else
+    TermWin.fprop = 1;	/* Proportional font */
+  if (TermWin.fprop == 1)
+    for (i = TermWin.font->min_char_or_byte2; i <= TermWin.font->max_char_or_byte2; i++) {
+      cw = TermWin.font->per_char[i].width;
+      MAX_IT(fw, cw);
+    }
+  /* not the first time thru and sizes haven't changed */
+  if (fw == TermWin.fwidth && fh == TermWin.fheight)
+    return;			/* TODO: not return; check MULTI_CHARSET if needed */
 
-    D_X11(("Font information:  Ascent == %hd, Descent == %hd\n", TermWin.font->ascent, TermWin.font->descent));
-    if (TermWin.font->min_bounds.width == TermWin.font->max_bounds.width)
-      TermWin.fprop = 0;	/* Mono-spaced (fixed width) font */
-    else
-      TermWin.fprop = 1;	/* Proportional font */
-    if (TermWin.fprop == 1)
-      for (i = TermWin.font->min_char_or_byte2;
-	   i <= TermWin.font->max_char_or_byte2; i++) {
-	cw = TermWin.font->per_char[i].width;
-	MAX_IT(fw, cw);
-      }
-    /* not the first time thru and sizes haven't changed */
-    if (fw == TermWin.fwidth && fh == TermWin.fheight)
-      return;			/* TODO: not return; check MULTI_CHARSET if needed */
-
-    TermWin.fwidth = fw;
-    TermWin.fheight = fh;
-  }
+  TermWin.fwidth = fw;
+  TermWin.fheight = fh;
 
   /* check that size of boldFont is okay */
 #ifndef NO_BOLDFONT
   TermWin.boldFont = NULL;
   if (boldFont != NULL) {
-    int i, cw, fh, fw = 0;
 
     fw = boldFont->min_bounds.width;
     fh = boldFont->ascent + boldFont->descent + rs_line_space;
@@ -354,8 +381,9 @@ change_font(int init, const char *fontname)
       }
     }
 
-    if (fw == TermWin.fwidth && fh == TermWin.fheight)
+    if (fw == TermWin.fwidth && fh == TermWin.fheight) {
       TermWin.boldFont = boldFont;
+    }
   }
 #endif /* NO_BOLDFONT */
 

@@ -2453,3 +2453,9 @@ Tue Sep 21 20:00:50 PDT 1999	Michael Jennings <mej@eterm.org>
 	not compile, but I'm going home anyway.
 	
 -------------------------------------------------------------------------------
+Wed Sep 22 15:52:01 PDT 1999	Michael Jennings <mej@eterm.org>
+
+	The font caching seems to work now, so let me know if you find any
+	problems.
+	
+-------------------------------------------------------------------------------
