@@ -3649,3 +3649,9 @@ Wed May 31 22:34:12 PDT 2000	Michael Jennings <mej@eterm.org>
 	work however, as do any action bindings you may have.)
 	
 -------------------------------------------------------------------------------
+Thu Jun  1 19:31:18 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fix a potential DoS pointed out on BUGTRAQ by Kit Knox
+	<kit@rootshell.com>.
+	
+-------------------------------------------------------------------------------

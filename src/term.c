@@ -1296,6 +1296,8 @@ process_window_mode(unsigned int nargs, int args[])
 	  return;		/* Make sure there are 2 args left */
 	y = args[++i];
 	x = args[++i];
+        UPPER_BOUND(y, scr->height);
+        UPPER_BOUND(x, scr->width);
 	XResizeWindow(Xdisplay, TermWin.parent, x, y);
 #ifdef USE_XIM
 	xim_set_status_position();
@@ -1318,6 +1320,8 @@ process_window_mode(unsigned int nargs, int args[])
 	  return;		/* Make sure there are 2 args left */
 	y = args[++i];
 	x = args[++i];
+        UPPER_BOUND(y, scr->height / TermWin.fheight);
+        UPPER_BOUND(x, scr->width / TermWin.fwidth);
 	XResizeWindow(Xdisplay, TermWin.parent,
 		      Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
 		      Height2Pixel(y) + 2 * TermWin.internalBorder);
