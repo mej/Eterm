@@ -28,7 +28,7 @@
 #define NS_SCREEN_OPTS       "-RDD"
 #define NS_SCREEN_GREP       "grep escape \"$SCREENRC\" 2>/dev/null || grep escape ~/.screenrc 2>/dev/null || grep escape \"$SYSSCREENRC\" 2>/dev/null || grep escape /etc/screenrc 2>/dev/null || grep escape /usr/local/etc/screenrc 2>/dev/null || echo \"escape ^Aa\"\n"
 #define NS_SCREEM_CALL       "%s 2>/dev/null || %s"
-#define NS_WRAP_CALL         "export TERM=vt100; screen -wipe; %s"
+#define NS_WRAP_CALL         "TERM=vt100; export TERM; screen -wipe; %s"
 #define NS_SCREEN_RC         ".screenrc"
 #define NS_TWIN_CALL         "twattach %s 2>/dev/null || twin %s"
 #define NS_TWIN_PARA         "twin@"

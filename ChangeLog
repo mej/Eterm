@@ -4918,3 +4918,12 @@ Fixed typo in configure.in that caused ESCREEN to always be defined.
 
 Added support for /etc/screen/screenrc, as it is on gentoo.
 ----------------------------------------------------------------------
+Mon Nov 18 12:28:43 2002                        Michael Jennings (mej)
+
+Remove acinclude.m4 now that libast.m4 has all that stuff in it.
+
+Hopefully improve exit handling.
+
+Change "export TERM=vt100" to the portable "TERM=vt100; export TERM"
+syntax.
+----------------------------------------------------------------------

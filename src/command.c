@@ -1045,9 +1045,11 @@ handle_child_signal(int sig)
     /* If the child that exited is the command we spawned, or if the
        child exited before fork() returned in the parent, it must be
        our immediate child that exited.  We exit gracefully. */
-    if (((pid == cmd_pid) && (cmd_pid != -1))
-        || ((pid == -1) && (errno == ECHILD) && (cmd_pid != -1))
-        || ((pid == 0) && (cmd_pid != -1) && ((kill(cmd_pid, 0)) < 0))) {
+    if ((cmd_pid != -1)
+        && ((pid == cmd_pid)
+            || ((pid == -1) && (errno == ECHILD))
+            || ((pid == 0) && ((kill(cmd_pid, 0)) < 0)))) {
+        cmd_pid = -1;
         if (Options & Opt_pause) {
             paused = 1;
             return;
@@ -3224,7 +3226,7 @@ cmd_getc(void)
                 RETURN_CHAR();
             }
         }
-        if (paused == 1 && cmd_fd == -1) {
+        if (paused == 1) {
             const char *done = " -- Task Finished, ESC to exit";
 
             append_to_title(rs_finished_title ? rs_finished_title : done);
@@ -3235,6 +3237,8 @@ cmd_getc(void)
             if (rs_finished_text) {
                 cmd_write((unsigned char *) rs_finished_text, strlen(rs_finished_text));
             }
+        } else if (!paused && pipe_fd < 0 && cmd_fd < 0) {
+            exit(0);
         }
 #ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
         if (scrollbar_uparrow_is_pressed()) {
@@ -3309,12 +3313,28 @@ cmd_getc(void)
 
                 cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
                 while (count) {
-
                     register int n = read(cmd_fd, cmdbuf_endp, count);
 
-                    if (n <= 0) {
-                        if (paused) {
+                    if (n < 0) {
+                        if (errno == EINTR) {
+                            /* Ignore and continue reading. */
+                            continue;
+                        } else if (errno == EAGAIN) {
+                            /* Stop looping. */
+                            break;
+                        } else {
+                            /* Our file descriptor went bye-bye. */
                             cmd_fd = -1;
+                            if (!paused && (Options & Opt_pause)) {
+                                paused = 1;
+                            }
+                            break;
+                        }
+                    } else if (n == 0) {
+                        /* EOF */
+                        cmd_fd = -1;
+                        if (!paused && (Options & Opt_pause)) {
+                            paused = 1;
                         }
                         break;
                     }
@@ -3334,8 +3354,23 @@ cmd_getc(void)
 
                     register int n = read(pipe_fd, cmdbuf_endp, count);
 
-                    if (n <= 0)
+                    if (n < 0) {
+                        if (errno == EINTR) {
+                            /* Ignore and continue reading. */
+                            continue;
+                        } else if (errno == EAGAIN) {
+                            /* Stop looping. */
+                            break;
+                        } else {
+                            /* Our file descriptor went bye-bye. */
+                            pipe_fd = -1;
+                            break;
+                        }
+                    } else if (n == 0) {
+                        /* EOF */
+                        pipe_fd = -1;
                         break;
+                    }
                     n = add_carriage_returns(cmdbuf_endp, n);
                     cmdbuf_endp += n;
                     count -= n;
