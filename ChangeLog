@@ -4717,3 +4717,7 @@ Fixed the flickering of the buttonbar caused by Escreen updates.
 
 Also fixed the deselecting of the current button on redraw.
 ----------------------------------------------------------------------
+Thu Jun 20 11:51:59 2002                        Michael Jennings (mej)
+
+Forgot to change the header....
+----------------------------------------------------------------------

@@ -58,10 +58,10 @@ extern void script_handler_nop(char **);
 extern void script_handler_dialog(char **);
 
 #ifdef ESCREEN
-extern void script_handler_display(char **);
-extern void script_handler_region(char **);
-extern void script_handler_statement(char **);
-extern void script_handler_reset(char **);
+extern void script_handler_es_display(char **);
+extern void script_handler_es_region(char **);
+extern void script_handler_es_statement(char **);
+extern void script_handler_es_reset(char **);
 #endif
 
 /* Engine */
