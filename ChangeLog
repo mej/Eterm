@@ -3969,3 +3969,11 @@ Tue Nov 14 17:17:53 PST 2000	Michael Jennings <mej@eterm.org>
 	this will not work with those themes.
 	
 -------------------------------------------------------------------------------
+Wed Nov 15 14:20:13 PST 2000	Michael Jennings <mej@eterm.org>
+
+	As requested by Chris Morton <chris.morton@ericsson.com>, I added
+	support for the SunCut, SunCopy, SunPaste, and SunFront keys.  The 1st
+	3 operate on the xclipboard-managed "ClipBoard" buffer.  The SunFront
+	key will activate Eterm's "steal focus" mechanism.
+	
+-------------------------------------------------------------------------------

@@ -296,16 +296,20 @@ lookup_key(XEvent * ev)
   }
 #endif
 
-#ifdef HAVE_X11_SUNKEYSYM_H
+#if defined(HAVE_X11_SUNKEYSYM_H) && defined(HAVE_X11_XMU_ATOMS_H)
   switch (keysym) {
     case SunXK_Copy:
     case SunXK_Cut:
+      selection_copy_to_clipboard();
+      LK_RET();
       break;
     case SunXK_Paste:
-      selection_request(ev->xkey.time, ev->xkey.x, ev->xkey.y);
+      selection_paste_from_clipboard();
       LK_RET();
       break;
     case SunXK_Front:
+      xterm_seq(XTerm_Takeover, "");
+      LK_RET();
       break;
     default:
       break;

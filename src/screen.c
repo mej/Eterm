@@ -2364,7 +2364,7 @@ PasteIt(unsigned char *data, unsigned int nitems)
  * EXT: SelectionNotify
  */
 void
-selection_paste(Window win, unsigned prop, int Delete)
+selection_paste(Window win, unsigned prop, int delete)
 {
   long nread;
   unsigned long bytes_after, nitems;
@@ -2375,7 +2375,7 @@ selection_paste(Window win, unsigned prop, int Delete)
   if (prop == None)
     return;
   for (nread = 0, bytes_after = 1; bytes_after > 0;) {
-    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, Delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
+    if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)) {
       if (data != NULL) {
         XFree(data);
       }
@@ -2437,6 +2437,46 @@ selection_request(Time tm, int x, int y)
     }
 #else
     XConvertSelection(Xdisplay, XA_PRIMARY, XA_STRING, prop, TermWin.vt, tm);
+#endif
+  }
+}
+
+void
+selection_copy(Atom selection, Atom prop, char *str, size_t len)
+{
+  XSetSelectionOwner(Xdisplay, selection, TermWin.vt, CurrentTime);
+  if (XGetSelectionOwner(Xdisplay, XA_PRIMARY) != TermWin.vt) {
+    print_error("Can't take ownership of primary selection\n");
+  }
+  XChangeProperty(Xdisplay, Xroot, prop, XA_STRING, 8, PropModeReplace, str, len);
+}
+
+void
+selection_copy_to_clipboard(void)
+{
+  if (selection.text) {
+    selection_copy(X_CLIPBOARD_SELECTION, X_CLIPBOARD_PROP, selection.text, selection.len);
+  }
+}
+
+void
+selection_paste_from_clipboard(void)
+{
+  Atom select, type;
+
+  select = X_CLIPBOARD_SELECTION;
+  if (XGetSelectionOwner(Xdisplay, select) == None) {
+    selection_paste(Xroot, X_CLIPBOARD_PROP, False);
+  } else {
+    type = XInternAtom(Xdisplay, "VT_SELECTION", False);
+#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
+    if (encoding_method != LATIN1) {
+      XConvertSelection(Xdisplay, select, XA_COMPOUND_TEXT(Xdisplay), type, TermWin.vt, CurrentTime);
+    } else {
+      XConvertSelection(Xdisplay, select, XA_STRING, type, TermWin.vt, CurrentTime);
+    }
+#else
+    XConvertSelection(Xdisplay, select, XA_STRING, type, TermWin.vt, CurrentTime);
 #endif
   }
 }
@@ -2664,12 +2704,10 @@ selection_make(Time tm)
   selection.text = new_selection_text;
   selection.screen = current_screen;
 
-  XSetSelectionOwner(Xdisplay, XA_PRIMARY, TermWin.vt, tm);
-  if (XGetSelectionOwner(Xdisplay, XA_PRIMARY) != TermWin.vt)
-    print_error("can't get primary selection\n");
-  XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8,
-		  PropModeReplace, selection.text, selection.len);
+  selection_copy(XA_PRIMARY, XA_CUT_BUFFER0, selection.text, selection.len);
   D_SELECT(("selection.len=%d\n", selection.len));
+  return;
+  tm = 0;
 }
 
 /*

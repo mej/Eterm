@@ -16,6 +16,14 @@
 #include <X11/Xfuncproto.h>
 #include "startup.h"
 
+#ifdef XA_CLIPBOARD
+# define X_CLIPBOARD_SELECTION  XA_CLIPBOARD(Xdisplay)
+# define X_CLIPBOARD_PROP       XA_CLIPBOARD(Xdisplay)
+#else
+# define X_CLIPBOARD_SELECTION  XA_PRIMARY
+# define X_CLIPBOARD_PROP       XA_CUT_BUFFER0
+#endif
+
 /************ Macros and Definitions ************/
 #define WRAP_CHAR		(MAX_COLS + 1)
 #define PROP_SIZE       	4096
@@ -279,6 +287,9 @@ extern void selection_check(void);
 extern void PasteIt(unsigned char *, unsigned int);
 extern void selection_paste(Window, unsigned, int);
 extern void selection_request(Time, int, int);
+extern void selection_copy(Atom, Atom, char *, size_t);
+extern void selection_copy_to_clipboard(void);
+extern void selection_paste_from_clipboard(void);
 extern void selection_reset(void);
 extern void selection_clear(void);
 extern void selection_setclr(int, int, int, int, int);
