@@ -1747,7 +1747,7 @@ xterm_seq(int op, const char *str)
          70-79    Internal Eterm Operations
        */
       switch (eterm_seq_op) {
-#ifdef PIXMAP_OFFSET
+#ifdef PIXMAP_SUPPORT
 	case 0:
 	  nstr = (char *) strsep(&tnstr, ";");
           if (nstr) {
@@ -1762,7 +1762,8 @@ xterm_seq(int op, const char *str)
                             });
             } else if (BOOL_OPT_ISFALSE(nstr)) {
               D_CMD(("   Request to disable transparency.\n"));
-              FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}});
+              FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} \
+                                                                                                 else {image_set_mode(idx, MODE_SOLID);}});
             } else {
               D_CMD(("   Bad boolean value in transparency request.\n"));
               break;
@@ -1775,7 +1776,8 @@ xterm_seq(int op, const char *str)
                               Imlib_free_pixmap(imlib_id, images[idx].current->pmap->pixmap);  \
                             } \
                             images[idx].current->pmap->pixmap = None; \
-                          } else if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}});
+                          } else if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} \
+                                                                                                      else {image_set_mode(idx, MODE_SOLID);}});
           }
           redraw_all_images();
 	  break;
@@ -1785,21 +1787,9 @@ xterm_seq(int op, const char *str)
             if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
               break;
             }
-            if ((strlen(color) == 2) || (!strcasecmp(color, "down"))) {
-              /* They specified an image index */
-              if (!strcasecmp(color, "bg")) {
-                which = image_bg;
-              } else if (!strcasecmp(color, "sb")) {
-                which = image_sb;
-              } else if (!strcasecmp(color, "sa")) {
-                which = image_sa;
-              } else if (!strcasecmp(color, "up")) {
-                which = image_up;
-              } else if (!strcasecmp(color, "down")) {
-                which = image_down;
-              } else {
-                break;
-              }
+            which = image_max;
+            FOREACH_IMAGE(if (!strcasecmp(color, (get_image_type(idx) + 6))) {which = idx; break;});
+            if (which != image_max) {
               if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
                 break;
               }
@@ -1847,7 +1837,7 @@ xterm_seq(int op, const char *str)
 
               if (iml->mod == NULL) {
                 iml->mod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
-                iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0xff;
+                iml->mod->brightness = iml->mod->contrast = iml->mod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->mod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1862,7 +1852,7 @@ xterm_seq(int op, const char *str)
 
               if (iml->rmod == NULL) {
                 iml->rmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
-                iml->rmod->brightness = iml->rmod->contrast = iml->rmod->gamma = 0xff;
+                iml->rmod->brightness = iml->rmod->contrast = iml->rmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->rmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1877,7 +1867,7 @@ xterm_seq(int op, const char *str)
 
               if (iml->gmod == NULL) {
                 iml->gmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
-                iml->gmod->brightness = iml->gmod->contrast = iml->gmod->gamma = 0xff;
+                iml->gmod->brightness = iml->gmod->contrast = iml->gmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->gmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1892,7 +1882,7 @@ xterm_seq(int op, const char *str)
 
               if (iml->bmod == NULL) {
                 iml->bmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
-                iml->bmod->brightness = iml->bmod->contrast = iml->bmod->gamma = 0xff;
+                iml->bmod->brightness = iml->bmod->contrast = iml->bmod->gamma = 0x100;
               }
               if (!BEG_STRCASECMP("brightness", mod)) {
                 iml->bmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
@@ -1905,6 +1895,128 @@ xterm_seq(int op, const char *str)
           }
           if (changed) {
             redraw_all_images();
+          }
+	  break;
+        case 2:
+          changed = 0;
+          which = image_max;
+          if ((nstr = (char *) strsep(&tnstr, ";")) == NULL || (valptr = (char *) strsep(&tnstr, ";")) == NULL) {
+            break;
+          }
+          FOREACH_IMAGE(if (!strcasecmp(valptr, (get_image_type(idx) + 6))) {which = idx; break;});
+          if (which != image_max) {
+            if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
+              break;
+            }
+          } else {
+            which = image_bg;
+          }
+          D_PIXMAP(("Operation == \"%s\", which == %d, value == \"%s\"\n", nstr, (int) which, valptr));
+          if (!strcasecmp(nstr, "shade")) {
+            imlib_t *iml = images[which].current->iml;
+            int s;
+
+            s = (int) strtol(valptr, (char **) NULL, 0);
+            s = ((100 - s) << 8) / 100;
+            if (s == 0x100) {
+              if (iml->mod != NULL) {
+                if (iml->mod->brightness != 0x100) {
+                  iml->mod->brightness = 0x100;
+                  changed = 1;
+                }
+                if (iml->mod->contrast == 0x100 && iml->mod->gamma == 0x100) {
+                  FREE(iml->mod);
+                }
+              }
+            } else {
+              if (iml->mod == NULL) {
+                iml->mod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->mod->contrast = iml->mod->gamma = 0x100;
+              }
+              if (iml->mod->brightness != s) {
+                iml->mod->brightness = s;
+                changed = 1;
+              }
+            }
+          } else if (!strcasecmp(nstr, "tint")) {
+            imlib_t *iml = images[which].current->iml;
+            unsigned long t, r, g, b;
+
+            if (!isdigit(*valptr)) {
+              t = get_tint_by_color_name(valptr);
+            } else {
+              t = (unsigned long) strtoul(valptr, (char **) NULL, 0);
+              D_PIXMAP(("Got numerical tint 0x%06x\n", t));
+            }
+            r = (t & 0xff0000) >> 16;
+            if (r == 0xff) {
+              if (iml->rmod != NULL) {
+                if (iml->rmod->brightness != 0x100) {
+                  iml->rmod->brightness = 0x100;
+                  changed = 1;
+                  if (iml->rmod->contrast == 0x100 && iml->rmod->gamma == 0x100) {
+                    FREE(iml->rmod);
+                  }
+                }
+              }
+            } else {
+              if (iml->rmod == NULL) {
+                iml->rmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->rmod->contrast = iml->rmod->gamma = 0x100;
+              }
+              if (iml->rmod->brightness != (int) r) {
+                iml->rmod->brightness = r;
+                changed = 1;
+              }
+            }
+            g = (t & 0xff00) >> 8;
+            if (g == 0xff) {
+              if (iml->gmod != NULL) {
+                if (iml->gmod->brightness != 0x100) {
+                  iml->gmod->brightness = 0x100;
+                  changed = 1;
+                  if (iml->gmod->contrast == 0x100 && iml->gmod->gamma == 0x100) {
+                    FREE(iml->gmod);
+                  }
+                }
+              }
+            } else {
+              if (iml->gmod == NULL) {
+                iml->gmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->gmod->contrast = iml->gmod->gamma = 0x100;
+              }
+              if (iml->gmod->brightness != (int) g) {
+                iml->gmod->brightness = g;
+                changed = 1;
+              }
+            }
+            b = t & 0xff;
+            if (b == 0xff) {
+              if (iml->bmod != NULL) {
+                if (iml->bmod->brightness != 0x100) {
+                  iml->bmod->brightness = 0x100;
+                  changed = 1;
+                  if (iml->bmod->contrast == 0x100 && iml->bmod->gamma == 0x100) {
+                    FREE(iml->bmod);
+                  }
+                }
+              }
+            } else {
+              if (iml->bmod == NULL) {
+                iml->bmod = (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier));
+                iml->bmod->contrast = iml->bmod->gamma = 0x100;
+              }
+              if (iml->bmod->brightness != (int) b) {
+                iml->bmod->brightness = b;
+                changed = 1;
+              }
+            }
+          }
+          if (changed) {
+            if (image_mode_is(which, MODE_TRANS)) {
+              free_desktop_pixmap();
+            }
+            redraw_image(which);
           }
 	  break;
 	case 3:

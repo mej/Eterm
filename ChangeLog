@@ -3386,3 +3386,12 @@ Tue Mar 28 12:31:06 PST 2000	Michael Jennings <mej@eterm.org>
 	"#8080ff").  Severely twisted. :-)
 	
 -------------------------------------------------------------------------------
+Tue Mar 28 18:42:09 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Tint by number or color, and shade by percentage, are now available
+	via the "\e]6;2;" escape sequence.  For example, "\e]6;2;shade;10\a"
+	will shade the background by 10%.  "\e]6;2;tint;lightblue\a" will give
+	the background a light blue tint.  "\e]6;2;shade;sa;30\a" will give a
+	30% shade to the scrollbar anchor.
+	
+-------------------------------------------------------------------------------

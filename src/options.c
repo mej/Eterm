@@ -3806,45 +3806,11 @@ post_parse(void)
     unsigned long r, g, b, t;
 
     if (!isdigit(*rs_tint)) {
-      XColor xcol, wcol;
-    
-      wcol.pixel = WhitePixel(Xdisplay, Xscreen);
-      XQueryColor(Xdisplay, Xcmap, &wcol);
-      D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", rs_tint, wcol.red, wcol.green, wcol.blue));
-      if (!XParseColor(Xdisplay, Xcmap, rs_tint, &xcol)) {
-        print_error("Unable to parse tint color \"%s\".  Ignoring.", rs_tint);
-        t = 0xffffff;
-      } else {
-        D_PIXMAP(("RGB values for color are %d/%d/%d\n", xcol.red, xcol.green, xcol.blue));
-        if ((wcol.flags & DoRed) && (xcol.flags & DoRed)) {
-          r = (xcol.red << 8) / wcol.red;
-          D_PIXMAP(("Got red == %lu\n", r));
-          if (r >= 0x100) r = 0xff;
-        } else {
-          r = 0xff;
-        }
-        if ((wcol.flags & DoGreen) && (xcol.flags & DoGreen)) {
-          g = (xcol.green << 8) / wcol.green;
-          D_PIXMAP(("Got green == %lu\n", g));
-          if (g >= 0x100) g = 0xff;
-        } else {
-          g = 0xff;
-        }
-        if ((wcol.flags & DoBlue) && (xcol.flags & DoBlue)) {
-          b = (xcol.blue << 8) / wcol.blue;
-          D_PIXMAP(("Got blue == %lu\n", b));
-          if (b >= 0x100) b = 0xff;
-        } else {
-          b = 0xff;
-        }
-        t = (r << 16) | (g << 8) | b;
-        D_PIXMAP(("Final tint is 0x%06x\n", t));
-      }
+      t = get_tint_by_color_name(rs_tint);
     } else {
       t = (unsigned long) strtoul(rs_tint, (char **) NULL, 0);
       D_PIXMAP(("Got numerical tint 0x%06x\n", t));
     }
-
     if (t != 0xffffff) {
       r = (t & 0xff0000) >> 16;
       if (r != 0xff) {

@@ -40,6 +40,7 @@ extern XSizeHints szHint;
 _XFUNCPROTOBEGIN
 
 extern void set_text_property(Window, char *, char *);
+extern unsigned long get_tint_by_color_name(const char *);
 extern Pixel get_bottom_shadow_color(Pixel, const char *);
 extern Pixel get_top_shadow_color(Pixel, const char *);
 extern Pixel get_color_by_name(const char *, const char *);

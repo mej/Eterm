@@ -81,61 +81,26 @@ static const char *get_iclass_name(unsigned char);
 static void copy_buffer_pixmap(unsigned char mode, unsigned long fill, unsigned short width, unsigned short height);
 
 const char *
-get_image_type(unsigned short type)
+get_image_type(unsigned char type)
 {
-
   switch (type) {
-    case image_bg:
-      return "image_bg";
-      break;
-    case image_up:
-      return "image_up";
-      break;
-    case image_down:
-      return "image_down";
-      break;
-    case image_left:
-      return "image_left";
-      break;
-    case image_right:
-      return "image_right";
-      break;
-    case image_sb:
-      return "image_sb";
-      break;
-    case image_sa:
-      return "image_sa";
-      break;
-    case image_st:
-      return "image_st";
-      break;
-    case image_menu:
-      return "image_menu";
-      break;
-    case image_menuitem:
-      return "image_menuitem";
-      break;
-    case image_submenu:
-      return "image_submenu";
-      break;
-    case image_button:
-      return "image_button";
-      break;
-    case image_bbar:
-      return "image_bbar";
-      break;
-    case image_gbar:
-      return "image_gbar";
-      break;
-    case image_dialog:
-      return "image_dialog";
-      break;
-    case image_max:
-      return "image_max";
-      break;
-    default:
-      ASSERT_NOTREACHED_RVAL("");
-      break;
+    case image_bg:       return "image_bg"; break;
+    case image_up:       return "image_up"; break;
+    case image_down:     return "image_down"; break;
+    case image_left:     return "image_left"; break;
+    case image_right:    return "image_right"; break;
+    case image_sb:       return "image_sb"; break;
+    case image_sa:       return "image_sa"; break;
+    case image_st:       return "image_st"; break;
+    case image_menu:     return "image_menu"; break;
+    case image_menuitem: return "image_menuitem"; break;
+    case image_submenu:  return "image_submenu"; break;
+    case image_button:   return "image_button"; break;
+    case image_bbar:     return "image_bbar"; break;
+    case image_gbar:     return "image_gbar"; break;
+    case image_dialog:   return "image_dialog"; break;
+    case image_max:      
+    default:             return "image_max"; break;
   }
   ASSERT_NOTREACHED_RVAL("");
 }

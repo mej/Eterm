@@ -27,6 +27,8 @@
 #include <X11/Xatom.h>
 #include <Imlib.h>
 
+#include "misc.h"
+
 /************ Macros and Definitions ************/
 #ifdef PIXMAP_SUPPORT
 # define background_is_image() ((buffer_pixmap) || (images[image_bg].current && images[image_bg].current->iml && images[image_bg].current->iml->im))
@@ -48,6 +50,7 @@
 # define background_is_trans()    NOP
 # define background_is_viewport() NOP
 # define background_is_auto()     NOP
+# define get_image_type_string(t) NOP
 # define delete_simage(simg)      NOP
 #endif
 #define PIXMAP_EXT NULL
@@ -178,7 +181,7 @@ extern Window desktop_window;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern const char *get_image_type(unsigned short);
+extern const char *get_image_type(unsigned char);
 extern unsigned char image_mode_any(unsigned char);
 extern unsigned short parse_pixmap_ops(char *);
 extern unsigned short set_pixmap_scale(const char *, pixmap_t *);
