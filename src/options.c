@@ -1638,10 +1638,10 @@ parse_color(char *buff)
   } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
     RESET_AND_ASSIGN(rs_color[scrollColor], Word(2, buff));
 
-  } else if (!BEG_STRCASECMP(buff, "unfocusedmenu ")) {
+  } else if (!BEG_STRCASECMP(buff, "unfocused_menu ")) {
     RESET_AND_ASSIGN(rs_color[unfocusedMenuColor], Word(2, buff));
 
-  } else if (!BEG_STRCASECMP(buff, "unfocusedscrollbar ")) {
+  } else if (!BEG_STRCASECMP(buff, "unfocused_scrollbar ")) {
     RESET_AND_ASSIGN(rs_color[unfocusedScrollColor], Word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "pointer ")) {
@@ -2281,6 +2281,49 @@ parse_image(char *buff)
       return;
     }
 
+  } else if (!BEG_STRCASECMP(buff, "mode ")) {
+    char *mode = PWord(2, buff);
+    char *allow_list = PWord(4, buff);
+
+    if (idx < 0) {
+      print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!mode) {
+      print_error("Parse error in file %s, line %lu:  Missing parameters for mode line", file_peek_path(), file_peek_line());
+      return;
+    }
+    if (!BEG_STRCASECMP(mode, "image")) {
+      images[idx].mode = (MODE_IMAGE | ALLOW_IMAGE);
+    } else if (!BEG_STRCASECMP(mode, "trans")) {
+      images[idx].mode = (MODE_TRANS | ALLOW_TRANS);
+    } else if (!BEG_STRCASECMP(mode, "viewport")) {
+      images[idx].mode = (MODE_VIEWPORT | ALLOW_VIEWPORT);
+    } else if (!BEG_STRCASECMP(mode, "auto")) {
+      images[idx].mode = (MODE_AUTO | ALLOW_AUTO);
+    } else if (!BEG_STRCASECMP(mode, "solid")) {
+      images[idx].mode = MODE_SOLID;
+    } else {
+      print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), mode);
+    }
+    if (allow_list) {
+      char *allow;
+
+      for (; (allow = (char *) strsep(&allow_list, " ")) != NULL;) {
+	if (!BEG_STRCASECMP("image", allow)) {
+	  images[idx].mode |= ALLOW_IMAGE;
+	} else if (!BEG_STRCASECMP("transparent", allow)) {
+	  images[idx].mode |= ALLOW_TRANS;
+	} else if (!BEG_STRCASECMP("viewport", allow)) {
+	  images[idx].mode |= ALLOW_VIEWPORT;
+	} else if (!BEG_STRCASECMP("auto", allow)) {
+	  images[idx].mode |= ALLOW_AUTO;
+	} else if (!BEG_STRCASECMP("solid", allow)) {
+	} else {
+	  print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), allow);
+	}
+      }
+    }
   } else if (!BEG_STRCASECMP(buff, "state ")) {
     char *state = PWord(2, buff), new = 0;
 
@@ -2319,49 +2362,6 @@ parse_image(char *buff)
       images[idx].current->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
       MEMSET(images[idx].current->pmap, 0, sizeof(pixmap_t));
       MEMSET(images[idx].current->iml, 0, sizeof(imlib_t));
-    }
-  } else if (!BEG_STRCASECMP(buff, "mode ")) {
-    char *mode = PWord(2, buff);
-    char *allow_list = PWord(4, buff);
-
-    if (idx < 0) {
-      print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined", file_peek_path(), file_peek_line());
-      return;
-    }
-    if (!mode) {
-      print_error("Parse error in file %s, line %lu:  Missing mode line", file_peek_path(), file_peek_line());
-      return;
-    }
-    if (!BEG_STRCASECMP(mode, "image ")) {
-      images[idx].mode = (MODE_IMAGE | ALLOW_IMAGE);
-    } else if (!BEG_STRCASECMP(mode, "trans ")) {
-      images[idx].mode = (MODE_TRANS | ALLOW_TRANS);
-    } else if (!BEG_STRCASECMP(mode, "viewport ")) {
-      images[idx].mode = (MODE_VIEWPORT | ALLOW_VIEWPORT);
-    } else if (!BEG_STRCASECMP(mode, "auto ")) {
-      images[idx].mode = (MODE_AUTO | ALLOW_AUTO);
-    } else if (!BEG_STRCASECMP(mode, "solid ")) {
-      images[idx].mode = MODE_SOLID;
-    } else {
-      print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), mode);
-    }
-    if (allow_list) {
-      char *allow;
-
-      for (; (allow = (char *) strsep(&allow_list, " ")) != NULL;) {
-	if (!BEG_STRCASECMP("image", allow)) {
-	  images[idx].mode |= ALLOW_IMAGE;
-	} else if (!BEG_STRCASECMP("transparent", allow)) {
-	  images[idx].mode |= ALLOW_TRANS;
-	} else if (!BEG_STRCASECMP("viewport", allow)) {
-	  images[idx].mode |= ALLOW_VIEWPORT;
-	} else if (!BEG_STRCASECMP("auto", allow)) {
-	  images[idx].mode |= ALLOW_AUTO;
-	} else if (!BEG_STRCASECMP("solid", allow)) {
-	} else {
-	  print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), allow);
-	}
-      }
     }
   } else if (!BEG_STRCASECMP(buff, "file ")) {
     char *filename = PWord(2, buff);
@@ -3393,6 +3393,8 @@ save_config(char *path)
   time_t cur_time = time(NULL);
   struct tm *cur_tm;
   struct stat fst;
+  simage_t *simg;
+  action_t *action;
 
   cur_tm = localtime(&cur_time);
 
@@ -3426,9 +3428,21 @@ save_config(char *path)
   fprintf(fp, "    background %s\n", rs_color[bgColor]);
   fprintf(fp, "    cursor %s\n", rs_color[cursorColor]);
   fprintf(fp, "    cursor_text %s\n", rs_color[cursorColor2]);
-  fprintf(fp, "    menu_text %s\n", rs_color[menuTextColor]);
-  fprintf(fp, "    scrollbar %s\n", rs_color[scrollColor]);
-  fprintf(fp, "    unfocusedscrollbar %s\n", rs_color[unfocusedScrollColor]);
+  if (rs_color[menuColor]) {
+    fprintf(fp, "    menu %s\n", rs_color[menuColor]);
+  }
+  if (rs_color[unfocusedMenuColor]) {
+    fprintf(fp, "    unfocused_menu %s\n", rs_color[unfocusedMenuColor]);
+  }
+  if (rs_color[menuTextColor]) {
+    fprintf(fp, "    menu_text %s\n", rs_color[menuTextColor]);
+  }
+  if (rs_color[scrollColor]) {
+    fprintf(fp, "    scrollbar %s\n", rs_color[scrollColor]);
+  }
+  if (rs_color[unfocusedScrollColor]) {
+    fprintf(fp, "    unfocused_scrollbar %s\n", rs_color[unfocusedScrollColor]);
+  }
   fprintf(fp, "    pointer %s\n", rs_color[pointerColor]);
   fprintf(fp, "    video normal\n");
   for (i = 0; i < 16; i++) {
@@ -3455,7 +3469,7 @@ save_config(char *path)
     fprintf(fp, "    desktop %d\n", rs_desktop);
   }
   fprintf(fp, "    scrollbar_type %s\n", (scrollBar.type == SCROLLBAR_XTERM ? "xterm" : (scrollBar.type == SCROLLBAR_MOTIF ? "motif" : "next")));
-  fprintf(fp, "    scrollbar_width %d\n", scrollBar.width);
+  fprintf(fp, "    scrollbar_width %d\n", scrollbar_anchor_width());
   for (i = 0; i < 5; i++) {
     fprintf(fp, "    font %d %s\n", i, rs_font[i]);
   }
@@ -3466,6 +3480,154 @@ save_config(char *path)
 #endif
   fprintf(fp, "  end attributes\n\n");
 
+  fprintf(fp, "  begin imageclasses\n");
+  fprintf(fp, "    path \"%s\"\n", rs_path);
+  if (rs_icon != NULL) {
+    fprintf(fp, "    icon %s\n", rs_icon);
+  }
+  if (rs_anim_delay) {
+    /* FIXME:  Do something here! */
+  }
+  for (i = 0; i < image_max; i++) {
+    fprintf(fp, "    begin image\n");
+    switch (i) {
+      case image_bg:      fprintf(fp, "      type background\n"); break;
+      case image_sb:      fprintf(fp, "      type trough\n"); break;
+      case image_sa:      fprintf(fp, "      type anchor\n"); break;
+      case image_up:      fprintf(fp, "      type up_arrow\n"); break;
+      case image_down:    fprintf(fp, "      type down_arrow\n"); break;
+      case image_left:    fprintf(fp, "      type left_arrow\n"); break;
+      case image_right:   fprintf(fp, "      type right_arrow\n"); break;
+      case image_menu:    fprintf(fp, "      type menu\n"); break;
+      case image_submenu: fprintf(fp, "      type submenu\n"); break;
+    }
+    fprintf(fp, "      mode ");
+    switch (images[i].mode & MODE_MASK) {
+      case MODE_IMAGE:     fprintf(fp, "image"); break;
+      case MODE_TRANS:     fprintf(fp, "trans"); break;
+      case MODE_VIEWPORT:  fprintf(fp, "viewport"); break;
+      case MODE_AUTO:      fprintf(fp, "auto"); break;
+      default:             fprintf(fp, "solid"); break;
+    }
+    if (images[i].mode & ALLOW_MASK) {
+      fprintf(fp, " allow");
+      if (image_mode_is(i, ALLOW_IMAGE)) {
+        fprintf(fp, " image");
+      }
+      if (image_mode_is(i, ALLOW_TRANS)) {
+        fprintf(fp, " trans");
+      }
+      if (image_mode_is(i, ALLOW_VIEWPORT)) {
+        fprintf(fp, " viewport");
+      }
+      if (image_mode_is(i, ALLOW_AUTO)) {
+        fprintf(fp, " auto");
+      }
+    }
+    fprintf(fp, "\n");
+
+    /* Now save each state. */
+    simg = images[i].norm;
+    fprintf(fp, "      state normal\n");
+    if (simg->iml->im) {
+      fprintf(fp, "      file %s\n", NONULL(simg->iml->im->filename));
+    }
+    fprintf(fp, "      geom %hdx%hd+%hd+%hd", simg->pmap->w, simg->pmap->h, simg->pmap->x, simg->pmap->y);
+    if (simg->pmap->op & OP_TILE) {
+      fprintf(fp, ":tiled");
+    }
+    if (simg->pmap->op & OP_HSCALE) {
+      fprintf(fp, ":hscaled");
+    }
+    if (simg->pmap->op & OP_VSCALE) {
+      fprintf(fp, ":vscaled");
+    }
+    if (simg->pmap->op & OP_SCALE) {
+      fprintf(fp, ":scaled");
+    }
+    if (simg->pmap->op & OP_PROPSCALE) {
+      fprintf(fp, ":propscaled");
+    }
+    fprintf(fp, "\n");
+    if (simg->iml->mod) {
+      fprintf(fp, "      colormod image 0x%02x 0x%02x 0x%02x\n", simg->iml->mod->brightness, simg->iml->mod->contrast, simg->iml->mod->gamma);
+    }
+    /* FIXME:  Other mods */
+    if (simg->iml->border) {
+      fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top, simg->iml->border->bottom);
+    }
+    if (simg->iml->bevel) {
+      fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+    }
+    if (simg->iml->pad) {
+      fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top, simg->iml->pad->bottom);
+    }
+    /* FIXME:  Other states */
+    fprintf(fp, "    end image\n");
+  }
+  fprintf(fp, "  end imageclasses\n\n");
+
+  /* FIXME:  Menus */
+
+  fprintf(fp, "  begin actions\n");
+  for (action = action_list; action; action = action->next) {
+    fprintf(fp, "    bind ");
+    if (action->mod != MOD_NONE) {
+      if (action->mod & MOD_ANY) {
+        fprintf(fp, "anymod ");
+      }
+      if (action->mod & MOD_CTRL) {
+        fprintf(fp, "ctrl ");
+      }
+      if (action->mod & MOD_SHIFT) {
+        fprintf(fp, "shift ");
+      }
+      if (action->mod & MOD_LOCK) {
+        fprintf(fp, "lock ");
+      }
+      if (action->mod & MOD_MOD1) {
+        fprintf(fp, "mod1 ");
+      }
+      if (action->mod & MOD_MOD2) {
+        fprintf(fp, "mod2 ");
+      }
+      if (action->mod & MOD_MOD3) {
+        fprintf(fp, "mod3 ");
+      }
+      if (action->mod & MOD_MOD4) {
+        fprintf(fp, "mod4 ");
+      }
+      if (action->mod & MOD_MOD5) {
+        fprintf(fp, "mod5 ");
+      }
+      if (action->keysym) {
+        fprintf(fp, "0x%04x", (unsigned int) action->keysym);
+      } else {
+        fprintf(fp, "button");
+        if (action->button == Button5) {
+          fprintf(fp, "5");
+        } else if (action->button == Button4) {
+          fprintf(fp, "4");
+        } else if (action->button == Button3) {
+          fprintf(fp, "3");
+        } else if (action->button == Button2) {
+          fprintf(fp, "2");
+        } else {
+          fprintf(fp, "1");
+        }
+      }
+      fprintf(fp, " to ");
+      if (action->type == ACTION_STRING) {
+        fprintf(fp, "string \"%s\"\n", action->param.string);
+      } else if (action->type == ACTION_ECHO) {
+        fprintf(fp, "echo \"%s\"\n", action->param.string);
+      } else if (action->type == ACTION_MENU) {
+        fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title);
+      }
+    }
+  }
+  fprintf(fp, "  end actions\n\n");
+
 #ifdef MULTI_CHARSET
   fprintf(fp, "  begin multichar\n");
   fprintf(fp, "    encoding %s\n", rs_multchar_encoding);
@@ -3473,6 +3635,13 @@ save_config(char *path)
     fprintf(fp, "    font %d %s\n", i, rs_mfont[i]);
   }
   fprintf(fp, "  end multichar\n\n");
+#endif
+
+#ifdef USE_XIM
+  fprintf(fp, "  begin xim\n");
+  fprintf(fp, "    input_method %s\n", rs_input_method);
+  fprintf(fp, "    preedit_type %s\n", rs_preedit_type);
+  fprintf(fp, "  end xim\n\n");
 #endif
 
   fprintf(fp, "  begin toggles\n");
@@ -3496,6 +3665,7 @@ save_config(char *path)
   fprintf(fp, "    xterm_select %d\n", (Options & Opt_xterm_select ? 1 : 0));
   fprintf(fp, "    select_line %d\n", (Options & Opt_select_whole_line ? 1 : 0));
   fprintf(fp, "    select_trailing_spaces %d\n", (Options & Opt_select_trailing_spaces ? 1 : 0));
+  fprintf(fp, "    report_as_keysyms %d\n", (Options & Opt_report_as_keysyms ? 1 : 0));
   fprintf(fp, "  end toggles\n\n");
 
   fprintf(fp, "  begin keyboard\n");

@@ -2735,3 +2735,9 @@ Fri Nov  5 13:04:36 PST 1999	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
+Mon Nov  8 18:46:52 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Saving settings now works, for the most part.  Still some stuff to get
+	cleaned up, but it's basically there now.
+	
+-------------------------------------------------------------------------------

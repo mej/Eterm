@@ -25,9 +25,9 @@ begin main
     cursor #ffff00
     cursor_text #880000
     scrollbar #3f1c00
-    unfocusedscrollbar #777777
+    unfocused_scrollbar #777777
     menu #777777
-    unfocusedmenu #777777
+    unfocused_menu #777777
     menu_text black
     pointer white
 
@@ -273,8 +273,7 @@ begin main
 
 
 # If true, Eterm will select the whole line when you triple click on the
-# window, instead of from that location/word to the end of the line
-# (because that behaviour sucks --Mandrake)
+# window, instead of from that location/word to the end of the line.
     select_line false
 
 # If true, Eterm will handle the Meta (Alt) + keypress to set the 8th bit.
