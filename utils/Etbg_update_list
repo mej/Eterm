@@ -49,10 +49,10 @@ begin menu
 EOF
 if [ -d tile ]; then
     for i in `(cd tile && ls -1)` ; do 
-        echo '"tile/'$i'@0x0+0+0:tile"' >> $LISTFILE.new
+        echo '"tile/'$i'@0+0:tile"' >> $LISTFILE.new
         echo "  begin menuitem" >&3
         eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
-        echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
+        echo "    action string \"\\e]20;tile/$i;0+0:tile\\a\"" >&3
         echo "  end" >&3
     done
 fi
@@ -64,10 +64,10 @@ EOF
 
 if [ -d scale ]; then
     for i in `(cd scale && ls -1)` ; do \
-        echo '"scale/'$i'@100x100"' >> $LISTFILE.new ; \
+        echo '"scale/'$i'@100"' >> $LISTFILE.new ; \
         echo "  begin menuitem" >&3
         eval echo "\ \ \ \ text \\\"\`echo $i | $SEDCMD\`\\\"" >&3
-        echo "    action string \"\\e]20;tile/$i;0x0+0+0:tile\\a\"" >&3
+        echo "    action string \"\\e]20;scale/$i;100\\a\"" >&3
         echo "  end" >&3
     done
 fi
