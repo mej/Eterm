@@ -2595,3 +2595,8 @@ Mon Oct 18 19:33:26 PDT 1999    Mandrake <mandrake@mandrake.net>
 	Esetroot.c and in Etbg, but I'll fix those later.
 
 -------------------------------------------------------------------------------
+
+Mon Oct 18 23:59:17 PDT 1999    Mandrake <mandrake@mandrake.net>
+
+	More warning bashing in Esetroot.c
+-------------------------------------------------------------------------------

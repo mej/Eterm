@@ -31,6 +31,7 @@ unsigned char debug = 0;
 
 #define Xdepth	 (DefaultDepth(Xdisplay, screen))
 
+void set_pixmap_property(Pixmap p);
 void
 set_pixmap_property(Pixmap p)
 {
@@ -45,7 +46,7 @@ set_pixmap_property(Pixmap p)
 
   if (debug) {
     fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  prop_root == 0x%08x, prop_esetroot == 0x%08x\n", __FILE__, __LINE__,
-	    p, prop_root, prop_esetroot);
+	    (unsigned int)  p, (unsigned int) prop_root, (unsigned int) prop_esetroot);
   }
   if (prop_root != None && prop_esetroot != None) {
     XGetWindowProperty(Xdisplay, Xroot, prop_root, 0L, 1L, False, AnyPropertyType,
@@ -56,11 +57,11 @@ set_pixmap_property(Pixmap p)
       if (data_root && data_esetroot) {
 	if (debug) {
 	  fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  data_root == 0x%08x, data_esetroot == 0x%08x\n", __FILE__, __LINE__,
-		  p, *((Pixmap *) data_root), *((Pixmap *) data_esetroot));
+		  (unsigned int) p, (unsigned int) *((Pixmap *) data_root), (unsigned int) *((Pixmap *) data_esetroot));
 	}
 	if (type == XA_PIXMAP && *((Pixmap *) data_root) == *((Pixmap *) data_esetroot)) {
 	  if (debug) {
-	    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  XKillClient() is being called.\n", __FILE__, __LINE__, p);
+	    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  XKillClient() is being called.\n", __FILE__, __LINE__, (unsigned int) p);
 	  }
 	  XKillClient(Xdisplay, *((Pixmap *) data_root));
 	}
@@ -81,7 +82,7 @@ set_pixmap_property(Pixmap p)
   XChangeProperty(Xdisplay, Xroot, prop_esetroot, XA_PIXMAP, 32, PropModeReplace,
 		  (unsigned char *) &p, 1);
   if (debug) {
-    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  _XROOTPMAP_ID and ESETROOT_PMAP_ID set to 0x%08x.\n", __FILE__, __LINE__, p, p);
+    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  _XROOTPMAP_ID and ESETROOT_PMAP_ID set to 0x%08x.\n", __FILE__, __LINE__, (unsigned int) p, (unsigned int) p);
   }
   XSetCloseDownMode(Xdisplay, RetainPermanent);
   XFlush(Xdisplay);
@@ -161,16 +162,16 @@ main(int argc, char *argv[])
   scr = ScreenOfDisplay(Xdisplay, screen);
   if (debug) {
     fprintf(stderr, "%s:%d:  Chose screen %d\n", __FILE__, __LINE__, screen);
-    fprintf(stderr, "%s:%d:  Root window is 0x%08x\n", __FILE__, __LINE__, Xroot);
-    fprintf(stderr, "%s:%d:  Found screen information at 0x%08x\n", __FILE__, __LINE__, scr);
+    fprintf(stderr, "%s:%d:  Root window is 0x%08x\n", __FILE__, __LINE__, (unsigned int) Xroot);
+    fprintf(stderr, "%s:%d:  Found screen information at 0x%08x\n", __FILE__, __LINE__, (unsigned int) scr);
   }
   params.flags = PARAMS_VISUALID;
   params.visualid = (DefaultVisual(Xdisplay, screen))->visualid;
   id = Imlib_init_with_params(Xdisplay, &params);
   im = Imlib_load_image(id, fname);
   if (debug) {
-    fprintf(stderr, "%s:%d:  The Imlib Data is at 0x%08x\n", __FILE__, __LINE__, id);
-    fprintf(stderr, "%s:%d:  The Imlib Image is at 0x%08x\n", __FILE__, __LINE__, im);
+    fprintf(stderr, "%s:%d:  The Imlib Data is at 0x%08x\n", __FILE__, __LINE__, (unsigned int) id);
+    fprintf(stderr, "%s:%d:  The Imlib Image is at 0x%08x\n", __FILE__, __LINE__, (unsigned int) im);
   }
   if (scale) {
     w = scr->width;
@@ -206,13 +207,13 @@ main(int argc, char *argv[])
   }
   if (debug) {
     fprintf(stderr, "%s:%d:  Assigned width and height for rendering as %dx%d\n", __FILE__, __LINE__, w, h);
-    fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y, p);
-    fprintf(stderr, "%s:%d:  Applied Graphics Context 0x%08x to pixmap.\n", __FILE__, __LINE__, gc);
+    fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y, (unsigned int) p);
+    fprintf(stderr, "%s:%d:  Applied Graphics Context 0x%08x to pixmap.\n", __FILE__, __LINE__, (unsigned int) gc);
   }
   Imlib_render(id, im, w, h);
   temp_pmap = Imlib_move_image(id, im);
   if (debug) {
-    fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, temp_pmap);
+    fprintf(stderr, "%s:%d:  Rendered at %dx%d onto pixmap 0x%08x\n", __FILE__, __LINE__, w, h, (unsigned int) temp_pmap);
   }
   if (temp_pmap != None) {
     XSetTile(Xdisplay, gc, temp_pmap);
