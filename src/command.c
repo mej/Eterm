@@ -1030,12 +1030,11 @@ handle_child_signal(int sig)
      our immediate child that exited.  We exit gracefully. */
   if (pid == cmd_pid && cmd_pid != -1) {
     if (Options & Opt_pause) {
-      const char *message = "\r\nPress any key to exit " APL_NAME "....";
+      const char *done = " -- Task Finished, ESC to exit";
 
-      scr_refresh(DEFAULT_REFRESH);
-      scr_add_lines((unsigned char *) message, 1, strlen(message));
-      scr_refresh(DEFAULT_REFRESH);
-      keypress_exit = 1;
+      append_to_title(done);
+      append_to_icon_name(done);
+      paused = 1;
       return;
     }
     exit(EXIT_SUCCESS);
@@ -2441,7 +2440,9 @@ cmd_getc(void)
 
     /* Nothing to do! */
     FD_ZERO(&readfds);
-    FD_SET(cmd_fd, &readfds);
+    if (cmd_fd >= 0) {
+      FD_SET(cmd_fd, &readfds);
+    }
     FD_SET(Xfd, &readfds);
     if (pipe_fd >= 0) {
       FD_SET(pipe_fd, &readfds);
@@ -2461,7 +2462,7 @@ cmd_getc(void)
     retval = select(num_fds, &readfds, NULL, NULL, delay);
 
     /* See if we can read from the application */
-    if (FD_ISSET(cmd_fd, &readfds)) {
+    if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
       register unsigned int count = CMD_BUF_SIZE;
 
       cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
@@ -2469,8 +2470,12 @@ cmd_getc(void)
 
 	register int n = read(cmd_fd, cmdbuf_endp, count);
 
-	if (n <= 0)
+	if (n <= 0) {
+          if (paused) {
+            cmd_fd = -1;
+          }
 	  break;
+        }
 	cmdbuf_endp += n;
 	count -= n;
       }

@@ -181,6 +181,10 @@ extern void set_colorfgbg(void);
 #else
 # define set_colorfgbg() ((void)0)
 #endif /* NO_BRIGHTCOLOR */
+extern void set_title(const char *);
+extern void set_icon_name(const char *);
+extern void append_to_title(const char *);
+extern void append_to_icon_name(const char *);
 extern void xterm_seq(int, const char *);
 
 _XFUNCPROTOEND

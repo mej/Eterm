@@ -80,7 +80,7 @@ typedef struct {
 } mouse_button_state_t;
 
 /************ Variables ************/
-extern unsigned char keypress_exit;
+extern unsigned char paused;
 extern event_master_t event_master;
 extern mouse_button_state_t button_state;
 

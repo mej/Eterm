@@ -3625,3 +3625,27 @@ Tue May 30 08:49:43 PDT 2000	Michael Jennings <mej@eterm.org>
 	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
+Wed May 31 22:34:12 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Okay, first off I need to thank Marius Gedminas <mgedmin@takas.lt>.
+	Not only did he point out several issues, he was even willing to send
+	a patch. :-)
+
+	This commit includes Marius' patch which keeps MappingNotify events
+	from overriding users' modifier settings.  It also includes a fix to
+	a seg fault that he pointed out when menus were loaded without the
+	menu imageclass having been defined.
+
+	He also pointed out that --pause tends to sit and spin, taking up 100%
+	of the CPU time.  Funny how E-Cpu never seemed to get too bent out of
+	shape over it, but he was indeed correct.
+
+	Thus I have fixed it, and while doing so, I have changed the way it
+	works.  It no longer waits for a keypress per se.  Actually, it just
+	ignores the fact that its child went away and keeps right on taking
+	X events.  There are a few exceptions though.  Either ESC or Ctrl-C
+	will exit a paused Eterm.  Any other input that doesn't have special
+	meaning to Eterm will be ignored.  (Shift-PgUp and Shift-PgDn still
+	work however, as do any action bindings you may have.)
+	
+-------------------------------------------------------------------------------

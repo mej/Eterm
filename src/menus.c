@@ -428,7 +428,6 @@ menu_create(char *title)
   menu_t *menu;
   static Cursor cursor;
   static long mask;
-  static XGCValues gcvalue;
   static XSetWindowAttributes xattr;
 
   if (!mask) {
@@ -440,7 +439,6 @@ menu_create(char *title)
 
     cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
     mask = PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask | Button3MotionMask;
-    gcvalue.foreground = images[image_menu].norm->fg;
   }
   menu = (menu_t *) MALLOC(sizeof(menu_t));
   MEMSET(menu, 0, sizeof(menu_t));
@@ -455,7 +453,7 @@ menu_create(char *title)
   menu->swin = XCreateWindow(Xdisplay, menu->win, 0, 0, 1, 1, 0, Xdepth, InputOutput, CopyFromParent,
 			     CWOverrideRedirect | CWSaveUnder | CWBackingStore | CWBorderPixel | CWColormap, &xattr);
 
-  menu->gc = X_CREATE_GC(GCForeground, &gcvalue);
+  menu->gc = X_CREATE_GC(0, NULL);
   menuitem_clear_current(menu);
 
   return menu;

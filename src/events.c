@@ -52,7 +52,7 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
-unsigned char keypress_exit = 0;
+unsigned char paused = 0;
 event_master_t event_master;
 event_dispatcher_data_t primary_data;
 mouse_button_state_t button_state =
@@ -203,7 +203,7 @@ unsigned char
 handle_key_press(event_t * ev)
 {
 #ifdef COUNT_X_EVENTS
-  static long long keypress_cnt = 0;
+  static unsigned long keypress_cnt = 0;
 #endif
 
   PROF_INIT(handle_key_press);
@@ -723,7 +723,7 @@ unsigned char
 handle_motion_notify(event_t * ev)
 {
 #ifdef COUNT_X_EVENTS
-  static long long motion_cnt = 0;
+  static unsigned long motion_cnt = 0;
 #endif
 
   PROF_INIT(handle_motion_notify);
@@ -762,7 +762,7 @@ unsigned char
 process_x_event(event_t * ev)
 {
 #ifdef COUNT_X_EVENTS
-  static long long event_cnt = 0;
+  static unsigned long event_cnt = 0;
 #endif
 
   COUNT_EVENT(event_cnt);

@@ -318,7 +318,7 @@ static const struct {
       OPT_BLONG("backing-store", "use backing store", &Options, Opt_backing_store),
       OPT_BLONG("double-buffer", "use double-buffering to reduce exposes (uses more memory)", &Options, Opt_double_buffer),
       OPT_BLONG("no-cursor", "disable the text cursor", &Options, Opt_noCursor),
-      OPT_BLONG("pause", "pause for a keypress after the child process exits", &Options, Opt_pause),
+      OPT_BLONG("pause", "pause after the child process exits", &Options, Opt_pause),
       OPT_BLONG("xterm-select", "duplicate xterm's broken selection behavior", &Options, Opt_xterm_select),
       OPT_BLONG("select-line", "triple-click selects whole line", &Options, Opt_select_whole_line),
       OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &Options, Opt_select_trailing_spaces),

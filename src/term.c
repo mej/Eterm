@@ -168,6 +168,17 @@ get_modifiers(void)
     D_X11(("Defaulted Alt key to match Meta mask\n"));
     AltMask = MetaMask;  /* MetaMask will always be defined at this point. */
   }
+
+  /* See if the user wants to override any of those */
+  if (rs_meta_mod) {
+    MetaMask = modmasks[rs_meta_mod - 1];
+  }
+  if (rs_alt_mod) {
+    AltMask = modmasks[rs_alt_mod - 1];
+  }
+  if (rs_numlock_mod) {
+    NumLockMask = modmasks[rs_numlock_mod - 1];
+  }
 }
 
 /* To handle buffer overflows properly, we must malloc a buffer.  Free it when done. */
@@ -260,10 +271,6 @@ lookup_key(XEvent * ev)
     LK_RET();
   }
   if (len) {
-    /* If we're in pause mode, exit. */
-    if (keypress_exit) {
-      exit(0);
-    }
     /* Only home for keypresses with length. */
     if (Options & Opt_home_on_input) {
       TermWin.view_start = 0;
@@ -373,6 +380,16 @@ lookup_key(XEvent * ev)
       LK_RET();
 #endif
       break;
+  }
+
+  /* At this point, all the keystrokes that have special meaning to us have been handled.
+     If we're in pause mode, this is a keystroke we need to ignore.  Just return here. */
+  if (paused) {
+    /* Allow ESC or Ctrl-C to exit. */
+    if ((keysym == XK_Escape) || ((ctrl) && ((keysym == XK_C) || (keysym == XK_c)))) {
+      exit(0);
+    }
+    LK_RET();
   }
 
   /* Process extended keysyms.  This is where the conversion to escape sequences happens. */
@@ -1612,7 +1629,7 @@ set_colorfgbg(void)
 }
 #endif /* NO_BRIGHTCOLOR */
 
-static void
+void
 set_title(const char *str)
 {
   static char *name = NULL;
@@ -1630,7 +1647,7 @@ set_title(const char *str)
   }
 }
 
-static void
+void
 set_icon_name(const char *str)
 {
   static char *name = NULL;
@@ -1643,6 +1660,40 @@ set_icon_name(const char *str)
     D_X11(("Setting window icon name to \"%s\"\n", str));
     XSetIconName(Xdisplay, TermWin.parent, str);
     name = StrDup(str);
+  }
+}
+
+void
+append_to_title(const char *str)
+{
+  char *name, *buff;
+
+  REQUIRE(str != NULL);
+
+  XFetchName(Xdisplay, TermWin.parent, &name);
+  if (name != NULL) {
+    buff = (char *) MALLOC(strlen(name) + strlen(str) + 1);
+    strcpy(buff, name);
+    strcat(buff, str);
+    set_title(buff);
+    FREE(buff);
+  }
+}
+
+void
+append_to_icon_name(const char *str)
+{
+  char *name, *buff;
+
+  REQUIRE(str != NULL);
+
+  XGetIconName(Xdisplay, TermWin.parent, &name);
+  if (name != NULL) {
+    buff = (char *) MALLOC(strlen(name) + strlen(str) + 1);
+    strcpy(buff, name);
+    strcat(buff, str);
+    set_icon_name(buff);
+    FREE(buff);
   }
 }
 
