@@ -599,6 +599,12 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
       if (simg->pmap->pixmap != None) {
 	XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
         if ((pw <= 0) || (ph <= 0)) {
+          /* Reset and try again. */
+          get_desktop_window();
+          get_desktop_pixmap();
+          XGetGeometry(Xdisplay, desktop_pixmap, &w, &px, &py, &pw, &ph, &pb, &pd);
+        }
+        if ((pw <= 0) || (ph <= 0)) {
           print_error("Value of desktop pixmap property is invalid.  Please restart your "
                       "window manager or use Esetroot to set a new one.");
           desktop_pixmap = None;
@@ -1024,7 +1030,7 @@ load_image(const char *file, short type)
 
 # ifdef PIXMAP_OFFSET
 
-#  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0xff || (mod)->contrast != 0xff || (mod)->gamma != 0xff))
+#  define MOD_IS_SET(mod) ((mod) && ((mod)->brightness != 0x100 || (mod)->contrast != 0x100 || (mod)->gamma != 0x100))
 
 unsigned char
 need_colormod(register imlib_t *iml)
@@ -1076,6 +1082,8 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
   if (rm == 256 && gm == 256 && bm == 256) {
     return;			/* Nothing to do */
   }
+  D_PIXMAP((" -> rm == %hu, gm == %hu, bm == %hu, shade == %hu\n", rm, gm, bm, shade));
+
   if (Xdepth <= 8) {
 
     XColor cols[256];
@@ -1109,7 +1117,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 		  p, w, h);
     return;
   }
-  D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.", p, w, h, ximg));
+  D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.\n", p, w, h, ximg));
   if (Xdepth <= 8) {
     D_PIXMAP(("Rendering low-depth image, depth == %d\n", (int) Xdepth));
     for (y = 0; y < h; y++) {
@@ -1153,10 +1161,13 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
     for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
 	v = XGetPixel(ximg, x, y);
-	r = ((((v >> br) & mr) * rm) >> 8) & 0xff;
-	g = ((((v >> bg) & mg) * gm) >> 8) & 0xff;
-	b = ((((v << bb) & mb) * bm) >> 8) & 0xff;
-	v = ((r & mr) << br) | ((g & mg) << bg) | ((b & mb) >> bb);
+#define R() (((((v >> br) & mr) * rm) >> 8) & 0xff)
+#define G() (((((v >> bg) & mg) * gm) >> 8) & 0xff)
+#define B() (((((v << bb) & mb) * bm) >> 8) & 0xff)
+	v = ((R() & mr) << br) | ((G() & mg) << bg) | ((B() & mb) >> bb);
+#undef R
+#undef G
+#undef B
 	XPutPixel(ximg, x, y, v);
       }
     }
