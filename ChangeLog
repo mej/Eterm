@@ -5198,3 +5198,8 @@ Thu Mar 11 11:55:45 2004                        Michael Jennings (mej)
 
 Fix "make distcheck"
 ----------------------------------------------------------------------
+Mon Apr  5 17:12:06 2004                        Michael Jennings (mej)
+
+Fixed bug in loading print_pipe attribute pointed out by Tom A. Cox
+<tomc@hot.rr.com>.
+----------------------------------------------------------------------

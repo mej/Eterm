@@ -1441,8 +1441,7 @@ parse_misc(char *buff, void *state)
     }
     if (!BEG_STRCASECMP(buff, "print_pipe ")) {
 #ifdef PRINTPIPE
-        RESET_AND_ASSIGN(rs_print_pipe, STRDUP(get_pword(2, buff)));
-        chomp(rs_print_pipe);
+        RESET_AND_ASSIGN(rs_print_pipe, get_word(2, buff));
 #else
         print_warning("Support for the print_pipe attribute was not compiled in, ignoring\n");
 #endif
