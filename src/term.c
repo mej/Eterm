@@ -84,11 +84,6 @@ char *def_colorName[] =
 #ifndef NO_BOLDUNDERLINE
   ,NULL, NULL			/* colorBD, colorUL */
 #endif				/* NO_BOLDUNDERLINE */
-  ,"rgb:ff/ff/ff"		/* menuTextColor */
-  ,"rgb:b2/b2/b2"		/* scrollColor: match Netscape color */
-  ,NULL				/* menuColor: match scrollbar color */
-  ,NULL				/* unfocusedscrollColor: somebody chose black? */
-  ,NULL				/* unfocusedMenuColor */
 };
 char *rs_color[NRS_COLORS];
 Pixel PixColors[NRS_COLORS + NSHADOWCOLORS];

@@ -61,7 +61,8 @@ is an integer between 0 and 5 which determines how verbose the debugging
 output is.
 .TP
 .B \-\-install
-Tells Eterm to install its own colormap rather than using the default one.
+Tells Eterm to install its own colormap rather than using the default
+one.
 .TP
 .BR "\-h" , " \-\-help"
 Print out a message describing available options.
@@ -108,33 +109,6 @@ as the bold color.
 Use
 .I color
 as the underline color.
-.TP
-.BI \-\-menu-color " color"
-Use
-.I color
-as the menu color (only makes sense if menu is enabled).
-.TP
-.BI \-\-menu-text-color " color"
-Use
-.I color
-as the menu text color (only makes sense if menu is enabled).
-.TP
-.BI \-S " color" ", \-\-scrollbar-color " color
-Use
-.I color
-as the scrollbar color (only makes sense if scrollbar is enabled).
-.TP
-.BI \-\-unfocused-menu-color " color
-Use
-.I color
-as the menu color when window does not have focus 
-(only makes sense if scrollbar is enabled).
-.TP
-.BI \-\-unfocused-scrollbar-color " color
-Use
-.I color
-as the scrollbar color when window does not have focus 
-(only makes sense if scrollbar is enabled).
 .TP
 .BI \-\-pointer-color " color"
 Use
@@ -200,19 +174,62 @@ Size of the extra gap, in pixels, to provide between lines in the terminal windo
 .TP
 .BI \-\-bold-font " font"
 Sets the bold text font to
-.I font.
+.IR font .
 .TP
 .BI \-F " font" ", \-\-font " font
 Sets the normal text font to
-.I font.
+.IR font .
+.TP
+.BI \-\-default-font\-index " num"
+Specifies the index of the default (normal) text font.
 .TP
 .BI \-\-font1 " font"
 .TP
 .BI ...
 .TP
 .BI \-\-font4 " font"
-Sets font X to
-.I font.
+Sets the font at the specified index (1-4) to
+.IR font .
+.TP
+.BI \-\-font-fx " effects"
+Specifies the effects to apply to the terminal window font.  The value
+of
+.I effects
+is a single string containing a series of corner/color pairs.  These
+pairs define toward which corner a drop shadow of each character
+should be made, and what color that shadow will be.  The corner is
+specified first using the following keywords:
+.BR top_left " or " tl ", "
+.BR top_right " or " tr ", "
+.BR bottom_left " or " bl ", and "
+.BR bottom_right " or " br .
+Each corner specifier is then followed by a color.
+
+There are also several shortcuts for doing common effects.  You can
+get a single-color outline by using the keyword
+.B outline
+followed by a color.  A single-color drop shadow is also available
+using the keyword
+.B shadow
+followed by an optional corner specifier
+.BR "" "(" bottom_right " being the default)"
+and a color.  For a 3-D embossed look, use
+.BI emboss " dark_color"
+.IR light_color .
+The opposite effect, a carved-out look, can be obtained with
+.BI carved " dark_color"
+.IR light_color .
+(Of course, with those last two, the 3-D look will only work if you
+choose the light and dark colors wisely.)
+
+Finally, for no font effects at all, simply specify the keyword
+.BR none .
+
+The default value is
+.B bottom_right black
+which yields a black drop shadow, greatly improving the visibility of
+lightly-colored fonts on top of light spots in a background image.
+Note that font effects are not active in solid color mode.
 .TP
 .BI \-P " pic" ", \-\-background-pixmap " pic
 Use
@@ -273,6 +290,17 @@ program (found in the
 .B utils/
 directory) to set your root background image.
 .TP
+.BR \-0 ", " \-\-itrans
+Activate the immutable transparency optimization for transparent Eterm
+windows.  Note that this does NOT activate transparency; you must
+still include the
+.BR \-O " or " \-\-trans
+option.  This option should be used on transparent windows which are
+shaded or tinted and which do not move around on the desktop much.
+See the
+.B "Mon Mar  6 21:11:13 PST 2000"
+ChangeLog entry for a more detailed explanation.
+.TP
 .BR \-\-viewport-mode
 This activates a special Eterm mode which is hard to describe in words.
 Basically, imagine the effect you get with pseudo-transparency, where
@@ -284,6 +312,36 @@ desktop, and dragging the Eterm around the screen reveals different
 portions of the image as you move, much like a small viewport window
 in a ship or submarine does.  The effect is especially keen if you
 open several Eterms in this mode with the same image.
+.TP
+.BI \-\-shade " percentage"
+Shade the background image/transparency by a specified percentage.
+.TP
+.BI \-\-tint " mask"
+.TP
+.BI \-\-tint " color"
+Tints the background pixmap (either an image file or the transparent
+portion can be shaded).  The
+.I mask
+is an integer, usually specified in hexadecimal in the form
+.BR " " "0x" "RRGGBB" ","
+where
+.BR "RR" ", " "GG" ", and " "BB"
+are hexadecimal numbers between
+.BR "00" " and " "ff" " (" "0" " and"
+.BR "255" " decimal)"
+which represent the brightness of the image's red, green, and blue
+values, respectively.  A value of
+.B 00
+will mask that color out entirely, while a value of
+.B ff
+will not change that color at all.
+
+You may also specify an X
+.I color
+such as
+.BR grey75 " or " MidnightBlue " or " "#babb7f"
+instead of a
+.IR mask .
 .TP
 \fB\-\-cmod\fR \fIbrightness\fR [ \fIcontrast\fR [ \fIgamma \fR] ]
 Specifies a color modifier to apply to the image overall.  Each of the three
@@ -312,7 +370,13 @@ image.
 .BI \-p " newpath" ", \-\-path " newpath
 Sets the pic search path.  When the
 .B --background-pixmap
-or other pixmap options are used, this path will be used to find the image.
+or other pixmap options are used, this path will be used to find the
+image.
+.TP
+.BI \-\-cache " size"
+Specify the
+.I size
+in bytes for the Imlib2 cache.
 .TP
 .BI \-N " list" ", \-\-anim " list
 Specifies an animation list to be use in cycling the background pixmap.  The
@@ -320,16 +384,10 @@ Specifies an animation list to be use in cycling the background pixmap.  The
 consists of two or more words.  The first word defines the delay, in seconds,
 between updates of the background.  This should be set to a reasonable value
 to insure that Eterm doesn't spend all its time rendering backgrounds.  All
-remaining words have the same syntax as the
-.B background
-attribute in a configuration file (two integers followed by the image filename),
-except that the two integers are optional.  If they are specified, remember to
-group them with the filename using quotes.  The following are both valid:
-.RS 10
-Eterm -N '10 image1.jpg image2.jpg'
-.br
-Eterm -N '10 "0 0 image1.jpg" "-1 -1 image2.jpg"'
-.RE
+remaining words specify background images and have the same syntax as
+the
+.B \-P
+option above, including the optional geometry string.
 .TP
 .BI \-M " font" ", \-\-mfont " font
 Sets the normal multibyte text font to
@@ -366,14 +424,15 @@ to run setuid or setgid, usually setuid root.
 Enables the "visual bell".  Means the window will flash or blink rather
 than beep.
 .TP
-.BR "\-H", " \-\-home-on-echo"
+.BR "\-H", " \-\-home-on-output"
 Jump to bottom on output.
 .TP
 .BR "\-\-home-on-input"
 Jump to bottom on input.
 .TP
-.BR "\-E", " \-\-home-on-refresh"
-Jump to bottom on refresh (^L)
+.BR \-q ", " \-\-no-input
+Keeps Eterm from accepting keyboard input, and keeps the window
+manager from focusing it.  Useful for log tailers and such.
 .TP
 .BR "\-\-scrollbar-right"
 Display scrollbar on the right hand side.
@@ -393,9 +452,13 @@ Un-iconify on beep.
 .BR "\-8", " \-\-meta8"
 Causes the Meta key to set the 8th bit in the char.
 .TP
-.BR "\-\-backing-store"
-If supported by the X server, tries to use backing store for faster
-refreshes.
+.BR "\-\-double-buffer"
+Rather than drawing text directly onto the window, this option causes
+Eterm to allocate an additional pixmap the size of the terminal window
+into which the background *and* the text are rendered.  This pixmap is
+then set as the window background.  Double-buffering uses additional
+memory in the X server, but it allows Eterm to ignore expose events so
+redraws are faster.
 .TP
 .BR "\-\-no-cursor"
 Disables the text cursor.
@@ -490,10 +553,42 @@ The pipe for the PrintScreen function.
 .BI \-\-cut-chars " separators"
 The seperators for double-click selection.
 .TP
+.BI \-\-finished-title " title"
+Specifies the string Eterm should add to its title bar if
+.B \-\-pause
+is specified and the child process completes.
+.TP
+.BI \-\-finished-text " text"
+Same as above, but displays text in the terminal window.
+.TP
 .BI \-\-term-name " TERM"
 Use
 .I TERM
 for the value $TERM.
+.TP
+.BI \-\-pipe-name " pipe"
+Specifies a named pipe from which to display output.  This is useful
+for systems where syslog output goes to a named pipe, like
+.B /dev/xconsole
+on Debian.
+.TP
+.BI "\-a " "line" ", \-\-attribute " "line"
+This option is used to pass config file attributes on the command
+line.
+.I line
+should be a single string, so you will almost certainly have to quote
+it.  The first word of
+.I line
+must be the context (see config file section below) which should parse
+the rest of the
+.IR line .
+So, for example, you could specify the foreground color like so:
+.BR "-a 'color foreground blue'" .
+Or you could add a binding:
+.BR "-a 'actions bind anymod button1 to script exit'" .
+Note that this option may only be used with config file attributes
+that are not context-sensitive; i.e., menus and imageclasses cannot be
+specified using this option.
 .TP
 .BR "\-C", " \-\-console"
 Grab console messages.  Depending on your system, Eterm may need to be

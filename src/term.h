@@ -115,11 +115,6 @@ enum color_list {
     colorBD,
     colorUL,
 # endif
-    menuTextColor,
-    scrollColor,
-    menuColor,
-    unfocusedScrollColor,
-    unfocusedMenuColor,
     NRS_COLORS,				/* */
     topShadowColor = NRS_COLORS,
     bottomShadowColor,

@@ -1236,8 +1236,8 @@ sco_get_pty(void)
 
   for (idx = 0; idx < 256; idx++) {
 
-    sprintf(ptydev, "%s%d", "/dev/ptyp", idx);
-    sprintf(ttydev, "%s%d", "/dev/ttyp", idx);
+    sprintf(ptydev, "/dev/ptyp%d", idx);
+    sprintf(ttydev, "/dev/ttyp%d", idx);
 
     if (access(ttydev, F_OK) < 0) {
       idx = 256;

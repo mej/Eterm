@@ -198,11 +198,6 @@ static const struct {
       OPT_LONG("colorBD", "bold color", &rs_color[colorBD]),
       OPT_LONG("colorUL", "underline color", &rs_color[colorUL]),
 #endif /* NO_BOLDUNDERLINE */
-      OPT_LONG("menu-color", "menu color", &rs_color[menuColor]),
-      OPT_LONG("menu-text-color", "menu text color", &rs_color[menuTextColor]),
-      OPT_STR('S', "scrollbar-color", "scrollbar color", &rs_color[scrollColor]),
-      OPT_LONG("unfocused-menu-color", "unfocused menu color", &rs_color[unfocusedMenuColor]),
-      OPT_LONG("unfocused-scrollbar-color", "unfocused scrollbar color", &rs_color[unfocusedScrollColor]),
       OPT_LONG("pointer-color", "mouse pointer color", &rs_color[pointerColor]),
 #ifndef NO_CURSORCOLOR
       OPT_STR('c', "cursor-color", "cursor color", &rs_color[cursorColor]),
@@ -314,7 +309,7 @@ static const struct {
 
 /* =======[ Misc options ]======= */
       OPT_INT('L', "save-lines", "lines to save in scrollback buffer", &rs_saveLines),
-      OPT_INT('a', "min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
+      OPT_ILONG("min-anchor-size", "minimum size of the scrollbar anchor", &rs_min_anchor_size),
 #ifdef BORDER_WIDTH_OPTION
       OPT_INT('w', "border-width", "term window border width", &(TermWin.internalBorder)),
 #endif
@@ -328,6 +323,7 @@ static const struct {
       OPT_LONG("finished-text", "text to output after program termination", &rs_finished_text),
       OPT_LONG("term-name", "value to use for setting $TERM", &rs_term_name),
       OPT_LONG("pipe-name", "filename of console pipe to emulate -C", &rs_pipe_name),
+      OPT_STR('a', "attribute", "parse an attribute in the specified context", NULL),
       OPT_BOOL('C', "console", "grab console messages", &Options, Opt_console),
       OPT_ARGS('e', "exec", "execute a command rather than a shell", &rs_exec_args)
 };
@@ -897,6 +893,8 @@ get_options(int argc, char *argv[])
 	usage();
       } else if (!strcasecmp(opt, "version")) {
 	version();
+      } else if (!strcasecmp(opt, "attribute")) {
+        conf_parse_line(NULL, val_ptr);
       } else {			/* It's not --exec */
 	if (optList[j].flag & OPT_BOOLEAN) {	/* Boolean value */
 	  D_OPTIONS(("Boolean option detected\n"));
@@ -1009,7 +1007,8 @@ get_options(int argc, char *argv[])
 	  return;
 	} else if (opt[pos] == 'h') {
 	  usage();
-
+	} else if (opt[pos] == 'a') {
+          conf_parse_line(NULL, val_ptr);
 	} else {
 	  if (optList[j].flag & OPT_BOOLEAN) {	/* Boolean value */
 	    D_OPTIONS(("Boolean option detected\n"));
@@ -1180,21 +1179,6 @@ parse_color(char *buff, void *state)
 #else
     print_warning("Support for the cursor_text attribute was not compiled in, ignoring\n");
 #endif
-
-  } else if (!BEG_STRCASECMP(buff, "menu ")) {
-    RESET_AND_ASSIGN(rs_color[menuColor], get_word(2, buff));
-
-  } else if (!BEG_STRCASECMP(buff, "menu_text ")) {
-    RESET_AND_ASSIGN(rs_color[menuTextColor], get_word(2, buff));
-
-  } else if (!BEG_STRCASECMP(buff, "scrollbar ")) {
-    RESET_AND_ASSIGN(rs_color[scrollColor], get_word(2, buff));
-
-  } else if (!BEG_STRCASECMP(buff, "unfocused_menu ")) {
-    RESET_AND_ASSIGN(rs_color[unfocusedMenuColor], get_word(2, buff));
-
-  } else if (!BEG_STRCASECMP(buff, "unfocused_scrollbar ")) {
-    RESET_AND_ASSIGN(rs_color[unfocusedScrollColor], get_word(2, buff));
 
   } else if (!BEG_STRCASECMP(buff, "pointer ")) {
     RESET_AND_ASSIGN(rs_color[pointerColor], get_word(2, buff));
@@ -3344,21 +3328,6 @@ save_config(char *path, unsigned char save_theme)
   fprintf(fp, "    background %s\n", rs_color[bgColor]);
   fprintf(fp, "    cursor %s\n", rs_color[cursorColor]);
   fprintf(fp, "    cursor_text %s\n", rs_color[cursorColor2]);
-  if (rs_color[menuColor]) {
-    fprintf(fp, "    menu %s\n", rs_color[menuColor]);
-  }
-  if (rs_color[unfocusedMenuColor]) {
-    fprintf(fp, "    unfocused_menu %s\n", rs_color[unfocusedMenuColor]);
-  }
-  if (rs_color[menuTextColor]) {
-    fprintf(fp, "    menu_text %s\n", rs_color[menuTextColor]);
-  }
-  if (rs_color[scrollColor]) {
-    fprintf(fp, "    scrollbar %s\n", rs_color[scrollColor]);
-  }
-  if (rs_color[unfocusedScrollColor]) {
-    fprintf(fp, "    unfocused_scrollbar %s\n", rs_color[unfocusedScrollColor]);
-  }
   fprintf(fp, "    pointer %s\n", rs_color[pointerColor]);
   fprintf(fp, "    video normal\n");
   for (i = 0; i < 16; i++) {
