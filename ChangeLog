@@ -5173,3 +5173,8 @@ Wed Feb 11 14:06:20 2004                        Michael Jennings (mej)
 Fixed handling of escape sequences while printing.  Pointed out by
 Tom A. Cox <tomc@hot.rr.com>.
 ----------------------------------------------------------------------
+Sun Feb 29 17:51:48 2004                        Michael Jennings (mej)
+
+Disable use of ~/user.cfg as requested by Laurence J. Lane
+<ljlane@debian.org>.
+----------------------------------------------------------------------
