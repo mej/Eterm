@@ -1937,7 +1937,7 @@ scr_refresh(int type)
             yy = ypixel - TermWin.font->ascent;
             ww = Width2Pixel(wlen);
             hh = Height2Pixel(1);
-            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
+            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
             if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
               yy--;
               hh++;
@@ -1984,7 +1984,7 @@ scr_refresh(int type)
             DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
             UPDATE_BOX(xx, yy, xx + ww, yy + hh);
           } else {
-            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, wlen);
+            CLEAR_CHARS(xpixel, ypixel - TermWin.font->ascent, len);
             DRAW_STRING(draw_string, xpixel, ypixel, buffer, wlen);
             UPDATE_BOX(xpixel, ypixel - TermWin.font->ascent, xpixel + Width2Pixel(wlen), ypixel + Height2Pixel(1));
           }

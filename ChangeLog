@@ -3600,6 +3600,8 @@ Fri May 26 20:43:03 PDT 2000	Michael Jennings <mej@eterm.org>
 	"br," or you can spell out "top_left," "top_right," "bottom_left," or
 	"bottom_right."  If you omit a corner name, the first one defaults to
 	top-left, the second to top-right, and so on as listed above.
+
+	For no font effects at all, simply specify "none".
 	
 -------------------------------------------------------------------------------
 Sun May 28 14:45:03 PDT 2000	Michael Jennings <mej@eterm.org>
@@ -3615,5 +3617,11 @@ Sun May 28 14:45:03 PDT 2000	Michael Jennings <mej@eterm.org>
 	if I can track down where it's freeing my pixmaps.  But I have some
 	errands to run first, so I'm going to commit this for now.  It
 	shouldn't actually change any functionality.
+	
+-------------------------------------------------------------------------------
+Tue May 30 08:49:43 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fix to multibyte screen rendering from Sung-Hyun Nam
+	<namsh@lgic.co.kr>.
 	
 -------------------------------------------------------------------------------
