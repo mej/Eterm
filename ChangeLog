@@ -3478,3 +3478,8 @@ Wed Apr 12 21:18:19 PDT 2000	Michael Jennings <mej@eterm.org>
 	are, I hope you like it.
 	
 -------------------------------------------------------------------------------
+Wed Apr 12 21:46:41 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	Fixed auto mode problems.  That was a really dumb oversight.
+	
+-------------------------------------------------------------------------------

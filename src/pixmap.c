@@ -646,9 +646,6 @@ paste_simage(simage_t *simg, unsigned char which, Drawable d, unsigned short x, 
             FREE(reply);
             enl_ipc_sync();
             if (pmap) {
-              if (mask) {
-                shaped_window_apply_mask(pmap, mask);
-              }
               gc = XCreateGC(Xdisplay, d, 0, NULL);
               XSetClipMask(Xdisplay, gc, mask);
               XSetClipOrigin(Xdisplay, gc, x, y);
@@ -888,7 +885,6 @@ render_simage(simage_t * simg, Window win, unsigned short width, unsigned short 
             enl_ipc_sync();
             if (pmap) {
               if (mask) {
-                shaped_window_apply_mask(pmap, mask);
                 XSetClipMask(Xdisplay, gc, mask);
                 XSetClipOrigin(Xdisplay, gc, 0, 0);
               }

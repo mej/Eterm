@@ -293,7 +293,9 @@ AC_ARG_WITH(imlib,
 if test $USE_IMLIB -eq 1 ; then
   AC_CHECK_LIB(Imlib2, imlib_create_image,
                GRLIBS="-lImlib2"
+               AC_CHECK_LIB(ttf, TT_Init_FreeType, GRLIBS="$GRLIBS -lttf", , $SUBLIBS $X_LIBS)
                AC_CHECK_LIB(dl, dlopen, GRLIBS="$GRLIBS -ldl", , $SUBLIBS $X_LIBS)
+               AC_CHECK_LIB(m, pow, GRLIBS="$GRLIBS -lm", , $SUBLIBS $X_LIBS)
                AC_DEFINE(PIXMAP_SUPPORT)
                AC_DEFINE(BACKING_STORE)
               ,
