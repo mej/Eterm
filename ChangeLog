@@ -4025,3 +4025,15 @@ Fri Dec 29 14:39:09 PST 2000	Michael Jennings <mej@eterm.org>
 	with some other FreeBSD-related patches from Mr. Wu.
 	
 -------------------------------------------------------------------------------
+Tue Jan  2 18:28:57 PST 2001	Michael Jennings <mej@eterm.org>
+
+	Applied a couple patches I'd overlooked in my inbox.  Sebastian
+	Dransfeld <sebastid@stud.ntnu.no> added a config file option to
+	duplicate the behavior of the --buttonbar command-line option.  He
+	also updated the man page, something I usually put off until just
+	before I do a release. :-)
+
+	I also went back and redid the way Eterm does backquote execution to
+	avoid a potential race condition.
+	
+-------------------------------------------------------------------------------

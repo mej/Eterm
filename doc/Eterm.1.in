@@ -427,6 +427,9 @@ Reports certain keystrokes as keysyms and modifiers rather than escape sequences
 This option is intended for use only with programs that support this special Eterm
 mode.  Do not enable it unless you are executing a program which uses this mode.
 .TP
+.BR \-\-buttonbar
+Toggle the display of all buttonbars.
+.TP
 .BI \-\-big-font-key " keysym"
 Specify a keysym to increase the font size.  Default is Shift and the +
 key on the keypad.  Ctrl-> or Meta-> may also work (if you #define one
@@ -1353,6 +1356,11 @@ Reports certain keystrokes as keysyms and modifiers rather than escape sequences
 .B NOTE:
 This option is intended for use only with programs that support this special Eterm
 mode.  Do not enable it unless you are executing a program which uses this mode.
+.RE
+
+.BI buttonbar " boolean"
+.RS 5
+Toggle the display of all buttonbars.
 .RE
 
 .RE

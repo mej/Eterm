@@ -1425,15 +1425,21 @@ builtin_random(char *param)
 static char *
 builtin_exec(char *param)
 {
-
   unsigned long fsize;
-  char *Command, *Output = NULL, *OutFile;
+  char *Command, *Output = NULL;
+  char OutFile[256];
   FILE *fp;
+  int fd;
 
   D_PARSE(("builtin_exec(%s) called\n", param));
 
   Command = (char *) MALLOC(CONFIG_BUFF);
-  OutFile = tmpnam(NULL);
+  strcat(OutFile, "Eterm-exec-");
+  fd = libast_temp_file(OutFile, sizeof(OutFile));
+  if ((fd < 0) || fchown(fd, my_ruid, my_rgid)) {
+    print_error("Unable to create unique temporary file for \"%s\" -- %s\n", param, strerror(errno));
+    return ((char *) NULL);
+  }
   if (strlen(param) + strlen(OutFile) + 8 > CONFIG_BUFF) {
     print_error("Parse error in file %s, line %lu:  Cannot execute command, line too long\n",
                 file_peek_path(), file_peek_line());
@@ -1443,7 +1449,7 @@ builtin_exec(char *param)
   strcat(Command, " >");
   strcat(Command, OutFile);
   system(Command);
-  if ((fp = fopen(OutFile, "rb")) != NULL) {
+  if ((fp = fdopen(fd, "rb")) != NULL) {
     fseek(fp, 0, SEEK_END);
     fsize = ftell(fp);
     rewind(fp);
@@ -2265,6 +2271,14 @@ parse_toggles(char *buff, void *state)
       image_toggles &= ~IMOPT_ITRANS;
     }
 
+  } else if (!BEG_STRCASECMP(buff, "buttonbar")) {
+    if (bool_val) {
+      FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+      rs_buttonbars = 1;  /* Reset for future use. */
+    } else {
+      FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+      rs_buttonbars = 1;  /* Reset for future use. */
+    }
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(), file_peek_line(), buff);
   }
@@ -3506,16 +3520,18 @@ conf_parse(char *conf_name, const char *dir, const char *path) {
               file_push(fp, path, NULL, 1, 0);
             }
 	  } else if (!BEG_STRCASECMP(get_pword(1, buff + 1), "preproc ")) {
-	    char cmd[PATH_MAX];
+	    char cmd[PATH_MAX], fname[PATH_MAX];
+            int fd;
 	    FILE *fp;
 
 	    if (file_peek_preproc()) {
 	      continue;
 	    }
-	    outfile = tmpnam(NULL);
-	    snprintf(cmd, PATH_MAX, "%s < %s > %s", get_pword(2, buff), file_peek_path(), outfile);
+            strcpy(fname, "Eterm-preproc-");
+            fd = libast_temp_file(fname, PATH_MAX);
+	    snprintf(cmd, PATH_MAX, "%s < %s > %s", get_pword(2, buff), file_peek_path(), fname);
 	    system(cmd);
-	    fp = fopen(outfile, "rt");
+	    fp = fdopen(fd, "rt");
 	    if (fp != NULL) {
 	      fclose(file_peek_fp());
 	      file_poke_fp(fp);
