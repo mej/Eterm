@@ -4779,3 +4779,7 @@ Fixed bug pointed out by JC Wong <catalyst@gmx.net> where resizing a
 window which had had transparency toggled on would reveal a black spot
 at the bottom of the scrollbar.
 ----------------------------------------------------------------------
+Tue Aug 13 22:55:58 2002                        Michael Jennings (mej)
+
+Documentation fix from Jim Lewis <jel@louie.cc>.
+----------------------------------------------------------------------

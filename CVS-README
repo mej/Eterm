@@ -12,9 +12,9 @@ using the UNIX client you will need to set your environment variable
 appropriately:
 
 bash/ksh/sh users:
- export CVSROOT=":pserver:anonymous@cvs.enlightenment.org:/cvs/enlightenment"
+ export CVSROOT=":pserver:anonymous@cvs.enlightenment.org:/cvsroot/enlightenment"
 or csh/tcsh users:
- setenv CVSROOT ":pserver:anonymous@cvs.enlightenment.org:/cvs/enlightenment"
+ setenv CVSROOT ":pserver:anonymous@cvs.enlightenment.org:/cvsroot/enlightenment"
 
 At this point, you'll need to run the following command (only the
 FIRST time you check out the source code should you have to run this

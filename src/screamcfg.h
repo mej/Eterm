@@ -20,7 +20,7 @@
 #define NS_MAXCMD            512
 
 #define NS_SSH_CALL          "ssh"
-#define NS_SSH_OPTS          "-t"
+#define NS_SSH_OPTS          "-t -A -X"
 #define NS_SSH_TUNNEL_OPTS   "-N"
 #define NS_SCREAM_CALL       "scream %s"
 #define NS_SCREAM_OPTS       "-xRR"

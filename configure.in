@@ -492,23 +492,18 @@ if test "$FOUND_LIBAST" -ne "1"; then
   echo "        Shall I retrieve and build LibAST now (y/n)?";
   read ANS
   if test "x$ANS" = "xy" -o "x$ANS" = "xyes" -o "x$ANS" = "xY" -o "x$ANS" = "xYES"; then
-    if test -d CVS ; then
       # Download from CVS server
       CVSROOT=":pserver:anonymous@cvs.enlightenment.sourceforge.net:/cvsroot/enlightenment"
       grep $CVSROOT $HOME/.cvspass >/dev/null 2>&1 || cvs -d $CVSROOT login
       cvs -z3 -d $CVSROOT co -d libast eterm/libast
       (cd libast && ./autogen.sh $ac_configure_args && make install && cd .. && rm -rf libast)
       if test $? -ne 0; then
-        echo 'ERROR:  Unable to auto-get libast, sorry.' 1>&2
-        exit 1
+          echo 'ERROR:  Unable to auto-get libast, sorry.' 1>&2
+          exit 1
       fi
       FOUND_LIBAST=1
       AC_CHECK_PROG(LIBAST_CONFIG, libast-config, libast-config, false)
       test "$LIBAST_CONFIG" = "false" && FOUND_LIBAST=0
-    else
-      # Download tarball
-      :
-    fi
   fi
 fi
 if test "$FOUND_LIBAST" -eq "1"; then
