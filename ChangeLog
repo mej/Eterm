@@ -3404,3 +3404,8 @@ Thu Mar 30 20:34:10 PST 2000	Michael Jennings <mej@eterm.org>
 	toggle this.
 	
 -------------------------------------------------------------------------------
+Fri Mar 31 15:12:37 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Added the escape sequence for the "no input" option.  "\e]6;27\a".
+	
+-------------------------------------------------------------------------------

@@ -1667,6 +1667,7 @@ xterm_seq(int op, const char *str)
   XColor xcol;
   char *nstr, *tnstr, *orig_tnstr, *valptr;
   unsigned char eterm_seq_op, which = 0;
+  XWMHints *wm_hints;
 #ifdef PIXMAP_SUPPORT
   unsigned char changed = 0, scaled = 0;
   char *color, *mod;
@@ -2117,6 +2118,15 @@ xterm_seq(int op, const char *str)
 	case 26:
 	  nstr = (char *) strsep(&tnstr, ";");
 	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_report_as_keysyms);
+	  break;
+	case 27:
+	  nstr = (char *) strsep(&tnstr, ";");
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_no_input);
+          wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+          wm_hints->flags |= InputHint;
+          wm_hints->input = ((Options & Opt_no_input) ? False : True);
+          XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+          XFree(wm_hints);
 	  break;
 	case 30:
 	  nstr = (char *) strsep(&tnstr, ";");
