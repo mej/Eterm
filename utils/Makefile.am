@@ -1,7 +1,7 @@
 # $Id$
 
 bin_PROGRAMS = Esetroot Etbg Ettable
-bin_SCRIPTS = Etcolors Etsearch kEsetroot
+bin_SCRIPTS = Etcolors Etsearch kEsetroot Etbg_update_list
 
 Esetroot_SOURCES = Esetroot.c
 Esetroot_LDFLAGS = -rpath $(libdir):$(pkglibdir)
@@ -9,6 +9,4 @@ Esetroot_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Etbg_SOURCES = Etbg.c
 Ettable_SOURCES = Ettable.c
 
-EXTRA_DIST = Etbg.c Esetroot.c Ettable.c Makefile.am \
-             Makefile.in Etcolors Etsearch kEsetroot.in
-
+EXTRA_DIST = Etcolors Etsearch kEsetroot.in Etbg_update_list

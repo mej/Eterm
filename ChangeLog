@@ -4200,3 +4200,14 @@ Mon Jun 11 22:04:08 PDT 2001	Michael Jennings <mej@eterm.org>
 	Laurence J. Lane <ljlane@debian.org>.
 	
 -------------------------------------------------------------------------------
+Wed Jun 13 21:13:51 PDT 2001	Michael Jennings <mej@eterm.org>
+
+	There is now a new mechanism for dealing with the background image
+	collection, including a new update script.  Please read the newly-
+	rewritten bg/README.backgrounds for details.
+
+	Also, I'm trying to flesh out the Contributors list in that file, but
+	my memory isn't cooperating.  So if you contributed one of the
+	backgrounds, or know someone who did, please let me know.
+	
+-------------------------------------------------------------------------------

@@ -34,14 +34,14 @@ if test "$DIE" -eq 1; then
         exit 1
 fi
 
-echo "  libtoolize --copy --force"
-libtoolize --copy --force
+echo "  libtoolize -c -f"
+libtoolize -c -f
 echo "  aclocal -I . $ACLOCAL_FLAGS"
 aclocal -I . $ACLOCAL_FLAGS
 echo "  autoheader"
 autoheader
-echo "  automake --add-missing"
-automake --add-missing
+echo "  automake -a -c"
+automake -a -c
 echo "  autoconf"
 autoconf
 

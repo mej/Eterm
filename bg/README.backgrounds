@@ -1,34 +1,64 @@
-Eterm Background Archive
-========================
+Eterm Background Images
+=======================
 
-This is the official (<G>) collection of Eterm background images.  The only
-things that make it official are (1) I put it together, and (2) the default
-themes that come with Eterm are designed to work with these images.  NONE of
-these images are original work by either of the Eterm authors; they have all
-been collected from various sites on the web.  As far as I know, they are all
-freely available for use.
+The default themes for Eterm are designed to select a background image
+at random.  In order for this to work, some sort of mechanism had to
+be created for the creation and maintenance of a set of backgrounds,
+both tileable and scaled.  This mechanism had to allow for easy
+selection of the random image as well as easy alterations to the
+collection.
 
-However, should any person who can provide proof of ownership of any of these
-pictures object to their inclusion, they will be IMMEDIATELY withdrawn.  No
-copyright infringement is intended.  Inclusion here should be taken as a
-compliment. :-)
+So here's how it works.  Underneath this directory (bg/) you'll find
+two subdirectories:  tile and scale.  These directories contain tiled
+and scaled background images, respectively.  When "make install" is
+run, these images are automatically installed in directories with the
+same names underneath <prefix>/share/Eterm/pix/.  Once these images
+have been copied into place, the Etbg_update_list utility is run to
+create or update the pixmaps.list file, a text file containing the
+master list of images and their geometries, from which Eterm will
+choose an image at random.
 
-Installation
+If you wish to add or remove images from the collection, first cd into
+<prefix>/share/Eterm/pix/.  Once there, remove any unwanted images
+from the tile/ and/or scale/ directories.  Then copy any images you
+want into either the tile/ or scale/ directory, depending on whether
+you want Eterm to tile the image or scale it.  When you have finished
+adding and/or removing images, run the Etbg_update_list script again
+(it is found in <prefix>/bin/) to update the list.
+
+You may have as many or as few images in your collection as you like;
+just remember to re-run the Etbg_update_list script after completing
+each set of changes.  Note that if you have fewer than 2 images in the
+collection, you should edit the theme.cfg file for your theme to
+deactivate the random image selection.  (If you neglect to do this,
+you may receive error messages from Eterm, but it will continue to
+function.)
+
+
+Disclaimer
+----------
+
+All images distributed with Eterm itself, and all those in the
+supplementary backgrounds collection, were downloaded freely from the
+Internet or submitted directly via e-mail by their authors.  None of
+these images are original work by me.  Furthermore, I have made every
+effort to ensure that the ones I downloaded are freely distributable.
+
+However, should any person who can provide proof of ownership of any
+of these pictures object to their inclusion, they will be IMMEDIATELY
+withdrawn.  No copyright infringement is intended.  Inclusion here
+should be taken as a compliment. :-)
+
+
+Contributors
 ------------
 
-Now that this is included with the Eterm distribution, these images will be
-cataloged and installed as part of the normal Eterm build process.
+The following contributions have been made by their authors.  Thanks
+to all who have contributed.  If one of your images is in this
+collection, but it isn't reflected here, please e-mail me
+(mej@eterm.org) so I can correct the omission.  Note that some of
+these images are included with the supplemental backgrounds collection
+rather than with the Eterm distribution.
 
-Changes
--------
-
-Adding pictures to the archive is equally simple.  If the picture is intended
-to be tiled, copy it into the "tile" directory.  If it is intended to be scaled
-(i.e., non-tileable pictures), copy it into the "scale" directory.  Then re-run
-"make" and "make install".  That's it!  The images will automatically be
-included in Eterm's random rotation.
-
-Removing pictures is done the same way.  Simply remove them from whichever
-directory they reside in, then re-run "make" and "make install".  You will need
-to manually remove the file from the pixmap directory if you so desire; these
-instructions only pertain to changing the standard rotation.
+Neopolis-horizon.jpg		Joe Colburn <joe@nodomain.com>
+cyber_bg.jpg			Joe Colburn <joe@nodomain.com>
