@@ -437,13 +437,16 @@ handle_configure_notify(event_t * ev)
 
     D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  Internal cache data shows %dx%d at (%hd, %hd)\n",
               width, height, x, y, szHint.width, szHint.height, TermWin.x, TermWin.y));
-#if 0
     /* If the font change count is non-zero, this event is telling us we resized ourselves. */
-    if (font_change_count > 0) {
-      font_change_count--;
+    if (font_chg > 0) {
+      font_chg--;
     }
-#endif
     if ((width != (unsigned int) szHint.width) || (height != (unsigned int) szHint.height)) {
+      Window win;
+      int unused;
+
+      XGetGeometry(Xdisplay, TermWin.parent, &win, &unused, &unused, &width, &height, &unused, &unused);
+      D_EVENTS((" -> XGetGeometry says I'm %ldx%ld\n", width, height));
       /* We were resized externally.  Handle the resize. */
       D_EVENTS((" -> External resize detected.\n"));
       handle_resize(width, height);

@@ -483,7 +483,11 @@ update_size_hints(void)
   szHint.base_width = (2 * TermWin.internalBorder);
   szHint.base_height = (2 * TermWin.internalBorder);
   szHint.base_width += ((scrollbar_is_visible()) ? (scrollbar_trough_width()) : (0));
-  D_X11(("Size Hints:  base width/height == %lux%lu\n", szHint.base_width, szHint.base_height));
+
+  szHint.width_inc = TermWin.fwidth;
+  szHint.height_inc = TermWin.fheight;
+
+  D_X11(("Size Hints:  base width/height == %lux%lu, width/height increment == %lux%lu\n", szHint.base_width, szHint.base_height, szHint.width_inc, szHint.height_inc));
 
   szHint.min_width = szHint.base_width + szHint.width_inc;
   szHint.min_height = szHint.base_height + szHint.height_inc;

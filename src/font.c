@@ -54,6 +54,7 @@ char **etmfonts = NULL;
 const char *def_mfontName[] = {MFONT0, MFONT1, MFONT2, MFONT3, MFONT4};
 #endif
 const char *def_fontName[] = {FONT0, FONT1, FONT2, FONT3, FONT4};
+unsigned char font_chg = 0;
 
 static cachefont_t *font_cache = NULL, *cur_font = NULL;
 static void font_cache_add(const char *name, unsigned char type, void *info);
@@ -134,19 +135,24 @@ font_cache_add(const char *name, unsigned char type, void *info) {
   font->type = type;
   font->ref_cnt = 1;
   switch (type) {
-  case FONT_TYPE_X: font->fontinfo.xfontinfo = (XFontStruct *) info; break;
-  case FONT_TYPE_TTF:  break;
-  case FONT_TYPE_FNLIB:  break;
-  default:  break;
+    case FONT_TYPE_X: font->fontinfo.xfontinfo = (XFontStruct *) info; break;
+    case FONT_TYPE_TTF:  break;
+    case FONT_TYPE_FNLIB:  break;
+    default:  break;
   }
-
+  D_FONT((" -> Created new cachefont_t struct at %p:  \"%s\", %d, %p\n", font, font->name, font->type, font->fontinfo.xfontinfo));
   if (font_cache == NULL) {
     font_cache = cur_font = font;
     font->next = NULL;
+    D_FONT((" -> Stored as first font in cache.  font_cache == cur_font == font == %p\n", font_cache));
+    D_FONT((" -> font_cache->next == cur_font->next == font->next == %p\n", font_cache->next));
   } else {
+    D_FONT((" -> font_cache->next == %p, cur_font->next == %p\n", font_cache->next, cur_font->next));
     cur_font->next = font;
     font->next = NULL;
     cur_font = font;
+    D_FONT((" -> Stored font in cache.  font_cache == %p, cur_font == %p\n", font_cache, cur_font));
+    D_FONT((" -> font_cache->next == %p, cur_font->next == %p\n", font_cache->next, cur_font->next));
   }
 }
 
@@ -184,6 +190,9 @@ font_cache_del(const void *info) {
           tmp = current->next;
           current->next = current->next->next;
           XFreeFont(Xdisplay, (XFontStruct *) info);
+          if (cur_font == tmp) {
+            cur_font = current;  /* If we're nuking the last entry in the cache, point cur_font to the *new* last entry. */
+          }
           FREE(tmp->name);
           FREE(tmp);
         } else {
@@ -316,7 +325,7 @@ change_font(int init, const char *fontname)
 #ifndef NO_BOLDFONT
   static XFontStruct *boldFont = NULL;
 #endif
-  short idx = 0;
+  short idx = 0, old_idx = font_idx;
   int fh, fw = 0;
   register unsigned long i;
   register int cw;
@@ -374,6 +383,9 @@ change_font(int init, const char *fontname)
     }
     if (fontname != NULL) {
       eterm_font_add(&etfonts, fontname, font_idx);
+    } else if (font_idx == old_idx) {
+      D_FONT((" -> Change to the same font index (%d) we had before?  I don't think so.\n", font_idx));
+      return;
     }
   }
   D_FONT((" -> Changing to font index %u (\"%s\")\n", (unsigned int) font_idx, NONULL(etfonts[font_idx])));
@@ -465,6 +477,7 @@ change_font(int init, const char *fontname)
 
   TermWin.width = TermWin.ncol * TermWin.fwidth;
   TermWin.height = TermWin.nrow * TermWin.fheight;
+  D_FONT((" -> New font width/height = %ldx%ld, making the terminal size %ldx%ld\n", TermWin.fwidth, TermWin.fheight, TermWin.width, TermWin.height));
 
   if (init) {
     szHint.width_inc = TermWin.fwidth;
@@ -479,6 +492,7 @@ change_font(int init, const char *fontname)
     szHint.flags = PMinSize | PResizeInc | PBaseSize | PWinGravity;
   } else {
     parent_resize();
+    font_chg++;
   }
   return;
 }

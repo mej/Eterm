@@ -61,7 +61,7 @@ typedef struct cachefont_struct {
 } cachefont_t;
 
 /************ Variables ************/
-extern unsigned char font_idx, def_font_idx, font_cnt;
+extern unsigned char font_idx, def_font_idx, font_cnt, font_chg;
 extern const char *def_fontName[];
 extern char *rs_font[NFONTS];
 extern char **etfonts, **etmfonts;
