@@ -50,6 +50,7 @@ extern void enl_query_for_image(unsigned char);
 extern void eterm_ipc_parse(char *);
 extern void eterm_ipc_send(char *);
 extern char *eterm_ipc_get(void);
+extern char *enl_send_and_wait(char *);
 extern void eterm_handle_winop(char *);
 
 _XFUNCPROTOEND

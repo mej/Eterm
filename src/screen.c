@@ -29,6 +29,7 @@ static const char cvs_ident[] = "$Id$";
 #include "mem.h"
 #include "graphics.h"
 #include "screen.h"
+#include "scrollbar.h"
 #include "options.h"
 #ifdef PIXMAP_SUPPORT
 # include "pixmap.h"
@@ -3181,6 +3182,8 @@ debug_colors(void)
 void xim_get_position(XPoint *pos)
 {
    pos->x = Col2Pixel(screen.col);
+   if (scrollbar_visible() && !(Options & Opt_scrollBar_right))
+     pos->x += scrollbar_trough_width();
    pos->y = Height2Pixel(screen.row) + TermWin.font->ascent
             + TermWin.internalBorder;
 }

@@ -83,8 +83,8 @@ begin main
 # not been set and Eterm cannot map the foreground color to one of the
 # high-intensity colors (8-15).
     font 0 fixed
-    font 1 6x10
-    font 2 6x13
+    font 1 5x7
+    font 2 6x10
     font 3 8x13
     font 4 9x15
 #    font bold 7x14

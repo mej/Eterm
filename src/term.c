@@ -297,11 +297,11 @@ lookup_key(XEvent * ev)
 #ifdef KEYSYM_ATTRIBUTE
     if (!(shft | ctrl) && KeySym_map[keysym - 0xFF00] != NULL) {
 
-      const unsigned char *kbuf;
+      const unsigned char *tmpbuf;
       unsigned int len;
 
-      kbuf = (KeySym_map[keysym - 0xFF00]);
-      len = *kbuf++;
+      tmpbuf = (KeySym_map[keysym - 0xFF00]);
+      len = *tmpbuf++;
 
       /* escape prefix */
       if (meta
@@ -313,7 +313,7 @@ lookup_key(XEvent * ev)
 
 	tt_write(&ch, 1);
       }
-      tt_write(kbuf, len);
+      tt_write(tmpbuf, len);
       LK_RET();
     } else
 #endif
@@ -348,7 +348,7 @@ lookup_key(XEvent * ev)
 #endif
 
 	case XK_Home:
-	  len = strlen(strcpy(kbuf, KS_HOME));
+          len = strlen(strcpy(kbuf, KS_HOME));
 	  break;
 
 #ifdef XK_KP_Left

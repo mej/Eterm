@@ -242,7 +242,7 @@ extern char *rs_pixmapScale;
 extern char *rs_config_file;
 extern unsigned int rs_line_space;
 #ifndef NO_BOLDFONT
-extern const char *rs_boldFont;
+extern char *rs_boldFont;
 #endif
 #ifdef PRINTPIPE
 extern char *rs_print_pipe;

@@ -80,6 +80,7 @@ typedef struct {
 typedef struct {
   unsigned short clicks, bypass_keystate, report_mode, mouse_offset;
   Time button_press, last_button_press, activate_time;
+  unsigned char ignore_release;
 } mouse_button_state_t;
 
 /************ Variables ************/

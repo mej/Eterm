@@ -200,11 +200,11 @@ char *rs_preeditType = NULL;
 #endif
 char *rs_name = NULL;
 #ifndef NO_BOLDFONT
-const char *rs_boldFont = NULL;
+char *rs_boldFont = NULL;
 #endif
-const char *rs_font[NFONTS];
+char *rs_font[NFONTS];
 #ifdef MULTI_CHARSET
-const char *rs_mfont[NFONTS];
+char *rs_mfont[NFONTS];
 #endif
 #ifdef PRINTPIPE
 char *rs_print_pipe = NULL;
@@ -781,16 +781,6 @@ version(void)
   printf(" +SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
 #else
   printf(" -SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
-#endif
-#ifdef MENU_SHADOW_IN
-  printf(" +MENU_SHADOW_IN");
-#else
-  printf(" -MENU_SHADOW_IN");
-#endif
-#ifdef CTRL_CLICK_RAISE
-  printf(" +CTRL_CLICK_RAISE");
-#else
-  printf(" -CTRL_CLICK_RAISE");
 #endif
 #ifdef META8_OPTION
   printf(" +META8_OPTION");
@@ -2470,6 +2460,8 @@ parse_image(char *buff)
       images[idx].mode = (MODE_VIEWPORT | ALLOW_VIEWPORT);
     } else if (!BEG_STRCASECMP(mode, "auto ")) {
       images[idx].mode = (MODE_AUTO | ALLOW_AUTO);
+    } else if (!BEG_STRCASECMP(mode, "solid ")) {
+      images[idx].mode = MODE_SOLID;
     } else {
       print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), mode);
     }
@@ -2485,6 +2477,7 @@ parse_image(char *buff)
 	  images[idx].mode |= ALLOW_VIEWPORT;
 	} else if (!BEG_STRCASECMP("auto", allow)) {
 	  images[idx].mode |= ALLOW_AUTO;
+	} else if (!BEG_STRCASECMP("solid", allow)) {
 	} else {
 	  print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), allow);
 	}

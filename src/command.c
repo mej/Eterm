@@ -1775,13 +1775,13 @@ static void
 xim_get_area(XRectangle *preedit_rect, XRectangle *status_rect,
 	     XRectangle *needed_rect)
 {
-  preedit_rect->x = needed_rect->width + (scrollbar_visible() && !(Options & Opt_scrollBar_right) ? (scrollBar.width) : 0);
+  preedit_rect->x = needed_rect->width + (scrollbar_visible() && !(Options & Opt_scrollBar_right) ? (scrollbar_trough_width()) : 0);
   preedit_rect->y = Height2Pixel(TermWin.nrow - 1);
 
-  preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollBar_right) ? (scrollBar.width) : 0);
+  preedit_rect->width = Width2Pixel(TermWin.ncol + 1) - needed_rect->width + (!(Options & Opt_scrollBar_right) ? (scrollbar_trough_width()) : 0);
   preedit_rect->height = Height2Pixel(1);
 
-  status_rect->x = (scrollbar_visible() && !(Options & Opt_scrollBar_right)) ? (scrollBar.width) : 0;
+  status_rect->x = (scrollbar_visible() && !(Options & Opt_scrollBar_right)) ? (scrollbar_trough_width()) : 0;
   status_rect->y = Height2Pixel(TermWin.nrow - 1);
 
   status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TermWin.ncol + 1);

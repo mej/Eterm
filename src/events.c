@@ -57,7 +57,7 @@ unsigned char keypress_exit = 0;
 event_master_t event_master;
 event_dispatcher_data_t primary_data;
 mouse_button_state_t button_state =
-{0, 0, 0, 0, 0, 0, 0};
+{0, 0, 0, 0, 0, 0, 0, 0};
 
 /********** The Event Handling Subsystem **********/
 void
@@ -504,6 +504,7 @@ handle_button_press(event_t * ev)
     XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
   }
   if (action_dispatch(ev, 0)) {
+    button_state.ignore_release = 1;
     return 1;
   }
 
@@ -565,6 +566,11 @@ handle_button_release(event_t * ev)
 
   D_EVENTS(("handle_button_release(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
 
+  if (button_state.ignore_release == 1) {
+    button_state.ignore_release = 0;
+    return 0;
+  }
+
   REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
   button_state.mouse_offset = 0;
   button_state.report_mode = (button_state.bypass_keystate ? 0 : ((PrivateModes & PrivMode_mouse_report) ? 1 : 0));
@@ -596,17 +602,11 @@ handle_button_release(event_t * ev)
       switch (ev->xbutton.button) {
 	case Button1:
 	case Button3:
-#if defined(CTRL_CLICK_RAISE) || defined(CTRL_CLICK_MENU)
-	  if (!(ev->xbutton.state & ControlMask))
-#endif
-	    selection_make(ev->xbutton.time);
+          selection_make(ev->xbutton.time);
 	  break;
 
 	case Button2:
-#ifdef CTRL_CLICK_SCROLLBAR
-	  if (!(ev->xbutton.state & ControlMask))
-#endif
-	    selection_request(ev->xbutton.time, ev->xbutton.x, ev->xbutton.y);
+          selection_request(ev->xbutton.time, ev->xbutton.x, ev->xbutton.y);
 	  break;
 	case Button4:
 	  scr_page(UP, (ev->xbutton.state & ShiftMask) ? 1 : 5);

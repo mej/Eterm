@@ -192,21 +192,6 @@
 /* #define SCROLLBAR_INITIAL_DELAY 40 */
 /* #define SCROLLBAR_CONTINUOUS_DELAY 2 */
 
-/* An alternative placement of the menubar shadow */
-/* #define MENUBAR_SHADOW_IN */
-
-/* An alternative placement of the menu shadow */
-#define MENU_SHADOW_IN
-
-/* Allow Ctrl+Button1 in a window to raise and steal focus */
-#define CTRL_CLICK_RAISE
-
-/* Allow Ctrl+Button2 in a window to toggle the scrollbar */
-#define CTRL_CLICK_SCROLLBAR
-
-/* Allow Ctrl+Button3 in a window to toggle the menubar */
-#define CTRL_CLICK_MENU
-
 /********************* Multi-lingual support options *********************/
 
 /* Allow option/attribute for Meta to set the 8th bit */
@@ -297,8 +282,8 @@
 # define FONT4 "13x26"
 #else	/* MULTI_CHARSET */
 # define FONT0 "fixed"
-# define FONT1 "6x10"
-# define FONT2 "6x13"
+# define FONT1 "5x7"
+# define FONT2 "6x10"
 # define FONT3 "7x14"
 # define FONT4 "8x13"
 #endif	/* MULTI_CHARSET */
@@ -331,7 +316,7 @@ inline void *memmove(void *, const void *, size_t);
 /* COLORTERM, TERM environment variables */
 #ifdef MULTI_CHARSET
 # define TERMENV	"kterm"
-# define COLORTERMENV	"Kterm"
+# define COLORTERMENV	"Eterm"
 #else
 # define TERMENV	"xterm"
 # define COLORTERMENV	"Eterm"

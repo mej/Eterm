@@ -30,26 +30,22 @@
 #  define FALSE (0)
 #endif
 #ifndef TRUE
-#  define TRUE (!FALSE)
+#  define TRUE (1)
 #endif
 
 int
 main(int argc, char **argv)
 {
   int scale = FALSE, trans = FALSE;
-  unsigned int i, pic = 0, tint = 0, shade = 0;
+  unsigned int i, pic = 0;
 
   for (i = 1; i < argc; i++) {
     if (strcasecmp(argv[i], "-scale") == 0) {
       scale = TRUE;
     } else if (strcasecmp(argv[i], "-trans") == 0) {
       trans = TRUE;
-    } else if (strcasecmp(argv[i], "-tint") == 0 && i < argc - 1) {
-      tint = ++i;
-    } else if (strcasecmp(argv[i], "-shade") == 0 && i < argc - 1) {
-      shade = ++i;
     } else if (strncasecmp(argv[i], "-h", 2) == 0) {
-      printf("Usage: %s [[-scale] file] [-trans] [-tint 0xACOLOR] [-shade nn%]\n", argv[0]);
+      printf("Usage: %s [[-scale] file] [-trans]\n", argv[0]);
       return 0;
     } else {
       pic = i;
@@ -58,16 +54,10 @@ main(int argc, char **argv)
 
   if (pic && argv[pic]) {
     printf("\033]6;0;0\a");
-    printf("\033]20;%s%s\a", argv[pic], scale ? ";100x100+0+0" : ";0");
+    printf("\033]20;%s%s\a", argv[pic], scale ? "@100x100+50+50:scale" : "@0x0+0+0:tile");
   }
   if (trans) {
     printf("\033]6;0;1\a");
-  }
-  if (tint && argv[tint]) {
-    printf("\033]6;2;%s\a", argv[tint]);
-  }
-  if (shade && argv[shade]) {
-    printf("\033]6;1;%s\a", argv[shade]);
   }
   return 0;
 }

@@ -65,10 +65,10 @@ typedef struct font_struct {
 /************ Variables ************/
 extern unsigned char font_change_count;
 extern const char *def_fontName[];
-extern const char *rs_font[NFONTS];
+extern char *rs_font[NFONTS];
 # ifdef MULTI_CHARSET
 extern const char *def_mfontName[];
-extern const char *rs_mfont[NFONTS];
+extern char *rs_mfont[NFONTS];
 # endif
 
 /************ Function Prototypes ************/

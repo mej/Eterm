@@ -53,7 +53,6 @@
 # define DndLink	7
 #endif
 
-# define menuBar_esc	10
 # define scrollBar_esc	30
 
 /* Motif window hints */
