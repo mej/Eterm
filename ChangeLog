@@ -5039,3 +5039,10 @@ Wed Apr 23 12:14:00 2003                        Michael Jennings (mej)
 Apparently some versions of gcc (or maybe ld?) don't like duplicate
 libraries on the link line.  Fix provided by Mark <somnione@gmx.net>.
 ----------------------------------------------------------------------
+Thu Apr 24 14:29:05 2003                        Michael Jennings (mej)
+
+Fixed seg fault caused by people who neglect to grow the multichar
+font list in parallel with the normal font list.
+
+Also tweaked the default fonts to be less error-prone.
+----------------------------------------------------------------------

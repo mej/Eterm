@@ -151,21 +151,21 @@ struct defaultfont {
 #define DEF_10646 2
 #define NFONT_LIST_10646 "5x7", "6x10", "fixed", "8x13", "9x15"
 #define MFONT_LIST_10646 \
-  "-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso10646-1",\
-  "-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1",\
-  "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1",\
-  "-misc-fixed-medium-r-normal--14-130-75-75-c-70-iso10646-1",\
-  "-misc-fixed-medium-r-normal--15-140-75-75-c-90-iso10646-1"
+  "-misc-fixed-medium-r-normal--7-*-*-*-c-*-iso10646-1",\
+  "-misc-fixed-medium-r-normal--10-*-*-*-c-*-iso10646-1",\
+  "-misc-fixed-medium-r-semicondensed--13-*-*-*-c-*-iso10646-1",\
+  "-misc-fixed-medium-r-normal--14-*-*-*-c-*-iso10646-1",\
+  "-misc-fixed-medium-r-normal--15-*-*-*-c-*-iso10646-1"
 
 /* special common rule for ISO-8859-* */
 
 #define DEF_8859 2
 #define NFONT_LIST_ISO8859X \
-  "-misc-fixed-medium-r-normal--7-70-75-75-c-50-iso8859-%d",\
-  "-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso8859-%d",\
-  "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-%d",\
-  "-misc-fixed-medium-r-normal--13-120-75-75-c-80-iso8859-%d",\
-  "-misc-fixed-medium-r-normal--18-120-75-75-c-90-iso8859-%d"
+  "-misc-fixed-medium-r-normal--7-*-*-*-c-*-iso8859-%d",\
+  "-misc-fixed-medium-r-normal--10-*-*-*-c-*-iso8859-%d",\
+  "-misc-fixed-medium-r-semicondensed--13-*-*-*-c-*-iso8859-%d",\
+  "-misc-fixed-medium-r-normal--13-*-*-*-c-*-iso8859-%d",\
+  "-misc-fixed-medium-r-normal--18-*-*-*-c-*-iso8859-%d"
 
 
 #endif /* _DEFAULTFONT_H_ */

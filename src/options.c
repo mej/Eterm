@@ -2484,24 +2484,29 @@ init_defaults(void)
 #ifndef NO_BRIGHTCOLOR
     colorfgbg = DEFAULT_RSTYLE;
 #endif
+
+    /* Font stuff. */
     MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
 #if AUTO_ENCODING
-#ifdef MULTI_CHARSET
+    /* Auto-encoding means the default fonts are chosen by locale. */
+# ifdef MULTI_CHARSET
     eterm_default_font_locale(&etfonts, &etmfonts, &rs_multichar_encoding, &def_font_idx);
-#else
+# else
     eterm_default_font_locale(&etfonts, NULL, NULL, &def_font_idx);
-#endif
+# endif
 #else
+    /* No auto-encoding, so use built-in ISO-8859-1 fonts. */
     for (i = 0; i < NFONTS; i++) {
         eterm_font_add(&etfonts, def_fontName[i], i);
-#ifdef MULTI_CHARSET
+# ifdef MULTI_CHARSET
         eterm_font_add(&etmfonts, def_mfontName[i], i);
-#endif
+# endif
     }
-#ifdef MULTI_CHARSET
+# ifdef MULTI_CHARSET
     rs_multichar_encoding = STRDUP(MULTICHAR_ENCODING);
+# endif
 #endif
-#endif
+
     TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 
     /* Initialize the parser */
@@ -2595,12 +2600,19 @@ post_parse(void)
         rs_boldFont = NULL;
     }
 #endif
+
+    /* Add any fonts we got from the command line. */
     for (i = 0; i < NFONTS; i++) {
         if (rs_font[i]) {
             if (def_font_idx == 0) {
                 eterm_font_add(&etfonts, rs_font[i], i);
                 RESET_AND_ASSIGN(rs_font[i], NULL);
             } else {
+                /* If they changed the default font index to something other than 0,
+                   put rs_font[0] in that position.  Any indexes less than that are
+                   reduced by one so that rs_font[1-n] (n being the default font
+                   index) will be assigned to etfonts[0-(n-1)], and rs_font[0] will
+                   be etfonts[n].  Anything higher than n stays as is. */
                 eterm_font_add(&etfonts, rs_font[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
                 RESET_AND_ASSIGN(rs_font[i], NULL);
             }
@@ -2614,12 +2626,33 @@ post_parse(void)
                 eterm_font_add(&etmfonts, rs_mfont[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
                 RESET_AND_ASSIGN(rs_mfont[i], NULL);
             }
-        }
-        if (rs_multichar_encoding != NULL) {
-            set_multichar_encoding(rs_multichar_encoding);
+        } else {
+            eterm_font_add(&etmfonts, etfonts[i], i);
         }
 #endif
     }
+    /* Make sure all fonts 0 through font_cnt are populated for both normal
+       and multi-byte font structures. */
+    for (; i < font_cnt; i++) {
+        if (!etfonts[i]) {
+            eterm_font_add(&etfonts, etfonts[def_font_idx], i);
+        }
+#ifdef MULTI_CHARSET
+        if (!etmfonts[i]) {
+            if (etmfonts[def_font_idx]) {
+                eterm_font_add(&etmfonts, etmfonts[def_font_idx], i);
+            } else {
+                eterm_font_add(&etmfonts, etfonts[i], i);
+            }
+        }
+#endif
+    }
+#ifdef MULTI_CHARSET
+    if (rs_multichar_encoding != NULL) {
+        set_multichar_encoding(rs_multichar_encoding);
+    }
+#endif
+
     if (rs_font_effects) {
         if (parse_font_fx(rs_font_effects) != 1) {
             print_error("Syntax error in the font effects specified on the command line.\n");
