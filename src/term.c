@@ -937,7 +937,7 @@ process_csi_seq(void)
 	  break;
 	case 9:
 #ifdef PIXMAP_OFFSET
-	  if (image_mode_is(image_bg, MODE_TRANS)) {
+	  if (Options & Opt_pixmapTrans) {
 	    char tbuff[70];
 	    char shading = 0;
 	    unsigned long tint = 0xffffff;
@@ -1629,7 +1629,7 @@ xterm_seq(int op, const char *str)
 
   XColor xcol;
   char *nstr, *tnstr, *orig_tnstr;
-  unsigned char eterm_seq_op, which = 0;
+  unsigned char eterm_seq_op;
 #ifdef PIXMAP_SUPPORT
   unsigned char changed = 0, scaled = 0;
   char *color, *mod, *valptr;
@@ -1645,9 +1645,6 @@ xterm_seq(int op, const char *str)
   switch (op) {
     case XTerm_title:
       set_title(str);
-      break;
-    case XTerm_prop:
-      
       break;
     case XTerm_name:
       set_title(str);		/* drop */
@@ -1689,10 +1686,10 @@ xterm_seq(int op, const char *str)
          may not be needed.
        */
 
-      D_CMD(("Got XTerm_EtermSeq sequence\n"));
+      D_EVENTS(("Got XTerm_EtermSeq sequence\n"));
       nstr = strsep(&tnstr, ";");
       eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
-      D_CMD(("    XTerm_EtermSeq operation is %d\n", eterm_seq_op));
+      D_EVENTS(("    XTerm_EtermSeq operation is %d\n", eterm_seq_op));
       /* Yes, there is order to the numbers for this stuff.  And here it is:
          0-9      Transparency Configuration
          10-14    Scrollbar Configuration
@@ -1707,72 +1704,40 @@ xterm_seq(int op, const char *str)
 #ifdef PIXMAP_OFFSET
 	case 0:
 	  nstr = strsep(&tnstr, ";");
-          if (nstr) {
-            if (BOOL_OPT_ISTRUE(nstr)) {
-              D_CMD(("   Request to enable transparency.\n"));
-              FOREACH_IMAGE(if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) { \
-                              image_set_mode(idx, MODE_TRANS); \
-                              if (images[idx].current->pmap->pixmap != None) { \
-                                Imlib_free_pixmap(imlib_id, images[idx].current->pmap->pixmap);  \
-                              } \
-                              images[idx].current->pmap->pixmap = None; \
-                            });
-            } else if (BOOL_OPT_ISFALSE(nstr)) {
-              D_CMD(("   Request to disable transparency.\n"));
-              FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}});
-            } else {
-              D_CMD(("   Bad boolean value in transparency request.\n"));
-              break;
-            }
-          } else {
-            D_CMD(("   Request to toggle transparency.\n"));
-            FOREACH_IMAGE(if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) { \
-                            image_set_mode(idx, MODE_TRANS); \
-                            if (images[idx].current->pmap->pixmap != None) { \
-                              Imlib_free_pixmap(imlib_id, images[idx].current->pmap->pixmap);  \
-                            } \
-                            images[idx].current->pmap->pixmap = None; \
-                          } else if (image_mode_is(idx, MODE_TRANS)) {if (image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);} else {image_set_mode(idx, MODE_SOLID);}});
-          }
-          redraw_all_images();
+	  OPT_SET_OR_TOGGLE_NEG(nstr, Options, Opt_pixmapTrans);
+	  if (Options & Opt_pixmapTrans) {
+	    Options &= ~(Opt_pixmapTrans);
+	  } else {
+	    Options |= Opt_pixmapTrans;
+	    if (images[image_bg].current->pmap->pixmap != None) {
+	      Imlib_free_pixmap(imlib_id, images[image_bg].current->pmap->pixmap);
+	    }
+	    images[image_bg].current->pmap->pixmap = None;
+	  }
+	  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+	  scr_touch();
+	  render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+	  scrollbar_show(0);
 	  break;
 	case 1:
-          if ((color = strsep(&tnstr, ";")) == NULL) {
+          color = strsep(&tnstr, ";");
+          if (!color) {
             break;
           }
-          if ((strlen(color) == 2) || (!strcasecmp(color, "down"))) {
-            /* They specified an image index */
-            if (!strcasecmp(color, "bg")) {
-              which = image_bg;
-            } else if (!strcasecmp(color, "sb")) {
-              which = image_sb;
-            } else if (!strcasecmp(color, "sa")) {
-              which = image_sa;
-            } else if (!strcasecmp(color, "up")) {
-              which = image_up;
-            } else if (!strcasecmp(color, "down")) {
-              which = image_down;
-            } else {
-              break;
-            }
-            if ((color = strsep(&tnstr, ";")) == NULL) {
-              break;
-            }
-          } else {
-            which = image_bg;
-          }
-          if ((mod = strsep(&tnstr, ";")) == NULL) {
+          mod = strsep(&tnstr, ";");
+          if (!mod) {
             break;
           }
-          if ((valptr = strsep(&tnstr, ";")) == NULL) {
+          valptr = strsep(&tnstr, ";");
+          if (!valptr) {
             break;
           }
-	  D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n", mod, color, get_image_type(which), valptr));
-	  if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
+	  D_EVENTS(("Modifying the %s attribute of the %s color modifier to be %s\n", mod, color, valptr));
+	  if (Options & Opt_pixmapTrans && desktop_pixmap != None) {
 	    free_desktop_pixmap();
 	    desktop_pixmap = None;	/* Force the re-read */
 	  }
-	  if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
+	  if (Options & Opt_viewport_mode && viewport_pixmap != None) {
 	    XFreePixmap(Xdisplay, viewport_pixmap);
 	    viewport_pixmap = None;	/* Force the re-read */
 	  }
@@ -1836,18 +1801,19 @@ xterm_seq(int op, const char *str)
               iml->bmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
             }
           }
-          redraw_all_images();
+          
+	  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+	  scr_touch();
 	  break;
 	case 3:
-          if (desktop_pixmap != None) {
-            free_desktop_pixmap();
-          }
-          get_desktop_window();
-          if (desktop_window == None) {
-            FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);});
-            break;
-          }
-          redraw_all_images();
+	  if (Options & Opt_pixmapTrans) {
+	    get_desktop_window();
+	    if (desktop_pixmap != None) {
+	      free_desktop_pixmap();
+	    }
+	    render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+	    scr_touch();
+	  }
 	  break;
 #endif
 	case 10:
@@ -1932,8 +1898,9 @@ xterm_seq(int op, const char *str)
 	  break;
 	case 24:
 	  nstr = strsep(&tnstr, ";");
-          FOREACH_IMAGE(if (!image_mode_is(idx, MODE_VIEWPORT) && image_mode_is(idx, ALLOW_VIEWPORT)) {image_set_mode(idx, MODE_VIEWPORT);});
-          redraw_all_images();
+	  OPT_SET_OR_TOGGLE(nstr, Options, Opt_viewport_mode);
+	  render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+	  scr_touch();
 	  break;
 	case 25:
 	  nstr = strsep(&tnstr, ";");
@@ -2005,7 +1972,11 @@ xterm_seq(int op, const char *str)
 
     case XTerm_Pixmap:
 #ifdef PIXMAP_SUPPORT
-      FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {image_set_mode(idx, MODE_IMAGE);});
+# ifdef PIXMAP_OFFSET
+      if (Options & Opt_pixmapTrans) {
+	Options &= ~(Opt_pixmapTrans);
+      }
+# endif
       if (!strcmp(str, ";")) {
 	load_image("", image_bg);
 	bg_needs_update = 1;
@@ -2027,7 +1998,8 @@ xterm_seq(int op, const char *str)
 	}
       }
       if ((changed) || (bg_needs_update)) {
-        redraw_image(image_bg);
+	render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 1);
+	scr_touch();
       }
 #endif /* PIXMAP_SUPPORT */
       break;

@@ -44,24 +44,24 @@ begin main
 # The colors below are taken from Rasterman's .Xdefaults file.  They are intended to
 # display ANSI art properly when combined with a good ANSI-art font (like vga or
 # Rasterman's nexus font).
-    color  0 0    0    0
-    color  1 0xaa 0    0
-    color  2 0    0210 0
-    color  3 0xaa 0x55 0x22
-    color  4 0    0    0xaa
-    color  5 0xaa 0    0xaa
-    color  6 0    0xaa 0xaa
-    color  7 0xaa 0xaa 0xaa
-    color  8 0x44 0x44 0x44
-    color  9 0xff 0x44 0x44
-    color 10 0x44 0xff 0x44
-    color 11 0xff 0xff 0x44
-    color 12 0x44 0x44 0xff
-    color 13 0xff 0x44 0xff
-    color 14 0x44 0xff 0xff
-    color 15 #ffffff
-    color bd #ffffff
-    color ul #ffffff
+#   color  0 0    0    0
+#   color  1 0xaa 0    0
+#   color  2 0    0210 0
+#   color  3 0xaa 0x55 0x22
+#   color  4 0    0    0xaa
+#   color  5 0xaa 0    0xaa
+#   color  6 0    0xaa 0xaa
+#   color  7 0xaa 0xaa 0xaa
+#   color  8 0x44 0x44 0x44
+#   color  9 0xff 0x44 0x44
+#   color 10 0x44 0xff 0x44
+#   color 11 0xff 0xff 0x44
+#   color 12 0x44 0x44 0xff
+#   color 13 0xff 0x44 0xff
+#   color 14 0x44 0xff 0xff
+#   color 15 #ffffff
+#   color bd #ffffff
+#   color ul #ffffff
 
 # This ends the color section.  Any text after the word "end" is
 # assumed to be a comment and ignored.
@@ -121,7 +121,7 @@ begin main
 # The mode line.  This defines the startup mode for the image, as well as what modes are allowed.
 # Valid modes are "image" (to display the image file), "trans" (to be transparent), or "viewport"
 # (for viewport mode).  Syntax is "mode <startup_mode> allow <allowed_modes>".
-      mode trans allow image trans viewport auto
+      mode trans allow image trans viewport
 
 # Set the image border.  This is a portion of the image which will be kept at its actual size when
 # scaling.  Use this for beveled images (buttons, etc.).
@@ -133,7 +133,7 @@ begin main
 # The rest of the images.
     begin image
       type trough
-      mode trans allow image trans viewport auto
+      mode image allow trans viewport
       state normal
       file bar_vertical_3.png
 # Here is how you specify the geometry string separately.  See the man page for its syntax.
@@ -142,7 +142,6 @@ begin main
     end image
     begin image
       type anchor
-      mode image allow image auto
       state normal
       file bar_vertical_1.png
       geom :scale
@@ -154,7 +153,6 @@ begin main
     end image
     begin image
       type up_arrow
-      mode image allow image auto
       state normal
       file button_arrow_up_1.png
       geom :scale
@@ -170,7 +168,6 @@ begin main
     end image
     begin image
       type down_arrow
-      mode image allow image auto
       state normal
       file button_arrow_down_1.png
       geom :scale
@@ -186,7 +183,6 @@ begin main
     end image
     begin image
       type menu
-      mode image allow image auto
       state normal
       file bar_horizontal_1.png
       geom 100x100+0+0:scale
@@ -198,7 +194,6 @@ begin main
     end image
     begin image
       type submenu
-      mode image allow image auto
       state normal
       file menu1.png
       geom 100x100+0+0:scale
@@ -296,7 +291,7 @@ begin main
     borderless true
 
 # If true, Eterm will use save-unders.
-    backing_store true
+    save_under true
 
   end toggles
 

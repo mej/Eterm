@@ -51,33 +51,33 @@
 
 /* The various scrollbar elements */
 #ifdef PIXMAP_SCROLLBAR
-# define scrollbar_win_is_scrollbar(w)      (scrollbar_visible() && (w) == scrollBar.win)
-# define scrollbar_win_is_uparrow(w)        ((w) == scrollBar.up_win)
-# define scrollbar_win_is_downarrow(w)      ((w) == scrollBar.dn_win)
-# define scrollbar_win_is_anchor(w)         ((w) == scrollBar.sa_win)
-# define scrollbar_is_pixmapped()           ((images[image_sb].current->iml->im) && (images[image_sb].mode & MODE_MASK))
-# define scrollbar_uparrow_is_pixmapped()   ((images[image_up].current->iml->im) && (images[image_up].mode & MODE_MASK))
-# define scrollbar_downarrow_is_pixmapped() ((images[image_down].current->iml->im) && (images[image_down].mode & MODE_MASK))
-# define scrollbar_anchor_is_pixmapped()    ((images[image_sa].current->iml->im) && (images[image_sa].mode & MODE_MASK))
-# define scrollbar_upButton(w, y)	    ( scrollbar_uparrow_is_pixmapped() ? scrollbar_win_is_uparrow(w) \
-                                              : ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollBar.end && (y) <= scrollbar_dn_loc()) \
-                                                 || (scrollBar.type != SCROLLBAR_NEXT && (y) < scrollBar.beg)))
-# define scrollbar_dnButton(w, y)	    ( scrollbar_downarrow_is_pixmapped() ? scrollbar_win_is_downarrow(w) \
-                                              : ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollbar_dn_loc()) \
-                                                 || (scrollBar.type != SCROLLBAR_NEXT && (y) > scrollBar.end)))
+# define scrollbar_win_is_scrollbar(w) (scrollbar_visible() && (w) == scrollBar.win)
+# define scrollbar_win_is_uparrow(w) ((w) == scrollBar.up_win)
+# define scrollbar_win_is_downarrow(w) ((w) == scrollBar.dn_win)
+# define scrollbar_win_is_anchor(w) ((w) == scrollBar.sa_win)
+# define scrollbar_is_pixmapped() (images[image_sb].current->iml->im)
+# define scrollbar_uparrow_is_pixmapped() (images[image_up].current->iml->im)
+# define scrollbar_downarrow_is_pixmapped() (images[image_down].current->iml->im)
+# define scrollbar_anchor_is_pixmapped() (images[image_sa].current->iml->im)
+# define scrollbar_upButton(w, y)	( scrollbar_uparrow_is_pixmapped() ? scrollbar_win_is_uparrow(w) \
+                                          : ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollBar.end && (y) <= scrollbar_dn_loc()) \
+                                             || (scrollBar.type != SCROLLBAR_NEXT && (y) < scrollBar.beg)))
+# define scrollbar_dnButton(w, y)	( scrollbar_downarrow_is_pixmapped() ? scrollbar_win_is_downarrow(w) \
+                                          : ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollbar_dn_loc()) \
+                                             || (scrollBar.type != SCROLLBAR_NEXT && (y) > scrollBar.end)))
 #else
-# define scrollbar_win_is_scrollbar(w)	    (scrollbar_visible() && (w) == scrollBar.win)
-# define scrollbar_win_is_uparrow(w)        (0)
-# define scrollbar_win_is_downarrow(w)      (0)
-# define scrollbar_win_is_anchor(w)         (0)
-# define scrollbar_is_pixmapped()           (0)
-# define scrollbar_uparrow_is_pixmapped()   (0)
+# define scrollbar_win_is_scrollbar(w)	  (scrollbar_visible() && (w) == scrollBar.win)
+# define scrollbar_win_is_uparrow(w) (0)
+# define scrollbar_win_is_downarrow(w) (0)
+# define scrollbar_win_is_anchor(w) (0)
+# define scrollbar_is_pixmapped() (0)
+# define scrollbar_uparrow_is_pixmapped() (0)
 # define scrollbar_downarrow_is_pixmapped() (0)
-# define scrollbar_anchor_is_pixmapped()    (0)
-# define scrollbar_upButton(w, y)	    ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollBar.end && (y) <= scrollbar_dn_loc()) \
-                                              || (scrollBar.type != SCROLLBAR_NEXT && (y) < scrollBar.beg))
-# define scrollbar_dnButton(w, y)	    ((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollbar_dn_loc()) \
-                                              || (scrollBar.type != SCROLLBAR_NEXT && (y) > scrollBar.end))
+# define scrollbar_anchor_is_pixmapped() (0)
+# define scrollbar_upButton(w, y)	((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollBar.end && (y) <= scrollbar_dn_loc()) \
+                                          || (scrollBar.type != SCROLLBAR_NEXT && (y) < scrollBar.beg))
+# define scrollbar_dnButton(w, y)	((scrollBar.type == SCROLLBAR_NEXT && (y) > scrollbar_dn_loc()) \
+                                          || (scrollBar.type != SCROLLBAR_NEXT && (y) > scrollBar.end))
 #endif
 
 /* Scrollbar dimensions */
@@ -142,7 +142,6 @@ extern void Draw_up_button(int, int, int);
 extern void Draw_dn_button(int, int, int);
 extern void scrollbar_init(void);
 extern void scrollbar_event_init_dispatcher(void);
-extern unsigned char sb_handle_configure_notify(event_t *);
 extern unsigned char sb_handle_enter_notify(event_t *);
 extern unsigned char sb_handle_leave_notify(event_t *);
 extern unsigned char sb_handle_focus_in(event_t *);

@@ -638,6 +638,8 @@ unsigned char
 menuitem_set_action(menuitem_t * item, unsigned char type, char *action)
 {
 
+  unsigned long len;
+
   ASSERT_RVAL(item != NULL, 0);
 
   item->type = type;
@@ -768,9 +770,7 @@ menuitem_select(menu_t * menu, menuitem_t * item)
   XMoveWindow(Xdisplay, menu->swin, item->x, item->y);
   XMapWindow(Xdisplay, menu->swin);
   if (item->type == MENUITEM_SUBMENU) {
-    if (image_mode_is(image_submenu, MODE_IMAGE) && image_mode_is(image_submenu, ALLOW_IMAGE)) {
-      paste_simage(images[image_submenu].selected, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
-    }
+    paste_simage(images[image_submenu].selected, menu->swin, 0, 0, item->w - MENU_VGAP, item->h);
   } else {
     render_simage(images[image_menu].selected, menu->swin, item->w - MENU_VGAP, item->h, image_menu, 0);
   }
@@ -792,9 +792,7 @@ menuitem_deselect(menu_t * menu, menuitem_t * item)
   XUnmapWindow(Xdisplay, menu->swin);
   if (find_item_in_menu(menu, item) != (unsigned short) -1) {
     if (item->type == MENUITEM_SUBMENU) {
-      if (image_mode_is(image_submenu, MODE_IMAGE) && image_mode_is(image_submenu, ALLOW_IMAGE)) {
-        paste_simage(images[image_submenu].norm, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
-      }
+      paste_simage(images[image_submenu].norm, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
     }
     draw_string(menu->win, menu->gc, 2 * MENU_HGAP, item->y + item->h - MENU_VGAP, item->text, item->len);
     if (item->rtext) {
@@ -933,9 +931,7 @@ menu_draw(menu_t * menu)
       }
       switch (item->type) {
 	case MENUITEM_SUBMENU:
-          if (image_mode_is(image_submenu, MODE_IMAGE) && image_mode_is(image_submenu, ALLOW_IMAGE)) {
-            paste_simage(images[image_submenu].norm, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
-          }
+	  paste_simage(images[image_submenu].norm, menu->win, item->x, item->y, item->w - MENU_VGAP, item->h);
 	  break;
 	case MENUITEM_STRING:
 #if 0

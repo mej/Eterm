@@ -59,25 +59,25 @@
 # define Opt_utmpLogging		(1LU <<  6)
 # define Opt_scrollBar			(1LU <<  7)
 # define Opt_meta8			(1LU <<  8)
-# define Opt_exec			(1LU <<  9)
-# define Opt_homeOnEcho			(1LU << 10)
-# define Opt_homeOnRefresh		(1LU << 11)
-# define Opt_scrollBar_right		(1LU << 12)
-# define Opt_borderless			(1LU << 13)
-# define Opt_backing_store		(1LU << 14)
-# define Opt_noCursor			(1LU << 15)
-# define Opt_pause			(1LU << 16)
-# define Opt_homeOnInput		(1LU << 17)
-# define Opt_report_as_keysyms		(1LU << 18)
-# define Opt_xterm_select		(1LU << 19)
-# define Opt_select_whole_line		(1LU << 20)
-# define Opt_scrollbar_popup		(1LU << 21)
-# define Opt_select_trailing_spaces	(1LU << 22)
-# define Opt_install                	(1LU << 23)
-# define Opt_scrollBar_floating		(1LU << 24)
-
-# define IMOPT_TRANS                    (1U << 0)
-# define IMOPT_VIEWPORT                 (1U << 1)
+# define Opt_pixmapScale		(1LU <<  9)
+# define Opt_exec			(1LU << 10)
+# define Opt_homeOnEcho			(1LU << 11)
+# define Opt_homeOnRefresh		(1LU << 12)
+# define Opt_scrollBar_floating		(1LU << 13)
+# define Opt_scrollBar_right		(1LU << 14)
+# define Opt_borderless			(1LU << 15)
+# define Opt_pixmapTrans		(1LU << 16)
+# define Opt_backing_store		(1LU << 17)
+# define Opt_noCursor			(1LU << 18)
+# define Opt_pause			(1LU << 19)
+# define Opt_homeOnInput		(1LU << 20)
+# define Opt_report_as_keysyms		(1LU << 21)
+# define Opt_xterm_select		(1LU << 22)
+# define Opt_select_whole_line		(1LU << 23)
+# define Opt_viewport_mode		(1LU << 24)
+# define Opt_scrollbar_popup		(1LU << 25)
+# define Opt_select_trailing_spaces	(1LU << 26)
+# define Opt_install                	(1LU << 27)
 
 #define BOOL_OPT_ISTRUE(s)  (!strcasecmp((s), true_vals[0]) || !strcasecmp((s), true_vals[1]) \
                              || !strcasecmp((s), true_vals[2]) || !strcasecmp((s), true_vals[3]))
@@ -205,7 +205,7 @@ typedef struct eterm_function_struct {
 } eterm_func;
 
 /************ Variables ************/
-extern unsigned long Options, image_toggles;
+extern unsigned long Options;
 extern char *theme_dir, *user_dir;
 extern       char **rs_execArgs;        /* Args to exec (-e or --exec) */
 extern       char  *rs_title;		/* Window title */

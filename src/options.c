@@ -183,7 +183,7 @@ eterm_func builtins[] =
   {"appname", builtin_appname, 0},
   {(char *) NULL, (eterm_function_ptr) NULL, 0}
 };
-unsigned long Options = (Opt_scrollBar), image_toggles = 0;
+unsigned long Options = (Opt_scrollBar);
 static menu_t *curmenu;
 char *theme_dir = NULL, *user_dir = NULL;
 char **rs_execArgs = NULL;	/* Args to exec (-e or --exec) */
@@ -263,6 +263,10 @@ char *rs_cmod_blue = NULL;
 char *rs_anim_pixmap_list = NULL;
 char **rs_anim_pixmaps = NULL;
 time_t rs_anim_delay = 0;
+# endif
+# ifdef PIXMAP_OFFSET
+char *rs_viewport_mode = NULL;
+const char *rs_pixmapTrans = NULL;
 # endif
 static char *rs_pixmaps[image_max];
 #endif
@@ -376,12 +380,14 @@ static const struct {
       OPT_LONG("trough-pixmap", "scrollbar background (trough) pixmap [scaling optional]", &rs_pixmaps[image_sb]),
       OPT_LONG("anchor-pixmap", "scrollbar anchor pixmap [scaling optional]", &rs_pixmaps[image_sa]),
       OPT_LONG("menu-pixmap", "menu pixmap [scaling optional]", &rs_pixmaps[image_menu]),
-      OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", NULL, &image_toggles, IMOPT_TRANS),
-      OPT_BLONG("viewport-mode", "use viewport mode for the background image", NULL, &image_toggles, IMOPT_VIEWPORT),
+      OPT_BOOL('@', "scale", "scale rather than tile", &rs_pixmapScale, &Options, Opt_pixmapScale),
+# ifdef PIXMAP_OFFSET
+      OPT_BOOL('O', "trans", "creates a pseudo-transparent Eterm", &rs_pixmapTrans, &Options, Opt_pixmapTrans),
       OPT_LONG("cmod", "image color modifier (\"brightness contrast gamma\")", &rs_cmod_image),
       OPT_LONG("cmod-red", "red-only color modifier (\"brightness contrast gamma\")", &rs_cmod_red),
       OPT_LONG("cmod-green", "green-only color modifier (\"brightness contrast gamma\")", &rs_cmod_green),
       OPT_LONG("cmod-blue", "blue-only color modifier (\"brightness contrast gamma\")", &rs_cmod_blue),
+# endif
       OPT_STR('p', "path", "pixmap file search path", &rs_path),
 # ifdef BACKGROUND_CYCLING_SUPPORT
       OPT_STR('N', "anim", "a delay and list of pixmaps for cycling", &rs_anim_pixmap_list),
@@ -430,6 +436,9 @@ static const struct {
       OPT_BLONG("select-line", "triple-click selects whole line", &rs_select_whole_line, &Options, Opt_select_whole_line),
       OPT_BLONG("select-trailing-spaces", "do not skip trailing spaces when selecting", &rs_select_trailing_spaces, &Options, Opt_select_trailing_spaces),
       OPT_BLONG("report-as-keysyms", "report special keys as keysyms", &rs_report_as_keysyms, &Options, Opt_report_as_keysyms),
+#ifdef PIXMAP_OFFSET
+      OPT_BLONG("viewport-mode", "use viewport mode for the background image", &rs_viewport_mode, &Options, Opt_viewport_mode),
+#endif
 
 /* =======[ Keyboard options ]======= */
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
@@ -2462,13 +2471,13 @@ parse_image(char *buff)
       return;
     }
     if (!BEG_STRCASECMP(mode, "image ")) {
-      images[idx].mode = (MODE_IMAGE | ALLOW_IMAGE);
+      images[idx].mode = MODE_IMAGE;
     } else if (!BEG_STRCASECMP(mode, "trans ")) {
-      images[idx].mode = (MODE_TRANS | ALLOW_TRANS);
+      images[idx].mode = MODE_TRANS;
     } else if (!BEG_STRCASECMP(mode, "viewport ")) {
-      images[idx].mode = (MODE_VIEWPORT | ALLOW_VIEWPORT);
+      images[idx].mode = MODE_VIEWPORT;
     } else if (!BEG_STRCASECMP(mode, "auto ")) {
-      images[idx].mode = (MODE_AUTO | ALLOW_AUTO);
+      images[idx].mode = MODE_AUTO;
     } else {
       print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"", file_peek_path(), file_peek_line(), mode);
     }
@@ -2671,7 +2680,7 @@ parse_actions(char *buff)
   unsigned short mod = MOD_NONE;
   unsigned char button = BUTTON_NONE;
   KeySym keysym = 0;
-  char *str;
+  char *to, *str;
   unsigned short i;
 
   ASSERT(buff != NULL);
@@ -2842,16 +2851,16 @@ parse_menuitem(char *buff)
 void
 parse_xim(char *buff)
 {
-
+#ifdef USE_XIM
   ASSERT(buff != NULL);
 
-#ifdef USE_XIM
   if (!BEG_STRCASECMP(buff, "input_method ")) {
     rs_inputMethod = Word(2, buff);
   } else if (!BEG_STRCASECMP(buff, "preedit_type ")) {
     rs_preeditType = Word(2, buff);
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim",
+    print_error("Parse error in file %s, line %lu:\n"
+		"Attribute \"%s\" is not valid within context xim",
 		file_peek_path(), file_peek_line(), buff);
   }
 #else
@@ -2863,22 +2872,23 @@ parse_xim(char *buff)
 void
 parse_multichar(char *buff)
 {
-
+#ifdef MULTI_CHARSET
   ASSERT(buff != NULL);
 
-#ifdef MULTI_CHARSET
   if (!BEG_STRCASECMP(buff, "encoding ")) {
     if ((rs_multchar_encoding = Word(2, buff)) != NULL) {
       if (BEG_STRCASECMP(rs_multchar_encoding, "eucj")
 	  && BEG_STRCASECMP(rs_multchar_encoding, "sjis")
 	  && BEG_STRCASECMP(rs_multchar_encoding, "euckr")) {
-	print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"",
+	print_error("Parse error in file %s, line %lu:"
+		    " Invalid multichar encoding mode \"%s\"",
 		    file_peek_path(), file_peek_line(), rs_multchar_encoding);
 	return;
       }
       set_multichar_encoding(rs_multchar_encoding);
     } else {
-      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding",
+      print_error("Parse error in file %s, line %lu: "
+		  " Invalid parameter list \"\" for attribute encoding",
 		  file_peek_path(), file_peek_line());
     }
   } else if (!BEG_STRCASECMP(buff, "font ")) {
@@ -2887,7 +2897,8 @@ parse_multichar(char *buff)
     unsigned char n;
 
     if (NumWords(buff) != 3) {
-      print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font",
+      print_error("Parse error in file %s, line %lu:"
+		  " Invalid parameter list \"%s\" for attribute font",
 		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       return;
     }
@@ -2896,21 +2907,25 @@ parse_multichar(char *buff)
       if (n <= 4) {
 	rs_mfont[n] = Word(2, tmp);
       } else {
-	print_error("Parse error in file %s, line %lu:  Invalid font index %d",
+	print_error("Parse error in file %s, line %lu:"
+		    " Invalid font index %d",
 		    file_peek_path(), file_peek_line(), n);
       }
     } else {
       tmp = Word(1, tmp);
-      print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"",
+      print_error("Parse error in file %s, line %lu:"
+		  " Invalid font index \"%s\"",
 		  file_peek_path(), file_peek_line(), (tmp ? tmp : ""));
       FREE(tmp);
     }
   } else {
-    print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar",
+    print_error("Parse error in file %s, line %lu:"
+		" Attribute \"%s\" is not valid within context multichar",
 		file_peek_path(), file_peek_line(), buff);
   }
 #else
-  print_warning("Multichar support was not compiled in, ignoring entire context");
+  print_warning("Multichar support was not compiled in,"
+		" ignoring entire context");
   file_poke_skip(1);
 #endif
 }
@@ -3341,13 +3356,6 @@ post_parse(void)
     }
     if (!(images[i].clicked)) {
       images[i].clicked = images[i].selected;
-    }
-    if ((image_toggles & IMOPT_TRANS) && (image_mode_is(i, ALLOW_TRANS))) {
-      D_PIXMAP(("Detected transparency option.  Enabling transparency on image %s\n", get_image_type(i)));
-      image_set_mode(i, MODE_TRANS);
-    } else if ((image_toggles & IMOPT_VIEWPORT) && (image_mode_is(i, ALLOW_VIEWPORT))) {
-      D_PIXMAP(("Detected viewport option.  Enabling viewport mode on image %s\n", get_image_type(i)));
-      image_set_mode(i, MODE_VIEWPORT);
     }
   }
 

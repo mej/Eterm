@@ -174,6 +174,7 @@ parse_escaped_string(char *str)
 
   register char *pold, *pnew;
   unsigned char i;
+  size_t len = strlen(str);
 
   D_STRINGS(("parse_escaped_string(\"%s\")\n", str));
 

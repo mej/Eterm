@@ -64,7 +64,6 @@
 # define XTerm_name	0
 # define XTerm_iconName	1
 # define XTerm_title	2
-# define XTerm_prop	3
 # define XTerm_logfile	46
 # define XTerm_font	50
 

@@ -241,7 +241,6 @@ scrollbar_event_init_dispatcher(void)
 
   MEMSET(&scrollbar_event_data, 0, sizeof(event_dispatcher_data_t));
 
-  EVENT_DATA_ADD_HANDLER(scrollbar_event_data, ConfigureNotify, sb_handle_configure_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, EnterNotify, sb_handle_enter_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, LeaveNotify, sb_handle_leave_notify);
   EVENT_DATA_ADD_HANDLER(scrollbar_event_data, FocusIn, sb_handle_focus_in);
@@ -264,18 +263,6 @@ scrollbar_event_init_dispatcher(void)
   event_data_add_parent(&scrollbar_event_data, TermWin.vt);
   event_data_add_parent(&scrollbar_event_data, TermWin.parent);
 
-}
-
-unsigned char
-sb_handle_configure_notify(event_t * ev)
-{
-
-  D_EVENTS(("sb_handle_configure_notify(ev [0x%08x] on window 0x%08x)\n", ev, ev->xany.window));
-
-  REQUIRE_RVAL(XEVENT_IS_PARENT(ev, &scrollbar_event_data), 0);
-
-  redraw_image(image_sb);
-  return 0;
 }
 
 unsigned char
@@ -706,11 +693,19 @@ scrollbar_show(short mouseoffset)
       gcvalue.foreground = (Xdepth <= 2 ? PixColors[fgColor] : PixColors[scrollColor]);
       scrollbarGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
 
-      if ((Options & Opt_scrollBar_floating) && !scrollbar_is_pixmapped() && !background_is_pixmap()) {
-        XSetWindowBackground(Xdisplay, scrollBar.win, PixColors[bgColor]);
-      } else {
+      if (scrollbar_is_pixmapped() || (Options & (Opt_scrollBar_floating | Opt_pixmapTrans))) {
 	render_simage(images[image_sb].current, scrollBar.win, scrollbar_trough_width(), scrollbar_trough_height(), image_sb, 0);
+      } else if (Options & Opt_scrollBar_floating) {
+	if (background_is_pixmap()) {
+	  /* FIXME:  Extend the bg pixmap into the scrollbar window here? -- mej */
+	  XSetWindowBackground(Xdisplay, scrollBar.win, gcvalue.foreground);
+	} else {
+	  XSetWindowBackground(Xdisplay, scrollBar.win, PixColors[bgColor]);
+	}
+      } else {
+	XSetWindowBackground(Xdisplay, scrollBar.win, gcvalue.foreground);
       }
+      XClearWindow(Xdisplay, scrollBar.win);
       gcvalue.foreground = PixColors[topShadowColor];
       topShadowGC = XCreateGC(Xdisplay, scrollBar.win, GCForeground, &gcvalue);
 
@@ -727,7 +722,7 @@ scrollbar_show(short mouseoffset)
       focus = TermWin.focus;
       gcvalue.foreground = PixColors[focus ? scrollColor : unfocusedScrollColor];
 # ifdef PIXMAP_OFFSET
-      if (!((Options & Opt_scrollBar_floating) && image_mode_is(image_sb, (MODE_TRANS | MODE_VIEWPORT)))) {
+      if (!((Options & Opt_pixmapTrans) && (Options & Opt_scrollBar_floating))) {
 # endif
 	if (scrollbar_is_pixmapped()) {
 	  XSetWindowBackgroundPixmap(Xdisplay, scrollBar.win, images[image_sb].current->pmap->pixmap);
