@@ -144,6 +144,8 @@ char *rs_config_file = NULL;
 char *rs_url = NULL;
 char *rs_hop = NULL;
 int rs_delay = -1;
+unsigned char rs_es_dock = BBAR_DOCKED_BOTTOM;
+char *rs_es_font = NULL;
 #endif
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
@@ -2367,6 +2369,23 @@ parse_escreen(char *buff, void *state)
         RESET_AND_ASSIGN(rs_hop, get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "delay ")) {
         rs_delay = strtol(get_pword(2, buff), (char **) NULL, 0);
+    } else if (!BEG_STRCASECMP(buff, "bbar_font ")) {
+        RESET_AND_ASSIGN(rs_es_font, get_word(2, buff));
+    } else if (!BEG_STRCASECMP(buff, "bbar_dock ")) {
+        char *where = get_pword(2, buff);
+
+        if (!where) {
+            print_error("Parse error in file %s, line %lu:  Attribute bbar_dock requires a parameter\n", file_peek_path(), file_peek_line());
+        } else if (!BEG_STRCASECMP(where, "top")) {
+            rs_es_dock = BBAR_DOCKED_TOP;
+        } else if (!BEG_STRCASECMP(where, "bot")) {	/* "bot" or "bottom" */
+            rs_es_dock = BBAR_DOCKED_BOTTOM;
+        } else if (!BEG_STRCASECMP(where, "no")) {	/* "no" or "none" */
+            rs_es_dock = BBAR_UNDOCKED;
+        } else {
+            print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute bbar_dock\n", file_peek_path(),
+                        file_peek_line(), where);
+        }
     } else {
         print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context escreen\n",
                     file_peek_path(), file_peek_line(), buff);

@@ -4881,3 +4881,11 @@ Allow users to customize the Escreen current/active display colors.
 
 Don't display the Escreen button if there's no Escreen menu defined.
 ----------------------------------------------------------------------
+Thu Oct 24 23:54:46 2002                        Michael Jennings (mej)
+
+Added bbar_dock and bbar_font directives to escreen context so that
+users can alter the dock location and font of the Escreen buttonbar.
+
+This should be it for feature additions and last-minute code changes.
+I need to update the docs, but that's about it.
+----------------------------------------------------------------------

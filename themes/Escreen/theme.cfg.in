@@ -127,5 +127,6 @@ end actions
 begin escreen
     #url screen://localhost/
     #delay 2
+    #bbar_dock bottom
     #bbar_font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1"
 end escreen

@@ -112,7 +112,9 @@ extern char *rs_config_file;
 #ifdef ESCREEN
 extern char *rs_url;
 extern char *rs_hop;
-extern int   rs_delay;
+extern int rs_delay;
+extern unsigned char rs_es_dock;
+extern char *rs_es_font;
 #endif
 extern unsigned int rs_line_space;
 extern unsigned int rs_meta_mod, rs_alt_mod, rs_numlock_mod;
@@ -124,7 +126,7 @@ extern char *rs_print_pipe;
 #endif
 extern char *rs_cutchars;
 #ifdef CUTCHAR_OPTION
-extern       char  *rs_cutchars;
+extern char *rs_cutchars;
 #endif
 extern const char *true_vals[];
 extern const char *false_vals[];

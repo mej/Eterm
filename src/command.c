@@ -2816,7 +2816,7 @@ make_escreen_menu(buttonbar_t *bbar)
 #endif
 
     if (been_here) {            /* the start function may be called more than once */
-        return 0;               /* in later versions, but we only want one EScreen menu */
+        return 0;               /* in later versions, but we only want one Escreen menu */
     }
 
     been_here = 1;
@@ -2926,7 +2926,7 @@ escreen_init(char **argv)
         if (buttonbar == NULL) {
             buttonbar = bbar;
         }
-        bbar_set_font(bbar, "-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1");
+        bbar_set_font(bbar, ((rs_es_font) ? (rs_es_font) : ("-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1")));
         bbar_init(bbar, TERM_WINDOW_GET_WIDTH());
         bbar_add(bbar);
     }
@@ -2941,7 +2941,7 @@ escreen_init(char **argv)
 
     make_escreen_menu(bbar);
 
-    bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
+    bbar_set_docked(bbar, rs_es_dock);
     bbar_set_visible(bbar, 0);
     bbar_show(bbar, 1);
     parent_resize();
