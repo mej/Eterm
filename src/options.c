@@ -1579,7 +1579,7 @@ shell_expand(char *s)
   register char *pbuff = s, *tmp1;
   register unsigned long j, k, l = 0;
   char new[CONFIG_BUFF];
-  unsigned char eval_escape = 1, eval_var = 1, eval_exec = 1, eval_func = 1, in_single = 0, in_double = 0;
+  unsigned char in_single = 0, in_double = 0;
   unsigned long cnt1 = 0, cnt2 = 0;
   const unsigned long max = CONFIG_BUFF - 1;
   char *Command, *Output, *EnvVar;
@@ -1594,7 +1594,7 @@ shell_expand(char *s)
     switch (*pbuff) {
       case '~':
 	D_OPTIONS(("Tilde detected.\n"));
-	if (eval_var) {
+	if (!in_single && !in_double) {
 	  strncpy(new + j, getenv("HOME"), max - j);
 	  cnt1 = strlen(getenv("HOME")) - 1;
           cnt2 = max - j - 1;
@@ -1605,7 +1605,7 @@ shell_expand(char *s)
 	break;
       case '\\':
 	D_OPTIONS(("Escape sequence detected.\n"));
-	if (eval_escape || (in_single && *(pbuff + 1) == '\'')) {
+	if (!in_single || (in_single && *(pbuff + 1) == '\'')) {
 	  switch (tolower(*(++pbuff))) {
 	    case 'n':
 	      new[j] = '\n';
@@ -1699,7 +1699,7 @@ shell_expand(char *s)
       case '`':
 #ifdef ALLOW_BACKQUOTE_EXEC
 	D_OPTIONS(("Backquotes detected.  Evaluating expression.\n"));
-	if (eval_exec) {
+	if (!in_single) {
 	  Command = (char *) MALLOC(CONFIG_BUFF);
 	  l = 0;
 	  for (pbuff++; *pbuff && *pbuff != '`' && l < max; pbuff++, l++) {
@@ -1733,7 +1733,7 @@ shell_expand(char *s)
 	break;
       case '$':
 	D_OPTIONS(("Environment variable detected.  Evaluating.\n"));
-	if (eval_var) {
+	if (!in_single) {
 	  EnvVar = (char *) MALLOC(128);
 	  switch (*(++pbuff)) {
 	    case '{':
@@ -1776,16 +1776,8 @@ shell_expand(char *s)
       case '\'':
 	D_OPTIONS(("Single quotes detected.\n"));
 	if (in_single) {
-	  eval_var = 1;
-	  eval_exec = 1;
-	  eval_func = 1;
-	  eval_escape = 1;
 	  in_single = 0;
 	} else {
-	  eval_var = 0;
-	  eval_exec = 0;
-	  eval_func = 0;
-	  eval_escape = 0;
 	  in_single = 1;
 	}
 	new[j] = *pbuff;

@@ -252,6 +252,7 @@ safe_print_string(char *str, unsigned long len)
     if (n + 2 >= rb_size) {
       rb_size *= 2;
       ret_buff = (char *) REALLOC(ret_buff, rb_size + 1);
+      p = ret_buff + n;
     }
     if (*str < ' ') {
       *p++ = '^';

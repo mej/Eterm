@@ -33,7 +33,8 @@ static const char cvs_ident[] = "$Id$";
 static void memrec_add_var(memrec_t *, void *, size_t);
 static void memrec_rem_var(memrec_t *, const char *, const char *, unsigned long, void *);
 static void memrec_chg_var(memrec_t *, const char *, const char *, unsigned long, void *, void *, size_t);
-static void memrec_dump(memrec_t *);
+static void memrec_dump_pointers(memrec_t *);
+static void memrec_dump_resources(memrec_t *);
 
 /* 
  * These're added for a pretty obvious reason -- they're implemented towards
@@ -68,8 +69,8 @@ memrec_add_var(memrec_t *memrec, void *ptr, size_t size)
   if ((memrec->ptrs = (ptr_t *) realloc(memrec->ptrs, sizeof(ptr_t) * memrec->cnt)) == NULL) {
     D_MEM(("Unable to reallocate pointer list -- %s\n", strerror(errno)));
   }
-  D_MEM(("Adding variable of size %lu at %8p\n", size, ptr));
   p = memrec->ptrs + memrec->cnt - 1;
+  D_MEM(("Adding variable of size %lu at %8p.  Storing as pointer #%lu at %8p (from %8p).\n", size, ptr, memrec->cnt, p, memrec->ptrs));
   p->ptr = ptr;
   p->size = size;
 }
@@ -92,7 +93,7 @@ memrec_rem_var(memrec_t *memrec, const char *var, const char *filename, unsigned
     return;
   }
   memrec->cnt--;
-  D_MEM(("Removing variable of size %lu at %8p\n", p->size, p->ptr));
+  D_MEM(("Removing variable %s (%8p) of size %lu which is stored at %8p (from %8p)\n", var, ptr, p->size, p, memrec->ptrs));
   memmove(p, p + 1, sizeof(ptr_t) * (memrec->cnt - i));
   memrec->ptrs = (ptr_t *) realloc(memrec->ptrs, sizeof(ptr_t) * memrec->cnt);
 }
@@ -114,13 +115,13 @@ memrec_chg_var(memrec_t *memrec, const char *var, const char *filename, unsigned
     D_MEM(("ERROR:  File %s, line %d attempted to realloc variable %s (%8p) which was not allocated with MALLOC/REALLOC\n", filename, line, var, oldp));
     return;
   }
-  D_MEM(("Changing variable of %lu bytes at %8p to one of %lu bytes at %8p\n", p->size, p->ptr, size, newp));
+  D_MEM(("Changing variable %s (%8p, %lu -> %8p, %lu) stored at %8p (from %8p)\n", var, oldp, p->size, newp, size, p, memrec->ptrs));
   p->ptr = newp;
   p->size = size;
 }
 
 static void
-memrec_dump(memrec_t *memrec)
+memrec_dump_pointers(memrec_t *memrec)
 {
   register ptr_t *p;
   unsigned long i, j, k, l, total = 0;
@@ -136,12 +137,13 @@ memrec_dump(memrec_t *memrec)
   memset(buff, 0, sizeof(buff));
 
   /* First, dump the contents of the memrec->ptrs[] array. */
-  for (p = memrec->ptrs, j = 0; j < len; p++, j += 8) {
+  for (p = memrec->ptrs, j = 0; j < len; j += 8) {
     fprintf(LIBMEJ_DEBUG_FD, "DUMP ::  %07lu | %8p | %06lu | %07x | ", (unsigned long) 0, memrec->ptrs, (unsigned long) (sizeof(ptr_t) * memrec->cnt), (unsigned int) j);
     /* l is the number of characters we're going to output */
     l = ((len - j < 8) ? (len - j) : (8));
     /* Copy l bytes (up to 8) from memrec->ptrs[] (p) to buffer */
-    memcpy(buff, p + j, l);
+    memset(buff, 0, sizeof(buff));
+    memcpy(buff, ((char *) p) + j, l);
     for (k = 0; k < l; k++) {
       fprintf(LIBMEJ_DEBUG_FD, "%02x ", buff[k]);
     }
@@ -156,7 +158,7 @@ memrec_dump(memrec_t *memrec)
   }
 
   /* Now print out each pointer and its contents. */
-  for (p = memrec->ptrs, i = 0; i < memrec->cnt; p++, i++) {
+  for (i = 0; i < memrec->cnt; p++, i++) {
     /* Add this pointer's size to our total */
     total += p->size;
     for (j = 0; j < p->size; j += 8) {
@@ -164,7 +166,9 @@ memrec_dump(memrec_t *memrec)
       /* l is the number of characters we're going to output */
       l = ((p->size - j < 8) ? (p->size - j) : (8));
       /* Copy l bytes (up to 8) from p->ptr to buffer */
-      memcpy(buff, p->ptr + j, l);
+      memset(buff, 0, sizeof(buff));
+      memcpy(buff, ((char *) p->ptr) + j, l);
+      buff[l] = 0;
       for (k = 0; k < l; k++) {
 	fprintf(LIBMEJ_DEBUG_FD, "%02x ", buff[k]);
       }
@@ -180,6 +184,18 @@ memrec_dump(memrec_t *memrec)
   }
   fprintf(LIBMEJ_DEBUG_FD, "DUMP :: Total allocated memory: %10lu bytes\n\n", total);
   fflush(LIBMEJ_DEBUG_FD);
+}
+
+static void
+memrec_dump_resources(memrec_t *memrec)
+{
+  register ptr_t *p;
+  unsigned long i, j, k, l, total = 0;
+  unsigned long len;
+  unsigned char buff[9];
+
+  ASSERT(memrec != NULL);
+
 }
 
 /******************** MEMORY ALLOCATION INTERFACE ********************/
@@ -289,7 +305,7 @@ libmej_strdup(const char *var, const char *filename, unsigned long line, const c
 void
 libmej_dump_mem_tables(void)
 {
-  memrec_dump(&malloc_rec);
+  memrec_dump_pointers(&malloc_rec);
 }
 
 
@@ -328,7 +344,7 @@ libmej_x_free_pixmap(const char *var, const char *filename, unsigned long line, 
 void
 libmej_dump_pixmap_tables(void)
 {
-  memrec_dump(&pixmap_rec);
+  memrec_dump_resources(&pixmap_rec);
 }
 
 
@@ -367,5 +383,5 @@ libmej_x_free_gc(const char *var, const char *filename, unsigned long line, Disp
 void
 libmej_dump_gc_tables(void)
 {
-  memrec_dump(&gc_rec);
+  memrec_dump_resources(&gc_rec);
 }

@@ -3852,3 +3852,10 @@ Thu Aug 31 23:02:10 PDT 2000	Michael Jennings <mej@eterm.org>
 	libmej using the existing allocation tracking routines.
 	
 -------------------------------------------------------------------------------
+Fri Sep  1 00:39:41 PDT 2000	Michael Jennings <mej@eterm.org>
+
+	That should fix the crashes.  Somehow I managed to temporarily forget
+	about pointer arithmetic.  And somehow I thought trying to dereference
+	a pixmap ID would be a good thing.  Sigh.  I need sleep.
+	
+-------------------------------------------------------------------------------
