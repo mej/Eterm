@@ -99,7 +99,7 @@ static inline void
 draw_string(Drawable d, GC gc, int x, int y, char *str, size_t len)
 {
 
-  /*D_MENU(("draw_string():  Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y)); */
+  D_MENU(("draw_string():  Writing string \"%s\" (length %lu) onto drawable 0x%08x at %d, %d\n", str, len, d, x, y));
 
 #ifdef MULTI_CHARSET
   if (current_menu && current_menu->fontset)
@@ -913,6 +913,15 @@ menu_draw(menu_t * menu)
   }
   XMoveResizeWindow(Xdisplay, menu->win, menu->x, menu->y, menu->w, menu->h);
 
+  /* Size and render selected item window */
+  XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
+  /* This must come before the rendering of the menu window so that pmap->pixmap is guaranteed to be the menu background. */
+  render_simage(images[image_menu].selected, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP, image_menu, 0);
+  if (image_mode_is(image_menu, MODE_AUTO)) {
+    enl_ipc_sync();
+  }
+  XUnmapWindow(Xdisplay, menu->swin);
+
   /* Draw menu background */
   if (image_mode_is(image_menu, MODE_AUTO)) {
     pixmap_t *pmap = images[image_menu].norm->pmap;
@@ -926,15 +935,21 @@ menu_draw(menu_t * menu)
   } else {
     render_simage(images[image_menu].norm, menu->win, menu->w, menu->h, image_menu, 0);
   }
-  menu->bg = images[image_menu].norm->pmap->pixmap;
+  if (!image_mode_is(image_menu, MODE_MASK)) {
+    GC gc;
+    pixmap_t *pmap = images[image_menu].norm->pmap;
 
-  /* Size and render selected item window */
-  XResizeWindow(Xdisplay, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP);
-  render_simage(images[image_menu].selected, menu->swin, menu->w - 2 * MENU_HGAP, menu->fheight + MENU_VGAP, image_menu, 0);
-  if (image_mode_is(image_menu, MODE_AUTO)) {
-    enl_ipc_sync();
+    if (pmap->pixmap != None) {
+      XFreePixmap(Xdisplay, pmap->pixmap);
+    }
+    pmap->pixmap = XCreatePixmap(Xdisplay, menu->win, menu->w, menu->h, Xdepth);
+    gcvalue.foreground = PixColors[menuColor];
+    gc = XCreateGC(Xdisplay, menu->win, GCForeground, &gcvalue);
+    XFillRectangle(Xdisplay, pmap->pixmap, gc, 0, 0, menu->w, menu->h);
+    XFreeGC(Xdisplay, gc);
   }
-  XUnmapWindow(Xdisplay, menu->swin);
+  menu->bg = images[image_menu].norm->pmap->pixmap;
+  D_MENU(("menu_draw():  Menu background is 0x%08x\n", menu->bg));
   XMapWindow(Xdisplay, menu->win);
 
   str_x = 2 * MENU_HGAP;
@@ -972,7 +987,7 @@ menu_draw(menu_t * menu)
 	item->y = str_y - menu->fheight - MENU_VGAP / 2;
 	item->w = menu->w - MENU_HGAP;
 	item->h = menu->fheight + MENU_VGAP;
-	D_MENU(("   -> Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
+	D_MENU(("menu_draw():  Hot Area at %hu, %hu to %hu, %hu (width %hu, height %hu)\n", item->x, item->y, item->x + item->w, item->y + item->h,
 		item->w, item->h));
       }
       switch (item->type) {
@@ -996,6 +1011,8 @@ menu_draw(menu_t * menu)
 	  fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
 	  break;
 #endif
+        default:
+          break;
       }
       draw_string(menu->bg, menu->gc, str_x, str_y - MENU_VGAP / 2, item->text, item->len);
       if (item->rtext) {

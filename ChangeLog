@@ -3059,3 +3059,10 @@ Tue Jan 18 16:47:54 PST 2000	Michael Jennings <mej@eterm.org>
 	collection (i.e., removing the cool-but-too-busy-or-bright pics).
 	
 -------------------------------------------------------------------------------
+Tue Jan 18 20:16:01 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Updated the menu files to include all the new images in the background
+	collection.  Also fixed a bug with solid-color menus and menus where
+	the selected state was not defined.
+	
+-------------------------------------------------------------------------------

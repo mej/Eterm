@@ -3277,9 +3277,11 @@ post_parse(void)
       FREE(rs_pixmaps[i]);	/* These are created by StrDup() */
     }
     if (!(images[i].selected)) {
+      D_PIXMAP(("post_parse():  No \"selected\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
       images[i].selected = images[i].norm;
     }
     if (!(images[i].clicked)) {
+      D_PIXMAP(("post_parse():  No \"clicked\" state for image %s.  Setting fallback to the normal state.\n", get_image_type(i)));
       images[i].clicked = images[i].selected;
     }
     if ((image_toggles & IMOPT_TRANS) && (image_mode_is(i, ALLOW_TRANS))) {
