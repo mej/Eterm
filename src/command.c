@@ -2513,26 +2513,29 @@ expire_buttons(void *xd, int n)
 static int
 err_msg(void *xd, int err, char *msg)
 {
-    char *sc[] = { "Copy mode", "Bell in", "Wuff,  Wuff!!" };
-    int n, nsc = sizeof(sc) / sizeof(char *);
+#if DEBUG >= DEBUG_ESCREEN
+    if (DEBUG_LEVEL >= DEBUG_ESCREEN) {
+        char *sc[] = { "Copy mode", "Bell in", "Wuff,  Wuff!!" };
+        int n, nsc = sizeof(sc) / sizeof(char *);
 
-    /* there are certain things that would make sense if we were displaying
-       a status-line; they do not, however, warrant an alert-box, so we drop
-       them here. */
-
-    USE_VAR(xd);
-    USE_VAR(err);
-
-    if (strlen(msg)) {
-        for (n = 0; n < nsc; n++) {
-            if (!strncmp(msg, sc[n], strlen(sc[n]))) {
-                break;
+        /* there are certain things that would make sense if we were displaying
+           a status-line; they do not, however, warrant an alert-box, so we drop
+           them here. */
+        if (strlen(msg)) {
+            for (n = 0; n < nsc; n++) {
+                if (!strncmp(msg, sc[n], strlen(sc[n]))) {
+                    break;
+                }
+            }
+            if (n >= nsc) {
+                menu_dialog(NULL, msg, 0, NULL, NULL);
             }
         }
-        if (n >= nsc) {
-            menu_dialog(NULL, msg, 0, NULL, NULL);
-        }
     }
+#endif
+    USE_VAR(xd);
+    USE_VAR(err);
+    USE_VAR(msg);
     return NS_SUCC;
 }
 

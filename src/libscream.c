@@ -1003,7 +1003,7 @@ ns_make_call(_ns_sess * sess)
         tmp = screen = ns_make_call_el(NS_SCREEN_CALL, NS_SCREEN_OPTS, sess->rsrc);
 #endif
     if (sess->backend == NS_MODE_NEGOTIATE) {
-        int r, l = strlen(NS_SCREEM_CALL) + (scream ? strlen(scream) : 0) + (screen ? strlen(screen) : 0) - 3;
+        int r, l = strlen(NS_SCREEM_CALL) + (scream ? strlen(scream) : 1) + (screen ? strlen(screen) : 1) - 3;
 
         if ((screem = MALLOC(l))) {
             r = snprintf(screem, l, NS_SCREEM_CALL, scream ? scream : ":", screen ? screen : ":");

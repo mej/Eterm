@@ -4767,3 +4767,9 @@ Thu Jul 11 20:03:23 2002                        Michael Jennings (mej)
 
 Each side of an || must have a valid shell command.
 ----------------------------------------------------------------------
+Thu Jul 11 20:39:28 2002                        Michael Jennings (mej)
+
+Addition to last fix.  Also, we're going to specify error messages
+that *should* be shown and ignore others, not show all but a select
+few.  This helps with the status line issue.
+----------------------------------------------------------------------
