@@ -560,6 +560,9 @@ handle_resize(unsigned int width, unsigned int height)
     TermWin.nrow = new_nrow;
 
     term_resize(width, height);
+    szHint.width = szHint.base_width + TermWin.width;
+    szHint.height = szHint.base_height + TermWin.height;
+    D_X11((" -> New szHint.width/height == %lux%lu\n", szHint.width, szHint.height));
     scrollbar_resize(width, height);
     scr_reset();
 

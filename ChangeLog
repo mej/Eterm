@@ -2768,3 +2768,17 @@ Fri Nov 12 17:55:05 PST 1999	Michael Jennings <mej@eterm.org>
 	now documented for the first time.
 	
 -------------------------------------------------------------------------------
+Fri Nov 12 19:37:35 PST 1999	Michael Jennings <mej@eterm.org>
+
+	Okay, I've fixed a lot here.  First off, I fixed the bug Gnea
+	<gnea@rochester.rr.com> pointed out with toggling Max Size in E.
+	Turned out to be a symptom of a much larger problem, but it should be
+	fixed now.  Then I corrected the XIM issues pointed out by Sung-Hyun
+	Nam <namsh@lgic.co.kr> and Jerome De Greef
+	<jerome_degreef@hotmail.com>, as well as a stupid typo on my part that
+	Jerome happened upon.  Next I fixed the bug Adam Lucas
+	<ALucas@wcom.net> spotted with changing the scrollbar type.  While
+	fixing that, I also fixed changing the scrollbar width.  Both
+	operations are a lot smoother and cleaner now.
+	
+-------------------------------------------------------------------------------

@@ -227,8 +227,8 @@ extern     time_t   rs_anim_delay;
 extern char *rs_path;
 extern char *rs_noCursor;
 #ifdef USE_XIM
-extern char *rs_inputMethod;
-extern char *rs_preeditType;
+extern char *rs_input_method;
+extern char *rs_preedit_type;
 #endif
 extern char *rs_name;
 extern char *rs_config_file;

@@ -1785,6 +1785,8 @@ xim_destroy_cb(XIM xim, XPointer client_data, XPointer call_data)
 {
   Input_Context = NULL;
   XRegisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
+  xim = NULL;
+  client_data = call_data = (XPointer) 0;
 }
 
 static void
@@ -1794,6 +1796,8 @@ xim_instantiate_cb(Display *display, XPointer client_data, XPointer call_data)
   if (Input_Context) {
     XUnregisterIMInstantiateCallback(Xdisplay, NULL, NULL, NULL, xim_instantiate_cb, NULL);
   }
+  display = NULL;
+  client_data = call_data = (XPointer) 0;
 }
 #endif
 
@@ -1812,10 +1816,10 @@ xim_real_init(void)
   XVaNestedList preedit_attr = NULL;
   XVaNestedList status_attr = NULL;
 
-  REQUIRE(Input_Context == NULL);
+  REQUIRE_RVAL(Input_Context == NULL, -1);
 
-  if (rs_inputMethod && *rs_inputMethod) {
-    strncpy(tmp, rs_inputMethod, sizeof(tmp) - 1);
+  if (rs_input_method && *rs_input_method) {
+    strncpy(tmp, rs_input_method, sizeof(tmp) - 1);
     for (s = tmp; *s; s = next_s + 1) {
       for (; *s && isspace(*s); s++);
       if (!*s) {
@@ -1873,7 +1877,7 @@ xim_real_init(void)
     XCloseIM(xim);
     return -1;
   }
-  strncpy(tmp, (rs_preeditType ? rs_preeditType : "OverTheSpot,OffTheSpot,Root"), sizeof(tmp) - 1);
+  strncpy(tmp, (rs_preedit_type ? rs_preedit_type : "OverTheSpot,OffTheSpot,Root"), sizeof(tmp) - 1);
   for (found = 0, s = tmp; *s && !found; s = next_s + 1) {
     unsigned short  i;
 

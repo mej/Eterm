@@ -156,6 +156,8 @@ extern unsigned char scrollbar_dispatch_event(event_t *);
 extern unsigned char scrollbar_mapping(unsigned char);
 extern void scrollbar_reset(void);
 extern void scrollbar_resize(int, int);
+extern void scrollbar_change_type(unsigned int);
+extern void scrollbar_change_width(unsigned short);
 extern unsigned char scrollbar_show(short);
 
 _XFUNCPROTOEND

@@ -109,7 +109,7 @@ lookup_key(XEvent * ev)
   int ctrl, meta, shft, len;
   KeySym keysym;
 #ifdef USE_XIM
-  int valid_keysym;
+  int valid_keysym = 0;
   static unsigned char short_buf[256];
   unsigned char *kbuf = short_buf;
   int kbuf_alloced = 0;
@@ -1810,41 +1810,29 @@ xterm_seq(int op, const char *str)
 	  if (nstr && *nstr) {
 	    if (!strcasecmp(nstr, "xterm")) {
 #ifdef XTERM_SCROLLBAR
-	      scrollBar.type = SCROLLBAR_XTERM;
+	      scrollbar_change_type(SCROLLBAR_XTERM);
 #else
 	      print_error("Support for xterm scrollbars was not compiled in.  Sorry.");
 #endif
 	    } else if (!strcasecmp(nstr, "next")) {
 #ifdef NEXT_SCROLLBAR
-	      scrollBar.type = SCROLLBAR_NEXT;
+	      scrollbar_change_type(SCROLLBAR_NEXT);
 #else
 	      print_error("Support for NeXT scrollbars was not compiled in.  Sorry.");
 #endif
 	    } else if (!strcasecmp(nstr, "motif")) {
 #ifdef MOTIF_SCROLLBAR
-	      scrollBar.type = SCROLLBAR_MOTIF;
+	      scrollbar_change_type(SCROLLBAR_MOTIF);
 #else
 	      print_error("Support for motif scrollbars was not compiled in.  Sorry.");
 #endif
 	    } else {
 	      print_error("Unrecognized scrollbar type \"%s\".", nstr);
 	    }
-	    scrollbar_reset();
-	    map_scrollbar(0);
-	    map_scrollbar(1);
-	    scrollbar_show(0);
 	  }
 	  nstr = (char *) strsep(&tnstr, ";");
 	  if (nstr && *nstr) {
-	    scrollBar.width = strtoul(nstr, (char **) NULL, 0);
-	    if (scrollBar.width == 0) {
-	      print_error("Invalid scrollbar length \"%s\".", nstr);
-	      scrollBar.width = SB_WIDTH;
-	    }
-	    scrollbar_reset();
-	    map_scrollbar(0);
-	    map_scrollbar(1);
-	    scrollbar_show(0);
+            scrollbar_change_width((unsigned short) strtoul(nstr, (char **) NULL, 0));
 	  }
 	  break;
 	case 11:

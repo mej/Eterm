@@ -426,8 +426,8 @@ handle_configure_notify(event_t * ev)
     int x = ev->xconfigurerequest.x, y = ev->xconfigurerequest.y;
     unsigned int width = ev->xconfigurerequest.width, height = ev->xconfigurerequest.height;
 
-    D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  TermWin.x == %hd, TermWin.y == %hd\n",
-              width, height, x, y, TermWin.x, TermWin.y));
+    D_EVENTS((" -> TermWin.parent is %ldx%ld at (%d, %d).  Internal cache data shows %dx%d at (%hd, %hd)\n",
+              width, height, x, y, szHint.width, szHint.height, TermWin.x, TermWin.y));
     /* If the font change count is non-zero, this event is telling us we resized ourselves. */
     if (font_change_count > 0) {
       font_change_count--;

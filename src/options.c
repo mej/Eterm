@@ -195,8 +195,8 @@ int rs_desktop = -1;
 char *rs_path = NULL;
 int rs_saveLines = SAVELINES;	/* Lines in the scrollback buffer */
 #ifdef USE_XIM
-char *rs_inputMethod = NULL;
-char *rs_preeditType = NULL;
+char *rs_input_method = NULL;
+char *rs_preedit_type = NULL;
 #endif
 char *rs_name = NULL;
 #ifndef NO_BOLDFONT
@@ -371,8 +371,8 @@ static const struct {
 	       &rs_multchar_encoding),
 #endif /* MULTI_CHARSET */
 #ifdef USE_XIM
-      OPT_LONG("input-method", "XIM input method", &rs_inputMethod),
-      OPT_LONG("preedit-type", "XIM preedit type", &rs_preeditType),
+      OPT_LONG("input-method", "XIM input method", &rs_input_method),
+      OPT_LONG("preedit-type", "XIM preedit type", &rs_preedit_type),
 #endif
 
 /* =======[ Toggles ]======= */
@@ -2417,7 +2417,7 @@ parse_image(char *buff)
         iml->mod->contrast = (int) strtol(PWord(2, mods), (char **) NULL, 0);
       }
       if (n > 2) {
-        iml->rmod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
+        iml->mod->gamma = (int) strtol(PWord(3, mods), (char **) NULL, 0);
       }
     } else if (!BEG_STRCASECMP(color, "red ")) {
       RESET_AND_ASSIGN(iml->rmod, (ImlibColorModifier *) MALLOC(sizeof(ImlibColorModifier)));
@@ -2721,9 +2721,9 @@ parse_xim(char *buff)
 
 #ifdef USE_XIM
   if (!BEG_STRCASECMP(buff, "input_method ")) {
-    RESET_AND_ASSIGN(rs_inputMethod, Word(2, buff));
+    RESET_AND_ASSIGN(rs_input_method, Word(2, buff));
   } else if (!BEG_STRCASECMP(buff, "preedit_type ")) {
-    RESET_AND_ASSIGN(rs_preeditType, Word(2, buff));
+    RESET_AND_ASSIGN(rs_preedit_type, Word(2, buff));
   } else {
     print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim",
 		file_peek_path(), file_peek_line(), buff);
@@ -3762,7 +3762,9 @@ save_config(char *path)
 
 #ifdef MULTI_CHARSET
   fprintf(fp, "  begin multichar\n");
-  fprintf(fp, "    encoding %s\n", rs_multchar_encoding);
+  if (rs_multichar_encoding) {
+    fprintf(fp, "    encoding %s\n", rs_multchar_encoding);
+  }
   for (i = 0; i < 5; i++) {
     fprintf(fp, "    font %d %s\n", i, rs_mfont[i]);
   }
@@ -3771,8 +3773,12 @@ save_config(char *path)
 
 #ifdef USE_XIM
   fprintf(fp, "  begin xim\n");
-  fprintf(fp, "    input_method %s\n", rs_input_method);
-  fprintf(fp, "    preedit_type %s\n", rs_preedit_type);
+  if (rs_input_method) {
+    fprintf(fp, "    input_method %s\n", rs_input_method);
+  }
+  if (rs_preedit_type) {
+    fprintf(fp, "    preedit_type %s\n", rs_preedit_type);
+  }
   fprintf(fp, "  end xim\n\n");
 #endif
 
