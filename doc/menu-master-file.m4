@@ -24,6 +24,14 @@ define(FONT_ITEM, `begin menuitem
     text "$1"
     action string "\e]50;#$2"
   end')
+define(TILE_IMAGE_ITEM, `begin menuitem
+    text "$1"
+    action string "\e]20;tile/$2;0+0:tile\a"
+  end')
+define(SCALE_IMAGE_ITEM, `begin menuitem
+    text "$1"
+    action string "\e]20;scale/$2;100\a"
+  end')
 
 dnl#
 dnl# Define these only for the chooser theme
@@ -154,50 +162,50 @@ end
 
 begin menu
   title Tiled
-  STRING_ITEM(`70s Marble', `\e]20;tile/70s_marble.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Atoms', `\e]20;tile/atoms.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Black Stone', `\e]20;tile/blackstone.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Blue Ether', `\e]20;tile/ether_blue.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Blue Marble', `\e]20;tile/blue_marble.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Bubbly 1', `\e]20;tile/bubbly1.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Bubbly 2', `\e]20;tile/bubbly2.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Bubbly 3', `\e]20;tile/bubbly3.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Bubbly 4', `\e]20;tile/bubbly4.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Circuit', `\e]20;tile/circuit.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Confusion', `\e]20;tile/confusion.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Cyber Playground', `\e]20;tile/cyber_bg.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Dimples', `\e]20;tile/014.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Dirt', `\e]20;tile/dirt.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Egg', `\e]20;tile/egg.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Ether', `\e]20;tile/ether.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Giger 1', `\e]20;tile/giger1.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Giger 2', `\e]20;tile/giger2.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Gray Matter', `\e]20;tile/22.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Gray Waves', `\e]20;tile/59.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Green Ether', `\e]20;tile/ether_green.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Lava', `\e]20;tile/004.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Nebula', `\e]20;tile/nebula.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`On Stage', `\e]20;tile/lightb1.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Purple Stuff', `\e]20;tile/purple_stuff.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Red Whisper', `\e]20;tile/40.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Shale', `\e]20;tile/shale.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Soft Marble', `\e]20;tile/soft.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Space', `\e]20;tile/space.png;0x0+0+0:tile\a')
-  STRING_ITEM(`Starry Night', `\e]20;tile/starry.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Steel', `\e]20;tile/steel1.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Twisted', `\e]20;tile/twisted.jpg;0x0+0+0:tile\a')
-  STRING_ITEM(`Whirlpool', `\e]20;tile/015.jpg;0x0+0+0:tile\a')
+  TILE_IMAGE_ITEM(`70s Marble', `tile/70s_marble.jpg')
+  TILE_IMAGE_ITEM(`Atoms', `tile/atoms.jpg')
+  TILE_IMAGE_ITEM(`Black Stone', `tile/blackstone.jpg')
+  TILE_IMAGE_ITEM(`Blue Ether', `tile/ether_blue.jpg')
+  TILE_IMAGE_ITEM(`Blue Marble', `tile/blue_marble.jpg')
+  TILE_IMAGE_ITEM(`Bubbly 1', `tile/bubbly1.jpg')
+  TILE_IMAGE_ITEM(`Bubbly 2', `tile/bubbly2.jpg')
+  TILE_IMAGE_ITEM(`Bubbly 3', `tile/bubbly3.jpg')
+  TILE_IMAGE_ITEM(`Bubbly 4', `tile/bubbly4.jpg')
+  TILE_IMAGE_ITEM(`Circuit', `tile/circuit.jpg')
+  TILE_IMAGE_ITEM(`Confusion', `tile/confusion.jpg')
+  TILE_IMAGE_ITEM(`Cyber Playground', `tile/cyber_bg.jpg')
+  TILE_IMAGE_ITEM(`Dimples', `tile/014.jpg')
+  TILE_IMAGE_ITEM(`Dirt', `tile/dirt.jpg')
+  TILE_IMAGE_ITEM(`Egg', `tile/egg.jpg')
+  TILE_IMAGE_ITEM(`Ether', `tile/ether.jpg')
+  TILE_IMAGE_ITEM(`Giger 1', `tile/giger1.jpg')
+  TILE_IMAGE_ITEM(`Giger 2', `tile/giger2.jpg')
+  TILE_IMAGE_ITEM(`Gray Matter', `tile/22.jpg')
+  TILE_IMAGE_ITEM(`Gray Waves', `tile/59.jpg')
+  TILE_IMAGE_ITEM(`Green Ether', `tile/ether_green.jpg')
+  TILE_IMAGE_ITEM(`Lava', `tile/004.jpg')
+  TILE_IMAGE_ITEM(`Nebula', `tile/nebula.jpg')
+  TILE_IMAGE_ITEM(`On Stage', `tile/lightb1.jpg')
+  TILE_IMAGE_ITEM(`Purple Stuff', `tile/purple_stuff.jpg')
+  TILE_IMAGE_ITEM(`Red Whisper', `tile/40.jpg')
+  TILE_IMAGE_ITEM(`Shale', `tile/shale.jpg')
+  TILE_IMAGE_ITEM(`Soft Marble', `tile/soft.jpg')
+  TILE_IMAGE_ITEM(`Space', `tile/space.png')
+  TILE_IMAGE_ITEM(`Starry Night', `tile/starry.jpg')
+  TILE_IMAGE_ITEM(`Steel', `tile/steel1.jpg')
+  TILE_IMAGE_ITEM(`Twisted', `tile/twisted.jpg')
+  TILE_IMAGE_ITEM(`Whirlpool', `tile/015.jpg')
 end
 begin menu
   title Scaled
-  STRING_ITEM(`Day/Night', `\e]20;scale/day-night.jpg;100x100+50+50\a')
-  STRING_ITEM(`Good Morning', `\e]20;scale/good-morning.jpg;100x100+50+50\a')
-  STRING_ITEM(`Neopolis', `\e]20;scale/Neopolis-horizon.jpg;100x100+50+50\a')
-  STRING_ITEM(`Pond', `\e]20;scale/pond.jpg;100x100+50+50\a')
-  STRING_ITEM(`Ripple', `\e]20;scale/ripple.jpg;100x100+50+50\a')
-  STRING_ITEM(`Sunset', `\e]20;scale/sunset.jpg;100x100+50+50\a')
-  STRING_ITEM(`Wasteland', `\e]20;scale/wasteland.jpg;100x100+50+50\a')
-  STRING_ITEM(`Winter Tree', `\e]20;scale/wintertree.jpg;100x100+50+50\a')
+  SCALE_IMAGE_ITEM(`Day/Night', `scale/day-night.jpg')
+  SCALE_IMAGE_ITEM(`Good Morning', `scale/good-morning.jpg')
+  SCALE_IMAGE_ITEM(`Neopolis', `scale/Neopolis-horizon.jpg')
+  SCALE_IMAGE_ITEM(`Pond', `scale/pond.jpg')
+  SCALE_IMAGE_ITEM(`Ripple', `scale/ripple.jpg')
+  SCALE_IMAGE_ITEM(`Sunset', `scale/sunset.jpg')
+  SCALE_IMAGE_ITEM(`Wasteland', `scale/wasteland.jpg')
+  SCALE_IMAGE_ITEM(`Winter Tree', `scale/wintertree.jpg')
 end
 begin menu
   title Attrib
