@@ -3047,3 +3047,9 @@ Mon Jan 17 13:09:37 PST 2000	Michael Jennings <mej@eterm.org>
 	Fixed the faulty assumption that font->per_char is always non-NULL.
 	
 -------------------------------------------------------------------------------
+Mon Jan 17 13:27:52 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Fix XK_KP_Insert and XK_KP_Delete to respond to the application keypad
+	setting.
+	
+-------------------------------------------------------------------------------

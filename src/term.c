@@ -503,9 +503,32 @@ lookup_key(XEvent * ev)
 	  len = 4;
 	  strcpy(kbuf, "\033[3~");
 	  break;
+
+#ifdef XK_KP_Insert
+	case XK_KP_Insert:
+	  if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+            len = 3;
+            strcpy(kbuf, "\033Op");
+            break;
+          }
+#endif
 	case XK_Insert:
 	  len = 4;
 	  strcpy(kbuf, "\033[2~");
+	  break;
+
+#ifdef XK_KP_Delete
+	case XK_KP_Delete:
+	  if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+            len = 3;
+            strcpy(kbuf, "\033On");
+            break;
+          }
+#endif
+	case XK_Delete:
+#ifdef KS_DELETE
+	  len = strlen(strcpy(kbuf, KS_DELETE));
+#endif
 	  break;
 
 	case XK_Menu:
@@ -536,16 +559,6 @@ lookup_key(XEvent * ev)
 	case XK_KP_Begin:
 	  len = 3;
 	  strcpy(kbuf, "\033Ou");
-	  break;
-
-	case XK_KP_Insert:
-	  len = 3;
-	  strcpy(kbuf, "\033Op");
-	  break;
-
-	case XK_KP_Delete:
-	  len = 3;
-	  strcpy(kbuf, "\033On");
 	  break;
 #endif /* XK_KP_Begin */
 
@@ -640,11 +653,6 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 	  FKEY(31, XK_F17);
 	  break;
 #undef FKEY
-#ifdef KS_DELETE
-	case XK_Delete:
-	  len = strlen(strcpy(kbuf, KS_DELETE));
-	  break;
-#endif
       }
 
 #ifdef META8_OPTION
