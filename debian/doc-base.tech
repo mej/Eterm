@@ -6,5 +6,5 @@ Abstract: Technical Reference for Eterm's escape codes, config file format,
 Section: Apps/Terminals
 
 Format: HTML
-Index: /usr/doc/eterm/Eterm_reference.html
-Files: /usr/doc/eterm/Eterm_reference.html
+Index: /usr/share/doc/eterm/Eterm_reference.html
+Files: /usr/share/doc/eterm/Eterm_reference.html

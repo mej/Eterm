@@ -1,29 +1,10 @@
-eterm (0.9.0-0-cvs0b) unstable; urgency=low
+eterm (0.9.1-0.2000022502) unstable; urgency=low
 
-  * Yet Another CVS release 
+  * A CVS release.
 
- -- Laurence John Lane <ljlane@debian.org>  Fri, 19 Nov 1999 22:38:33 -0500
-
-eterm (0.9.0-0-cvs0a) unstable; urgency=low
-
-  * Yet Another CVS Release 
-
- -- Laurence John Lane <ljlane@debian.org>  Thu, 18 Nov 1999 13:41:21 -0500
-
-eterm (0.9.0-0-cvs00) unstable; urgency=low
-
-  * changed cvs version numbering
-
- -- Laurence John Lane <ljlane@debian.org>  Sat, 23 Oct 1999 19:39:25 -0400
-
-eterm (0.9.0-0.1) unstable; urgency=low
-
-  * new mainter
-  * jacked the stable debian/ for the cvs tree
-
- -- Laurence John Lane <ljlane@debian.org>  Thu, 21 Oct 1999 22:20:12 -0400
+ -- Laurence J. Lane <ljlane@debian.org>  Fri, 25 Feb 2000 17:11:42 -0500
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address: "ljlane@debian.org"
+add-log-mailing-address: "bma@debian.org"
 End:

@@ -1,8 +1,13 @@
 This package was debianized by Sean E. Perry shaleh@debian.org on
 Sun, 27 Sep 1998 20:18:11 -0400.
 
-It was downloaded from www.eterm.org
+The source for this package was obtained from:
+
+  ftp://eterm.sourceforge.net/pub/eterm/Eterm-0.9.tar.gz
 
 Copyright:
 
-Eterm is released under the GPL.
+Eterm is released under the GNU Public License.  Debian systems should have 
+a copy located at:
+  
+  /usr/share/common-licenses/GPL.

@@ -1,15 +1,22 @@
 #!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
 
-export DH_COMPAT=2
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
 
-vpath build debian/pmt/
-vpath install debian/pmt/
-cfg = --prefix=/usr --mandir=/usr/share/man
-pwd := $(shell pwd)
+# This is the debhelper compatability version to use.
+export DH_COMPAT=1
+pwd:=$(shell pwd)
 
-build:
+cfg = --mandir=$(pwd)/tmp/usr/share/man --enable-fsstd \
+  --enable-xim --with-backspace=del --with-delete=execute
+
+build: build-stamp
+build-stamp:
 	dh_testdir
-	test -x autogen.sh && ./autogen.sh $(cfg)  || ./configure $(cfg)
+
+	./autogen.sh ${cfg}
 
 	install -d debian/pmt/
 
@@ -28,39 +35,58 @@ build:
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp
-	-$(MAKE) -k distclean clean
-	rm -rvf debian/pmt/
+	rm -f build-stamp config.cache
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) clean
+	-rm -rf debian/pmt/
+
 	dh_clean
 
 install: build
-	dh_testdir 
-	dh_testroot 
-	dh_clean 
-	dh_installdirs 
-	$(MAKE) install DESTDIR=$(pwd)/debian/eterm
-	touch debian/pmt/$@
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
 
+	# Add here commands to install the package into debian/tmp.
+	$(MAKE) install prefix=$(pwd)/debian/tmp/usr
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
 binary-arch: build install
-	dh_testdir 
-	dh_testroot 
-	dh_installdocs README ReleaseNotes doc/{Eterm.tcap,Eterm.ti,Eterm_reference.html}
-	dh_installmenu 
-	dh_undocumented  Esetroot.1 Etbg.1 Etcolors.1 Ettable.1 Etwinop.1
-	dh_installchangelogs 
-	dh_strip 
-	dh_compress 
-	dh_fixperms 
-	dh_suidregister usr/bin/Eterm
-	dh_installdeb 
-	dh_makeshlibs
-	dh_shlibdeps -l$(pwd)/debian/Eterm/usr/lib 
-	dh_gencontrol 
-	dh_md5sums 
-	dh_builddeb 
+#	dh_testversion
+	dh_testdir
+	dh_testroot
+#	dh_installdebconf	
+	dh_installdocs
+	dh_installexamples
+	dh_installmenu
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installinit
+#	dh_installcron
+	dh_installmanpages
+	dh_installinfo
+#	dh_undocumented
+	dh_installchangelogs ChangeLog
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	# You may want to make some executables suid here.
+#	dh_suidregister
+#	dh_makeshlibs
+	dh_installdeb
+#	dh_perl
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
 
-binary-indep:
-
-binary: binary-arch
-
-.PHONY: clean binary-indep binary-arch binary
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install
