@@ -2,45 +2,49 @@
 
 export DH_COMPAT=2
 
-vpath build debian
-vpath install debian
+vpath build debian/pmt/
+vpath install debian/pmt/
 cfg = --prefix=/usr --mandir=/usr/share/man
+pwd := $(shell pwd)
 
 build:
 	dh_testdir
 	test -x autogen.sh && ./autogen.sh $(cfg)  || ./configure $(cfg)
 
+	install -d debian/pmt/
+
 	# because glibc 2.1's utmpx.h is incompatible on sparc
-	sed 's/#define HAVE_UTMPX_H 1/\/* #undef HAVE_UTMPX_H *\//' config.h > config.h.tmp
-	mv config.h.tmp config.h
+	sed 's/#define HAVE_UTMPX_H 1/\/* #undef HAVE_UTMPX_H *\//' config.h > debian/pmt/config.h
+	cp debian/pmt/config.h config.h
 
 	# fix rpath issues
-	cp libtool libtool-2
+	cp libtool debian/pmt/libtool
 	sed \
 	-e 's/^hardcode_libdir_flag_spec.*$$/hardcode_libdir_flag_spec="-D__LIBTOOL_IS_A_FOOL__ "/' \
-	-e '/^archive_cmds="/s/"$$/ \\$$deplibs"/' libtool-2 > libtool
+	-e '/^archive_cmds="/s/"$$/ \\$$deplibs"/' debian/pmt/libtool > libtool
 	$(MAKE)
-	touch debian/$@
+	touch debian/pmt/$@
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
-	test -f Makefile && $(MAKE) -k distclean
-	dh_clean debian/{build,install,libtool-2}
+	-$(MAKE) -k distclean clean
+	rm -rvf debian/pmt/
+	dh_clean
 
 install: build
 	dh_testdir 
 	dh_testroot 
 	dh_clean 
 	dh_installdirs 
-	$(MAKE) install DESTDIR=$(shell pwd)/debian/eterm
-	touch debian/$@
+	$(MAKE) install DESTDIR=$(pwd)/debian/eterm
+	touch debian/pmt/$@
 
 binary-arch: build install
 	dh_testdir 
 	dh_testroot 
-	dh_installdocs README ReleaseNotes doc/{FAQ.html,Eterm.tcap,Eterm.ti,Eterm_reference.html}
+	dh_installdocs README ReleaseNotes doc/{Eterm.tcap,Eterm.ti,Eterm_reference.html}
 	dh_installmenu 
 	dh_undocumented  Esetroot.1 Etbg.1 Etcolors.1 Ettable.1 Etwinop.1
 	dh_installchangelogs 
@@ -50,7 +54,7 @@ binary-arch: build install
 	dh_suidregister usr/bin/Eterm
 	dh_installdeb 
 	dh_makeshlibs
-	dh_shlibdeps 
+	dh_shlibdeps -l$(pwd)/debian/Eterm/usr/lib 
 	dh_gencontrol 
 	dh_md5sums 
 	dh_builddeb 

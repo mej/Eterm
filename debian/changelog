@@ -1,3 +1,9 @@
+eterm (0.9.0-0-cvs0a) unstable; urgency=low
+
+  * Yet Another CVS Release 
+
+ -- Laurence John Lane <ljlane@debian.org>  Thu, 18 Nov 1999 13:41:21 -0500
+
 eterm (0.9.0-0-cvs00) unstable; urgency=low
 
   * changed cvs version numbering

@@ -13,4 +13,3 @@ Description: Enlightened Terminal Emulator (ala xterm) with Imlib support
  Imlib graphics engine is used to render images.  This version supports
  background images, pixmap shading/tinting, and pseudo-transparency.
  Eterm also now uses libpthreads.
-
