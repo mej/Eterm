@@ -3946,3 +3946,11 @@ Thu Nov  9 19:22:18 PST 2000	Michael Jennings <mej@eterm.org>
 	zed@linuxpower.org.
 	
 -------------------------------------------------------------------------------
+Thu Nov  9 20:14:34 PST 2000	Michael Jennings <mej@eterm.org>
+
+	Thanks to continuing help from Sung-Hyun Nam <namsh@lgic.co.kr>, I
+	finally figured out the double-buffering problem people were seeing.
+	And as it turns out, his original patch was correct.  So now it's
+	fixed.  Many thanks for his assistance.
+	
+-------------------------------------------------------------------------------

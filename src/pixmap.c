@@ -952,10 +952,10 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
       } else {
         XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
-      }
-      if (!(renderop & RENDER_FORCE_PIXMAP)) {
-        IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
-        simg->pmap->pixmap = None;
+	if (!(renderop & RENDER_FORCE_PIXMAP)) {
+	  IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
+	  simg->pmap->pixmap = None;
+	}
       }
     } else {
       image_mode_fallback(which);
@@ -978,10 +978,10 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         XSetWindowBackgroundPixmap(Xdisplay, win, buffer_pixmap);
       } else {
         XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
-      }
-      if (!(renderop & RENDER_FORCE_PIXMAP)) {
-        IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
-        simg->pmap->pixmap = None;
+	if (!(renderop & RENDER_FORCE_PIXMAP)) {
+	  IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
+	  simg->pmap->pixmap = None;
+	}
       }
     } else {
       image_mode_fallback(which);
@@ -1096,10 +1096,10 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
           /* FIXME:  For efficiency, just fill the window with the pixmap
              and handle exposes by copying from simg->pmap->pixmap. */
           XSetWindowBackgroundPixmap(Xdisplay, win, simg->pmap->pixmap);
-        }
-        if (!(renderop & RENDER_FORCE_PIXMAP)) {
-          IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
-          simg->pmap->pixmap = None;
+	  if (!(renderop & RENDER_FORCE_PIXMAP)) {
+	    IMLIB_FREE_PIXMAP(simg->pmap->pixmap);
+	    simg->pmap->pixmap = None;
+	  }
         }
       } else {
         print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
