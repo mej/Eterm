@@ -3823,7 +3823,7 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
     fprintf(fp, "    term_name %s\n", getenv("TERM"));
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
-    if (save_theme && rs_exec_args) {
+    if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
         fprintf(fp, "    exec ");
         for (i = 0; rs_exec_args[i]; i++) {
             fprintf(fp, "'%s' ", rs_exec_args[i]);

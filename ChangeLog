@@ -5203,3 +5203,9 @@ Mon Apr  5 17:12:06 2004                        Michael Jennings (mej)
 Fixed bug in loading print_pipe attribute pointed out by Tom A. Cox
 <tomc@hot.rr.com>.
 ----------------------------------------------------------------------
+Tue Apr 20 13:44:22 2004                        Michael Jennings (mej)
+
+As requested by Ben Armstrong <synrg@sanctuary.nslug.ns.ca>, saving
+theme settings will not preserve -e/--exec arguments unless a theme
+was specifically named by the user.
+----------------------------------------------------------------------
