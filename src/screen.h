@@ -118,11 +118,11 @@ enum {
 #define RS_multi2		(RS_multi0|RS_multi1)	/* multibyte 2nd byte */
 #define RS_multiMask		(RS_multi0|RS_multi1)	/* multibyte mask */
 #endif
-#define RS_fgMask		0x00001F00u	/* 32 colors */
-#define RS_Overscore		0x00002000u	/* overscore */
-#define RS_Italic		0x00004000u	/* italic */
-#define RS_Bold			0x00008000u	/* bold */
-#define RS_bgMask		0x001F0000u	/* 32 colors */
+#define RS_fgMask		0x0003FE00u	/* 512 colors */
+#define RS_bgMask		0x000001FFu	/* 512 colors */
+#define RS_Overscore		0x00040000u	/* overscore */
+#define RS_Italic		0x00080000u	/* italic */
+#define RS_Bold			0x00100000u	/* bold */
 #define RS_Dim			0x00200000u	/* dim (apply alpha) */
 #define RS_Conceal		0x00400000u	/* conceal */
 #define RS_Blink		0x00800000u	/* blink */
@@ -130,15 +130,15 @@ enum {
 #define RS_attrMask		(0xFF000000u|RS_Overscore|RS_Italic|RS_Bold|RS_Dim|RS_Conceal|RS_Blink)
 
 /* how to build & extract colors and attributes */
-#define GET_FGCOLOR(r)	(((r) & RS_fgMask)>>8)
-#define GET_BGCOLOR(r)	(((r) & RS_bgMask)>>16)
+#define GET_FGCOLOR(r)	(((r) & RS_fgMask)>>9)
+#define GET_BGCOLOR(r)	(((r) & RS_bgMask))
 #define GET_ATTR(r)	(((r) & RS_attrMask))
 #define GET_BGATTR(r)	(((r) & (RS_attrMask | RS_bgMask)))
 
-#define SET_FGCOLOR(r,fg)	(((r) & ~RS_fgMask)  | ((fg)<<8))
-#define SET_BGCOLOR(r,bg)	(((r) & ~RS_bgMask)  | ((bg)<<16))
+#define SET_FGCOLOR(r,fg)	(((r) & ~RS_fgMask)  | ((fg)<<9))
+#define SET_BGCOLOR(r,bg)	(((r) & ~RS_bgMask)  | (bg))
 #define SET_ATTR(r,a)		(((r) & ~RS_attrMask)| (a))
-#define DEFAULT_RSTYLE		(RS_None | (fgColor<<8) | (bgColor<<16))
+#define DEFAULT_RSTYLE		(RS_None | (fgColor<<9) | (bgColor))
 
 /* screen_t flags */
 #define Screen_Relative		(1<<0)	/* relative origin mode flag         */

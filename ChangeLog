@@ -5317,3 +5317,11 @@ Mon Apr 18 16:00:22 2005                        Michael Jennings (mej)
 
 Remove unused NO_XLOCALE crap and do it right.
 ----------------------------------------------------------------------
+Mon Apr 18 18:00:17 2005                        Michael Jennings (mej)
+
+Applied a patch from Fredrik Svensson <fred@ludd.ltu.se> for 256-color
+support (a la xterm).  I also renamed and imported a couple of his
+test scripts into utils/, and in playing around with them, I found and
+fixed an X server resource leak.  Use Etpalette to view the 256-color
+palette.
+----------------------------------------------------------------------

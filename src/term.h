@@ -63,6 +63,7 @@
 # define ESCSEQ_XTERM_ICONNAME       1
 # define ESCSEQ_XTERM_TITLE          2
 # define ESCSEQ_XTERM_PROP           3
+# define ESCSEQ_XTERM_CHANGE_COLOR   4
 # define ESCSEQ_XTERM_FGCOLOR       10
 # define ESCSEQ_XTERM_BGCOLOR       11
 # define ESCSEQ_XTERM_CURSOR_COLOR  12
@@ -84,13 +85,11 @@
 # define ESCSEQ_XTERM_RESTOREFG   39     /* change default fg color */
 # define ESCSEQ_XTERM_RESTOREBG   49     /* change default bg color */
 
-# define restoreFG  39  /* restore default fg color */
-# define restoreBG  49  /* restore default bg color */
+# define restoreFG  512  /* restore default fg color */
+# define restoreBG  513  /* restore default bg color */
 
-enum color_list {
-    fgColor,
-    bgColor,
-    minColor,				/* 2 */
+enum ansi_color_list {
+    minColor,				/* 0 */
     BlackColor = minColor,
     Red3Color,
     Green3Color,
@@ -110,6 +109,11 @@ enum color_list {
     CyanColor,
     maxBright,				/* minBright + 7 */
     WhiteColor = maxBright,
+};
+
+enum color_list {  /* Extra colors */
+    fgColor = 256,
+    bgColor,
 # ifndef NO_CURSORCOLOR
     cursorColor,
     cursorColor2,

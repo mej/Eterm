@@ -58,7 +58,6 @@ unsigned char meta_char = 033;  /* Alt-key prefix */
 unsigned long PrivateModes = PrivMode_Default;
 unsigned long SavedModes = PrivMode_Default;
 char *def_colorName[] = {
-    "rgb:aa/aa/aa", "rgb:0/0/0",        /* fg/bg */
     "rgb:0/0/0",                /* 0: black             (#000000) */
     /* low-intensity colors */
     "rgb:cc/00/00",             /* 1: red     */
@@ -77,6 +76,254 @@ char *def_colorName[] = {
     "rgb:ff/00/ff",             /* 5/13: bright magenta */
     "rgb:00/ff/ff",             /* 6/14: bright cyan    */
     "rgb:ff/ff/ff",             /* 7/15: bright white   */
+
+    /* 6x6x6 color cube generated with color-cube-gen.pl */
+    "rgb:00/00/00",
+    "rgb:00/00/2a",
+    "rgb:00/00/55",
+    "rgb:00/00/7f",
+    "rgb:00/00/aa",
+    "rgb:00/00/d4",
+    "rgb:00/2a/00",
+    "rgb:00/2a/2a",
+    "rgb:00/2a/55",
+    "rgb:00/2a/7f",
+    "rgb:00/2a/aa",
+    "rgb:00/2a/d4",
+    "rgb:00/55/00",
+    "rgb:00/55/2a",
+    "rgb:00/55/55",
+    "rgb:00/55/7f",
+    "rgb:00/55/aa",
+    "rgb:00/55/d4",
+    "rgb:00/7f/00",
+    "rgb:00/7f/2a",
+    "rgb:00/7f/55",
+    "rgb:00/7f/7f",
+    "rgb:00/7f/aa",
+    "rgb:00/7f/d4",
+    "rgb:00/aa/00",
+    "rgb:00/aa/2a",
+    "rgb:00/aa/55",
+    "rgb:00/aa/7f",
+    "rgb:00/aa/aa",
+    "rgb:00/aa/d4",
+    "rgb:00/d4/00",
+    "rgb:00/d4/2a",
+    "rgb:00/d4/55",
+    "rgb:00/d4/7f",
+    "rgb:00/d4/aa",
+    "rgb:00/d4/d4",
+    "rgb:2a/00/00",
+    "rgb:2a/00/2a",
+    "rgb:2a/00/55",
+    "rgb:2a/00/7f",
+    "rgb:2a/00/aa",
+    "rgb:2a/00/d4",
+    "rgb:2a/2a/00",
+    "rgb:2a/2a/2a",
+    "rgb:2a/2a/55",
+    "rgb:2a/2a/7f",
+    "rgb:2a/2a/aa",
+    "rgb:2a/2a/d4",
+    "rgb:2a/55/00",
+    "rgb:2a/55/2a",
+    "rgb:2a/55/55",
+    "rgb:2a/55/7f",
+    "rgb:2a/55/aa",
+    "rgb:2a/55/d4",
+    "rgb:2a/7f/00",
+    "rgb:2a/7f/2a",
+    "rgb:2a/7f/55",
+    "rgb:2a/7f/7f",
+    "rgb:2a/7f/aa",
+    "rgb:2a/7f/d4",
+    "rgb:2a/aa/00",
+    "rgb:2a/aa/2a",
+    "rgb:2a/aa/55",
+    "rgb:2a/aa/7f",
+    "rgb:2a/aa/aa",
+    "rgb:2a/aa/d4",
+    "rgb:2a/d4/00",
+    "rgb:2a/d4/2a",
+    "rgb:2a/d4/55",
+    "rgb:2a/d4/7f",
+    "rgb:2a/d4/aa",
+    "rgb:2a/d4/d4",
+    "rgb:55/00/00",
+    "rgb:55/00/2a",
+    "rgb:55/00/55",
+    "rgb:55/00/7f",
+    "rgb:55/00/aa",
+    "rgb:55/00/d4",
+    "rgb:55/2a/00",
+    "rgb:55/2a/2a",
+    "rgb:55/2a/55",
+    "rgb:55/2a/7f",
+    "rgb:55/2a/aa",
+    "rgb:55/2a/d4",
+    "rgb:55/55/00",
+    "rgb:55/55/2a",
+    "rgb:55/55/55",
+    "rgb:55/55/7f",
+    "rgb:55/55/aa",
+    "rgb:55/55/d4",
+    "rgb:55/7f/00",
+    "rgb:55/7f/2a",
+    "rgb:55/7f/55",
+    "rgb:55/7f/7f",
+    "rgb:55/7f/aa",
+    "rgb:55/7f/d4",
+    "rgb:55/aa/00",
+    "rgb:55/aa/2a",
+    "rgb:55/aa/55",
+    "rgb:55/aa/7f",
+    "rgb:55/aa/aa",
+    "rgb:55/aa/d4",
+    "rgb:55/d4/00",
+    "rgb:55/d4/2a",
+    "rgb:55/d4/55",
+    "rgb:55/d4/7f",
+    "rgb:55/d4/aa",
+    "rgb:55/d4/d4",
+    "rgb:7f/00/00",
+    "rgb:7f/00/2a",
+    "rgb:7f/00/55",
+    "rgb:7f/00/7f",
+    "rgb:7f/00/aa",
+    "rgb:7f/00/d4",
+    "rgb:7f/2a/00",
+    "rgb:7f/2a/2a",
+    "rgb:7f/2a/55",
+    "rgb:7f/2a/7f",
+    "rgb:7f/2a/aa",
+    "rgb:7f/2a/d4",
+    "rgb:7f/55/00",
+    "rgb:7f/55/2a",
+    "rgb:7f/55/55",
+    "rgb:7f/55/7f",
+    "rgb:7f/55/aa",
+    "rgb:7f/55/d4",
+    "rgb:7f/7f/00",
+    "rgb:7f/7f/2a",
+    "rgb:7f/7f/55",
+    "rgb:7f/7f/7f",
+    "rgb:7f/7f/aa",
+    "rgb:7f/7f/d4",
+    "rgb:7f/aa/00",
+    "rgb:7f/aa/2a",
+    "rgb:7f/aa/55",
+    "rgb:7f/aa/7f",
+    "rgb:7f/aa/aa",
+    "rgb:7f/aa/d4",
+    "rgb:7f/d4/00",
+    "rgb:7f/d4/2a",
+    "rgb:7f/d4/55",
+    "rgb:7f/d4/7f",
+    "rgb:7f/d4/aa",
+    "rgb:7f/d4/d4",
+    "rgb:aa/00/00",
+    "rgb:aa/00/2a",
+    "rgb:aa/00/55",
+    "rgb:aa/00/7f",
+    "rgb:aa/00/aa",
+    "rgb:aa/00/d4",
+    "rgb:aa/2a/00",
+    "rgb:aa/2a/2a",
+    "rgb:aa/2a/55",
+    "rgb:aa/2a/7f",
+    "rgb:aa/2a/aa",
+    "rgb:aa/2a/d4",
+    "rgb:aa/55/00",
+    "rgb:aa/55/2a",
+    "rgb:aa/55/55",
+    "rgb:aa/55/7f",
+    "rgb:aa/55/aa",
+    "rgb:aa/55/d4",
+    "rgb:aa/7f/00",
+    "rgb:aa/7f/2a",
+    "rgb:aa/7f/55",
+    "rgb:aa/7f/7f",
+    "rgb:aa/7f/aa",
+    "rgb:aa/7f/d4",
+    "rgb:aa/aa/00",
+    "rgb:aa/aa/2a",
+    "rgb:aa/aa/55",
+    "rgb:aa/aa/7f",
+    "rgb:aa/aa/aa",
+    "rgb:aa/aa/d4",
+    "rgb:aa/d4/00",
+    "rgb:aa/d4/2a",
+    "rgb:aa/d4/55",
+    "rgb:aa/d4/7f",
+    "rgb:aa/d4/aa",
+    "rgb:aa/d4/d4",
+    "rgb:d4/00/00",
+    "rgb:d4/00/2a",
+    "rgb:d4/00/55",
+    "rgb:d4/00/7f",
+    "rgb:d4/00/aa",
+    "rgb:d4/00/d4",
+    "rgb:d4/2a/00",
+    "rgb:d4/2a/2a",
+    "rgb:d4/2a/55",
+    "rgb:d4/2a/7f",
+    "rgb:d4/2a/aa",
+    "rgb:d4/2a/d4",
+    "rgb:d4/55/00",
+    "rgb:d4/55/2a",
+    "rgb:d4/55/55",
+    "rgb:d4/55/7f",
+    "rgb:d4/55/aa",
+    "rgb:d4/55/d4",
+    "rgb:d4/7f/00",
+    "rgb:d4/7f/2a",
+    "rgb:d4/7f/55",
+    "rgb:d4/7f/7f",
+    "rgb:d4/7f/aa",
+    "rgb:d4/7f/d4",
+    "rgb:d4/aa/00",
+    "rgb:d4/aa/2a",
+    "rgb:d4/aa/55",
+    "rgb:d4/aa/7f",
+    "rgb:d4/aa/aa",
+    "rgb:d4/aa/d4",
+    "rgb:d4/d4/00",
+    "rgb:d4/d4/2a",
+    "rgb:d4/d4/55",
+    "rgb:d4/d4/7f",
+    "rgb:d4/d4/aa",
+    "rgb:d4/d4/d4",
+
+    /* grayscale */
+    "rgb:08/08/08",
+    "rgb:12/12/12",
+    "rgb:1c/1c/1c",
+    "rgb:26/26/26",
+    "rgb:30/30/30",
+    "rgb:3a/3a/3a",
+    "rgb:44/44/44",
+    "rgb:4e/4e/4e",
+    "rgb:58/58/58",
+    "rgb:62/62/62",
+    "rgb:6c/6c/6c",
+    "rgb:76/76/76",
+    "rgb:80/80/80",
+    "rgb:8a/8a/8a",
+    "rgb:94/94/94",
+    "rgb:9e/9e/9e",
+    "rgb:a8/a8/a8",
+    "rgb:b2/b2/b2",
+    "rgb:bc/bc/bc",
+    "rgb:c6/c6/c6",
+    "rgb:d0/d0/d0",
+    "rgb:da/da/da",
+    "rgb:e4/e4/e4",
+    "rgb:ee/ee/ee",
+
+    /* fg/bg */
+    "rgb:aa/aa/aa", "rgb:0/0/0",
+
 #ifndef NO_CURSORCOLOR
     NULL, NULL,                 /* cursorColor, cursorColor2 */
 #endif                          /* NO_CURSORCOLOR */
@@ -1268,9 +1515,11 @@ process_xterm_seq(void)
             if (ch) {
                 if (ch == '\t')
                     ch = ' ';   /* translate '\t' to space */
-                else if (ch < ' ')
+                else if (ch < ' ') {
+		    if (ch == 27 && (ch = cmd_getc()) == '\\')  /* ESC \ (ST) is String Terminator in Xterm */
+		        break;
                     return;     /* control character - exit */
-
+		}
                 if (n < sizeof(string) - 1)
                     string[n++] = ch;
             }
@@ -1652,6 +1901,13 @@ process_sgr_mode(unsigned int nargs, int arg[])
           case 37:
               scr_color(minColor + (arg[i] - 30), RS_Bold);
               break;
+          case 38:
+	      if (arg[i+1] == 5) {
+		  i += 2;
+                  if (arg[i] >= 0 && arg[i] < 256)
+		      scr_color(arg[i], RS_Bold);		  
+	      }
+	      break;
           /* default fg */
           case 39:
               scr_color(restoreFG, RS_Bold);
@@ -1668,6 +1924,13 @@ process_sgr_mode(unsigned int nargs, int arg[])
           case 47:
               scr_color(minColor + (arg[i] - 40), RS_Blink);
               break;
+          case 48:
+	      if (arg[i+1] == 5) {
+		  i += 2;
+                  if (arg[i] >= 0 && arg[i] < 256) 
+		      scr_color(arg[i], RS_Blink);		  
+	      }
+	      break;
           /* default bg */
           case 49:
               scr_color(restoreBG, RS_Blink);
@@ -1843,6 +2106,7 @@ append_to_icon_name(const char *str)
  *       1 = change icon name
  *       2 = change title
  *       3 = set text property on window
+ *       4 = set any of 256 colors 
  *      46 = change logfile (not implemented)
  *      50 = change font
  *
@@ -1861,6 +2125,7 @@ xterm_seq(int op, const char *str)
     XColor xcol;
     char *nstr, *tnstr, *valptr;
     unsigned char eterm_seq_op;
+    unsigned int i;
     XWMHints *wm_hints;
 
 #ifdef PIXMAP_SUPPORT
@@ -1894,6 +2159,17 @@ xterm_seq(int op, const char *str)
           }
           set_text_property(TermWin.parent, nstr, valptr);
           break;
+      case ESCSEQ_XTERM_CHANGE_COLOR:  /* Changing existing colors 256 */
+          while ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+              i = (unsigned int) strtoul(nstr, (char **) NULL, 0);
+              nstr = (char *) strsep(&tnstr, ";");
+              if ((i < 256) && (nstr != NULL)) {
+                  D_COLORS(("Changing color : [%d] -> %s\n", i, nstr));
+                  set_window_color(i, nstr);
+              }
+          } 
+          break;
+
       case ESCSEQ_XTERM_TAKEOVER: /* 5 */
           XSetInputFocus(Xdisplay, TermWin.parent, RevertToParent, CurrentTime);
           XRaiseWindow(Xdisplay, TermWin.parent);

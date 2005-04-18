@@ -491,7 +491,7 @@ scr_color(unsigned int color, unsigned int Intensity)
                   break;
             }
         } else {
-            if ((rstyle & Intensity) && color >= minColor && color <= maxColor) {
+            if ((rstyle & Intensity) && (color >= minColor) && (color <= maxColor)) {
                 switch (Intensity) {
                     case RS_Bold:
                         if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND)) {

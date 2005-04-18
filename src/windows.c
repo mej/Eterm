@@ -261,6 +261,7 @@ process_colors(void)
     Pixel pixel;
 
     for (i = 0; i < NRS_COLORS; i++) {
+        D_COLORS(("Adding color %d of %d (%s)\n",i,NRS_COLORS,def_colorName[i]));
         if ((Xdepth <= 2) || ((pixel = get_color_by_name(rs_color[i], def_colorName[i])) == (Pixel) (-1))) {
             switch (i) {
               case fgColor:
@@ -304,6 +305,7 @@ process_colors(void)
                   break;
             }
         }
+        D_COLORS(("Pixel : %x\n",pixel));
         PixColors[i] = pixel;
     }
 
@@ -677,7 +679,7 @@ stored_palette(char op)
 {
     static Pixel default_colors[NRS_COLORS + EXTRA_COLORS];
     static unsigned char stored = 0;
-    unsigned char i;
+    unsigned int i;
 
     if (op == SAVE) {
         for (i = 0; i < NRS_COLORS; i++) {
@@ -718,6 +720,9 @@ set_window_color(int idx, const char *color)
         if (!XAllocColor(Xdisplay, cmap, &xcol)) {
             print_warning("Unable to allocate \"%s\" in the color map.\n", color);
             return;
+        }
+        if ((idx > maxBright) && (idx < 256) && (PixColors[idx])) {
+            XFreeColors(Xdisplay, cmap, (unsigned long *) &(PixColors[idx]), 1, 0);
         }
         PixColors[idx] = xcol.pixel;
     } else {

@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+# Built from 
+# Author: Todd Larason <jtl@molehill.org>
+# $XFree86: xc/programs/xterm/vttests/256colors2.pl,v 1.1 1999/07/11 08:49:54 dawes Exp $
+# adapted to the special needs for Eterm by Fredrik Svensson <fred@ludd.ltu.se>
+
+
+$redmax   = 2*3;
+$greenmax = 2*3;
+$bluemax  = 2*3;
+$adj = 0;
+
+# colors 16-231 are a 6x6x6 color cube
+for ($red = 0; $red < $redmax; $red++) {
+    for ($green = 0; $green < $greenmax; $green++) {
+	for ($blue = 0; $blue < $bluemax; $blue++) {
+	    printf("    \"rgb:%2.2x/%2.2x/%2.2x\",\n",
+		   int ($red   * 255 / ($redmax - $adj) ),
+		   int ($green * 255 / ($greenmax - $adj)),
+		   int ($blue  * 255 / ($bluemax - $adj )));
+	}
+    }
+}
+
+# colors 232-255 are a grayscale ramp, intentionally leaving out
+# black and white
+for ($gray = 0; $gray < 24; $gray++) {
+    $level = ($gray * 10) + 8;
+    printf("    \"rgb:%2.2x/%2.2x/%2.2x\",\n",
+	    $level, $level, $level);
+}

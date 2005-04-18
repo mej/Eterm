@@ -2516,6 +2516,7 @@ init_defaults(void)
     rs_path = NULL;
 #endif
     colorfgbg = DEFAULT_RSTYLE;
+    MEMSET(PixColors, 0, sizeof(PixColors));
 
     /* Font stuff. */
     MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
