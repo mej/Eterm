@@ -26,11 +26,10 @@
 # include <X11/Xproto.h>
 # include <X11/keysym.h>
 
-# if defined(NO_XLOCALE) || !defined(HAVE_X11_LOCALE_H)
-#  include <locale.h>
-# else
+# ifdef HAVE_X11_LOCALE_H
 #  include <X11/Xlocale.h>
 # endif
+# include <locale.h>
 
 # include "options.h"
 # include "system.h"  /* For RETSIGTYPE */

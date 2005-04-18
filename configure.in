@@ -205,7 +205,7 @@ sys/ioctl.h sys/select.h sys/time.h \
 sys/sockio.h sys/byteorder.h malloc.h \
 utmpx.h unistd.h bsd/signal.h regex.h \
 regexp.h stdarg.h X11/Xmu/Atoms.h \
-X11/Sunkeysym.h)
+X11/Sunkeysym.h X11/Xlocale.h)
 AC_HEADER_TIME
 
 dnl# Missing typedefs and replacements
@@ -816,9 +816,6 @@ AC_ARG_ENABLE(xim,
 	        AC_DEFINE(USE_XIM, , [Define for X Input Method support.])
 	        XIM="TRUE"
 ])
-
-# check if we need X_LOCALE definition
-AC_CHECK_LIB(X11, _Xsetlocale, AC_DEFINE(X_LOCALE, , [X locale.]), AC_DEFINE(NO_XLOCALE, , [No X locale.]))
 
 # For multibyte selection handling
 #if test "$MULTICHAR_ENCODING" != "none"; then

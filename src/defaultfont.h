@@ -1,11 +1,11 @@
 #ifndef _DEFAULTFONT_H_
 #define _DEFAULTFONT_H_
 
-#if defined (NO_XLOCALE) || !defined(HAVE_X11_LOCALE_H)
-# include <locale.h>
-#else
-# include <X11/Xlocale.h>
-#endif
+# ifdef HAVE_X11_LOCALE_H
+#  include <X11/Xlocale.h>
+# else
+#  include <locale.h>
+# endif
 
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>

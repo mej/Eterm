@@ -5313,3 +5313,7 @@ Fixed error in saving of cut_chars attribute.
 
 Fixed saving/handling of beep_command attribute.
 ----------------------------------------------------------------------
+Mon Apr 18 16:00:22 2005                        Michael Jennings (mej)
+
+Remove unused NO_XLOCALE crap and do it right.
+----------------------------------------------------------------------
