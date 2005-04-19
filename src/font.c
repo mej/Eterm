@@ -166,15 +166,15 @@ font_cache_add(const char *name, unsigned char type, void *info)
     font->type = type;
     font->ref_cnt = 1;
     switch (type) {
-      case FONT_TYPE_X:
-          font->fontinfo.xfontinfo = (XFontStruct *) info;
-          break;
-      case FONT_TYPE_TTF:
-          break;
-      case FONT_TYPE_FNLIB:
-          break;
-      default:
-          break;
+        case FONT_TYPE_X:
+            font->fontinfo.xfontinfo = (XFontStruct *) info;
+            break;
+        case FONT_TYPE_TTF:
+            break;
+        case FONT_TYPE_FNLIB:
+            break;
+        default:
+            break;
     }
     D_FONT((" -> Created new cachefont_t struct at %p:  \"%s\", %d, %p\n", font, font->name, font->type, font->fontinfo.xfontinfo));
 
@@ -230,7 +230,8 @@ font_cache_del(const void *info)
            update the "next" pointer of the font prior to the one we're actually deleting. */
         for (current = font_cache; current->next; current = current->next) {
             if (((current->next->type == FONT_TYPE_X) && (current->next->fontinfo.xfontinfo == (XFontStruct *) info))) {
-                D_FONT((" -> Match found at current->next (%8p, current == %8p).  Font name is \"%s\"\n", current->next, current, NONULL(current->next->name)));
+                D_FONT((" -> Match found at current->next (%8p, current == %8p).  Font name is \"%s\"\n", current->next, current,
+                        NONULL(current->next->name)));
                 if (--(current->next->ref_cnt) == 0) {
                     D_FONT(("    -> Reference count is now 0.  Deleting from cache.\n"));
                     tmp = current->next;
@@ -315,18 +316,18 @@ font_cache_find_info(const char *name, unsigned char type)
         if ((current->type == type) && !strcasecmp(current->name, name)) {
             D_FONT(("    -> Match!\n"));
             switch (type) {
-              case FONT_TYPE_X:
-                  return ((void *) current->fontinfo.xfontinfo);
-                  break;
-              case FONT_TYPE_TTF:
-                  return (NULL);
-                  break;
-              case FONT_TYPE_FNLIB:
-                  return (NULL);
-                  break;
-              default:
-                  return (NULL);
-                  break;
+                case FONT_TYPE_X:
+                    return ((void *) current->fontinfo.xfontinfo);
+                    break;
+                case FONT_TYPE_TTF:
+                    return (NULL);
+                    break;
+                case FONT_TYPE_FNLIB:
+                    return (NULL);
+                    break;
+                default:
+                    return (NULL);
+                    break;
             }
         }
     }
@@ -398,18 +399,18 @@ load_font(const char *name, const char *fallback, unsigned char type)
         font_cache_add_ref(font);
         D_FONT((" -> Font found in cache.  Incrementing reference count to %d and returning existing data.\n", font->ref_cnt));
         switch (type) {
-          case FONT_TYPE_X:
-              return ((void *) font->fontinfo.xfontinfo);
-              break;
-          case FONT_TYPE_TTF:
-              return (NULL);
-              break;
-          case FONT_TYPE_FNLIB:
-              return (NULL);
-              break;
-          default:
-              return (NULL);
-              break;
+            case FONT_TYPE_X:
+                return ((void *) font->fontinfo.xfontinfo);
+                break;
+            case FONT_TYPE_TTF:
+                return (NULL);
+                break;
+            case FONT_TYPE_FNLIB:
+                return (NULL);
+                break;
+            default:
+                return (NULL);
+                break;
         }
     }
 
@@ -455,7 +456,8 @@ change_font(int init, const char *fontname)
     short idx = 0, old_idx = font_idx;
     int fh, fw = 0;
 
-    D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx, (unsigned int) font_idx));
+    D_FONT(("change_font(%d, \"%s\"):  def_font_idx == %u, font_idx == %u\n", init, NONULL(fontname), (unsigned int) def_font_idx,
+            (unsigned int) font_idx));
 
     if (init) {
         ASSERT(etfonts != NULL);
@@ -473,46 +475,46 @@ change_font(int init, const char *fontname)
         ASSERT(fontname != NULL);
 
         switch (*fontname) {
-              /* Empty font name.  Reset to default. */
-          case '\0':
-              font_idx = def_font_idx;
-              fontname = NULL;
-              break;
+                /* Empty font name.  Reset to default. */
+            case '\0':
+                font_idx = def_font_idx;
+                fontname = NULL;
+                break;
 
-              /* A font escape sequence.  See which one it is. */
-          case FONT_CMD:
-              idx = atoi(++fontname);
-              switch (*fontname) {
-                case '+':
-                    NEXT_FONT(idx);
-                    break;
+                /* A font escape sequence.  See which one it is. */
+            case FONT_CMD:
+                idx = atoi(++fontname);
+                switch (*fontname) {
+                    case '+':
+                        NEXT_FONT(idx);
+                        break;
 
-                case '-':
-                    PREV_FONT(idx);
-                    break;
+                    case '-':
+                        PREV_FONT(idx);
+                        break;
 
-                default:
-                    if (*fontname != '\0' && !isdigit(*fontname))
-                        return; /* It's not a number.  Punt. */
-                    /* Set current font to font N */
-                    BOUND(idx, 0, (font_cnt - 1));
-                    font_idx = idx;
-                    break;
-              }
-              /* NULL out the fontname so we don't try to load it */
-              fontname = NULL;
-              break;
+                    default:
+                        if (*fontname != '\0' && !isdigit(*fontname))
+                            return;     /* It's not a number.  Punt. */
+                        /* Set current font to font N */
+                        BOUND(idx, 0, (font_cnt - 1));
+                        font_idx = idx;
+                        break;
+                }
+                /* NULL out the fontname so we don't try to load it */
+                fontname = NULL;
+                break;
 
-          default:
-              /* Change to the named font.  See if we already have it, and if so, just set the index. */
-              for (idx = 0; idx < font_cnt; idx++) {
-                  if (!strcasecmp(etfonts[idx], fontname)) {
-                      font_idx = idx;
-                      fontname = NULL;
-                      break;
-                  }
-              }
-              break;
+            default:
+                /* Change to the named font.  See if we already have it, and if so, just set the index. */
+                for (idx = 0; idx < font_cnt; idx++) {
+                    if (!strcasecmp(etfonts[idx], fontname)) {
+                        font_idx = idx;
+                        fontname = NULL;
+                        break;
+                    }
+                }
+                break;
         }
 
         /* If we get here with a non-NULL fontname, we have to load a new font.  Rats. */
@@ -588,7 +590,8 @@ change_font(int init, const char *fontname)
         TermWin.fprop = 1;      /* Proportional font */
 
     /* For proportional fonts with large size variations, do some math-fu to try and help the appearance */
-    if (TermWin.fprop && (BITFIELD_IS_SET(vt_options, VT_OPTIONS_PROPORTIONAL)) && TermWin.font->per_char && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
+    if (TermWin.fprop && (BITFIELD_IS_SET(vt_options, VT_OPTIONS_PROPORTIONAL)) && TermWin.font->per_char
+        && (TermWin.font->max_bounds.width - TermWin.font->min_bounds.width >= 3)) {
         int cw, n = 0, sum = 0, sumsq = 0, min_w, max_w;
         unsigned int i;
         double dev;
@@ -610,7 +613,8 @@ change_font(int init, const char *fontname)
             /* Final font width is the average width plus 2 standard
                deviations, but no larger than the font's max width */
             fw = ((sum / n) + (((int) dev) << 1));
-            D_FONT(("Proportional font optimizations:  Average width %d, standard deviation %3.2f, new width %d\n", (sum / n), dev, fw));
+            D_FONT(("Proportional font optimizations:  Average width %d, standard deviation %3.2f, new width %d\n", (sum / n), dev,
+                    fw));
             UPPER_BOUND(fw, max_w);
         } else {
             LOWER_BOUND(fw, TermWin.font->max_bounds.width);

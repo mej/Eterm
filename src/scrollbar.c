@@ -203,22 +203,23 @@ sb_handle_button_press(event_t *ev)
             tt_printf((unsigned char *) "\033[B");
         else {
             switch (ev->xbutton.button) {
-              case Button2:
-                  tt_printf((unsigned char *) "\014");
-                  break;
-              case Button1:
-                  tt_printf((unsigned char *) "\033[6~");
-                  break;
-              case Button3:
-                  tt_printf((unsigned char *) "\033[5~");
-                  break;
+                case Button2:
+                    tt_printf((unsigned char *) "\014");
+                    break;
+                case Button1:
+                    tt_printf((unsigned char *) "\033[6~");
+                    break;
+                case Button3:
+                    tt_printf((unsigned char *) "\033[5~");
+                    break;
             }
         }
     } else
 #endif /* NO_SCROLLBAR_REPORT */
     {
         D_EVENTS(("ButtonPress event for window 0x%08x at %d, %d\n", ev->xany.window, ev->xbutton.x, ev->xbutton.y));
-        D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
+        D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win,
+                  scrollbar.sa_win, scrollbar.win));
 
         if (scrollbar_win_is_uparrow(ev->xany.window)) {
             scrollbar_draw_uparrow(IMAGE_STATE_CLICKED, 0);
@@ -242,40 +243,41 @@ sb_handle_button_press(event_t *ev)
                 scrollbar_draw_anchor(IMAGE_STATE_CLICKED, 0);
             }
             switch (ev->xbutton.button) {
-              case Button2:
-                  button_state.mouse_offset = scrollbar_anchor_height() / 2;    /* Align to center */
-                  if (!scrollbar_win_is_anchor(ev->xany.window)) {
-                      scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
-                  } else if (scrollbar.type == SCROLLBAR_XTERM) {
-                      scr_move_to(scrollbar.anchor_top + ev->xbutton.y - button_state.mouse_offset, scrollbar_scrollarea_height());
-                  }
-                  scrollbar_set_motion(1);
-                  break;
+                case Button2:
+                    button_state.mouse_offset = scrollbar_anchor_height() / 2;  /* Align to center */
+                    if (!scrollbar_win_is_anchor(ev->xany.window)) {
+                        scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
+                    } else if (scrollbar.type == SCROLLBAR_XTERM) {
+                        scr_move_to(scrollbar.anchor_top + ev->xbutton.y - button_state.mouse_offset,
+                                    scrollbar_scrollarea_height());
+                    }
+                    scrollbar_set_motion(1);
+                    break;
 
-              case Button1:
-                  button_state.mouse_offset = ((scrollbar_win_is_anchor(ev->xany.window)) ? (MAX(ev->xbutton.y, 1)) : (1));
-                  /* drop */
-              case Button3:
+                case Button1:
+                    button_state.mouse_offset = ((scrollbar_win_is_anchor(ev->xany.window)) ? (MAX(ev->xbutton.y, 1)) : (1));
+                    /* drop */
+                case Button3:
 #if defined(MOTIF_SCROLLBAR) || defined(NEXT_SCROLLBAR)
-                  if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
-                      if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)) {
-                          scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
-                          scr_page(UP, TermWin.nrow - CONTEXT_LINES);
-                      } else if (scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)) {
-                          scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
-                          scr_page(DN, TermWin.nrow - CONTEXT_LINES);
-                      } else {
-                          scrollbar_set_motion(1);
-                      }
-                  }
+                    if (scrollbar.type == SCROLLBAR_MOTIF || scrollbar.type == SCROLLBAR_NEXT) {
+                        if (scrollbar_is_above_anchor(ev->xany.window, ev->xbutton.y)) {
+                            scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
+                            scr_page(UP, TermWin.nrow - CONTEXT_LINES);
+                        } else if (scrollbar_is_below_anchor(ev->xany.window, ev->xbutton.y)) {
+                            scrollbar_draw_trough(IMAGE_STATE_CLICKED, 0);
+                            scr_page(DN, TermWin.nrow - CONTEXT_LINES);
+                        } else {
+                            scrollbar_set_motion(1);
+                        }
+                    }
 #endif /* MOTIF_SCROLLBAR || NEXT_SCROLLBAR */
 
 #ifdef XTERM_SCROLLBAR
-                  if (scrollbar.type == SCROLLBAR_XTERM) {
-                      scr_page((ev->xbutton.button == Button1 ? DN : UP), TermWin.nrow - CONTEXT_LINES);
-                  }
+                    if (scrollbar.type == SCROLLBAR_XTERM) {
+                        scr_page((ev->xbutton.button == Button1 ? DN : UP), TermWin.nrow - CONTEXT_LINES);
+                    }
 #endif /* XTERM_SCROLLBAR */
-                  break;
+                    break;
             }
         }
     }
@@ -333,7 +335,8 @@ sb_handle_motion_notify(event_t *ev)
         return 1;
 
     D_EVENTS(("MotionNotify event for window 0x%08x\n", ev->xany.window));
-    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win, scrollbar.sa_win, scrollbar.win));
+    D_EVENTS(("  up [0x%08x], down [0x%08x], anchor [0x%08x], trough [0x%08x]\n", scrollbar.up_win, scrollbar.dn_win,
+              scrollbar.sa_win, scrollbar.win));
 
     if ((scrollbar_win_is_trough(ev->xany.window) || scrollbar_win_is_anchor(ev->xany.window)) && scrollbar_is_moving()) {
         Window unused_root, unused_child;
@@ -341,7 +344,8 @@ sb_handle_motion_notify(event_t *ev)
         unsigned int unused_mask;
 
         while (XCheckTypedWindowEvent(Xdisplay, scrollbar.win, MotionNotify, ev));
-        XQueryPointer(Xdisplay, scrollbar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+        XQueryPointer(Xdisplay, scrollbar.win, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x),
+                      &(ev->xbutton.y), &unused_mask);
         scr_move_to(scrollbar_position(ev->xbutton.y) - button_state.mouse_offset, scrollbar_scrollarea_height());
         refresh_count = refresh_limit = 0;
         scr_refresh(refresh_type);
@@ -541,7 +545,8 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
             int x = ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? 1 : 0);
 
             XSetForeground(Xdisplay, gc_stipple, images[image_sa].current->bg);
-            XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, x + 1, 0, scrollbar_anchor_width() - x - 1, scrollbar_anchor_height());
+            XFillRectangle(Xdisplay, scrollbar.sa_win, gc_stipple, x + 1, 0, scrollbar_anchor_width() - x - 1,
+                           scrollbar_anchor_height());
             XClearWindow(Xdisplay, scrollbar.sa_win);
         }
 #endif /* XTERM_SCROLLBAR */
@@ -557,9 +562,11 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
             XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sa].current->bg, ""));
             XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sa].current->bg, ""));
             if (scrollbar_anchor_is_pressed()) {
-                draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+                draw_shadow(scrollbar.sa_win, gc_bottom, gc_top, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(),
+                            scrollbar_get_shadow());
             } else {
-                draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(), scrollbar_get_shadow());
+                draw_shadow(scrollbar.sa_win, gc_top, gc_bottom, 0, 0, scrollbar_anchor_width(), scrollbar_anchor_height(),
+                            scrollbar_get_shadow());
             }
         }
 #endif
@@ -573,7 +580,8 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
         Pixmap pmap;
 
         thumb = (images[image_st].current->iml) ? 1 : 0;
-        render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa, thumb);
+        render_simage(images[image_sa].current, scrollbar.sa_win, scrollbar_anchor_width(), scrollbar_anchor_height(), image_sa,
+                      thumb);
         pmap = images[image_sa].current->pmap->pixmap;
         /* Draw the thumb if there is one. */
         if (thumb) {
@@ -600,7 +608,8 @@ scrollbar_draw_anchor(unsigned char image_state, unsigned char force_modes)
             UPPER_BOUND(th, scrollbar_anchor_height() >> 1);
             D_SCROLLBAR(("Thumb width/height has been calculated at %hux%hu.\n", tw, th));
             if ((tw > 0) && (th > 0)) {
-                paste_simage(images[image_st].current, image_st, scrollbar.sa_win, pmap, (scrollbar_anchor_width() - tw) >> 1, (scrollbar_anchor_height() - th) >> 1, tw, th);
+                paste_simage(images[image_st].current, image_st, scrollbar.sa_win, pmap, (scrollbar_anchor_width() - tw) >> 1,
+                             (scrollbar_anchor_height() - th) >> 1, tw, th);
                 XSetWindowBackgroundPixmap(Xdisplay, scrollbar.sa_win, pmap);
                 XClearWindow(Xdisplay, scrollbar.sa_win);
                 IMLIB_FREE_PIXMAP(pmap);
@@ -664,7 +673,8 @@ scrollbar_draw_trough(unsigned char image_state, unsigned char force_modes)
             XFillRectangle(Xdisplay, scrollbar.win, gc_scrollbar, 0, 0, scrollbar_trough_width(), scrollbar_trough_height());
             XSetForeground(Xdisplay, gc_top, get_top_shadow_color(images[image_sb].current->bg, ""));
             XSetForeground(Xdisplay, gc_bottom, get_bottom_shadow_color(images[image_sb].current->bg, ""));
-            draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(), scrollbar_get_shadow());
+            draw_shadow(scrollbar.win, gc_bottom, gc_top, 0, 0, scrollbar_trough_width(), scrollbar_trough_height(),
+                        scrollbar_get_shadow());
         }
         return;
     }
@@ -696,9 +706,10 @@ scrollbar_init(int width, int height)
 
     /* Create the scrollbar trough window.  It will be the parent to the other windows. */
     scrollbar.win =
-        XCreateWindow(Xdisplay, TermWin.parent, ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (width - scrollbar_trough_width()) : (0)),
-                      bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), height, 0, Xdepth, InputOutput, CopyFromParent,
-                      CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
+        XCreateWindow(Xdisplay, TermWin.parent,
+                      ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (width - scrollbar_trough_width()) : (0)),
+                      bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), height, 0, Xdepth, InputOutput,
+                      CopyFromParent, CWOverrideRedirect | CWBackPixel | CWBorderPixel | CWColormap, &Attributes);
     XDefineCursor(Xdisplay, scrollbar.win, cursor);
     XSelectInput(Xdisplay, scrollbar.win, mask);
     XStoreName(Xdisplay, scrollbar.win, "Eterm Scrollbar");
@@ -707,7 +718,8 @@ scrollbar_init(int width, int height)
     /* Now the up arrow window. */
     scrollbar.up_win =
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_up_loc(), scrollbar_arrow_width(),
-                      scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
+                      scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap,
+                      &Attributes);
     XSelectInput(Xdisplay, scrollbar.up_win, mask);
     XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Up Arrow");
     D_SCROLLBAR(("Created scrollbar up arrow window 0x%08x\n", scrollbar.up_win));
@@ -715,7 +727,8 @@ scrollbar_init(int width, int height)
     /* The down arrow window */
     scrollbar.dn_win =
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar_dn_loc(), scrollbar_arrow_width(),
-                      scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap, &Attributes);
+                      scrollbar_arrow_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWColormap,
+                      &Attributes);
     XSelectInput(Xdisplay, scrollbar.dn_win, mask);
     XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Down Arrow");
     D_SCROLLBAR(("Created scrollbar down arrow window 0x%08x\n", scrollbar.dn_win));
@@ -723,7 +736,8 @@ scrollbar_init(int width, int height)
     /* The anchor window */
     scrollbar.sa_win =
         XCreateWindow(Xdisplay, scrollbar.win, scrollbar_get_shadow(), scrollbar.anchor_top, scrollbar_anchor_width(),
-                      scrollbar_anchor_height(), 0, Xdepth, InputOutput, CopyFromParent, CWOverrideRedirect | CWSaveUnder | CWColormap, &Attributes);
+                      scrollbar_anchor_height(), 0, Xdepth, InputOutput, CopyFromParent,
+                      CWOverrideRedirect | CWSaveUnder | CWColormap, &Attributes);
     XSelectInput(Xdisplay, scrollbar.sa_win, mask);
     XMapWindow(Xdisplay, scrollbar.sa_win);
     XStoreName(Xdisplay, scrollbar.up_win, "Eterm Scrollbar Anchor");
@@ -803,7 +817,8 @@ scrollbar_calc_size(int width, int height)
     scrollbar.height = height - (2 * scrollbar_get_shadow());
     scrollbar.win_width = scrollbar.width + (2 * scrollbar_get_shadow());
     scrollbar.win_height = height;
-    D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollbar.width, scrollbar.height, scrollbar.win_width, scrollbar.win_height));
+    D_X11((" -> New scrollbar width/height == %hux%hu, win_width/height == %hux%hu\n", scrollbar.width, scrollbar.height,
+           scrollbar.win_width, scrollbar.win_height));
     D_X11((" -> New scroll area start/end == %hu - %hu, up_arrow_loc == %hu, down_arrow_loc == %hu\n", scrollbar.scrollarea_start,
            scrollbar.scrollarea_end, scrollbar.up_arrow_loc, scrollbar.down_arrow_loc));
 }
@@ -820,7 +835,8 @@ scrollbar_resize(int width, int height)
     D_SCROLLBAR((" -> XMoveResizeWindow(Xdisplay, 0x%08x, %d, y, %d, %d)\n", scrollbar.win,
                  ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (width - scrollbar_trough_width()) : (0)),
                  scrollbar_trough_width(), scrollbar_trough_height()));
-    XMoveResizeWindow(Xdisplay, scrollbar.win, ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (width - scrollbar_trough_width()) : (0)),
+    XMoveResizeWindow(Xdisplay, scrollbar.win,
+                      ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (width - scrollbar_trough_width()) : (0)),
                       bbar_calc_docked_height(BBAR_DOCKED_TOP), scrollbar_trough_width(), scrollbar_trough_height());
     scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
     scrollbar_reposition_and_draw(MODE_MASK);

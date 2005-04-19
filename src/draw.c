@@ -71,36 +71,36 @@ draw_arrow(Drawable d, GC gc_top, GC gc_bottom, int x, int y, int w, int shadow,
     BOUND(shadow, 1, 2);
 
     switch (type) {
-      case DRAW_ARROW_UP:
-          for (; shadow > 0; shadow--, x++, y++, w--) {
-              XDrawLine(Xdisplay, d, gc_top, x, y + w, x + w / 2, y);
-              XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w / 2, y);
-              XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w);
-          }
-          break;
-      case DRAW_ARROW_DOWN:
-          for (; shadow > 0; shadow--, x++, y++, w--) {
-              XDrawLine(Xdisplay, d, gc_top, x, y, x + w / 2, y + w);
-              XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y);
-              XDrawLine(Xdisplay, d, gc_bottom, x + w, y, x + w / 2, y + w);
-          }
-          break;
-      case DRAW_ARROW_LEFT:
-          for (; shadow > 0; shadow--, x++, y++, w--) {
-              XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w, y);
-              XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w / 2);
-              XDrawLine(Xdisplay, d, gc_top, x, y + w / 2, x + w, y);
-          }
-          break;
-      case DRAW_ARROW_RIGHT:
-          for (; shadow > 0; shadow--, x++, y++, w--) {
-              XDrawLine(Xdisplay, d, gc_top, x, y, x, y + w);
-              XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y + w / 2);
-              XDrawLine(Xdisplay, d, gc_bottom, x, y + w, x + w, y + w / 2);
-          }
-          break;
-      default:
-          break;
+        case DRAW_ARROW_UP:
+            for (; shadow > 0; shadow--, x++, y++, w--) {
+                XDrawLine(Xdisplay, d, gc_top, x, y + w, x + w / 2, y);
+                XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w / 2, y);
+                XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w);
+            }
+            break;
+        case DRAW_ARROW_DOWN:
+            for (; shadow > 0; shadow--, x++, y++, w--) {
+                XDrawLine(Xdisplay, d, gc_top, x, y, x + w / 2, y + w);
+                XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y);
+                XDrawLine(Xdisplay, d, gc_bottom, x + w, y, x + w / 2, y + w);
+            }
+            break;
+        case DRAW_ARROW_LEFT:
+            for (; shadow > 0; shadow--, x++, y++, w--) {
+                XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x + w, y);
+                XDrawLine(Xdisplay, d, gc_bottom, x + w, y + w, x, y + w / 2);
+                XDrawLine(Xdisplay, d, gc_top, x, y + w / 2, x + w, y);
+            }
+            break;
+        case DRAW_ARROW_RIGHT:
+            for (; shadow > 0; shadow--, x++, y++, w--) {
+                XDrawLine(Xdisplay, d, gc_top, x, y, x, y + w);
+                XDrawLine(Xdisplay, d, gc_top, x, y, x + w, y + w / 2);
+                XDrawLine(Xdisplay, d, gc_bottom, x, y + w, x + w, y + w / 2);
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -173,27 +173,27 @@ bevel_pixmap(Pixmap p, int w, int h, Imlib_Border * bord, unsigned char up)
     }
     /* Determine bitshift and bitmask values */
     switch (real_depth) {
-      case 15:
-          br = 7;
-          bg = 2;
-          bb = 3;
-          mr = mg = mb = 0xf8;
-          break;
-      case 16:
-          br = 8;
-          bg = bb = 3;
-          mr = mb = 0xf8;
-          mg = 0xfc;
-          break;
-      case 24:
-      case 32:
-          br = 16;
-          bg = 8;
-          bb = 0;
-          mr = mg = mb = 0xff;
-          break;
-      default:
-          return;
+        case 15:
+            br = 7;
+            bg = 2;
+            bb = 3;
+            mr = mg = mb = 0xf8;
+            break;
+        case 16:
+            br = 8;
+            bg = bb = 3;
+            mr = mb = 0xf8;
+            mg = 0xfc;
+            break;
+        case 24:
+        case 32:
+            br = 16;
+            bg = 8;
+            bb = 0;
+            mr = mg = mb = 0xff;
+            break;
+        default:
+            return;
     }
 
     /* Left edge */

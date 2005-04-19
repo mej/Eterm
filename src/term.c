@@ -326,10 +326,10 @@ char *def_colorName[] = {
 
 #ifndef NO_CURSORCOLOR
     NULL, NULL,                 /* cursorColor, cursorColor2 */
-#endif                          /* NO_CURSORCOLOR */
+#endif /* NO_CURSORCOLOR */
 #ifndef NO_BOLDUNDERLINE
     NULL, NULL,                 /* colorBD, colorUL */
-#endif                          /* NO_BOLDUNDERLINE */
+#endif /* NO_BOLDUNDERLINE */
 #ifdef ESCREEN
     NULL, NULL,                 /* ES_COLOR_CURRENT, ES_COLOR_ACTIVE */
 #endif
@@ -375,22 +375,22 @@ get_modifiers(void)
             }
             /* Check to see if it's one that we care about. */
             switch (XKeycodeToKeysym(Xdisplay, kc[k], 0)) {
-              case XK_Meta_L:
-              case XK_Meta_R:
-                  D_X11(("Found Meta key as mod %d\n", l + 1));
-                  match = MetaMask = modmasks[l];
-                  break;
-              case XK_Alt_L:
-              case XK_Alt_R:
-                  D_X11(("Found Alt key as mod %d\n", l + 1));
-                  match = AltMask = modmasks[l];
-                  break;
-              case XK_Num_Lock:
-                  D_X11(("Found NumLock key as mod %d\n", l + 1));
-                  match = NumLockMask = modmasks[l];
-                  break;
-              default:
-                  break;
+                case XK_Meta_L:
+                case XK_Meta_R:
+                    D_X11(("Found Meta key as mod %d\n", l + 1));
+                    match = MetaMask = modmasks[l];
+                    break;
+                case XK_Alt_L:
+                case XK_Alt_R:
+                    D_X11(("Found Alt key as mod %d\n", l + 1));
+                    match = AltMask = modmasks[l];
+                    break;
+                case XK_Num_Lock:
+                    D_X11(("Found NumLock key as mod %d\n", l + 1));
+                    match = NumLockMask = modmasks[l];
+                    break;
+                default:
+                    break;
             }
             if (match) {
                 break;
@@ -486,20 +486,21 @@ lookup_key(XEvent * ev)
             kbuf = (unsigned char *) MALLOC(len + 1);
             kbuf_alloced = 1;
             len = XmbLookupString(xim_input_context, &ev->xkey, (char *) kbuf, len, &keysym, &status_return);
-            D_TTY(("XmbLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\" based on the XIM input context %010p\n",
-                   len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len), xim_input_context));
+            D_TTY(("XmbLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\" based on the XIM input context %010p\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len), xim_input_context));
         }
         valid_keysym = (status_return == XLookupKeySym) || (status_return == XLookupBoth);
     } else {
         /* No XIM input context.  Do it the normal way. */
         len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(short_buf), &keysym, NULL);
-        D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+        D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym,
+               safe_print_string(kbuf, len)));
         valid_keysym = 1;
     }
 #else /* USE_XIM */
     /* Translate the key event into its corresponding string according to X.  This also gets us a keysym. */
     len = XLookupString(&ev->xkey, (char *) kbuf, sizeof(kbuf), &keysym, NULL);
-    D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+    D_TTY(("XLookupString() gave us len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym,
+           safe_print_string(kbuf, len)));
 
     /* If there is no string and it's a Latin2-7 character, replace it with the Latin1 character instead. */
     if (!len && (keysym >= 0x0100) && (keysym < 0x0900)) {
@@ -562,21 +563,21 @@ lookup_key(XEvent * ev)
 
 #if defined(HAVE_X11_SUNKEYSYM_H) && defined(HAVE_X11_XMU_ATOMS_H)
         switch (keysym) {
-          case SunXK_Copy:
-          case SunXK_Cut:
-              selection_copy(XA_CLIPBOARD(Xdisplay));
-              LK_RET();
-              break;
-          case SunXK_Paste:
-              selection_paste(XA_CLIPBOARD(Xdisplay));
-              LK_RET();
-              break;
-          case SunXK_Front:
-              xterm_seq(ESCSEQ_XTERM_TAKEOVER, "");
-              LK_RET();
-              break;
-          default:
-              break;
+            case SunXK_Copy:
+            case SunXK_Cut:
+                selection_copy(XA_CLIPBOARD(Xdisplay));
+                LK_RET();
+                break;
+            case SunXK_Paste:
+                selection_paste(XA_CLIPBOARD(Xdisplay));
+                LK_RET();
+                break;
+            case SunXK_Front:
+                xterm_seq(ESCSEQ_XTERM_TAKEOVER, "");
+                LK_RET();
+                break;
+            default:
+                break;
         }
 #endif
 
@@ -587,34 +588,34 @@ lookup_key(XEvent * ev)
                 shft = 0;
             } else if (!ctrl && !meta && (PrivateModes & PrivMode_ShiftKeys)) {
                 switch (keysym) {
-                  case XK_Prior:       /* Shift-PgUp scrolls up a page */
-                      if (TermWin.saveLines) {
-                          scr_page(UP, (TermWin.nrow - CONTEXT_LINES));
-                          LK_RET();
-                      }
-                      break;
+                    case XK_Prior:     /* Shift-PgUp scrolls up a page */
+                        if (TermWin.saveLines) {
+                            scr_page(UP, (TermWin.nrow - CONTEXT_LINES));
+                            LK_RET();
+                        }
+                        break;
 
-                  case XK_Next:        /* Shift-PgDn scrolls down a page */
-                      if (TermWin.saveLines) {
-                          scr_page(DN, (TermWin.nrow - CONTEXT_LINES));
-                          LK_RET();
-                      }
-                      break;
+                    case XK_Next:      /* Shift-PgDn scrolls down a page */
+                        if (TermWin.saveLines) {
+                            scr_page(DN, (TermWin.nrow - CONTEXT_LINES));
+                            LK_RET();
+                        }
+                        break;
 
-                  case XK_Insert:      /* Shift-Ins pastes the current selection. */
-                      selection_paste(XA_PRIMARY);
-                      LK_RET();
-                      break;
+                    case XK_Insert:    /* Shift-Ins pastes the current selection. */
+                        selection_paste(XA_PRIMARY);
+                        LK_RET();
+                        break;
 
-                  case XK_KP_Add:      /* Shift-Plus on the keypad increases the font size */
-                      change_font(0, BIGGER_FONT);
-                      LK_RET();
-                      break;
+                    case XK_KP_Add:    /* Shift-Plus on the keypad increases the font size */
+                        change_font(0, BIGGER_FONT);
+                        LK_RET();
+                        break;
 
-                  case XK_KP_Subtract: /* Shift-Minus on the keypad decreases the font size */
-                      change_font(0, SMALLER_FONT);
-                      LK_RET();
-                      break;
+                    case XK_KP_Subtract:       /* Shift-Minus on the keypad decreases the font size */
+                        change_font(0, SMALLER_FONT);
+                        LK_RET();
+                        break;
                 }
             }
         }
@@ -622,48 +623,48 @@ lookup_key(XEvent * ev)
         /* Allow PgUp/PgDn by themselves to scroll.  Not recommended. */
         else if (!ctrl && !meta) {
             switch (keysym) {
-              case XK_Prior:
-                  if (TermWin.saveLines) {
-                      scr_page(UP, TermWin.nrow - CONTEXT_LINES);
-                      LK_RET();
-                  }
-                  break;
+                case XK_Prior:
+                    if (TermWin.saveLines) {
+                        scr_page(UP, TermWin.nrow - CONTEXT_LINES);
+                        LK_RET();
+                    }
+                    break;
 
-              case XK_Next:
-                  if (TermWin.saveLines) {
-                      scr_page(DN, TermWin.nrow - CONTEXT_LINES);
-                      LK_RET();
-                  }
-                  break;
+                case XK_Next:
+                    if (TermWin.saveLines) {
+                        scr_page(DN, TermWin.nrow - CONTEXT_LINES);
+                        LK_RET();
+                    }
+                    break;
             }
         }
 #endif
 
 
         switch (keysym) {
-          case XK_Print:       /* Print the screen contents out to the print pipe */
+            case XK_Print:     /* Print the screen contents out to the print pipe */
 #if DEBUG >= DEBUG_SELECTION
-              if (DEBUG_LEVEL >= DEBUG_SELECTION) {
-                  scr_dump_to_file("/tmp/Eterm_screen_dump.log");
-              } else
+                if (DEBUG_LEVEL >= DEBUG_SELECTION) {
+                    scr_dump_to_file("/tmp/Eterm_screen_dump.log");
+                } else
 #endif
 #ifdef PRINTPIPE
-                  scr_printscreen(ctrl | shft);
+                    scr_printscreen(ctrl | shft);
 #endif
-              LK_RET();
-              break;
+                LK_RET();
+                break;
 
-          case XK_Mode_switch:
+            case XK_Mode_switch:
 #ifdef GREEK_SUPPORT
-              greek_mode = !greek_mode;
-              if (greek_mode) {
-                  xterm_seq(ESCSEQ_XTERM_TITLE, (greek_getmode() == GREEK_ELOT928 ? "[Greek: iso]" : "[Greek: ibm]"));
-                  greek_reset();
-              } else
-                  xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
-              LK_RET();
+                greek_mode = !greek_mode;
+                if (greek_mode) {
+                    xterm_seq(ESCSEQ_XTERM_TITLE, (greek_getmode() == GREEK_ELOT928 ? "[Greek: iso]" : "[Greek: ibm]"));
+                    greek_reset();
+                } else
+                    xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
+                LK_RET();
 #endif
-              break;
+                break;
         }
 
         /* At this point, all the keystrokes that have special meaning to us have been handled.
@@ -703,301 +704,301 @@ lookup_key(XEvent * ev)
 #endif
                 /* This is a big-ass switch statement that handles all the special keysyms */
                 switch (keysym) {
-                  case XK_BackSpace:
-                      len = 1;
+                    case XK_BackSpace:
+                        len = 1;
 #ifdef FORCE_BACKSPACE
-                      kbuf[0] = (!(shft | ctrl) ? '\b' : '\177');
+                        kbuf[0] = (!(shft | ctrl) ? '\b' : '\177');
 #elif defined(FORCE_DELETE)
-                      kbuf[0] = ((shft | ctrl) ? '\b' : '\177');
+                        kbuf[0] = ((shft | ctrl) ? '\b' : '\177');
 #else
-                      kbuf[0] = (((PrivateModes & PrivMode_BackSpace) ? !(shft | ctrl) : (shft | ctrl)) ? '\b' : '\177');
+                        kbuf[0] = (((PrivateModes & PrivMode_BackSpace) ? !(shft | ctrl) : (shft | ctrl)) ? '\b' : '\177');
 #endif
 #ifdef MULTI_CHARSET
-                      if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR)) && scr_multi2()) {
-                          memmove(kbuf + len, kbuf, len);
-                          len *= 2;
-                      }
+                        if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR)) && scr_multi2()) {
+                            memmove(kbuf + len, kbuf, len);
+                            len *= 2;
+                        }
 #endif /* MULTI_CHARSET */
-                      break;
+                        break;
 
-                      /* Tab key is normal unless it's shift-tab. */
-                  case XK_Tab:
-                  case XK_ISO_Left_Tab:
-                      if (shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033[Z");
-                      }
-                      break;
+                        /* Tab key is normal unless it's shift-tab. */
+                    case XK_Tab:
+                    case XK_ISO_Left_Tab:
+                        if (shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033[Z");
+                        }
+                        break;
 
 #ifdef XK_KP_Home
-                  case XK_KP_Home:
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Ow");
-                          break;
-                      }
-                      /* -> else FALL THROUGH */
+                    case XK_KP_Home:
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Ow");
+                            break;
+                        }
+                        /* -> else FALL THROUGH */
 #endif
 
-                  case XK_Home:
-                      len = strlen(strcpy(kbuf, KS_HOME));
-                      break;
+                    case XK_Home:
+                        len = strlen(strcpy(kbuf, KS_HOME));
+                        break;
 
 #ifdef XK_KP_Left
-                  case XK_KP_Left:     /* \033Ot or standard cursor key */
-                  case XK_KP_Up:       /* \033Ox or standard cursor key */
-                  case XK_KP_Right:    /* \033Ov or standard cursor key */
-                  case XK_KP_Down:     /* \033Or or standard cursor key */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033OZ");       /* The Z is replaced by t, x, v, or r */
-                          kbuf[2] = ("txvr"[keysym - XK_KP_Left]);
-                          break;
-                      } else {
-                          keysym = XK_Left + (keysym - XK_KP_Left);
-                      }
-                      /* Continue on with the normal cursor keys... */
+                    case XK_KP_Left:   /* \033Ot or standard cursor key */
+                    case XK_KP_Up:     /* \033Ox or standard cursor key */
+                    case XK_KP_Right:  /* \033Ov or standard cursor key */
+                    case XK_KP_Down:   /* \033Or or standard cursor key */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033OZ");     /* The Z is replaced by t, x, v, or r */
+                            kbuf[2] = ("txvr"[keysym - XK_KP_Left]);
+                            break;
+                        } else {
+                            keysym = XK_Left + (keysym - XK_KP_Left);
+                        }
+                        /* Continue on with the normal cursor keys... */
 #endif
-                  case XK_Left:        /* "\033[D" */
-                  case XK_Up:  /* "\033[A" */
-                  case XK_Right:       /* "\033[C" */
-                  case XK_Down:        /* "\033[B" */
-                      len = 3;
-                      strcpy(kbuf, "\033[@");
-                      kbuf[2] = ("DACB"[keysym - XK_Left]);
-                      if (PrivateModes & PrivMode_aplCUR) {
-                          kbuf[1] = 'O';
-                      } else if (shft) {        /* do Shift first */
-                          kbuf[2] = ("dacb"[keysym - XK_Left]);
-                      } else if (ctrl) {
-                          kbuf[1] = 'O';
-                          kbuf[2] = ("dacb"[keysym - XK_Left]);
-                      }
+                    case XK_Left:      /* "\033[D" */
+                    case XK_Up:        /* "\033[A" */
+                    case XK_Right:     /* "\033[C" */
+                    case XK_Down:      /* "\033[B" */
+                        len = 3;
+                        strcpy(kbuf, "\033[@");
+                        kbuf[2] = ("DACB"[keysym - XK_Left]);
+                        if (PrivateModes & PrivMode_aplCUR) {
+                            kbuf[1] = 'O';
+                        } else if (shft) {      /* do Shift first */
+                            kbuf[2] = ("dacb"[keysym - XK_Left]);
+                        } else if (ctrl) {
+                            kbuf[1] = 'O';
+                            kbuf[2] = ("dacb"[keysym - XK_Left]);
+                        }
 #ifdef MULTI_CHARSET
-                      if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR))
-                          && ((keysym == XK_Left && scr_multi2())
-                              || (keysym == XK_Right && scr_multi1()))) {
-                          memmove(kbuf + len, kbuf, len);
-                          len *= 2;
-                      }
+                        if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR))
+                            && ((keysym == XK_Left && scr_multi2())
+                                || (keysym == XK_Right && scr_multi1()))) {
+                            memmove(kbuf + len, kbuf, len);
+                            len *= 2;
+                        }
 #endif /* MULTI_CHARSET */
-                      break;
+                        break;
 
-                      /* Keypad and normal PgUp/PgDn */
+                        /* Keypad and normal PgUp/PgDn */
 #ifndef UNSHIFTED_SCROLLKEYS
 # ifdef XK_KP_Prior
-                  case XK_KP_Prior:
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Oy");
-                          break;
-                      }
-                      /* -> else FALL THROUGH */
+                    case XK_KP_Prior:
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Oy");
+                            break;
+                        }
+                        /* -> else FALL THROUGH */
 # endif /* XK_KP_Prior */
-                  case XK_Prior:
-                      len = 4;
-                      strcpy(kbuf, "\033[5~");
-                      break;
+                    case XK_Prior:
+                        len = 4;
+                        strcpy(kbuf, "\033[5~");
+                        break;
 # ifdef XK_KP_Next
-                  case XK_KP_Next:
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Os");
-                          break;
-                      }
-                      /* -> else FALL THROUGH */
+                    case XK_KP_Next:
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Os");
+                            break;
+                        }
+                        /* -> else FALL THROUGH */
 # endif /* XK_KP_Next */
-                  case XK_Next:
-                      len = 4;
-                      strcpy(kbuf, "\033[6~");
-                      break;
+                    case XK_Next:
+                        len = 4;
+                        strcpy(kbuf, "\033[6~");
+                        break;
 #endif /* UNSHIFTED_SCROLLKEYS */
 
-                      /* End key */
+                        /* End key */
 #ifdef XK_KP_End
-                  case XK_KP_End:
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Oq");
-                          break;
-                      }
-                      /* -> else FALL THROUGH */
+                    case XK_KP_End:
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Oq");
+                            break;
+                        }
+                        /* -> else FALL THROUGH */
 #endif /* XK_KP_End */
-                  case XK_End:
-                      len = strlen(strcpy(kbuf, KS_END));
-                      break;
+                    case XK_End:
+                        len = strlen(strcpy(kbuf, KS_END));
+                        break;
 
-                  case XK_Select:
-                      len = 4;
-                      strcpy(kbuf, "\033[4~");
-                      break;
+                    case XK_Select:
+                        len = 4;
+                        strcpy(kbuf, "\033[4~");
+                        break;
 
 #ifdef DXK_Remove
-                  case DXK_Remove:
+                    case DXK_Remove:
 #endif
-                  case XK_Execute:
-                      len = 4;
-                      strcpy(kbuf, "\033[3~");
-                      break;
+                    case XK_Execute:
+                        len = 4;
+                        strcpy(kbuf, "\033[3~");
+                        break;
 
 #ifdef XK_KP_Insert
-                  case XK_KP_Insert:
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Op");
-                          break;
-                      }
+                    case XK_KP_Insert:
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Op");
+                            break;
+                        }
 #endif
-                  case XK_Insert:
-                      len = 4;
-                      strcpy(kbuf, "\033[2~");
-                      break;
+                    case XK_Insert:
+                        len = 4;
+                        strcpy(kbuf, "\033[2~");
+                        break;
 
 #ifdef XK_KP_Delete
-                  case XK_KP_Delete:
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033On");
-                          break;
-                      }
+                    case XK_KP_Delete:
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033On");
+                            break;
+                        }
 #endif
-                  case XK_Delete:
+                    case XK_Delete:
 #ifdef KS_DELETE
-                      len = strlen(strcpy(kbuf, KS_DELETE));
+                        len = strlen(strcpy(kbuf, KS_DELETE));
 #ifdef MULTI_CHARSET
-                      if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR)) && scr_multi1()) {
-                          memmove(kbuf + len, kbuf, len);
-                          len *= 2;
-                      }
+                        if ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_MBYTE_CURSOR)) && scr_multi1()) {
+                            memmove(kbuf + len, kbuf, len);
+                            len *= 2;
+                        }
 #endif /* MULTI_CHARSET */
 #endif
-                      break;
+                        break;
 
-                  case XK_Menu:
-                      len = 5;
-                      strcpy(kbuf, "\033[29~");
-                      break;
-                  case XK_Find:
-                      len = 4;
-                      strcpy(kbuf, "\033[1~");
-                      break;
-                  case XK_Help:
-                      len = 5;
-                      strcpy(kbuf, "\033[28~");
-                      break;
+                    case XK_Menu:
+                        len = 5;
+                        strcpy(kbuf, "\033[29~");
+                        break;
+                    case XK_Find:
+                        len = 4;
+                        strcpy(kbuf, "\033[1~");
+                        break;
+                    case XK_Help:
+                        len = 5;
+                        strcpy(kbuf, "\033[28~");
+                        break;
 
-                  case XK_KP_Enter:
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033OM");
-                      } else {
-                          len = 1;
-                          kbuf[0] = '\r';
-                      }
-                      break;
+                    case XK_KP_Enter:
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033OM");
+                        } else {
+                            len = 1;
+                            kbuf[0] = '\r';
+                        }
+                        break;
 
 #ifdef XK_KP_Begin
-                  case XK_KP_Begin:
-                      len = 3;
-                      strcpy(kbuf, "\033Ou");
-                      break;
+                    case XK_KP_Begin:
+                        len = 3;
+                        strcpy(kbuf, "\033Ou");
+                        break;
 #endif /* XK_KP_Begin */
 
-                  case XK_KP_F1:       /* "\033OP" */
-                  case XK_KP_F2:       /* "\033OQ" */
-                  case XK_KP_F3:       /* "\033OR" */
-                  case XK_KP_F4:       /* "\033OS" */
-                      len = 3;
-                      strcpy(kbuf, "\033OP");
-                      kbuf[2] += (keysym - XK_KP_F1);
-                      break;
+                    case XK_KP_F1:     /* "\033OP" */
+                    case XK_KP_F2:     /* "\033OQ" */
+                    case XK_KP_F3:     /* "\033OR" */
+                    case XK_KP_F4:     /* "\033OS" */
+                        len = 3;
+                        strcpy(kbuf, "\033OP");
+                        kbuf[2] += (keysym - XK_KP_F1);
+                        break;
 
-                  case XK_KP_Multiply: /* "\033Oj" : "*" */
-                  case XK_KP_Add:      /* "\033Ok" : "+" */
-                  case XK_KP_Separator:        /* "\033Ol" : "," */
-                  case XK_KP_Subtract: /* "\033Om" : "-" */
-                  case XK_KP_Decimal:  /* "\033On" : "." */
-                  case XK_KP_Divide:   /* "\033Oo" : "/" */
-                  case XK_KP_0:        /* "\033Op" : "0" */
-                  case XK_KP_1:        /* "\033Oq" : "1" */
-                  case XK_KP_2:        /* "\033Or" : "2" */
-                  case XK_KP_3:        /* "\033Os" : "3" */
-                  case XK_KP_4:        /* "\033Ot" : "4" */
-                  case XK_KP_5:        /* "\033Ou" : "5" */
-                  case XK_KP_6:        /* "\033Ov" : "6" */
-                  case XK_KP_7:        /* "\033Ow" : "7" */
-                  case XK_KP_8:        /* "\033Ox" : "8" */
-                  case XK_KP_9:        /* "\033Oy" : "9" */
-                      /* allow shift to override */
-                      if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
-                          len = 3;
-                          strcpy(kbuf, "\033Oj");
-                          kbuf[2] += (keysym - XK_KP_Multiply);
-                      } else {
-                          len = 1;
-                          kbuf[0] = ('*' + (keysym - XK_KP_Multiply));
-                      }
-                      break;
+                    case XK_KP_Multiply:       /* "\033Oj" : "*" */
+                    case XK_KP_Add:    /* "\033Ok" : "+" */
+                    case XK_KP_Separator:      /* "\033Ol" : "," */
+                    case XK_KP_Subtract:       /* "\033Om" : "-" */
+                    case XK_KP_Decimal:        /* "\033On" : "." */
+                    case XK_KP_Divide: /* "\033Oo" : "/" */
+                    case XK_KP_0:      /* "\033Op" : "0" */
+                    case XK_KP_1:      /* "\033Oq" : "1" */
+                    case XK_KP_2:      /* "\033Or" : "2" */
+                    case XK_KP_3:      /* "\033Os" : "3" */
+                    case XK_KP_4:      /* "\033Ot" : "4" */
+                    case XK_KP_5:      /* "\033Ou" : "5" */
+                    case XK_KP_6:      /* "\033Ov" : "6" */
+                    case XK_KP_7:      /* "\033Ow" : "7" */
+                    case XK_KP_8:      /* "\033Ox" : "8" */
+                    case XK_KP_9:      /* "\033Oy" : "9" */
+                        /* allow shift to override */
+                        if ((PrivateModes & PrivMode_aplKP) ? !shft : shft) {
+                            len = 3;
+                            strcpy(kbuf, "\033Oj");
+                            kbuf[2] += (keysym - XK_KP_Multiply);
+                        } else {
+                            len = 1;
+                            kbuf[0] = ('*' + (keysym - XK_KP_Multiply));
+                        }
+                        break;
 
 #define FKEY(n,fkey) do { \
 len = 5; \
 sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 } while (0);
 
-                  case XK_F1:  /* "\033[11~" */
-                  case XK_F2:  /* "\033[12~" */
-                  case XK_F3:  /* "\033[13~" */
-                  case XK_F4:  /* "\033[14~" */
-                  case XK_F5:  /* "\033[15~" */
-                      FKEY(11, XK_F1);
-                      break;
+                    case XK_F1:        /* "\033[11~" */
+                    case XK_F2:        /* "\033[12~" */
+                    case XK_F3:        /* "\033[13~" */
+                    case XK_F4:        /* "\033[14~" */
+                    case XK_F5:        /* "\033[15~" */
+                        FKEY(11, XK_F1);
+                        break;
 
-                  case XK_F6:  /* "\033[17~" */
-                  case XK_F7:  /* "\033[18~" */
-                  case XK_F8:  /* "\033[19~" */
-                  case XK_F9:  /* "\033[20~" */
-                  case XK_F10: /* "\033[21~" */
-                      FKEY(17, XK_F6);
-                      break;
+                    case XK_F6:        /* "\033[17~" */
+                    case XK_F7:        /* "\033[18~" */
+                    case XK_F8:        /* "\033[19~" */
+                    case XK_F9:        /* "\033[20~" */
+                    case XK_F10:       /* "\033[21~" */
+                        FKEY(17, XK_F6);
+                        break;
 
-                  case XK_F11: /* "\033[23~" */
-                  case XK_F12: /* "\033[24~" */
-                  case XK_F13: /* "\033[25~" */
-                  case XK_F14: /* "\033[26~" */
-                      FKEY(23, XK_F11);
-                      break;
+                    case XK_F11:       /* "\033[23~" */
+                    case XK_F12:       /* "\033[24~" */
+                    case XK_F13:       /* "\033[25~" */
+                    case XK_F14:       /* "\033[26~" */
+                        FKEY(23, XK_F11);
+                        break;
 
-                  case XK_F15: /* "\033[28~" */
-                  case XK_F16: /* "\033[29~" */
-                      FKEY(28, XK_F15);
-                      break;
+                    case XK_F15:       /* "\033[28~" */
+                    case XK_F16:       /* "\033[29~" */
+                        FKEY(28, XK_F15);
+                        break;
 
-                  case XK_F17: /* "\033[31~" */
-                  case XK_F18: /* "\033[32~" */
-                  case XK_F19: /* "\033[33~" */
-                  case XK_F20: /* "\033[34~" */
-                  case XK_F21: /* "\033[35~" */
-                  case XK_F22: /* "\033[36~" */
-                  case XK_F23: /* "\033[37~" */
-                  case XK_F24: /* "\033[38~" */
-                  case XK_F25: /* "\033[39~" */
-                  case XK_F26: /* "\033[40~" */
-                  case XK_F27: /* "\033[41~" */
-                  case XK_F28: /* "\033[42~" */
-                  case XK_F29: /* "\033[43~" */
-                  case XK_F30: /* "\033[44~" */
-                  case XK_F31: /* "\033[45~" */
-                  case XK_F32: /* "\033[46~" */
-                  case XK_F33: /* "\033[47~" */
-                  case XK_F34: /* "\033[48~" */
-                  case XK_F35: /* "\033[49~" */
-                      FKEY(31, XK_F17);
-                      break;
+                    case XK_F17:       /* "\033[31~" */
+                    case XK_F18:       /* "\033[32~" */
+                    case XK_F19:       /* "\033[33~" */
+                    case XK_F20:       /* "\033[34~" */
+                    case XK_F21:       /* "\033[35~" */
+                    case XK_F22:       /* "\033[36~" */
+                    case XK_F23:       /* "\033[37~" */
+                    case XK_F24:       /* "\033[38~" */
+                    case XK_F25:       /* "\033[39~" */
+                    case XK_F26:       /* "\033[40~" */
+                    case XK_F27:       /* "\033[41~" */
+                    case XK_F28:       /* "\033[42~" */
+                    case XK_F29:       /* "\033[43~" */
+                    case XK_F30:       /* "\033[44~" */
+                    case XK_F31:       /* "\033[45~" */
+                    case XK_F32:       /* "\033[46~" */
+                    case XK_F33:       /* "\033[47~" */
+                    case XK_F34:       /* "\033[48~" */
+                    case XK_F35:       /* "\033[49~" */
+                        FKEY(31, XK_F17);
+                        break;
 #undef FKEY
                 }
 
@@ -1061,7 +1062,8 @@ sprintf((char *) kbuf,"\033[%02d~", (int)((n) + (keysym - fkey))); \
 
         tt_write(&ch, 1);
     }
-    D_TTY(("After handling:  len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym, safe_print_string(kbuf, len)));
+    D_TTY(("After handling:  len %d, keysym \"%s\" (0x%04x), and buffer \"%s\"\n", len, XKeysymToString(keysym), keysym,
+           safe_print_string(kbuf, len)));
     tt_write(kbuf, len);        /* Send the resulting string to the child process */
 
     LK_RET();
@@ -1134,79 +1136,79 @@ process_escape_seq(void)
     unsigned char ch = cmd_getc();
 
     switch (ch) {
-      case '#':
-          if (cmd_getc() == '8')
-              scr_E();
-          break;
-      case '(':
-          scr_charset_set(0, cmd_getc());
-          break;
-      case ')':
-          scr_charset_set(1, cmd_getc());
-          break;
-      case '*':
-          scr_charset_set(2, cmd_getc());
-          break;
-      case '+':
-          scr_charset_set(3, cmd_getc());
-          break;
+        case '#':
+            if (cmd_getc() == '8')
+                scr_E();
+            break;
+        case '(':
+            scr_charset_set(0, cmd_getc());
+            break;
+        case ')':
+            scr_charset_set(1, cmd_getc());
+            break;
+        case '*':
+            scr_charset_set(2, cmd_getc());
+            break;
+        case '+':
+            scr_charset_set(3, cmd_getc());
+            break;
 #ifdef MULTI_CHARSET
-      case '$':
-          scr_charset_set(-2, cmd_getc());
-          break;
+        case '$':
+            scr_charset_set(-2, cmd_getc());
+            break;
 #endif
-      case '7':
-          scr_cursor(SAVE);
-          break;
-      case '8':
-          scr_cursor(RESTORE);
-          break;
-      case '=':
-      case '>':
-          PrivMode((ch == '='), PrivMode_aplKP);
-          break;
-      case '@':
-          (void) cmd_getc();
-          break;
-      case 'D':
-          scr_index(UP);
-          break;
-      case 'E':
-          scr_add_lines((unsigned char *) "\n\r", 1, 2);
-          break;
-      case 'G':
-          if ((ch = cmd_getc()) == 'Q') {       /* query graphics */
-              tt_printf((unsigned char *) "\033G0\n");  /* no graphics */
-          } else {
-              do {
-                  ch = cmd_getc();
-              } while (ch != ':');
-          }
-          break;
-      case 'H':
-          scr_set_tab(1);
-          break;
-      case 'M':
-          scr_index(DN);
-          break;
-      case 'Z':
-          tt_printf((unsigned char *) ESCZ_ANSWER);
-          break;
-      case '[':
-          process_csi_seq();
-          break;
-      case ']':
-          process_xterm_seq();
-          break;
-      case 'c':
-          scr_poweron();
-          break;
-      case 'n':
-          scr_charset_choose(2);
-          break;
-      case 'o':
-          scr_charset_choose(3);
-          break;
+        case '7':
+            scr_cursor(SAVE);
+            break;
+        case '8':
+            scr_cursor(RESTORE);
+            break;
+        case '=':
+        case '>':
+            PrivMode((ch == '='), PrivMode_aplKP);
+            break;
+        case '@':
+            (void) cmd_getc();
+            break;
+        case 'D':
+            scr_index(UP);
+            break;
+        case 'E':
+            scr_add_lines((unsigned char *) "\n\r", 1, 2);
+            break;
+        case 'G':
+            if ((ch = cmd_getc()) == 'Q') {     /* query graphics */
+                tt_printf((unsigned char *) "\033G0\n");        /* no graphics */
+            } else {
+                do {
+                    ch = cmd_getc();
+                } while (ch != ':');
+            }
+            break;
+        case 'H':
+            scr_set_tab(1);
+            break;
+        case 'M':
+            scr_index(DN);
+            break;
+        case 'Z':
+            tt_printf((unsigned char *) ESCZ_ANSWER);
+            break;
+        case '[':
+            process_csi_seq();
+            break;
+        case ']':
+            process_xterm_seq();
+            break;
+        case 'c':
+            scr_poweron();
+            break;
+        case 'n':
+            scr_charset_choose(2);
+            break;
+        case 'o':
+            scr_charset_choose(3);
+            break;
     }
 }
 
@@ -1262,213 +1264,214 @@ process_csi_seq(void)
         return;
 
     switch (ch) {
-      case '@':
-          scr_insdel_chars((arg[0] ? arg[0] : 1), INSERT);
-          break;
-      case 'A':
-      case 'e':                /* Cursor up n lines "\e[<n>A" */
-          scr_gotorc((arg[0] ? -arg[0] : -1), 0, RELATIVE);
-          break;
-      case 'B':                /* Cursor down n lines "\e[<n>B" */
-          scr_gotorc((arg[0] ? +arg[0] : +1), 0, RELATIVE);
-          break;
-      case 'C':
-      case 'a':                /* Cursor right n columns "\e[<n>C" */
-          scr_gotorc(0, (arg[0] ? +arg[0] : +1), RELATIVE);
-          break;
-      case 'D':                /* Cursor left n columns "\e[<n>D" */
-          scr_gotorc(0, (arg[0] ? -arg[0] : -1), RELATIVE);
-          break;
-      case 'E':                /* Cursor down n lines and to first column "\e[<n>E" */
-          scr_gotorc((arg[0] ? +arg[0] : +1), 0, R_RELATIVE);
-          break;
-      case 'F':                /* Cursor up n lines and to first column "\e[<n>F" */
-          scr_gotorc((arg[0] ? -arg[0] : -1), 0, R_RELATIVE);
-          break;
-      case 'G':
-      case '`':                /* Cursor to column n "\e[<n>G" */
-          scr_gotorc(0, (arg[0] ? arg[0] - 1 : +1), R_RELATIVE);
-          break;
-      case 'H':
-      case 'f':                /* Cursor to row r, column c "\e[<r>;<c>H" */
-          switch (nargs) {
-            case 0:
-                scr_gotorc(0, 0, 0);
-                break;
-            case 1:
-                scr_gotorc((arg[0] ? arg[0] - 1 : 0), 0, 0);
-                break;
-            default:
-                scr_gotorc(arg[0] - 1, arg[1] - 1, 0);
-                break;
-          }
-          break;
-      case 'I':                /* Tab right n tab stops "\e[<n>I" */
-          scr_tab(arg[0] ? +arg[0] : +1);
-          break;
-      case 'J':                /* Clear part or all of screen, depending on n "\e[<n>J" */
-          scr_erase_screen(arg[0]);
-          break;
-      case 'K':                /* Clear part or all of line, depending on n "\e[<n>K" */
-          scr_erase_line(arg[0]);
-          break;
-      case 'L':
-          scr_insdel_lines((arg[0] ? arg[0] : 1), INSERT);
-          break;
-      case 'M':
-          scr_insdel_lines((arg[0] ? arg[0] : 1), DELETE);
-          break;
-      case 'P':
-          scr_insdel_chars((arg[0] ? arg[0] : 1), DELETE);
-          break;
-      case 'W':
-          switch (arg[0]) {
-            case 0:
-                scr_set_tab(1);
-                break;          /* = ESC H */
-            case 2:
-                scr_set_tab(0);
-                break;          /* = ESC [ 0 g */
-            case 5:
-                scr_set_tab(-1);
-                break;          /* = ESC [ 3 g */
-          }
-          break;
-      case 'X':
-          scr_insdel_chars((arg[0] ? arg[0] : 1), ERASE);
-          break;
-      case 'Z':                /* Tab left n tab stops "\e[<n>Z" */
-          scr_tab(arg[0] ? -arg[0] : -1);
-          break;
+        case '@':
+            scr_insdel_chars((arg[0] ? arg[0] : 1), INSERT);
+            break;
+        case 'A':
+        case 'e':              /* Cursor up n lines "\e[<n>A" */
+            scr_gotorc((arg[0] ? -arg[0] : -1), 0, RELATIVE);
+            break;
+        case 'B':              /* Cursor down n lines "\e[<n>B" */
+            scr_gotorc((arg[0] ? +arg[0] : +1), 0, RELATIVE);
+            break;
+        case 'C':
+        case 'a':              /* Cursor right n columns "\e[<n>C" */
+            scr_gotorc(0, (arg[0] ? +arg[0] : +1), RELATIVE);
+            break;
+        case 'D':              /* Cursor left n columns "\e[<n>D" */
+            scr_gotorc(0, (arg[0] ? -arg[0] : -1), RELATIVE);
+            break;
+        case 'E':              /* Cursor down n lines and to first column "\e[<n>E" */
+            scr_gotorc((arg[0] ? +arg[0] : +1), 0, R_RELATIVE);
+            break;
+        case 'F':              /* Cursor up n lines and to first column "\e[<n>F" */
+            scr_gotorc((arg[0] ? -arg[0] : -1), 0, R_RELATIVE);
+            break;
+        case 'G':
+        case '`':              /* Cursor to column n "\e[<n>G" */
+            scr_gotorc(0, (arg[0] ? arg[0] - 1 : +1), R_RELATIVE);
+            break;
+        case 'H':
+        case 'f':              /* Cursor to row r, column c "\e[<r>;<c>H" */
+            switch (nargs) {
+                case 0:
+                    scr_gotorc(0, 0, 0);
+                    break;
+                case 1:
+                    scr_gotorc((arg[0] ? arg[0] - 1 : 0), 0, 0);
+                    break;
+                default:
+                    scr_gotorc(arg[0] - 1, arg[1] - 1, 0);
+                    break;
+            }
+            break;
+        case 'I':              /* Tab right n tab stops "\e[<n>I" */
+            scr_tab(arg[0] ? +arg[0] : +1);
+            break;
+        case 'J':              /* Clear part or all of screen, depending on n "\e[<n>J" */
+            scr_erase_screen(arg[0]);
+            break;
+        case 'K':              /* Clear part or all of line, depending on n "\e[<n>K" */
+            scr_erase_line(arg[0]);
+            break;
+        case 'L':
+            scr_insdel_lines((arg[0] ? arg[0] : 1), INSERT);
+            break;
+        case 'M':
+            scr_insdel_lines((arg[0] ? arg[0] : 1), DELETE);
+            break;
+        case 'P':
+            scr_insdel_chars((arg[0] ? arg[0] : 1), DELETE);
+            break;
+        case 'W':
+            switch (arg[0]) {
+                case 0:
+                    scr_set_tab(1);
+                    break;      /* = ESC H */
+                case 2:
+                    scr_set_tab(0);
+                    break;      /* = ESC [ 0 g */
+                case 5:
+                    scr_set_tab(-1);
+                    break;      /* = ESC [ 3 g */
+            }
+            break;
+        case 'X':
+            scr_insdel_chars((arg[0] ? arg[0] : 1), ERASE);
+            break;
+        case 'Z':              /* Tab left n tab stops "\e[<n>Z" */
+            scr_tab(arg[0] ? -arg[0] : -1);
+            break;
 
-      case 'c':
-          /* TODO: A different response should be sent depending on the value of
-             priv and of arg[0], but what should those reponses be? */
+        case 'c':
+            /* TODO: A different response should be sent depending on the value of
+               priv and of arg[0], but what should those reponses be? */
 #ifndef NO_VT100_ANS
-          tt_printf((unsigned char *) VT100_ANS);
+            tt_printf((unsigned char *) VT100_ANS);
 #endif
-          break;
-      case 'd':                /* Cursor to row n "\e[<n>d" */
-          scr_gotorc((arg[0] ? arg[0] - 1 : +1), 0, C_RELATIVE);
-          break;
-      case 'g':
-          switch (arg[0]) {
-            case 0:
-                scr_set_tab(0);
-                break;          /* delete tab */
-            case 3:
-                scr_set_tab(-1);
-                break;          /* clear all tabs */
-          }
-          break;
+            break;
+        case 'd':              /* Cursor to row n "\e[<n>d" */
+            scr_gotorc((arg[0] ? arg[0] - 1 : +1), 0, C_RELATIVE);
+            break;
+        case 'g':
+            switch (arg[0]) {
+                case 0:
+                    scr_set_tab(0);
+                    break;      /* delete tab */
+                case 3:
+                    scr_set_tab(-1);
+                    break;      /* clear all tabs */
+            }
+            break;
 #ifdef PRINTPIPE
-      case 'i':
-          switch (arg[0]) {
-            case 0:
-                scr_printscreen(0);     /* Print screen "\e[0i" */
-                break;
-            case 5:
-                process_print_pipe();   /* Start printing to print pipe "\e[5i" */
-                break;
-          }
-          break;
+        case 'i':
+            switch (arg[0]) {
+                case 0:
+                    scr_printscreen(0); /* Print screen "\e[0i" */
+                    break;
+                case 5:
+                    process_print_pipe();       /* Start printing to print pipe "\e[5i" */
+                    break;
+            }
+            break;
 #endif
-      case 'm':
-          process_sgr_mode(nargs, arg);
-          break;
-      case 'n':                /* request for information */
-          switch (arg[0]) {
-            case 5:
-                tt_printf((unsigned char *) "\033[0n");
-                break;          /* ready */
-            case 6:
-                scr_report_position();
-                break;
+        case 'm':
+            process_sgr_mode(nargs, arg);
+            break;
+        case 'n':              /* request for information */
+            switch (arg[0]) {
+                case 5:
+                    tt_printf((unsigned char *) "\033[0n");
+                    break;      /* ready */
+                case 6:
+                    scr_report_position();
+                    break;
 #if defined (ENABLE_DISPLAY_ANSWER)
-            case 7:
-                tt_write((unsigned char *) display_name, strlen(display_name));
-                tt_write("\n", 1);
-                break;
+                case 7:
+                    tt_write((unsigned char *) display_name, strlen(display_name));
+                    tt_write("\n", 1);
+                    break;
 #endif
-            case 8:
-                xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
-                break;
-            case 9:
+                case 8:
+                    xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION);
+                    break;
+                case 9:
 #ifdef PIXMAP_OFFSET
-                if (image_mode_is(image_bg, MODE_TRANS)) {
-                    char tbuff[70];
-                    char shading = 0;
-                    unsigned long tint = 0xffffff;
+                    if (image_mode_is(image_bg, MODE_TRANS)) {
+                        char tbuff[70];
+                        char shading = 0;
+                        unsigned long tint = 0xffffff;
 
-                    if (images[image_bg].current->iml->mod) {
-                        shading = images[image_bg].current->iml->mod->brightness / 0xff * 100;
-                    }
-                    if (images[image_bg].current->iml->rmod) {
-                        tint = (tint & 0x00ffff) | ((images[image_bg].current->iml->rmod->brightness & 0xff) << 16);
-                    }
-                    if (images[image_bg].current->iml->gmod) {
-                        tint = (tint & 0xff00ff) | ((images[image_bg].current->iml->gmod->brightness & 0xff) << 8);
-                    }
-                    if (images[image_bg].current->iml->bmod) {
-                        tint = (tint & 0xffff00) | (images[image_bg].current->iml->bmod->brightness & 0xff);
-                    }
-                    snprintf(tbuff, sizeof(tbuff), APL_NAME "-" VERSION ":  Transparent - %d%% shading - 0x%06lx tint mask", shading, tint);
-                    xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
-                } else
+                        if (images[image_bg].current->iml->mod) {
+                            shading = images[image_bg].current->iml->mod->brightness / 0xff * 100;
+                        }
+                        if (images[image_bg].current->iml->rmod) {
+                            tint = (tint & 0x00ffff) | ((images[image_bg].current->iml->rmod->brightness & 0xff) << 16);
+                        }
+                        if (images[image_bg].current->iml->gmod) {
+                            tint = (tint & 0xff00ff) | ((images[image_bg].current->iml->gmod->brightness & 0xff) << 8);
+                        }
+                        if (images[image_bg].current->iml->bmod) {
+                            tint = (tint & 0xffff00) | (images[image_bg].current->iml->bmod->brightness & 0xff);
+                        }
+                        snprintf(tbuff, sizeof(tbuff), APL_NAME "-" VERSION ":  Transparent - %d%% shading - 0x%06lx tint mask",
+                                 shading, tint);
+                        xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
+                    } else
 #endif
 #ifdef PIXMAP_SUPPORT
-                {
-                    char *tbuff;
-                    unsigned short len;
+                    {
+                        char *tbuff;
+                        unsigned short len;
 
-                    if (background_is_pixmap()) {
-                        const char *fname;
+                        if (background_is_pixmap()) {
+                            const char *fname;
 
-                        imlib_context_set_image(images[image_bg].current->iml->im);
-                        fname = imlib_image_get_filename();
-                        len = strlen(fname) + sizeof(APL_NAME) + sizeof(VERSION) + 5;
-                        tbuff = MALLOC(len);
-                        snprintf(tbuff, len, APL_NAME "-" VERSION ":  %s", fname);
-                        xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
-                        FREE(tbuff);
-                    } else {
-                        xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION ":  No Pixmap");
+                            imlib_context_set_image(images[image_bg].current->iml->im);
+                            fname = imlib_image_get_filename();
+                            len = strlen(fname) + sizeof(APL_NAME) + sizeof(VERSION) + 5;
+                            tbuff = MALLOC(len);
+                            snprintf(tbuff, len, APL_NAME "-" VERSION ":  %s", fname);
+                            xterm_seq(ESCSEQ_XTERM_TITLE, tbuff);
+                            FREE(tbuff);
+                        } else {
+                            xterm_seq(ESCSEQ_XTERM_TITLE, APL_NAME "-" VERSION ":  No Pixmap");
+                        }
                     }
-                }
 #endif /* PIXMAP_SUPPORT */
+                    break;
+            }
+            break;
+        case 'r':              /* set top and bottom margins */
+            if (priv != '?') {
+                if (nargs < 2 || arg[0] >= arg[1])
+                    scr_scroll_region(0, 10000);
+                else
+                    scr_scroll_region(arg[0] - 1, arg[1] - 1);
                 break;
-          }
-          break;
-      case 'r':                /* set top and bottom margins */
-          if (priv != '?') {
-              if (nargs < 2 || arg[0] >= arg[1])
-                  scr_scroll_region(0, 10000);
-              else
-                  scr_scroll_region(arg[0] - 1, arg[1] - 1);
-              break;
-          }
-          /* drop */
-      case 't':
-          if (priv != '?') {
-              process_window_mode(nargs, arg);
-              break;
-          }
-          /* drop */
-      case 's':
-          if (ch == 's' && !nargs) {
-              scr_cursor(SAVE);
-              break;
-          }
-          /* drop */
-      case 'h':
-      case 'l':
-          process_terminal_mode(ch, priv, nargs, arg);
-          break;
-      case 'u':
-          if (!nargs) {
-              scr_cursor(RESTORE);
-          }
-          break;
+            }
+            /* drop */
+        case 't':
+            if (priv != '?') {
+                process_window_mode(nargs, arg);
+                break;
+            }
+            /* drop */
+        case 's':
+            if (ch == 's' && !nargs) {
+                scr_cursor(SAVE);
+                break;
+            }
+            /* drop */
+        case 'h':
+        case 'l':
+            process_terminal_mode(ch, priv, nargs, arg);
+            break;
+        case 'u':
+            if (!nargs) {
+                scr_cursor(RESTORE);
+            }
+            break;
     }
 }
 
@@ -1516,10 +1519,10 @@ process_xterm_seq(void)
                 if (ch == '\t')
                     ch = ' ';   /* translate '\t' to space */
                 else if (ch < ' ') {
-		    if (ch == 27 && (ch = cmd_getc()) == '\\')  /* ESC \ (ST) is String Terminator in Xterm */
-		        break;
+                    if (ch == 27 && (ch = cmd_getc()) == '\\')  /* ESC \ (ST) is String Terminator in Xterm */
+                        break;
                     return;     /* control character - exit */
-		}
+                }
                 if (n < sizeof(string) - 1)
                     string[n++] = ch;
             }
@@ -1547,17 +1550,17 @@ process_xterm_seq(void)
             return;
         }
         switch (arg) {
-          case 'l':
-              xterm_seq(ESCSEQ_XTERM_TITLE, (char *) string);
-              break;
-          case 'L':
-              xterm_seq(ESCSEQ_XTERM_ICONNAME, (char *) string);
-              break;
-          case 'I':
-              set_icon_pixmap((char *) string, NULL);
-              break;
-          default:
-              break;
+            case 'l':
+                xterm_seq(ESCSEQ_XTERM_TITLE, (char *) string);
+                break;
+            case 'L':
+                xterm_seq(ESCSEQ_XTERM_ICONNAME, (char *) string);
+                break;
+            case 'I':
+                set_icon_pixmap((char *) string, NULL);
+                break;
+            default:
+                break;
         }
     }
 }
@@ -1574,6 +1577,7 @@ process_window_mode(unsigned int nargs, int args[])
     int dummy_x, dummy_y;
     unsigned int dummy_border, dummy_depth;
     char buff[1024];
+
 #ifdef ENABLE_NAME_REPORTING_ESCAPES
     char *name;
 #endif
@@ -1586,86 +1590,87 @@ process_window_mode(unsigned int nargs, int args[])
 
     for (i = 0; i < nargs; i++) {
         switch (args[i]) {
-          case 1:
-              XMapRaised(Xdisplay, TermWin.parent);
-              break;
-          case 2:
-              XIconifyWindow(Xdisplay, TermWin.parent, Xscreen);
-              break;
-          case 3:
-              if (i + 2 >= nargs)
-                  return;       /* Make sure there are 2 args left */
-              x = args[++i];
-              y = args[++i];
-              if (((unsigned int) x > (unsigned int) scr->width) || ((unsigned int) y > (unsigned int) scr->height))
-                  return;       /* Don't move off-screen */
-              XMoveWindow(Xdisplay, TermWin.parent, x, y);
-              break;
-          case 4:
-              if (i + 2 >= nargs)
-                  return;       /* Make sure there are 2 args left */
-              y = args[++i];
-              x = args[++i];
-              BOUND(y, szHint.min_height, scr->height);
-              BOUND(x, szHint.min_width, scr->width);
-              XResizeWindow(Xdisplay, TermWin.parent, x, y);
-              break;
-          case 5:
-              XRaiseWindow(Xdisplay, TermWin.parent);
-              break;
-          case 6:
-              XLowerWindow(Xdisplay, TermWin.parent);
-              break;
-          case 7:
-              XClearWindow(Xdisplay, TermWin.vt);
-              XSync(Xdisplay, False);
-              scr_touch();
-              scr_refresh(DEFAULT_REFRESH);
-              break;
-          case 8:
-              if (i + 2 >= nargs)
-                  return;       /* Make sure there are 2 args left */
-              y = args[++i];
-              x = args[++i];
-              BOUND(y, 1, scr->height / TermWin.fheight);
-              BOUND(x, 1, scr->width / TermWin.fwidth);
-              XResizeWindow(Xdisplay, TermWin.parent,
-                            Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
-                            Height2Pixel(y) + 2 * TermWin.internalBorder);
-              break;
-          case 11:
-              break;
-          case 13:
-              XTranslateCoordinates(Xdisplay, TermWin.parent, Xroot, 0, 0, &x, &y, &dummy_child);
-              snprintf(buff, sizeof(buff), "\033[3;%d;%dt", x, y);
-              tt_write((unsigned char *) buff, strlen(buff));
-              break;
-          case 14:
-              /* Store current width and height in x and y */
-              XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x), (unsigned int *) (&y), &dummy_border, &dummy_depth);
-              snprintf(buff, sizeof(buff), "\033[4;%d;%dt", y, x);
-              tt_write((unsigned char *) buff, strlen(buff));
-              break;
-          case 18:
-              snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TERM_WINDOW_GET_REPORTED_ROWS(), TERM_WINDOW_GET_REPORTED_COLS());
-              tt_write((unsigned char *) buff, strlen(buff));
-              break;
+            case 1:
+                XMapRaised(Xdisplay, TermWin.parent);
+                break;
+            case 2:
+                XIconifyWindow(Xdisplay, TermWin.parent, Xscreen);
+                break;
+            case 3:
+                if (i + 2 >= nargs)
+                    return;     /* Make sure there are 2 args left */
+                x = args[++i];
+                y = args[++i];
+                if (((unsigned int) x > (unsigned int) scr->width) || ((unsigned int) y > (unsigned int) scr->height))
+                    return;     /* Don't move off-screen */
+                XMoveWindow(Xdisplay, TermWin.parent, x, y);
+                break;
+            case 4:
+                if (i + 2 >= nargs)
+                    return;     /* Make sure there are 2 args left */
+                y = args[++i];
+                x = args[++i];
+                BOUND(y, szHint.min_height, scr->height);
+                BOUND(x, szHint.min_width, scr->width);
+                XResizeWindow(Xdisplay, TermWin.parent, x, y);
+                break;
+            case 5:
+                XRaiseWindow(Xdisplay, TermWin.parent);
+                break;
+            case 6:
+                XLowerWindow(Xdisplay, TermWin.parent);
+                break;
+            case 7:
+                XClearWindow(Xdisplay, TermWin.vt);
+                XSync(Xdisplay, False);
+                scr_touch();
+                scr_refresh(DEFAULT_REFRESH);
+                break;
+            case 8:
+                if (i + 2 >= nargs)
+                    return;     /* Make sure there are 2 args left */
+                y = args[++i];
+                x = args[++i];
+                BOUND(y, 1, scr->height / TermWin.fheight);
+                BOUND(x, 1, scr->width / TermWin.fwidth);
+                XResizeWindow(Xdisplay, TermWin.parent,
+                              Width2Pixel(x) + 2 * TermWin.internalBorder + (scrollbar_is_visible()? scrollbar_trough_width() : 0),
+                              Height2Pixel(y) + 2 * TermWin.internalBorder);
+                break;
+            case 11:
+                break;
+            case 13:
+                XTranslateCoordinates(Xdisplay, TermWin.parent, Xroot, 0, 0, &x, &y, &dummy_child);
+                snprintf(buff, sizeof(buff), "\033[3;%d;%dt", x, y);
+                tt_write((unsigned char *) buff, strlen(buff));
+                break;
+            case 14:
+                /* Store current width and height in x and y */
+                XGetGeometry(Xdisplay, TermWin.parent, &dummy_child, &dummy_x, &dummy_y, (unsigned int *) (&x),
+                             (unsigned int *) (&y), &dummy_border, &dummy_depth);
+                snprintf(buff, sizeof(buff), "\033[4;%d;%dt", y, x);
+                tt_write((unsigned char *) buff, strlen(buff));
+                break;
+            case 18:
+                snprintf(buff, sizeof(buff), "\033[8;%d;%dt", TERM_WINDOW_GET_REPORTED_ROWS(), TERM_WINDOW_GET_REPORTED_COLS());
+                tt_write((unsigned char *) buff, strlen(buff));
+                break;
 #ifdef ENABLE_NAME_REPORTING_ESCAPES
-          case 20:
-              XGetIconName(Xdisplay, TermWin.parent, &name);
-              snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
-              tt_write((unsigned char *) buff, strlen(buff));
-              XFree(name);
-              break;
-          case 21:
-              XFetchName(Xdisplay, TermWin.parent, &name);
-              snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
-              tt_write((unsigned char *) buff, strlen(buff));
-              XFree(name);
-              break;
+            case 20:
+                XGetIconName(Xdisplay, TermWin.parent, &name);
+                snprintf(buff, sizeof(buff), "\033]L%s\033\\", name);
+                tt_write((unsigned char *) buff, strlen(buff));
+                XFree(name);
+                break;
+            case 21:
+                XFetchName(Xdisplay, TermWin.parent, &name);
+                snprintf(buff, sizeof(buff), "\033]l%s\033\\", name);
+                tt_write((unsigned char *) buff, strlen(buff));
+                XFree(name);
+                break;
 #endif
-          default:
-              break;
+            default:
+                break;
         }
     }
 }
@@ -1690,149 +1695,149 @@ process_terminal_mode(int mode, int priv, unsigned int nargs, int arg[])
 
     /* make lo/hi boolean */
     switch (mode) {
-      case 'l':
-          mode = 0;
-          break;
-      case 'h':
-          mode = 1;
-          break;
+        case 'l':
+            mode = 0;
+            break;
+        case 'h':
+            mode = 1;
+            break;
     }
 
     switch (priv) {
-      case 0:
-          if (mode && mode != 1)
-              return;           /* only do high/low */
-          for (i = 0; i < nargs; i++)
-              switch (arg[i]) {
-                case 4:
-                    scr_insert_mode(mode);
-                    break;
-                    /* case 38:  TEK mode */
-              }
-          break;
+        case 0:
+            if (mode && mode != 1)
+                return;         /* only do high/low */
+            for (i = 0; i < nargs; i++)
+                switch (arg[i]) {
+                    case 4:
+                        scr_insert_mode(mode);
+                        break;
+                        /* case 38:  TEK mode */
+                }
+            break;
 
-      case '?':
-          for (i = 0; i < nargs; i++)
-              switch (arg[i]) {
-                case 1:        /* application cursor keys */
-                    PrivCases(PrivMode_aplCUR);
-                    break;
+        case '?':
+            for (i = 0; i < nargs; i++)
+                switch (arg[i]) {
+                    case 1:    /* application cursor keys */
+                        PrivCases(PrivMode_aplCUR);
+                        break;
 
-                    /* case 2:   - reset charsets to USASCII */
+                        /* case 2:   - reset charsets to USASCII */
 
-                case 3:        /* 80/132 */
-                    PrivCases(PrivMode_132);
-                    if (PrivateModes & PrivMode_132OK)
-                        set_width(state ? 132 : 80);
-                    break;
+                    case 3:    /* 80/132 */
+                        PrivCases(PrivMode_132);
+                        if (PrivateModes & PrivMode_132OK)
+                            set_width(state ? 132 : 80);
+                        break;
 
-                    /* case 4:   - smooth scrolling */
+                        /* case 4:   - smooth scrolling */
 
-                case 5:        /* reverse video */
-                    PrivCases(PrivMode_rVideo);
-                    scr_rvideo_mode(state);
-                    break;
+                    case 5:    /* reverse video */
+                        PrivCases(PrivMode_rVideo);
+                        scr_rvideo_mode(state);
+                        break;
 
-                case 6:        /* relative/absolute origins  */
-                    PrivCases(PrivMode_relOrigin);
-                    scr_relative_origin(state);
-                    break;
+                    case 6:    /* relative/absolute origins  */
+                        PrivCases(PrivMode_relOrigin);
+                        scr_relative_origin(state);
+                        break;
 
-                case 7:        /* autowrap */
-                    PrivCases(PrivMode_Autowrap);
-                    scr_autowrap(state);
-                    break;
+                    case 7:    /* autowrap */
+                        PrivCases(PrivMode_Autowrap);
+                        scr_autowrap(state);
+                        break;
 
-                    /* case 8:   - auto repeat, can't do on a per window basis */
+                        /* case 8:   - auto repeat, can't do on a per window basis */
 
-                case 9:        /* X10 mouse reporting */
-                    PrivCases(PrivMode_MouseX10);
-                    /* orthogonal */
-                    if (PrivateModes & PrivMode_MouseX10)
-                        PrivateModes &= ~(PrivMode_MouseX11);
-                    break;
+                    case 9:    /* X10 mouse reporting */
+                        PrivCases(PrivMode_MouseX10);
+                        /* orthogonal */
+                        if (PrivateModes & PrivMode_MouseX10)
+                            PrivateModes &= ~(PrivMode_MouseX11);
+                        break;
 
-                case 25:       /* visible/invisible cursor */
-                    PrivCases(PrivMode_VisibleCursor);
-                    scr_cursor_visible(state);
-                    break;
+                    case 25:   /* visible/invisible cursor */
+                        PrivCases(PrivMode_VisibleCursor);
+                        scr_cursor_visible(state);
+                        break;
 
-                case 30:
-                    PrivCases(PrivMode_scrollbar);
-                    map_scrollbar(state);
-                    break;
+                    case 30:
+                        PrivCases(PrivMode_scrollbar);
+                        map_scrollbar(state);
+                        break;
 
-                case 35:
-                    PrivCases(PrivMode_ShiftKeys);
-                    break;
+                    case 35:
+                        PrivCases(PrivMode_ShiftKeys);
+                        break;
 
-                case 40:       /* 80 <--> 132 mode */
-                    PrivCases(PrivMode_132OK);
-                    break;
+                    case 40:   /* 80 <--> 132 mode */
+                        PrivCases(PrivMode_132OK);
+                        break;
 
-                case 47:       /* secondary screen */
-                    PrivCases(PrivMode_Screen);
-                    scr_change_screen(state);
-                    break;
+                    case 47:   /* secondary screen */
+                        PrivCases(PrivMode_Screen);
+                        scr_change_screen(state);
+                        break;
 
-                case 66:       /* application key pad */
-                    PrivCases(PrivMode_aplKP);
-                    break;
+                    case 66:   /* application key pad */
+                        PrivCases(PrivMode_aplKP);
+                        break;
 
-                case 67:
-                    PrivCases(PrivMode_BackSpace);
-                    break;
+                    case 67:
+                        PrivCases(PrivMode_BackSpace);
+                        break;
 
-                case 1000:     /* X11 mouse reporting */
-                    PrivCases(PrivMode_MouseX11);
-                    /* orthogonal */
-                    if (PrivateModes & PrivMode_MouseX11)
-                        PrivateModes &= ~(PrivMode_MouseX10);
-                    break;
+                    case 1000: /* X11 mouse reporting */
+                        PrivCases(PrivMode_MouseX11);
+                        /* orthogonal */
+                        if (PrivateModes & PrivMode_MouseX11)
+                            PrivateModes &= ~(PrivMode_MouseX10);
+                        break;
 
 #if 0
-                case 1001:
-                    break;      /* X11 mouse highlighting */
+                    case 1001:
+                        break;  /* X11 mouse highlighting */
 #endif
 
-                case 1010:     /* Scroll to bottom on TTY output */
-                    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_HOME_ON_OUTPUT))
-                        BITFIELD_CLEAR(vt_options, VT_OPTIONS_HOME_ON_OUTPUT);
-                    else
-                        BITFIELD_SET(vt_options, VT_OPTIONS_HOME_ON_OUTPUT);
-                    break;
-                case 1012:     /* Scroll to bottom on TTY input */
-                    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_HOME_ON_INPUT))
-                        BITFIELD_CLEAR(vt_options, VT_OPTIONS_HOME_ON_INPUT);
-                    else
-                        BITFIELD_SET(vt_options, VT_OPTIONS_HOME_ON_INPUT);
-                    break;
+                    case 1010: /* Scroll to bottom on TTY output */
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_HOME_ON_OUTPUT))
+                            BITFIELD_CLEAR(vt_options, VT_OPTIONS_HOME_ON_OUTPUT);
+                        else
+                            BITFIELD_SET(vt_options, VT_OPTIONS_HOME_ON_OUTPUT);
+                        break;
+                    case 1012: /* Scroll to bottom on TTY input */
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_HOME_ON_INPUT))
+                            BITFIELD_CLEAR(vt_options, VT_OPTIONS_HOME_ON_INPUT);
+                        else
+                            BITFIELD_SET(vt_options, VT_OPTIONS_HOME_ON_INPUT);
+                        break;
 
-                case 1047:     /* Alternate screen & clear */
-                    PrivCases(PrivMode_Screen);
-                    if (!state) {
-                        /* Only clear the screen before switching from
-                           secondary to primary. */
-                        scr_erase_screen(2);
-                    }
-                    scr_change_screen(state);
-                    break;
-                case 1048:     /* Save/restore cursor pos */
-                    PrivCases(PrivMode_Screen);
-                    scr_cursor(state ? SAVE : RESTORE);
-                    break;
-                case 1049:     /* Alternate screen & cursor */
-                    PrivCases(PrivMode_Screen);
-                    scr_cursor(state ? SAVE : RESTORE);
-                    if (!state) {
-                        /* Only clear the screen before switching from
-                           secondary to primary. */
-                        scr_erase_screen(2);
-                    }
-                    scr_change_screen(state);
-                    break;
-              }
-          break;
+                    case 1047: /* Alternate screen & clear */
+                        PrivCases(PrivMode_Screen);
+                        if (!state) {
+                            /* Only clear the screen before switching from
+                               secondary to primary. */
+                            scr_erase_screen(2);
+                        }
+                        scr_change_screen(state);
+                        break;
+                    case 1048: /* Save/restore cursor pos */
+                        PrivCases(PrivMode_Screen);
+                        scr_cursor(state ? SAVE : RESTORE);
+                        break;
+                    case 1049: /* Alternate screen & cursor */
+                        PrivCases(PrivMode_Screen);
+                        scr_cursor(state ? SAVE : RESTORE);
+                        if (!state) {
+                            /* Only clear the screen before switching from
+                               secondary to primary. */
+                            scr_erase_screen(2);
+                        }
+                        scr_change_screen(state);
+                        break;
+                }
+            break;
     }
 }
 
@@ -1848,125 +1853,125 @@ process_sgr_mode(unsigned int nargs, int arg[])
     }
     for (i = 0; i < nargs; i++)
         switch (arg[i]) {
-          case 0:
-              scr_rendition(0, ~RS_None);
-              break;
-          case 1:
-              scr_rendition(1, RS_Bold);
-              break;
-          case 2:
-              scr_rendition(1, RS_Dim);
-              break;
-          case 3:
-              scr_rendition(1, RS_Italic);
-              break;
-          case 4:
-              scr_rendition(1, RS_Uline);
-              break;
-          case 5:
-              scr_rendition(1, RS_Blink);
-              break;
-          case 6:
-              scr_rendition(1, RS_Overscore);
-              break;
-          case 7:
-              scr_rendition(1, RS_RVid);
-              break;
-          case 8:
-              scr_rendition(1, RS_Conceal);
-              break;
-          case 22:
-              scr_rendition(0, RS_Bold);
-              scr_rendition(0, RS_Dim);
-              break;
-          case 24:
-              scr_rendition(0, RS_Uline);
-              break;
-          case 25:
-              scr_rendition(0, RS_Blink);
-              scr_rendition(0, RS_Overscore);
-              break;
-          case 27:
-              scr_rendition(0, RS_RVid);
-              break;
+            case 0:
+                scr_rendition(0, ~RS_None);
+                break;
+            case 1:
+                scr_rendition(1, RS_Bold);
+                break;
+            case 2:
+                scr_rendition(1, RS_Dim);
+                break;
+            case 3:
+                scr_rendition(1, RS_Italic);
+                break;
+            case 4:
+                scr_rendition(1, RS_Uline);
+                break;
+            case 5:
+                scr_rendition(1, RS_Blink);
+                break;
+            case 6:
+                scr_rendition(1, RS_Overscore);
+                break;
+            case 7:
+                scr_rendition(1, RS_RVid);
+                break;
+            case 8:
+                scr_rendition(1, RS_Conceal);
+                break;
+            case 22:
+                scr_rendition(0, RS_Bold);
+                scr_rendition(0, RS_Dim);
+                break;
+            case 24:
+                scr_rendition(0, RS_Uline);
+                break;
+            case 25:
+                scr_rendition(0, RS_Blink);
+                scr_rendition(0, RS_Overscore);
+                break;
+            case 27:
+                scr_rendition(0, RS_RVid);
+                break;
 
-          /* set fg color */
-          case 30:
-          case 31:
-          case 32:
-          case 33:
-          case 34:
-          case 35:
-          case 36:
-          case 37:
-              scr_color(minColor + (arg[i] - 30), RS_Bold);
-              break;
-          case 38:
-	      if (arg[i+1] == 5) {
-		  i += 2;
-                  if (arg[i] >= 0 && arg[i] < 256)
-		      scr_color(arg[i], RS_Bold);		  
-	      }
-	      break;
-          /* default fg */
-          case 39:
-              scr_color(restoreFG, RS_Bold);
-              break;
+                /* set fg color */
+            case 30:
+            case 31:
+            case 32:
+            case 33:
+            case 34:
+            case 35:
+            case 36:
+            case 37:
+                scr_color(minColor + (arg[i] - 30), RS_Bold);
+                break;
+            case 38:
+                if (arg[i + 1] == 5) {
+                    i += 2;
+                    if (arg[i] >= 0 && arg[i] < 256)
+                        scr_color(arg[i], RS_Bold);
+                }
+                break;
+                /* default fg */
+            case 39:
+                scr_color(restoreFG, RS_Bold);
+                break;
 
-          /* set bg color */
-          case 40:
-          case 41:
-          case 42:
-          case 43:
-          case 44:
-          case 45:
-          case 46:
-          case 47:
-              scr_color(minColor + (arg[i] - 40), RS_Blink);
-              break;
-          case 48:
-	      if (arg[i+1] == 5) {
-		  i += 2;
-                  if (arg[i] >= 0 && arg[i] < 256) 
-		      scr_color(arg[i], RS_Blink);		  
-	      }
-	      break;
-          /* default bg */
-          case 49:
-              scr_color(restoreBG, RS_Blink);
-              break;
+                /* set bg color */
+            case 40:
+            case 41:
+            case 42:
+            case 43:
+            case 44:
+            case 45:
+            case 46:
+            case 47:
+                scr_color(minColor + (arg[i] - 40), RS_Blink);
+                break;
+            case 48:
+                if (arg[i + 1] == 5) {
+                    i += 2;
+                    if (arg[i] >= 0 && arg[i] < 256)
+                        scr_color(arg[i], RS_Blink);
+                }
+                break;
+                /* default bg */
+            case 49:
+                scr_color(restoreBG, RS_Blink);
+                break;
 
-          /* set fg color - bright */
-          case 90:
-          case 91:
-          case 92:
-          case 93:
-          case 94:
-          case 95:
-          case 96:
-          case 97:
-              scr_color(minBright + (arg[i] - 90), RS_Bold);
-              break;
-          /* default fg */
-          case 99:
-              scr_color(restoreFG, RS_Bold);
-              break;
+                /* set fg color - bright */
+            case 90:
+            case 91:
+            case 92:
+            case 93:
+            case 94:
+            case 95:
+            case 96:
+            case 97:
+                scr_color(minBright + (arg[i] - 90), RS_Bold);
+                break;
+                /* default fg */
+            case 99:
+                scr_color(restoreFG, RS_Bold);
+                break;
 
-          /* set bg color - bright */
-          case 100:
-          case 101:
-          case 102:
-          case 103:
-          case 104:
-          case 105:
-          case 106:
-          case 107:
-              scr_color(minBright + (arg[i] - 100), RS_Blink);
-              break;
-          /* default bg */
-          case 109:
-              scr_color(restoreBG, RS_Blink);
-              break;
+                /* set bg color - bright */
+            case 100:
+            case 101:
+            case 102:
+            case 103:
+            case 104:
+            case 105:
+            case 106:
+            case 107:
+                scr_color(minBright + (arg[i] - 100), RS_Blink);
+                break;
+                /* default bg */
+            case 109:
+                scr_color(restoreBG, RS_Blink);
+                break;
 
         }
 }
@@ -2142,60 +2147,60 @@ xterm_seq(int op, const char *str)
 #endif
 
     switch (op) {
-      case ESCSEQ_XTERM_NAME: /* 0 */
-          set_title(str);       /* drop */
-      case ESCSEQ_XTERM_ICONNAME: /* 1 */
-          set_icon_name(str);
-          break;
-      case ESCSEQ_XTERM_TITLE: /* 2 */
-          set_title(str);
-          break;
-      case ESCSEQ_XTERM_PROP: /* 3 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) == NULL) {
-              break;
-          }
-          if ((valptr = strchr(nstr, '=')) != NULL) {
-              *(valptr++) = 0;
-          }
-          set_text_property(TermWin.parent, nstr, valptr);
-          break;
-      case ESCSEQ_XTERM_CHANGE_COLOR:  /* Changing existing colors 256 */
-          while ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              i = (unsigned int) strtoul(nstr, (char **) NULL, 0);
-              nstr = (char *) strsep(&tnstr, ";");
-              if ((i < 256) && (nstr != NULL)) {
-                  D_COLORS(("Changing color : [%d] -> %s\n", i, nstr));
-                  set_window_color(i, nstr);
-              }
-          } 
-          break;
-
-      case ESCSEQ_XTERM_TAKEOVER: /* 5 */
-          XSetInputFocus(Xdisplay, TermWin.parent, RevertToParent, CurrentTime);
-          XRaiseWindow(Xdisplay, TermWin.parent);
-          break;
-
-      case ESCSEQ_XTERM_ETERMSEQ: /* 6 */
-          /* Eterm proprietary escape sequences.  See technical reference for details. */
-          D_CMD(("Got ESCSEQ_XTERM_ETERMSEQ sequence\n"));
-          nstr = (char *) strsep(&tnstr, ";");
-          eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
-          D_CMD(("    ESCSEQ_XTERM_ETERMSEQ operation is %d\n", eterm_seq_op));
-          /* Yes, there is order to the numbers for this stuff.  And here it is:
-             0-9      Image Class/Mode Configuration
-             10-19    Scrollbar/Buttonbar/Menu Configuration
-             20-39    Miscellaneous Toggles
-             40-49    Foreground/Background Color Configuration
-             50-69    Window/Window Manager Configuration/Interaction
-             70+      Internal Eterm Operations
-           */
-          switch (eterm_seq_op) {
-#ifdef PIXMAP_SUPPORT
-            case 0:
+        case ESCSEQ_XTERM_NAME:        /* 0 */
+            set_title(str);     /* drop */
+        case ESCSEQ_XTERM_ICONNAME:    /* 1 */
+            set_icon_name(str);
+            break;
+        case ESCSEQ_XTERM_TITLE:       /* 2 */
+            set_title(str);
+            break;
+        case ESCSEQ_XTERM_PROP:        /* 3 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) == NULL) {
+                break;
+            }
+            if ((valptr = strchr(nstr, '=')) != NULL) {
+                *(valptr++) = 0;
+            }
+            set_text_property(TermWin.parent, nstr, valptr);
+            break;
+        case ESCSEQ_XTERM_CHANGE_COLOR:        /* Changing existing colors 256 */
+            while ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                i = (unsigned int) strtoul(nstr, (char **) NULL, 0);
                 nstr = (char *) strsep(&tnstr, ";");
-                if (nstr) {
-                    if (BOOL_OPT_ISTRUE(nstr)) {
-                        D_CMD(("   Request to enable transparency.\n"));
+                if ((i < 256) && (nstr != NULL)) {
+                    D_COLORS(("Changing color : [%d] -> %s\n", i, nstr));
+                    set_window_color(i, nstr);
+                }
+            }
+            break;
+
+        case ESCSEQ_XTERM_TAKEOVER:    /* 5 */
+            XSetInputFocus(Xdisplay, TermWin.parent, RevertToParent, CurrentTime);
+            XRaiseWindow(Xdisplay, TermWin.parent);
+            break;
+
+        case ESCSEQ_XTERM_ETERMSEQ:    /* 6 */
+            /* Eterm proprietary escape sequences.  See technical reference for details. */
+            D_CMD(("Got ESCSEQ_XTERM_ETERMSEQ sequence\n"));
+            nstr = (char *) strsep(&tnstr, ";");
+            eterm_seq_op = (unsigned char) strtol(nstr, (char **) NULL, 10);
+            D_CMD(("    ESCSEQ_XTERM_ETERMSEQ operation is %d\n", eterm_seq_op));
+            /* Yes, there is order to the numbers for this stuff.  And here it is:
+               0-9      Image Class/Mode Configuration
+               10-19    Scrollbar/Buttonbar/Menu Configuration
+               20-39    Miscellaneous Toggles
+               40-49    Foreground/Background Color Configuration
+               50-69    Window/Window Manager Configuration/Interaction
+               70+      Internal Eterm Operations
+             */
+            switch (eterm_seq_op) {
+#ifdef PIXMAP_SUPPORT
+                case 0:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr) {
+                        if (BOOL_OPT_ISTRUE(nstr)) {
+                            D_CMD(("   Request to enable transparency.\n"));
                       /* *INDENT-OFF* */
                       FOREACH_IMAGE(
                                     if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) {
@@ -2207,8 +2212,8 @@ xterm_seq(int op, const char *str)
                                     }
                                     );
                       /* *INDENT-ON* */
-                    } else if (BOOL_OPT_ISFALSE(nstr)) {
-                        D_CMD(("   Request to disable transparency.\n"));
+                        } else if (BOOL_OPT_ISFALSE(nstr)) {
+                            D_CMD(("   Request to disable transparency.\n"));
                       /* *INDENT-OFF* */
                       FOREACH_IMAGE(
                                     if (image_mode_is(idx, MODE_TRANS)) {
@@ -2220,12 +2225,12 @@ xterm_seq(int op, const char *str)
                                     }
                                     );
                       /* *INDENT-ON* */
+                        } else {
+                            D_CMD(("   Bad boolean value in transparency request.\n"));
+                            break;
+                        }
                     } else {
-                        D_CMD(("   Bad boolean value in transparency request.\n"));
-                        break;
-                    }
-                } else {
-                    D_CMD(("   Request to toggle transparency.\n"));
+                        D_CMD(("   Request to toggle transparency.\n"));
                   /* *INDENT-OFF* */
                   FOREACH_IMAGE(
                                 if (!image_mode_is(idx, MODE_TRANS) && image_mode_is(idx, ALLOW_TRANS)) {
@@ -2243,42 +2248,59 @@ xterm_seq(int op, const char *str)
                                 }
                                 );
                   /* *INDENT-ON* */
-                }
-                redraw_all_images();
-                break;
-            case 1:
-                changed = 0;
-                for (; 1;) {
-                    if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
-                        break;
                     }
-                    which = image_max;
-                    FOREACH_IMAGE(if (!strcasecmp(color, (get_image_type(idx) + 6))) {
-                                  which = idx; break;}
-                    );
-                    if (which != image_max) {
+                    redraw_all_images();
+                    break;
+                case 1:
+                    changed = 0;
+                    for (; 1;) {
                         if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
                             break;
                         }
-                    } else {
-                        which = image_bg;
-                    }
-                    if ((mod = (char *) strsep(&tnstr, ";")) == NULL) {
-                        break;
-                    }
-                    if (!strcasecmp(mod, "clear")) {
-                        imlib_t *iml = images[which].current->iml;
-
-                        D_CMD(("Clearing the %s color modifier of the %s image\n", color, get_image_type(which)));
-                        if (!strcasecmp(color, "image")) {
-                            FREE(iml->mod);
-                        } else if (!strcasecmp(color, "red")) {
-                            FREE(iml->rmod);
-                        } else if (!strcasecmp(color, "green")) {
-                            FREE(iml->gmod);
-                        } else if (!strcasecmp(color, "blue")) {
-                            FREE(iml->bmod);
+                        which = image_max;
+                        FOREACH_IMAGE(if (!strcasecmp(color, (get_image_type(idx) + 6))) {
+                                      which = idx; break;}
+                        );
+                        if (which != image_max) {
+                            if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
+                                break;
+                            }
+                        } else {
+                            which = image_bg;
                         }
+                        if ((mod = (char *) strsep(&tnstr, ";")) == NULL) {
+                            break;
+                        }
+                        if (!strcasecmp(mod, "clear")) {
+                            imlib_t *iml = images[which].current->iml;
+
+                            D_CMD(("Clearing the %s color modifier of the %s image\n", color, get_image_type(which)));
+                            if (!strcasecmp(color, "image")) {
+                                FREE(iml->mod);
+                            } else if (!strcasecmp(color, "red")) {
+                                FREE(iml->rmod);
+                            } else if (!strcasecmp(color, "green")) {
+                                FREE(iml->gmod);
+                            } else if (!strcasecmp(color, "blue")) {
+                                FREE(iml->bmod);
+                            }
+# ifdef PIXMAP_OFFSET
+                            if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
+                                free_desktop_pixmap();
+                            } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
+                                LIBAST_X_FREE_PIXMAP(viewport_pixmap);
+                                viewport_pixmap = None; /* Force the re-read */
+                            }
+# endif
+                            changed = 1;
+                            continue;
+                        }
+                        if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
+                            break;
+                        }
+                        D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n",
+                               mod, color, get_image_type(which), valptr));
+                        changed = 1;
 # ifdef PIXMAP_OFFSET
                         if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
                             free_desktop_pixmap();
@@ -2287,533 +2309,516 @@ xterm_seq(int op, const char *str)
                             viewport_pixmap = None;     /* Force the re-read */
                         }
 # endif
-                        changed = 1;
-                        continue;
+                        if (!strcasecmp(color, "image")) {
+                            imlib_t *iml = images[which].current->iml;
+
+                            if (iml->mod == NULL) {
+                                iml->mod = create_colormod();
+                            }
+                            if (!BEG_STRCASECMP(mod, "brightness")) {
+                                iml->mod->brightness = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "contrast")) {
+                                iml->mod->contrast = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "gamma")) {
+                                iml->mod->gamma = (int) strtol(valptr, (char **) NULL, 0);
+                            }
+                            update_cmod(iml->mod);
+                            reload_image(iml);
+                            update_cmod_tables(iml);
+
+                        } else if (!strcasecmp(color, "red")) {
+                            imlib_t *iml = images[which].current->iml;
+
+                            if (iml->rmod == NULL) {
+                                iml->rmod = create_colormod();
+                            }
+                            if (!BEG_STRCASECMP(mod, "brightness")) {
+                                iml->rmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "contrast")) {
+                                iml->rmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "gamma")) {
+                                iml->rmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
+                            }
+                            update_cmod(iml->rmod);
+                            reload_image(iml);
+                            update_cmod_tables(iml);
+
+                        } else if (!strcasecmp(color, "green")) {
+                            imlib_t *iml = images[which].current->iml;
+
+                            if (iml->gmod == NULL) {
+                                iml->gmod = create_colormod();
+                            }
+                            if (!BEG_STRCASECMP(mod, "brightness")) {
+                                iml->gmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "contrast")) {
+                                iml->gmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "gamma")) {
+                                iml->gmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
+                            }
+                            update_cmod(iml->gmod);
+                            reload_image(iml);
+                            update_cmod_tables(iml);
+
+                        } else if (!strcasecmp(color, "blue")) {
+                            imlib_t *iml = images[which].current->iml;
+
+                            if (iml->bmod == NULL) {
+                                iml->bmod = create_colormod();
+                            }
+                            if (!BEG_STRCASECMP(mod, "bright")) {
+                                iml->bmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "contrast")) {
+                                iml->bmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
+                            } else if (!BEG_STRCASECMP(mod, "gamma")) {
+                                iml->bmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
+                            }
+                            update_cmod(iml->bmod);
+                            reload_image(iml);
+                            update_cmod_tables(iml);
+                        }
                     }
-                    if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
-                        break;
+                    if (changed) {
+                        redraw_all_images();
                     }
-                    D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n",
-                           mod, color, get_image_type(which), valptr));
-                    changed = 1;
-# ifdef PIXMAP_OFFSET
-                    if (image_mode_is(which, MODE_TRANS) && (desktop_pixmap != None)) {
-                        free_desktop_pixmap();
-                    } else if (image_mode_is(which, MODE_VIEWPORT) && (viewport_pixmap != None)) {
-                        LIBAST_X_FREE_PIXMAP(viewport_pixmap);
-                        viewport_pixmap = None; /* Force the re-read */
-                    }
-# endif
-                    if (!strcasecmp(color, "image")) {
-                        imlib_t *iml = images[which].current->iml;
-
-                        if (iml->mod == NULL) {
-                            iml->mod = create_colormod();
-                        }
-                        if (!BEG_STRCASECMP(mod, "brightness")) {
-                            iml->mod->brightness = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "contrast")) {
-                            iml->mod->contrast = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "gamma")) {
-                            iml->mod->gamma = (int) strtol(valptr, (char **) NULL, 0);
-                        }
-                        update_cmod(iml->mod);
-                        reload_image(iml);
-                        update_cmod_tables(iml);
-
-                    } else if (!strcasecmp(color, "red")) {
-                        imlib_t *iml = images[which].current->iml;
-
-                        if (iml->rmod == NULL) {
-                            iml->rmod = create_colormod();
-                        }
-                        if (!BEG_STRCASECMP(mod, "brightness")) {
-                            iml->rmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "contrast")) {
-                            iml->rmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "gamma")) {
-                            iml->rmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
-                        }
-                        update_cmod(iml->rmod);
-                        reload_image(iml);
-                        update_cmod_tables(iml);
-
-                    } else if (!strcasecmp(color, "green")) {
-                        imlib_t *iml = images[which].current->iml;
-
-                        if (iml->gmod == NULL) {
-                            iml->gmod = create_colormod();
-                        }
-                        if (!BEG_STRCASECMP(mod, "brightness")) {
-                            iml->gmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "contrast")) {
-                            iml->gmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "gamma")) {
-                            iml->gmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
-                        }
-                        update_cmod(iml->gmod);
-                        reload_image(iml);
-                        update_cmod_tables(iml);
-
-                    } else if (!strcasecmp(color, "blue")) {
-                        imlib_t *iml = images[which].current->iml;
-
-                        if (iml->bmod == NULL) {
-                            iml->bmod = create_colormod();
-                        }
-                        if (!BEG_STRCASECMP(mod, "bright")) {
-                            iml->bmod->brightness = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "contrast")) {
-                            iml->bmod->contrast = (int) strtol(valptr, (char **) NULL, 0);
-                        } else if (!BEG_STRCASECMP(mod, "gamma")) {
-                            iml->bmod->gamma = (int) strtol(valptr, (char **) NULL, 0);
-                        }
-                        update_cmod(iml->bmod);
-                        reload_image(iml);
-                        update_cmod_tables(iml);
-                    }
-                }
-                if (changed) {
-                    redraw_all_images();
-                }
-                break;
-            case 2:
-                changed = 0;
-                which = image_max;
-                if ((nstr = (char *) strsep(&tnstr, ";")) == NULL || (valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                     break;
-                }
-                FOREACH_IMAGE(if (!strcasecmp(valptr, (get_image_type(idx) + 6))) {
-                              which = idx; break;}
-                );
-                if (which != image_max) {
-                    if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
+                case 2:
+                    changed = 0;
+                    which = image_max;
+                    if ((nstr = (char *) strsep(&tnstr, ";")) == NULL || (valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                         break;
                     }
-                } else {
-                    which = image_bg;
-                }
-                D_PIXMAP(("Operation == \"%s\", which == %d, value == \"%s\"\n", nstr, (int) which, valptr));
-                if (!strcasecmp(nstr, "shade")) {
-                    imlib_t *iml = images[which].current->iml;
-                    int s;
-
-                    s = (int) strtol(valptr, (char **) NULL, 0);
-                    s = ((100 - s) << 8) / 100;
-                    if (s == 0x100) {
-                        if (iml->mod != NULL) {
-                            if (iml->mod->brightness != 0x100) {
-                                iml->mod->brightness = 0x100;
-                                changed = 1;
-                            }
-                            if (iml->mod->contrast == 0x100 && iml->mod->gamma == 0x100) {
-                                FREE(iml->mod);
-                            }
-                        }
-                    } else {
-                        if (iml->mod == NULL) {
-                            iml->mod = create_colormod();
-                        }
-                        if (iml->mod->brightness != s) {
-                            iml->mod->brightness = s;
-                            changed = 1;
-                        }
-                    }
-                } else if (!strcasecmp(nstr, "tint")) {
-                    imlib_t *iml = images[which].current->iml;
-                    unsigned long t, r, g, b;
-
-                    if (!isdigit(*valptr)) {
-                        t = get_tint_by_color_name(valptr);
-                    } else {
-                        t = (unsigned long) strtoul(valptr, (char **) NULL, 0);
-                        D_PIXMAP(("Got numerical tint 0x%06x\n", t));
-                    }
-                    r = (t & 0xff0000) >> 16;
-                    if (r == 0xff) {
-                        if (iml->rmod != NULL) {
-                            if (iml->rmod->brightness != 0x100) {
-                                iml->rmod->brightness = 0x100;
-                                changed = 1;
-                                if (iml->rmod->contrast == 0x100 && iml->rmod->gamma == 0x100) {
-                                    FREE(iml->rmod);
-                                }
-                            }
-                        }
-                    } else {
-                        if (iml->rmod == NULL) {
-                            iml->rmod = create_colormod();
-                        }
-                        if (iml->rmod->brightness != (int) r) {
-                            iml->rmod->brightness = r;
-                            changed = 1;
-                        }
-                    }
-                    g = (t & 0xff00) >> 8;
-                    if (g == 0xff) {
-                        if (iml->gmod != NULL) {
-                            if (iml->gmod->brightness != 0x100) {
-                                iml->gmod->brightness = 0x100;
-                                changed = 1;
-                                if (iml->gmod->contrast == 0x100 && iml->gmod->gamma == 0x100) {
-                                    FREE(iml->gmod);
-                                }
-                            }
-                        }
-                    } else {
-                        if (iml->gmod == NULL) {
-                            iml->gmod = create_colormod();
-                        }
-                        if (iml->gmod->brightness != (int) g) {
-                            iml->gmod->brightness = g;
-                            changed = 1;
-                        }
-                    }
-                    b = t & 0xff;
-                    if (b == 0xff) {
-                        if (iml->bmod != NULL) {
-                            if (iml->bmod->brightness != 0x100) {
-                                iml->bmod->brightness = 0x100;
-                                changed = 1;
-                                if (iml->bmod->contrast == 0x100 && iml->bmod->gamma == 0x100) {
-                                    FREE(iml->bmod);
-                                }
-                            }
-                        }
-                    } else {
-                        if (iml->bmod == NULL) {
-                            iml->bmod = create_colormod();
-                            iml->bmod->contrast = iml->bmod->gamma = 0x100;
-                        }
-                        if (iml->bmod->brightness != (int) b) {
-                            iml->bmod->brightness = b;
-                            changed = 1;
-                        }
-                    }
-                }
-                if (changed) {
-                    if (image_mode_is(which, MODE_TRANS)) {
-                        free_desktop_pixmap();
-                    }
-                    redraw_image(which);
-                }
-                break;
-            case 3:
-# ifdef PIXMAP_OFFSET
-                get_desktop_window();
-                if (desktop_window == None) {
-                    FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {
-                                  image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);}
+                    FOREACH_IMAGE(if (!strcasecmp(valptr, (get_image_type(idx) + 6))) {
+                                  which = idx; break;}
                     );
+                    if (which != image_max) {
+                        if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
+                            break;
+                        }
+                    } else {
+                        which = image_bg;
+                    }
+                    D_PIXMAP(("Operation == \"%s\", which == %d, value == \"%s\"\n", nstr, (int) which, valptr));
+                    if (!strcasecmp(nstr, "shade")) {
+                        imlib_t *iml = images[which].current->iml;
+                        int s;
+
+                        s = (int) strtol(valptr, (char **) NULL, 0);
+                        s = ((100 - s) << 8) / 100;
+                        if (s == 0x100) {
+                            if (iml->mod != NULL) {
+                                if (iml->mod->brightness != 0x100) {
+                                    iml->mod->brightness = 0x100;
+                                    changed = 1;
+                                }
+                                if (iml->mod->contrast == 0x100 && iml->mod->gamma == 0x100) {
+                                    FREE(iml->mod);
+                                }
+                            }
+                        } else {
+                            if (iml->mod == NULL) {
+                                iml->mod = create_colormod();
+                            }
+                            if (iml->mod->brightness != s) {
+                                iml->mod->brightness = s;
+                                changed = 1;
+                            }
+                        }
+                    } else if (!strcasecmp(nstr, "tint")) {
+                        imlib_t *iml = images[which].current->iml;
+                        unsigned long t, r, g, b;
+
+                        if (!isdigit(*valptr)) {
+                            t = get_tint_by_color_name(valptr);
+                        } else {
+                            t = (unsigned long) strtoul(valptr, (char **) NULL, 0);
+                            D_PIXMAP(("Got numerical tint 0x%06x\n", t));
+                        }
+                        r = (t & 0xff0000) >> 16;
+                        if (r == 0xff) {
+                            if (iml->rmod != NULL) {
+                                if (iml->rmod->brightness != 0x100) {
+                                    iml->rmod->brightness = 0x100;
+                                    changed = 1;
+                                    if (iml->rmod->contrast == 0x100 && iml->rmod->gamma == 0x100) {
+                                        FREE(iml->rmod);
+                                    }
+                                }
+                            }
+                        } else {
+                            if (iml->rmod == NULL) {
+                                iml->rmod = create_colormod();
+                            }
+                            if (iml->rmod->brightness != (int) r) {
+                                iml->rmod->brightness = r;
+                                changed = 1;
+                            }
+                        }
+                        g = (t & 0xff00) >> 8;
+                        if (g == 0xff) {
+                            if (iml->gmod != NULL) {
+                                if (iml->gmod->brightness != 0x100) {
+                                    iml->gmod->brightness = 0x100;
+                                    changed = 1;
+                                    if (iml->gmod->contrast == 0x100 && iml->gmod->gamma == 0x100) {
+                                        FREE(iml->gmod);
+                                    }
+                                }
+                            }
+                        } else {
+                            if (iml->gmod == NULL) {
+                                iml->gmod = create_colormod();
+                            }
+                            if (iml->gmod->brightness != (int) g) {
+                                iml->gmod->brightness = g;
+                                changed = 1;
+                            }
+                        }
+                        b = t & 0xff;
+                        if (b == 0xff) {
+                            if (iml->bmod != NULL) {
+                                if (iml->bmod->brightness != 0x100) {
+                                    iml->bmod->brightness = 0x100;
+                                    changed = 1;
+                                    if (iml->bmod->contrast == 0x100 && iml->bmod->gamma == 0x100) {
+                                        FREE(iml->bmod);
+                                    }
+                                }
+                            }
+                        } else {
+                            if (iml->bmod == NULL) {
+                                iml->bmod = create_colormod();
+                                iml->bmod->contrast = iml->bmod->gamma = 0x100;
+                            }
+                            if (iml->bmod->brightness != (int) b) {
+                                iml->bmod->brightness = b;
+                                changed = 1;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        if (image_mode_is(which, MODE_TRANS)) {
+                            free_desktop_pixmap();
+                        }
+                        redraw_image(which);
+                    }
                     break;
-                }
-                get_desktop_pixmap();
-                redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+                case 3:
+# ifdef PIXMAP_OFFSET
+                    get_desktop_window();
+                    if (desktop_window == None) {
+                        FOREACH_IMAGE(if (image_mode_is(idx, MODE_TRANS)) {
+                                      image_set_mode(idx, MODE_IMAGE); image_allow_mode(idx, ALLOW_IMAGE);}
+                        );
+                        break;
+                    }
+                    get_desktop_pixmap();
+                    redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
 # endif
-                break;
+                    break;
 #endif
-            case 10:
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    if (!strcasecmp(nstr, "xterm")) {
+                case 10:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        if (!strcasecmp(nstr, "xterm")) {
 #ifdef XTERM_SCROLLBAR
-                        scrollbar_change_type(SCROLLBAR_XTERM);
+                            scrollbar_change_type(SCROLLBAR_XTERM);
 #else
-                        print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
+                            print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
 #endif
-                    } else if (!strcasecmp(nstr, "next")) {
+                        } else if (!strcasecmp(nstr, "next")) {
 #ifdef NEXT_SCROLLBAR
-                        scrollbar_change_type(SCROLLBAR_NEXT);
+                            scrollbar_change_type(SCROLLBAR_NEXT);
 #else
-                        print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
+                            print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
 #endif
-                    } else if (!strcasecmp(nstr, "motif")) {
+                        } else if (!strcasecmp(nstr, "motif")) {
 #ifdef MOTIF_SCROLLBAR
-                        scrollbar_change_type(SCROLLBAR_MOTIF);
+                            scrollbar_change_type(SCROLLBAR_MOTIF);
 #else
-                        print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
+                            print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
 #endif
-                    } else {
-                        print_error("Unrecognized scrollbar type \"%s\".\n", nstr);
+                        } else {
+                            print_error("Unrecognized scrollbar type \"%s\".\n", nstr);
+                        }
                     }
-                }
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    scrollbar_change_width((unsigned short) strtoul(nstr, (char **) NULL, 0));
-                }
-                break;
-            case 11:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT);
-                scr_touch();
-                parent_resize();
-                break;
-            case 12:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_FLOATING);
-                scrollbar_reposition_and_always_draw();
-                break;
-            case 13:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP);
-                break;
-            case 14:
-                nstr = (char *) strsep(&tnstr, ";");
-                if (!(nstr) || !(*(nstr))) {
-                    bbar_show_all(-1);
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        scrollbar_change_width((unsigned short) strtoul(nstr, (char **) NULL, 0));
+                    }
+                    break;
+                case 11:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT);
+                    scr_touch();
                     parent_resize();
-                } else if (BOOL_OPT_ISTRUE(nstr)) {
-                    bbar_show_all(1);
-                    parent_resize();
-                } else if (BOOL_OPT_ISFALSE(nstr)) {
-                    bbar_show_all(0);
-                    parent_resize();
-                }
-                break;
-            case 20:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_VISUAL_BELL);
-                break;
+                    break;
+                case 12:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_FLOATING);
+                    scrollbar_reposition_and_always_draw();
+                    break;
+                case 13:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP);
+                    break;
+                case 14:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (!(nstr) || !(*(nstr))) {
+                        bbar_show_all(-1);
+                        parent_resize();
+                    } else if (BOOL_OPT_ISTRUE(nstr)) {
+                        bbar_show_all(1);
+                        parent_resize();
+                    } else if (BOOL_OPT_ISFALSE(nstr)) {
+                        bbar_show_all(0);
+                        parent_resize();
+                    }
+                    break;
+                case 20:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_VISUAL_BELL);
+                    break;
 #ifdef MAPALERT_OPTION
-            case 21:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_MAP_ALERT);
-                break;
+                case 21:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_MAP_ALERT);
+                    break;
 #endif
-            case 22:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_XTERM_SELECT);
-                break;
-            case 23:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SELECT_WHOLE_LINE);
-                break;
-            case 24:
-                nstr = (char *) strsep(&tnstr, ";");
-                FOREACH_IMAGE(if (!image_mode_is(idx, MODE_VIEWPORT) && image_mode_is(idx, ALLOW_VIEWPORT)) {
-                              image_set_mode(idx, MODE_VIEWPORT);}
-                );
-                redraw_images_by_mode(MODE_VIEWPORT);
-                break;
-            case 25:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SELECT_TRAILING_SPACES);
-                break;
-            case 26:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_REPORT_AS_KEYSYMS);
-                break;
-            case 27:
-                nstr = (char *) strsep(&tnstr, ";");
-                OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_NO_INPUT);
-                wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
-                wm_hints->flags |= InputHint;
-                wm_hints->input = ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT)) ? False : True);
-                XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
-                XFree(wm_hints);
-                break;
-            case 40:
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr) {
-                    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
-                        PixColors[fgColor] = xcol.pixel;
-                        scr_refresh(DEFAULT_REFRESH);
+                case 22:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_XTERM_SELECT);
+                    break;
+                case 23:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SELECT_WHOLE_LINE);
+                    break;
+                case 24:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    FOREACH_IMAGE(if (!image_mode_is(idx, MODE_VIEWPORT) && image_mode_is(idx, ALLOW_VIEWPORT)) {
+                                  image_set_mode(idx, MODE_VIEWPORT);}
+                    );
+                    redraw_images_by_mode(MODE_VIEWPORT);
+                    break;
+                case 25:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_SELECT_TRAILING_SPACES);
+                    break;
+                case 26:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_REPORT_AS_KEYSYMS);
+                    break;
+                case 27:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, eterm_options, ETERM_OPTIONS_NO_INPUT);
+                    wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+                    wm_hints->flags |= InputHint;
+                    wm_hints->input = ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT)) ? False : True);
+                    XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+                    XFree(wm_hints);
+                    break;
+                case 40:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr) {
+                        if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
+                            PixColors[fgColor] = xcol.pixel;
+                            scr_refresh(DEFAULT_REFRESH);
+                        }
                     }
-                }
-                break;
-            case 41:
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr) {
-                    if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
-                        PixColors[bgColor] = xcol.pixel;
-                        scr_refresh(DEFAULT_REFRESH);
+                    break;
+                case 41:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr) {
+                        if (XParseColor(Xdisplay, cmap, nstr, &xcol) && XAllocColor(Xdisplay, cmap, &xcol)) {
+                            PixColors[bgColor] = xcol.pixel;
+                            scr_refresh(DEFAULT_REFRESH);
+                        }
                     }
-                }
-                break;
-            case 50:
-                /* Change desktops */
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    XClientMessageEvent xev;
+                    break;
+                case 50:
+                    /* Change desktops */
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        XClientMessageEvent xev;
 
-                    rs_desktop = (int) strtol(nstr, (char **) NULL, 0);
-                    xev.type = ClientMessage;
-                    xev.window = TermWin.parent;
-                    xev.message_type = props[PROP_DESKTOP];
-                    xev.format = 32;
-                    xev.data.l[0] = rs_desktop;
-                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
-                                    PropModeReplace, (unsigned char *) &rs_desktop, 1);
-                    XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) & xev);
-                }
-                break;
-            case 51:
-                /* Change opacity */
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    XClientMessageEvent xev;
-                    spif_uint32_t tmp;
+                        rs_desktop = (int) strtol(nstr, (char **) NULL, 0);
+                        xev.type = ClientMessage;
+                        xev.window = TermWin.parent;
+                        xev.message_type = props[PROP_DESKTOP];
+                        xev.format = 32;
+                        xev.data.l[0] = rs_desktop;
+                        XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
+                                        PropModeReplace, (unsigned char *) &rs_desktop, 1);
+                        XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) & xev);
+                    }
+                    break;
+                case 51:
+                    /* Change opacity */
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        XClientMessageEvent xev;
+                        spif_uint32_t tmp;
 
-                    tmp = (int) strtol(nstr, (char **) NULL, 0);
-                    if (tmp < 0x100) {
-                        rs_opacity = tmp | (tmp << 24) | (tmp << 16) | (tmp << 8);
+                        tmp = (int) strtol(nstr, (char **) NULL, 0);
+                        if (tmp < 0x100) {
+                            rs_opacity = tmp | (tmp << 24) | (tmp << 16) | (tmp << 8);
+                        } else {
+                            rs_opacity = 0xffffffff;
+                        }
+                        xev.type = ClientMessage;
+                        xev.window = TermWin.parent;
+                        xev.message_type = props[PROP_EWMH_OPACITY];
+                        xev.format = 32;
+                        xev.data.l[0] = rs_opacity;
+                        XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
+                                        PropModeReplace, (unsigned char *) &rs_opacity, 1);
+                        XChangeProperty(Xdisplay, TermWin.vt, xev.message_type, XA_CARDINAL, 32,
+                                        PropModeReplace, (unsigned char *) &rs_opacity, 1);
+                        XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) (&xev));
+                    }
+                    break;
+
+                case 72:
+                    /* Search scrollback buffer for a string.  NULL to clear. */
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        scr_search_scrollback(nstr);
                     } else {
-                        rs_opacity = 0xffffffff;
+                        scr_search_scrollback(NULL);
                     }
-                    xev.type = ClientMessage;
-                    xev.window = TermWin.parent;
-                    xev.message_type = props[PROP_EWMH_OPACITY];
-                    xev.format = 32;
-                    xev.data.l[0] = rs_opacity;
-                    XChangeProperty(Xdisplay, TermWin.parent, xev.message_type, XA_CARDINAL, 32,
-                                    PropModeReplace, (unsigned char *) &rs_opacity, 1);
-                    XChangeProperty(Xdisplay, TermWin.vt, xev.message_type, XA_CARDINAL, 32,
-                                    PropModeReplace, (unsigned char *) &rs_opacity, 1);
-                    XSendEvent(Xdisplay, Xroot, False, SubstructureNotifyMask, (XEvent *) (&xev));
-                }
-                break;
+                    break;
 
-            case 72:
-                /* Search scrollback buffer for a string.  NULL to clear. */
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    scr_search_scrollback(nstr);
-                } else {
-                    scr_search_scrollback(NULL);
-                }
-                break;
+                case 80:
+                    /* Set debugging level */
+                    nstr = (char *) strsep(&tnstr, ";");
+                    if (nstr && *nstr) {
+                        DEBUG_LEVEL = (unsigned int) strtoul(nstr, (char **) NULL, 0);
+                    }
+                    break;
 
-            case 80:
-                /* Set debugging level */
-                nstr = (char *) strsep(&tnstr, ";");
-                if (nstr && *nstr) {
-                    DEBUG_LEVEL = (unsigned int) strtoul(nstr, (char **) NULL, 0);
-                }
-                break;
-
-            default:
-                break;
-          }
-          break;
+                default:
+                    break;
+            }
+            break;
 
 #ifdef XTERM_COLOR_CHANGE
-      case ESCSEQ_XTERM_FGCOLOR: /* 10 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              set_window_color(fgColor, nstr);
-          }
-          /* drop */
-      case ESCSEQ_XTERM_BGCOLOR: /* 11 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              set_window_color(bgColor, nstr);
-          }
-          /* drop */
-      case ESCSEQ_XTERM_CURSOR_COLOR: /* 12 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+        case ESCSEQ_XTERM_FGCOLOR:     /* 10 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                set_window_color(fgColor, nstr);
+            }
+            /* drop */
+        case ESCSEQ_XTERM_BGCOLOR:     /* 11 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                set_window_color(bgColor, nstr);
+            }
+            /* drop */
+        case ESCSEQ_XTERM_CURSOR_COLOR:        /* 12 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
 # ifndef NO_CURSORCOLOR
-              set_window_color(cursorColor, nstr);
+                set_window_color(cursorColor, nstr);
 # endif
-          }
-          /* drop */
-      case ESCSEQ_XTERM_PTR_FGCOLOR: /* 13 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              set_pointer_colors(nstr, NULL);
-          }
-          /* drop */
-      case ESCSEQ_XTERM_PTR_BGCOLOR: /* 14 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              /* UNSUPPORTED */
-          }
-          /* drop */
-      case ESCSEQ_XTERM_TEK_FGCOLOR: /* 15 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              /* UNSUPPORTED */
-          }
-          /* drop */
-      case ESCSEQ_XTERM_TEK_BGCOLOR: /* 16 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              /* UNSUPPORTED */
-          }
-          /* drop */
-      case ESCSEQ_XTERM_HILIGHT_COLOR: /* 17 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              /* UNSUPPORTED */
-          }
-          /* drop */
-      case ESCSEQ_XTERM_BOLD_COLOR: /* 18 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              set_window_color(colorBD, nstr);
-          }
-          /* drop */
-      case ESCSEQ_XTERM_ULINE_COLOR: /* 19 */
-          if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
-              set_window_color(colorUL, nstr);
-          }
+            }
+            /* drop */
+        case ESCSEQ_XTERM_PTR_FGCOLOR: /* 13 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                set_pointer_colors(nstr, NULL);
+            }
+            /* drop */
+        case ESCSEQ_XTERM_PTR_BGCOLOR: /* 14 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                /* UNSUPPORTED */
+            }
+            /* drop */
+        case ESCSEQ_XTERM_TEK_FGCOLOR: /* 15 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                /* UNSUPPORTED */
+            }
+            /* drop */
+        case ESCSEQ_XTERM_TEK_BGCOLOR: /* 16 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                /* UNSUPPORTED */
+            }
+            /* drop */
+        case ESCSEQ_XTERM_HILIGHT_COLOR:       /* 17 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                /* UNSUPPORTED */
+            }
+            /* drop */
+        case ESCSEQ_XTERM_BOLD_COLOR:  /* 18 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                set_window_color(colorBD, nstr);
+            }
+            /* drop */
+        case ESCSEQ_XTERM_ULINE_COLOR: /* 19 */
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
+                set_window_color(colorUL, nstr);
+            }
 #endif
-          break;
+            break;
 
-      case ESCSEQ_XTERM_PIXMAP: /* 20 */
+        case ESCSEQ_XTERM_PIXMAP:      /* 20 */
 #ifdef PIXMAP_SUPPORT
-          FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {
-                        image_set_mode(idx, MODE_IMAGE);}
-          );
-          if (!strcmp(str, ";")) {
-              image_set_mode(image_bg, MODE_SOLID);
-              bg_needs_update = 1;
-          } else {
-              nstr = (char *) strsep(&tnstr, ";");
-              if (nstr) {
-                  if (*nstr) {
-                      set_pixmap_scale("", images[image_bg].current->pmap);
-                      bg_needs_update = 1;
-                      load_image(nstr, images[image_bg].current);
-                  }
-                  while ((nstr = (char *) strsep(&tnstr, ";")) && *nstr) {
-                      changed += set_pixmap_scale(nstr, images[image_bg].current->pmap);
-                      scaled = 1;
-                  }
-              } else {
-                  image_set_mode(image_bg, MODE_SOLID);
-                  bg_needs_update = 1;
-              }
-          }
-          if ((changed) || (bg_needs_update)) {
-              redraw_image(image_bg);
-          }
+            FOREACH_IMAGE(if (!image_mode_is(idx, MODE_IMAGE) && image_mode_is(idx, ALLOW_IMAGE)) {
+                          image_set_mode(idx, MODE_IMAGE);}
+            );
+            if (!strcmp(str, ";")) {
+                image_set_mode(image_bg, MODE_SOLID);
+                bg_needs_update = 1;
+            } else {
+                nstr = (char *) strsep(&tnstr, ";");
+                if (nstr) {
+                    if (*nstr) {
+                        set_pixmap_scale("", images[image_bg].current->pmap);
+                        bg_needs_update = 1;
+                        load_image(nstr, images[image_bg].current);
+                    }
+                    while ((nstr = (char *) strsep(&tnstr, ";")) && *nstr) {
+                        changed += set_pixmap_scale(nstr, images[image_bg].current->pmap);
+                        scaled = 1;
+                    }
+                } else {
+                    image_set_mode(image_bg, MODE_SOLID);
+                    bg_needs_update = 1;
+                }
+            }
+            if ((changed) || (bg_needs_update)) {
+                redraw_image(image_bg);
+            }
 #endif /* PIXMAP_SUPPORT */
-          break;
+            break;
 
-      case ESCSEQ_XTERM_DUMPSCREEN: /* 30 */
+        case ESCSEQ_XTERM_DUMPSCREEN:  /* 30 */
 #if 0
-          nstr = (char *) strsep(&tnstr, ";");
-          if (nstr && *nstr) {
-              scr_dump_to_file(nstr);
-          }
-          break;
+            nstr = (char *) strsep(&tnstr, ";");
+            if (nstr && *nstr) {
+                scr_dump_to_file(nstr);
+            }
+            break;
 #endif
-      case ESCSEQ_XTERM_RESTOREFG: /* 39 */
+        case ESCSEQ_XTERM_RESTOREFG:   /* 39 */
 #ifdef XTERM_COLOR_CHANGE
-          set_window_color(fgColor, str);
+            set_window_color(fgColor, str);
 #endif
-          break;
-      case ESCSEQ_XTERM_RESTOREBG: /* 40 */
+            break;
+        case ESCSEQ_XTERM_RESTOREBG:   /* 40 */
 #ifdef XTERM_COLOR_CHANGE
-          set_window_color(bgColor, str);
+            set_window_color(bgColor, str);
 #endif
-          break;
-      case ESCSEQ_XTERM_LOGFILE: /* 46 */
-          nstr = (char *) strsep(&tnstr, ";");
-          if (nstr && *nstr && BOOL_OPT_ISTRUE(nstr)) {
-              /* Logging on */
-          } else {
-              /* Logging off */
-          }
-          break;
-      case ESCSEQ_XTERM_FONT: /* 50 */
-          change_font(0, str);
-          break;
-      default:
-          D_CMD(("Unsupported xterm escape sequence operator:  0x%02x\n", op));
-          break;
+            break;
+        case ESCSEQ_XTERM_LOGFILE:     /* 46 */
+            nstr = (char *) strsep(&tnstr, ";");
+            if (nstr && *nstr && BOOL_OPT_ISTRUE(nstr)) {
+                /* Logging on */
+            } else {
+                /* Logging off */
+            }
+            break;
+        case ESCSEQ_XTERM_FONT:        /* 50 */
+            change_font(0, str);
+            break;
+        default:
+            D_CMD(("Unsupported xterm escape sequence operator:  0x%02x\n", op));
+            break;
     }
 #ifdef PIXMAP_SUPPORT
     FREE(orig_tnstr);

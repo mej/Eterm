@@ -109,7 +109,8 @@ static char elot_xlat_plain[] =
     "65-122:193,194,216,196,197,214,195,199,201,206,202,203,204,205,207,208,81,209,211,212,200,217,87,215,213,198,91,92,93,94,95,96,225,226,248,228,229,246,227,231,233,238,234,235,236,237,239,240,113,241,243,244,232,249,242,247,245,230";
 
 /* c and s give copyright and section sign */
-static char elot_xlat_acc[] = "65-122:182,194,216,196,184,214,195,185,186,206,202,203,204,205,188,208,81,209,211,212,200,191,87,215,190,198,91,92,93,94,95,96,220,226,"
+static char elot_xlat_acc[] =
+    "65-122:182,194,216,196,184,214,195,185,186,206,202,203,204,205,188,208,81,209,211,212,200,191,87,215,190,198,91,92,93,94,95,96,220,226,"
     /*248 */ "169,228,221,246,227,222,223,238,234,235,236,237,252,240,113,241," /*243 */ "167,244,232,254,242,247,253,230";
 static char elot_xlat_acc_xtra[] = "46-62:183,47,48,49,50,51,52,53,54,55,56,57,58,59,171,61,187";       /* anw teleia, quotes */
 static char elot_xlat_uml[] =
@@ -286,10 +287,10 @@ kstate_add_switcher(char *str)
         return;
     switcher = &pStateNow->switcher[pStateNow->num_switcher];
     switch (switcher->type = str[0]) {
-      case 'A':                /* ascii eg: A;:2 */
-          switcher->code = str[1];
-          switcher->nextstate = atoi(&str[3]);
-          break;
+        case 'A':              /* ascii eg: A;:2 */
+            switcher->code = str[1];
+            switcher->nextstate = atoi(&str[3]);
+            break;
     }
     switcher->on = 0;
     pStateNow->num_switcher++;

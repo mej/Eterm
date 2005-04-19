@@ -97,7 +97,8 @@ action_t *action_find_match(unsigned short mod, unsigned char button, KeySym key
 
     D_ACTIONS(("mod == 0x%08x, button == %d, keysym == 0x%08x\n", mod, button, keysym));
     for (action = action_list; action; action = action->next) {
-        D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
+        D_ACTIONS(("Checking action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button,
+                   action->keysym));
         if ((action->mod == mod) && (action->button == button) && (action->keysym == keysym)) {
             D_ACTIONS(("Match found at %8p\n", action));
             return action;
@@ -146,7 +147,8 @@ action_check_modifiers(unsigned short mod, int x_mod)
 
     /* When we do have to check the modifiers, we do so in this order to eliminate the
        most popular choices first.  If any test fails, we return FALSE. */
-    D_ACTIONS(("Checking modifier set 0x%08x (" MOD_FMT ") vs. X modifier set 0x%08x (" MOD_FMT ")\n", mod, SHOW_MODS(mod), x_mod, SHOW_X_MODS(x_mod)));
+    D_ACTIONS(("Checking modifier set 0x%08x (" MOD_FMT ") vs. X modifier set 0x%08x (" MOD_FMT ")\n", mod, SHOW_MODS(mod), x_mod,
+               SHOW_X_MODS(x_mod)));
     if (mod != MOD_ANY) {
         /* LOGICAL_XOR() returns true if either the first parameter or the second parameter
            is true, but not both...just like XOR.  If the mask we're looking for is set in
@@ -202,7 +204,8 @@ action_dispatch(event_t *ev, KeySym keysym)
 
     ASSERT_RVAL(ev != NULL, 0);
     ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, 0);
-    D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n", ev, ev->xbutton.button, keysym, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
+    D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n", ev, ev->xbutton.button, keysym,
+               ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
     for (action = action_list; action; action = action->next) {
         /* The very first thing we do is match the event type to the type
            of the current action.  This means that we'll only run through
@@ -241,29 +244,29 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
     action->type = type;
     action->keysym = keysym;
     switch (type) {
-      case ACTION_STRING:
-          action->handler = (action_handler_t) action_handle_string;
-          action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
-          strcpy(action->param.string, (char *) param);
-          parse_escaped_string(action->param.string);
-          break;
-      case ACTION_ECHO:
-          action->handler = (action_handler_t) action_handle_echo;
-          action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
-          strcpy(action->param.string, (char *) param);
-          parse_escaped_string(action->param.string);
-          break;
-      case ACTION_SCRIPT:
-          action->handler = (action_handler_t) action_handle_script;
-          action->param.script = (char *) MALLOC(strlen((char *) param) + 2);
-          strcpy(action->param.script, (char *) param);
-          break;
-      case ACTION_MENU:
-          action->handler = (action_handler_t) action_handle_menu;
-          action->param.menu = (menu_t *) param;
-          break;
-      default:
-          break;
+        case ACTION_STRING:
+            action->handler = (action_handler_t) action_handle_string;
+            action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
+            strcpy(action->param.string, (char *) param);
+            parse_escaped_string(action->param.string);
+            break;
+        case ACTION_ECHO:
+            action->handler = (action_handler_t) action_handle_echo;
+            action->param.string = (char *) MALLOC(strlen((char *) param) + 2);
+            strcpy(action->param.string, (char *) param);
+            parse_escaped_string(action->param.string);
+            break;
+        case ACTION_SCRIPT:
+            action->handler = (action_handler_t) action_handle_script;
+            action->param.script = (char *) MALLOC(strlen((char *) param) + 2);
+            strcpy(action->param.script, (char *) param);
+            break;
+        case ACTION_MENU:
+            action->handler = (action_handler_t) action_handle_menu;
+            action->param.menu = (menu_t *) param;
+            break;
+        default:
+            break;
     }
     D_ACTIONS(("Added action.  mod == 0x%08x, button == %d, keysym == 0x%08x\n", action->mod, action->button, action->keysym));
 }

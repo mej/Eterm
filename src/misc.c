@@ -143,64 +143,64 @@ parse_escaped_string(char *str)
         }
         D_STRINGS(("Operating on \'%c\'\n", *pold));
         switch (*pold) {
-          case '\\':
-              D_STRINGS(("Backslash + %c\n", *(pold + 1)));
-              switch (tolower(*(++pold))) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                    for (i = 0; *pold >= '0' && *pold <= '7'; pold++) {
-                        i = (i * 8) + (*pold - '0');
-                    }
-                    pold--;
-                    D_STRINGS(("Octal number evaluates to %d\n", i));
-                    *pnew = i;
-                    break;
-                case 'n':
-                    *pnew = '\n';
-                    break;
-                case 'r':
-                    *pnew = '\r';
-                    break;
-                case 't':
-                    *pnew = '\t';
-                    break;
-                case 'b':
-                    *pnew = '\b';
-                    break;
-                case 'f':
-                    *pnew = '\f';
-                    break;
-                case 'a':
-                    *pnew = '\a';
-                    break;
-                case 'v':
-                    *pnew = '\v';
-                    break;
-                case 'e':
-                    *pnew = '\033';
-                    break;
-                case 'c':
-                    pold++;
-                    *pnew = MAKE_CTRL_CHAR(*pold);
-                    break;
-                default:
-                    *pnew = *pold;
-                    break;
-              }
-              break;
-          case '^':
-              D_STRINGS(("Caret + %c\n", *(pold + 1)));
-              pold++;
-              *pnew = MAKE_CTRL_CHAR(*pold);
-              break;
-          default:
-              *pnew = *pold;
+            case '\\':
+                D_STRINGS(("Backslash + %c\n", *(pold + 1)));
+                switch (tolower(*(++pold))) {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                        for (i = 0; *pold >= '0' && *pold <= '7'; pold++) {
+                            i = (i * 8) + (*pold - '0');
+                        }
+                        pold--;
+                        D_STRINGS(("Octal number evaluates to %d\n", i));
+                        *pnew = i;
+                        break;
+                    case 'n':
+                        *pnew = '\n';
+                        break;
+                    case 'r':
+                        *pnew = '\r';
+                        break;
+                    case 't':
+                        *pnew = '\t';
+                        break;
+                    case 'b':
+                        *pnew = '\b';
+                        break;
+                    case 'f':
+                        *pnew = '\f';
+                        break;
+                    case 'a':
+                        *pnew = '\a';
+                        break;
+                    case 'v':
+                        *pnew = '\v';
+                        break;
+                    case 'e':
+                        *pnew = '\033';
+                        break;
+                    case 'c':
+                        pold++;
+                        *pnew = MAKE_CTRL_CHAR(*pold);
+                        break;
+                    default:
+                        *pnew = *pold;
+                        break;
+                }
+                break;
+            case '^':
+                D_STRINGS(("Caret + %c\n", *(pold + 1)));
+                pold++;
+                *pnew = MAKE_CTRL_CHAR(*pold);
+                break;
+            default:
+                *pnew = *pold;
         }
     }
 
@@ -229,7 +229,7 @@ escape_string(spif_charptr_t str, spif_char_t quote, spif_int32_t maxlen)
     spif_charptr_t buff, s = str, pbuff;
 
     D_STRINGS(("escape_string(%s %c %ld)\n", (char *) str, quote, maxlen));
-    if (! quote) {
+    if (!quote) {
         quote = '\"';
     }
 

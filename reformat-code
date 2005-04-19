@@ -2,14 +2,14 @@
 
 TYPENAMES=""
 
-for i in button_t buttonbar_t menu_t menuitem_t ; do
+for i in eterm_action_t button_t buttonbar_t menu_t menuitem_t ; do
     TYPENAMES="$TYPENAMES -T $i"
 done
 
 for i in *.c src/*.c utils/*.c ; do
     if test -f $i; then
         echo Reformatting $i
-        indent -bad -bap -bbo -br -brs -cdw -ce -ci4 -cli2 -cs -di1 -i4 -l180 \
+        indent -bad -bap -bbo -br -brs -cdw -ce -ci4 -cli4 -cs -di1 -i4 -l132 \
             -lp -lps -nbc -nbfda -npcs -nprs -nsob -nss -nut -psl -saf -sai -saw $TYPENAMES $i
     fi
 done

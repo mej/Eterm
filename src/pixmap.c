@@ -95,55 +95,55 @@ const char *
 get_image_type(unsigned char type)
 {
     switch (type) {
-      case image_bg:
-          return "image_bg";
-          break;
-      case image_up:
-          return "image_up";
-          break;
-      case image_down:
-          return "image_down";
-          break;
-      case image_left:
-          return "image_left";
-          break;
-      case image_right:
-          return "image_right";
-          break;
-      case image_sb:
-          return "image_sb";
-          break;
-      case image_sa:
-          return "image_sa";
-          break;
-      case image_st:
-          return "image_st";
-          break;
-      case image_menu:
-          return "image_menu";
-          break;
-      case image_menuitem:
-          return "image_menuitem";
-          break;
-      case image_submenu:
-          return "image_submenu";
-          break;
-      case image_button:
-          return "image_button";
-          break;
-      case image_bbar:
-          return "image_bbar";
-          break;
-      case image_gbar:
-          return "image_gbar";
-          break;
-      case image_dialog:
-          return "image_dialog";
-          break;
-      case image_max:
-      default:
-          return "image_max";
-          break;
+        case image_bg:
+            return "image_bg";
+            break;
+        case image_up:
+            return "image_up";
+            break;
+        case image_down:
+            return "image_down";
+            break;
+        case image_left:
+            return "image_left";
+            break;
+        case image_right:
+            return "image_right";
+            break;
+        case image_sb:
+            return "image_sb";
+            break;
+        case image_sa:
+            return "image_sa";
+            break;
+        case image_st:
+            return "image_st";
+            break;
+        case image_menu:
+            return "image_menu";
+            break;
+        case image_menuitem:
+            return "image_menuitem";
+            break;
+        case image_submenu:
+            return "image_submenu";
+            break;
+        case image_button:
+            return "image_button";
+            break;
+        case image_bbar:
+            return "image_bbar";
+            break;
+        case image_gbar:
+            return "image_gbar";
+            break;
+        case image_dialog:
+            return "image_dialog";
+            break;
+        case image_max:
+        default:
+            return "image_max";
+            break;
     }
     ASSERT_NOTREACHED_RVAL("");
 }
@@ -162,52 +162,52 @@ const char *
 imlib_strerror(Imlib_Load_Error err)
 {
     switch (err) {
-      case IMLIB_LOAD_ERROR_NONE:
-          return "Success";
-          break;
-      case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
-          return "No such file or directory";
-          break;
-      case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
-          return "Is a directory";
-          break;
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
-          return "Permission denied";
-          break;
-      case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
-          return "No loader available for that file format";
-          break;
-      case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
-          return "Path too long";
-          break;
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
-          return "Path component does not exist";
-          break;
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
-          return "Path component is not a directory";
-          break;
-      case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
-          return "Path points outside address space";
-          break;
-      case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
-          return "Too many symbolic links in path";
-          break;
-      case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
-          return "Out of memory";
-          break;
-      case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
-          return "No more file descriptors";
-          break;
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
-          return "Permission denied";
-          break;
-      case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
-          return "Disk full";
-          break;
-      case IMLIB_LOAD_ERROR_UNKNOWN:
-      default:
-          return "Unknown error";
-          break;
+        case IMLIB_LOAD_ERROR_NONE:
+            return "Success";
+            break;
+        case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
+            return "No such file or directory";
+            break;
+        case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
+            return "Is a directory";
+            break;
+        case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
+            return "Permission denied";
+            break;
+        case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
+            return "No loader available for that file format";
+            break;
+        case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
+            return "Path too long";
+            break;
+        case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
+            return "Path component does not exist";
+            break;
+        case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
+            return "Path component is not a directory";
+            break;
+        case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
+            return "Path points outside address space";
+            break;
+        case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
+            return "Too many symbolic links in path";
+            break;
+        case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
+            return "Out of memory";
+            break;
+        case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
+            return "No more file descriptors";
+            break;
+        case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
+            return "Permission denied";
+            break;
+        case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
+            return "Disk full";
+            break;
+        case IMLIB_LOAD_ERROR_UNKNOWN:
+        default:
+            return "Unknown error";
+            break;
     }
     ASSERT_NOTREACHED_RVAL("");
 }
@@ -334,7 +334,8 @@ set_pixmap_scale(const char *geom, pixmap_t *pmap)
         pmap->op = op;
         changed++;
     }
-    D_PIXMAP(("Returning %hu, *pmap == { op [%hu], w [%hd], h [%hd], x [%hd], y [%hd] }\n", changed, pmap->op, pmap->w, pmap->h, pmap->x, pmap->y));
+    D_PIXMAP(("Returning %hu, *pmap == { op [%hu], w [%hd], h [%hd], x [%hd], y [%hd] }\n", changed, pmap->op, pmap->w, pmap->h,
+              pmap->x, pmap->y));
     return changed;
 }
 
@@ -538,54 +539,54 @@ static const char *
 get_iclass_name(unsigned char which)
 {
     switch (which) {
-      case image_bg:
-          return "ETERM_BG";
-          break;
-      case image_up:
-          return "ETERM_ARROW_UP";
-          break;
-      case image_down:
-          return "ETERM_ARROW_DOWN";
-          break;
-      case image_left:
-          return "ETERM_ARROW_LEFT";
-          break;
-      case image_right:
-          return "ETERM_ARROW_RIGHT";
-          break;
-      case image_sb:
-          return "ETERM_TROUGH";
-          break;
-      case image_sa:
-          return "ETERM_ANCHOR";
-          break;
-      case image_st:
-          return "ETERM_THUMB";
-          break;
-      case image_menu:
-          return "ETERM_MENU_ITEM";
-          break;                /* FIXME:  This should be ETERM_MENU_BOX */
-      case image_menuitem:
-          return "ETERM_MENU_ITEM";
-          break;
-      case image_submenu:
-          return "ETERM_MENU_SUBMENU";
-          break;
-      case image_button:
-          return "ETERM_MENU_ITEM";
-          break;                /* FIXME:  These four should    */
-      case image_bbar:
-          return "ETERM_MENU_BOX";
-          break;                /* have their own image classes */
-      case image_gbar:
-          return "ETERM_ANCHOR";
-          break;
-      case image_dialog:
-          return "ETERM_MENU_BOX";
-          break;
-      default:
-          ASSERT_NOTREACHED_RVAL(NULL);
-          break;
+        case image_bg:
+            return "ETERM_BG";
+            break;
+        case image_up:
+            return "ETERM_ARROW_UP";
+            break;
+        case image_down:
+            return "ETERM_ARROW_DOWN";
+            break;
+        case image_left:
+            return "ETERM_ARROW_LEFT";
+            break;
+        case image_right:
+            return "ETERM_ARROW_RIGHT";
+            break;
+        case image_sb:
+            return "ETERM_TROUGH";
+            break;
+        case image_sa:
+            return "ETERM_ANCHOR";
+            break;
+        case image_st:
+            return "ETERM_THUMB";
+            break;
+        case image_menu:
+            return "ETERM_MENU_ITEM";
+            break;              /* FIXME:  This should be ETERM_MENU_BOX */
+        case image_menuitem:
+            return "ETERM_MENU_ITEM";
+            break;
+        case image_submenu:
+            return "ETERM_MENU_SUBMENU";
+            break;
+        case image_button:
+            return "ETERM_MENU_ITEM";
+            break;              /* FIXME:  These four should    */
+        case image_bbar:
+            return "ETERM_MENU_BOX";
+            break;              /* have their own image classes */
+        case image_gbar:
+            return "ETERM_ANCHOR";
+            break;
+        case image_dialog:
+            return "ETERM_MENU_BOX";
+            break;
+        default:
+            ASSERT_NOTREACHED_RVAL(NULL);
+            break;
     }
 }
 
@@ -628,7 +629,8 @@ check_image_ipc(unsigned char reset)
                           }
                           );
             /* *INDENT-ON* */
-            print_error("Looks like this version of Enlightenment doesn't support the IPC " "commands I need.  Disallowing \"auto\" mode for all images.\n");
+            print_error("Looks like this version of Enlightenment doesn't support the IPC "
+                        "commands I need.  Disallowing \"auto\" mode for all images.\n");
             FREE(reply);
             checked = 2;
             return 0;
@@ -668,7 +670,8 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     }
     p = LIBAST_X_CREATE_PIXMAP(width, height);
     gc = LIBAST_X_CREATE_GC(0, NULL);
-    D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y, desktop_window));
+    D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y,
+              desktop_window));
     if (p != None) {
         if (pw < scr->width || ph < scr->height) {
             D_PIXMAP(("Tiling %ux%u desktop pixmap 0x%08x onto p.\n", pw, ph, desktop_pixmap));
@@ -677,10 +680,12 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
             XSetFillStyle(Xdisplay, gc, FillTiled);
             XFillRectangle(Xdisplay, p, gc, 0, 0, width, height);
         } else {
-            D_PIXMAP(("Copying %hux%hu rectangle at %d, %d from %ux%u desktop pixmap 0x%08x onto p.\n", width, height, x, y, pw, ph, desktop_pixmap));
+            D_PIXMAP(("Copying %hux%hu rectangle at %d, %d from %ux%u desktop pixmap 0x%08x onto p.\n", width, height, x, y, pw, ph,
+                      desktop_pixmap));
             XCopyArea(Xdisplay, desktop_pixmap, p, gc, x, y, width, height, 0, 0);
         }
-        if ((which != image_bg || (BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS)) || images[image_bg].current != images[image_bg].norm)
+        if ((which != image_bg || (BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS))
+             || images[image_bg].current != images[image_bg].norm)
             && need_colormod(simg->iml)) {
             colormod_trans(p, simg->iml, gc, width, height);
         }
@@ -782,13 +787,15 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
 }
 
 void
-paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsigned short x, unsigned short y, unsigned short w,
+             unsigned short h)
 {
     Pixmap pmap = None, mask = None;
     GC gc;
 
     ASSERT(simg != NULL);
-    D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win, (int) d, x, y, w, h));
+    D_PIXMAP(("paste_simage(%8p, %s, 0x%08x, 0x%08x, %hd, %hd, %hd, %hd) called.\n", simg, get_image_type(which), (int) win,
+              (int) d, x, y, w, h));
 
     REQUIRE(d != None);
     REQUIRE(w > 0);
@@ -814,7 +821,8 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
                     snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) d, state, w, h);
                     reply = enl_send_and_wait(buff);
                     if (strstr(reply, "Error")) {
-                        print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
+                        print_error
+                            ("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
                         image_mode_fallback(which);
                         FREE(reply);
                     } else {
@@ -832,7 +840,8 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
                             LIBAST_X_FREE_GC(gc);
                             return;
                         } else {
-                            print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
+                            print_error
+                                ("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
                             FREE(reply);
                             image_mode_fallback(which);
                         }
@@ -905,31 +914,31 @@ redraw_image(unsigned char which)
 {
 
     switch (which) {
-      case image_bg:
-          render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
-          scr_touch();
-          break;
-      case image_up:
-          scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, MODE_MASK);
-          break;
-      case image_down:
-          scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, MODE_MASK);
-          break;
-      case image_sb:
-          scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
-          break;
-      case image_sa:
-      case image_st:
-          scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
-          break;
-      case image_button:
-      case image_bbar:
-      case image_gbar:
-          bbar_draw_all(IMAGE_STATE_CURRENT, MODE_MASK);
-          break;
-      default:
-          D_PIXMAP(("Bad value %u\n", which));
-          break;
+        case image_bg:
+            render_simage(images[image_bg].current, TermWin.vt, TermWin_TotalWidth(), TermWin_TotalHeight(), image_bg, 0);
+            scr_touch();
+            break;
+        case image_up:
+            scrollbar_draw_uparrow(IMAGE_STATE_CURRENT, MODE_MASK);
+            break;
+        case image_down:
+            scrollbar_draw_downarrow(IMAGE_STATE_CURRENT, MODE_MASK);
+            break;
+        case image_sb:
+            scrollbar_draw_trough(IMAGE_STATE_CURRENT, MODE_MASK);
+            break;
+        case image_sa:
+        case image_st:
+            scrollbar_draw_anchor(IMAGE_STATE_CURRENT, MODE_MASK);
+            break;
+        case image_button:
+        case image_bbar:
+        case image_gbar:
+            bbar_draw_all(IMAGE_STATE_CURRENT, MODE_MASK);
+            break;
+        default:
+            D_PIXMAP(("Bad value %u\n", which));
+            break;
     }
 }
 
@@ -998,7 +1007,8 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
     ASSERT(simg->iml != NULL);
     ASSERT(simg->pmap != NULL);
     REQUIRE(win != None);
-    D_PIXMAP(("Rendering simg->iml->im %8p (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width, height, win));
+    D_PIXMAP(("Rendering simg->iml->im %8p (%s) at %hux%hu onto window 0x%08x\n", simg->iml->im, get_image_type(which), width,
+              height, win));
     D_PIXMAP(("Image mode is 0x%02x\n", images[which].mode));
 #ifdef PIXMAP_SUPPORT
     if ((which == image_bg) && image_mode_is(image_bg, MODE_VIEWPORT)) {
@@ -1015,7 +1025,6 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
         LIBAST_X_FREE_PIXMAP(buffer_pixmap);
         buffer_pixmap = None;
     }
-
 #ifdef PIXMAP_SUPPORT
     /* Reset window shape mask. */
     shaped_window_apply_mask(win, None);
@@ -1038,10 +1047,12 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                 if (renderop & RENDER_FORCE_PIXMAP) {
                     char *reply;
 
-                    snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, width, height);
+                    snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) win, state, width,
+                             height);
                     reply = enl_send_and_wait(buff);
                     if (strstr(reply, "Error")) {
-                        print_error("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
+                        print_error
+                            ("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
                         image_mode_fallback(which);
                         FREE(reply);
                     } else {
@@ -1070,7 +1081,8 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                             snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
                             enl_ipc_send(buff);
                         } else {
-                            print_error("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
+                            print_error
+                                ("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
                             FREE(reply);
                             image_mode_fallback(which);
                         }
@@ -1107,7 +1119,8 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
     } else if (image_mode_is(which, MODE_VIEWPORT) && image_mode_is(which, ALLOW_VIEWPORT)) {
         Pixmap p;
 
-        D_PIXMAP(("Viewport mode enabled.  viewport_pixmap == 0x%08x and simg->pmap->pixmap == 0x%08x\n", viewport_pixmap, simg->pmap->pixmap));
+        D_PIXMAP(("Viewport mode enabled.  viewport_pixmap == 0x%08x and simg->pmap->pixmap == 0x%08x\n", viewport_pixmap,
+                  simg->pmap->pixmap));
         p = create_viewport_pixmap(simg, win, 0, 0, width, height);
         if (p && (p != simg->pmap->pixmap)) {
             if (simg->pmap->pixmap != None) {
@@ -1272,7 +1285,8 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                 XSetForeground(Xdisplay, gc, ((which == image_bg) ? (PixColors[bgColor]) : (simg->bg)));
                 XFillRectangle(Xdisplay, simg->pmap->pixmap, gc, 0, 0, width, height);
                 if (simg->iml->bevel != NULL && simg->iml->bevel->edges != NULL) {
-                    DRAW_SOLID_BEVEL(simg->pmap->pixmap, width, height, simg->bg, simg->iml->bevel->up, simg->iml->bevel->edges->left);
+                    DRAW_SOLID_BEVEL(simg->pmap->pixmap, width, height, simg->bg, simg->iml->bevel->up,
+                                     simg->iml->bevel->edges->left);
                 }
                 /* FIXME:  For efficiency, just fill the window with the pixmap
                    and handle exposes by copying from simg->pmap->pixmap. */
@@ -1858,35 +1872,35 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
         }
         /* Determine bitshift and bitmask values */
         switch (real_depth) {
-          case 15:
+            case 15:
 #ifdef HAVE_MMX
-              shade_ximage_15_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_15_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
-              shade_ximage_15(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_15(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
-              break;
-          case 16:
+                break;
+            case 16:
 #ifdef HAVE_MMX
-              shade_ximage_16_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_16_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
-              shade_ximage_16(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_16(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
-              break;
-          case 24:
-              if (ximg->bits_per_pixel != 32) {
-                  shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
-              }
-              /* drop */
-          case 32:
+                break;
+            case 24:
+                if (ximg->bits_per_pixel != 32) {
+                    shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                }
+                /* drop */
+            case 32:
 #ifdef HAVE_MMX
-              shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
-              shade_ximage_32(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                shade_ximage_32(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
-              break;
-          default:
-              print_warning("Bit depth of %d is unsupported for tinting/shading.\n", real_depth);
-              return;
+                break;
+            default:
+                print_warning("Bit depth of %d is unsupported for tinting/shading.\n", real_depth);
+                return;
         }
     }
     XPutImage(Xdisplay, p, gc, ximg, 0, 0, 0, 0, w, h);
@@ -1928,7 +1942,8 @@ update_desktop_info(int *w, int *h)
         XGetGeometry(Xdisplay, desktop_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
     }
     if ((pw <= 0) || (ph <= 0)) {
-        print_error("Value of desktop pixmap property is invalid.  Please restart your \n" "window manager or use Esetroot to set a new one.");
+        print_error("Value of desktop pixmap property is invalid.  Please restart your \n"
+                    "window manager or use Esetroot to set a new one.");
         desktop_pixmap = None;
         return 0;
     }
@@ -1970,8 +1985,12 @@ get_desktop_window(void)
         }
 
 
-        if ((XGetWindowProperty(Xdisplay, w, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data)) != Success) {
-            if ((XGetWindowProperty(Xdisplay, w, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data)) != Success) {
+        if ((XGetWindowProperty
+             (Xdisplay, w, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after,
+              &data)) != Success) {
+            if ((XGetWindowProperty
+                 (Xdisplay, w, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after,
+                  &data)) != Success) {
                 continue;
             }
         }
@@ -2020,7 +2039,8 @@ get_desktop_pixmap(void)
         LIBAST_X_FREE_PIXMAP(color_pixmap);
         color_pixmap = None;
     }
-    XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
+    XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_PIXMAP], 0L, 1L, False, AnyPropertyType, &type, &format, &length,
+                       &after, &data);
     if (type == XA_PIXMAP) {
         p = *((Pixmap *) data);
         XFree(data);
@@ -2068,7 +2088,8 @@ get_desktop_pixmap(void)
     } else {
         XFree(data);
     }
-    XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data);
+    XGetWindowProperty(Xdisplay, desktop_window, props[PROP_TRANS_COLOR], 0L, 1L, False, AnyPropertyType, &type, &format, &length,
+                       &after, &data);
     if (type == XA_CARDINAL) {
         XGCValues gcvalue;
         GC gc;
@@ -2172,7 +2193,8 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
                 if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {
                     for (i = 0; i < count; i++) {
                         D_PIXMAP(("Got icon sizes:  Width %d to %d +/- %d, Height %d to %d +/- %d\n", icon_sizes[i].min_width,
-                                  icon_sizes[i].max_width, icon_sizes[i].width_inc, icon_sizes[i].min_height, icon_sizes[i].max_height, icon_sizes[i].height_inc));
+                                  icon_sizes[i].max_width, icon_sizes[i].width_inc, icon_sizes[i].min_height,
+                                  icon_sizes[i].max_height, icon_sizes[i].height_inc));
                         if (icon_sizes[i].max_width > 64 || icon_sizes[i].max_height > 64) {
                             continue;
                         }

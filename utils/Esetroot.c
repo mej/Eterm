@@ -56,15 +56,18 @@ set_pixmap_property(Pixmap p)
     if (prop_root != None && prop_esetroot != None) {
         XGetWindowProperty(Xdisplay, Xroot, prop_root, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data_root);
         if (type == XA_PIXMAP) {
-            XGetWindowProperty(Xdisplay, Xroot, prop_esetroot, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after, &data_esetroot);
+            XGetWindowProperty(Xdisplay, Xroot, prop_esetroot, 0L, 1L, False, AnyPropertyType, &type, &format, &length, &after,
+                               &data_esetroot);
             if (data_root && data_esetroot) {
                 if (debug) {
-                    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  data_root == 0x%08x, data_esetroot == 0x%08x\n", __FILE__,
-                            __LINE__, (unsigned int) p, (unsigned int) *((Pixmap *) data_root), (unsigned int) *((Pixmap *) data_esetroot));
+                    fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  data_root == 0x%08x, data_esetroot == 0x%08x\n",
+                            __FILE__, __LINE__, (unsigned int) p, (unsigned int) *((Pixmap *) data_root),
+                            (unsigned int) *((Pixmap *) data_esetroot));
                 }
                 if (type == XA_PIXMAP && *((Pixmap *) data_root) == *((Pixmap *) data_esetroot)) {
                     if (debug) {
-                        fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  XKillClient() is being called.\n", __FILE__, __LINE__, (unsigned int) p);
+                        fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  XKillClient() is being called.\n", __FILE__,
+                                __LINE__, (unsigned int) p);
                     }
                     XKillClient(Xdisplay, *((Pixmap *) data_root));
                 }
@@ -83,7 +86,8 @@ set_pixmap_property(Pixmap p)
     XChangeProperty(Xdisplay, Xroot, prop_root, XA_PIXMAP, 32, PropModeReplace, (unsigned char *) &p, 1);
     XChangeProperty(Xdisplay, Xroot, prop_esetroot, XA_PIXMAP, 32, PropModeReplace, (unsigned char *) &p, 1);
     if (debug) {
-        fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  _XROOTPMAP_ID and ESETROOT_PMAP_ID set to 0x%08x.\n", __FILE__, __LINE__, (unsigned int) p, (unsigned int) p);
+        fprintf(stderr, "%s:%d:  set_pixmap_property(0x%08x):  _XROOTPMAP_ID and ESETROOT_PMAP_ID set to 0x%08x.\n", __FILE__,
+                __LINE__, (unsigned int) p, (unsigned int) p);
     }
     XSetCloseDownMode(Xdisplay, RetainPermanent);
     XFlush(Xdisplay);
@@ -145,13 +149,15 @@ main(int argc, char *argv[])
     if (debug) {
         fprintf(stderr, "%s:%d:  Display name is \"%s\"\n", __FILE__, __LINE__, displayname ? displayname : "(nil)");
         fprintf(stderr, "%s:%d:  Background color name is \"%s\"\n", __FILE__, __LINE__, bgcolor ? bgcolor : "(nil)");
-        fprintf(stderr, "%s:%d:  Image will be %s\n", __FILE__, __LINE__, scale ? "scaled" : (center ? "centered" : (fit ? "fit" : "tiled")));
+        fprintf(stderr, "%s:%d:  Image will be %s\n", __FILE__, __LINE__,
+                scale ? "scaled" : (center ? "centered" : (fit ? "fit" : "tiled")));
         fprintf(stderr, "%s:%d:  Image file is %s\n", __FILE__, __LINE__, fname ? fname : "(nil)");
     }
     if (!displayname) {
         displayname = getenv("DISPLAY");
         if (debug) {
-            fprintf(stderr, "%s:%d:  Display name set to %s via getenv(\"DISPLAY\")\n", __FILE__, __LINE__, displayname ? displayname : "(nil)");
+            fprintf(stderr, "%s:%d:  Display name set to %s via getenv(\"DISPLAY\")\n", __FILE__, __LINE__,
+                    displayname ? displayname : "(nil)");
         }
     }
     if (!displayname) {
@@ -224,7 +230,8 @@ main(int argc, char *argv[])
     }
     if (debug) {
         fprintf(stderr, "%s:%d:  Assigned width and height for rendering as %dx%d\n", __FILE__, __LINE__, w, h);
-        fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y, (unsigned int) p);
+        fprintf(stderr, "%s:%d:  Created %dx%d+%d+%d pixmap 0x%08x\n", __FILE__, __LINE__, scr->width, scr->height, x, y,
+                (unsigned int) p);
         fprintf(stderr, "%s:%d:  Applied Graphics Context %8p to pixmap.\n", __FILE__, __LINE__, gc);
     }
     imlib_context_set_anti_alias(1);

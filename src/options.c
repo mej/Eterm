@@ -79,12 +79,14 @@ static void *parse_multichar(char *, void *);
 static void *parse_escreen(char *, void *);
 
 static char *rs_pipe_name = NULL;
+
 #ifdef PIXMAP_SUPPORT
 static int rs_shade = 0;
 static char *rs_tint = NULL;
 #endif
 static unsigned long rs_buttonbars = 1;
 static char *rs_font_effects = NULL;
+
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
 static char *rs_bigfont_key = NULL;
 static char *rs_smallfont_key = NULL;
@@ -108,11 +110,13 @@ char *rs_geometry = NULL;       /* Geometry string */
 int rs_desktop = -1;
 char *rs_path = NULL;
 int rs_saveLines = SAVELINES;   /* Lines in the scrollback buffer */
+
 #ifdef USE_XIM
 char *rs_input_method = NULL;
 char *rs_preedit_type = NULL;
 #endif
 char *rs_name = NULL;
+
 #ifndef NO_BOLDFONT
 char *rs_boldFont = NULL;
 #endif
@@ -126,6 +130,7 @@ unsigned long rs_scrollbar_width = 0;
 char *rs_finished_title = NULL;
 char *rs_finished_text = NULL;
 char *rs_term_name = NULL;
+
 #ifdef PIXMAP_SUPPORT
 char *rs_pixmapScale = NULL;
 char *rs_icon = NULL;
@@ -134,6 +139,7 @@ char *rs_cmod_red = NULL;
 char *rs_cmod_green = NULL;
 char *rs_cmod_blue = NULL;
 unsigned long rs_cache_size = (unsigned long) -1;
+
 # ifdef BACKGROUND_CYCLING_SUPPORT
 char *rs_anim_pixmap_list = NULL;
 char **rs_anim_pixmaps = NULL;
@@ -143,6 +149,7 @@ static char *rs_pixmaps[image_max];
 #endif
 char *rs_theme = NULL;
 char *rs_config_file = NULL;
+
 #ifdef ESCREEN
 char *rs_url = NULL;
 char *rs_hop = NULL;
@@ -154,6 +161,7 @@ spif_charptr_t rs_beep_command = NULL;
 spif_uint32_t rs_opacity = 0xffffffff;
 unsigned int rs_line_space = 0;
 unsigned int rs_meta_mod = 0, rs_alt_mod = 0, rs_numlock_mod = 0;
+
 #ifdef KEYSYM_ATTRIBUTE
 unsigned char *KeySym_map[256]; /* probably mostly empty */
 #endif
@@ -209,12 +217,12 @@ spifopt_t option_list[] = {
 #ifndef NO_BOLDUNDERLINE
     SPIFOPT_STR_LONG("colorBD", "bold color", rs_color[colorBD]),
     SPIFOPT_STR_LONG("colorUL", "underline color", rs_color[colorUL]),
-#endif                          /* NO_BOLDUNDERLINE */
+#endif /* NO_BOLDUNDERLINE */
     SPIFOPT_STR_LONG("pointer-color", "mouse pointer color", rs_color[pointerColor]),
 #ifndef NO_CURSORCOLOR
     SPIFOPT_STR('c', "cursor-color", "cursor color", rs_color[cursorColor]),
     SPIFOPT_STR_LONG("cursor-text-color", "cursor text color", rs_color[cursorColor2]),
-#endif                          /* NO_CURSORCOLOR */
+#endif /* NO_CURSORCOLOR */
 
     /* =======[ X11 options ]======= */
     SPIFOPT_STR('g', "geometry", "WxH+X+Y = size and position", rs_geometry),
@@ -261,8 +269,8 @@ spifopt_t option_list[] = {
     SPIFOPT_INT_LONG("cache", "set Imlib2 image/pixmap cache size", rs_cache_size),
 # ifdef BACKGROUND_CYCLING_SUPPORT
     SPIFOPT_STR('N', "anim", "a delay and list of pixmaps for cycling", rs_anim_pixmap_list),
-# endif                         /* BACKGROUND_CYCLING_SUPPORT */
-#endif                          /* PIXMAP_SUPPORT */
+# endif /* BACKGROUND_CYCLING_SUPPORT */
+#endif /* PIXMAP_SUPPORT */
 
     /* =======[ Kanji options ]======= */
 #ifdef MULTI_CHARSET
@@ -272,7 +280,7 @@ spifopt_t option_list[] = {
     SPIFOPT_STR_LONG("mfont3", "multichar font 3", rs_mfont[3]),
     SPIFOPT_STR_LONG("mfont4", "multichar font 4", rs_mfont[4]),
     SPIFOPT_STR_LONG("mencoding", "multichar encoding mode (eucj/sjis/euckr/big5/gb)", rs_multichar_encoding),
-#endif                          /* MULTI_CHARSET */
+#endif /* MULTI_CHARSET */
 #ifdef USE_XIM
     SPIFOPT_STR_LONG("input-method", "XIM input method", rs_input_method),
     SPIFOPT_STR_LONG("preedit-type", "XIM preedit type", rs_preedit_type),
@@ -287,12 +295,15 @@ spifopt_t option_list[] = {
     SPIFOPT_BOOL_LONG("home-on-input", "jump to bottom on input", vt_options, VT_OPTIONS_HOME_ON_INPUT),
     SPIFOPT_BOOL('q', "no-input", "configure for output only", eterm_options, ETERM_OPTIONS_NO_INPUT),
     SPIFOPT_BOOL_LONG("scrollbar-right", "display the scrollbar on the right", eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT),
-    SPIFOPT_BOOL_LONG("scrollbar-floating", "display the scrollbar with no trough", eterm_options, ETERM_OPTIONS_SCROLLBAR_FLOATING),
+    SPIFOPT_BOOL_LONG("scrollbar-floating", "display the scrollbar with no trough", eterm_options,
+                      ETERM_OPTIONS_SCROLLBAR_FLOATING),
     SPIFOPT_BOOL_LONG("scrollbar-popup", "popup the scrollbar only when focused", eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP),
     SPIFOPT_BOOL('x', "borderless", "force Eterm to have no borders", eterm_options, ETERM_OPTIONS_BORDERLESS),
     SPIFOPT_BOOL_LONG("overstrike-bold", "simulate bold by overstriking characters", vt_options, VT_OPTIONS_OVERSTRIKE_BOLD),
-    SPIFOPT_BOOL_LONG("bold-brightens-foreground", "\"bold\" attribute brightens foreground color", vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND),
-    SPIFOPT_BOOL_LONG("blink-brightens-background", "\"blink\" attribute brightens background color", vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND),
+    SPIFOPT_BOOL_LONG("bold-brightens-foreground", "\"bold\" attribute brightens foreground color", vt_options,
+                      VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND),
+    SPIFOPT_BOOL_LONG("blink-brightens-background", "\"blink\" attribute brightens background color", vt_options,
+                      VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND),
     SPIFOPT_BOOL_LONG("colors-suppress-bold", "do not make ANSI colors 0-16 bold", vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
@@ -302,15 +313,18 @@ spifopt_t option_list[] = {
 #ifdef META8_OPTION
     SPIFOPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", vt_options, VT_OPTIONS_META8),
 #endif
-    SPIFOPT_BOOL_LONG("double-buffer", "reduce exposes using double-buffering (and more memory)", eterm_options, ETERM_OPTIONS_DOUBLE_BUFFER),
+    SPIFOPT_BOOL_LONG("double-buffer", "reduce exposes using double-buffering (and more memory)", eterm_options,
+                      ETERM_OPTIONS_DOUBLE_BUFFER),
     SPIFOPT_BOOL_LONG("no-cursor", "disable the text cursor", eterm_options, ETERM_OPTIONS_NO_CURSOR),
     SPIFOPT_BOOL_LONG("pause", "pause after the child process exits", eterm_options, ETERM_OPTIONS_PAUSE),
     SPIFOPT_BOOL_LONG("xterm-select", "duplicate xterm's selection behavior", eterm_options, ETERM_OPTIONS_XTERM_SELECT),
     SPIFOPT_BOOL_LONG("select-line", "triple-click selects whole line", eterm_options, ETERM_OPTIONS_SELECT_WHOLE_LINE),
-    SPIFOPT_BOOL_LONG("select-trailing-spaces", "do not skip trailing spaces when selecting", eterm_options, ETERM_OPTIONS_SELECT_TRAILING_SPACES),
+    SPIFOPT_BOOL_LONG("select-trailing-spaces", "do not skip trailing spaces when selecting", eterm_options,
+                      ETERM_OPTIONS_SELECT_TRAILING_SPACES),
     SPIFOPT_BOOL_LONG("report-as-keysyms", "report special keys as keysyms", vt_options, VT_OPTIONS_REPORT_AS_KEYSYMS),
     SPIFOPT_BOOL_LONG("buttonbar", "toggle the display of all buttonbars", rs_buttonbars, BBAR_FORCE_TOGGLE),
-    SPIFOPT_BOOL_LONG("resize-gravity", "toggle gravitation to nearest corner on resize", eterm_options, ETERM_OPTIONS_RESIZE_GRAVITY),
+    SPIFOPT_BOOL_LONG("resize-gravity", "toggle gravitation to nearest corner on resize", eterm_options,
+                      ETERM_OPTIONS_RESIZE_GRAVITY),
     SPIFOPT_BOOL_LONG("secondary-screen", "toggle use of secondary screen", vt_options, VT_OPTIONS_SECONDARY_SCREEN),
 
 /* =======[ Keyboard options ]======= */
@@ -338,7 +352,7 @@ spifopt_t option_list[] = {
 #endif
 #ifdef CUTCHAR_OPTION
     SPIFOPT_STR_LONG("cut-chars", "seperators for double-click selection", rs_cutchars),
-#endif                          /* CUTCHAR_OPTION */
+#endif /* CUTCHAR_OPTION */
     SPIFOPT_STR_LONG("finished-title", "post-termination window title text", rs_finished_title),
     SPIFOPT_STR_LONG("finished-text", "post-termination terminal text", rs_finished_text),
     SPIFOPT_STR_LONG("term-name", "value to use for setting $TERM", rs_term_name),
@@ -408,10 +422,7 @@ version(void)
            "    " SCROLLBAR_IDENT "\n"
            "    " STARTUP_IDENT "\n"
            "    " SYSTEM_IDENT "\n"
-           "    " TERM_IDENT "\n"
-           "    " TIMER_IDENT "\n"
-           "    " UTMP_IDENT "\n"
-           "    " WINDOWS_IDENT "\n" "\n");
+           "    " TERM_IDENT "\n" "    " TIMER_IDENT "\n" "    " UTMP_IDENT "\n" "    " WINDOWS_IDENT "\n" "\n");
 
     printf("Debugging configuration:  ");
 #ifdef DEBUG
@@ -947,7 +958,8 @@ parse_color(char *buff, void *state)
 
         } else {
             tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n", file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n", file_peek_path(), file_peek_line(),
+                        NONULL(tmp));
             FREE(tmp);
         }
     } else {
@@ -1023,7 +1035,8 @@ parse_attributes(char *buff, void *state)
 
         } else {
             tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
+                        NONULL(tmp));
             FREE(tmp);
         }
 
@@ -1044,7 +1057,8 @@ parse_toggles(char *buff, void *state)
         return NULL;
     }
     if (!(tmp = get_pword(2, buff))) {
-        print_error("Parse error in file %s, line %lu:  Missing boolean value in context toggles\n", file_peek_path(), file_peek_line());
+        print_error("Parse error in file %s, line %lu:  Missing boolean value in context toggles\n", file_peek_path(),
+                    file_peek_line());
         return NULL;
     }
     if (BOOL_OPT_ISTRUE(tmp)) {
@@ -1631,7 +1645,8 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         if (!mode) {
-            print_error("Parse error in file %s, line %lu:  Missing parameters for mode line\n", file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing parameters for mode line\n", file_peek_path(),
+                        file_peek_line());
             return NULL;
         }
         if (!BEG_STRCASECMP(mode, "image")) {
@@ -1661,7 +1676,8 @@ parse_image(char *buff, void *state)
                     images[idx].mode |= ALLOW_AUTO;
                 } else if (!BEG_STRCASECMP(allow, "solid")) {
                 } else {
-                    print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(), allow);
+                    print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(),
+                                allow);
                 }
             }
         }
@@ -1796,13 +1812,13 @@ parse_image(char *buff, void *state)
         imlib_t *iml = images[idx].current->iml;
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n",
+                        file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n",
+                        file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!color) {
@@ -1895,7 +1911,7 @@ parse_image(char *buff, void *state)
         if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
             && (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
             FREE(images[idx].current->iml->border);
-            images[idx].current->iml->border = (Imlib_Border *) NULL;	/* No sense in wasting CPU time and memory if there are no borders */
+            images[idx].current->iml->border = (Imlib_Border *) NULL;   /* No sense in wasting CPU time and memory if there are no borders */
         }
     } else if (!BEG_STRCASECMP(buff, "bevel ")) {
         if (!CHECK_VALID_INDEX(idx)) {
@@ -1944,8 +1960,8 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n", file_peek_path(),
-                        file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n",
+                        file_peek_path(), file_peek_line());
             return NULL;
         }
         if (num_words(buff + 8) < 4) {
@@ -2024,7 +2040,8 @@ parse_actions(char *buff, void *state)
         }
         FREE(str);
         if ((button == BUTTON_NONE) && (keysym == 0)) {
-            print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n", file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n", file_peek_path(),
+                        file_peek_line());
             return NULL;
         }
         i++;
@@ -2155,7 +2172,8 @@ parse_menuitem(char *buff, void *state)
         char *rtext = get_word(2, buff);
 
         if (!rtext) {
-            print_error("Parse error in file %s, line %lu:  Missing menuitem right-justified text.\n", file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Missing menuitem right-justified text.\n", file_peek_path(),
+                        file_peek_line());
             return ((void *) curitem);
         }
         menuitem_set_rtext(curitem, rtext);
@@ -2220,12 +2238,13 @@ parse_bbar(char *buff, void *state)
         char *where = get_pword(2, buff);
 
         if (!where) {
-            print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(),
+                        file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             bbar_set_docked(bbar, BBAR_DOCKED_TOP);
-        } else if (!BEG_STRCASECMP(where, "bot")) {	/* "bot" or "bottom" */
+        } else if (!BEG_STRCASECMP(where, "bot")) {     /* "bot" or "bottom" */
             bbar_set_docked(bbar, BBAR_DOCKED_BOTTOM);
-        } else if (!BEG_STRCASECMP(where, "no")) {	/* "no" or "none" */
+        } else if (!BEG_STRCASECMP(where, "no")) {      /* "no" or "none" */
             bbar_set_docked(bbar, BBAR_UNDOCKED);
         } else {
             print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(),
@@ -2286,7 +2305,8 @@ parse_bbar(char *buff, void *state)
             } else if (!BEG_STRCASECMP(type, "script ")) {
                 button_set_action(button, ACTION_SCRIPT, action);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(), type);
+                print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(),
+                            type);
                 FREE(action);
                 FREE(button);
                 return ((void *) bbar);
@@ -2377,7 +2397,8 @@ parse_multichar(char *buff, void *state)
             }
         } else {
             tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(), NONULL(tmp));
+            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
+                        NONULL(tmp));
             FREE(tmp);
         }
 
@@ -2414,12 +2435,13 @@ parse_escreen(char *buff, void *state)
         char *where = get_pword(2, buff);
 
         if (!where) {
-            print_error("Parse error in file %s, line %lu:  Attribute bbar_dock requires a parameter\n", file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  Attribute bbar_dock requires a parameter\n", file_peek_path(),
+                        file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             rs_es_dock = BBAR_DOCKED_TOP;
-        } else if (!BEG_STRCASECMP(where, "bot")) {	/* "bot" or "bottom" */
+        } else if (!BEG_STRCASECMP(where, "bot")) {     /* "bot" or "bottom" */
             rs_es_dock = BBAR_DOCKED_BOTTOM;
-        } else if (!BEG_STRCASECMP(where, "no")) {	/* "no" or "none" */
+        } else if (!BEG_STRCASECMP(where, "no")) {      /* "no" or "none" */
             rs_es_dock = BBAR_UNDOCKED;
         } else {
             print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute bbar_dock\n", file_peek_path(),
@@ -2448,8 +2470,7 @@ conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
 
         path_env = getenv(PATH_ENV);
         if (path_env) {
-            snprintf(path, sizeof(path), "%s:%s", CONFIG_SEARCH_PATH,
-                     path_env);
+            snprintf(path, sizeof(path), "%s:%s", CONFIG_SEARCH_PATH, path_env);
         } else {
             snprintf(path, sizeof(path), CONFIG_SEARCH_PATH);
         }
@@ -2570,8 +2591,7 @@ post_parse(void)
 
 #if DEBUG > 0
     if (DEBUG_LEVEL > DEBUG) {
-        print_warning("Requested debug level of %d exceeds compile-time maximum of %d\n",
-                      DEBUG_LEVEL, DEBUG);
+        print_warning("Requested debug level of %d exceeds compile-time maximum of %d\n", DEBUG_LEVEL, DEBUG);
     } else if (DEBUG_LEVEL > 0) {
         DPRINTF1(("Now running with debugging level of %d\n", DEBUG_LEVEL));
     }
@@ -2736,7 +2756,7 @@ post_parse(void)
         if (rs_pixmaps[i]) {
             reset_simage(images[i].norm, RESET_ALL_SIMG);
             load_image(rs_pixmaps[i], images[i].norm);
-            FREE(rs_pixmaps[i]);	/* These are created by STRDUP() */
+            FREE(rs_pixmaps[i]);        /* These are created by STRDUP() */
         }
 #else
         /* Right now, solid mode is the only thing we can do without pixmap support. */
@@ -3024,11 +3044,11 @@ post_parse(void)
             unsigned long w, h;
             int count;
 
-            count = num_words(rs_anim_pixmap_list) - 1;	/* -1 for the delay */
+            count = num_words(rs_anim_pixmap_list) - 1; /* -1 for the delay */
             rs_anim_pixmaps = (char **) MALLOC(sizeof(char *) * (count + 1));
 
             for (i = 0; i < count; i++) {
-                temp = get_word(i + 2, rs_anim_pixmap_list);	/* +2 rather than +1 to account for the delay */
+                temp = get_word(i + 2, rs_anim_pixmap_list);    /* +2 rather than +1 to account for the delay */
                 if (temp == NULL)
                     break;
                 if (num_words(temp) != 3) {
@@ -3116,8 +3136,8 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (theme_dir ? theme_dir : PKGDATADIR "/themes/Eterm\n"),
-                                path);
+                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
+                                (theme_dir ? theme_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
             }
@@ -3146,8 +3166,8 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.", (user_dir ? user_dir : PKGDATADIR "/themes/Eterm\n"),
-                                path);
+                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
+                                (user_dir ? user_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
             }
@@ -3263,69 +3283,69 @@ save_config(char *path, unsigned char save_theme)
         for (i = 0; i < image_max; i++) {
             fprintf(fp, "    begin image\n");
             switch (i) {
-              case image_bg:
-                  fprintf(fp, "      type background\n");
-                  break;
-              case image_sb:
-                  fprintf(fp, "      type trough\n");
-                  break;
-              case image_sa:
-                  fprintf(fp, "      type anchor\n");
-                  break;
-              case image_st:
-                  fprintf(fp, "      type thumb\n");
-                  break;
-              case image_up:
-                  fprintf(fp, "      type up_arrow\n");
-                  break;
-              case image_down:
-                  fprintf(fp, "      type down_arrow\n");
-                  break;
-              case image_left:
-                  fprintf(fp, "      type left_arrow\n");
-                  break;
-              case image_right:
-                  fprintf(fp, "      type right_arrow\n");
-                  break;
-              case image_menu:
-                  fprintf(fp, "      type menu\n");
-                  break;
-              case image_menuitem:
-                  fprintf(fp, "      type menuitem\n");
-                  break;
-              case image_submenu:
-                  fprintf(fp, "      type submenu\n");
-                  break;
-              case image_button:
-                  fprintf(fp, "      type button\n");
-                  break;
-              case image_bbar:
-                  fprintf(fp, "      type button_bar\n");
-                  break;
-              case image_gbar:
-                  fprintf(fp, "      type grab_bar\n");
-                  break;
-              case image_dialog:
-                  fprintf(fp, "      type dialog_box\n");
-                  break;
+                case image_bg:
+                    fprintf(fp, "      type background\n");
+                    break;
+                case image_sb:
+                    fprintf(fp, "      type trough\n");
+                    break;
+                case image_sa:
+                    fprintf(fp, "      type anchor\n");
+                    break;
+                case image_st:
+                    fprintf(fp, "      type thumb\n");
+                    break;
+                case image_up:
+                    fprintf(fp, "      type up_arrow\n");
+                    break;
+                case image_down:
+                    fprintf(fp, "      type down_arrow\n");
+                    break;
+                case image_left:
+                    fprintf(fp, "      type left_arrow\n");
+                    break;
+                case image_right:
+                    fprintf(fp, "      type right_arrow\n");
+                    break;
+                case image_menu:
+                    fprintf(fp, "      type menu\n");
+                    break;
+                case image_menuitem:
+                    fprintf(fp, "      type menuitem\n");
+                    break;
+                case image_submenu:
+                    fprintf(fp, "      type submenu\n");
+                    break;
+                case image_button:
+                    fprintf(fp, "      type button\n");
+                    break;
+                case image_bbar:
+                    fprintf(fp, "      type button_bar\n");
+                    break;
+                case image_gbar:
+                    fprintf(fp, "      type grab_bar\n");
+                    break;
+                case image_dialog:
+                    fprintf(fp, "      type dialog_box\n");
+                    break;
             }
             fprintf(fp, "      mode ");
             switch (images[i].mode & MODE_MASK) {
-              case MODE_IMAGE:
-                  fprintf(fp, "image");
-                  break;
-              case MODE_TRANS:
-                  fprintf(fp, "trans");
-                  break;
-              case MODE_VIEWPORT:
-                  fprintf(fp, "viewport");
-                  break;
-              case MODE_AUTO:
-                  fprintf(fp, "auto");
-                  break;
-              default:
-                  fprintf(fp, "solid");
-                  break;
+                case MODE_IMAGE:
+                    fprintf(fp, "image");
+                    break;
+                case MODE_TRANS:
+                    fprintf(fp, "trans");
+                    break;
+                case MODE_VIEWPORT:
+                    fprintf(fp, "viewport");
+                    break;
+                case MODE_AUTO:
+                    fprintf(fp, "auto");
+                    break;
+                default:
+                    fprintf(fp, "solid");
+                    break;
             }
             if (images[i].mode & ALLOW_MASK) {
                 fprintf(fp, " allow");
@@ -3392,12 +3412,13 @@ save_config(char *path, unsigned char save_theme)
             }
 #endif
             if (simg->iml->border) {
-                fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                        simg->iml->border->bottom);
+                fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right,
+                        simg->iml->border->top, simg->iml->border->bottom);
             }
             if (simg->iml->bevel) {
-                fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
-                        simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+                fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"),
+                        simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top,
+                        simg->iml->bevel->edges->bottom);
             }
             if (simg->iml->pad) {
                 fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
@@ -3444,21 +3465,22 @@ save_config(char *path, unsigned char save_theme)
                             simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness,
+                            simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness,
+                            simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right,
+                            simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
-                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
-                            simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"),
+                            simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top,
+                            simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
                     fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
@@ -3506,21 +3528,22 @@ save_config(char *path, unsigned char save_theme)
                             simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness,
+                            simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness,
+                            simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right,
+                            simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
-                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
-                            simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"),
+                            simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top,
+                            simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
                     fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
@@ -3568,21 +3591,22 @@ save_config(char *path, unsigned char save_theme)
                             simg->iml->rmod->gamma);
                 }
                 if (simg->iml->gmod) {
-                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness, simg->iml->gmod->contrast,
-                            simg->iml->gmod->gamma);
+                    fprintf(fp, "      colormod green 0x%02x 0x%02x 0x%02x\n", simg->iml->gmod->brightness,
+                            simg->iml->gmod->contrast, simg->iml->gmod->gamma);
                 }
                 if (simg->iml->bmod) {
-                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness, simg->iml->bmod->contrast,
-                            simg->iml->bmod->gamma);
+                    fprintf(fp, "      colormod blue 0x%02x 0x%02x 0x%02x\n", simg->iml->bmod->brightness,
+                            simg->iml->bmod->contrast, simg->iml->bmod->gamma);
                 }
 #endif
                 if (simg->iml->border) {
-                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right, simg->iml->border->top,
-                            simg->iml->border->bottom);
+                    fprintf(fp, "      border %hu %hu %hu %hu\n", simg->iml->border->left, simg->iml->border->right,
+                            simg->iml->border->top, simg->iml->border->bottom);
                 }
                 if (simg->iml->bevel) {
-                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"), simg->iml->bevel->edges->left,
-                            simg->iml->bevel->edges->right, simg->iml->bevel->edges->top, simg->iml->bevel->edges->bottom);
+                    fprintf(fp, "      bevel %s %hu %hu %hu %hu\n", ((simg->iml->bevel->up) ? "up" : "down"),
+                            simg->iml->bevel->edges->left, simg->iml->bevel->edges->right, simg->iml->bevel->edges->top,
+                            simg->iml->bevel->edges->bottom);
                 }
                 if (simg->iml->pad) {
                     fprintf(fp, "      padding %hu %hu %hu %hu\n", simg->iml->pad->left, simg->iml->pad->right, simg->iml->pad->top,
@@ -3849,11 +3873,11 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    min_anchor_size %d\n", rs_min_anchor_size);
     fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
     fprintf(fp, "    term_name %s\n", getenv("TERM"));
-    fprintf(fp, "    beep_command \"%s\"\n", SPIF_CAST_PTR(char) (
-                                                                  (rs_beep_command)
+    fprintf(fp, "    beep_command \"%s\"\n", SPIF_CAST_PTR(char) ((rs_beep_command)
                                                                   ? (SPIF_CAST_PTR(char) rs_beep_command)
                                                                   : (SPIF_CAST_PTR(char) "")
-                                                                 ));
+            ));
+
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
     if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
         fprintf(fp, "    exec ");

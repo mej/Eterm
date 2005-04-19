@@ -85,13 +85,15 @@ enl_ipc_get_win(void)
         XFree(str);
     }
     if (ipc_win != None) {
-        if (!XGetGeometry(Xdisplay, ipc_win, &dummy_win, &dummy_int, &dummy_int, &dummy_uint, &dummy_uint, &dummy_uint, &dummy_uint)) {
+        if (!XGetGeometry
+            (Xdisplay, ipc_win, &dummy_win, &dummy_int, &dummy_int, &dummy_uint, &dummy_uint, &dummy_uint, &dummy_uint)) {
             D_ENL((" -> IPC Window property is valid, but the window doesn't exist.  I give up!\n"));
             ipc_win = None;
         }
         str = NULL;
         if (ipc_win != None) {
-            XGetWindowProperty(Xdisplay, ipc_win, props[PROP_ENL_COMMS], 0, 14, False, AnyPropertyType, &prop, &format, &num, &after, &str);
+            XGetWindowProperty(Xdisplay, ipc_win, props[PROP_ENL_COMMS], 0, 14, False, AnyPropertyType, &prop, &format, &num,
+                               &after, &str);
             if (str) {
                 XFree(str);
             } else {

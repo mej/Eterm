@@ -5325,3 +5325,7 @@ test scripts into utils/, and in playing around with them, I found and
 fixed an X server resource leak.  Use Etpalette to view the 256-color
 palette.
 ----------------------------------------------------------------------
+Mon Apr 18 21:49:08 2005                        Michael Jennings (mej)
+
+Re-indent code.
+----------------------------------------------------------------------

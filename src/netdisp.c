@@ -111,7 +111,8 @@ network_display(const char *display)
                 if (colon == NULL)
                     colon = ":0.0";
 
-                sprintf(ipaddress, "%d.%d.%d.%d%s", (int) ((addr >> 030) & 0xFF), (int) ((addr >> 020) & 0xFF), (int) ((addr >> 010) & 0xFF), (int) (addr & 0xFF), colon);
+                sprintf(ipaddress, "%d.%d.%d.%d%s", (int) ((addr >> 030) & 0xFF), (int) ((addr >> 020) & 0xFF),
+                        (int) ((addr >> 010) & 0xFF), (int) (addr & 0xFF), colon);
 
                 rval = ipaddress;
                 break;

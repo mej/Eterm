@@ -61,7 +61,8 @@ timer_add(unsigned long msec, timer_handler_t handler, void *data)
     timer->time.tv_usec = ((msec % 1000) * 1000) + tv.tv_usec;
     timer->handler = handler;
     timer->data = data;
-    D_TIMER(("Added timer.  Timer set to %lu/%lu with handler %8p and data %8p\n", timer->time.tv_sec, timer->time.tv_usec, timer->handler, timer->data));
+    D_TIMER(("Added timer.  Timer set to %lu/%lu with handler %8p and data %8p\n", timer->time.tv_sec, timer->time.tv_usec,
+             timer->handler, timer->data));
     return ((timerhdl_t) timer);
 }
 

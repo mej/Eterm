@@ -76,6 +76,7 @@ eterm_bootstrap(int argc, char *argv[])
 
     int i;
     char *val;
+
     /* "WINDOWID=\0" = 10 chars, UINT_MAX = 10 chars */
     static char windowid_string[20], *display_string, *term_string;
 
@@ -160,7 +161,9 @@ eterm_bootstrap(int argc, char *argv[])
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
     }
-    if ((user_dir = conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
+    if ((user_dir =
+         conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
+                          (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
         D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
@@ -194,7 +197,8 @@ eterm_bootstrap(int argc, char *argv[])
 #endif
     spifopt_parse(argc, argv);
     D_UTMP(("Saved real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", my_ruid, my_rgid, my_euid, my_egid));
-    D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(), getegid()));
+    D_UTMP(("Now running with real uid/gid = [ %d, %d ]  effective uid/gid = [ %d, %d ]\n", getuid(), getgid(), geteuid(),
+            getegid()));
 
 #ifdef ESCREEN
 #  define ESCREEN_PREFIX "Escreen"
@@ -240,7 +244,8 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Initialize the scrollbar */
     scrollbar_init(szHint.width, szHint.height - bbar_calc_docked_height(BBAR_DOCKED));
-    scrollbar_mapping((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR)) && !((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP)) && !TermWin.focus));
+    scrollbar_mapping((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR))
+                      && !((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_POPUP)) && !TermWin.focus));
 
     /* Initialize the menu subsystem. */
     menu_init();

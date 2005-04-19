@@ -73,7 +73,8 @@ event_register_dispatcher(event_dispatcher_t func, event_dispatcher_init_t init)
 
     /* Add a secondary event dispatcher */
     event_master.num_dispatchers++;
-    event_master.dispatchers = (event_dispatcher_t *) REALLOC(event_master.dispatchers, sizeof(event_dispatcher_t) * event_master.num_dispatchers);
+    event_master.dispatchers =
+        (event_dispatcher_t *) REALLOC(event_master.dispatchers, sizeof(event_dispatcher_t) * event_master.num_dispatchers);
     event_master.dispatchers[event_master.num_dispatchers - 1] = (event_dispatcher_t) func;
     (init) ();                  /* Initialize the dispatcher's data */
 }
@@ -230,7 +231,8 @@ handle_property_notify(event_t *ev)
 
         if ((ev->xany.window == TermWin.parent) || (ev->xany.window == Xroot)) {
             D_EVENTS(("On %s.  prop (_WIN_WORKSPACE) == 0x%08x, ev->xproperty.atom == 0x%08x\n",
-                      ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) props[PROP_DESKTOP], (int) ev->xproperty.atom));
+                      ((ev->xany.window == Xroot) ? "the root window" : "TermWin.parent"), (int) props[PROP_DESKTOP],
+                      (int) ev->xproperty.atom));
             if (ev->xproperty.atom == props[PROP_DESKTOP]) {
                 win = get_desktop_window();
                 if (win == (Window) 1) {
@@ -270,7 +272,8 @@ handle_property_notify(event_t *ev)
     }
 #endif
     if ((ev->xany.window == Xroot) && (image_mode_any(MODE_AUTO))) {
-        D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == %d, ev->xproperty.atom == %d\n", (int) props[PROP_ENL_COMMS], (int) ev->xproperty.atom));
+        D_EVENTS(("On the root window.  prop (ENLIGHTENMENT_COMMS) == %d, ev->xproperty.atom == %d\n", (int) props[PROP_ENL_COMMS],
+                  (int) ev->xproperty.atom));
         if ((props[PROP_ENL_COMMS] != None) && (ev->xproperty.atom == props[PROP_ENL_COMMS])) {
             if ((enl_ipc_get_win()) != None) {
 #ifdef PIXMAP_SUPPORT
@@ -341,7 +344,8 @@ handle_client_message(event_t *ev)
         unsigned char *data;
         unsigned long Size, RemainingBytes;
 
-        XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType, &ActualFormat, &Size, &RemainingBytes, &data);
+        XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType,
+                           &ActualFormat, &Size, &RemainingBytes, &data);
         if (data != NULL) {
             XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
             selection_paste(XA_CUT_BUFFER0);
@@ -394,18 +398,18 @@ handle_visibility_notify(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
     switch (ev->xvisibility.state) {
-      case VisibilityUnobscured:
-          D_X11(("Window completely visible.  Using FAST_REFRESH.\n"));
-          refresh_type = FAST_REFRESH;
-          break;
-      case VisibilityPartiallyObscured:
-          D_X11(("Window partially hidden.  Using SLOW_REFRESH.\n"));
-          refresh_type = SLOW_REFRESH;
-          break;
-      default:
-          D_X11(("Window completely hidden.  Using NO_REFRESH.\n"));
-          refresh_type = NO_REFRESH;
-          break;
+        case VisibilityUnobscured:
+            D_X11(("Window completely visible.  Using FAST_REFRESH.\n"));
+            refresh_type = FAST_REFRESH;
+            break;
+        case VisibilityPartiallyObscured:
+            D_X11(("Window partially hidden.  Using SLOW_REFRESH.\n"));
+            refresh_type = SLOW_REFRESH;
+            break;
+        default:
+            D_X11(("Window completely hidden.  Using NO_REFRESH.\n"));
+            refresh_type = NO_REFRESH;
+            break;
     }
     return 1;
 }
@@ -460,7 +464,8 @@ handle_focus_in(event_t *ev)
         unsigned int unused_mask;
 
         TermWin.focus = 1;
-        XQueryPointer(Xdisplay, TermWin.parent, &unused_root, &child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+        XQueryPointer(Xdisplay, TermWin.parent, &unused_root, &child, &unused_root_x, &unused_root_y, &(ev->xbutton.x),
+                      &(ev->xbutton.y), &unused_mask);
         if (child == TermWin.vt) {
             if (images[image_bg].current != images[image_bg].selected) {
                 images[image_bg].current = images[image_bg].selected;
@@ -523,7 +528,8 @@ handle_configure_notify(event_t *ev)
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, ConfigureNotify, ev)) {
-        D_EVENTS(("New event:  Window 0x%08x, %dx%d at %d, %d\n", ev->xany.window, ev->xconfigure.width, ev->xconfigure.height, ev->xconfigure.x, ev->xconfigure.y));
+        D_EVENTS(("New event:  Window 0x%08x, %dx%d at %d, %d\n", ev->xany.window, ev->xconfigure.width, ev->xconfigure.height,
+                  ev->xconfigure.x, ev->xconfigure.y));
     }
     if (ev->xany.window == TermWin.parent) {
         int x = ev->xconfigure.x, y = ev->xconfigure.y;
@@ -651,85 +657,87 @@ handle_button_press(event_t *ev)
                 mouse_report(&(ev->xbutton));
             } else {
                 switch (ev->xbutton.button) {
-                  case Button1:
-                      if ((button_state.last_button_press == 1) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
-                          button_state.clicks++;
-                      } else {
-                          button_state.clicks = 1;
-                      }
-                      selection_click(button_state.clicks, ev->xbutton.x, ev->xbutton.y);
-                      button_state.last_button_press = 1;
-                      break;
+                    case Button1:
+                        if ((button_state.last_button_press == 1)
+                            && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
+                            button_state.clicks++;
+                        } else {
+                            button_state.clicks = 1;
+                        }
+                        selection_click(button_state.clicks, ev->xbutton.x, ev->xbutton.y);
+                        button_state.last_button_press = 1;
+                        break;
 
-                  case Button3:
-                      if ((button_state.last_button_press == 3) && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
-                          selection_rotate(ev->xbutton.x, ev->xbutton.y);
-                      } else {
-                          selection_extend(ev->xbutton.x, ev->xbutton.y, 1);
-                      }
-                      button_state.last_button_press = 3;
-                      break;
+                    case Button3:
+                        if ((button_state.last_button_press == 3)
+                            && (ev->xbutton.time - button_state.button_press < MULTICLICK_TIME)) {
+                            selection_rotate(ev->xbutton.x, ev->xbutton.y);
+                        } else {
+                            selection_extend(ev->xbutton.x, ev->xbutton.y, 1);
+                        }
+                        button_state.last_button_press = 3;
+                        break;
 #ifdef MOUSEWHEEL
-                      /* This section activates the following bindings:
-                       *
-                       * Mousewheel Up               -- Scroll up 1 page
-                       * Ctrl + Mousewheel Up        -- Scroll up 5 pages
-                       * Shift + Mousewheel Up       -- Scroll up 1 line
-                       * Alt + Mousewheel Up         -- Send PgUp to tty
-                       * Alt + Ctrl + Mousewheel Up  -- Send 5 PgUp's to tty
-                       * Alt + Shift + Mousewheel Up -- Send Up Arrow to tty
-                       *
-                       * Mousewheel Down               -- Scroll down 1 page
-                       * Ctrl + Mousewheel Down        -- Scroll down 5 pages
-                       * Shift + Mousewheel Down       -- Scroll down 1 line
-                       * Alt + Mousewheel Down         -- Send PgDn to tty
-                       * Alt + Ctrl + Mousewheel Down  -- Send 5 PgDn's to tty
-                       * Alt + Shift + Mousewheel Down -- Send Down Arrow to tty
-                       *
-                       * Note that the number of lines which constitute a "page" is equal to the number
-                       * of text rows in the terminal window.  The context lines are subtracted out *after*
-                       * the conversion is done.  In other words, scrolling 5 pages means scrolling
-                       * (5 * LINES_PER_PAGE) - CONTEXT_LINES
-                       *    _not_
-                       * (LINES_PER_PAGE - CONTEXT_LINES) * 5
-                       *
-                       * This is also true for the scroll() function in script.c.
-                       */
-                  case Button4:
-                      if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
-                          scr_page(UP, (TermWin.nrow * 5) - CONTEXT_LINES);
-                      } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
-                          scr_page(UP, 1);
-                      } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
-                          tt_write("\033[5~", 4);
-                      } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
-                          tt_write("\033[A", 3);
-                      } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
-                          tt_write("\033[5~\033[5~\033[5~\033[5~\033[5~", 20);
-                      } else {
-                          scr_page(UP, TermWin.nrow - CONTEXT_LINES);
-                      }
-                      button_state.last_button_press = 4;
-                      break;
-                  case Button5:
-                      if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
-                          scr_page(DN, (TermWin.nrow * 5) - CONTEXT_LINES);
-                      } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
-                          scr_page(DN, 1);
-                      } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
-                          tt_write("\033[6~", 4);
-                      } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
-                          tt_write("\033[B", 3);
-                      } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
-                          tt_write("\033[6~\033[6~\033[6~\033[6~\033[6~", 20);
-                      } else {
-                          scr_page(DN, TermWin.nrow - CONTEXT_LINES);
-                      }
-                      button_state.last_button_press = 5;
-                      break;
+                        /* This section activates the following bindings:
+                         *
+                         * Mousewheel Up               -- Scroll up 1 page
+                         * Ctrl + Mousewheel Up        -- Scroll up 5 pages
+                         * Shift + Mousewheel Up       -- Scroll up 1 line
+                         * Alt + Mousewheel Up         -- Send PgUp to tty
+                         * Alt + Ctrl + Mousewheel Up  -- Send 5 PgUp's to tty
+                         * Alt + Shift + Mousewheel Up -- Send Up Arrow to tty
+                         *
+                         * Mousewheel Down               -- Scroll down 1 page
+                         * Ctrl + Mousewheel Down        -- Scroll down 5 pages
+                         * Shift + Mousewheel Down       -- Scroll down 1 line
+                         * Alt + Mousewheel Down         -- Send PgDn to tty
+                         * Alt + Ctrl + Mousewheel Down  -- Send 5 PgDn's to tty
+                         * Alt + Shift + Mousewheel Down -- Send Down Arrow to tty
+                         *
+                         * Note that the number of lines which constitute a "page" is equal to the number
+                         * of text rows in the terminal window.  The context lines are subtracted out *after*
+                         * the conversion is done.  In other words, scrolling 5 pages means scrolling
+                         * (5 * LINES_PER_PAGE) - CONTEXT_LINES
+                         *    _not_
+                         * (LINES_PER_PAGE - CONTEXT_LINES) * 5
+                         *
+                         * This is also true for the scroll() function in script.c.
+                         */
+                    case Button4:
+                        if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+                            scr_page(UP, (TermWin.nrow * 5) - CONTEXT_LINES);
+                        } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+                            scr_page(UP, 1);
+                        } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+                            tt_write("\033[5~", 4);
+                        } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+                            tt_write("\033[A", 3);
+                        } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+                            tt_write("\033[5~\033[5~\033[5~\033[5~\033[5~", 20);
+                        } else {
+                            scr_page(UP, TermWin.nrow - CONTEXT_LINES);
+                        }
+                        button_state.last_button_press = 4;
+                        break;
+                    case Button5:
+                        if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+                            scr_page(DN, (TermWin.nrow * 5) - CONTEXT_LINES);
+                        } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+                            scr_page(DN, 1);
+                        } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+                            tt_write("\033[6~", 4);
+                        } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+                            tt_write("\033[B", 3);
+                        } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+                            tt_write("\033[6~\033[6~\033[6~\033[6~\033[6~", 20);
+                        } else {
+                            scr_page(DN, TermWin.nrow - CONTEXT_LINES);
+                        }
+                        button_state.last_button_press = 5;
+                        break;
 #endif
-                  default:
-                      break;
+                    default:
+                        break;
                 }
             }
             button_state.button_press = ev->xbutton.time;
@@ -757,14 +765,14 @@ handle_button_release(event_t *ev)
         if (ev->xbutton.subwindow == None) {
             if (button_state.report_mode) {
                 switch (PrivateModes & PrivMode_mouse_report) {
-                  case PrivMode_MouseX10:
-                      break;
+                    case PrivMode_MouseX10:
+                        break;
 
-                  case PrivMode_MouseX11:
-                      ev->xbutton.state = button_state.bypass_keystate;
-                      ev->xbutton.button = AnyButton;
-                      mouse_report(&(ev->xbutton));
-                      break;
+                    case PrivMode_MouseX11:
+                        ev->xbutton.state = button_state.bypass_keystate;
+                        ev->xbutton.button = AnyButton;
+                        mouse_report(&(ev->xbutton));
+                        break;
                 }
                 return (1);
             }
@@ -777,16 +785,16 @@ handle_button_release(event_t *ev)
                 selection_extend(ev->xbutton.x, ev->xbutton.y, 0);
             }
             switch (ev->xbutton.button) {
-              case Button1:
-              case Button3:
-                  selection_make(ev->xbutton.time);
-                  break;
+                case Button1:
+                case Button3:
+                    selection_make(ev->xbutton.time);
+                    break;
 
-              case Button2:
-                  selection_paste(XA_PRIMARY);
-                  break;
-              default:
-                  break;
+                case Button2:
+                    selection_paste(XA_PRIMARY);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -824,7 +832,8 @@ handle_motion_notify(event_t *ev)
             unsigned int unused_mask;
 
             while (XCheckTypedWindowEvent(Xdisplay, TermWin.vt, MotionNotify, ev));
-            XQueryPointer(Xdisplay, TermWin.vt, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x), &(ev->xbutton.y), &unused_mask);
+            XQueryPointer(Xdisplay, TermWin.vt, &unused_root, &unused_child, &unused_root_x, &unused_root_y, &(ev->xbutton.x),
+                          &(ev->xbutton.y), &unused_mask);
 #ifdef MOUSE_THRESHOLD
             /* deal with a `jumpy' mouse */
             if ((ev->xmotion.time - button_state.button_press) > MOUSE_THRESHOLD)
@@ -865,8 +874,9 @@ xerror_handler(Display * display, XErrorEvent * event)
 
     strcpy(err_string, "");
     XGetErrorText(display, event->error_code, err_string, sizeof(err_string));
-    print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n", request_code_to_name(event->request_code),
-                (int) event->resourceid, event->request_code, event->minor_code, err_string, event->error_code);
+    print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n",
+                request_code_to_name(event->request_code), (int) event->resourceid, event->request_code, event->minor_code,
+                err_string, event->error_code);
 #if DEBUG > DEBUG_X11
     if (DEBUG_LEVEL >= DEBUG_X11) {
         dump_stack_trace();

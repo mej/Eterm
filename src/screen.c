@@ -398,21 +398,21 @@ scr_cursor(int mode)
     D_SCREEN(("scr_cursor(%s)\n", (mode == SAVE ? "SAVE" : "RESTORE")));
 
     switch (mode) {
-      case SAVE:
-          save.row = screen.row;
-          save.col = screen.col;
-          save.rstyle = rstyle;
-          save.charset = screen.charset;
-          save.charset_char = charsets[screen.charset];
-          break;
-      case RESTORE:
-          screen.row = save.row;
-          screen.col = save.col;
-          rstyle = save.rstyle;
-          screen.charset = save.charset;
-          charsets[screen.charset] = save.charset_char;
-          set_font_style();
-          break;
+        case SAVE:
+            save.row = screen.row;
+            save.col = screen.col;
+            save.rstyle = rstyle;
+            save.charset = screen.charset;
+            save.charset_char = charsets[screen.charset];
+            break;
+        case RESTORE:
+            screen.row = save.row;
+            screen.col = save.col;
+            rstyle = save.rstyle;
+            screen.charset = save.charset;
+            charsets[screen.charset] = save.charset_char;
+            set_font_style();
+            break;
     }
 }
 
@@ -483,12 +483,12 @@ scr_color(unsigned int color, unsigned int Intensity)
     else {
         if (Xdepth <= 2) {      /* Monochrome - ignore color changes */
             switch (Intensity) {
-              case RS_Bold:
-                  color = fgColor;
-                  break;
-              case RS_Blink:
-                  color = bgColor;
-                  break;
+                case RS_Bold:
+                    color = fgColor;
+                    break;
+                case RS_Blink:
+                    color = bgColor;
+                    break;
             }
         } else {
             if ((rstyle & Intensity) && (color >= minColor) && (color <= maxColor)) {
@@ -508,12 +508,12 @@ scr_color(unsigned int color, unsigned int Intensity)
         }
     }
     switch (Intensity) {
-      case RS_Bold:
-          rstyle = SET_FGCOLOR(rstyle, color);
-          break;
-      case RS_Blink:
-          rstyle = SET_BGCOLOR(rstyle, color);
-          break;
+        case RS_Bold:
+            rstyle = SET_FGCOLOR(rstyle, color);
+            break;
+        case RS_Blink:
+            rstyle = SET_BGCOLOR(rstyle, color);
+            break;
     }
 }
 
@@ -531,47 +531,47 @@ scr_rendition(int set, int style)
 /* A: Set style */
         rstyle |= style;
         switch (style) {
-          case RS_RVid:
-              if (rvideo)
-                  rstyle &= ~RS_RVid;
-              break;
-          case RS_Bold:
-              color = GET_FGCOLOR(rstyle);
-              scr_color((color == fgColor ? GET_FGCOLOR(colorfgbg) : color), RS_Bold);
-              break;
-          case RS_Blink:
-              color = GET_BGCOLOR(rstyle);
-              scr_color((color == bgColor ? GET_BGCOLOR(colorfgbg) : color), RS_Blink);
-              break;
+            case RS_RVid:
+                if (rvideo)
+                    rstyle &= ~RS_RVid;
+                break;
+            case RS_Bold:
+                color = GET_FGCOLOR(rstyle);
+                scr_color((color == fgColor ? GET_FGCOLOR(colorfgbg) : color), RS_Bold);
+                break;
+            case RS_Blink:
+                color = GET_BGCOLOR(rstyle);
+                scr_color((color == bgColor ? GET_BGCOLOR(colorfgbg) : color), RS_Blink);
+                break;
         }
     } else {
 /* B: Unset style */
         rstyle &= ~style;
 
         switch (style) {
-          case ~RS_None:       /* default fg/bg colors */
-              rstyle = DEFAULT_RSTYLE | (old_style & RS_fontMask);
-              /* FALLTHROUGH */
-          case RS_RVid:
-              if (rvideo)
-                  rstyle |= RS_RVid;
-              break;
-          case RS_Bold:
-              color = GET_FGCOLOR(rstyle);
-              if (color >= minBright && color <= maxBright) {
-                  scr_color(color, RS_Bold);
-                  if ((rstyle & RS_fgMask) == (colorfgbg & RS_fgMask))
-                      scr_color(restoreFG, RS_Bold);
-              }
-              break;
-          case RS_Blink:
-              color = GET_BGCOLOR(rstyle);
-              if (color >= minBright && color <= maxBright) {
-                  scr_color(color, RS_Blink);
-                  if ((rstyle & RS_bgMask) == (colorfgbg & RS_bgMask))
-                      scr_color(restoreBG, RS_Blink);
-              }
-              break;
+            case ~RS_None:     /* default fg/bg colors */
+                rstyle = DEFAULT_RSTYLE | (old_style & RS_fontMask);
+                /* FALLTHROUGH */
+            case RS_RVid:
+                if (rvideo)
+                    rstyle |= RS_RVid;
+                break;
+            case RS_Bold:
+                color = GET_FGCOLOR(rstyle);
+                if (color >= minBright && color <= maxBright) {
+                    scr_color(color, RS_Bold);
+                    if ((rstyle & RS_fgMask) == (colorfgbg & RS_fgMask))
+                        scr_color(restoreFG, RS_Bold);
+                }
+                break;
+            case RS_Blink:
+                color = GET_BGCOLOR(rstyle);
+                if (color >= minBright && color <= maxBright) {
+                    scr_color(color, RS_Blink);
+                    if ((rstyle & RS_bgMask) == (colorfgbg & RS_bgMask))
+                        scr_color(restoreBG, RS_Blink);
+                }
+                break;
         }
     }
 }
@@ -752,35 +752,35 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
             } else
 #endif
                 switch (c) {
-                  case 127:
-                      continue; /* ummmm..... */
-                  case '\t':
-                      scr_tab(1);
-                      continue;
-                  case '\n':
-                      LOWER_BOUND(stp[last_col], screen.col);
-                      screen.flags &= ~Screen_WrapNext;
-                      if (screen.row == screen.bscroll) {
-                          scroll_text(screen.tscroll, screen.bscroll, 1, 0);
-                          j = screen.bscroll + TermWin.saveLines;
-                          blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline|RS_Overscore));
-                      } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
-                          screen.row++;
-                          row = screen.row + TermWin.saveLines;
-                      }
-                      stp = screen.text[row];   /* _must_ refresh */
-                      srp = screen.rend[row];   /* _must_ refresh */
-                      continue;
-                  case '\r':
-                      LOWER_BOUND(stp[last_col], screen.col);
-                      screen.flags &= ~Screen_WrapNext;
-                      screen.col = 0;
-                      continue;
-                  default:
+                    case 127:
+                        continue;       /* ummmm..... */
+                    case '\t':
+                        scr_tab(1);
+                        continue;
+                    case '\n':
+                        LOWER_BOUND(stp[last_col], screen.col);
+                        screen.flags &= ~Screen_WrapNext;
+                        if (screen.row == screen.bscroll) {
+                            scroll_text(screen.tscroll, screen.bscroll, 1, 0);
+                            j = screen.bscroll + TermWin.saveLines;
+                            blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline | RS_Overscore));
+                        } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
+                            screen.row++;
+                            row = screen.row + TermWin.saveLines;
+                        }
+                        stp = screen.text[row]; /* _must_ refresh */
+                        srp = screen.rend[row]; /* _must_ refresh */
+                        continue;
+                    case '\r':
+                        LOWER_BOUND(stp[last_col], screen.col);
+                        screen.flags &= ~Screen_WrapNext;
+                        screen.col = 0;
+                        continue;
+                    default:
 #ifdef MULTI_CHARSET
-                      rstyle &= ~RS_multiMask;
+                        rstyle &= ~RS_multiMask;
 #endif
-                      break;
+                        break;
                 }
 #ifdef MULTI_CHARSET
         }
@@ -792,7 +792,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 j = screen.bscroll + TermWin.saveLines;
                 /* blank_line(screen.text[j], screen.rend[j], TermWin.ncol,
                    rstyle);    Bug fix from John Ellison - need to reset rstyle */
-                blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline|RS_Overscore));
+                blank_screen_mem(screen.text, screen.rend, j, rstyle & ~(RS_Uline | RS_Overscore));
             } else if (screen.row < (TERM_WINDOW_GET_REPORTED_ROWS() - 1)) {
                 screen.row++;
                 row = screen.row + TermWin.saveLines;
@@ -832,7 +832,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
 
 #ifdef ESCREEN
     if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        if (screen.row >= TERM_WINDOW_GET_ROWS()) {   /* last row -> upd-flag */
+        if (screen.row >= TERM_WINDOW_GET_ROWS()) {     /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         }
     }
@@ -928,7 +928,7 @@ scr_gotorc(int row, int col, int relative)
     }
 #ifdef ESCREEN
     if (NS_MAGIC_LINE(TermWin.screen_mode)) {
-        if (screen.row >= TERM_WINDOW_GET_ROWS()) {   /* last row -> upd-flag */
+        if (screen.row >= TERM_WINDOW_GET_ROWS()) {     /* last row -> upd-flag */
             TermWin.screen_pending |= 1;
         } else if (TermWin.screen_pending) {    /* left last -> upd-finis */
             TermWin.screen_pending |= 2;
@@ -993,26 +993,26 @@ scr_erase_line(int mode)
 
     if (screen.text[row]) {
         switch (mode) {
-          case 0:              /* erase to end of line */
-              col = screen.col;
-              num = TERM_WINDOW_GET_REPORTED_COLS() - col;
-              UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], col);
-              break;
-          case 1:              /* erase to beginning of line */
-              col = 0;
-              num = screen.col + 1;
-              break;
-          case 2:              /* erase whole line */
-              col = 0;
-              num = TERM_WINDOW_GET_REPORTED_COLS();
-              screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
-              break;
-          default:
-              return;
+            case 0:            /* erase to end of line */
+                col = screen.col;
+                num = TERM_WINDOW_GET_REPORTED_COLS() - col;
+                UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], col);
+                break;
+            case 1:            /* erase to beginning of line */
+                col = 0;
+                num = screen.col + 1;
+                break;
+            case 2:            /* erase whole line */
+                col = 0;
+                num = TERM_WINDOW_GET_REPORTED_COLS();
+                screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
+                break;
+            default:
+                return;
         }
-        blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num, rstyle & ~(RS_Uline|RS_Overscore));
+        blank_line(&(screen.text[row][col]), &(screen.rend[row][col]), num, rstyle & ~(RS_Uline | RS_Overscore));
     } else {
-        blank_screen_mem(screen.text, screen.rend, row, rstyle & ~(RS_Uline|RS_Overscore));
+        blank_screen_mem(screen.text, screen.rend, row, rstyle & ~(RS_Uline | RS_Overscore));
     }
 }
 
@@ -1046,24 +1046,24 @@ scr_erase_screen(int mode)
 
 
     switch (mode) {
-      case 0:                  /* erase to end of screen */
-          scr_erase_line(0);
-          row = screen.row + 1; /* possible OOB */
-          num = TERM_WINDOW_GET_REPORTED_ROWS() - row;
-          break;
-      case 1:                  /* erase to beginning of screen */
-          scr_erase_line(1);
-          row = 0;              /* possible OOB */
-          num = screen.row;
-          break;
-      case 2:                  /* erase whole screen */
-          row = 0;
-          num = TERM_WINDOW_GET_REPORTED_ROWS();
-          break;
-      default:
-          return;
+        case 0:                /* erase to end of screen */
+            scr_erase_line(0);
+            row = screen.row + 1;       /* possible OOB */
+            num = TERM_WINDOW_GET_REPORTED_ROWS() - row;
+            break;
+        case 1:                /* erase to beginning of screen */
+            scr_erase_line(1);
+            row = 0;            /* possible OOB */
+            num = screen.row;
+            break;
+        case 2:                /* erase whole screen */
+            row = 0;
+            num = TERM_WINDOW_GET_REPORTED_ROWS();
+            break;
+        default:
+            return;
     }
-    if (row >= 0 && row <= TERM_WINDOW_GET_REPORTED_ROWS()) {      /* check OOB */
+    if (row >= 0 && row <= TERM_WINDOW_GET_REPORTED_ROWS()) {   /* check OOB */
         UPPER_BOUND(num, (TERM_WINDOW_GET_REPORTED_ROWS() - row));
         if (rstyle & RS_RVid || rstyle & RS_Uline || rstyle & RS_Overscore)
             ren = -1;
@@ -1172,27 +1172,28 @@ scr_insdel_chars(int count, int insdel)
     screen.flags &= ~Screen_WrapNext;
 
     switch (insdel) {
-      case INSERT:
-          for (col = TERM_WINDOW_GET_REPORTED_COLS() - 1; (col - count) >= screen.col; col--) {
-              screen.text[row][col] = screen.text[row][col - count];
-              screen.rend[row][col] = screen.rend[row][col - count];
-          }
-          screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] += count;
-          UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], TERM_WINDOW_GET_REPORTED_COLS());
-          /* FALLTHROUGH */
-      case ERASE:
-          blank_line(&(screen.text[row][screen.col]), &(screen.rend[row][screen.col]), count, rstyle);
-          break;
-      case DELETE:
-          for (col = screen.col; (col + count) < TERM_WINDOW_GET_REPORTED_COLS(); col++) {
-              screen.text[row][col] = screen.text[row][col + count];
-              screen.rend[row][col] = screen.rend[row][col + count];
-          }
-          blank_line(&(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS() - count]), &(screen.rend[row][TERM_WINDOW_GET_REPORTED_COLS() - count]), count, rstyle);
-          screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] -= count;
-          if (((signed char) screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()]) < 0)
-              screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
-          break;
+        case INSERT:
+            for (col = TERM_WINDOW_GET_REPORTED_COLS() - 1; (col - count) >= screen.col; col--) {
+                screen.text[row][col] = screen.text[row][col - count];
+                screen.rend[row][col] = screen.rend[row][col - count];
+            }
+            screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] += count;
+            UPPER_BOUND(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()], TERM_WINDOW_GET_REPORTED_COLS());
+            /* FALLTHROUGH */
+        case ERASE:
+            blank_line(&(screen.text[row][screen.col]), &(screen.rend[row][screen.col]), count, rstyle);
+            break;
+        case DELETE:
+            for (col = screen.col; (col + count) < TERM_WINDOW_GET_REPORTED_COLS(); col++) {
+                screen.text[row][col] = screen.text[row][col + count];
+                screen.rend[row][col] = screen.rend[row][col + count];
+            }
+            blank_line(&(screen.text[row][TERM_WINDOW_GET_REPORTED_COLS() - count]),
+                       &(screen.rend[row][TERM_WINDOW_GET_REPORTED_COLS() - count]), count, rstyle);
+            screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] -= count;
+            if (((signed char) screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()]) < 0)
+                screen.text[row][TERM_WINDOW_GET_REPORTED_COLS()] = 0;
+            break;
     }
 #ifdef MULTI_CHARSET
     if ((screen.rend[row][0] & RS_multiMask) == RS_multi2) {
@@ -1337,22 +1338,22 @@ set_font_style(void)
 {
     rstyle &= ~RS_fontMask;
     switch (charsets[screen.charset]) {
-      case '0':                /* DEC Special Character & Line Drawing Set */
-          rstyle |= RS_acsFont;
-          break;
-      case 'A':                /* United Kingdom (UK) */
-          rstyle |= RS_ukFont;
-          break;
-      case 'B':                /* United States (USASCII) */
-          break;
-      case '<':                /* Multinational character set */
-          break;
-      case '5':                /* Finnish character set */
-          break;
-      case 'C':                /* Finnish character set */
-          break;
-      case 'K':                /* German character set */
-          break;
+        case '0':              /* DEC Special Character & Line Drawing Set */
+            rstyle |= RS_acsFont;
+            break;
+        case 'A':              /* United Kingdom (UK) */
+            rstyle |= RS_ukFont;
+            break;
+        case 'B':              /* United States (USASCII) */
+            break;
+        case '<':              /* Multinational character set */
+            break;
+        case '5':              /* Finnish character set */
+            break;
+        case 'C':              /* Finnish character set */
+            break;
+        case 'K':              /* German character set */
+            break;
     }
 }
 
@@ -1495,7 +1496,8 @@ scr_expose(int x, int y, int width, int height)
     rect_end.row = Pixel2Row(y + height + TermWin.fheight - 1);
     BOUND(rect_end.row, 0, nr);
 
-    D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, rect_beg.col, rect_beg.row, rect_end.col, rect_end.row));
+    D_SCREEN(("scr_expose(x:%d, y:%d, w:%d, h:%d) area (c:%d,r:%d)-(c:%d,r:%d)\n", x, y, width, height, rect_beg.col, rect_beg.row,
+              rect_end.col, rect_end.row));
 
     for (i = rect_beg.row; i <= rect_end.row; i++) {
         MEMSET(&(drawn_text[i][rect_beg.col]), 0, rect_end.col - rect_beg.col + 1);
@@ -1547,7 +1549,7 @@ scr_bell(void)
         scr_rvideo_mode(!rvideo);
         scr_rvideo_mode(!rvideo);
     } else if (!SPIF_PTR_ISNULL(rs_beep_command) && (*rs_beep_command)) {
-        system_no_wait(SPIF_CAST_C(char *) rs_beep_command);
+        system_no_wait(SPIF_CAST_C(char *)rs_beep_command);
     } else {
         XBell(Xdisplay, 0);
     }
@@ -1619,14 +1621,14 @@ scr_refresh(int type)
      scrrow,                    /* screen row offset                         */
      row_offset,                /* basic offset in screen structure          */
      boldlast = 0,              /* last character in some row was bold       */
-     len, wlen,                 /* text length screen/buffer                 */
-     fprop,                     /* proportional font used                    */
-     is_cursor,                 /* cursor this position                      */
-     rvid,                      /* reverse video this position               */
-     fore, back,                /* desired foreground/background             */
-     wbyte,                     /* we're in multibyte                        */
-     xpixel,                    /* x offset for start of drawing (font)      */
-     ypixel;                    /* y offset for start of drawing (font)      */
+        len, wlen,              /* text length screen/buffer                 */
+        fprop,                  /* proportional font used                    */
+        is_cursor,              /* cursor this position                      */
+        rvid,                   /* reverse video this position               */
+        fore, back,             /* desired foreground/background             */
+        wbyte,                  /* we're in multibyte                        */
+        xpixel,                 /* x offset for start of drawing (font)      */
+        ypixel;                 /* y offset for start of drawing (font)      */
     register int col, row,      /* column/row we're processing               */
      rend;                      /* rendition                                 */
     static int focus = -1;      /* screen in focus?                          */
@@ -1657,15 +1659,15 @@ scr_refresh(int type)
     PROF_INIT(scr_refresh);
 
     switch (type) {
-      case NO_REFRESH:
-          D_SCREEN(("scr_refresh(NO_REFRESH) called.\n"));
-          break;
-      case SLOW_REFRESH:
-          D_SCREEN(("scr_refresh(SLOW_REFRESH) called.\n"));
-          break;
-      case FAST_REFRESH:
-          D_SCREEN(("scr_refresh(FAST_REFRESH) called.\n"));
-          break;
+        case NO_REFRESH:
+            D_SCREEN(("scr_refresh(NO_REFRESH) called.\n"));
+            break;
+        case SLOW_REFRESH:
+            D_SCREEN(("scr_refresh(SLOW_REFRESH) called.\n"));
+            break;
+        case FAST_REFRESH:
+            D_SCREEN(("scr_refresh(FAST_REFRESH) called.\n"));
+            break;
     }
     if (type == NO_REFRESH)
         return;
@@ -1870,18 +1872,18 @@ scr_refresh(int type)
             } else
                 is_cursor = 0;
             switch (rend & RS_fontMask) {
-              case RS_acsFont:
-                  for (i = 0; i < len; i++)
-                      if (buffer[i] == 0x5f)
-                          buffer[i] = 0x7f;
-                      else if (buffer[i] > 0x5f && buffer[i] < 0x7f)
-                          buffer[i] -= 0x5f;
-                  break;
-              case RS_ukFont:
-                  for (i = 0; i < len; i++)
-                      if (buffer[i] == '#')
-                          buffer[i] = 0x1e;
-                  break;
+                case RS_acsFont:
+                    for (i = 0; i < len; i++)
+                        if (buffer[i] == 0x5f)
+                            buffer[i] = 0x7f;
+                        else if (buffer[i] > 0x5f && buffer[i] < 0x7f)
+                            buffer[i] -= 0x5f;
+                    break;
+                case RS_ukFont:
+                    for (i = 0; i < len; i++)
+                        if (buffer[i] == '#')
+                            buffer[i] = 0x1e;
+                    break;
             }
             if (rvid)
                 SWAP_IT(fore, back, i);
@@ -2057,10 +2059,12 @@ scr_refresh(int type)
                             gcmask |= (GCForeground | GCBackground);
                             XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
                             if (font->ascent < ascent) {
-                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row), Width2Pixel(len), ascent - font->ascent);
+                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row), Width2Pixel(len),
+                                               ascent - font->ascent);
                             }
                             if (font->descent < descent) {
-                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row) + ascent + font->descent, Width2Pixel(len), descent - font->descent);
+                                XFillRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, Row2Pixel(row) + ascent + font->descent,
+                                               Width2Pixel(len), descent - font->descent);
                             }
                             SWAP_IT(gcvalue.foreground, gcvalue.background, ltmp);
                             XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
@@ -2088,7 +2092,8 @@ scr_refresh(int type)
             }
             if (rend & RS_Overscore) {
                 if (ascent > 1) {
-                    XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen) - 1, ypixel - ascent);
+                    XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, xpixel + Width2Pixel(wlen) - 1,
+                              ypixel - ascent);
                     UPDATE_BOX(xpixel, ypixel + 1, xpixel + Width2Pixel(wlen) - 1, ypixel + 1);
                 } else {
                     XDrawLine(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - 1, xpixel + Width2Pixel(wlen) - 1, ypixel - 1);
@@ -2101,7 +2106,8 @@ scr_refresh(int type)
                     XSetForeground(Xdisplay, TermWin.gc, PixColors[cursorColor]);
                 }
 #endif
-                XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
+                XDrawRectangle(Xdisplay, draw_buffer, TermWin.gc, xpixel, ypixel - ascent, Width2Pixel(1 + wbyte) - 1,
+                               Height2Pixel(1) - 1);
                 UPDATE_BOX(xpixel, ypixel - ascent, Width2Pixel(1 + wbyte) - 1, Height2Pixel(1) - 1);
                 XSetForeground(Xdisplay, TermWin.gc, PixColors[fgColor]);
             }
@@ -2133,18 +2139,22 @@ scr_refresh(int type)
 #endif
     }
     if (buffer_pixmap) {
-        D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y, high_x - low_x + 1, high_y - low_y + 1));
+        D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y,
+                  high_x - low_x + 1, high_y - low_y + 1));
         XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
         if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, TermWin.internalBorder - 1, 0);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1,
+                      TermWin.internalBorder - 1, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
         }
         if (fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, TermWin_TotalWidth() - 2, 0);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1,
+                      TermWin_TotalWidth() - 2, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
         }
         if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
-            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, 0, TermWin.internalBorder - 1);
+            XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, 0,
+                      TermWin.internalBorder - 1);
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
         }
         if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
@@ -2439,7 +2449,9 @@ selection_fetch(Window win, unsigned prop, int delete)
         return;
     }
     for (nread = 0, bytes_after = 1; bytes_after > 0;) {
-        if ((XGetWindowProperty(Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems, &bytes_after, &data) != Success)
+        if ((XGetWindowProperty
+             (Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems,
+              &bytes_after, &data) != Success)
             || (actual_type == None) || (data == NULL)) {
             D_SELECT(("Unable to fetch the value of property %d from window 0x%08x\n", (int) prop, (int) win));
             if (data != NULL) {
@@ -2448,7 +2460,8 @@ selection_fetch(Window win, unsigned prop, int delete)
             return;
         }
         nread += nitems;
-        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n", (int) actual_type, actual_fmt, nitems, data, bytes_after));
+        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n", (int) actual_type,
+                  actual_fmt, nitems, data, bytes_after));
 
         if (nitems == 0) {
             D_SELECT(("Retrieval of incremental selection complete.\n"));
@@ -2460,7 +2473,8 @@ selection_fetch(Window win, unsigned prop, int delete)
             /* We can handle strings directly. */
             selection_write(data, nitems);
         } else if (actual_type == props[PROP_SELECTION_INCR]) {
-            D_SELECT(("Incremental selection transfer initiated.  Length is at least %u bytes.\n", (unsigned) *((unsigned *) data)));
+            D_SELECT(("Incremental selection transfer initiated.  Length is at least %u bytes.\n",
+                      (unsigned) *((unsigned *) data)));
             TermWin.mask |= PropertyChangeMask;
             XSelectInput(Xdisplay, TermWin.vt, TermWin.mask);
         } else {
@@ -2687,18 +2701,18 @@ selection_make(Time tm)
 
     D_SELECT(("selection.op=%d, selection.clicks=%d\n", selection.op, selection.clicks));
     switch (selection.op) {
-      case SELECTION_CONT:
-          break;
-      case SELECTION_INIT:
-          selection_reset();
-          selection.end.row = selection.beg.row = selection.mark.row;
-          selection.end.col = selection.beg.col = selection.mark.col;
-          /* FALLTHROUGH */
-      case SELECTION_BEGIN:
-          selection.op = SELECTION_DONE;
-          /* FALLTHROUGH */
-      default:
-          return;
+        case SELECTION_CONT:
+            break;
+        case SELECTION_INIT:
+            selection_reset();
+            selection.end.row = selection.beg.row = selection.mark.row;
+            selection.end.col = selection.beg.col = selection.mark.col;
+            /* FALLTHROUGH */
+        case SELECTION_BEGIN:
+            selection.op = SELECTION_DONE;
+            /* FALLTHROUGH */
+        default:
+            return;
     }
     selection.op = SELECTION_DONE;
 
@@ -2901,7 +2915,8 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
 #ifdef MULTI_CHARSET
                 srp = &(screen.rend[beg_row + row_offset - 1][last_col + 1]);
                 r = *(srp - 1);
-                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) && DELIMIT_REND(r) == w2) {
+                if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))
+                    && DELIMIT_REND(r) == w2) {
                     srp--;
 #else
                 if (DELIMIT_TEXT(t) == w1 && (!w1 || *stp == t || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))) {
@@ -2962,9 +2977,12 @@ selection_delimit_word(int col, int row, row_col_t *beg, row_col_t *end)
                 stp = screen.text[end_row + row_offset + 1];
 #ifdef MULTI_CHARSET
                 srp = screen.rend[end_row + row_offset + 1];
-                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT))) && DELIMIT_REND(*srp) == w2) {
+                if (DELIMIT_TEXT(*stp) == w1
+                    && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))
+                    && DELIMIT_REND(*srp) == w2) {
 #else
-                if (DELIMIT_TEXT(*stp) == w1 && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))) {
+                if (DELIMIT_TEXT(*stp) == w1
+                    && (!w1 || *stp1 == *stp || !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_XTERM_SELECT)))) {
 #endif
                     end_row++;
                     end_col = 0;
@@ -3038,24 +3056,24 @@ selection_extend_colrow(int col, int row, int flag, int cont)
     D_SELECT(("selection_extend_colrow(%d, %d, %d, %d) clicks:%d\n", col, row, flag, cont, selection.clicks));
 
     switch (selection.op) {
-      case SELECTION_INIT:
-          selection_reset();
-          selection.end.col = selection.beg.col = selection.mark.col;
-          selection.end.row = selection.beg.row = selection.mark.row;
-          selection.op = SELECTION_BEGIN;
-          /* FALLTHROUGH */
-      case SELECTION_BEGIN:
-          break;
-      case SELECTION_DONE:
-          selection.op = SELECTION_CONT;
-          /* FALLTHROUGH */
-      case SELECTION_CONT:
-          break;
-      case SELECTION_CLEAR:
-          selection_start_colrow(col, row);
-          /* FALLTHROUGH */
-      default:
-          return;
+        case SELECTION_INIT:
+            selection_reset();
+            selection.end.col = selection.beg.col = selection.mark.col;
+            selection.end.row = selection.beg.row = selection.mark.row;
+            selection.op = SELECTION_BEGIN;
+            /* FALLTHROUGH */
+        case SELECTION_BEGIN:
+            break;
+        case SELECTION_DONE:
+            selection.op = SELECTION_CONT;
+            /* FALLTHROUGH */
+        case SELECTION_CONT:
+            break;
+        case SELECTION_CLEAR:
+            selection_start_colrow(col, row);
+            /* FALLTHROUGH */
+        default:
+            return;
     }
     if ((selection.beg.row < -TermWin.nscrolled)
         || (selection.end.row < -TermWin.nscrolled)) {
@@ -3285,7 +3303,8 @@ selection_send(XSelectionRequestEvent * rq)
         target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
         target_list[1] = (Atom32) XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list, (sizeof(target_list) / sizeof(target_list[0])));
+                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list,
+                        (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
     } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
@@ -3297,7 +3316,8 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
             if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value, xtextp.nitems);
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value,
+                                xtextp.nitems);
                 ev.xselection.property = rq->property;
             }
         }
@@ -3315,22 +3335,23 @@ twin_mouse_drag_report(XButtonEvent * ev)
     int button_number, key_state, x = Pixel2Col(ev->x), y = Pixel2Row(ev->y);
 
     switch (ev->button) {
-      case AnyButton:          /* Button release */
-          button_number = pb + Button1; /* yeah, yeah */
-          break;
-      case Button1:            /* Button press */
-      case Button2:
-      case Button3:
-          pb = button_number = ev->button - Button1;
-          break;
-      default:                 /* Wheel mouse */
-          button_number = 64 + ev->button - Button3 - 1;
-          break;
+        case AnyButton:        /* Button release */
+            button_number = pb + Button1;       /* yeah, yeah */
+            break;
+        case Button1:          /* Button press */
+        case Button2:
+        case Button3:
+            pb = button_number = ev->button - Button1;
+            break;
+        default:               /* Wheel mouse */
+            button_number = 64 + ev->button - Button3 - 1;
+            break;
     }
     key_state = ((ev->state & (ShiftMask | ControlMask))
                  + ((ev->state & Mod1Mask) ? 2 : 0));
     tt_printf((unsigned char *) "\033[5M%c%c%c%c%c",
-              (32 + button_number + (key_state << 2)), (32 + (x & 0x7f) + 1), (32 + ((x >> 7) & 0x7f) + 1), (32 + (y & 0x7f) + 1), (32 + ((y >> 7) & 0x7f) + 1));
+              (32 + button_number + (key_state << 2)), (32 + (x & 0x7f) + 1), (32 + ((x >> 7) & 0x7f) + 1), (32 + (y & 0x7f) + 1),
+              (32 + ((y >> 7) & 0x7f) + 1));
 }
 
 void
@@ -3339,21 +3360,22 @@ mouse_report(XButtonEvent * ev)
     int button_number, key_state;
 
     switch (ev->button) {
-      case AnyButton:          /* Button release */
-          button_number = 3;
-          break;
-      case Button1:            /* Button press */
-      case Button2:
-      case Button3:
-          pb = button_number = ev->button - Button1;
-          break;
-      default:                 /* Wheel mouse */
-          button_number = 64 + ev->button - Button3 - 1;
-          break;
+        case AnyButton:        /* Button release */
+            button_number = 3;
+            break;
+        case Button1:          /* Button press */
+        case Button2:
+        case Button3:
+            pb = button_number = ev->button - Button1;
+            break;
+        default:               /* Wheel mouse */
+            button_number = 64 + ev->button - Button3 - 1;
+            break;
     }
     key_state = ((ev->state & (ShiftMask | ControlMask))
                  + ((ev->state & Mod1Mask) ? 2 : 0));
-    tt_printf((unsigned char *) "\033[M%c%c%c", (32 + button_number + (key_state << 2)), (32 + Pixel2Col(ev->x) + 1), (32 + Pixel2Row(ev->y) + 1));
+    tt_printf((unsigned char *) "\033[M%c%c%c", (32 + button_number + (key_state << 2)), (32 + Pixel2Col(ev->x) + 1),
+              (32 + Pixel2Row(ev->y) + 1));
 }
 
 void

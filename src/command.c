@@ -201,57 +201,61 @@ privileges(int mode)
 #endif
 
     switch (mode) {
-      case IGNORE:
-          /* Revoke suid/sgid privs and return to normal uid/gid -- mej */
-          D_UTMP(("[%ld]: Before privileges(REVERT): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(), getegid()));
+        case IGNORE:
+            /* Revoke suid/sgid privs and return to normal uid/gid -- mej */
+            D_UTMP(("[%ld]: Before privileges(REVERT): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(),
+                    getegid()));
 
 #ifdef HAVE_SETRESGID
-          setresgid(my_rgid, my_rgid, my_egid);
+            setresgid(my_rgid, my_rgid, my_egid);
 #elif defined(HAVE_SAVED_UIDS)
-          setregid(my_rgid, my_rgid);
+            setregid(my_rgid, my_rgid);
 #else
-          setregid(my_egid, -1);
-          setregid(-1, my_rgid);
+            setregid(my_egid, -1);
+            setregid(-1, my_rgid);
 #endif
 
 #ifdef HAVE_SETRESUID
-          setresuid(my_ruid, my_ruid, my_euid);
+            setresuid(my_ruid, my_ruid, my_euid);
 #elif defined(HAVE_SAVED_UIDS)
-          setreuid(my_ruid, my_ruid);
+            setreuid(my_ruid, my_ruid);
 #else
-          setreuid(my_euid, -1);
-          setreuid(-1, my_ruid);
+            setreuid(my_euid, -1);
+            setreuid(-1, my_ruid);
 #endif
 
-          D_UTMP(("[%ld]: After privileges(REVERT): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(), getegid()));
-          break;
+            D_UTMP(("[%ld]: After privileges(REVERT): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(),
+                    getegid()));
+            break;
 
-      case SAVE:
-          break;
+        case SAVE:
+            break;
 
-      case RESTORE:
-          D_UTMP(("[%ld]: Before privileges(INVOKE): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(), getegid()));
+        case RESTORE:
+            D_UTMP(("[%ld]: Before privileges(INVOKE): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(),
+                    getegid()));
 
 #ifdef HAVE_SETRESUID
-          setresuid(my_ruid, my_euid, my_euid);
+            setresuid(my_ruid, my_euid, my_euid);
 #elif defined(HAVE_SAVED_UIDS)
-          setreuid(my_ruid, my_euid);
+            setreuid(my_ruid, my_euid);
 #else
-          setreuid(-1, my_euid);
-          setreuid(my_ruid, -1);
+            setreuid(-1, my_euid);
+            setreuid(my_ruid, -1);
 #endif
 
 #ifdef HAVE_SETRESGID
-          setresgid(my_rgid, my_egid, my_egid);
+            setresgid(my_rgid, my_egid, my_egid);
 #elif defined(HAVE_SAVED_UIDS)
-          setregid(my_rgid, my_egid);
+            setregid(my_rgid, my_egid);
 #else
-          setregid(-1, my_egid);
-          setregid(my_rgid, -1);
+            setregid(-1, my_egid);
+            setregid(my_rgid, -1);
 #endif
 
-          D_UTMP(("[%ld]: After privileges(INVOKE): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(), getegid()));
-          break;
+            D_UTMP(("[%ld]: After privileges(INVOKE): [ %ld, %ld ]  [ %ld, %ld ]\n", getpid(), getuid(), getgid(), geteuid(),
+                    getegid()));
+            break;
     }
 }
 
@@ -1172,7 +1176,8 @@ clean_exit(void)
 
 #ifndef __CYGWIN32__
     if (ttydev) {
-        D_CMD(("Restoring \"%s\" to mode %03o, uid %d, gid %d\n", ttydev, ttyfd_stat.st_mode, ttyfd_stat.st_uid, ttyfd_stat.st_gid));
+        D_CMD(("Restoring \"%s\" to mode %03o, uid %d, gid %d\n", ttydev, ttyfd_stat.st_mode, ttyfd_stat.st_uid,
+               ttyfd_stat.st_gid));
         if (chmod(ttydev, ttyfd_stat.st_mode) != 0) {
             D_UTMP(("chmod(\"%s\", %03o) failed:  %s\n", ttydev, ttyfd_stat.st_mode, strerror(errno)));
         }
@@ -1856,14 +1861,18 @@ xim_send_spot(void)
 static void
 xim_get_area(XRectangle * preedit_rect, XRectangle * status_rect, XRectangle * needed_rect)
 {
-    preedit_rect->x = needed_rect->width + (scrollbar_is_visible() && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))
+    preedit_rect->x = needed_rect->width + (scrollbar_is_visible()
+                                            && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))
                                             ? (scrollbar_trough_width()) : (0));
     preedit_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
-    preedit_rect->width = Width2Pixel(TERM_WINDOW_GET_COLS() + 1) - needed_rect->width + (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (scrollbar_trough_width()) : 0);
+    preedit_rect->width =
+        Width2Pixel(TERM_WINDOW_GET_COLS() + 1) - needed_rect->width +
+        (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT)) ? (scrollbar_trough_width()) : 0);
     preedit_rect->height = Height2Pixel(1);
 
-    status_rect->x = (scrollbar_is_visible() && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))) ? (scrollbar_trough_width()) : 0;
+    status_rect->x = (scrollbar_is_visible()
+                      && !(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR_RIGHT))) ? (scrollbar_trough_width()) : 0;
     status_rect->y = Height2Pixel(TERM_WINDOW_GET_ROWS() - 1);
 
     status_rect->width = needed_rect->width ? needed_rect->width : Width2Pixel(TERM_WINDOW_GET_COLS() + 1);
@@ -1922,7 +1931,8 @@ xim_real_init(void)
             *(end + 1) = '\0';
             if (*s) {
                 snprintf(buf, sizeof(buf), "@im=%s", s);
-                if (((p = XSetLocaleModifiers(buf)) != NULL) && (*p) && ((xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL)) != NULL)) {
+                if (((p = XSetLocaleModifiers(buf)) != NULL) && (*p)
+                    && ((xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL)) != NULL)) {
                     break;
                 }
             }
@@ -2011,18 +2021,22 @@ xim_real_init(void)
         xim_set_size(&rect);
         xim_get_position(&spot);
         xim_set_color(&fg, &bg);
-        preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
+        preedit_attr =
+            XVaCreateNestedList(0, XNArea, &rect, XNSpotLocation, &spot, XNForeground, fg, XNBackground, bg, XNFontSet,
+                                TermWin.fontset, NULL);
     } else if (xim_input_style & XIMPreeditArea) {
         xim_set_color(&fg, &bg);
         /* The necessary width of preedit area is unknown until create input context. */
         needed_rect.width = 0;
         xim_get_area(&rect, &status_rect, &needed_rect);
         preedit_attr = XVaCreateNestedList(0, XNArea, &rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
-        status_attr = XVaCreateNestedList(0, XNArea, &status_rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
+        status_attr =
+            XVaCreateNestedList(0, XNArea, &status_rect, XNForeground, fg, XNBackground, bg, XNFontSet, TermWin.fontset, NULL);
     }
     xim_input_context =
         XCreateIC(xim_input_method, XNInputStyle, xim_input_style, XNClientWindow, TermWin.parent, XNFocusWindow, TermWin.parent,
-                  preedit_attr ? XNPreeditAttributes : NULL, preedit_attr, status_attr ? XNStatusAttributes : NULL, status_attr, NULL);
+                  preedit_attr ? XNPreeditAttributes : NULL, preedit_attr, status_attr ? XNStatusAttributes : NULL, status_attr,
+                  NULL);
     if (preedit_attr) {
         XFree(preedit_attr);
     }
@@ -2126,7 +2140,8 @@ run_command(char **argv)
 
     /* store original tty status for restoration clean_exit() -- rgg 04/12/95 */
     lstat(ttydev, &ttyfd_stat);
-    D_CMD(("Original settings of %s are mode %o, uid %d, gid %d\n", ttydev, ttyfd_stat.st_mode, ttyfd_stat.st_uid, ttyfd_stat.st_gid));
+    D_CMD(("Original settings of %s are mode %o, uid %d, gid %d\n", ttydev, ttyfd_stat.st_mode, ttyfd_stat.st_uid,
+           ttyfd_stat.st_gid));
 
     /* install exit handler for cleanup */
 #ifdef HAVE_ATEXIT
@@ -2572,12 +2587,12 @@ static int
 input_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (void *, char *, size_t, size_t))
 {
     switch (menu_dialog(xd, prompt, maxlen, retstr, inp_tab)) {
-      case 0:
-          return NS_SUCC;
-      case -2:
-          return NS_USER_CXL;
-      default:
-          return NS_FAIL;
+        case 0:
+            return NS_SUCC;
+        case -2:
+            return NS_USER_CXL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -2702,45 +2717,45 @@ matrix(int n)
                 r = screen.rend[ys + y];
 
                 switch (w) {
-                  case 0:      /* restart */
-                      if (s[x]) {
-                          r[x] = MATRIX_LO;
-                          s[x] = 0;
-                          t = screen.text[ys];
-                          r = screen.rend[ys];
-                      }
-                      r[x] = MATRIX_HI;
-                      t[x] = random() & 0xff;
-                      s[x]++;
-                      /* fall-through */
+                    case 0:    /* restart */
+                        if (s[x]) {
+                            r[x] = MATRIX_LO;
+                            s[x] = 0;
+                            t = screen.text[ys];
+                            r = screen.rend[ys];
+                        }
+                        r[x] = MATRIX_HI;
+                        t[x] = random() & 0xff;
+                        s[x]++;
+                        /* fall-through */
 
-                  case 1:      /* continue */
-                  case 2:
-                  case 3:
-                      for (f = random() & 7; f != 0; f--) {
-                          if (y < TERM_WINDOW_GET_ROWS() - 1) {
-                              t2 = screen.text[ys + y + 1];
-                              r2 = screen.rend[ys + y + 1];
-                              t2[x] = t[x];
-                              r2[x] = r[x];
-                              s[x]++;
-                              y++;
-                          } else {
-                              s[x] = 0;
-                              f = 0;
-                          }
-                          r[x] = MATRIX_LO;
-                          t[x] = random() & 0xff;
-                          if (f) {
-                              scr_refresh(FAST_REFRESH);
-                              t = screen.text[ys + y];
-                              r = screen.rend[ys + y];
-                          }
-                      }
-                      break;
+                    case 1:    /* continue */
+                    case 2:
+                    case 3:
+                        for (f = random() & 7; f != 0; f--) {
+                            if (y < TERM_WINDOW_GET_ROWS() - 1) {
+                                t2 = screen.text[ys + y + 1];
+                                r2 = screen.rend[ys + y + 1];
+                                t2[x] = t[x];
+                                r2[x] = r[x];
+                                s[x]++;
+                                y++;
+                            } else {
+                                s[x] = 0;
+                                f = 0;
+                            }
+                            r[x] = MATRIX_LO;
+                            t[x] = random() & 0xff;
+                            if (f) {
+                                scr_refresh(FAST_REFRESH);
+                                t = screen.text[ys + y];
+                                r = screen.rend[ys + y];
+                            }
+                        }
+                        break;
 
-                  default:
-                      t[x] = random() & 0xff;   /* hold */
+                    default:
+                        t[x] = random() & 0xff; /* hold */
                 }
             }
         }
@@ -2825,6 +2840,7 @@ make_escreen_menu(buttonbar_t *bbar)
 {
     static int been_here = 0;
     button_t *button;
+
 #if 0
     menu_t *m;
     menuitem_t *i;
@@ -3040,8 +3056,7 @@ tt_winsize(int fd)
     ws.ws_xpixel = (unsigned short) TERM_WINDOW_GET_WIDTH();
     ws.ws_ypixel = (unsigned short) TERM_WINDOW_GET_HEIGHT();
 #endif
-    D_CMD(("Sending TIOCSWINSZ to fd %d:  %hdx%hd (%hdx%hd)\n",
-           fd, ws.ws_row, ws.ws_col, ws.ws_xpixel, ws.ws_ypixel));
+    D_CMD(("Sending TIOCSWINSZ to fd %d:  %hdx%hd (%hdx%hd)\n", fd, ws.ws_row, ws.ws_col, ws.ws_xpixel, ws.ws_ypixel));
     ioctl(fd, TIOCSWINSZ, &ws);
 }
 
@@ -3117,7 +3132,8 @@ check_pixmap_change(int sig)
         SIG_RETURN(0);
     }
     now = time(NULL);
-    D_PIXMAP(("now %lu >= %lu (last_update %lu + rs_anim_delay %lu) ?\n", now, last_update + rs_anim_delay, last_update, rs_anim_delay));
+    D_PIXMAP(("now %lu >= %lu (last_update %lu + rs_anim_delay %lu) ?\n", now, last_update + rs_anim_delay, last_update,
+              rs_anim_delay));
     if (now >= last_update + rs_anim_delay || 1) {
         D_PIXMAP(("Time to update pixmap.  now == %lu\n", now));
         imlib_context_set_image(images[image_bg].current->iml->im);
@@ -3177,42 +3193,43 @@ cmd_getc(void)
 #ifdef ESCREEN
     if (TermWin.screen) {
         switch (TermWin.screen->backend) {
-          case NS_MODE_NONE:
-              break;
-          case NS_MODE_NEGOTIATE:
+            case NS_MODE_NONE:
+                break;
+            case NS_MODE_NEGOTIATE:
 #  ifdef NS_HAVE_SCREEN
-          case NS_MODE_SCREEN:
-              parse_screen_status_if_necessary();
-              break;
+            case NS_MODE_SCREEN:
+                parse_screen_status_if_necessary();
+                break;
 #  endif
 #  ifdef NS_HAVE_SCREAM
-          case NS_MODE_SCREAM:
-              break;
+            case NS_MODE_SCREAM:
+                break;
 #  endif
 #  ifdef NS_HAVE_TWIN
-          case NS_MODE_TWIN:
-              if (!TermWin.screen->twin) {
-                  if (!TermWin.screen->timestamp) {
-                      TermWin.screen->timestamp = time(NULL);
-                  } else if (TermWin.screen->timestamp < time(NULL)) {
-                      if (!Tw_CheckMagic(libscream_magic)) {
-                          D_ESCREEN(("ns_attach_by_sess: Tw_CheckMagic failed\n"));
-                          TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
-                      } else {
-                          if (!(TermWin.screen->twin = Tw_Open(TermWin.screen->twin_str))) {
-                              ns_desc_twin(TermWin.screen, "cmd_getc->Tw_Open");
-                              TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
-                          } else {
-                              D_ESCREEN(("ns_attach_by_sess: Tw_Open(%s) succeeded: handle @ %p\n", TermWin.screen->twin_str, TermWin.screen->twin));
-                          }
-                      }
-                  }
-              }
-              break;
+            case NS_MODE_TWIN:
+                if (!TermWin.screen->twin) {
+                    if (!TermWin.screen->timestamp) {
+                        TermWin.screen->timestamp = time(NULL);
+                    } else if (TermWin.screen->timestamp < time(NULL)) {
+                        if (!Tw_CheckMagic(libscream_magic)) {
+                            D_ESCREEN(("ns_attach_by_sess: Tw_CheckMagic failed\n"));
+                            TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
+                        } else {
+                            if (!(TermWin.screen->twin = Tw_Open(TermWin.screen->twin_str))) {
+                                ns_desc_twin(TermWin.screen, "cmd_getc->Tw_Open");
+                                TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
+                            } else {
+                                D_ESCREEN(("ns_attach_by_sess: Tw_Open(%s) succeeded: handle @ %p\n", TermWin.screen->twin_str,
+                                           TermWin.screen->twin));
+                            }
+                        }
+                    }
+                }
+                break;
 #  endif
-          default:
-              D_ESCREEN(("mode %d not supported...\n", TermWin.screen->backend));
-              TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
+            default:
+                D_ESCREEN(("mode %d not supported...\n", TermWin.screen->backend));
+                TermWin.screen->backend = TermWin.screen_mode = NS_MODE_NONE;
         }
     }
 #endif
@@ -3521,7 +3538,7 @@ main_loop(void)
                     set_multichar_encoding("utf8");
                 }
                 handle = iconv_open("WCHAR_T", "UTF-8");
-                if (handle == SPIF_CAST_C(iconv_t) -1) {
+                if (handle == SPIF_CAST_C(iconv_t) - 1) {
                     print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
                     setlocale(LC_ALL, "C");
@@ -3536,24 +3553,26 @@ main_loop(void)
                     bufflen = cmdbuf_ptr - str;
                     outlen = bufflen * 6;
                     poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+
                     errno = 0;
-                    D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff, bufflen));
+                    D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff,
+                          bufflen));
                     print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
                     outlen = (size_t) (poutbuff - outbuff);
-                    if (retval != (size_t) -1) {
+                    if (retval != (size_t) - 1) {
                         errno = 0;
                     }
                     if (errno == E2BIG) {
                         print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
                     } else if (errno == EILSEQ) {
-                        print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n",
-                                    *pinbuff, *pinbuff);
+                        print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n", *pinbuff, *pinbuff);
                         *pinbuff = ' ';
                         pinbuff++;
                     } else if (errno == EINVAL) {
                         D_VT(("Incomplete multibyte sequence encountered.\n"));
-                        print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n", (cmdbuf_ptr - str), outlen);
+                        print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n",
+                                      (cmdbuf_ptr - str), outlen);
                     } else {
                         print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
                     }
@@ -3565,19 +3584,22 @@ main_loop(void)
                     outlen = wcsrtombs(NULL, &wcbuff, 0, &mbs) + 1;
                     if (outlen > 0) {
                         outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+
                         outlen = wcsrtombs(outbuff, &wcbuff, outlen, &mbs);
-                        if ((long)outlen >= 0) {
+                        if ((long) outlen >= 0) {
                             FREE(wcbuff);
                             print_error("I win!\n");
                         } else {
-                            print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno, strerror(errno));
+                            print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno,
+                                        strerror(errno));
                         }
                         if (pinbuff > (char *) str) {
                             cmdbuf_ptr = (unsigned char *) pinbuff;
                             scr_add_lines(outbuff, nlines, outlen);
                         }
                     } else {
-                        print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen, errno, strerror(errno));
+                        print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen,
+                                    errno, strerror(errno));
                     }
                     FREE(outbuff);
                 }
@@ -3587,32 +3609,32 @@ main_loop(void)
         } else {
             switch (ch) {
 # ifdef NO_ENQ_ANS
-              case 005:
-                  break;
+                case 005:
+                    break;
 # else
-              case 005:        /* ^E (ENQ) terminal status enquiry */
-                  tt_printf(VT100_ANS);
-                  break;
+                case 005:      /* ^E (ENQ) terminal status enquiry */
+                    tt_printf(VT100_ANS);
+                    break;
 # endif
-              case 007:        /* ^G (BEL) */
-                  scr_bell();
-                  break;
-              case '\b':
-                  scr_backspace();
-                  break;
-              case 013:        /* ^K (VT) */
-              case 014:        /* ^L (FF) */
-                  scr_index(UP);
-                  break;
-              case 016:        /* ^N (SO) shift out (enter ACS mode) */
-                  scr_charset_choose(1);
-                  break;
-              case 017:        /* ^O (SI) shift in (leave ACS mode) */
-                  scr_charset_choose(0);
-                  break;
-              case 033:
-                  process_escape_seq();
-                  break;
+                case 007:      /* ^G (BEL) */
+                    scr_bell();
+                    break;
+                case '\b':
+                    scr_backspace();
+                    break;
+                case 013:      /* ^K (VT) */
+                case 014:      /* ^L (FF) */
+                    scr_index(UP);
+                    break;
+                case 016:      /* ^N (SO) shift out (enter ACS mode) */
+                    scr_charset_choose(1);
+                    break;
+                case 017:      /* ^O (SI) shift in (leave ACS mode) */
+                    scr_charset_choose(0);
+                    break;
+                case 033:
+                    process_escape_seq();
+                    break;
             }
         }
     } while (ch != EOF);

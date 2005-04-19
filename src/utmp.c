@@ -247,11 +247,11 @@ void
 b_login(struct utmp *ut)
 {
     /*
-       ** replacement for freebsd's login(), which uses ttyslot()
-       **
-       ** like I shouldn't have just KNOWN that from the comment on get_tslot
-       ** below...
-       **            - brian
+     ** replacement for freebsd's login(), which uses ttyslot()
+     **
+     ** like I shouldn't have just KNOWN that from the comment on get_tslot
+     ** below...
+     **            - brian
      */
     register int fd;
     int tty;

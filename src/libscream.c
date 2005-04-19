@@ -185,7 +185,8 @@ ns_new_hop(int lp, char *fw, int fp, int delay, _ns_sess * s)
 
     if (s) {
         /* see if we already have a matching hop. */
-        while (h && !(((h->localport == lp) || (!lp)) && (!strcmp(h->fw, fw)) && (h->fwport == fp) && (h->sess->port == s->port) && (!strcmp(h->sess->host, s->host))))
+        while (h && !(((h->localport == lp) || (!lp)) && (!strcmp(h->fw, fw)) && (h->fwport == fp) && (h->sess->port == s->port)
+                      && (!strcmp(h->sess->host, s->host))))
             h = h->next;
 
         if (h) {
@@ -277,7 +278,9 @@ ns_dst_hop(_ns_hop ** ss, _ns_sess * sp)
             while (p && ((p == sp) || (p->port != sp->port) || (strcmp(p->host, sp->host))))
                 p = p->next;
             if (!p)
-                ns_desc_hop(s, NS_PREFIX "ns_dst_sess: Leak alert -- found a hop that is only\n referenced once, but has a refcount > 1. Hop data follow");
+                ns_desc_hop(s,
+                            NS_PREFIX
+                            "ns_dst_sess: Leak alert -- found a hop that is only\n referenced once, but has a refcount > 1. Hop data follow");
             else
                 s->sess = p;
         }
@@ -800,7 +803,10 @@ ns_desc_twin(_ns_sess * sess, char *doc)
     }
     D_ESCREEN(("%s: twin status (%s) is %d-%s, %d-%s\n", doc, sess->twin_str,
                Tw_Errno(sess->twin),
-               Tw_StrError(sess->twin, Tw_Errno(sess->twin)), Tw_ErrnoDetail(sess->twin), Tw_StrErrorDetail(sess->twin, Tw_Errno(sess->twin), Tw_ErrnoDetail(sess->twin))));
+               Tw_StrError(sess->twin, Tw_Errno(sess->twin)), Tw_ErrnoDetail(sess->twin), Tw_StrErrorDetail(sess->twin,
+                                                                                                            Tw_Errno(sess->twin),
+                                                                                                            Tw_ErrnoDetail(sess->
+                                                                                                                           twin))));
 #else
     USE_VAR(sess);
     USE_VAR(doc);
@@ -827,7 +833,8 @@ ns_desc_hop(_ns_hop * h, char *doc)
         D_ESCREEN(("%s:\n", doc));
 
     D_ESCREEN(("tunnel from localhost:%d to %s:%d to %s:%d is %s.  (delay %d, %d ref%s)\n",
-               h->localport, h->fw, h->fwport, h->sess->host, h->sess->port, h->established ? "up" : "down", h->delay, h->refcount, h->refcount == 1 ? "" : "s"));
+               h->localport, h->fw, h->fwport, h->sess->host, h->sess->port, h->established ? "up" : "down", h->delay, h->refcount,
+               h->refcount == 1 ? "" : "s"));
 }
 
 
@@ -849,7 +856,8 @@ ns_desc_sess(_ns_sess * sess, char *doc)
         D_ESCREEN(("%s: (efuns@%p)\t (user %s) local %s", doc, sess->efuns, sess->user, sess->proto));
     else {
         D_ESCREEN(("%s: (efuns@%p)\t %s://%s%s%s@%s",
-                   doc, sess->efuns, sess->proto ? sess->proto : "???", sess->user, sess->pass ? ":" : "", sess->pass ? sess->pass : "", sess->host));
+                   doc, sess->efuns, sess->proto ? sess->proto : "???", sess->user, sess->pass ? ":" : "",
+                   sess->pass ? sess->pass : "", sess->host));
         if (sess->port != NS_DFLT_SSH_PORT)
             D_ESCREEN((":%s", sess->port));
     }
@@ -1093,17 +1101,21 @@ ns_attach_ssh(_ns_sess ** sp)
     if (sess->hop) {
         if (sess->hop->established == NS_HOP_DOWN) {    /* the nightmare foe */
             ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d -L %d:%s:%d %s@%s",
-                           NS_SSH_CALL, NS_SSH_TUNNEL_OPTS, sess->hop->fwport, sess->hop->localport, sess->host, sess->port, sess->user, sess->hop->fw);
+                           NS_SSH_CALL, NS_SSH_TUNNEL_OPTS, sess->hop->fwport, sess->hop->localport, sess->host, sess->port,
+                           sess->user, sess->hop->fw);
             if (ret < 0 || ret > NS_MAXCMD)
                 return NS_FAIL;
             ns_run(sess->efuns, cmd);
             sleep(sess->hop->delay);
         }
         ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@localhost \"%s%s\"",
-                       NS_SSH_CALL, NS_SSH_OPTS, sess->hop->localport, sess->user, call, ((sess->backend == NS_MODE_SCREEN) || (sess->backend == NS_MODE_NEGOTIATE)) ? esc : "");
+                       NS_SSH_CALL, NS_SSH_OPTS, sess->hop->localport, sess->user, call, ((sess->backend == NS_MODE_SCREEN)
+                                                                                          || (sess->backend ==
+                                                                                              NS_MODE_NEGOTIATE)) ? esc : "");
     } else {
-        ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@%s \"%s%s\"", NS_SSH_CALL, NS_SSH_OPTS, sess->port, sess->user, sess->host, call,
-                       ((sess->backend == NS_MODE_SCREEN) || (sess->backend == NS_MODE_NEGOTIATE)) ? esc : "");
+        ret =
+            snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@%s \"%s%s\"", NS_SSH_CALL, NS_SSH_OPTS, sess->port, sess->user, sess->host,
+                     call, ((sess->backend == NS_MODE_SCREEN) || (sess->backend == NS_MODE_NEGOTIATE)) ? esc : "");
     }
     ns_free(&call);
 
@@ -1139,21 +1151,21 @@ ns_attach_by_sess(_ns_sess ** sp, int *err)
     (void) ns_sess_init(sess);
 
     switch (sess->where) {
-      case NS_LCL:
-          sess->fd = ns_attach_lcl(&sess);
-          break;
-      case NS_SU:              /* (fixme) uses ssh, should use su */
-          /* local session, but for a different uid. */
-          /* FALL-THROUGH */
-      case NS_SSH:
-          if (!sess->delay) {
-              sess->delay = NS_INIT_DELAY ? NS_INIT_DELAY : 1;
-          }
-          sess->fd = ns_attach_ssh(&sess);
-          break;
-      default:
-          *err = NS_UNKNOWN_LOC;
-          goto fail;
+        case NS_LCL:
+            sess->fd = ns_attach_lcl(&sess);
+            break;
+        case NS_SU:            /* (fixme) uses ssh, should use su */
+            /* local session, but for a different uid. */
+            /* FALL-THROUGH */
+        case NS_SSH:
+            if (!sess->delay) {
+                sess->delay = NS_INIT_DELAY ? NS_INIT_DELAY : 1;
+            }
+            sess->fd = ns_attach_ssh(&sess);
+            break;
+        default:
+            *err = NS_UNKNOWN_LOC;
+            goto fail;
     }
 
     D_ESCREEN(("ns_attach_by_sess: screen session-fd is %d, ^%c-%c\n", sess->fd, sess->escape + 'A' - 1, sess->literal));
@@ -1316,9 +1328,9 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
                                 }
                             } else
 #  endif
-                                {
-                                    NOP;
-                                }
+                            {
+                                NOP;
+                            }
                             while (*r && (f || *r != ' ')) {
                                 if (*r == '\"')
                                     f = 1 - f;
@@ -1382,11 +1394,11 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
             goto fail;
     } else {
         char *loc[] = {
-          "/usr/local/etc/screenrc",      /* official */
-          "/etc/screenrc",    /* actual (on SuSE) */
-          "/usr/etc/screenrc",
-          "/opt/etc/screenrc",
-          "/etc/screen/screenrc"
+            "/usr/local/etc/screenrc",  /* official */
+            "/etc/screenrc",    /* actual (on SuSE) */
+            "/usr/etc/screenrc",
+            "/opt/etc/screenrc",
+            "/etc/screen/screenrc"
         };
         int n, nloc = sizeof(loc) / sizeof(char *);
 
@@ -1491,7 +1503,8 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 
     if (hop && strlen(hop)) {
         sess->hop = ns_parse_hop(sess, hop);
-        if (sess->hop && (!strcmp(sess->host, sess->hop->fw) || !strcmp(sess->host, "localhost") || !strcmp(sess->host, "127.0.0.1")))
+        if (sess->hop
+            && (!strcmp(sess->host, sess->hop->fw) || !strcmp(sess->host, "localhost") || !strcmp(sess->host, "127.0.0.1")))
             D_ESCREEN(("ns_attach_by_URL: routing in circles...\n"));
     }
 
@@ -1559,12 +1572,12 @@ ns_tog_disp(_ns_sess * s)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          return ns_screen_command(s, "\x01\x01");
-          break;
+        case NS_MODE_SCREEN:
+            return ns_screen_command(s, "\x01\x01");
+            break;
 #endif
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -1581,28 +1594,28 @@ ns_go2_disp(_ns_sess * s, int d)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          b[1] = '0' + d;
-          return ns_screen_command(s, b);
-          break;
+        case NS_MODE_SCREEN:
+            b[1] = '0' + d;
+            return ns_screen_command(s, b);
+            break;
 #endif
 #ifdef NS_HAVE_TWIN
-      case NS_MODE_TWIN:
-          {
-              tscreen ts = Tw_FirstScreen(s->twin);
+        case NS_MODE_TWIN:
+            {
+                tscreen ts = Tw_FirstScreen(s->twin);
 
-              printf("screen: %p\n", ts);
-              while (d-- && ts)
-                  ts = Tw_NextObj(s->twin, ts);
-              if (ts) {
-                  Tw_RaiseScreen(s->twin, ts);
-                  return NS_SUCC;
-              }
-          }
-          break;
+                printf("screen: %p\n", ts);
+                while (d-- && ts)
+                    ts = Tw_NextObj(s->twin, ts);
+                if (ts) {
+                    Tw_RaiseScreen(s->twin, ts);
+                    return NS_SUCC;
+                }
+            }
+            break;
 #endif
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -1617,13 +1630,13 @@ ns_mon_disp(_ns_sess * s, int no, int quiet)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (no >= 0)
-              ns_go2_disp(s, no);
-          if (quiet == NS_MON_TOGGLE_QUIET)
-              s->flags |= NS_SESS_NO_MON_MSG;
-          return ns_screen_command(s, "\x01M");
-          break;
+        case NS_MODE_SCREEN:
+            if (no >= 0)
+                ns_go2_disp(s, no);
+            if (quiet == NS_MON_TOGGLE_QUIET)
+                s->flags |= NS_SESS_NO_MON_MSG;
+            return ns_screen_command(s, "\x01M");
+            break;
 #endif
     }
     return NS_FAIL;
@@ -1638,13 +1651,13 @@ ns_sbb_disp(_ns_sess * s, int no)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          ns_go2_disp(s, no);
-          return ns_screen_command(s, "\x01\x1b");
-          break;
+        case NS_MODE_SCREEN:
+            ns_go2_disp(s, no);
+            return ns_screen_command(s, "\x01\x1b");
+            break;
 #endif
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -1705,21 +1718,21 @@ ns_add_disp(_ns_sess * s, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (after >= 0)
-              ns_go2_disp(s, after);
-          if (ns_screen_command(s, "\x01\x03") == NS_SUCC) {
-              if (!name || strlen(name))
-                  ns_ren_disp(s, -2, name);
-              ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
-          }
-          break;
+        case NS_MODE_SCREEN:
+            if (after >= 0)
+                ns_go2_disp(s, after);
+            if (ns_screen_command(s, "\x01\x03") == NS_SUCC) {
+                if (!name || strlen(name))
+                    ns_ren_disp(s, -2, name);
+                ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
+            }
+            break;
 #endif
 #ifdef NS_HAVE_TWIN
-      case NS_MODE_TWIN:
-          ret = ns_twin_control(s, "twin", TW_MSG_CONTROL_OPEN);
-          printf("ns_add_disp: twin add window after %d -> %d\n", after, ret);
-          break;
+        case NS_MODE_TWIN:
+            ret = ns_twin_control(s, "twin", TW_MSG_CONTROL_OPEN);
+            printf("ns_add_disp: twin add window after %d -> %d\n", after, ret);
+            break;
 #endif
     }
     return ret;
@@ -1754,10 +1767,10 @@ ns_mov_disp(_ns_sess * s, int fm, int to)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          D_ESCREEN(("ns_mov_disp: move #%d to #%d\n", fm, to));
-          ns_mov_screen_disp(s, fm, to);
-          break;
+        case NS_MODE_SCREEN:
+            D_ESCREEN(("ns_mov_disp: move #%d to #%d\n", fm, to));
+            ns_mov_screen_disp(s, fm, to);
+            break;
 #endif
     }
     return NS_FAIL;
@@ -1776,8 +1789,8 @@ ns_rsz_disp(_ns_sess * s, int d, int w, int h)
     }
 
     switch (s->backend) {
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -1810,10 +1823,10 @@ ns_rem_disp(_ns_sess * s, int d, int ask)
     if (*i == 'y' || *i == 'Y') {
         switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-          case NS_MODE_SCREEN:
-              ns_go2_disp(s, d);
-              ret = ns_screen_command(s, "\x01ky\r");
-              break;
+            case NS_MODE_SCREEN:
+                ns_go2_disp(s, d);
+                ret = ns_screen_command(s, "\x01ky\r");
+                break;
 #endif
         }
     }
@@ -1866,17 +1879,17 @@ ns_ren_disp(_ns_sess * s, int d, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if ((n = MALLOC(strlen(i ? i : name) + l + 1))) {
-              if (d >= 0)
-                  ns_go2_disp(s, d);
-              strcpy(&n[l], i ? i : name);      /* copy new name */
-              while (l)         /* prepend backspaces */
-                  n[--l] = '\x08';
-              ret = ns_screen_xcommand(s, 'A', n);      /* rename */
-              FREE(n);
-          }
-          break;
+        case NS_MODE_SCREEN:
+            if ((n = MALLOC(strlen(i ? i : name) + l + 1))) {
+                if (d >= 0)
+                    ns_go2_disp(s, d);
+                strcpy(&n[l], i ? i : name);    /* copy new name */
+                while (l)       /* prepend backspaces */
+                    n[--l] = '\x08';
+                ret = ns_screen_xcommand(s, 'A', n);    /* rename */
+                FREE(n);
+            }
+            break;
 #endif
     }
 
@@ -1895,8 +1908,8 @@ ns_log_disp(_ns_sess * s, int d, char *logfile)
     }
 
     switch (s->backend) {
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -1935,13 +1948,13 @@ ns_rel_region(_ns_sess * s, _ns_disp * d, int n)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (n < 0)
-              return NS_FAIL;
-          do {
-              ret = ns_screen_command(s, "\x01\x09");
-          } while (--n && (ret == NS_SUCC));
-          break;
+        case NS_MODE_SCREEN:
+            if (n < 0)
+                return NS_FAIL;
+            do {
+                ret = ns_screen_command(s, "\x01\x09");
+            } while (--n && (ret == NS_SUCC));
+            break;
 #endif
     }
     return ret;
@@ -1962,9 +1975,9 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          ret = ns_screen_command(s, "\x01S");
-          break;
+        case NS_MODE_SCREEN:
+            ret = ns_screen_command(s, "\x01S");
+            break;
 #endif
     }
     return ret;
@@ -1995,9 +2008,9 @@ ns_rem_region(_ns_sess * s, _ns_disp * d, int r, int ask)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          ret = ns_screen_command(s, "\x01X");
-          break;
+        case NS_MODE_SCREEN:
+            ret = ns_screen_command(s, "\x01X");
+            break;
 #endif
     }
     return ret;
@@ -2017,9 +2030,9 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          ret = ns_screen_command(s, "\x01Q");
-          break;
+        case NS_MODE_SCREEN:
+            ret = ns_screen_command(s, "\x01Q");
+            break;
 #endif
     }
     return ret;
@@ -2109,11 +2122,11 @@ ns_upd_stat(_ns_sess * s)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          return ns_screen_command(s, NS_SCREEN_UPDATE);
+        case NS_MODE_SCREEN:
+            return ns_screen_command(s, NS_SCREEN_UPDATE);
 #endif
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -2144,20 +2157,20 @@ ns_statement(_ns_sess * s, char *c)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if ((ret = ns_parse_screen_cmd(s, i ? i : c, NS_ESC_INTERACTIVE)) == NS_SUCC) {
-              if (s->escape != x) {
-                  y = s->escape;
-                  s->escape = x;
-              }
-              ret = ns_screen_xcommand(s, NS_SCREEN_CMD, i ? i : c);
-              s->escape = y;
-          } else if (ret == NS_NOT_ALLOWED) {
-              ns_inp_dial(s, "Sorry, David, I cannot allow that.", 0, NULL, NULL);
-          }
+        case NS_MODE_SCREEN:
+            if ((ret = ns_parse_screen_cmd(s, i ? i : c, NS_ESC_INTERACTIVE)) == NS_SUCC) {
+                if (s->escape != x) {
+                    y = s->escape;
+                    s->escape = x;
+                }
+                ret = ns_screen_xcommand(s, NS_SCREEN_CMD, i ? i : c);
+                s->escape = y;
+            } else if (ret == NS_NOT_ALLOWED) {
+                ns_inp_dial(s, "Sorry, David, I cannot allow that.", 0, NULL, NULL);
+            }
 #endif
-      default:
-          ret = NS_FAIL;
+        default:
+            ret = NS_FAIL;
     }
 
     if (i)
@@ -2177,11 +2190,11 @@ ns_reset(_ns_sess * s, int type)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          return ns_screen_command(s, NS_SCREEN_INIT);
+        case NS_MODE_SCREEN:
+            return ns_screen_command(s, NS_SCREEN_INIT);
 #endif
-      default:
-          return NS_FAIL;
+        default:
+            return NS_FAIL;
     }
 }
 
@@ -2199,8 +2212,8 @@ ns_get_url(_ns_sess * s, int d)
         return NULL;
     }
 
-    l = ((s->proto) ? strlen(s->proto) + 3 : 0) + strlen(s->user) + 1 + strlen(s->host) + 1 + 5 + 1 + ((s->rsrc) ? strlen(s->rsrc) : 0) + 7 + (s->name ? strlen(s->name) + 4 : 0) +
-        1;
+    l = ((s->proto) ? strlen(s->proto) + 3 : 0) + strlen(s->user) + 1 + strlen(s->host) + 1 + 5 + 1 +
+        ((s->rsrc) ? strlen(s->rsrc) : 0) + 7 + (s->name ? strlen(s->name) + 4 : 0) + 1;
 
     if ((u = MALLOC(l + 1))) {
         if (!s->escape) {
@@ -2219,8 +2232,9 @@ ns_get_url(_ns_sess * s, int d)
             lit[0] = s->literal;
             lit[1] = '\0';
         }
-        r = snprintf(u, l, "%s%s%s@%s:%d/%s%s%s%s%s%s", s->proto ? s->proto : "", s->proto ? "://" : "", s->user, s->host, s->port, ((s->rsrc) ? s->rsrc : ""),
-                     ((s->escape) ? "+-e" : ""), esc, ((s->escape) ? lit : ""), ((s->name) ? "+-x+" : ""), ((s->name) ? s->name : ""));
+        r = snprintf(u, l, "%s%s%s@%s:%d/%s%s%s%s%s%s", s->proto ? s->proto : "", s->proto ? "://" : "", s->user, s->host, s->port,
+                     ((s->rsrc) ? s->rsrc : ""), ((s->escape) ? "+-e" : ""), esc, ((s->escape) ? lit : ""),
+                     ((s->name) ? "+-x+" : ""), ((s->name) ? s->name : ""));
         D_ESCREEN(("ns_get_url: URL is %s\n", u));
         if ((r >= 0) && (r < l)) {
             return u;
@@ -2770,17 +2784,17 @@ ns_parse_screen_key(_ns_sess * s, char c)
         D_ESCREEN(("screen_key: ^%c-%c %d\n", s->escape + 'A' - 1, c, c));
 
     switch (c) {
-      case NS_SCREEN_CMD:      /* send command (statement) to screen server */
-          ns_statement(s, NULL);
-          break;
-      case NS_SCREEN_RENAME:   /* rename current display */
-          ret = ns_ren_disp(s, -1, NULL);
-          break;
-      case NS_SCREEN_KILL:
-          ret = ns_rem_disp(s, -1, TRUE);
-          break;
-      default:
-          ret = ns_screen_command(s, b);
+        case NS_SCREEN_CMD:    /* send command (statement) to screen server */
+            ns_statement(s, NULL);
+            break;
+        case NS_SCREEN_RENAME: /* rename current display */
+            ret = ns_ren_disp(s, -1, NULL);
+            break;
+        case NS_SCREEN_KILL:
+            ret = ns_rem_disp(s, -1, TRUE);
+            break;
+        default:
+            ret = ns_screen_command(s, b);
     }
 
     return ret;
@@ -2853,7 +2867,8 @@ ns_screen_weird(_ns_sess * screen, long type, char *doc)
                 "send the result of 'screen --version' to <scream@azundris.com>\n"
                 "(together with your ~/.screenrc and /etc/screenrc if present).\n"
                 "If at all possible, please also run 'Eterm -e screen' and make\n"
-                "a screenshot of the offending window (and the window only, the\n" "beauty of your desktop is not relevant to this investigation. : ).\n", doc, type);
+                "a screenshot of the offending window (and the window only, the\n"
+                "beauty of your desktop is not relevant to this investigation. : ).\n", doc, type);
     }
     (void) ns_upd_stat(screen);
     return NS_FAIL;
@@ -3033,7 +3048,8 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         else if (!strcmp("am", vtype))
             screen->backend = NS_MODE_SCREAM;
         p = NULL;
-        D_ESCREEN(("ns_parse_screen_msg: scre%s %d.%2d.%2d %s a/o %s -> mode %d\n", vtype, ma, mi, mu, vrem, vdate, screen->backend));
+        D_ESCREEN(("ns_parse_screen_msg: scre%s %d.%2d.%2d %s a/o %s -> mode %d\n", vtype, ma, mi, mu, vrem, vdate,
+                   screen->backend));
     } else if (!strcmp(p, NS_SCREEN_NO_DEBUG))
         p = "debug info was not compiled into \"screen\"...";
     else if (!strncmp(p, NS_SCREEN_DK_CMD_T, strlen(NS_SCREEN_DK_CMD_T))) {
@@ -3080,8 +3096,8 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
     static int l = sizeof(NS_SCREEN_FLAGS);
     size_t status_blanks = 0;   /* status-bar overflow? */
     int ret = NS_SUCC, tmp, parsed,     /* no of *visible* elements in status line */
-     n,                         /* screen's index (immutable, sparse) */
-     r;                         /* real index (r'th element) */
+        n,                      /* screen's index (immutable, sparse) */
+        r;                      /* real index (r'th element) */
     _ns_efuns *efuns;
     _ns_disp *disp = NULL, *d2 = NULL;
 
@@ -3099,9 +3115,9 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
             while (p2 > p && *p2 == ' ') {
                 status_blanks++;
                 *(p2--) = '\0';
-            }                       /* p2 now points behind last item */
+            }                   /* p2 now points behind last item */
         } else {
-            *p2 = 0;                /* make darn sure it's NUL-terminated */
+            *p2 = 0;            /* make darn sure it's NUL-terminated */
         }
 
         D_ESCREEN(("parse_screen: screen sends (%d) ::%s::\n", strlen(p), p));

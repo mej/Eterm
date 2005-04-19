@@ -11,7 +11,7 @@ aclocal.m4
 config.status
 config.h
 libtool
-stamp-h
+stamp-h*
 move-themes
 *.spec
 config.h.in
@@ -20,3 +20,8 @@ mkinstalldirs
 install-sh
 Eterm*.tar.gz
 *.sddf
+autom4te*
+depcomp
+build.mezz
+iconv_test*
+utf8*
