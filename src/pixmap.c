@@ -1649,12 +1649,12 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
 # ifdef WORDS_BIGENDIAN
-                r = (ptr[x + 1] * rm) >> 8;
-                g = (ptr[x + 2] * gm) >> 8;
-                b = (ptr[x + 3] * bm) >> 8;
-                ptr[x + 1] = r;
-                ptr[x + 2] = g;
-                ptr[x + 3] = b;
+                r = (ptr[x + 6] * rm) >> 8;
+                g = (ptr[x + 5] * gm) >> 8;
+                b = (ptr[x + 4] * bm) >> 8;
+                ptr[x + 6] = r;
+                ptr[x + 5] = g;
+                ptr[x + 4] = b;
 # else
                 r = (ptr[x + 2] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
@@ -1672,9 +1672,9 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
 # ifdef WORDS_BIGENDIAN
-                r = (ptr[x + 1] * rm) >> 8;
-                g = (ptr[x + 2] * gm) >> 8;
-                b = (ptr[x + 3] * bm) >> 8;
+                r = (ptr[x + 6] * rm) >> 8;
+                g = (ptr[x + 5] * gm) >> 8;
+                b = (ptr[x + 4] * bm) >> 8;
 # else
                 r = (ptr[x + 2] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
@@ -1684,9 +1684,9 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 g |= (!(g >> 8) - 1);
                 b |= (!(b >> 8) - 1);
 # ifdef WORDS_BIGENDIAN
-                ptr[x + 1] = r;
-                ptr[x + 2] = g;
-                ptr[x + 3] = b;
+                ptr[x + 6] = r;
+                ptr[x + 5] = g;
+                ptr[x + 4] = b;
 # else
                 ptr[x + 2] = r;
                 ptr[x + 1] = g;
@@ -1874,27 +1874,34 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
         switch (real_depth) {
             case 15:
 #ifdef HAVE_MMX
+                D_PIXMAP(("Using MMX - 15 bit\n"));
                 shade_ximage_15_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
+                D_PIXMAP(("No MMX Found - 15 bit\n"));
                 shade_ximage_15(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
                 break;
             case 16:
 #ifdef HAVE_MMX
+                D_PIXMAP(("Using MMX - 16 bit\n"));
                 shade_ximage_16_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
+                D_PIXMAP(("No MMX Found - 16 bit\n"));
                 shade_ximage_16(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
                 break;
             case 24:
                 if (ximg->bits_per_pixel != 32) {
+                    D_PIXMAP(("Rendering 24 bit\n"));
                     shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
                 }
                 /* drop */
             case 32:
 #ifdef HAVE_MMX
+                D_PIXMAP(("Using MMX - 32 bit\n"));
                 shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
+                D_PIXMAP(("No MMX Found - 32 bit\n"));
                 shade_ximage_32(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #endif
                 break;

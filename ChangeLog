@@ -5329,3 +5329,8 @@ Mon Apr 18 21:49:08 2005                        Michael Jennings (mej)
 
 Re-indent code.
 ----------------------------------------------------------------------
+Mon Apr 18 22:11:22 2005                        Michael Jennings (mej)
+
+Patch from C. David Wilde <cdw@mylinuxguy.com> to correct the non-MMX
+color modifier routines.
+----------------------------------------------------------------------
