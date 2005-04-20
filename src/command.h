@@ -303,6 +303,15 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 
 /************ Structures ************/
 /* Motif window hints */
+# ifdef LONG64
+typedef struct _mwmhints {
+  CARD64 flags;
+  CARD64 functions;
+  CARD64 decorations;
+  INT64  input_mode;
+  CARD64 status;
+} MWMHints;
+# else
 typedef struct _mwmhints {
   CARD32 flags;
   CARD32 functions;
@@ -310,6 +319,8 @@ typedef struct _mwmhints {
   INT32  input_mode;
   CARD32 status;
 } MWMHints;
+# endif
+
 # ifdef HAVE_TERMIOS_H
 typedef struct termios ttymode_t;
 # else
