@@ -732,7 +732,7 @@ set_shadow_color_by_pixel(unsigned char which, Pixel p)
        \- This part is not included in the contents of the line variable.
 */
 unsigned char
-parse_font_fx(const char *line)
+parse_font_fx(char *line)
 {
     char *color, *corner;
     unsigned char which, n;

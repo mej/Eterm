@@ -5339,3 +5339,10 @@ Wed Apr 20 19:07:38 2005                    Michael Frysinger (vapier)
 Patch from Tres <tres@mindspring.com> to fix window manager hints on 
 64bit systems.  http://bugs.gentoo.org/show_bug.cgi?id=76324
 ----------------------------------------------------------------------
+Mon Apr 25 15:34:49 2005                        Michael Jennings (mej)
+
+Added --enable-escreen-fx flag to ./configure to enable/disable the
+Escreen startup effects (bosconian, matrix, etc.).
+
+Fixed some warnings.
+----------------------------------------------------------------------

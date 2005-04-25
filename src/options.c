@@ -2567,20 +2567,20 @@ init_defaults(void)
     conf_init_subsystem();
 
     /* Register Eterm's context parsers. */
-    conf_register_context("color", parse_color);
-    conf_register_context("attributes", parse_attributes);
-    conf_register_context("toggles", parse_toggles);
-    conf_register_context("keyboard", parse_keyboard);
-    conf_register_context("misc", parse_misc);
-    conf_register_context("imageclasses", parse_imageclasses);
-    conf_register_context("image", parse_image);
-    conf_register_context("actions", parse_actions);
-    conf_register_context("menu", parse_menu);
-    conf_register_context("menuitem", parse_menuitem);
-    conf_register_context("button_bar", parse_bbar);
-    conf_register_context("xim", parse_xim);
-    conf_register_context("multichar", parse_multichar);
-    conf_register_context("escreen", parse_escreen);
+    conf_register_context("color", SPIF_CAST_C(ctx_handler_t) parse_color);
+    conf_register_context("attributes", SPIF_CAST_C(ctx_handler_t) parse_attributes);
+    conf_register_context("toggles", SPIF_CAST_C(ctx_handler_t) parse_toggles);
+    conf_register_context("keyboard", SPIF_CAST_C(ctx_handler_t) parse_keyboard);
+    conf_register_context("misc", SPIF_CAST_C(ctx_handler_t) parse_misc);
+    conf_register_context("imageclasses", SPIF_CAST_C(ctx_handler_t) parse_imageclasses);
+    conf_register_context("image", SPIF_CAST_C(ctx_handler_t) parse_image);
+    conf_register_context("actions", SPIF_CAST_C(ctx_handler_t) parse_actions);
+    conf_register_context("menu", SPIF_CAST_C(ctx_handler_t) parse_menu);
+    conf_register_context("menuitem", SPIF_CAST_C(ctx_handler_t) parse_menuitem);
+    conf_register_context("button_bar", SPIF_CAST_C(ctx_handler_t) parse_bbar);
+    conf_register_context("xim", SPIF_CAST_C(ctx_handler_t) parse_xim);
+    conf_register_context("multichar", SPIF_CAST_C(ctx_handler_t) parse_multichar);
+    conf_register_context("escreen", SPIF_CAST_C(ctx_handler_t) parse_escreen);
 }
 
 /* Sync up options with our internal data after parsing options and configs */

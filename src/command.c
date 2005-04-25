@@ -2607,7 +2607,7 @@ exe_prg(void *xd, char **argv)
 
 /****** Azundris' playthings :-) ******/
 
-#ifdef HAVE_HUMOR
+#ifdef ESCREEN_FX
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
@@ -2828,7 +2828,7 @@ escreen_reg_funcs(void)
     ns_register_inp(efuns, input_dialog);
     ns_register_tab(efuns, menu_tab);
 
-#ifdef HAVE_HUMOR
+#ifdef ESCREEN_FX
     ns_register_fun(efuns, waitstate);
 #endif
 
@@ -3024,9 +3024,9 @@ init_command(char **argv)
     Xfd = XConnectionNumber(Xdisplay);
     D_CMD(("Xfd = %d\n", Xfd));
     cmdbuf_ptr = cmdbuf_endp = cmdbuf_base;
-    AT_LEAST((int) num_fds, Xfd + 1);
+    AT_LEAST(num_fds, ((unsigned int) (Xfd + 1)));
     if (pipe_fd >= 0) {
-        AT_LEAST((int) num_fds, pipe_fd + 1);
+        AT_LEAST(num_fds, ((unsigned int) (pipe_fd + 1)));
     }
     if ((cmd_fd = command_func(argv)) < 0) {
         print_error("Unable to run sub-command.\n");
