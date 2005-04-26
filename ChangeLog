@@ -5357,3 +5357,8 @@ Reverted patch from C. David Wilde <cdw@mylinuxguy.com> which broke
 big-endian machines and really didn't fix anything at all.  Thanks to
 Tres Melton <tres@mindspring.com> for catching this.
 ----------------------------------------------------------------------
+Tue Apr 26 13:40:54 2005                        Michael Jennings (mej)
+
+Patch from Tres Melton <tres@mindspring.com> to optimize 24-bit and
+32-bit non-MMX shading routines.
+----------------------------------------------------------------------

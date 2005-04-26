@@ -1651,22 +1651,14 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         /* No saturation */
         for (y = h; --y >= 0;) {
             for (x = -(w * 4); x < 0; x += 4) {
-                int r, g, b;
-
 # if WORDS_BIGENDIAN
-                r = (ptr[x + 1] * rm) >> 8;
-                g = (ptr[x + 2] * gm) >> 8;
-                b = (ptr[x + 3] * bm) >> 8;
-                ptr[x + 1] = r;
-                ptr[x + 2] = g;
-                ptr[x + 3] = b;
+                ptr[x + 1] = (unsigned char) ((ptr[x + 1] * rm) >> 8);
+                ptr[x + 2] = (unsigned char) ((ptr[x + 2] * gm) >> 8);
+                ptr[x + 3] = (unsigned char) ((ptr[x + 3] * bm) >> 8);
 # else
-                r = (ptr[x + 2] * rm) >> 8;
-                g = (ptr[x + 1] * gm) >> 8;
-                b = (ptr[x + 0] * bm) >> 8;
-                ptr[x + 2] = r;
-                ptr[x + 1] = g;
-                ptr[x + 0] = b;
+                ptr[x + 2] = (unsigned char) ((ptr[x + 2] * rm) >> 8);
+                ptr[x + 1] = (unsigned char) ((ptr[x + 1] * gm) >> 8);
+                ptr[x + 0] = (unsigned char) ((ptr[x + 0] * bm) >> 8);
 # endif
             }
             ptr += bpl;
@@ -1675,27 +1667,20 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         for (y = h; --y >= 0;) {
             for (x = -(w * 4); x < 0; x += 4) {
                 int r, g, b;
-
 # if WORDS_BIGENDIAN
                 r = (ptr[x + 1] * rm) >> 8;
+                ptr[x + 1] = r|(!(r >> 8) - 1);
                 g = (ptr[x + 2] * gm) >> 8;
+                ptr[x + 2] = g|(!(g >> 8) - 1);
                 b = (ptr[x + 3] * bm) >> 8;
+                ptr[x + 3] = b|(!(b >> 8) - 1);
 # else
                 r = (ptr[x + 2] * rm) >> 8;
+                ptr[x + 2] = r|(!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
+                ptr[x + 1] = g|(!(g >> 8) - 1);
                 b = (ptr[x + 0] * bm) >> 8;
-# endif
-                r |= (!(r >> 8) - 1);
-                g |= (!(g >> 8) - 1);
-                b |= (!(b >> 8) - 1);
-# if WORDS_BIGENDIAN
-                ptr[x + 1] = r;
-                ptr[x + 2] = g;
-                ptr[x + 3] = b;
-# else
-                ptr[x + 2] = r;
-                ptr[x + 1] = g;
-                ptr[x + 0] = b;
+                ptr[x + 0] = b|(!(b >> 8) - 1);
 # endif
             }
             ptr += bpl;
@@ -1719,19 +1704,13 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
 # if WORDS_BIGENDIAN
-                r = (ptr[x + 0] * rm) >> 8;
-                g = (ptr[x + 1] * gm) >> 8;
-                b = (ptr[x + 2] * bm) >> 8;
-                ptr[x + 0] = r;
-                ptr[x + 1] = g;
-                ptr[x + 2] = b;
+                ptr[x + 0] = (ptr[x + 0] * rm) >> 8;
+                ptr[x + 1] = (ptr[x + 1] * gm) >> 8;
+                ptr[x + 2] = (ptr[x + 2] * bm) >> 8;
 # else
-                r = (ptr[x + 2] * rm) >> 8;
-                g = (ptr[x + 1] * gm) >> 8;
-                b = (ptr[x + 0] * bm) >> 8;
-                ptr[x + 2] = r;
-                ptr[x + 1] = g;
-                ptr[x + 0] = b;
+                ptr[x + 2] = (ptr[x + 2] * rm) >> 8;
+                ptr[x + 1] = (ptr[x + 1] * gm) >> 8;
+                ptr[x + 0] = (ptr[x + 0] * bm) >> 8;
 # endif
             }
             ptr += bpl;
@@ -1740,27 +1719,20 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         for (y = h; --y >= 0;) {
             for (x = -(w * 3); x < 0; x += 3) {
                 int r, g, b;
-
 # if WORDS_BIGENDIAN
                 r = (ptr[x + 0] * rm) >> 8;
+                ptr[x + 0] = r|(!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
+                ptr[x + 1] = g|(!(g >> 8) - 1);
                 b = (ptr[x + 2] * bm) >> 8;
+                ptr[x + 2] = b|(!(b >> 8) - 1);
 # else
                 r = (ptr[x + 2] * rm) >> 8;
+                ptr[x + 2] = r|(!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
+                ptr[x + 1] = g|(!(g >> 8) - 1);
                 b = (ptr[x + 0] * bm) >> 8;
-# endif
-                r |= (!(r >> 8) - 1);
-                g |= (!(g >> 8) - 1);
-                b |= (!(b >> 8) - 1);
-# if WORDS_BIGENDIAN
-                ptr[x + 0] = r;
-                ptr[x + 1] = g;
-                ptr[x + 2] = b;
-# else
-                ptr[x + 2] = r;
-                ptr[x + 1] = g;
-                ptr[x + 0] = b;
+                ptr[x + 0] = b|(!(b >> 8) - 1);
 # endif
             }
             ptr += bpl;
