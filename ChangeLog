@@ -5336,8 +5336,8 @@ color modifier routines.
 ----------------------------------------------------------------------
 Wed Apr 20 19:07:38 2005                    Michael Frysinger (vapier)
 
-Patch from Tres <tres@mindspring.com> to fix window manager hints on 
-64bit systems.  http://bugs.gentoo.org/show_bug.cgi?id=76324
+Patch from Tres Melton <tres@mindspring.com> to fix window manager
+hints on 64bit systems.  http://bugs.gentoo.org/show_bug.cgi?id=76324
 ----------------------------------------------------------------------
 Mon Apr 25 15:34:49 2005                        Michael Jennings (mej)
 
@@ -5350,4 +5350,10 @@ Tue Apr 26 11:45:39 2005                        Michael Jennings (mej)
 
 Fixed incorrect WORDS_BIGENDIAN logic caught by Tres Melton
 <tres@mindspring.com>.
+----------------------------------------------------------------------
+Tue Apr 26 12:10:16 2005                        Michael Jennings (mej)
+
+Reverted patch from C. David Wilde <cdw@mylinuxguy.com> which broke
+big-endian machines and really didn't fix anything at all.  Thanks to
+Tres Melton <tres@mindspring.com> for catching this.
 ----------------------------------------------------------------------

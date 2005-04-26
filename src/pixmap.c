@@ -1654,12 +1654,12 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
 # if WORDS_BIGENDIAN
-                r = (ptr[x + 6] * rm) >> 8;
-                g = (ptr[x + 5] * gm) >> 8;
-                b = (ptr[x + 4] * bm) >> 8;
-                ptr[x + 6] = r;
-                ptr[x + 5] = g;
-                ptr[x + 4] = b;
+                r = (ptr[x + 1] * rm) >> 8;
+                g = (ptr[x + 2] * gm) >> 8;
+                b = (ptr[x + 3] * bm) >> 8;
+                ptr[x + 1] = r;
+                ptr[x + 2] = g;
+                ptr[x + 3] = b;
 # else
                 r = (ptr[x + 2] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
@@ -1677,9 +1677,9 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
 # if WORDS_BIGENDIAN
-                r = (ptr[x + 6] * rm) >> 8;
-                g = (ptr[x + 5] * gm) >> 8;
-                b = (ptr[x + 4] * bm) >> 8;
+                r = (ptr[x + 1] * rm) >> 8;
+                g = (ptr[x + 2] * gm) >> 8;
+                b = (ptr[x + 3] * bm) >> 8;
 # else
                 r = (ptr[x + 2] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
@@ -1689,9 +1689,9 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 g |= (!(g >> 8) - 1);
                 b |= (!(b >> 8) - 1);
 # if WORDS_BIGENDIAN
-                ptr[x + 6] = r;
-                ptr[x + 5] = g;
-                ptr[x + 4] = b;
+                ptr[x + 1] = r;
+                ptr[x + 2] = g;
+                ptr[x + 3] = b;
 # else
                 ptr[x + 2] = r;
                 ptr[x + 1] = g;
