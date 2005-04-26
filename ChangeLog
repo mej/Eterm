@@ -5346,3 +5346,8 @@ Escreen startup effects (bosconian, matrix, etc.).
 
 Fixed some warnings.
 ----------------------------------------------------------------------
+Tue Apr 26 11:45:39 2005                        Michael Jennings (mej)
+
+Fixed incorrect WORDS_BIGENDIAN logic caught by Tres Melton
+<tres@mindspring.com>.
+----------------------------------------------------------------------

@@ -52,6 +52,11 @@ static const char cvs_ident[] = "$Id$";
 #include "term.h"
 #include "windows.h"
 
+/* FIXME:  Workaround for older versions of libast. */
+#ifndef WORDS_BIGENDIAN
+#  define WORDS_BIGENDIAN 0
+#endif
+
 /* Assembler routines */
 extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
@@ -1648,7 +1653,7 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
             for (x = -(w * 4); x < 0; x += 4) {
                 int r, g, b;
 
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 r = (ptr[x + 6] * rm) >> 8;
                 g = (ptr[x + 5] * gm) >> 8;
                 b = (ptr[x + 4] * bm) >> 8;
@@ -1671,7 +1676,7 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
             for (x = -(w * 4); x < 0; x += 4) {
                 int r, g, b;
 
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 r = (ptr[x + 6] * rm) >> 8;
                 g = (ptr[x + 5] * gm) >> 8;
                 b = (ptr[x + 4] * bm) >> 8;
@@ -1683,7 +1688,7 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 r |= (!(r >> 8) - 1);
                 g |= (!(g >> 8) - 1);
                 b |= (!(b >> 8) - 1);
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 ptr[x + 6] = r;
                 ptr[x + 5] = g;
                 ptr[x + 4] = b;
@@ -1713,7 +1718,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
             for (x = -(w * 3); x < 0; x += 3) {
                 int r, g, b;
 
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 r = (ptr[x + 0] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
                 b = (ptr[x + 2] * bm) >> 8;
@@ -1736,7 +1741,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
             for (x = -(w * 3); x < 0; x += 3) {
                 int r, g, b;
 
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 r = (ptr[x + 0] * rm) >> 8;
                 g = (ptr[x + 1] * gm) >> 8;
                 b = (ptr[x + 2] * bm) >> 8;
@@ -1748,7 +1753,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 r |= (!(r >> 8) - 1);
                 g |= (!(g >> 8) - 1);
                 b |= (!(b >> 8) - 1);
-# ifdef WORDS_BIGENDIAN
+# if WORDS_BIGENDIAN
                 ptr[x + 0] = r;
                 ptr[x + 1] = g;
                 ptr[x + 2] = b;
