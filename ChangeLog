@@ -5362,3 +5362,8 @@ Tue Apr 26 13:40:54 2005                        Michael Jennings (mej)
 Patch from Tres Melton <tres@mindspring.com> to optimize 24-bit and
 32-bit non-MMX shading routines.
 ----------------------------------------------------------------------
+Tue Apr 26 14:38:20 2005                        Michael Jennings (mej)
+
+Patch from Bryan Kadzban <bryan@kdzbn.homelinux.net> to fix unsetting
+of bold/blink attribute.
+----------------------------------------------------------------------

@@ -504,6 +504,19 @@ scr_color(unsigned int color, unsigned int Intensity)
                         }
                         break;
                 }
+            } else if (!(rstyle & Intensity) && ((int) color >= minBright) && (color <= maxBright)) {
+                switch (Intensity) {
+                    case RS_Bold:
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND)) {
+                            color -= (minBright - minColor);
+                        }
+                        break;
+                    case RS_Blink:
+                        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND)) {
+                            color -= (minBright - minColor);
+                        }
+                        break;
+                }
             }
         }
     }
