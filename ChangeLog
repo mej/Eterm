@@ -5367,3 +5367,7 @@ Tue Apr 26 14:38:20 2005                        Michael Jennings (mej)
 Patch from Bryan Kadzban <bryan@kdzbn.homelinux.net> to fix unsetting
 of bold/blink attribute.
 ----------------------------------------------------------------------
+Wed Apr 27 14:46:41 2005                        Michael Jennings (mej)
+
+Disable MMX on x86_64 for now.
+----------------------------------------------------------------------
