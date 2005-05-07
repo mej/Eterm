@@ -1620,19 +1620,16 @@ shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         }
     } else {
         for (y = h; --y >= 0;) {
+            int r, g, b;
             for (x = -w; x < 0; x++) {
-                int r, g, b;
-
                 b = ((DATA16 *) ptr)[x];
-                r = (b & 0xf800) * rm;
-                g = (b & 0x7e0) * gm;
-                b = (b & 0x1f) * bm;
-                r |= (!(r >> 16) - 1);
-                g |= (!(g >> 11) - 1);
-                b |= (!(b >> 5) - 1);
-                ((DATA16 *) ptr)[x] = ((r >> 8) & 0xf800)
-                    | ((g >> 8) & 0x7e0)
-                    | ((b >> 8) & 0x1f);
+                r = ( (b >> 11 )            * rm ) >> 8;
+		r = ( r > 0x001f ) ? 0xf800 : ( r << 11 );
+                g = (((b >>  5 ) & 0x003f ) * gm ) >> 8;
+		g = ( g > 0x003f ) ? 0x07e0 : ( g << 5 );
+                b = (( b         & 0x001f ) * bm ) >> 8;
+		b = ( b > 0x001f ) ? 0x001f : b;
+                ((DATA16 *) ptr)[x] = (r|g|b);
             }
             ptr += bpl;
         }

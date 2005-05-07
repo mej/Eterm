@@ -5371,3 +5371,8 @@ Wed Apr 27 14:46:41 2005                        Michael Jennings (mej)
 
 Disable MMX on x86_64 for now.
 ----------------------------------------------------------------------
+Sat May  7 02:30:53 2005                        Michael Jennings (mej)
+
+Patch from Tres Melton <tres@mindspring.com> to correct overflow in
+non-MMX 16bpp shading code.
+----------------------------------------------------------------------
