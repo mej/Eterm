@@ -198,6 +198,7 @@ shade_ximage_15_mmx_saturate:
         paddusw %mm3, %mm1      /* ff eg */
         paddusw %mm3, %mm2      /* ff eb */
 
+        psubw %mm3, %mm0        /* 00 0r */
         psubw %mm3, %mm1        /* 00 0g */
         psubw %mm3, %mm2        /* 00 0b */
         
@@ -234,6 +235,7 @@ shade_ximage_15_mmx_saturate:
         paddusw %mm3, %mm1      /* ff eg */
         paddusw %mm3, %mm2      /* ff eb */
 
+        psubw %mm3, %mm0        /* 00 0r */
         psubw %mm3, %mm1        /* 00 0g */
         psubw %mm3, %mm2        /* 00 0b */
         

@@ -1578,16 +1578,13 @@ shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
             for (x = -w; x < 0; x++) {
                 int r, g, b;
 
-                b = ((DATA16 *) ptr)[x];
-                r = (b & 0x7c00) * rm;
-                g = (b & 0x3e0) * gm;
-                b = (b & 0x1f) * bm;
-                r |= (!(r >> 15) - 1);
-                g |= (!(g >> 10) - 1);
-                b |= (!(b >> 5) - 1);
-                ((DATA16 *) ptr)[x] = ((r >> 8) & 0x7c00)
-                    | ((g >> 8) & 0x3e0)
-                    | ((b >> 8) & 0x1f);
+                r = ( (b >> 10 )            * rm ) >> 8;
+                r = ( r > 0x001f ) ? 0xfc00 : ( r << 10 );
+                g = (((b >>  5 ) & 0x003f ) * gm ) >> 8;
+                g = ( g > 0x001f ) ? 0x03e0 : ( g << 5 );
+                b = (( b         & 0x001f ) * bm ) >> 8;
+                b = ( b > 0x001f ) ? 0x001f : b;
+                ((DATA16 *) ptr)[x] = (r|g|b);
             }
             ptr += bpl;
         }

@@ -5376,3 +5376,8 @@ Sat May  7 02:30:53 2005                        Michael Jennings (mej)
 Patch from Tres Melton <tres@mindspring.com> to correct overflow in
 non-MMX 16bpp shading code.
 ----------------------------------------------------------------------
+Sun May  8 21:13:45 2005                        Michael Jennings (mej)
+
+Patch from Tres Melton <tres@mindspring.com> to fix 15bpp shading
+routines.
+----------------------------------------------------------------------
