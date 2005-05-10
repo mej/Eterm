@@ -5381,3 +5381,7 @@ Sun May  8 21:13:45 2005                        Michael Jennings (mej)
 Patch from Tres Melton <tres@mindspring.com> to fix 15bpp shading
 routines.
 ----------------------------------------------------------------------
+Tue May 10 14:57:45 2005                        Michael Jennings (mej)
+
+Previous patch was incomplete; this fixes it.
+----------------------------------------------------------------------
