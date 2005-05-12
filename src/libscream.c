@@ -20,6 +20,7 @@
  * 2002/06/04  Azundris  advanced tab tear-off
  * 2002/06/05  Azundris  basic twin support
  * 2002/06/11  Azundris  more  twin support
+ * 2005/01/04  Azundris  send statements rather than hotkeys wherever possible
  ***************************************************************************/
 
 
@@ -94,7 +95,7 @@ static _ns_hop *ha = NULL;      /* anchor for hop list */
 
 
 static void ns_desc_hop(_ns_hop *, char *);
-static int ns_parse_screenrc(_ns_sess *, char *, int);
+static int ns_parse_screenrc(_ns_sess *, char *, ns_esc_whence);
 static int ns_mov_screen_disp(_ns_sess *, int, int);
 static _ns_sess *ns_dst_sess(_ns_sess **);
 
@@ -1572,9 +1573,10 @@ ns_tog_disp(_ns_sess * s)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            return ns_screen_command(s, "\x01\x01");
-            break;
+      case NS_MODE_SCREEN:
+/*        return ns_screen_command(s, "\x01\x01"); */
+          return ns_statement(s, "other");
+          break;
 #endif
         default:
             return NS_FAIL;
@@ -1585,8 +1587,6 @@ ns_tog_disp(_ns_sess * s)
 int
 ns_go2_disp(_ns_sess * s, int d)
 {
-    char b[] = "\x01_";
-
     if (!s)
         return NS_FAIL;
     if (s->curr && s->curr->index == d)
@@ -1594,10 +1594,16 @@ ns_go2_disp(_ns_sess * s, int d)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            b[1] = '0' + d;
-            return ns_screen_command(s, b);
-            break;
+      case NS_MODE_SCREEN:
+          {
+/*            char b[] = "\x01_";
+              b[1] = '0' + d;
+              return ns_screen_command(s, b); */
+              char b[] = "select _";
+              b[7] = '0' + d;
+              return ns_statement(s, b);
+          }
+          break;
 #endif
 #ifdef NS_HAVE_TWIN
         case NS_MODE_TWIN:
@@ -1630,13 +1636,16 @@ ns_mon_disp(_ns_sess * s, int no, int quiet)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            if (no >= 0)
-                ns_go2_disp(s, no);
-            if (quiet == NS_MON_TOGGLE_QUIET)
-                s->flags |= NS_SESS_NO_MON_MSG;
-            return ns_screen_command(s, "\x01M");
-            break;
+      case NS_MODE_SCREEN:
+          if (no >= 0)
+              ns_go2_disp(s, no);
+          if (quiet == NS_MON_TOGGLE_QUIET)
+              s->flags |= NS_SESS_NO_MON_MSG;
+          else
+              s->flags &= (~NS_SESS_NO_MON_MSG);
+/*        return ns_screen_command(s, "\x01M"); */
+          return ns_statement(s, "monitor");
+          break;
 #endif
     }
     return NS_FAIL;
@@ -1651,10 +1660,11 @@ ns_sbb_disp(_ns_sess * s, int no)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            ns_go2_disp(s, no);
-            return ns_screen_command(s, "\x01\x1b");
-            break;
+      case NS_MODE_SCREEN:
+          ns_go2_disp(s, no);
+/*        return ns_screen_command(s, "\x01\x1b"); */
+          return ns_statement(s, "copy");
+          break;
 #endif
         default:
             return NS_FAIL;
@@ -1718,15 +1728,16 @@ ns_add_disp(_ns_sess * s, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            if (after >= 0)
-                ns_go2_disp(s, after);
-            if (ns_screen_command(s, "\x01\x03") == NS_SUCC) {
-                if (!name || strlen(name))
-                    ns_ren_disp(s, -2, name);
-                ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
-            }
-            break;
+      case NS_MODE_SCREEN:
+          if (after >= 0)
+              ns_go2_disp(s, after);
+/*        if (ns_screen_command(s, "\x01\x03") == NS_SUCC) { */
+          if (ns_statement(s, "screen") == NS_SUCC) {
+              if (!name || strlen(name))
+                  ns_ren_disp(s, -2, name);
+              ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
+          }
+          break;
 #endif
 #ifdef NS_HAVE_TWIN
         case NS_MODE_TWIN:
@@ -1823,10 +1834,12 @@ ns_rem_disp(_ns_sess * s, int d, int ask)
     if (*i == 'y' || *i == 'Y') {
         switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-            case NS_MODE_SCREEN:
-                ns_go2_disp(s, d);
-                ret = ns_screen_command(s, "\x01ky\r");
-                break;
+          case NS_MODE_SCREEN:
+              ns_go2_disp(s, d);
+/*            ret = ns_screen_command(s, "\x01ky\r"); */
+              if ((ret = ns_statement(s, "kill")) == NS_SUCC)
+                  ret = ns_screen_command(s, "y\r");
+              break;
 #endif
         }
     }
@@ -1948,13 +1961,14 @@ ns_rel_region(_ns_sess * s, _ns_disp * d, int n)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            if (n < 0)
-                return NS_FAIL;
-            do {
-                ret = ns_screen_command(s, "\x01\x09");
-            } while (--n && (ret == NS_SUCC));
-            break;
+      case NS_MODE_SCREEN:
+          if (n < 0)
+              return NS_FAIL;
+          do {
+/*            ret = ns_screen_command(s, "\x01\x09"); */
+              ret = ns_statement(s, "focus");
+          } while (--n && (ret == NS_SUCC));
+          break;
 #endif
     }
     return ret;
@@ -1975,9 +1989,10 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            ret = ns_screen_command(s, "\x01S");
-            break;
+      case NS_MODE_SCREEN:
+/*        ret = ns_screen_command(s, "\x01S"); */
+          ret = ns_statement(s, "split");
+          break;
 #endif
     }
     return ret;
@@ -2008,9 +2023,10 @@ ns_rem_region(_ns_sess * s, _ns_disp * d, int r, int ask)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            ret = ns_screen_command(s, "\x01X");
-            break;
+      case NS_MODE_SCREEN:
+/*        ret = ns_screen_command(s, "\x01X"); */
+          ret = ns_statement(s, "remove");
+          break;
 #endif
     }
     return ret;
@@ -2030,9 +2046,10 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-        case NS_MODE_SCREEN:
-            ret = ns_screen_command(s, "\x01Q");
-            break;
+      case NS_MODE_SCREEN:
+/*        ret = ns_screen_command(s, "\x01Q"); */
+          ret = ns_statement(s, "only");
+          break;
 #endif
     }
     return ret;
@@ -2130,6 +2147,12 @@ ns_upd_stat(_ns_sess * s)
     }
 }
 
+/* send a statement to screen.  ("^A:" is automatically prefixed)
+   the command is parsed before execution (so if e.g. the command changes
+   the hotkey, we'll know).
+   s  the session
+   c  the statement.  if none is given, a dialog is opened.
+   <- an error-code */
 int
 ns_statement(_ns_sess * s, char *c)
 {
@@ -2348,8 +2371,8 @@ screen-specific routines
 static int
 ns_swp_screen_disp(_ns_sess * s, int fm, int to)
 {
-    char *t1 = "\x01'%d\r";
-    char *t2 = "\x01:number %d\r";
+/*  char *t2 = "\x01:number %d\r"; */
+    char *t2 = "number %d";
     char b[NS_MAXCMD + 1];
     int l;
     _ns_disp *d, *d2, *n;
@@ -2360,6 +2383,9 @@ ns_swp_screen_disp(_ns_sess * s, int fm, int to)
 #  endif
 
     if (!s->curr || s->curr->index != fm) {     /* switch to source disp if necessary */
+/*      char *t1 = "\x01'%d\r"; */
+        char *t1 = "select %d";
+
         if (!(s->curr = disp_fetch(s, fm))) {
             return NS_FAIL;
         }
@@ -2371,7 +2397,8 @@ ns_swp_screen_disp(_ns_sess * s, int fm, int to)
         }
 #  endif
 
-        (void) ns_screen_command(s, b);
+/*      (void) ns_screen_command(s, b); */
+        (void) ns_statement(s, b);
     }
 
     l = snprintf(b, NS_MAXCMD, t2, to);
@@ -2381,7 +2408,8 @@ ns_swp_screen_disp(_ns_sess * s, int fm, int to)
     }
 #  endif
 
-    (void) ns_screen_command(s, b);
+/*  (void) ns_screen_command(s, b); */
+    (void) ns_statement(s, b);
 
     d2 = disp_fetch(s, to);
 
@@ -2684,7 +2712,7 @@ ns_parse_esc(char **x)
    <-  error code */
 
 int
-ns_parse_screen_cmd(_ns_sess * s, char *p, int whence)
+ns_parse_screen_cmd(_ns_sess * s, char *p, ns_esc_whence whence)
 {
     char *p2;
     long v1 = -1;
@@ -2806,8 +2834,8 @@ ns_parse_screen_key(_ns_sess * s, char c)
    parse a whole string that may contain screen-escapes that should be
    handled interactively (that should open dialog boxes etc.).
    this will normally be called by menus, buttons etc. that want to send
-   input to the add without generating X events for the keystrokes (real
-   keystrokes do not come through here; the keyboard-handler should call
+   input without generating X events for the keystrokes (real keystrokes
+   do not come through here; the keyboard-handler should call
    ns_parse_screen_key() directly when it sees the session's escape-char).
    s   the session in question
    c   the string to parse
@@ -2885,7 +2913,7 @@ ns_screen_weird(_ns_sess * screen, long type, char *doc)
    <-      error code */
 
 static int
-ns_parse_screenrc(_ns_sess * s, char *fn, int whence)
+ns_parse_screenrc(_ns_sess * s, char *fn, ns_esc_whence whence)
 {
     int fd = -1;
     char *rc = NULL;

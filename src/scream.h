@@ -65,10 +65,12 @@
 #define NS_HOP_DOWN        0
 #define NS_HOP_UP          1
 
-#define NS_ESC_CMDLINE     1
-#define NS_ESC_SYSSCREENRC 2
-#define NS_ESC_SCREENRC    3
-#define NS_ESC_INTERACTIVE 4
+typedef enum {
+  NS_ESC_CMDLINE=1,
+  NS_ESC_SYSSCREENRC=2,
+  NS_ESC_SCREENRC=3,
+  NS_ESC_INTERACTIVE=4
+} ns_esc_whence;
 
 #define NS_SESS_NO_MON_MSG 1
 
@@ -127,7 +129,7 @@ typedef struct __ns_sess {   /* a whole screen-session with many clients */
   char   *home;              /* user's home dir. so we can find .screenrc */
   char   *sysrc;             /* global screen config */
   char    escape,literal;    /* talking to screen: defaults to ^A, a */
-  int     escdef;            /* where was the escape sequence defined? */
+  ns_esc_whence escdef;            /* where was the escape sequence defined? */
 
 #ifdef NS_HAVE_TWIN
   tdisplay twin;             /* twin-display */
@@ -231,7 +233,7 @@ int ns_twin_command(_ns_sess *,udat,byte *,udat,byte *);
 int ns_screen_xcommand(_ns_sess *,char , char *);
 
 /* parse and forward a screen-statement (from ^A: input or screenrc) */
-int ns_parse_screen_cmd(_ns_sess *,char *,int);
+int ns_parse_screen_cmd(_ns_sess *,char *,ns_esc_whence);
 
 /* parse and forward a screen-hotkey */
 int ns_parse_screen_key(_ns_sess *,char);
