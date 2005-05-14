@@ -5385,3 +5385,7 @@ Tue May 10 14:57:45 2005                        Michael Jennings (mej)
 
 Previous patch was incomplete; this fixes it.
 ----------------------------------------------------------------------
+Sat May 14 18:56:55 2005                    Michael Frysinger (vapier)
+
+Twin 0.4.6 and 0.5.1 install the header 'Tw/Tw1.h', not 'Tw/Tw_1.h'.
+----------------------------------------------------------------------

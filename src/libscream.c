@@ -62,7 +62,7 @@
 
 #ifdef NS_HAVE_TWIN
 #  include <Tw/Tw.h>
-#  include <Tw/Tw_1.h>
+#  include <Tw/Tw1.h>
 #  include <Tw/Twerrno.h>
 #endif
 
