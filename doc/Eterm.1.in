@@ -2185,7 +2185,7 @@ terminal window.
 .I buffer
 is either a number
 .BR 0 - 7 ,
-in which case the selection is copied to the cut buffer specified, or
+in which case the selection is pasted from the cut buffer specified, or
 one of the words
 .BR clipboard ", " primary ", or " secondary
 (or any initial substring thereof), in which case the contents of the

@@ -2688,7 +2688,7 @@ post_parse(void)
                 eterm_font_add(&etmfonts, rs_mfont[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
                 RESET_AND_ASSIGN(rs_mfont[i], NULL);
             }
-        } else {
+        } else if (etmfonts[i] == NULL) {
             eterm_font_add(&etmfonts, etfonts[i], i);
         }
 #endif

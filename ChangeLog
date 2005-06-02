@@ -5389,3 +5389,8 @@ Sat May 14 18:56:55 2005                    Michael Frysinger (vapier)
 
 Twin 0.4.6 and 0.5.1 install the header 'Tw/Tw1.h', not 'Tw/Tw_1.h'.
 ----------------------------------------------------------------------
+Thu Jun  2 13:36:23 2005                        Michael Jennings (mej)
+
+A couple small fixes from Yasufumi Haga <yasufumi.haga@nifty.com> to
+the man page and the handling of multi-byte fonts.
+----------------------------------------------------------------------
