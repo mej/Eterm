@@ -5394,3 +5394,7 @@ Thu Jun  2 13:36:23 2005                        Michael Jennings (mej)
 A couple small fixes from Yasufumi Haga <yasufumi.haga@nifty.com> to
 the man page and the handling of multi-byte fonts.
 ----------------------------------------------------------------------
+Mon Jun 13 19:28:19 2005                        Michael Jennings (mej)
+
+Cleanups and optimizations from Tres Melton <tres@mindspring.com>.
+----------------------------------------------------------------------

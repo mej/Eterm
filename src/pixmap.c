@@ -57,6 +57,9 @@ static const char cvs_ident[] = "$Id$";
 #  define WORDS_BIGENDIAN 0
 #endif
 
+/* Optimized check for rm, gm, and bm all < 256 */
+#define COLORMODS_HAVE_SATURATION(rm, gm, bm)  ((rm|gm|bm) >> 8)
+
 /* Assembler routines */
 extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
@@ -1557,7 +1560,7 @@ shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
     int x, y;
 
     ptr = (unsigned char *) data + (w * sizeof(DATA16));
-    if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    if (!COLORMODS_HAVE_SATURATION(rm, gm, bm)) {
         /* No saturation */
         for (y = h; --y >= 0;) {
             for (x = -w; x < 0; x++) {
@@ -1579,12 +1582,12 @@ shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
                 b = ((DATA16 *) ptr)[x];
-                r = ( (b >> 10 )            * rm ) >> 8;
-                r = ( r > 0x001f ) ? 0xfc00 : ( r << 10 );
-                g = (((b >>  5 ) & 0x003f ) * gm ) >> 8;
-                g = ( g > 0x001f ) ? 0x03e0 : ( g << 5 );
-                b = (( b         & 0x001f ) * bm ) >> 8;
-                b = ( b > 0x001f ) ? 0x001f : b;
+                r = (((b >> 10) & 0x001f ) * rm) >> 8;
+                r = (r > 0x001f) ? 0x7c00 : (r << 10);
+                g = (((b >>  5) & 0x001f ) * gm) >> 8;
+                g = (g > 0x001f) ? 0x03e0 : (g << 5);
+                b = (((b >>  0) & 0x001f ) * bm) >> 8;
+                b = (b > 0x001f) ? 0x001f : (b << 0);
                 ((DATA16 *) ptr)[x] = (r|g|b);
             }
             ptr += bpl;
@@ -1600,7 +1603,7 @@ shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
     int x, y;
 
     ptr = (unsigned char *) data + (w * sizeof(DATA16));
-    if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    if (!COLORMODS_HAVE_SATURATION(rm, gm, bm)) {
         /* No saturation */
         for (y = h; --y >= 0;) {
             for (x = -w; x < 0; x++) {
@@ -1618,15 +1621,16 @@ shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         }
     } else {
         for (y = h; --y >= 0;) {
-            int r, g, b;
             for (x = -w; x < 0; x++) {
+                int r, g, b;
+
                 b = ((DATA16 *) ptr)[x];
-                r = ( (b >> 11 )            * rm ) >> 8;
-		r = ( r > 0x001f ) ? 0xf800 : ( r << 11 );
-                g = (((b >>  5 ) & 0x003f ) * gm ) >> 8;
-		g = ( g > 0x003f ) ? 0x07e0 : ( g << 5 );
-                b = (( b         & 0x001f ) * bm ) >> 8;
-		b = ( b > 0x001f ) ? 0x001f : b;
+                r = (((b >> 11) & 0x001f) * rm) >> 8;
+		r = (r > 0x001f) ? 0xf800 : (r << 11);
+                g = (((b >>  5) & 0x003f) * gm) >> 8;
+		g = (g > 0x003f) ? 0x07e0 : (g << 5);
+                b = (((b >>  0) & 0x001f) * bm) >> 8;
+		b = (b > 0x001f) ? 0x001f : (b << 0);
                 ((DATA16 *) ptr)[x] = (r|g|b);
             }
             ptr += bpl;
@@ -1642,18 +1646,18 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
     int x, y;
 
     ptr = (unsigned char *) data + (w * 4);
-    if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    if (!COLORMODS_HAVE_SATURATION(rm, gm, bm)) {
         /* No saturation */
         for (y = h; --y >= 0;) {
             for (x = -(w * 4); x < 0; x += 4) {
 # if WORDS_BIGENDIAN
-                ptr[x + 1] = (unsigned char) ((ptr[x + 1] * rm) >> 8);
-                ptr[x + 2] = (unsigned char) ((ptr[x + 2] * gm) >> 8);
-                ptr[x + 3] = (unsigned char) ((ptr[x + 3] * bm) >> 8);
+                ptr[x + 1] = ((ptr[x + 1] * rm) >> 8);
+                ptr[x + 2] = ((ptr[x + 2] * gm) >> 8);
+                ptr[x + 3] = ((ptr[x + 3] * bm) >> 8);
 # else
-                ptr[x + 2] = (unsigned char) ((ptr[x + 2] * rm) >> 8);
-                ptr[x + 1] = (unsigned char) ((ptr[x + 1] * gm) >> 8);
-                ptr[x + 0] = (unsigned char) ((ptr[x + 0] * bm) >> 8);
+                ptr[x + 2] = ((ptr[x + 2] * rm) >> 8);
+                ptr[x + 1] = ((ptr[x + 1] * gm) >> 8);
+                ptr[x + 0] = ((ptr[x + 0] * bm) >> 8);
 # endif
             }
             ptr += bpl;
@@ -1692,12 +1696,10 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
     int x, y;
 
     ptr = (unsigned char *) data + (w * 3);
-    if ((rm <= 256) && (gm <= 256) && (bm <= 256)) {
+    if (!COLORMODS_HAVE_SATURATION(rm, gm, bm)) {
         /* No saturation */
         for (y = h; --y >= 0;) {
             for (x = -(w * 3); x < 0; x += 3) {
-                int r, g, b;
-
 # if WORDS_BIGENDIAN
                 ptr[x + 0] = (ptr[x + 0] * rm) >> 8;
                 ptr[x + 1] = (ptr[x + 1] * gm) >> 8;
@@ -1714,6 +1716,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         for (y = h; --y >= 0;) {
             for (x = -(w * 3); x < 0; x += 3) {
                 int r, g, b;
+
 # if WORDS_BIGENDIAN
                 r = (ptr[x + 0] * rm) >> 8;
                 ptr[x + 0] = r|(!(r >> 8) - 1);
