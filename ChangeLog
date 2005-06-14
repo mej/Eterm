@@ -5398,3 +5398,8 @@ Mon Jun 13 19:28:19 2005                        Michael Jennings (mej)
 
 Cleanups and optimizations from Tres Melton <tres@mindspring.com>.
 ----------------------------------------------------------------------
+Tue Jun 14 15:36:09 2005                        Michael Jennings (mej)
+
+Added SSE2 support patch thanks to Tres Melton <tres@mindspring.com>
+and John Ellson <ellson@research.att.com>.
+----------------------------------------------------------------------

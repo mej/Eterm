@@ -220,7 +220,13 @@ AC_CHECK_FUNCS(atexit _exit unsetenv setutent \
 seteuid memmove putenv strsep setresuid setresgid \
 memmem usleep snprintf strcasestr strcasechr \
 strcasepbrk strrev nl_langinfo)
+
+# NOTE:  The following line is NOT NOT NOT NOT NOT a typo!
+# If you are having problems with it, libast.m4 is not installed
+# or aclocal couldn't find it.  Hence the problem is on YOUR end.
 dps_snprintf_oflow()
+
+dnl# Check for math lib.
 AC_CHECK_LIB(m, pow)
 
 dnl# Portability checks for various functions
@@ -500,9 +506,11 @@ AC_ARG_ENABLE(trans,
                 AC_DEFINE(PIXMAP_OFFSET, , [Define for pseudo-transparency support.])
 ])
 
+dnl#
+dnl# MMX support
+dnl#
 AC_MSG_CHECKING(for MMX support)
 HAVE_MMX=""
-HAVE_MMX_64=""
 AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines], [
                   test "x$enableval" = "xyes" && HAVE_MMX="yes"
               ], [
@@ -510,23 +518,37 @@ AC_ARG_ENABLE(mmx, [  --enable-mmx            enable MMX assembly routines], [
                       i*86)
                           grep mmx /proc/cpuinfo >/dev/null 2>&1 && HAVE_MMX="yes"
                           ;;
-                      x86_64)
-                          grep mmx /proc/cpuinfo >/dev/null 2>&1 && HAVE_MMX_64="yes"
-                          ;;
                   esac
               ])
 if test "x$HAVE_MMX" = "xyes"; then
     AC_MSG_RESULT([yes (32-bit)])
     AC_DEFINE(HAVE_MMX, , [Define for 32-bit MMX support.])
-elif test "x$HAVE_MMX_64" = "xyes"; then
-    dnl# AC_MSG_RESULT([yes (64-bit)])
-    dnl# AC_DEFINE(HAVE_MMX_64, , [Define for 64-bit MMX support.])
-    AC_MSG_RESULT([no (64-bit MMX not yet supported)])
 else
     AC_MSG_RESULT([no (no MMX detected)])
 fi
-dnl# AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes" -o "x$HAVE_MMX_64" = "xyes")
 AM_CONDITIONAL(HAVE_MMX, test "x$HAVE_MMX" = "xyes")
+
+dnl#
+dnl# SSE2 support
+dnl#
+AC_MSG_CHECKING(for SSE2 support)
+HAVE_SSE2=""
+AC_ARG_ENABLE(sse2, [  --enable-sse2            enable SSE2 assembly routines], [
+                  test "x$enableval" = "xyes" && HAVE_SSE2="yes"
+              ], [
+                  case $host_cpu in
+                      x86_64)
+                          grep sse2 /proc/cpuinfo >/dev/null 2>&1 && HAVE_SSE2="yes"
+                          ;;
+                  esac
+              ])
+if test "x$HAVE_SSE2" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_SSE2, , [Define for 64-bit SSE2 support.])
+else
+    AC_MSG_RESULT([no (no SSE2 detected)])
+fi
+AM_CONDITIONAL(HAVE_SSE2, test "x$HAVE_SSE2" = "xyes")
 
 dnl#
 dnl# LibAST

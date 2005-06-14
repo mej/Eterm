@@ -6,6 +6,9 @@ bin_PROGRAMS = Eterm
 MMX_SRCS = mmx_cmod.S
 MMX_OBJS = mmx_cmod.lo
 
+SSE2_SRCS = sse2_cmod.c
+SSE2_OBJS = sse2_cmod.lo
+
 libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c          \
                       command.h draw.c draw.h e.c e.h eterm_debug.h eterm_utmp.h \
                       events.c events.h feature.h font.c font.h grkelot.c        \
@@ -16,14 +19,19 @@ libEterm_la_SOURCES = actions.c actions.h buttons.c buttons.h command.c         
                       timer.c timer.h utmp.c windows.c windows.h defaultfont.c   \
                       defaultfont.h libscream.c scream.h screamcfg.h
 
-EXTRA_libEterm_la_SOURCES = $(MMX_SRCS)
+EXTRA_libEterm_la_SOURCES = $(MMX_SRCS) $(SSE2_SRCS)
 
 libEterm_la_LDFLAGS = -release $(VERSION)
+if HAVE_SSE2
+libEterm_la_DEPENDENCIES = feature.h $(SSE2_OBJS)
+libEterm_la_LIBADD = $(SSE2_OBJS)
+else
 if HAVE_MMX
 libEterm_la_DEPENDENCIES = feature.h $(MMX_OBJS)
 libEterm_la_LIBADD = $(MMX_OBJS)
 else
 libEterm_la_DEPENDENCIES = feature.h
+endif
 endif
 
 Eterm_SOURCES = main.c
@@ -31,7 +39,7 @@ Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Eterm_LDADD = libEterm.la 
 
-EXTRA_DIST = mmx_cmod.S
+EXTRA_DIST = mmx_cmod.S sse2_cmod.c
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)

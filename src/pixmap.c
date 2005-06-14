@@ -60,10 +60,15 @@ static const char cvs_ident[] = "$Id$";
 /* Optimized check for rm, gm, and bm all < 256 */
 #define COLORMODS_HAVE_SATURATION(rm, gm, bm)  ((rm|gm|bm) >> 8)
 
-/* Assembler routines */
+/* Assembler routines for 32 bit cpu with mmx */
 extern void shade_ximage_15_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_16_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 extern void shade_ximage_32_mmx(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+
+/* Assembler routines for 64 bit cpu with sse2 */
+extern void shade_ximage_15_sse2(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+extern void shade_ximage_16_sse2(void *data, int bpl, int w, int h, int rm, int gm, int bm);
+extern void shade_ximage_32_sse2(void *data, int bpl, int w, int h, int rm, int gm, int bm);
 
 #ifdef PIXMAP_SUPPORT
 static Imlib_Border bord_none = { 0, 0, 0, 0 };
@@ -1551,7 +1556,7 @@ need_colormod(register imlib_t *iml)
 
 /* New optimized routines for tinting XImages written by Willem Monsuwe <willem@stack.nl> */
 
-#ifndef HAVE_MMX
+#if !defined HAVE_MMX && !defined HAVE_SSE2
 /* RGB 15 */
 static void
 shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
@@ -1743,7 +1748,13 @@ void
 colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h)
 {
 
+#ifdef HAVE_SSE2
+    XImage * __attribute__ ((aligned (16))) ximg;
+#elif defined HAVE_MMX
+    XImage * __attribute__ ((aligned (8))) ximg;
+#else
     XImage *ximg;
+#endif
     register unsigned long i;
 
 #if 0
@@ -1848,7 +1859,10 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
         /* Determine bitshift and bitmask values */
         switch (real_depth) {
             case 15:
-#ifdef HAVE_MMX
+#ifdef HAVE_SSE2
+                D_PIXMAP(("Using SSE2 - 15 bit\n"));
+                shade_ximage_15_sse2(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#elif defined HAVE_MMX
                 D_PIXMAP(("Using MMX - 15 bit\n"));
                 shade_ximage_15_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
@@ -1857,7 +1871,10 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
                 break;
             case 16:
-#ifdef HAVE_MMX
+#ifdef HAVE_SSE2
+                D_PIXMAP(("Using SSE2 - 16 bit\n"));
+                shade_ximage_16_sse2(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#elif defined HAVE_MMX
                 D_PIXMAP(("Using MMX - 16 bit\n"));
                 shade_ximage_16_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
@@ -1872,7 +1889,10 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
                 }
                 /* drop */
             case 32:
-#ifdef HAVE_MMX
+#ifdef HAVE_SSE2
+                D_PIXMAP(("Using SSE2 - 32 bit\n"));
+                shade_ximage_32_sse2(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+#elif defined HAVE_MMX
                 D_PIXMAP(("Using MMX - 32 bit\n"));
                 shade_ximage_32_mmx(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
 #else
