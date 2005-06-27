@@ -49,13 +49,13 @@ done
 export LIBTOOLIZE ACLOCAL AUTOCONF AUTOHEADER AUTOMAKE
 
 # Check for existing libast.m4 we can use.  Use the local one if not.
-if test ! -f "`$ACLOCAL --print-ac-dir`/libast.m4"; then
-    ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
-fi
+#if test ! -f "`$ACLOCAL --print-ac-dir`/libast.m4"; then
+#    ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
+#fi
 
 # Run the stuff.
 (set -x && $LIBTOOLIZE -c -f)
-(set -x && $ACLOCAL $ACLOCAL_FLAGS)
+(set -x && $ACLOCAL -I . $ACLOCAL_FLAGS)
 (set -x && $AUTOCONF)
 (set -x && $AUTOHEADER)
 (set -x && $AUTOMAKE -a -c)

@@ -5403,3 +5403,9 @@ Tue Jun 14 15:36:09 2005                        Michael Jennings (mej)
 Added SSE2 support patch thanks to Tres Melton <tres@mindspring.com>
 and John Ellson <ellson@research.att.com>.
 ----------------------------------------------------------------------
+Sun Jun 26 21:05:03 2005                        Michael Jennings (mej)
+
+Attempt to fix autogen.sh for Gentoo and Solaris.
+
+Detect and avoid E 0.17 faking E 0.16.x's IPC mechanisms.
+----------------------------------------------------------------------

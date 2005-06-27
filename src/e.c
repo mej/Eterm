@@ -64,7 +64,6 @@ check_for_enlightenment(void)
 Window
 enl_ipc_get_win(void)
 {
-
     unsigned char *str = NULL;
     Atom prop;
     unsigned long num, after;
@@ -75,7 +74,7 @@ enl_ipc_get_win(void)
 
     D_ENL(("Searching for IPC window.\n"));
 
-    if (props[PROP_ENL_COMMS] == None) {
+    if ((props[PROP_ENL_COMMS] == None) || (props[PROP_ENL_VERSION] == None)) {
         D_ENL((" -> Enlightenment is not running.  You lose!\n"));
         return None;
     }
@@ -83,6 +82,30 @@ enl_ipc_get_win(void)
     if (str) {
         sscanf((char *) str, "%*s %x", (unsigned int *) &ipc_win);
         XFree(str);
+    }
+    if (ipc_win != None) {
+        XGetWindowProperty(Xdisplay, Xroot, props[PROP_ENL_VERSION], 0, 14, False, AnyPropertyType,
+                           &prop, &format, &num, &after, &str);
+        if (str) {
+            char *ver, *tmp;
+
+            tmp = strchr((char *) str, ' ');
+            if (tmp) {
+                ver = tmp + 1;
+                tmp = strchr((char *) ver, ' ');
+                if (tmp) {
+                    *tmp = 0;
+                }
+
+                /* Make sure the version string is within the acceptable range. */
+                if (SPIF_CMP_IS_LESS(spiftool_version_compare(SPIF_CAST(charptr) str, SPIF_CAST(charptr) "0.16.4"))
+                    || SPIF_CMP_IS_GREATER(spiftool_version_compare(SPIF_CAST(charptr) str, SPIF_CAST(charptr) "0.16.999"))) {
+                    D_ENL((" -> IPC version string \"%s\" out of range.  I'll have to ignore it.\n"));
+                    ipc_win = None;
+                }
+            }
+            XFree(str);
+        }
     }
     if (ipc_win != None) {
         if (!XGetGeometry

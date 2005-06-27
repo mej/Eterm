@@ -146,6 +146,7 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_SELECTION_INCR] = XInternAtom(Xdisplay, "INCR", False);
     props[PROP_SELECTION_TARGETS] = XInternAtom(Xdisplay, "TARGETS", False);
     props[PROP_ENL_COMMS] = XInternAtom(Xdisplay, "ENLIGHTENMENT_COMMS", True);
+    props[PROP_ENL_VERSION] = XInternAtom(Xdisplay, "ENLIGHTENMENT_VERSION", True);
     props[PROP_ENL_MSG] = XInternAtom(Xdisplay, "ENL_MSG", False);
     props[PROP_DELETE_WINDOW] = XInternAtom(Xdisplay, "WM_DELETE_WINDOW", False);
     props[PROP_DND_PROTOCOL] = XInternAtom(Xdisplay, "DndProtocol", False);
