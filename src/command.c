@@ -1767,6 +1767,7 @@ create_fontset(const char *font1, const char *font2)
     if (fontname) {
         setlocale(LC_ALL, "");
         fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, &ds);
+        D_FONT(("Created fontset from %s, %d missing charsets, default string \"%s\".\n", fontname, mc, NONULL(ds)));
         FREE(fontname);
         if (mc) {
             XFreeStringList(ml);

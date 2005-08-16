@@ -324,12 +324,14 @@ eterm_bootstrap(int argc, char *argv[])
 #ifdef NO_UTF8_LOCALE
     /* Check locale for UTF-8 and deactivate if needed. */
     val = getenv("LANG");
+    D_CMD(("Checking locale \"%s\" for UTF-8.\n", NONULL(val)));
     if (val && *val) {
         char *tmp;
 
         tmp = strcasestr(val, ".utf");
         if (tmp) {
             *tmp = 0;
+            D_CMD((" -> Deactivating unsupported UTF-8 locale; now using \"%s\"\n", val));
         }
     }
 #endif

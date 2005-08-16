@@ -78,6 +78,9 @@
 #  define DEBUG_VT              6
 #  define D_VT(x)               DPRINTF6(x)
 
+#  define DEBUG_ALL_SCREEN      7
+#  define D_ALL_SCREEN(x)       DPRINTF7(x)
+
 #  define DEBUG_X               9
 
 #endif /* _ETERM_DEBUG_H */

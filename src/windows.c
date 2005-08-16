@@ -527,6 +527,7 @@ Create_Windows(int argc, char *argv[])
         gcvalue.background = PixColors[bgColor];
         gcvalue.graphics_exposures = 0;
         TermWin.gc = LIBAST_X_CREATE_GC(GCForeground | GCBackground | GCFont | GCGraphicsExposures, &gcvalue);
+        D_X11(("Created GC 0x%08x for TermWin.gc\n", TermWin.gc));
     }
 
     if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_CURSOR)) {

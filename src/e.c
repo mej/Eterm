@@ -90,9 +90,15 @@ enl_ipc_get_win(void)
             char *ver, *tmp;
 
             tmp = strchr((char *) str, ' ');
+            if (!tmp) {
+                tmp = strchr((char *) str, '-');
+            }
             if (tmp) {
                 ver = tmp + 1;
                 tmp = strchr((char *) ver, ' ');
+                if (! tmp) {
+                    tmp = strchr((char *) ver, '-');
+                }
                 if (tmp) {
                     *tmp = 0;
                 }

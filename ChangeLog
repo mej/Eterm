@@ -5409,3 +5409,13 @@ Attempt to fix autogen.sh for Gentoo and Solaris.
 
 Detect and avoid E 0.17 faking E 0.16.x's IPC mechanisms.
 ----------------------------------------------------------------------
+Tue Aug 16 10:48:12 2005                        Michael Jennings (mej)
+
+Applied a fix from benny@sweetfactory.org for a typo in keysym
+handling.
+
+Fixed percent signs in menu files thanks to Yasufumi Haga
+<yasufumi.haga@nifty.com>.
+
+Fixed E IPC version check to work with old and new schemes.
+----------------------------------------------------------------------

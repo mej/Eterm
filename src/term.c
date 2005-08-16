@@ -677,7 +677,7 @@ lookup_key(XEvent * ev)
         }
 
         /* Process extended keysyms.  This is where the conversion to escape sequences happens. */
-        if (keysym >= 0xfe00 && keysym <= 0xffff) {
+        if (keysym >= 0xff00 && keysym <= 0xffff) {
 #ifdef KEYSYM_ATTRIBUTE
             /* The "keysym" attribute in the config file gets handled here. */
             if (!(shft | ctrl) && KeySym_map[keysym - 0xff00] != NULL) {
