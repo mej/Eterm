@@ -9,6 +9,12 @@ broken() {
     echo "ERROR:  $1 not found."
     exit -1
 }
+abort() {
+	echo
+	echo "Running '$1' failed :("
+	echo "Try updating the package on your system and try again."
+	exit -2
+}
 
 DIE=0
 
@@ -54,14 +60,16 @@ export LIBTOOLIZE ACLOCAL AUTOCONF AUTOHEADER AUTOMAKE
 #fi
 
 # Run the stuff.
-(set -x && $LIBTOOLIZE -c -f)
-(set -x && $ACLOCAL -I . $ACLOCAL_FLAGS)
-(set -x && $AUTOCONF)
-(set -x && $AUTOHEADER)
-(set -x && $AUTOMAKE -a -c)
+(set -x && $LIBTOOLIZE -c -f) || abort libtool
+(set -x && $ACLOCAL -I . $ACLOCAL_FLAGS) || abort libtool
+(set -x && $AUTOCONF) || abort libtool
+(set -x && $AUTOHEADER) || abort libtool
+(set -x && $AUTOMAKE -a -c) || abort libtool
 
 # Run configure.
-./configure "$@"
+if test x"$NOCONFIGURE" = x; then
+(set -x && ./configure "$@")
+fi
 
 if [ -f cvs.motd ]; then
   echo "ATTENTION CVS Users!"
