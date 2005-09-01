@@ -61,10 +61,10 @@ export LIBTOOLIZE ACLOCAL AUTOCONF AUTOHEADER AUTOMAKE
 
 # Run the stuff.
 (set -x && $LIBTOOLIZE -c -f) || abort libtool
-(set -x && $ACLOCAL -I . $ACLOCAL_FLAGS) || abort libtool
-(set -x && $AUTOCONF) || abort libtool
-(set -x && $AUTOHEADER) || abort libtool
-(set -x && $AUTOMAKE -a -c) || abort libtool
+(set -x && $ACLOCAL -I . $ACLOCAL_FLAGS) || abort aclocal
+(set -x && $AUTOCONF) || abort autoconf
+(set -x && $AUTOHEADER) || abort autoheader
+(set -x && $AUTOMAKE -a -c) || abort automake
 
 # Run configure.
 if test x"$NOCONFIGURE" = x; then
