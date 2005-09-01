@@ -236,8 +236,8 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 # endif
 #endif
 
-#define VT100_ANS	"\033[?1;2c"	/* vt100 answerback */
-#define LINUX_ANS	"\033[?6;5c"	/* linux answerback */
+#define VT100_ANS	"\033[?1;2C"	/* vt100 answerback */
+#define LINUX_ANS	"\033[?6;5C"	/* linux answerback */
 #ifndef ESCZ_ANSWER
 # define ESCZ_ANSWER	VT100_ANS	/* obsolete ANSI ESC[c */
 #endif

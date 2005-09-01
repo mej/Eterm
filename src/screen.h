@@ -1,5 +1,5 @@
 /*--------------------------------*-C-*---------------------------------*
- * File:	screen.h
+ * File:    screen.h
  *
  * This module is all new by Robert Nation
  * <nation@rocket.sanders.lockheed.com>
@@ -21,9 +21,9 @@
 #endif
 
 /************ Macros and Definitions ************/
-#define WRAP_CHAR		(0xff)
-#define PROP_SIZE       	4096
-#define TABSIZE         	8	/* default tab size */
+#define WRAP_CHAR       (0xff)
+#define PROP_SIZE           4096
+#define TABSIZE             8   /* default tab size */
 
 #define IS_SELECTION(a)         (((a) == XA_PRIMARY) || ((a) == XA_SECONDARY) || ((a) == XA_CLIPBOARD(Xdisplay)))
 #define IS_CUT_BUFFER(a)        (((a) >= XA_CUT_BUFFER0) && ((a) <= XA_CUT_BUFFER7))
@@ -34,7 +34,7 @@
 #define REFRESH_ZERO_SCROLLBACK do { \
                                   if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_HOME_ON_OUTPUT)) TermWin.view_start = 0; \
                                 } while (0)
-#define CHECK_SELECTION	do { \
+#define CHECK_SELECTION do { \
                           if (selection.op) selection_check(); \
                         } while (0)
 #define CLEAR_SELECTION (selection.beg.row = selection.beg.col = selection.end.row = selection.end.col = 0)
@@ -75,21 +75,21 @@
 #define SLOW_REFRESH            (1<<2)  /* Partially exposed window          */
 #define SMOOTH_REFRESH          (1<<3)  /* Do sync'ing to make it smooth     */
 
-#define IGNORE	0
-#define SAVE	's'
-#define RESTORE	'r'
+#define IGNORE  0
+#define SAVE    's'
+#define RESTORE 'r'
 #define REVERT IGNORE
 #define INVOKE RESTORE
 
 /* flags for scr_gotorc() */
-#define C_RELATIVE		1	/* col movement is relative */
-#define R_RELATIVE		2	/* row movement is relative */
-#define RELATIVE		(R_RELATIVE|C_RELATIVE)
+#define C_RELATIVE      1   /* col movement is relative */
+#define R_RELATIVE      2   /* row movement is relative */
+#define RELATIVE        (R_RELATIVE|C_RELATIVE)
 
 /* modes for scr_insdel_chars(), scr_insdel_lines() */
-#define INSERT			-1	/* don't change these values */
-#define DELETE			+1
-#define ERASE			+2
+#define INSERT          -1  /* don't change these values */
+#define DELETE          +1
+#define ERASE           +2
 
 /* modes for scr_page() - scroll page. used by scrollbar window */
 enum {
@@ -104,49 +104,49 @@ enum {
     SECONDARY
 };
 
-#define RS_None			0		/* Normal */
-#define RS_Cursor		0x01000000u	/* cursor location */
-#define RS_Select		0x02000000u	/* selected text */
-#define RS_RVid			0x04000000u	/* reverse video */
-#define RS_Uline		0x08000000u	/* underline */
-#define RS_acsFont		0x10000000u	/* ACS graphics character set */
-#define RS_ukFont		0x20000000u	/* UK character set */
-#define RS_fontMask		(RS_acsFont|RS_ukFont)
 #ifdef MULTI_CHARSET
-#define RS_multi0		0x40000000u	/* only multibyte characters */
-#define RS_multi1		0x80000000u	/* multibyte 1st byte */
-#define RS_multi2		(RS_multi0|RS_multi1)	/* multibyte 2nd byte */
-#define RS_multiMask		(RS_multi0|RS_multi1)	/* multibyte mask */
+#define RS_multi1       0x80000000u /* multibyte 1st byte */
+#define RS_multi0       0x40000000u /* only multibyte characters */
+#define RS_multi2       (RS_multi0|RS_multi1)   /* multibyte 2nd byte */
+#define RS_multiMask    (RS_multi0|RS_multi1)   /* multibyte mask */
 #endif
-#define RS_fgMask		0x0003FE00u	/* 512 colors */
-#define RS_bgMask		0x000001FFu	/* 512 colors */
-#define RS_Overscore		0x00040000u	/* overscore */
-#define RS_Italic		0x00080000u	/* italic */
-#define RS_Bold			0x00100000u	/* bold */
-#define RS_Dim			0x00200000u	/* dim (apply alpha) */
-#define RS_Conceal		0x00400000u	/* conceal */
-#define RS_Blink		0x00800000u	/* blink */
+#define RS_ukFont       0x20000000u /* UK character set */
+#define RS_acsFont      0x10000000u /* ACS graphics character set */
+#define RS_fontMask     (RS_acsFont|RS_ukFont)
+#define RS_Uline        0x08000000u /* underline */
+#define RS_RVid         0x04000000u /* reverse video */
+#define RS_Select       0x02000000u /* selected text */
+#define RS_Cursor       0x01000000u /* cursor location */
+#define RS_Blink        0x00800000u /* blink */
+#define RS_Conceal      0x00400000u /* conceal */
+#define RS_Dim          0x00200000u /* dim (apply alpha) */
+#define RS_Bold         0x00100000u /* bold */
+#define RS_Italic       0x00080000u /* italic */
+#define RS_Overscore    0x00040000u /* overscore */
+#define RS_fgMask       0x0003FE00u /* 512 colors */
+#define RS_bgMask       0x000001FFu /* 512 colors */
+#define RS_None         0x00000000u /* Normal */
 
-#define RS_attrMask		(0xFF000000u|RS_Overscore|RS_Italic|RS_Bold|RS_Dim|RS_Conceal|RS_Blink)
+#define RS_attrMask     (0xFF000000u|RS_Overscore|RS_Italic|RS_Bold|RS_Dim|RS_Conceal|RS_Blink)
 
 /* how to build & extract colors and attributes */
-#define GET_FGCOLOR(r)	(((r) & RS_fgMask)>>9)
-#define GET_BGCOLOR(r)	(((r) & RS_bgMask))
-#define GET_ATTR(r)	(((r) & RS_attrMask))
-#define GET_BGATTR(r)	(((r) & (RS_attrMask | RS_bgMask)))
+#define GET_FGCOLOR(r)        (((r) & RS_fgMask)>>9)
+#define GET_BGCOLOR(r)        (((r) & RS_bgMask))
+#define GET_ATTR(r)           (((r) & RS_attrMask))
+#define GET_BGATTR(r)         (((r) & (RS_attrMask | RS_bgMask)))
 
-#define SET_FGCOLOR(r,fg)	(((r) & ~RS_fgMask)  | ((fg)<<9))
-#define SET_BGCOLOR(r,bg)	(((r) & ~RS_bgMask)  | (bg))
-#define SET_ATTR(r,a)		(((r) & ~RS_attrMask)| (a))
-#define DEFAULT_RSTYLE		(RS_None | (fgColor<<9) | (bgColor))
+#define SET_FGCOLOR(r,fg)     (((r) & ~RS_fgMask)  | ((fg)<<9))
+#define SET_BGCOLOR(r,bg)     (((r) & ~RS_bgMask)  | (bg))
+#define SET_ATTR(r,a)         (((r) & ~RS_attrMask)| (a))
+#define DEFAULT_RSTYLE        (RS_None | (fgColor<<9) | (bgColor))
 
 /* screen_t flags */
-#define Screen_Relative		(1<<0)	/* relative origin mode flag         */
-#define Screen_VisibleCursor	(1<<1)	/* cursor visible?                   */
-#define Screen_Autowrap		(1<<2)	/* auto-wrap flag                    */
-#define Screen_Insert		(1<<3)	/* insert mode (vs. overstrike)      */
-#define Screen_WrapNext		(1<<4)	/* need to wrap for next char?       */
-#define Screen_DefaultFlags	(Screen_VisibleCursor|Screen_Autowrap)
+#define Screen_Relative       (1<<0)    /* relative origin mode flag         */
+#define Screen_VisibleCursor  (1<<1)    /* cursor visible?                   */
+#define Screen_Autowrap       (1<<2)    /* auto-wrap flag                    */
+#define Screen_Insert         (1<<3)    /* insert mode (vs. overstrike)      */
+#define Screen_WrapNext       (1<<4)    /* need to wrap for next char?       */
+#define Screen_DefaultFlags   (Screen_VisibleCursor|Screen_Autowrap)
 
 /************ Structures ************/
 /* General overview of the screen stuff:
@@ -162,17 +162,17 @@ enum {
 typedef unsigned char text_t;
 typedef unsigned int rend_t;
 typedef enum {
-  SELECTION_CLEAR = 0,
-  SELECTION_INIT,
-  SELECTION_BEGIN,
-  SELECTION_CONT,
-  SELECTION_DONE
+    SELECTION_CLEAR = 0,
+    SELECTION_INIT,
+    SELECTION_BEGIN,
+    SELECTION_CONT,
+    SELECTION_DONE
 } selection_op_t;
 typedef enum {
-  LATIN1 = 0, UCS2, EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
+    LATIN1 = 0, UCS2, EUCJ, EUCKR = EUCJ, GB = EUCJ, SJIS, BIG5
 } encoding_t;
 typedef struct {
-  short row, col;
+    short row, col;
 } row_col_t;
 /* screen_t:
 
@@ -193,20 +193,20 @@ typedef struct {
    character set currently being used (0-3).
 */
 typedef struct {
-  text_t **text;
-  rend_t **rend;
-  short row, col;
-  short tscroll, bscroll;
-  unsigned char charset:2;
-  unsigned char flags:5;
+    text_t **text;
+    rend_t **rend;
+    short row, col;
+    short tscroll, bscroll;
+    unsigned char charset:2;
+    unsigned char flags:5;
 } screen_t;
 /* A save_t object is used to save/restore the cursor position and other
    relevant data when requested to do so by the application. */
 typedef struct {
-  short row, col;
-  short charset;
-  char charset_char;
-  rend_t rstyle;
+    short row, col;
+    short charset;
+    char charset_char;
+    rend_t rstyle;
 } save_t;
 /* selection_t:
 
@@ -222,12 +222,12 @@ typedef struct {
    -TermWin.nscrolled <= beg.row <= mark.row <= end.row < TermWin.nrow
 */
 typedef struct {
-  text_t  *text;
-  int len;
-  selection_op_t op;
-  unsigned short screen:1;
-  unsigned char clicks:3;
-  row_col_t beg, mark, end;
+    text_t  *text;
+    int len;
+    selection_op_t op;
+    unsigned short screen:1;
+    unsigned char clicks:3;
+    row_col_t beg, mark, end;
 } selection_t;
 
 /************ Variables ************/

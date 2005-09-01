@@ -1192,7 +1192,9 @@ process_escape_seq(void)
             scr_index(DN);
             break;
         case 'Z':
+#ifndef NO_ENQ_ANS
             tt_printf((unsigned char *) ESCZ_ANSWER);
+#endif
             break;
         case '[':
             process_csi_seq();

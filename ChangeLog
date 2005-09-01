@@ -5419,3 +5419,11 @@ Fixed percent signs in menu files thanks to Yasufumi Haga
 
 Fixed E IPC version check to work with old and new schemes.
 ----------------------------------------------------------------------
+Thu Sep  1 02:12:29 2005                        Michael Jennings (mej)
+
+Fix abort stuff.
+----------------------------------------------------------------------
+Thu Sep  1 02:16:17 2005                        Michael Jennings (mej)
+
+Fix but disable vt100 answerbacks.
+----------------------------------------------------------------------
