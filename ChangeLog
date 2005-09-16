@@ -5427,3 +5427,7 @@ Thu Sep  1 02:16:17 2005                        Michael Jennings (mej)
 
 Fix but disable vt100 answerbacks.
 ----------------------------------------------------------------------
+Thu Sep 15 21:55:34 2005                        Michael Jennings (mej)
+
+Support NetWM startup ID's.
+----------------------------------------------------------------------

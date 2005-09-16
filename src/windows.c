@@ -498,6 +498,16 @@ Create_Windows(int argc, char *argv[])
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
     }
 
+    /* Set startup ID property if given by the launching application. */
+    if (getenv("DESKTOP_STARTUP_ID")) {
+        Atom atom;
+        unsigned char *tmp = SPIF_CAST_PTR(uchar) getenv("DESKTOP_STARTUP_ID");
+
+        atom = XInternAtom(Xdisplay, "UTF8_STRING", False);
+        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_STARTUP_ID], atom, 8, PropModeReplace, tmp, strlen(tmp) + 1);
+        unsetenv("DESKTOP_STARTUP_ID");
+    }
+
     /* Set window opacity if needed. */
     if ((props[PROP_EWMH_OPACITY] != None) && (rs_opacity != 0xff)) {
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_OPACITY],
