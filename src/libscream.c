@@ -1732,10 +1732,15 @@ ns_add_disp(_ns_sess * s, int after, char *name)
           if (after >= 0)
               ns_go2_disp(s, after);
 /*        if (ns_screen_command(s, "\x01\x03") == NS_SUCC) { */
-          if (ns_statement(s, "screen") == NS_SUCC) {
-              if (!name || strlen(name))
+          ret = ns_statement(s, "screen");
+          if (ret == NS_SUCC) {
+              D_ESCREEN(("Sent \"screen\" command, now renaming tab.\n"));
+              if (!name || strlen(name)) {
                   ns_ren_disp(s, -2, name);
+              }
               ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
+          } else {
+              D_ESCREEN(("ns_statement(screen) returned %d\n", ret));
           }
           break;
 #endif
@@ -1870,6 +1875,7 @@ ns_ren_disp(_ns_sess * s, int d, char *name)
         return NS_FAIL;
     }
 
+    D_ESCREEN(("Renaming display %d to %s\n", d, ((name) ? (name) : ("dialog box input"))));
     if (!s->curr) {
         if (!(s->curr = s->dsps))
             return NS_FAIL;
@@ -1885,7 +1891,9 @@ ns_ren_disp(_ns_sess * s, int d, char *name)
             i = s->curr->name;
             l = strlen(i);
         }
+        D_ESCREEN(("Invoking input dialog; i == %s, l == %lu\n", NONULL(i), l));
         (void) ns_inp_dial(s, "Enter a new name for the current display", 12, &i, NULL);
+        D_ESCREEN((" -> Back, new name is:  \"%s\"\n", NONULL(i)));
         if (!i || !*i)
             return NS_FAIL;
     }
@@ -2187,10 +2195,13 @@ ns_statement(_ns_sess * s, char *c)
                     s->escape = x;
                 }
                 ret = ns_screen_xcommand(s, NS_SCREEN_CMD, i ? i : c);
+                D_ESCREEN(("ns_screen_xcommand(%10p, NS_SCREEN_CMD, %s) returned %d.\n",
+                           s, NONULL(((i) ? (i) : (c))), ret));
                 s->escape = y;
             } else if (ret == NS_NOT_ALLOWED) {
                 ns_inp_dial(s, "Sorry, David, I cannot allow that.", 0, NULL, NULL);
             }
+            break;
 #endif
         default:
             ret = NS_FAIL;
@@ -2199,6 +2210,7 @@ ns_statement(_ns_sess * s, char *c)
     if (i)
         FREE(i);
 
+    D_ESCREEN(("Returning %d\n", ret));
     return ret;
 }
 
@@ -2542,30 +2554,32 @@ ns_screen_command(_ns_sess * sess, char *cmd)
     char *c;
     int ret = NS_SUCC;
 
-    if (!cmd || !*cmd)
+    if (!cmd || !*cmd) {
         return NS_FAIL;
+    }
 
     if (NS_EFUN_EXISTS(efuns, sess, NULL, inp_text)) {
         if ((c = STRDUP(cmd))) {
-            {
-                char *p = c;    /* replace default escape-char with that */
+            char *p;
 
-                while (*p) {    /* actually used in this session */
-                    if (*p == NS_SCREEN_ESCAPE)
-                        *p = sess->escape;
-                    p++;
+            for (p = c; *p; p++) {
+                if (*p == NS_SCREEN_ESCAPE) {
+                    *p = sess->escape;
                 }
             }
             ns_desc_string(c, "ns_screen_command: xlated string");
+            D_ESCREEN(("Calling inp_text(NULL, %d, %s) with ret == %d\n", sess->fd, NONULL(c), ret));
             efuns->inp_text(NULL, sess->fd, c);
             FREE(c);
-        } else
+        } else {
+            /* out of memory */
             ret = NS_OOM;
-    } /* out of memory */
-    else {
+        }
+    } else {
         ret = NS_EFUN_NOT_SET;
         D_ESCREEN(("ns_screen_command: sess->efuns->inp_text not set!\n"));
     }
+    D_ESCREEN(("Returning %d\n", ret));
     return ret;
 }
 
@@ -2593,6 +2607,7 @@ ns_screen_xcommand(_ns_sess * s, char prefix, char *cmd)
         ret = ns_screen_command(s, i);
         FREE(i);
     }
+    D_ESCREEN(("Returning %d\n", ret));
     return ret;
 }
 

@@ -5431,3 +5431,9 @@ Thu Sep 15 21:55:34 2005                        Michael Jennings (mej)
 
 Support NetWM startup ID's.
 ----------------------------------------------------------------------
+Wed Oct  5 14:41:00 2005                        Michael Jennings (mej)
+
+Fixed an incredibly-difficult-to-track-down missing "break" statement
+which caused the "New..." and Ctrl-T functionality to fail to prompt
+for a tab name.
+----------------------------------------------------------------------
