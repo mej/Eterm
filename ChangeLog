@@ -5437,3 +5437,7 @@ Fixed an incredibly-difficult-to-track-down missing "break" statement
 which caused the "New..." and Ctrl-T functionality to fail to prompt
 for a tab name.
 ----------------------------------------------------------------------
+Mon Dec  5 15:46:34 2005                        Michael Jennings (mej)
+
+Prevent firewall bounces from trying for the same port.
+----------------------------------------------------------------------

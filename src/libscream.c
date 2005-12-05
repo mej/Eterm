@@ -39,6 +39,7 @@
 #include <limits.h>             /* PATH_MAX */
 #include <ctype.h>              /* isspace() */
 #include <errno.h>              /* errno */
+#include <sys/socket.h>
 
 #include "config.h"
 #include "feature.h"
@@ -203,22 +204,29 @@ ns_new_hop(int lp, char *fw, int fp, int delay, _ns_sess * s)
         bzero(h, sizeof(_ns_hop));
         if ((h->fw = STRDUP(fw))) {
             if (!lp) {
-                lp = NS_MIN_PORT;       /* local port defaults to */
-                if (ha) {       /* NS_MIN_PORT. if that's */
-                    int f;      /* taken, use next FREE port. */
+                int tmp_sock;
 
-                    do {        /* FREE as in, not used by us. */
-                        _ns_hop *i = ha;
+                tmp_sock = socket(PF_INET, SOCK_STREAM, 6);
+                if (tmp_sock > 0) {
+                    struct sockaddr_in addr;
 
-                        f = 0;
-                        while (i)
-                            if (i->localport == lp) {
-                                f = 1;
-                                lp++;
-                                i = NULL;
-                            } else
-                                i = i->next;
-                    } while (f);
+                    addr.sin_family = AF_INET;
+                    addr.sin_addr.s_addr = INADDR_LOOPBACK;
+                    for (lp = NS_MIN_PORT; (lp > 0) && (lp < NS_MAX_PORT); lp++) {
+                        addr.sin_port = htons(lp);
+
+                        if (!bind(tmp_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in))
+                            && !listen(tmp_sock, 1)) {
+                            /* We can listen on this port.  Use it! */
+                            /* FIXME:  Minor race condition between port selection and ssh call. */
+                            break;
+                        }
+                    }
+                    if ((lp < 0) || (lp == NS_MAX_PORT)) {
+                        /* We're going to fail anyway, so just throw something in. */
+                        lp = (NS_MIN_PORT + random()) % NS_MAX_PORT;
+                        BOUND(lp, NS_MIN_PORT, NS_MAX_PORT);
+                    }
                 }
             }
             h->delay = (delay ? delay : NS_TUNNEL_DELAY);

@@ -54,7 +54,7 @@
 #define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22
-#define NS_MIN_PORT          1025
+#define NS_MIN_PORT          47323
 #define NS_MAX_PORT          65535
 
 #define NS_MAX_DISPS         512
