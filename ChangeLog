@@ -5441,3 +5441,7 @@ Mon Dec  5 15:46:34 2005                        Michael Jennings (mej)
 
 Prevent firewall bounces from trying for the same port.
 ----------------------------------------------------------------------
+Thu Dec 22 18:32:31 2005                        Michael Jennings (mej)
+
+Cleanups and minor enhancements.
+----------------------------------------------------------------------

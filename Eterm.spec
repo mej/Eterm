@@ -3,6 +3,9 @@
 %endif
 
 %define __os_install_post /usr/lib/rpm/brp-compress
+%if %{?optflags:1}0
+%define optflags ${RPM_OPT_FLAGS:--O0 -g3}
+%endif
 
 Summary: Enlightened terminal emulator
 Name: Eterm
@@ -32,8 +35,7 @@ have the Imlib2 library installed.
 %setup -a 1
 
 %build
-#CFLAGS="$RPM_OPT_FLAGS"
-CFLAGS="-O0 -g3"
+CFLAGS="%{optflags}"
 export CFLAGS
 
 # When using the configure macro, I also specify all the directory

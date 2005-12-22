@@ -1251,6 +1251,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                 } else if (renderop & RENDER_FORCE_PIXMAP) {
                     pixmap = simg->pmap->pixmap;
                     simg->pmap->pixmap = LIBAST_X_CREATE_PIXMAP(width, height);
+                    D_PIXMAP(("Replacing pixmap 0x%08x with new pixmap 0x%08x.\n", pixmap, simg->pmap->pixmap));
                     XCopyArea(Xdisplay, pixmap, simg->pmap->pixmap, gc, 0, 0, width, height, 0, 0);
                     IMLIB_FREE_PIXMAP(pixmap);
                 } else {
