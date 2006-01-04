@@ -1748,14 +1748,7 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
 void
 colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h)
 {
-
-#ifdef HAVE_SSE2
-    XImage * __attribute__ ((aligned (16))) ximg;
-#elif defined HAVE_MMX
-    XImage * __attribute__ ((aligned (8))) ximg;
-#else
     XImage *ximg;
-#endif
     register unsigned long i;
 
 #if 0
@@ -1887,6 +1880,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
                 if (ximg->bits_per_pixel != 32) {
                     D_PIXMAP(("Rendering 24 bit\n"));
                     shade_ximage_24(ximg->data, ximg->bytes_per_line, w, h, rm, gm, bm);
+                    break;
                 }
                 /* drop */
             case 32:

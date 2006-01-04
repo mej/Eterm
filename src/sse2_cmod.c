@@ -1,12 +1,17 @@
-/*  File:  sse2_cmod.c
- *  Written and Copyright (C) 2005 by Tres Melton
+/*
+ * Copyright (C) 1997-2006, Michael Jennings
  *
- *  Permission is hereby granted to Michael Jennings to license this code as
- *  he sees fit.  I'd prefer the GPL but he will choose the BSD. The debate
- *  is moot as this is to become a part of the Eterm project, for which he is 
- *  the primary author.  For users of this code I ask that any modifications
- *  be released back into the community but with Michael Jennings chooses the
- *  BSD license then that request has no backing in law.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
  *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
@@ -15,8 +20,9 @@
  *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
+ * Ported from <willem@stack.nl> Willem Monsuwe's original x86/MMX assembly 
+ * code by Tres Melton in 2005 and 2006.  Anything copyrightable by me is
+ * assigned to the Eterm project and its founder/maintainer: Michael Jennings.
  *
  *  Much inspiration was drawn from the original x86 MMX port written by
  *	Willem Monsuwe <willem@stack.nl> in pure x86/MMX Assembly.  The MMX
@@ -24,6 +30,8 @@
  *	accessing had to be completely reworked for the x86_64 ABI and to 
  *	ensure they worked with various gcc options.  Further the code was
  *	extended to take advantage of the 128 bit xmm registers in SSE2.
+ *
+ *  The imlib2 code in Enlightenment also has a lot to teach on the subject.
  *
  *  Manuals used in this port:
  *      The Gnu Assembler
@@ -65,21 +73,7 @@
  *	assembly code in C functions is the only way to ensure that this code will continue to 
  *	function through a (however unlikely) change.  If pure assembly were to be used as the
  *	original MMX author, Willem Monsuwe, did and the ABI changed then this code would cease
- *	to function properly.  After examination of Willem's code I'm wondering if he
- *	wrote it for GNU/Linux originally.  The ENTER and LEAVE macros put all of the 
- *	parameters on the stack so that they can be accessed by references to the Base_Pointer
- *	the way that ANSI C is defined.  If he originally wrote this for GNU/Linux then he most
- *	likely would have just used the registers instead of unwinding those optimizations
- * 	manually by pushing them to the stack.  And if he explicitly wanted to use the stack
- *	then there are parameters to gcc that would have performed those operations for him:
- *	-mregparm/-mmemparm.  Other gcc options that can tweak with the stack and the number
- *	of registers available for function parameters are: -fcall-used/-fcall-saved,
- *	-fcaller-saves, -fstack-protector, -fPIC/-fpic, -mno-push-args, etc..  It might be
- *	advisable to check for these switches when using the original MMX code and emit a
- *	warning if any are enabled.  I know that the PIC option trashes the BX register and
- *	that both Willem and I use that register.  In other words If you do manage to get it
- *	to compile & run w/ -fpic it WILL break. On the plus side, you can keep the pieces!  :-)
- *	On the other hand I could be wrong about everything
+ *	to function properly.  
  *
  *  In Conclusion:
  *	Using C functions and inline assembly code should alleviate all of the concerns as the
@@ -126,8 +120,8 @@ void shade_ximage_15_sse2( volatile void *data, volatile int bpl, volatile int w
 	"jns 3f				\n\t"
 	"2:				\n\t"	/* Start of the inner loop (pixels 8 at a time --> 8 * 16 = 128bits/xmm register )		*/
 	"movdqu (%%rsi, %%rcx, 2), %%xmm0\n\t"	/* Load the 16 bits of the pixel (5 bits for red, 6 bits for green, 5 bits for blue)		*/
-	"movdqu %%xmm0, %%xmm1		\n\t"	/* Create a copy of the pixel for the green color						*/
-	"movdqu %%xmm0, %%xmm2		\n\t"	/* Create a copy of the pixel for the blue color						*/
+	"movdqa %%xmm0, %%xmm1		\n\t"	/* Create a copy of the pixel for the green color						*/
+	"movdqa %%xmm0, %%xmm2		\n\t"	/* Create a copy of the pixel for the blue color						*/
 	"psrlw $5, %%xmm1		\n\t"	/* Packed Shift Right Logical Words								*/
 						/* From A64_128bit_Media_Programming (p. 347)							*/
 						/* Shifts the blue off of the green color							*/
@@ -191,8 +185,8 @@ void shade_ximage_15_sse2( volatile void *data, volatile int bpl, volatile int w
 	"jns 8f				\n\t"
 	"7:				\n\t"
 	"movdqu (%%rsi, %%rcx, 2), %%xmm0\n\t"
-	"movdqu %%xmm0, %%xmm1		\n\t"
-	"movdqu %%xmm0, %%xmm2		\n\t"
+	"movdqa %%xmm0, %%xmm1		\n\t"
+	"movdqa %%xmm0, %%xmm2		\n\t"
 	"psrlw $5, %%xmm1		\n\t"
 	"psrlw $10, %%xmm0		\n\t"
 	"psllw $11, %%xmm2		\n\t"
@@ -301,8 +295,8 @@ void shade_ximage_16_sse2( volatile void *data, volatile int bpl, volatile int w
 	"jns 3f				\n\t"
 	"2:				\n\t"	/* Start of the inner loop (pixels 8 at a time --> 8 * 16 = 128bits/xmm register )		*/
 	"movdqu (%%rsi, %%rcx, 2), %%xmm0\n\t"	/* Load the 16 bits of the pixel (5 bits for red, 6 bits for green, 5 bits for blue)		*/
-	"movdqu %%xmm0, %%xmm1		\n\t"	/* Create a copy of the pixel for the green color						*/
-	"movdqu %%xmm0, %%xmm2		\n\t"	/* Create a copy of the pixel for the blue color						*/
+	"movdqa %%xmm0, %%xmm1		\n\t"	/* Create a copy of the pixel for the green color						*/
+	"movdqa %%xmm0, %%xmm2		\n\t"	/* Create a copy of the pixel for the blue color						*/
 	"psrlw $5, %%xmm1		\n\t"	/* Packed Shift Right Logical Words								*/
 						/* From A64_128bit_Media_Programming (p. 347)							*/
 						/* Shifts the blue off of the green color							*/
@@ -359,7 +353,7 @@ void shade_ximage_16_sse2( volatile void *data, volatile int bpl, volatile int w
 	"pcmpeqw %%xmm3, %%xmm3		\n\t"	/* Packed Compare Equal Words									*/
 						/* From A64_128bit_Media_Programming (p. 276)							*/
 						/* This sets xmm3 to 128 1's (since mm6 = mm6)							*/
-	"movdqu %%xmm3, %%xmm4		\n\t"	/* Make copy of 128 ones									*/
+	"movdqa %%xmm3, %%xmm4		\n\t"	/* Make copy of 128 ones									*/
 	"psllw $5, %%xmm3		\n\t"	/* xmm3 = 8 copies of 1111 1111 1110 0000							*/
 	"psllw $6, %%xmm4		\n\t"	/* xmm4 = 8 copies of 1111 1111 1100 0000							*/
 	"6:				\n\t"
@@ -368,8 +362,8 @@ void shade_ximage_16_sse2( volatile void *data, volatile int bpl, volatile int w
 	"jns 8f				\n\t"
 	"7:				\n\t"
 	"movdqu (%%rsi, %%rcx, 2), %%xmm0\n\t"
-	"movdqu %%xmm0, %%xmm1		\n\t"
-	"movdqu %%xmm0, %%xmm2		\n\t"
+	"movdqa %%xmm0, %%xmm1		\n\t"
+	"movdqa %%xmm0, %%xmm2		\n\t"
 	"psrlw $5, %%xmm1		\n\t"
 	"psrlw $11, %%xmm0		\n\t"
 	"psllw $11, %%xmm2		\n\t"
@@ -480,7 +474,7 @@ void shade_ximage_32_sse2( volatile void *data, volatile int bpl, volatile int w
 	"psllw $15, %%xmm6		\n\t"	/* Packed Shift Left Logical Words								*/
 						/* From A64_128bit_Media_Programming (p. 330)							*/
 						/* This sets 8 16 bit values of  1000 0000 0000 0000 in the 128 bit word			*/
-	"movdqu %%xmm6, %%xmm5		\n\t"	/* Copy mm6 to mm5 (we need mm6 later)								*/
+	"movdqa %%xmm6, %%xmm5		\n\t"	/* Copy mm6 to mm5 (we need mm6 later)								*/
 	"pmulhw %%xmm4, %%xmm5		\n\t"	/* Packed Multiply High Signed Word								*/
 						/* mm4 = ( mm4 * mm5 ) >> 16  (8 times, once for each 16bit value)				*/
 						/* For each color_ modifier (cm)								*/
