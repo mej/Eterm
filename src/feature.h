@@ -300,6 +300,10 @@ inline void *memmove(void *, const void *, size_t);
 # define NO_DELETE_KEY		/* These systems seem to be anal this way*/
 #endif
 
+#if !defined(HAVE_X11_EXTENSIONS_XRES_H)
+# undef HAVE_XRES_EXT
+#endif
+
 #ifndef PATH_ENV
 # define PATH_ENV "ETERMPATH"
 #endif

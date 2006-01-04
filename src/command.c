@@ -67,6 +67,9 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xos.h>
 #include <X11/Xproto.h>
 #include <X11/IntrinsicP.h>
+#ifdef HAVE_XRES_EXT
+# include <X11/extensions/XRes.h>
+#endif
 #ifdef PTY_GRP_NAME
 # include <grp.h>
 #endif
@@ -147,6 +150,7 @@ TW_DECL_MAGIC(libscream_magic);
 static RETSIGTYPE handle_child_signal(int);
 static RETSIGTYPE handle_exit_signal(int);
 static RETSIGTYPE handle_crash(int);
+static RETSIGTYPE x_resource_dump(int);
 
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;
@@ -1114,6 +1118,114 @@ handle_crash(int sig)
     SIG_RETURN(0);
 }
 
+#ifdef HAVE_XRES_EXT
+static RETSIGTYPE
+x_resource_dump(int sig)
+{
+    int event_base, error_base, count, i;
+    unsigned long bytes;
+    XResClient *clients = NULL;
+    XResType *types = NULL;
+    Atom pixmap_atom, gc_atom, font_atom;
+    pid_t my_pid;
+    char *title, *ptitle;
+
+    USE_VAR(sig);
+    my_pid = getpid();
+
+    /* Create type atoms for future use. */
+    pixmap_atom = XInternAtom(Xdisplay, "PIXMAP", False);
+    gc_atom = XInternAtom(Xdisplay, "GC", False);
+    gc_atom = XInternAtom(Xdisplay, "FONT", False);
+
+    /* Look at what *we* think our consumption is. */
+#if DEBUG >= DEBUG_MEM
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+        PIXMAP_DUMP();
+        GC_DUMP();
+    }
+#endif
+
+    /* Make sure we have the extension loaded. */
+    if (!XResQueryExtension(Xdisplay, &event_base, &error_base)) {
+        fprintf(stderr, "XResource extension not available on current display.\n");
+        return;
+    }
+    D_X11(("Got XResource extension values:  %d (0x%08x) / %d (0x%08x)\n",
+           event_base, event_base, error_base, error_base));
+
+    /* Get a list of X clients and find our window ID in the list. */
+    if (!XResQueryClients(Xdisplay, &count, &clients)) {
+        if (clients) {
+            XFree(clients);
+        }
+        D_X11((" -> Unable to query clients.\n"));
+        return;
+    }
+    D_X11((" -> Got %d clients.\n", count));
+
+    if (count == 0) {
+        D_X11((" -> Nothing to do!\n"));
+        return;
+    }
+
+    for (i = 0; i < count; i++) {
+        Window win;
+
+        win = clients[i].resource_base & (~clients[i].resource_mask);
+        D_X11(("Checking client:  base %d, mask %d, window 0x%08x\n", clients[i].resource_base,
+               clients[i].resource_mask, win));
+        if ((TermWin.parent & (~clients[i].resource_mask)) == win) {
+            break;
+        }
+    }
+    if (i == count) {
+        D_X11((" -> No client found with window 0x%08x (0x%08x\n", TermWin.parent,
+               (TermWin.parent & (~clients[i].resource_mask))));
+        return;
+    }
+
+    /* Request resource info for our client ID. */
+    if (!XResQueryClientResources(Xdisplay, clients[i].resource_base, &count, &types)
+        || !XResQueryClientPixmapBytes(Xdisplay, clients[i].resource_base, &bytes)) {
+        if (types) {
+            XFree(types);
+        }
+        D_X11((" -> Unable to query resources.\n"));
+        return;
+    }
+    D_X11((" -> Got %d types.\n", count));
+
+    /* Get and sanitize window title for easier identification. */
+    XFetchName(Xdisplay, TermWin.parent, &title);
+    if (title) {
+        for (ptitle = title; *ptitle; ptitle++) {
+            if (!isprint(*ptitle)) {
+                *ptitle = ' ';
+            }
+        }
+    }
+
+    for (i = 0; i < count; i++) {
+        if (types[i].resource_type == pixmap_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d pixmaps (%d bytes).\n", my_pid, TermWin.parent,
+                    NONULL(title), types[i].count, bytes);
+        } else if (types[i].resource_type == gc_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d GC's (%d bytes).\n", my_pid, TermWin.parent,
+                    NONULL(title), types[i].count, types[i].count * (sizeof(XGCValues) + sizeof(GC)));
+        } else if (types[i].resource_type == font_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d fonts (%d bytes).\n", my_pid, TermWin.parent,
+                    NONULL(title), types[i].count, types[i].count * (sizeof(XFontStruct) + sizeof(Font)));
+        }
+    }
+    XFree(clients);
+    XFree(types);
+    if (title) {
+        XFree(title);
+    }
+}
+#endif
+
 void
 install_handlers(void)
 {
@@ -1133,6 +1245,11 @@ install_handlers(void)
     signal(SIGILL, handle_crash);
     signal(SIGSYS, handle_crash);
     signal(SIGPIPE, SIG_IGN);
+#ifdef HAVE_XRES_EXT
+    signal(SIGUSR1, x_resource_dump);
+#else
+    signal(SIGUSR1, SIG_IGN);
+#endif
 }
 
 /* Exit gracefully, clearing the utmp entry and restoring tty attributes */

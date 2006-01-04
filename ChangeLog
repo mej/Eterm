@@ -5445,3 +5445,7 @@ Thu Dec 22 18:32:31 2005                        Michael Jennings (mej)
 
 Cleanups and minor enhancements.
 ----------------------------------------------------------------------
+Wed Jan  4 03:44:04 2006                        Michael Jennings (mej)
+
+X resource tracking/debugging support.
+----------------------------------------------------------------------
