@@ -211,22 +211,28 @@ ns_new_hop(int lp, char *fw, int fp, int delay, _ns_sess * s)
                     struct sockaddr_in addr;
 
                     addr.sin_family = AF_INET;
-                    addr.sin_addr.s_addr = INADDR_LOOPBACK;
+                    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
                     for (lp = NS_MIN_PORT; (lp > 0) && (lp < NS_MAX_PORT); lp++) {
                         addr.sin_port = htons(lp);
 
-                        if (!bind(tmp_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in))
-                            && !listen(tmp_sock, 1)) {
+                        if (bind(tmp_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in))) {
+                            D_ESCREEN(("Unable to bind socket %d to 127.0.0.1:%hd -- %s\n", tmp_sock, lp, strerror(errno)));
+                        } else if (listen(tmp_sock, 1)) {
+                            D_ESCREEN(("Unable to listen on port %hd -- %s\n", lp, strerror(errno)));
+                        } else {
                             /* We can listen on this port.  Use it! */
                             /* FIXME:  Minor race condition between port selection and ssh call. */
+                            D_ESCREEN(("Got available listening port %d.\n", lp));
                             break;
                         }
                     }
                     if ((lp < 0) || (lp == NS_MAX_PORT)) {
                         /* We're going to fail anyway, so just throw something in. */
-                        lp = (NS_MIN_PORT + random()) % NS_MAX_PORT;
+                        lp = NS_MIN_PORT + (random() % (NS_MAX_PORT - NS_MIN_PORT));
                         BOUND(lp, NS_MIN_PORT, NS_MAX_PORT);
+                        D_ESCREEN(("Chose random listening port %d.\n", lp));
                     }
+                    close(tmp_sock);
                 }
             }
             h->delay = (delay ? delay : NS_TUNNEL_DELAY);
