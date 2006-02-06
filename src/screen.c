@@ -2473,8 +2473,8 @@ selection_fetch(Window win, unsigned prop, int delete)
             return;
         }
         nread += nitems;
-        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n", (int) actual_type,
-                  actual_fmt, nitems, data, bytes_after));
+        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n",
+                  (int) actual_type, actual_fmt, nitems, data, bytes_after));
 
         if (nitems == 0) {
             D_SELECT(("Retrieval of incremental selection complete.\n"));
@@ -2523,11 +2523,12 @@ selection_fetch(Window win, unsigned prop, int delete)
 void
 selection_copy_string(Atom sel, char *str, size_t len)
 {
+    D_SELECT(("Copying %ul bytes from 0x%08x to selection %d\n", len, str, (int) sel));
     if (str == NULL || len == 0) {
         return;
     }
     if (IS_SELECTION(sel)) {
-        D_SELECT(("Copying selection to selection %d\n", (int) sel));
+        D_SELECT(("Changing ownership of selection %d to my window 0x%08x\n", (int) sel, (int) TermWin.vt));
         XSetSelectionOwner(Xdisplay, sel, TermWin.vt, CurrentTime);
         if (XGetSelectionOwner(Xdisplay, sel) != TermWin.vt) {
             print_error("Can't take ownership of selection\n");
@@ -2549,30 +2550,25 @@ selection_copy(Atom sel)
 void
 selection_paste(Atom sel)
 {
+    D_SELECT(("Attempting to paste selection %d.\n", (int) sel));
     if (selection.text != NULL) {
         /* If we have a selection of our own, paste it. */
         D_SELECT(("Pasting my current selection of length %lu\n", selection.len));
         selection_write(selection.text, selection.len);
     } else if (IS_SELECTION(sel)) {
-        if (XGetSelectionOwner(Xdisplay, sel) == None) {
-            /* If nobody owns the current selection, just try to paste it ourselves. */
-            D_SELECT(("Current selection %d unowned.  Attempting to paste the default cut buffer.\n", (int) sel));
-            selection_fetch(Xroot, XA_CUT_BUFFER0, False);
-        } else {
-            /* If someone owns the current selection, send a request to that client to
-               convert the selection to the appropriate form (usually XA_STRING) and
-               save it for us in the VT_SELECTION property.  We'll then get a SelectionNotify. */
-            D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
+        /* Request the current selection be converted to the appropriate
+           form (usually XA_STRING) and save it for us in the VT_SELECTION
+           property.  We'll then get a SelectionNotify. */
+        D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-            if (encoding_method != LATIN1) {
-                XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-            } else {
-                XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-            }
-#else
+        if (encoding_method != LATIN1) {
+            XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+        } else {
             XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-#endif
         }
+#else
+        XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+#endif
     } else {
         D_SELECT(("Pasting cut buffer %d.\n", (int) sel));
         selection_fetch(Xroot, sel, False);

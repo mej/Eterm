@@ -5462,3 +5462,7 @@ Thu Jan  5 14:50:53 2006                        Michael Jennings (mej)
 
 Fixed firewall bounce port checking from 2005-12-05.
 ----------------------------------------------------------------------
+Mon Feb  6 01:02:15 2006                        Michael Jennings (mej)
+
+Fixed paste from clipboard.
+----------------------------------------------------------------------
