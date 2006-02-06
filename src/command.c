@@ -1003,7 +1003,9 @@ void
 dump_stack_trace(void)
 {
     char cmd[256];
+#ifdef GDB
     struct stat st;
+#endif
 
 #ifdef NO_STACK_TRACE
     return;
@@ -1208,14 +1210,16 @@ x_resource_dump(int sig)
 
     for (i = 0; i < count; i++) {
         if (types[i].resource_type == pixmap_atom) {
-            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d pixmaps (%d bytes).\n", my_pid, TermWin.parent,
-                    NONULL(title), types[i].count, bytes);
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d pixmaps (%lu bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count, bytes);
         } else if (types[i].resource_type == gc_atom) {
-            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d GC's (%d bytes).\n", my_pid, TermWin.parent,
-                    NONULL(title), types[i].count, types[i].count * (sizeof(XGCValues) + sizeof(GC)));
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d GC's (%d bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count,
+                    types[i].count * (sizeof(XGCValues) + sizeof(GC)));
         } else if (types[i].resource_type == font_atom) {
-            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d fonts (%d bytes).\n", my_pid, TermWin.parent,
-                    NONULL(title), types[i].count, types[i].count * (sizeof(XFontStruct) + sizeof(Font)));
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d fonts (%d bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count,
+                    types[i].count * (sizeof(XFontStruct) + sizeof(Font)));
         }
     }
     XFree(clients);

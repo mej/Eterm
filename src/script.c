@@ -153,7 +153,7 @@ eterm_handle_winop(char *action)
  * the "primary" buffer (XA_PRIMARY in Xlib-speak).
  */
 void
-script_handler_copy(char **params)
+script_handler_copy(spif_charptr_t *params)
 {
     unsigned char i;
     char *buffer_id;
@@ -186,9 +186,9 @@ script_handler_copy(char **params)
  * <string> is the string of characters to send to the pty.
  */
 void
-script_handler_echo(char **params)
+script_handler_echo(spif_charptr_t *params)
 {
-    char **tmp;
+    spif_charptr_t *tmp;
 
     for (tmp = params; tmp && *tmp; tmp++) {
         tt_write(*tmp, strlen(*tmp));
@@ -205,7 +205,7 @@ script_handler_echo(char **params)
  * and no message.
  */
 void
-script_handler_exit(char **params)
+script_handler_exit(spif_charptr_t *params)
 {
     unsigned char code = 0;
     char *tmp;
@@ -230,7 +230,7 @@ script_handler_exit(char **params)
  * specified, SIGTERM is the default.
  */
 void
-script_handler_kill(char **params)
+script_handler_kill(spif_charptr_t *params)
 {
     int sig;
 
@@ -254,7 +254,7 @@ script_handler_kill(char **params)
  * the "primary" buffer (XA_PRIMARY in Xlib-speak).
  */
 void
-script_handler_paste(char **params)
+script_handler_paste(spif_charptr_t *params)
 {
     unsigned char i;
     char *buffer_id;
@@ -291,7 +291,7 @@ script_handler_paste(char **params)
  * will be theme.cfg.
  */
 void
-script_handler_save(char **params)
+script_handler_save(spif_charptr_t *params)
 {
     if (params && *params) {
         if (!strcasecmp(params[0], "theme")) {
@@ -312,7 +312,7 @@ script_handler_save(char **params)
  * the specified file.
  */
 void
-script_handler_save_buff(char **params)
+script_handler_save_buff(spif_charptr_t *params)
 {
     if (params && *params) {
         scr_dump_to_file(params[0]);
@@ -334,7 +334,7 @@ script_handler_save_buff(char **params)
  * and the type may be passed as a second parameter if you wish.
  */
 void
-script_handler_scroll(char **params)
+script_handler_scroll(spif_charptr_t *params)
 {
     char *type;
     double cnt_float;
@@ -384,7 +384,7 @@ script_handler_scroll(char **params)
  * search() will clear the previously-highlighted search term.
  */
 void
-script_handler_search(char **params)
+script_handler_search(spif_charptr_t *params)
 {
     static char *search = NULL;
 
@@ -406,7 +406,7 @@ script_handler_search(char **params)
  * If no command is specified, the default is to execute another Eterm.
  */
 void
-script_handler_spawn(char **params)
+script_handler_spawn(spif_charptr_t *params)
 {
     char *tmp;
 
@@ -426,9 +426,9 @@ script_handler_spawn(char **params)
  * <string> is the string of characters to send to the handler.
  */
 void
-script_handler_string(char **params)
+script_handler_string(spif_charptr_t *params)
 {
-    char **tmp;
+    spif_charptr_t *tmp;
 
     for (tmp = params; tmp && *tmp; tmp++) {
         cmd_write(*tmp, strlen(*tmp));
@@ -442,7 +442,7 @@ script_handler_string(char **params)
  * <command> is the command to be executed.
  */
 void
-script_handler_exec_dialog(char **params)
+script_handler_exec_dialog(spif_charptr_t *params)
 {
     char *tmp;
     int ret;
@@ -469,7 +469,7 @@ script_handler_exec_dialog(char **params)
  * <message> is the message to present.
  */
 void
-script_handler_msgbox(char **params)
+script_handler_msgbox(spif_charptr_t *params)
 {
     char *tmp;
 
@@ -500,7 +500,7 @@ script_handler_msgbox(char **params)
  * scrollback - View the scrollback for a display
  */
 void
-script_handler_es_display(char **params)
+script_handler_es_display(spif_charptr_t *params)
 {
     _ns_sess *sess = TermWin.screen;
     char *p, *a;
@@ -588,7 +588,7 @@ script_handler_es_display(char **params)
  * scrollback - View the scrollback for a region
  */
 void
-script_handler_es_region(char **params)
+script_handler_es_region(spif_charptr_t *params)
 {
     _ns_sess *sess = TermWin.screen;
     _ns_disp *disp;
@@ -671,7 +671,7 @@ script_handler_es_region(char **params)
  * <statement> is the Escreen (screen) statement to execute.
  */
 void
-script_handler_es_statement(char **params)
+script_handler_es_statement(spif_charptr_t *params)
 {
     char *tmp;
 
@@ -689,7 +689,7 @@ script_handler_es_statement(char **params)
  * Syntax:  es_reset()
  */
 void
-script_handler_es_reset(char **params)
+script_handler_es_reset(spif_charptr_t *params)
 {
     USE_VAR(params);
     ns_reset(TermWin.screen, 0);
@@ -703,7 +703,7 @@ script_handler_es_reset(char **params)
  * This function can be used to cancel undesired default behavior.
  */
 void
-script_handler_nop(char **params)
+script_handler_nop(spif_charptr_t *params)
 {
     USE_VAR(params);
 }
@@ -728,7 +728,7 @@ eterm_script_handler_t *script_find_handler(const char *name)
 void
 script_parse(char *s)
 {
-    char **token_list, **param_list;
+    spif_charptr_t *token_list, *param_list;
     register char *pstr;
     register unsigned long i;
     char *func_name, *params, *tmp;

@@ -31,7 +31,7 @@
 /************ Macros and Definitions ************/
 
 /************ Structures ************/
-typedef void (*eterm_script_handler_function_t)(char **);
+typedef void (*eterm_script_handler_function_t)(spif_charptr_t *);
 typedef struct {
   char *name;
   eterm_script_handler_function_t handler;
@@ -43,26 +43,26 @@ typedef struct {
 _XFUNCPROTOBEGIN
 
 /* Handlers */
-extern void script_handler_copy(char **);
-extern void script_handler_echo(char **);
-extern void script_handler_exec_dialog(char **);
-extern void script_handler_exit(char **);
-extern void script_handler_kill(char **);
-extern void script_handler_msgbox(char **);
-extern void script_handler_paste(char **);
-extern void script_handler_save(char **);
-extern void script_handler_save_buff(char **);
-extern void script_handler_scroll(char **);
-extern void script_handler_search(char **);
-extern void script_handler_spawn(char **);
-extern void script_handler_string(char **);
-extern void script_handler_nop(char **);
+extern void script_handler_copy(spif_charptr_t *);
+extern void script_handler_echo(spif_charptr_t *);
+extern void script_handler_exec_dialog(spif_charptr_t *);
+extern void script_handler_exit(spif_charptr_t *);
+extern void script_handler_kill(spif_charptr_t *);
+extern void script_handler_msgbox(spif_charptr_t *);
+extern void script_handler_paste(spif_charptr_t *);
+extern void script_handler_save(spif_charptr_t *);
+extern void script_handler_save_buff(spif_charptr_t *);
+extern void script_handler_scroll(spif_charptr_t *);
+extern void script_handler_search(spif_charptr_t *);
+extern void script_handler_spawn(spif_charptr_t *);
+extern void script_handler_string(spif_charptr_t *);
+extern void script_handler_nop(spif_charptr_t *);
 
 #ifdef ESCREEN
-extern void script_handler_es_display(char **);
-extern void script_handler_es_region(char **);
-extern void script_handler_es_statement(char **);
-extern void script_handler_es_reset(char **);
+extern void script_handler_es_display(spif_charptr_t *);
+extern void script_handler_es_region(spif_charptr_t *);
+extern void script_handler_es_statement(spif_charptr_t *);
+extern void script_handler_es_reset(spif_charptr_t *);
 #endif
 
 /* Engine */

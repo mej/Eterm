@@ -5466,3 +5466,9 @@ Mon Feb  6 01:02:15 2006                        Michael Jennings (mej)
 
 Fixed paste from clipboard.
 ----------------------------------------------------------------------
+Mon Feb  6 17:15:49 2006                        Michael Jennings (mej)
+
+DragonFly BSD fixes from Joerg Sonnenberger <joerg@britannica.bec.de>.
+
+Also some type mismatch fixes.
+----------------------------------------------------------------------

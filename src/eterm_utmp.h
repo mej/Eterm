@@ -69,8 +69,9 @@
 # ifdef HAVE_LASTLOG_H
 #  include <lastlog.h>
 # endif
-# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DragonFly__)
 #  include <ttyent.h>
+#  define NEW_BSD_UTMP
 # endif
 
 # ifdef HAVE_LIBUTEMPTER
