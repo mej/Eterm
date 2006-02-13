@@ -92,7 +92,7 @@ system_wait(char *command)
         setreuid(my_ruid, my_ruid);
         setregid(my_rgid, my_rgid);
         execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-        print_error("execl(%s) failed -- %s\n", command, strerror(errno));
+        libast_print_error("execl(%s) failed -- %s\n", command, strerror(errno));
         exit(EXIT_FAILURE);
     } else {
         D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
@@ -113,7 +113,7 @@ system_no_wait(char *command)
         setreuid(my_ruid, my_ruid);
         setregid(my_rgid, my_rgid);
         execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-        print_error("execl(%s) failed -- %s\n", command, strerror(errno));
+        libast_print_error("execl(%s) failed -- %s\n", command, strerror(errno));
         exit(EXIT_FAILURE);
     }
     return (0);

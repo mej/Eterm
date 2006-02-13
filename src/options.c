@@ -380,7 +380,7 @@ usage(void)
     printf("  (bool) -- Boolean option ('1', 'on', 'yes', or 'true' to activate, '0', 'off', 'no', or 'false' to deactivate)\n");
     printf("  (int)  -- Integer option (any signed number of reasonable value, usually in decimal/octal/hex)\n");
     printf("  (str)  -- String option (be sure to quote strings if needed to avoid shell expansion)\n");
-    printf("  (strs) -- Stringlist option (quoting strings will be split on whitespace)\n\n");
+    printf("  (strs) -- Stringlist option (quoting strings will be spiftool_split on whitespace)\n\n");
 
     printf("NOTE:  Long options can be separated from their values by an equal sign ('='), or you can\n");
     printf("       pass the value as the following argument on the command line (e.g., '--scrollbar 0'\n");
@@ -813,55 +813,55 @@ version(void)
 static void
 handle_attribute(char *val_ptr)
 {
-    conf_parse_line(NULL, val_ptr);
+    spifconf_parse_line(NULL, val_ptr);
 }
 
 /* The config file parsers.  Each function handles a given context. */
 static void *
 parse_color(char *buff, void *state)
 {
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "foreground ")) {
-        RESET_AND_ASSIGN(rs_color[fgColor], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[fgColor], spiftool_get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "background ")) {
-        RESET_AND_ASSIGN(rs_color[bgColor], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[bgColor], spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "cursor ")) {
 
 #ifndef NO_CURSORCOLOR
-        RESET_AND_ASSIGN(rs_color[cursorColor], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[cursorColor], spiftool_get_word(2, buff));
 #else
-        print_warning("Support for the cursor attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the cursor attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "cursor_text ")) {
 #ifndef NO_CURSORCOLOR
-        RESET_AND_ASSIGN(rs_color[cursorColor2], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[cursorColor2], spiftool_get_word(2, buff));
 #else
-        print_warning("Support for the cursor_text attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the cursor_text attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "pointer ")) {
-        RESET_AND_ASSIGN(rs_color[pointerColor], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[pointerColor], spiftool_get_word(2, buff));
 
 #ifdef ESCREEN
     } else if (!BEG_STRCASECMP(buff, "es_current ")) {
-        RESET_AND_ASSIGN(rs_color[ES_COLOR_CURRENT], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[ES_COLOR_CURRENT], spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "es_active ")) {
-        RESET_AND_ASSIGN(rs_color[ES_COLOR_ACTIVE], get_word(2, buff));
+        RESET_AND_ASSIGN(rs_color[ES_COLOR_ACTIVE], spiftool_get_word(2, buff));
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "video ")) {
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!BEG_STRCASECMP(tmp, "reverse")) {
             BITFIELD_SET(vt_options, VT_OPTIONS_REVERSE_VIDEO);
         } else if (BEG_STRCASECMP(tmp, "normal")) {
-            print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n",
+            libast_print_error("Parse error in file %s, line %lu:  Invalid value \"%s\" for attribute video\n",
                         file_peek_path(), file_peek_line(), tmp);
         }
     } else if (!BEG_STRCASECMP(buff, "color ")) {
@@ -869,14 +869,14 @@ parse_color(char *buff, void *state)
         char *tmp = 0, *r1, *g1, *b1;
         unsigned int n, r, g, b, index = 0;
 
-        n = num_words(buff);
+        n = spiftool_num_words(buff);
         if (n < 3) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
                         "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
-        tmp = get_pword(2, buff);
-        r1 = get_pword(3, buff);
+        tmp = spiftool_get_pword(2, buff);
+        r1 = spiftool_get_pword(3, buff);
         if (!isdigit(*r1)) {
             if (isdigit(*tmp)) {
                 n = strtoul(tmp, (char **) NULL, 0);
@@ -885,38 +885,38 @@ parse_color(char *buff, void *state)
                 } else if (n >= 8 && n <= 15) {
                     index = minBright + n - 8;
                 }
-                RESET_AND_ASSIGN(rs_color[index], get_word(1, r1));
+                RESET_AND_ASSIGN(rs_color[index], spiftool_get_word(1, r1));
                 return NULL;
             } else {
                 if (!BEG_STRCASECMP(tmp, "bd ")) {
 #ifndef NO_BOLDUNDERLINE
-                    RESET_AND_ASSIGN(rs_color[colorBD], get_word(1, r1));
+                    RESET_AND_ASSIGN(rs_color[colorBD], spiftool_get_word(1, r1));
 #else
-                    print_warning("Support for the color bd attribute was not compiled in, ignoring\n");
+                    libast_print_warning("Support for the color bd attribute was not compiled in, ignoring\n");
 #endif
                     return NULL;
                 } else if (!BEG_STRCASECMP(tmp, "ul ")) {
 #ifndef NO_BOLDUNDERLINE
-                    RESET_AND_ASSIGN(rs_color[colorUL], get_word(1, r1));
+                    RESET_AND_ASSIGN(rs_color[colorUL], spiftool_get_word(1, r1));
 #else
-                    print_warning("Support for the color ul attribute was not compiled in, ignoring\n");
+                    libast_print_warning("Support for the color ul attribute was not compiled in, ignoring\n");
 #endif
                     return NULL;
                 } else {
-                    tmp = get_word(1, tmp);
-                    print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n",
+                    tmp = spiftool_get_word(1, tmp);
+                    libast_print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n",
                                 file_peek_path(), file_peek_line(), NONULL(tmp));
                     FREE(tmp);
                 }
             }
         }
         if (n != 5) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for \n"
                         "attribute color", file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
-        g1 = get_pword(4, buff);
-        b1 = get_pword(5, buff);
+        g1 = spiftool_get_pword(4, buff);
+        b1 = spiftool_get_pword(5, buff);
         if (isdigit(*tmp)) {
             n = strtoul(tmp, (char **) NULL, 0);
             r = strtoul(r1, (char **) NULL, 0);
@@ -931,7 +931,7 @@ parse_color(char *buff, void *state)
                 RESET_AND_ASSIGN(rs_color[index], MALLOC(14));
                 sprintf(rs_color[index], "#%02x%02x%02x", r, g, b);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid color index %lu\n", file_peek_path(), file_peek_line(), n);
+                libast_print_error("Parse error in file %s, line %lu:  Invalid color index %lu\n", file_peek_path(), file_peek_line(), n);
             }
 
         } else if (!BEG_STRCASECMP(tmp, "bd ")) {
@@ -942,7 +942,7 @@ parse_color(char *buff, void *state)
             b = strtoul(b1, (char **) NULL, 0);
             sprintf(rs_color[colorBD], "#%02x%02x%02x", r, g, b);
 #else
-            print_warning("Support for the color bd attribute was not compiled in, ignoring\n");
+            libast_print_warning("Support for the color bd attribute was not compiled in, ignoring\n");
 #endif
 
         } else if (!BEG_STRCASECMP(tmp, "ul ")) {
@@ -953,17 +953,17 @@ parse_color(char *buff, void *state)
             b = strtoul(b1, (char **) NULL, 0);
             sprintf(rs_color[colorUL], "#%02x%02x%02x", r, g, b);
 #else
-            print_warning("Support for the color ul attribute was not compiled in, ignoring\n");
+            libast_print_warning("Support for the color ul attribute was not compiled in, ignoring\n");
 #endif
 
         } else {
-            tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n", file_peek_path(), file_peek_line(),
+            tmp = spiftool_get_word(1, tmp);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid color index \"%s\"\n", file_peek_path(), file_peek_line(),
                         NONULL(tmp));
             FREE(tmp);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context color\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context color\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return state;
@@ -972,76 +972,76 @@ parse_color(char *buff, void *state)
 static void *
 parse_attributes(char *buff, void *state)
 {
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "geometry ")) {
-        RESET_AND_ASSIGN(rs_geometry, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_geometry, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "title ")) {
-        RESET_AND_ASSIGN(rs_title, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_title, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "name ")) {
-        RESET_AND_ASSIGN(rs_name, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_name, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "iconname ")) {
-        RESET_AND_ASSIGN(rs_iconName, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_iconName, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "desktop ")) {
         rs_desktop = (int) strtol(buff, (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "scrollbar_type ")) {
-        RESET_AND_ASSIGN(rs_scrollbar_type, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_scrollbar_type, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "scrollbar_width ")) {
-        rs_scrollbar_width = strtoul(get_pword(2, buff), (char **) NULL, 0);
+        rs_scrollbar_width = strtoul(spiftool_get_pword(2, buff), (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "font ")) {
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
         unsigned long n;
 
         if (!BEG_STRCASECMP(tmp, "fx ") || !BEG_STRCASECMP(tmp, "effect")) {
-            if (parse_font_fx(get_pword(2, tmp)) != 1) {
-                print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification\n",
+            if (parse_font_fx(spiftool_get_pword(2, tmp)) != 1) {
+                libast_print_error("Parse error in file %s, line %lu:  Syntax error in font effects specification\n",
                             file_peek_path(), file_peek_line());
             }
         } else if (!BEG_STRCASECMP(tmp, "prop")) {
-            tmp = get_pword(2, tmp);
+            tmp = spiftool_get_pword(2, tmp);
             if (BOOL_OPT_ISTRUE(tmp)) {
                 BITFIELD_SET(vt_options, VT_OPTIONS_PROPORTIONAL);
             } else if (BOOL_OPT_ISFALSE(tmp)) {
                 BITFIELD_CLEAR(vt_options, VT_OPTIONS_PROPORTIONAL);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n",
+                libast_print_error("Parse error in file %s, line %lu:  Invalid/missing boolean value for attribute proportional\n",
                             file_peek_path(), file_peek_line());
             }
         } else if (isdigit(*tmp)) {
             n = strtoul(tmp, (char **) NULL, 0);
             if (n <= 255) {
-                eterm_font_add(&etfonts, get_pword(2, tmp), n);
+                eterm_font_add(&etfonts, spiftool_get_pword(2, tmp), n);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid font index %d\n", file_peek_path(), file_peek_line(), n);
+                libast_print_error("Parse error in file %s, line %lu:  Invalid font index %d\n", file_peek_path(), file_peek_line(), n);
             }
         } else if (!BEG_STRCASECMP(tmp, "bold ")) {
 #ifndef NO_BOLDFONT
-            RESET_AND_ASSIGN(rs_boldFont, get_word(2, tmp));
+            RESET_AND_ASSIGN(rs_boldFont, spiftool_get_word(2, tmp));
 #else
-            print_warning("Support for the bold font attribute was not compiled in, ignoring\n");
+            libast_print_warning("Support for the bold font attribute was not compiled in, ignoring\n");
 #endif
 
         } else if (!BEG_STRCASECMP(tmp, "default ")) {
-            def_font_idx = strtoul(get_pword(2, tmp), (char **) NULL, 0);
+            def_font_idx = strtoul(spiftool_get_pword(2, tmp), (char **) NULL, 0);
 
         } else {
-            tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
+            tmp = spiftool_get_word(1, tmp);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
                         NONULL(tmp));
             FREE(tmp);
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context attributes\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context attributes\n",
                     file_peek_path(), file_peek_line(), (buff ? buff : ""));
     }
     return state;
@@ -1053,11 +1053,11 @@ parse_toggles(char *buff, void *state)
     char *tmp;
     unsigned char bool_val;
 
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
-    if (!(tmp = get_pword(2, buff))) {
-        print_error("Parse error in file %s, line %lu:  Missing boolean value in context toggles\n", file_peek_path(),
+    if (!(tmp = spiftool_get_pword(2, buff))) {
+        libast_print_error("Parse error in file %s, line %lu:  Missing boolean value in context toggles\n", file_peek_path(),
                     file_peek_line());
         return NULL;
     }
@@ -1066,7 +1066,7 @@ parse_toggles(char *buff, void *state)
     } else if (BOOL_OPT_ISFALSE(tmp)) {
         bool_val = 0;
     } else {
-        print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles\n",
+        libast_print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context toggles\n",
                     file_peek_path(), file_peek_line(), tmp);
         return NULL;
     }
@@ -1079,7 +1079,7 @@ parse_toggles(char *buff, void *state)
             BITFIELD_CLEAR(vt_options, VT_OPTIONS_MAP_ALERT);
         }
 #else
-        print_warning("Support for the map_alert attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the map_alert attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "visual_bell ")) {
@@ -1109,7 +1109,7 @@ parse_toggles(char *buff, void *state)
             BITFIELD_CLEAR(eterm_options, ETERM_OPTIONS_WRITE_UTMP);
         }
 #else
-        print_warning("Support for the utmp_logging attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the utmp_logging attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "meta8 ")) {
@@ -1120,7 +1120,7 @@ parse_toggles(char *buff, void *state)
             BITFIELD_CLEAR(vt_options, VT_OPTIONS_META8);
         }
 #else
-        print_warning("Support for the meta8 attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the meta8 attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "iconic ")) {
@@ -1284,7 +1284,7 @@ parse_toggles(char *buff, void *state)
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(),
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context toggles\n", file_peek_path(),
                     file_peek_line(), buff);
     }
     return state;
@@ -1293,23 +1293,23 @@ parse_toggles(char *buff, void *state)
 static void *
 parse_keyboard(char *buff, void *state)
 {
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "smallfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-        RESET_AND_ASSIGN(rs_smallfont_key, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_smallfont_key, spiftool_get_word(2, buff));
         TO_KEYSYM(&ks_smallfont, rs_smallfont_key);
 #else
-        print_warning("Support for the smallfont_key attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the smallfont_key attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "bigfont_key ")) {
 #if defined (HOTKEY_CTRL) || defined (HOTKEY_META)
-        RESET_AND_ASSIGN(rs_bigfont_key, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_bigfont_key, spiftool_get_word(2, buff));
         TO_KEYSYM(&ks_bigfont, rs_bigfont_key);
 #else
-        print_warning("Support for the bigfont_key attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the bigfont_key attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "keysym ")) {
@@ -1324,15 +1324,15 @@ parse_keyboard(char *buff, void *state)
             if (sym >= 0xff00)
                 sym -= 0xff00;
             if (sym < 0 || sym > 0xff) {
-                print_error("Parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff\n",
+                libast_print_error("Parse error in file %s, line %lu:  Keysym 0x%x out of range 0xff00-0xffff\n",
                             file_peek_path(), file_peek_line(), sym + 0xff00);
                 return NULL;
             }
-            s = get_word(3, buff);
+            s = spiftool_get_word(3, buff);
             str = (char *) MALLOC(strlen(s) + 2);
             strcpy(str, s);
             FREE(s);
-            chomp(str);
+            spiftool_chomp(str);
             len = parse_escaped_string(str);
             if (len > 255)
                 len = 255;      /* We can only handle lengths that will fit in a char */
@@ -1346,34 +1346,34 @@ parse_keyboard(char *buff, void *state)
             }
         }
 #else
-        print_warning("Support for the keysym attributes was not compiled in, ignoring\n");
+        libast_print_warning("Support for the keysym attributes was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "meta_mod ")) {
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute meta_mod\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute meta_mod\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
         rs_meta_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "alt_mod ")) {
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute alt_mod\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute alt_mod\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
         rs_alt_mod = (unsigned int) strtoul(tmp, (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "numlock_mod ")) {
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute numlock_mod\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing modifier value for attribute numlock_mod\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
@@ -1382,40 +1382,40 @@ parse_keyboard(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "greek ")) {
 #ifdef GREEK_SUPPORT
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute greek\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute greek\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
         if (BOOL_OPT_ISTRUE(tmp)) {
-            RESET_AND_ASSIGN(rs_greek_keyboard, get_word(3, buff));
+            RESET_AND_ASSIGN(rs_greek_keyboard, spiftool_get_word(3, buff));
             if (BEG_STRCASECMP(rs_greek_keyboard, "iso")) {
                 greek_setmode(GREEK_ELOT928);
             } else if (BEG_STRCASECMP(rs_greek_keyboard, "ibm")) {
                 greek_setmode(GREEK_IBM437);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid greek keyboard mode \"%s\"\n",
+                libast_print_error("Parse error in file %s, line %lu:  Invalid greek keyboard mode \"%s\"\n",
                             file_peek_path(), file_peek_line(), (rs_greek_keyboard ? rs_greek_keyboard : ""));
             }
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             /* This space intentionally left no longer blank =^) */
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s\n",
+            libast_print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute %s\n",
                         file_peek_path(), file_peek_line(), tmp, buff);
             return NULL;
         }
 #else
-        print_warning("Support for the greek attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the greek attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "app_keypad ")) {
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_keypad\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
@@ -1424,17 +1424,17 @@ parse_keyboard(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             PrivateModes &= ~(PrivMode_aplKP);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_keypad\n",
+            libast_print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_keypad\n",
                         file_peek_path(), file_peek_line(), tmp);
             return NULL;
         }
 
     } else if (!BEG_STRCASECMP(buff, "app_cursor ")) {
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (!tmp) {
-            print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor\n",
+            libast_print_error("Parse error in file %s, line %lu:  Missing boolean value for attribute app_cursor\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
@@ -1443,13 +1443,13 @@ parse_keyboard(char *buff, void *state)
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             PrivateModes &= ~(PrivMode_aplCUR);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_cursor\n",
+            libast_print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" for attribute app_cursor\n",
                         file_peek_path(), file_peek_line(), tmp);
             return NULL;
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context keyboard\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context keyboard\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return state;
@@ -1458,69 +1458,69 @@ parse_keyboard(char *buff, void *state)
 static void *
 parse_misc(char *buff, void *state)
 {
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "print_pipe ")) {
 #ifdef PRINTPIPE
-        RESET_AND_ASSIGN(rs_print_pipe, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_print_pipe, spiftool_get_word(2, buff));
 #else
-        print_warning("Support for the print_pipe attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the print_pipe attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "save_lines ")) {
-        rs_saveLines = strtol(get_pword(2, buff), (char **) NULL, 0);
+        rs_saveLines = strtol(spiftool_get_pword(2, buff), (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "min_anchor_size ")) {
-        rs_min_anchor_size = strtol(get_pword(2, buff), (char **) NULL, 0);
+        rs_min_anchor_size = strtol(spiftool_get_pword(2, buff), (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "border_width ")) {
 #ifdef BORDER_WIDTH_OPTION
-        TermWin.internalBorder = (short) strtol(get_pword(2, buff), (char **) NULL, 0);
+        TermWin.internalBorder = (short) strtol(spiftool_get_pword(2, buff), (char **) NULL, 0);
 #else
-        print_warning("Support for the border_width attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the border_width attribute was not compiled in, ignoring\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "line_space ")) {
-        rs_line_space = strtol(get_pword(2, buff), (char **) NULL, 0);
+        rs_line_space = strtol(spiftool_get_pword(2, buff), (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "finished_title ")) {
-        RESET_AND_ASSIGN(rs_finished_title, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_finished_title, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "finished_text ")) {
-        RESET_AND_ASSIGN(rs_finished_text, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_finished_text, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "term_name ")) {
-        RESET_AND_ASSIGN(rs_term_name, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_term_name, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "beep_command ")) {
-        RESET_AND_ASSIGN(rs_beep_command, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_beep_command, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "debug ")) {
-        DEBUG_LEVEL = (unsigned int) strtoul(get_pword(2, buff), (char **) NULL, 0);
+        DEBUG_LEVEL = (unsigned int) strtoul(spiftool_get_pword(2, buff), (char **) NULL, 0);
 
     } else if (!BEG_STRCASECMP(buff, "exec ")) {
 
         register unsigned short k, n;
 
-        RESET_AND_ASSIGN(rs_exec_args, (char **) MALLOC(sizeof(char *) * ((n = num_words(get_pword(2, buff))) + 1)));
+        RESET_AND_ASSIGN(rs_exec_args, (char **) MALLOC(sizeof(char *) * ((n = spiftool_num_words(spiftool_get_pword(2, buff))) + 1)));
 
         for (k = 0; k < n; k++) {
-            rs_exec_args[k] = get_word(k + 2, buff);
+            rs_exec_args[k] = spiftool_get_word(k + 2, buff);
             D_OPTIONS(("rs_exec_args[%d] == %s\n", k, rs_exec_args[k]));
         }
         rs_exec_args[n] = (char *) NULL;
 
     } else if (!BEG_STRCASECMP(buff, "cut_chars ")) {
 #ifdef CUTCHAR_OPTION
-        RESET_AND_ASSIGN(rs_cutchars, get_word(2, buff));
-        chomp(rs_cutchars);
+        RESET_AND_ASSIGN(rs_cutchars, spiftool_get_word(2, buff));
+        spiftool_chomp(rs_cutchars);
 #else
-        print_warning("Support for the cut_chars attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the cut_chars attribute was not compiled in, ignoring\n");
 #endif
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context misc\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context misc\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return state;
@@ -1529,43 +1529,43 @@ parse_misc(char *buff, void *state)
 static void *
 parse_imageclasses(char *buff, void *state)
 {
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
 
     if (!BEG_STRCASECMP(buff, "icon ")) {
 #ifdef PIXMAP_SUPPORT
-        RESET_AND_ASSIGN(rs_icon, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_icon, spiftool_get_word(2, buff));
 #else
-        print_warning("Pixmap support was not compiled in, ignoring \"icon\" attribute\n");
+        libast_print_warning("Pixmap support was not compiled in, ignoring \"icon\" attribute\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "cache")) {
 #ifdef PIXMAP_SUPPORT
-        rs_cache_size = strtoul(get_pword(2, buff), (char **) NULL, 0);
+        rs_cache_size = strtoul(spiftool_get_pword(2, buff), (char **) NULL, 0);
 #else
-        print_warning("Pixmap support was not compiled in, ignoring \"cache\" attribute\n");
+        libast_print_warning("Pixmap support was not compiled in, ignoring \"cache\" attribute\n");
 #endif
 
     } else if (!BEG_STRCASECMP(buff, "path ")) {
-        RESET_AND_ASSIGN(rs_path, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_path, spiftool_get_word(2, buff));
 
     } else if (!BEG_STRCASECMP(buff, "anim ")) {
 #ifdef BACKGROUND_CYCLING_SUPPORT
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (tmp) {
             rs_anim_pixmap_list = STRDUP(tmp);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute anim\n", file_peek_path(),
                         file_peek_line());
         }
 #else
-        print_warning("Support for the anim attribute was not compiled in, ignoring\n");
+        libast_print_warning("Support for the anim attribute was not compiled in, ignoring\n");
 #endif
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context imageclasses\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context imageclasses\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return state;
@@ -1576,7 +1576,7 @@ parse_image(char *buff, void *state)
 {
     int idx;
 
-    if (*buff == CONF_BEGIN_CHAR) {
+    if (*buff == SPIFCONF_BEGIN_CHAR) {
         int *tmp;
 
         tmp = (int *) MALLOC(sizeof(int));
@@ -1584,7 +1584,7 @@ parse_image(char *buff, void *state)
         return ((void *) tmp);
     }
     ASSERT_RVAL(state != NULL, (void *) (file_skip_to_end(), NULL));
-    if (*buff == CONF_END_CHAR) {
+    if (*buff == SPIFCONF_END_CHAR) {
         int *tmp;
 
         tmp = (int *) state;
@@ -1593,10 +1593,10 @@ parse_image(char *buff, void *state)
     }
     idx = *((int *) state);
     if (!BEG_STRCASECMP(buff, "type ")) {
-        char *type = get_pword(2, buff);
+        char *type = spiftool_get_pword(2, buff);
 
         if (!type) {
-            print_error("Parse error in file %s, line %lu:  Missing image type\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing image type\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!strcasecmp(type, "background")) {
@@ -1630,22 +1630,22 @@ parse_image(char *buff, void *state)
         } else if (!strcasecmp(type, "dialog_box")) {
             idx = image_dialog;
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid image type \"%s\"\n", file_peek_path(), file_peek_line(), type);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid image type \"%s\"\n", file_peek_path(), file_peek_line(), type);
             return NULL;
         }
         *((int *) state) = idx;
 
     } else if (!BEG_STRCASECMP(buff, "mode ")) {
-        char *mode = get_pword(2, buff);
-        char *allow_list = get_pword(4, buff);
+        char *mode = spiftool_get_pword(2, buff);
+        char *allow_list = spiftool_get_pword(4, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"mode\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (!mode) {
-            print_error("Parse error in file %s, line %lu:  Missing parameters for mode line\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Missing parameters for mode line\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
@@ -1660,7 +1660,7 @@ parse_image(char *buff, void *state)
         } else if (!BEG_STRCASECMP(mode, "solid")) {
             images[idx].mode = MODE_SOLID;
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(), mode);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(), mode);
         }
         if (allow_list) {
             char *allow;
@@ -1676,20 +1676,20 @@ parse_image(char *buff, void *state)
                     images[idx].mode |= ALLOW_AUTO;
                 } else if (!BEG_STRCASECMP(allow, "solid")) {
                 } else {
-                    print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(),
+                    libast_print_error("Parse error in file %s, line %lu:  Invalid mode \"%s\"\n", file_peek_path(), file_peek_line(),
                                 allow);
                 }
             }
         }
     } else if (!BEG_STRCASECMP(buff, "state ")) {
-        char *state = get_pword(2, buff), new = 0;
+        char *state = spiftool_get_pword(2, buff), new = 0;
 
         if (!state) {
-            print_error("Parse error in file %s, line %lu:  Missing state\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing state\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"state\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"state\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
@@ -1718,7 +1718,7 @@ parse_image(char *buff, void *state)
             }
             images[idx].current = images[idx].disabled;
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid state \"%s\"\n", file_peek_path(), file_peek_line(), state);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid state \"%s\"\n", file_peek_path(), file_peek_line(), state);
             return NULL;
         }
         if (new) {
@@ -1729,20 +1729,20 @@ parse_image(char *buff, void *state)
             MEMSET(images[idx].current->iml, 0, sizeof(imlib_t));
         }
     } else if (!BEG_STRCASECMP(buff, "color ")) {
-        char *fg = get_word(2, buff), *bg = get_word(3, buff);
+        char *fg = spiftool_get_word(2, buff), *bg = spiftool_get_word(3, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image state defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (!fg || !bg) {
-            print_error("Parse error in file %s, line %lu:  Foreground and background colors must be specified with \"color\"\n",
+            libast_print_error("Parse error in file %s, line %lu:  Foreground and background colors must be specified with \"color\"\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
@@ -1761,20 +1761,20 @@ parse_image(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "file ")) {
 #ifdef PIXMAP_SUPPORT
-        char *filename = get_pword(2, buff);
+        char *filename = spiftool_get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (!filename) {
-            print_error("Parse error in file %s, line %lu:  Missing filename\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing filename\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!load_image(filename, images[idx].current)) {
@@ -1785,20 +1785,20 @@ parse_image(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "geom ")) {
 #ifdef PIXMAP_SUPPORT
-        char *geom = get_pword(2, buff);
+        char *geom = spiftool_get_pword(2, buff);
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (!geom) {
-            print_error("Parse error in file %s, line %lu:  Missing geometry string\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing geometry string\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         set_pixmap_scale(geom, images[idx].current->pmap);
@@ -1806,30 +1806,30 @@ parse_image(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "cmod ") || !BEG_STRCASECMP(buff, "colormod ")) {
 #ifdef PIXMAP_SUPPORT
-        char *color = get_pword(2, buff);
-        char *mods = get_pword(3, buff);
+        char *color = spiftool_get_pword(2, buff);
+        char *mods = spiftool_get_pword(3, buff);
         unsigned char n;
         imlib_t *iml = images[idx].current->iml;
 
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n",
+            libast_print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image type defined\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n",
+            libast_print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!color) {
-            print_error("Parse error in file %s, line %lu:  Missing color name\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing color name\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         if (!mods) {
-            print_error("Parse error in file %s, line %lu:  Missing modifier(s)\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing modifier(s)\n", file_peek_path(), file_peek_line());
             return NULL;
         }
-        n = num_words(mods);
+        n = spiftool_num_words(mods);
 
         if (!BEG_STRCASECMP(color, "image ")) {
             if (iml->mod) {
@@ -1838,10 +1838,10 @@ parse_image(char *buff, void *state)
             iml->mod = create_colormod();
             iml->mod->brightness = (int) strtol(mods, (char **) NULL, 0);
             if (n > 1) {
-                iml->mod->contrast = (int) strtol(get_pword(2, mods), (char **) NULL, 0);
+                iml->mod->contrast = (int) strtol(spiftool_get_pword(2, mods), (char **) NULL, 0);
             }
             if (n > 2) {
-                iml->mod->gamma = (int) strtol(get_pword(3, mods), (char **) NULL, 0);
+                iml->mod->gamma = (int) strtol(spiftool_get_pword(3, mods), (char **) NULL, 0);
             }
             update_cmod(iml->mod);
         } else if (!BEG_STRCASECMP(color, "red ")) {
@@ -1851,10 +1851,10 @@ parse_image(char *buff, void *state)
             iml->rmod = create_colormod();
             iml->rmod->brightness = (int) strtol(mods, (char **) NULL, 0);
             if (n > 1) {
-                iml->rmod->contrast = (int) strtol(get_pword(2, mods), (char **) NULL, 0);
+                iml->rmod->contrast = (int) strtol(spiftool_get_pword(2, mods), (char **) NULL, 0);
             }
             if (n > 2) {
-                iml->rmod->gamma = (int) strtol(get_pword(3, mods), (char **) NULL, 0);
+                iml->rmod->gamma = (int) strtol(spiftool_get_pword(3, mods), (char **) NULL, 0);
             }
             update_cmod(iml->rmod);
         } else if (!BEG_STRCASECMP(color, "green ")) {
@@ -1864,10 +1864,10 @@ parse_image(char *buff, void *state)
             iml->gmod = create_colormod();
             iml->gmod->brightness = (int) strtol(mods, (char **) NULL, 0);
             if (n > 1) {
-                iml->gmod->contrast = (int) strtol(get_pword(2, mods), (char **) NULL, 0);
+                iml->gmod->contrast = (int) strtol(spiftool_get_pword(2, mods), (char **) NULL, 0);
             }
             if (n > 2) {
-                iml->gmod->gamma = (int) strtol(get_pword(3, mods), (char **) NULL, 0);
+                iml->gmod->gamma = (int) strtol(spiftool_get_pword(3, mods), (char **) NULL, 0);
             }
             update_cmod(iml->gmod);
         } else if (!BEG_STRCASECMP(color, "blue ")) {
@@ -1877,14 +1877,14 @@ parse_image(char *buff, void *state)
             iml->bmod = create_colormod();
             iml->bmod->brightness = (int) strtol(mods, (char **) NULL, 0);
             if (n > 1) {
-                iml->bmod->contrast = (int) strtol(get_pword(2, mods), (char **) NULL, 0);
+                iml->bmod->contrast = (int) strtol(spiftool_get_pword(2, mods), (char **) NULL, 0);
             }
             if (n > 2) {
-                iml->bmod->gamma = (int) strtol(get_pword(3, mods), (char **) NULL, 0);
+                iml->bmod->gamma = (int) strtol(spiftool_get_pword(3, mods), (char **) NULL, 0);
             }
             update_cmod(iml->bmod);
         } else {
-            print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"\n",
+            libast_print_error("Parse error in file %s, line %lu:  Color must be either \"image\", \"red\", \"green\", or \"blue\"\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
@@ -1892,21 +1892,21 @@ parse_image(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "border ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"border\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"border\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
-        if (num_words(buff + 7) < 4) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"\n", file_peek_path(),
+        if (spiftool_num_words(buff + 7) < 4) {
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"border\"\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         RESET_AND_ASSIGN(images[idx].current->iml->border, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
 
-        images[idx].current->iml->border->left = (unsigned short) strtoul(get_pword(2, buff), (char **) NULL, 0);
-        images[idx].current->iml->border->right = (unsigned short) strtoul(get_pword(3, buff), (char **) NULL, 0);
-        images[idx].current->iml->border->top = (unsigned short) strtoul(get_pword(4, buff), (char **) NULL, 0);
-        images[idx].current->iml->border->bottom = (unsigned short) strtoul(get_pword(5, buff), (char **) NULL, 0);
+        images[idx].current->iml->border->left = (unsigned short) strtoul(spiftool_get_pword(2, buff), (char **) NULL, 0);
+        images[idx].current->iml->border->right = (unsigned short) strtoul(spiftool_get_pword(3, buff), (char **) NULL, 0);
+        images[idx].current->iml->border->top = (unsigned short) strtoul(spiftool_get_pword(4, buff), (char **) NULL, 0);
+        images[idx].current->iml->border->bottom = (unsigned short) strtoul(spiftool_get_pword(5, buff), (char **) NULL, 0);
 
         if ((images[idx].current->iml->border->left == 0) && (images[idx].current->iml->border->right == 0)
             && (images[idx].current->iml->border->top == 0) && (images[idx].current->iml->border->bottom == 0)) {
@@ -1915,17 +1915,17 @@ parse_image(char *buff, void *state)
         }
     } else if (!BEG_STRCASECMP(buff, "bevel ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
-        if (num_words(buff + 6) < 5) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"\n", file_peek_path(),
+        if (spiftool_num_words(buff + 6) < 5) {
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"bevel\"\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
@@ -1936,15 +1936,15 @@ parse_image(char *buff, void *state)
         images[idx].current->iml->bevel = (bevel_t *) MALLOC(sizeof(bevel_t));
         images[idx].current->iml->bevel->edges = (Imlib_Border *) MALLOC(sizeof(Imlib_Border));
 
-        if (!BEG_STRCASECMP(get_pword(2, buff), "down")) {
+        if (!BEG_STRCASECMP(spiftool_get_pword(2, buff), "down")) {
             images[idx].current->iml->bevel->up = 0;
         } else {
             images[idx].current->iml->bevel->up = 1;
         }
-        images[idx].current->iml->bevel->edges->left = (unsigned short) strtoul(get_pword(3, buff), (char **) NULL, 0);
-        images[idx].current->iml->bevel->edges->right = (unsigned short) strtoul(get_pword(4, buff), (char **) NULL, 0);
-        images[idx].current->iml->bevel->edges->top = (unsigned short) strtoul(get_pword(5, buff), (char **) NULL, 0);
-        images[idx].current->iml->bevel->edges->bottom = (unsigned short) strtoul(get_pword(6, buff), (char **) NULL, 0);
+        images[idx].current->iml->bevel->edges->left = (unsigned short) strtoul(spiftool_get_pword(3, buff), (char **) NULL, 0);
+        images[idx].current->iml->bevel->edges->right = (unsigned short) strtoul(spiftool_get_pword(4, buff), (char **) NULL, 0);
+        images[idx].current->iml->bevel->edges->top = (unsigned short) strtoul(spiftool_get_pword(5, buff), (char **) NULL, 0);
+        images[idx].current->iml->bevel->edges->bottom = (unsigned short) strtoul(spiftool_get_pword(6, buff), (char **) NULL, 0);
 
         if ((images[idx].current->iml->bevel->edges->left == 0) && (images[idx].current->iml->bevel->edges->right == 0)
             && (images[idx].current->iml->bevel->edges->top == 0) && (images[idx].current->iml->bevel->edges->bottom == 0)) {
@@ -1955,26 +1955,26 @@ parse_image(char *buff, void *state)
         }
     } else if (!BEG_STRCASECMP(buff, "padding ")) {
         if (!CHECK_VALID_INDEX(idx)) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image type defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         if (images[idx].current == NULL) {
-            print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n",
+            libast_print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n",
                         file_peek_path(), file_peek_line());
             return NULL;
         }
-        if (num_words(buff + 8) < 4) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"\n", file_peek_path(),
+        if (spiftool_num_words(buff + 8) < 4) {
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list for attribute \"padding\"\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         RESET_AND_ASSIGN(images[idx].current->iml->pad, (Imlib_Border *) MALLOC(sizeof(Imlib_Border)));
 
-        images[idx].current->iml->pad->left = (unsigned short) strtoul(get_pword(2, buff), (char **) NULL, 0);
-        images[idx].current->iml->pad->right = (unsigned short) strtoul(get_pword(3, buff), (char **) NULL, 0);
-        images[idx].current->iml->pad->top = (unsigned short) strtoul(get_pword(4, buff), (char **) NULL, 0);
-        images[idx].current->iml->pad->bottom = (unsigned short) strtoul(get_pword(5, buff), (char **) NULL, 0);
+        images[idx].current->iml->pad->left = (unsigned short) strtoul(spiftool_get_pword(2, buff), (char **) NULL, 0);
+        images[idx].current->iml->pad->right = (unsigned short) strtoul(spiftool_get_pword(3, buff), (char **) NULL, 0);
+        images[idx].current->iml->pad->top = (unsigned short) strtoul(spiftool_get_pword(4, buff), (char **) NULL, 0);
+        images[idx].current->iml->pad->bottom = (unsigned short) strtoul(spiftool_get_pword(5, buff), (char **) NULL, 0);
 
         if ((images[idx].current->iml->pad->left == 0) && (images[idx].current->iml->pad->right == 0)
             && (images[idx].current->iml->pad->top == 0) && (images[idx].current->iml->pad->bottom == 0)) {
@@ -1982,7 +1982,7 @@ parse_image(char *buff, void *state)
             images[idx].current->iml->pad = (Imlib_Border *) NULL;
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context image\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context image\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) state);
@@ -1997,12 +1997,12 @@ parse_actions(char *buff, void *state)
     char *str;
     unsigned short i;
 
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
 
     if (!BEG_STRCASECMP(buff, "bind ")) {
-        for (i = 2; (str = get_word(i, buff)) && strcasecmp(str, "to"); i++) {
+        for (i = 2; (str = spiftool_get_word(i, buff)) && strcasecmp(str, "to"); i++) {
             if (!BEG_STRCASECMP(str, "anymod")) {
                 mod = MOD_ANY;
             } else if (!BEG_STRCASECMP(str, "ctrl")) {
@@ -2035,45 +2035,45 @@ parse_actions(char *buff, void *state)
             FREE(str);
         }
         if (!str) {
-            print_error("Parse error in file %s, line %lu:  Syntax error (\"to\" not found)\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Syntax error (\"to\" not found)\n", file_peek_path(), file_peek_line());
             return NULL;
         }
         FREE(str);
         if ((button == BUTTON_NONE) && (keysym == 0)) {
-            print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n", file_peek_path(),
                         file_peek_line());
             return NULL;
         }
         i++;
-        str = get_pword(i, buff);
+        str = spiftool_get_pword(i, buff);
         if (!BEG_STRCASECMP(str, "string")) {
-            str = get_word(i + 1, buff);
+            str = spiftool_get_word(i + 1, buff);
             action_add(mod, button, keysym, ACTION_STRING, (void *) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "echo")) {
-            str = get_word(i + 1, buff);
+            str = spiftool_get_word(i + 1, buff);
             action_add(mod, button, keysym, ACTION_ECHO, (void *) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "menu")) {
             menu_t *menu;
 
-            str = get_word(i + 1, buff);
+            str = spiftool_get_word(i + 1, buff);
             menu = find_menu_by_title(menu_list, str);
             action_add(mod, button, keysym, ACTION_MENU, (void *) menu);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "script")) {
-            str = get_word(i + 1, buff);
+            str = spiftool_get_word(i + 1, buff);
             action_add(mod, button, keysym, ACTION_SCRIPT, (void *) str);
             FREE(str);
         } else {
-            print_error
+            libast_print_error
                 ("Parse error in file %s, line %lu:  No valid action type found.  Valid types are \"string,\" \"echo,\" \"menu,\" and \"script.\"\n",
                  file_peek_path(), file_peek_line());
             return NULL;
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context action\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context action\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return state;
@@ -2084,37 +2084,37 @@ parse_menu(char *buff, void *state)
 {
     menu_t *menu;
 
-    if (*buff == CONF_BEGIN_CHAR) {
-        char *title = get_pword(2, buff + 6);
+    if (*buff == SPIFCONF_BEGIN_CHAR) {
+        char *title = spiftool_get_pword(2, buff + 6);
 
         menu = menu_create(title);
         return ((void *) menu);
     }
     ASSERT_RVAL(state != NULL, (void *) (file_skip_to_end(), NULL));
     menu = (menu_t *) state;
-    if (*buff == CONF_END_CHAR) {
+    if (*buff == SPIFCONF_END_CHAR) {
         if (!(*(menu->title))) {
             char tmp[20];
 
             sprintf(tmp, "Eterm_Menu_%u", menu_list->nummenus);
             menu_set_title(menu, tmp);
-            print_error("Parse error in file %s, line %lu:  Menu context ended without giving a title.  Defaulted to \"%s\".\n",
+            libast_print_error("Parse error in file %s, line %lu:  Menu context ended without giving a title.  Defaulted to \"%s\".\n",
                         file_peek_path(), file_peek_line(), tmp);
         }
         menu_list = menulist_add_menu(menu_list, menu);
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "title ")) {
-        char *title = get_word(2, buff);
+        char *title = spiftool_get_word(2, buff);
 
         menu_set_title(menu, title);
         FREE(title);
 
     } else if (!BEG_STRCASECMP(buff, "font ")) {
-        char *name = get_word(2, buff);
+        char *name = spiftool_get_word(2, buff);
 
         if (!name) {
-            print_error("Parse error in file %s, line %lu:  Missing font name.\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing font name.\n", file_peek_path(), file_peek_line());
             return ((void *) menu);
         }
         menu_set_font(menu, name);
@@ -2128,7 +2128,7 @@ parse_menu(char *buff, void *state)
         menuitem_set_action(item, MENUITEM_SEP, (char *) NULL);
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
                     file_peek_line(), buff);
     }
     return ((void *) menu);
@@ -2141,16 +2141,16 @@ parse_menuitem(char *buff, void *state)
     menuitem_t *curitem;
 
     ASSERT_RVAL(state != NULL, (void *) (file_skip_to_end(), NULL));
-    if (*buff == CONF_BEGIN_CHAR) {
+    if (*buff == SPIFCONF_BEGIN_CHAR) {
         menu = (menu_t *) state;
         curitem = menuitem_create(NULL);
         return ((void *) curitem);
     }
     curitem = (menuitem_t *) state;
     ASSERT_RVAL(menu != NULL, state);
-    if (*buff == CONF_END_CHAR) {
+    if (*buff == SPIFCONF_END_CHAR) {
         if (!(curitem->text)) {
-            print_error("Parse error in file %s, line %lu:  Menuitem context ended with no text given.  Discarding this entry.\n",
+            libast_print_error("Parse error in file %s, line %lu:  Menuitem context ended with no text given.  Discarding this entry.\n",
                         file_peek_path(), file_peek_line());
             FREE(curitem);
         } else {
@@ -2159,20 +2159,20 @@ parse_menuitem(char *buff, void *state)
         return ((void *) menu);
     }
     if (!BEG_STRCASECMP(buff, "text ")) {
-        char *text = get_word(2, buff);
+        char *text = spiftool_get_word(2, buff);
 
         if (!text) {
-            print_error("Parse error in file %s, line %lu:  Missing menuitem text.\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing menuitem text.\n", file_peek_path(), file_peek_line());
             return ((void *) curitem);
         }
         menuitem_set_text(curitem, text);
         FREE(text);
 
     } else if (!BEG_STRCASECMP(buff, "rtext ")) {
-        char *rtext = get_word(2, buff);
+        char *rtext = spiftool_get_word(2, buff);
 
         if (!rtext) {
-            print_error("Parse error in file %s, line %lu:  Missing menuitem right-justified text.\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Missing menuitem right-justified text.\n", file_peek_path(),
                         file_peek_line());
             return ((void *) curitem);
         }
@@ -2182,8 +2182,8 @@ parse_menuitem(char *buff, void *state)
     } else if (!BEG_STRCASECMP(buff, "icon ")) {
 
     } else if (!BEG_STRCASECMP(buff, "action ")) {
-        char *type = get_pword(2, buff);
-        char *action = get_word(3, buff);
+        char *type = spiftool_get_pword(2, buff);
+        char *action = spiftool_get_word(3, buff);
 
         if (!BEG_STRCASECMP(type, "submenu ")) {
             menuitem_set_action(curitem, MENUITEM_SUBMENU, action);
@@ -2201,13 +2201,13 @@ parse_menuitem(char *buff, void *state)
             menuitem_set_action(curitem, MENUITEM_SEP, action);
 
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid menu item action \"%s\"\n", file_peek_path(), file_peek_line(),
+            libast_print_error("Parse error in file %s, line %lu:  Invalid menu item action \"%s\"\n", file_peek_path(), file_peek_line(),
                         NONULL(type));
         }
         FREE(action);
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n", file_peek_path(),
                     file_peek_line(), buff);
     }
     return ((void *) curitem);
@@ -2218,27 +2218,27 @@ parse_bbar(char *buff, void *state)
 {
     buttonbar_t *bbar;
 
-    if (*buff == CONF_BEGIN_CHAR) {
+    if (*buff == SPIFCONF_BEGIN_CHAR) {
         bbar = bbar_create();
         return ((void *) bbar);
     }
     ASSERT_RVAL(state != NULL, (void *) (file_skip_to_end(), NULL));
     bbar = (buttonbar_t *) state;
-    if (*buff == CONF_END_CHAR) {
+    if (*buff == SPIFCONF_END_CHAR) {
         bbar_add(bbar);
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "font ")) {
-        char *font = get_word(2, buff);
+        char *font = spiftool_get_word(2, buff);
 
         bbar_set_font(bbar, font);
         FREE(font);
 
     } else if (!BEG_STRCASECMP(buff, "dock ")) {
-        char *where = get_pword(2, buff);
+        char *where = spiftool_get_pword(2, buff);
 
         if (!where) {
-            print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Attribute dock requires a parameter\n", file_peek_path(),
                         file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             bbar_set_docked(bbar, BBAR_DOCKED_TOP);
@@ -2247,24 +2247,24 @@ parse_bbar(char *buff, void *state)
         } else if (!BEG_STRCASECMP(where, "no")) {      /* "no" or "none" */
             bbar_set_docked(bbar, BBAR_UNDOCKED);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute dock\n", file_peek_path(),
                         file_peek_line(), where);
         }
 
     } else if (!BEG_STRCASECMP(buff, "visible ")) {
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
 
         if (BOOL_OPT_ISTRUE(tmp)) {
             bbar_set_visible(bbar, 1);
         } else if (BOOL_OPT_ISFALSE(tmp)) {
             bbar_set_visible(bbar, 0);
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context button_bar\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Invalid boolean value \"%s\" in context button_bar\n", file_peek_path(),
                         file_peek_line(), tmp);
         }
 
     } else if (!BEG_STRCASECMP(buff, "button ") || !BEG_STRCASECMP(buff, "rbutton ")) {
-        char *text = get_pword(2, buff);
+        char *text = spiftool_get_pword(2, buff);
         char *icon = strcasestr(buff, "icon ");
         char *action = strcasestr(buff, "action ");
         button_t *button;
@@ -2272,10 +2272,10 @@ parse_bbar(char *buff, void *state)
         if (text == icon) {
             text = NULL;
         } else {
-            text = get_word(2, buff);
+            text = spiftool_get_word(2, buff);
         }
         if (!text && !icon) {
-            print_error("Parse error in file %s, line %lu:  Missing button specifications\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing button specifications\n", file_peek_path(), file_peek_line());
             return ((void *) bbar);
         }
 
@@ -2283,7 +2283,7 @@ parse_bbar(char *buff, void *state)
         if (icon) {
             simage_t *simg;
 
-            icon = get_word(2, icon);
+            icon = spiftool_get_word(2, icon);
             simg = create_simage();
             if (load_image(icon, simg)) {
                 button_set_icon(button, simg);
@@ -2293,9 +2293,9 @@ parse_bbar(char *buff, void *state)
             FREE(icon);
         }
         if (action) {
-            char *type = get_pword(2, action);
+            char *type = spiftool_get_pword(2, action);
 
-            action = get_word(2, type);
+            action = spiftool_get_word(2, type);
             if (!BEG_STRCASECMP(type, "menu ")) {
                 button_set_action(button, ACTION_MENU, action);
             } else if (!BEG_STRCASECMP(type, "string ")) {
@@ -2305,7 +2305,7 @@ parse_bbar(char *buff, void *state)
             } else if (!BEG_STRCASECMP(type, "script ")) {
                 button_set_action(button, ACTION_SCRIPT, action);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(),
+                libast_print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(),
                             type);
                 FREE(action);
                 FREE(button);
@@ -2313,7 +2313,7 @@ parse_bbar(char *buff, void *state)
             }
             FREE(action);
         } else {
-            print_error("Parse error in file %s, line %lu:  Missing button action\n", file_peek_path(), file_peek_line());
+            libast_print_error("Parse error in file %s, line %lu:  Missing button action\n", file_peek_path(), file_peek_line());
             FREE(button);
             return ((void *) bbar);
         }
@@ -2323,7 +2323,7 @@ parse_bbar(char *buff, void *state)
             bbar_add_button(bbar, button);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context menu\n",
                     file_peek_path(), file_peek_line(), buff);
     }
     return ((void *) bbar);
@@ -2333,19 +2333,19 @@ static void *
 parse_xim(char *buff, void *state)
 {
 #ifdef USE_XIM
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "input_method ")) {
-        RESET_AND_ASSIGN(rs_input_method, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_input_method, spiftool_get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "preedit_type ")) {
-        RESET_AND_ASSIGN(rs_preedit_type, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_preedit_type, spiftool_get_word(2, buff));
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context xim\n",
                     file_peek_path(), file_peek_line(), buff);
     }
 #else
-    print_warning("XIM support was not compiled in, ignoring entire context\n");
+    libast_print_warning("XIM support was not compiled in, ignoring entire context\n");
     file_poke_skip(1);
 #endif
     return state;
@@ -2356,11 +2356,11 @@ static void *
 parse_multichar(char *buff, void *state)
 {
 #ifdef MULTI_CHARSET
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "encoding ")) {
-        RESET_AND_ASSIGN(rs_multichar_encoding, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_multichar_encoding, spiftool_get_word(2, buff));
         if (rs_multichar_encoding != NULL) {
             if (BEG_STRCASECMP(rs_multichar_encoding, "eucj")
                 && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
@@ -2369,46 +2369,46 @@ parse_multichar(char *buff, void *state)
                 && BEG_STRCASECMP(rs_multichar_encoding, "gb")
                 && BEG_STRCASECMP(rs_multichar_encoding, "iso-10646")
                 && BEG_STRCASECMP(rs_multichar_encoding, "none")) {
-                print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
+                libast_print_error("Parse error in file %s, line %lu:  Invalid multichar encoding mode \"%s\"\n",
                             file_peek_path(), file_peek_line(), rs_multichar_encoding);
                 FREE(rs_multichar_encoding);
                 return NULL;
             }
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding\n",
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list \"\" for attribute encoding\n",
                         file_peek_path(), file_peek_line());
         }
     } else if (!BEG_STRCASECMP(buff, "font ")) {
 
-        char *tmp = get_pword(2, buff);
+        char *tmp = spiftool_get_pword(2, buff);
         unsigned long n;
 
-        if (num_words(buff) != 3) {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n",
+        if (spiftool_num_words(buff) != 3) {
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter list \"%s\" for attribute font\n",
                         file_peek_path(), file_peek_line(), NONULL(tmp));
             return NULL;
         }
         if (isdigit(*tmp)) {
             n = strtoul(tmp, (char **) NULL, 0);
             if (n <= 255) {
-                eterm_font_add(&etmfonts, get_pword(2, tmp), n);
+                eterm_font_add(&etmfonts, spiftool_get_pword(2, tmp), n);
             } else {
-                print_error("Parse error in file %s, line %lu:  Invalid font index %d\n", file_peek_path(), file_peek_line(), n);
+                libast_print_error("Parse error in file %s, line %lu:  Invalid font index %d\n", file_peek_path(), file_peek_line(), n);
             }
         } else {
-            tmp = get_word(1, tmp);
-            print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
+            tmp = spiftool_get_word(1, tmp);
+            libast_print_error("Parse error in file %s, line %lu:  Invalid font index \"%s\"\n", file_peek_path(), file_peek_line(),
                         NONULL(tmp));
             FREE(tmp);
         }
 
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context multichar\n",
                     file_peek_path(), file_peek_line(), buff);
     }
 #else
-    if (*buff == CONF_BEGIN_CHAR) {
-        print_warning("Multichar support was not compiled in, ignoring entire context\n");
+    if (*buff == SPIFCONF_BEGIN_CHAR) {
+        libast_print_warning("Multichar support was not compiled in, ignoring entire context\n");
         file_poke_skip(1);
     }
 #endif
@@ -2420,22 +2420,22 @@ static void *
 parse_escreen(char *buff, void *state)
 {
 #ifdef ESCREEN
-    if ((*buff == CONF_BEGIN_CHAR) || (*buff == CONF_END_CHAR)) {
+    if ((*buff == SPIFCONF_BEGIN_CHAR) || (*buff == SPIFCONF_END_CHAR)) {
         return NULL;
     }
     if (!BEG_STRCASECMP(buff, "url ")) {
-        RESET_AND_ASSIGN(rs_url, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_url, spiftool_get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "firewall ")) {
-        RESET_AND_ASSIGN(rs_hop, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_hop, spiftool_get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "delay ")) {
-        rs_delay = strtol(get_pword(2, buff), (char **) NULL, 0);
+        rs_delay = strtol(spiftool_get_pword(2, buff), (char **) NULL, 0);
     } else if (!BEG_STRCASECMP(buff, "bbar_font ")) {
-        RESET_AND_ASSIGN(rs_es_font, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_es_font, spiftool_get_word(2, buff));
     } else if (!BEG_STRCASECMP(buff, "bbar_dock ")) {
-        char *where = get_pword(2, buff);
+        char *where = spiftool_get_pword(2, buff);
 
         if (!where) {
-            print_error("Parse error in file %s, line %lu:  Attribute bbar_dock requires a parameter\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Attribute bbar_dock requires a parameter\n", file_peek_path(),
                         file_peek_line());
         } else if (!BEG_STRCASECMP(where, "top")) {
             rs_es_dock = BBAR_DOCKED_TOP;
@@ -2444,15 +2444,15 @@ parse_escreen(char *buff, void *state)
         } else if (!BEG_STRCASECMP(where, "no")) {      /* "no" or "none" */
             rs_es_dock = BBAR_UNDOCKED;
         } else {
-            print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute bbar_dock\n", file_peek_path(),
+            libast_print_error("Parse error in file %s, line %lu:  Invalid parameter \"%s\" to attribute bbar_dock\n", file_peek_path(),
                         file_peek_line(), where);
         }
     } else {
-        print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context escreen\n",
+        libast_print_error("Parse error in file %s, line %lu:  Attribute \"%s\" is not valid within context escreen\n",
                     file_peek_path(), file_peek_line(), buff);
     }
 #else
-    print_warning("Escreen support was not compiled in, ignoring entire context\n");
+    libast_print_warning("Escreen support was not compiled in, ignoring entire context\n");
     file_poke_skip(1);
 #endif
     return state;
@@ -2460,7 +2460,7 @@ parse_escreen(char *buff, void *state)
 }
 
 char *
-conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
+spifconf_parse_theme(char **theme, char *spifconf_name, unsigned char fallback)
 {
     static char path[CONFIG_BUFF];
     char *ret = NULL;
@@ -2474,22 +2474,22 @@ conf_parse_theme(char **theme, char *conf_name, unsigned char fallback)
         } else {
             snprintf(path, sizeof(path), CONFIG_SEARCH_PATH);
         }
-        shell_expand(path);
+        spifconf_shell_expand(path);
     }
     if (fallback & PARSE_TRY_USER_THEME) {
-        if (theme && *theme && (ret = conf_parse(conf_name, *theme, path)) != NULL) {
+        if (theme && *theme && (ret = spifconf_parse(spifconf_name, *theme, path)) != NULL) {
             return ret;
         }
     }
     if (fallback & PARSE_TRY_DEFAULT_THEME) {
         RESET_AND_ASSIGN(*theme, STRDUP(PACKAGE));
-        if ((ret = conf_parse(conf_name, *theme, path)) != NULL) {
+        if ((ret = spifconf_parse(spifconf_name, *theme, path)) != NULL) {
             return ret;
         }
     }
     if (fallback & PARSE_TRY_NO_THEME) {
         RESET_AND_ASSIGN(*theme, NULL);
-        return (conf_parse(conf_name, *theme, path));
+        return (spifconf_parse(spifconf_name, *theme, path));
     }
     return NULL;
 }
@@ -2514,7 +2514,7 @@ init_defaults(void)
 
 #if DEBUG >= DEBUG_MEM
     if (DEBUG_LEVEL >= DEBUG_MEM) {
-        memrec_init();
+        spifmem_init();
     }
 #endif
 
@@ -2564,23 +2564,23 @@ init_defaults(void)
     TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
 
     /* Initialize the parser */
-    conf_init_subsystem();
+    spifconf_init_subsystem();
 
     /* Register Eterm's context parsers. */
-    conf_register_context("color", SPIF_CAST_C(ctx_handler_t) parse_color);
-    conf_register_context("attributes", SPIF_CAST_C(ctx_handler_t) parse_attributes);
-    conf_register_context("toggles", SPIF_CAST_C(ctx_handler_t) parse_toggles);
-    conf_register_context("keyboard", SPIF_CAST_C(ctx_handler_t) parse_keyboard);
-    conf_register_context("misc", SPIF_CAST_C(ctx_handler_t) parse_misc);
-    conf_register_context("imageclasses", SPIF_CAST_C(ctx_handler_t) parse_imageclasses);
-    conf_register_context("image", SPIF_CAST_C(ctx_handler_t) parse_image);
-    conf_register_context("actions", SPIF_CAST_C(ctx_handler_t) parse_actions);
-    conf_register_context("menu", SPIF_CAST_C(ctx_handler_t) parse_menu);
-    conf_register_context("menuitem", SPIF_CAST_C(ctx_handler_t) parse_menuitem);
-    conf_register_context("button_bar", SPIF_CAST_C(ctx_handler_t) parse_bbar);
-    conf_register_context("xim", SPIF_CAST_C(ctx_handler_t) parse_xim);
-    conf_register_context("multichar", SPIF_CAST_C(ctx_handler_t) parse_multichar);
-    conf_register_context("escreen", SPIF_CAST_C(ctx_handler_t) parse_escreen);
+    spifconf_register_context("color", SPIF_CAST_C(ctx_handler_t) parse_color);
+    spifconf_register_context("attributes", SPIF_CAST_C(ctx_handler_t) parse_attributes);
+    spifconf_register_context("toggles", SPIF_CAST_C(ctx_handler_t) parse_toggles);
+    spifconf_register_context("keyboard", SPIF_CAST_C(ctx_handler_t) parse_keyboard);
+    spifconf_register_context("misc", SPIF_CAST_C(ctx_handler_t) parse_misc);
+    spifconf_register_context("imageclasses", SPIF_CAST_C(ctx_handler_t) parse_imageclasses);
+    spifconf_register_context("image", SPIF_CAST_C(ctx_handler_t) parse_image);
+    spifconf_register_context("actions", SPIF_CAST_C(ctx_handler_t) parse_actions);
+    spifconf_register_context("menu", SPIF_CAST_C(ctx_handler_t) parse_menu);
+    spifconf_register_context("menuitem", SPIF_CAST_C(ctx_handler_t) parse_menuitem);
+    spifconf_register_context("button_bar", SPIF_CAST_C(ctx_handler_t) parse_bbar);
+    spifconf_register_context("xim", SPIF_CAST_C(ctx_handler_t) parse_xim);
+    spifconf_register_context("multichar", SPIF_CAST_C(ctx_handler_t) parse_multichar);
+    spifconf_register_context("escreen", SPIF_CAST_C(ctx_handler_t) parse_escreen);
 }
 
 /* Sync up options with our internal data after parsing options and configs */
@@ -2591,7 +2591,7 @@ post_parse(void)
 
 #if DEBUG > 0
     if (DEBUG_LEVEL > DEBUG) {
-        print_warning("Requested debug level of %d exceeds compile-time maximum of %d\n", DEBUG_LEVEL, DEBUG);
+        libast_print_warning("Requested debug level of %d exceeds compile-time maximum of %d\n", DEBUG_LEVEL, DEBUG);
     } else if (DEBUG_LEVEL > 0) {
         DPRINTF1(("Now running with debugging level of %d\n", DEBUG_LEVEL));
     }
@@ -2602,22 +2602,22 @@ post_parse(void)
 #ifdef XTERM_SCROLLBAR
             scrollbar_set_type(SCROLLBAR_XTERM);
 #else
-            print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
+            libast_print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
 #endif
         } else if (!strcasecmp(rs_scrollbar_type, "next")) {
 #ifdef NEXT_SCROLLBAR
             scrollbar_set_type(SCROLLBAR_NEXT);
 #else
-            print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
+            libast_print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
 #endif
         } else if (!strcasecmp(rs_scrollbar_type, "motif")) {
 #ifdef MOTIF_SCROLLBAR
             scrollbar_set_type(SCROLLBAR_MOTIF);
 #else
-            print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
+            libast_print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
 #endif
         } else {
-            print_error("Unrecognized scrollbar type \"%s\".\n", rs_scrollbar_type);
+            libast_print_error("Unrecognized scrollbar type \"%s\".\n", rs_scrollbar_type);
         }
     }
     if (rs_scrollbar_width) {
@@ -2717,7 +2717,7 @@ post_parse(void)
 
     if (rs_font_effects) {
         if (parse_font_fx(rs_font_effects) != 1) {
-            print_error("Syntax error in the font effects specified on the command line.\n");
+            libast_print_error("Syntax error in the font effects specified on the command line.\n");
         }
         RESET_AND_ASSIGN(rs_font_effects, NULL);
     }
@@ -2913,7 +2913,7 @@ post_parse(void)
         FREE(rs_tint);
     }
     if (rs_cmod_image) {
-        unsigned char n = num_words(rs_cmod_image);
+        unsigned char n = spiftool_num_words(rs_cmod_image);
         imlib_t *iml = images[image_bg].norm->iml;
 
         if (iml->mod) {
@@ -2922,17 +2922,17 @@ post_parse(void)
         iml->mod = create_colormod();
         iml->mod->brightness = (int) strtol(rs_cmod_image, (char **) NULL, 0);
         if (n > 1) {
-            iml->mod->contrast = (int) strtol(get_pword(2, rs_cmod_image), (char **) NULL, 0);
+            iml->mod->contrast = (int) strtol(spiftool_get_pword(2, rs_cmod_image), (char **) NULL, 0);
         }
         if (n > 2) {
-            iml->mod->gamma = (int) strtol(get_pword(3, rs_cmod_image), (char **) NULL, 0);
+            iml->mod->gamma = (int) strtol(spiftool_get_pword(3, rs_cmod_image), (char **) NULL, 0);
         }
         D_PIXMAP(("From image cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_image,
                   iml->mod->brightness, iml->mod->contrast, iml->mod->gamma));
         FREE(rs_cmod_image);
     }
     if (rs_cmod_red) {
-        unsigned char n = num_words(rs_cmod_red);
+        unsigned char n = spiftool_num_words(rs_cmod_red);
         imlib_t *iml = images[image_bg].norm->iml;
 
         if (iml->rmod) {
@@ -2941,10 +2941,10 @@ post_parse(void)
         iml->rmod = create_colormod();
         iml->rmod->brightness = (int) strtol(rs_cmod_red, (char **) NULL, 0);
         if (n > 1) {
-            iml->rmod->contrast = (int) strtol(get_pword(2, rs_cmod_red), (char **) NULL, 0);
+            iml->rmod->contrast = (int) strtol(spiftool_get_pword(2, rs_cmod_red), (char **) NULL, 0);
         }
         if (n > 2) {
-            iml->rmod->gamma = (int) strtol(get_pword(3, rs_cmod_red), (char **) NULL, 0);
+            iml->rmod->gamma = (int) strtol(spiftool_get_pword(3, rs_cmod_red), (char **) NULL, 0);
         }
         D_PIXMAP(("From red cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_red,
                   iml->rmod->brightness, iml->rmod->contrast, iml->rmod->gamma));
@@ -2952,7 +2952,7 @@ post_parse(void)
         update_cmod(iml->rmod);
     }
     if (rs_cmod_green) {
-        unsigned char n = num_words(rs_cmod_green);
+        unsigned char n = spiftool_num_words(rs_cmod_green);
         imlib_t *iml = images[image_bg].norm->iml;
 
         if (iml->gmod) {
@@ -2961,10 +2961,10 @@ post_parse(void)
         iml->gmod = create_colormod();
         iml->gmod->brightness = (int) strtol(rs_cmod_green, (char **) NULL, 0);
         if (n > 1) {
-            iml->gmod->contrast = (int) strtol(get_pword(2, rs_cmod_green), (char **) NULL, 0);
+            iml->gmod->contrast = (int) strtol(spiftool_get_pword(2, rs_cmod_green), (char **) NULL, 0);
         }
         if (n > 2) {
-            iml->gmod->gamma = (int) strtol(get_pword(3, rs_cmod_green), (char **) NULL, 0);
+            iml->gmod->gamma = (int) strtol(spiftool_get_pword(3, rs_cmod_green), (char **) NULL, 0);
         }
         D_PIXMAP(("From green cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_green,
                   iml->gmod->brightness, iml->gmod->contrast, iml->gmod->gamma));
@@ -2972,7 +2972,7 @@ post_parse(void)
         update_cmod(iml->gmod);
     }
     if (rs_cmod_blue) {
-        unsigned char n = num_words(rs_cmod_blue);
+        unsigned char n = spiftool_num_words(rs_cmod_blue);
         imlib_t *iml = images[image_bg].norm->iml;
 
         if (iml->bmod) {
@@ -2981,10 +2981,10 @@ post_parse(void)
         iml->bmod = create_colormod();
         iml->bmod->brightness = (int) strtol(rs_cmod_blue, (char **) NULL, 0);
         if (n > 1) {
-            iml->bmod->contrast = (int) strtol(get_pword(2, rs_cmod_blue), (char **) NULL, 0);
+            iml->bmod->contrast = (int) strtol(spiftool_get_pword(2, rs_cmod_blue), (char **) NULL, 0);
         }
         if (n > 2) {
-            iml->bmod->gamma = (int) strtol(get_pword(3, rs_cmod_blue), (char **) NULL, 0);
+            iml->bmod->gamma = (int) strtol(spiftool_get_pword(3, rs_cmod_blue), (char **) NULL, 0);
         }
         D_PIXMAP(("From blue cmod string %s to brightness %d, contrast %d, and gamma %d\n", rs_cmod_blue,
                   iml->bmod->brightness, iml->bmod->contrast, iml->bmod->gamma));
@@ -3044,28 +3044,28 @@ post_parse(void)
             unsigned long w, h;
             int count;
 
-            count = num_words(rs_anim_pixmap_list) - 1; /* -1 for the delay */
+            count = spiftool_num_words(rs_anim_pixmap_list) - 1; /* -1 for the delay */
             rs_anim_pixmaps = (char **) MALLOC(sizeof(char *) * (count + 1));
 
             for (i = 0; i < count; i++) {
-                temp = get_word(i + 2, rs_anim_pixmap_list);    /* +2 rather than +1 to account for the delay */
+                temp = spiftool_get_word(i + 2, rs_anim_pixmap_list);    /* +2 rather than +1 to account for the delay */
                 if (temp == NULL)
                     break;
-                if (num_words(temp) != 3) {
-                    if (num_words(temp) == 1) {
+                if (spiftool_num_words(temp) != 3) {
+                    if (spiftool_num_words(temp) == 1) {
                         rs_anim_pixmaps[i] = temp;
                     }
                 } else {
-                    w1 = get_pword(1, temp);
-                    h1 = get_pword(2, temp);
+                    w1 = spiftool_get_pword(1, temp);
+                    h1 = spiftool_get_pword(2, temp);
                     w = strtol(w1, (char **) NULL, 0);
                     h = strtol(h1, (char **) NULL, 0);
                     if (w || h) {
-                        rs_anim_pixmaps[i] = get_word(3, temp);
+                        rs_anim_pixmaps[i] = spiftool_get_word(3, temp);
                         rs_anim_pixmaps[i] = (char *) REALLOC(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 9);
                         strcat(rs_anim_pixmaps[i], "@100x100");
                     } else {
-                        rs_anim_pixmaps[i] = get_word(3, temp);
+                        rs_anim_pixmaps[i] = spiftool_get_word(3, temp);
                         rs_anim_pixmaps[i] = (char *) REALLOC(rs_anim_pixmaps[i], strlen(rs_anim_pixmaps[i]) + 5);
                         strcat(rs_anim_pixmaps[i], "@0x0");
                     }
@@ -3084,14 +3084,14 @@ post_parse(void)
         struct stat fst;
 
         if (lstat(rs_pipe_name, &fst) != 0) {
-            print_error("Unable to stat console pipe \"%s\" -- %s\n", rs_pipe_name, strerror(errno));
+            libast_print_error("Unable to stat console pipe \"%s\" -- %s\n", rs_pipe_name, strerror(errno));
         } else {
             if (S_ISREG(fst.st_mode) || S_ISDIR(fst.st_mode)) {
-                print_error("Directories and regular files are not valid console pipes.  Sorry.\n");
+                libast_print_error("Directories and regular files are not valid console pipes.  Sorry.\n");
             } else {
                 pipe_fd = open(rs_pipe_name, O_RDONLY | O_NDELAY | O_NOCTTY);
                 if (pipe_fd < 0) {
-                    print_error("Unable to open console pipe -- %s\n", strerror(errno));
+                    libast_print_error("Unable to open console pipe -- %s\n", strerror(errno));
                 }
             }
         }
@@ -3136,7 +3136,7 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
+                    libast_print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
                                 (theme_dir ? theme_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
@@ -3166,7 +3166,7 @@ save_config(char *path, unsigned char save_theme)
                     *(--tmp) = '/';
                 }
                 if (!mkdirhier(path) || (stat(path, &fst) && !CAN_WRITE(fst))) {
-                    print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
+                    libast_print_error("I couldn't write to \"%s\" or \"%s\".  I give up.",
                                 (user_dir ? user_dir : PKGDATADIR "/themes/Eterm\n"), path);
                     return errno;
                 }
@@ -3186,7 +3186,7 @@ save_config(char *path, unsigned char save_theme)
         unlink(path);
     }
     if ((fp = fopen(path, "w")) == NULL) {
-        print_error("Unable to save configuration to file \"%s\" -- %s\n", path, strerror(errno));
+        libast_print_error("Unable to save configuration to file \"%s\" -- %s\n", path, strerror(errno));
         return errno;
     }
     strftime(dt_stamp, 50, "%Y/%m/%d at %X", cur_tm);

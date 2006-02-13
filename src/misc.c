@@ -80,7 +80,7 @@ str_trim(char *str)
 
     if (str && *str) {
 
-        chomp(str);
+        spiftool_chomp(str);
         n = strlen(str);
 
         if (!n) {
@@ -216,7 +216,7 @@ parse_escaped_string(char *str)
 #if DEBUG >= DEBUG_STRINGS
     if (DEBUG_LEVEL >= DEBUG_STRINGS) {
         D_STRINGS(("New value is:\n"));
-        hex_dump(str, (size_t) (pnew - str));
+        spiftool_hex_dump(str, (size_t) (pnew - str));
     }
 #endif
 

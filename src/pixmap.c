@@ -625,7 +625,7 @@ check_image_ipc(unsigned char reset)
         snprintf(buff, sizeof(buff), "imageclass %s query", iclass);
         reply = enl_send_and_wait(buff);
         if (strstr(reply, "not")) {
-            print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
+            libast_print_error("ImageClass \"%s\" is not defined in Enlightenment.  Disallowing \"auto\" mode for this image.\n", iclass);
             image_mode_fallback(i);
         } else if (strstr(reply, "Error")) {
             /* *INDENT-OFF* */
@@ -642,7 +642,7 @@ check_image_ipc(unsigned char reset)
                           }
                           );
             /* *INDENT-ON* */
-            print_error("Looks like this version of Enlightenment doesn't support the IPC "
+            libast_print_error("Looks like this version of Enlightenment doesn't support the IPC "
                         "commands I need.  Disallowing \"auto\" mode for all images.\n");
             FREE(reply);
             checked = 2;
@@ -759,7 +759,7 @@ create_viewport_pixmap(simage_t *simg, Drawable d, int x, int y, unsigned short 
             imlib_render_pixmaps_for_whole_image(&viewport_pixmap, &mask);
         }
         if (viewport_pixmap == None) {
-            print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
+            libast_print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
             image_set_mode(image_bg, MODE_SOLID);
             reset_simage(simg, RESET_ALL_SIMG);
             return None;
@@ -834,13 +834,13 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
                     snprintf(buff, sizeof(buff), "imageclass %s apply_copy 0x%x %s %hd %hd", iclass, (int) d, state, w, h);
                     reply = enl_send_and_wait(buff);
                     if (strstr(reply, "Error")) {
-                        print_error
+                        libast_print_error
                             ("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
                         image_mode_fallback(which);
                         FREE(reply);
                     } else {
                         pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
-                        mask = (Pixmap) strtoul(get_pword(2, reply), (char **) NULL, 0);
+                        mask = (Pixmap) strtoul(spiftool_get_pword(2, reply), (char **) NULL, 0);
                         FREE(reply);
                         enl_ipc_sync();
                         if (pmap) {
@@ -853,7 +853,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
                             LIBAST_X_FREE_GC(gc);
                             return;
                         } else {
-                            print_error
+                            libast_print_error
                                 ("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
                             FREE(reply);
                             image_mode_fallback(which);
@@ -906,7 +906,7 @@ paste_simage(simage_t *simg, unsigned char which, Window win, Drawable d, unsign
             imlib_render_pixmaps_for_whole_image_at_size(&pmap, &mask, w, h);
         }
         if (pmap == None) {
-            print_error("Delayed image load failure for \"%s\".\n", NONULL(imlib_image_get_filename()));
+            libast_print_error("Delayed image load failure for \"%s\".\n", NONULL(imlib_image_get_filename()));
             reset_simage(simg, RESET_ALL_SIMG);
             return;
         }
@@ -1064,7 +1064,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                              height);
                     reply = enl_send_and_wait(buff);
                     if (strstr(reply, "Error")) {
-                        print_error
+                        libast_print_error
                             ("Enlightenment didn't seem to like something about my syntax.  Disallowing \"auto\" mode for this image.\n");
                         image_mode_fallback(which);
                         FREE(reply);
@@ -1072,7 +1072,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                         Pixmap pmap, mask;
 
                         pmap = (Pixmap) strtoul(reply, (char **) NULL, 0);
-                        mask = (Pixmap) strtoul(get_pword(2, reply), (char **) NULL, 0);
+                        mask = (Pixmap) strtoul(spiftool_get_pword(2, reply), (char **) NULL, 0);
                         FREE(reply);
                         enl_ipc_sync();
                         if (pmap) {
@@ -1094,7 +1094,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                             snprintf(buff, sizeof(buff), "imageclass %s free_pixmap 0x%08x", iclass, (int) pmap);
                             enl_ipc_send(buff);
                         } else {
-                            print_error
+                            libast_print_error
                                 ("Enlightenment returned a null pixmap, which I can't use.  Disallowing \"auto\" mode for this image.\n");
                             FREE(reply);
                             image_mode_fallback(which);
@@ -1274,7 +1274,7 @@ render_simage(simage_t *simg, Window win, unsigned short width, unsigned short h
                     }
                 }
             } else {
-                print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
+                libast_print_error("Delayed image load failure for \"%s\".  Using solid color mode.\n", imlib_image_get_filename());
                 image_set_mode(which, MODE_SOLID);
                 reset_simage(simg, RESET_ALL_SIMG);
             }
@@ -1453,7 +1453,7 @@ load_image(const char *file, simage_t *simg)
         if (f != NULL) {
             im = imlib_load_image_with_error_return(f, &im_err);
             if (im == NULL) {
-                print_error("Unable to load image file \"%s\" -- %s\n", file, imlib_strerror(im_err));
+                libast_print_error("Unable to load image file \"%s\" -- %s\n", file, imlib_strerror(im_err));
                 return 0;
             } else {
                 reset_simage(simg, (RESET_IMLIB_IM | RESET_PMAP_PIXMAP | RESET_PMAP_MASK));
@@ -1462,7 +1462,7 @@ load_image(const char *file, simage_t *simg)
             D_PIXMAP(("Found image %8p.\n", im));
             return 1;
         } else {
-            print_error("Unable to locate file \"%s\" in image path.\n");
+            libast_print_error("Unable to locate file \"%s\" in image path.\n");
         }
     }
     reset_simage(simg, RESET_ALL_SIMG);
@@ -1817,7 +1817,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
     }
     ximg = XGetImage(Xdisplay, p, 0, 0, w, h, -1, ZPixmap);
     if (ximg == NULL) {
-        print_warning("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned NULL.\n", p, w, h);
+        libast_print_warning("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned NULL.\n", p, w, h);
         return;
     }
     D_PIXMAP(("XGetImage(Xdisplay, 0x%08x, 0, 0, %d, %d, -1, ZPixmap) returned %8p.\n", p, w, h, ximg));
@@ -1896,7 +1896,7 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 #endif
                 break;
             default:
-                print_warning("Bit depth of %d is unsupported for tinting/shading.\n", real_depth);
+                libast_print_warning("Bit depth of %d is unsupported for tinting/shading.\n", real_depth);
                 return;
         }
     }
@@ -1921,7 +1921,7 @@ update_desktop_info(int *w, int *h)
         get_desktop_window();
     }
     if (desktop_window == None) {
-        print_error("Unable to locate desktop window.  If you are running Enlightenment, please\n"
+        libast_print_error("Unable to locate desktop window.  If you are running Enlightenment, please\n"
                     "restart.  If not, please set your background image with Esetroot, then try again.");
         return 0;
     }
@@ -1939,7 +1939,7 @@ update_desktop_info(int *w, int *h)
         XGetGeometry(Xdisplay, desktop_pixmap, &dummy, &px, &py, &pw, &ph, &pb, &pd);
     }
     if ((pw <= 0) || (ph <= 0)) {
-        print_error("Value of desktop pixmap property is invalid.  Please restart your \n"
+        libast_print_error("Value of desktop pixmap property is invalid.  Please restart your \n"
                     "window manager or use Esetroot to set a new one.");
         desktop_pixmap = None;
         return 0;
@@ -2184,7 +2184,7 @@ set_icon_pixmap(char *filename, XWMHints * pwm_hints)
 
             temp_im = imlib_load_image_with_error_return(icon_path, &im_err);
             if (temp_im == NULL) {
-                print_error("Unable to load icon file \"%s\" -- %s\n", icon_path, imlib_strerror(im_err));
+                libast_print_error("Unable to load icon file \"%s\" -- %s\n", icon_path, imlib_strerror(im_err));
             } else {
                 /* If we're going to render the image anyway, might as well be nice and give it to the WM in a size it likes. */
                 if (XGetIconSizes(Xdisplay, Xroot, &icon_sizes, &count)) {

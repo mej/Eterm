@@ -1011,7 +1011,7 @@ dump_stack_trace(void)
     return;
 #endif
 
-    print_error("Attempting to dump a stack trace....\n");
+    libast_print_error("Attempting to dump a stack trace....\n");
     signal(SIGTSTP, exit);      /* Don't block on tty output, just die */
 
 #ifdef HAVE_U_STACK_TRACE
@@ -1033,7 +1033,7 @@ dump_stack_trace(void)
     snprintf(cmd, sizeof(cmd), "/bin/echo 'where\ndetach' | " DBX " %s %d", orig_argv0, getpid());
 #  endif
 #else
-    print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
+    libast_print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
     return;
 #endif
     signal(SIGALRM, (eterm_sighandler_t) hard_exit);
@@ -1086,7 +1086,7 @@ static RETSIGTYPE
 handle_exit_signal(int sig)
 {
 
-    print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
+    libast_print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
     signal(sig, SIG_DFL);
 
 #ifdef UTMP_SUPPORT
@@ -1105,7 +1105,7 @@ static RETSIGTYPE
 handle_crash(int sig)
 {
 
-    print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
+    libast_print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
     signal(sig, SIG_DFL);       /* Let the OS handle recursive seg faults */
 
     /* Lock down security so we don't write any core files as root. */
@@ -1279,7 +1279,7 @@ clean_exit(void)
                 FREE(rs_color[i]);
             }
         }
-        conf_free_subsystem();
+        spifconf_free_subsystem();
 # ifdef USE_XIM
         if (xim_input_context) {
             XUnsetICFocus(xim_input_context);
@@ -1413,15 +1413,15 @@ svr_get_pty(void)
         return (-1);
     } else {
         if (grantpt(fd) != 0) {
-            print_error("grantpt(%d) failed:  %s\n", fd, strerror(errno));
+            libast_print_error("grantpt(%d) failed:  %s\n", fd, strerror(errno));
             return (-1);
         } else if (unlockpt(fd) != 0) {
-            print_error("unlockpt(%d) failed:  %s\n", fd, strerror(errno));
+            libast_print_error("unlockpt(%d) failed:  %s\n", fd, strerror(errno));
             return (-1);
         } else {
             ptydev = ttydev = ptsname(fd);
             if (ttydev == NULL) {
-                print_error("ptsname(%d) failed:  %s\n", fd, strerror(errno));
+                libast_print_error("ptsname(%d) failed:  %s\n", fd, strerror(errno));
                 return (-1);
             }
         }
@@ -1486,7 +1486,7 @@ get_pty(void)
         fcntl(fd, F_SETFL, O_NDELAY);
         return (fd);
     } else {
-        print_error("Can't open pseudo-tty -- %s\n", strerror(errno));
+        libast_print_error("Can't open pseudo-tty -- %s\n", strerror(errno));
         return (-1);
     }
 }
@@ -1519,10 +1519,10 @@ get_tty(void)
 
     privileges(INVOKE);
     if (ttydev == NULL) {
-        print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
+        libast_print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
         exit(EXIT_FAILURE);
     } else if ((fd = open(ttydev, O_RDWR)) < 0) {
-        print_error("Can't open slave tty %s -- %s\n", ttydev, strerror(errno));
+        libast_print_error("Can't open slave tty %s -- %s\n", ttydev, strerror(errno));
         exit(EXIT_FAILURE);
     } else {
         D_TTY(("Opened slave tty %s\n", ttydev));
@@ -1917,7 +1917,7 @@ init_locale(void)
     XSetLocaleModifiers("");
     TermWin.fontset = (XFontSet) 0;
     if ((locale == NULL) || (!XSupportsLocale())) {
-        print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
+        libast_print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
         locale = setlocale(LC_ALL, "C");
         XSetLocaleModifiers("");
         REQUIRE(locale);
@@ -2088,13 +2088,13 @@ xim_real_init(void)
         destroy_cb.callback = xim_destroy_cb;
         destroy_cb.client_data = NULL;
         if (XSetIMValues(xim_input_method, XNDestroyCallback, &destroy_cb, NULL)) {
-            print_error("Could not set destroy callback to IM\n");
+            libast_print_error("Could not set destroy callback to IM\n");
         }
     }
 #endif
 
     if ((XGetIMValues(xim_input_method, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
-        print_error("input method doesn't support any style\n");
+        libast_print_error("input method doesn't support any style\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2128,14 +2128,14 @@ xim_real_init(void)
     XFree(xim_styles);
 
     if (found == 0) {
-        print_error("input method doesn't support my preedit type\n");
+        libast_print_error("input method doesn't support my preedit type\n");
         XCloseIM(xim_input_method);
         return -1;
     }
     if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
         && (xim_input_style != (XIMPreeditArea | XIMStatusArea))
         && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
-        print_error("This program does not support the preedit type\n");
+        libast_print_error("This program does not support the preedit type\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2166,7 +2166,7 @@ xim_real_init(void)
         XFree(status_attr);
     }
     if (xim_input_context == NULL) {
-        print_error("Failed to create input context\n");
+        libast_print_error("Failed to create input context\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2272,7 +2272,7 @@ run_command(char **argv)
 # if defined (__sun__)
     on_exit(clean_exit, NULL);  /* non-ANSI exit handler */
 # else
-    print_error("no atexit(), UTMP entries can't be cleaned\n");
+    libast_print_error("no atexit(), UTMP entries can't be cleaned\n");
 # endif
 #endif
 
@@ -2300,7 +2300,7 @@ run_command(char **argv)
     cmd_pid = fork();
     D_CMD(("After fork(), cmd_pid == %d\n", cmd_pid));
     if (cmd_pid < 0) {
-        print_error("fork(): %s\n", strerror(errno));
+        libast_print_error("fork(): %s\n", strerror(errno));
         return (-1);
     }
     if (cmd_pid == 0) {
@@ -2377,7 +2377,7 @@ run_command(char **argv)
 #endif
         D_CMD(("[%d] About to spawn shell\n", getpid()));
         if (chdir(initial_dir)) {
-            print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
+            libast_print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
         }
         if (argv != NULL) {
 #if DEBUG >= DEBUG_CMD
@@ -2391,7 +2391,7 @@ run_command(char **argv)
 #endif
             D_CMD(("[%d] execvp(\"%s\", %8p) is next.  I'm outta here!\n", getpid(), NONULL(argv[0]), argv));
             execvp(argv[0], argv);
-            print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
+            libast_print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
         } else {
 
             const char *argv0, *shell;
@@ -2408,7 +2408,7 @@ run_command(char **argv)
                 argv0 = p;
             }
             execlp(shell, argv0, NULL);
-            print_error("execlp() failed, cannot execute \"%s\": %s\n", shell, strerror(errno));
+            libast_print_error("execlp() failed, cannot execute \"%s\": %s\n", shell, strerror(errno));
         }
         sleep(3);               /* Sleep to make sure fork() returns in the parent, and so user can read error message */
         exit(EXIT_FAILURE);
@@ -3151,7 +3151,7 @@ init_command(char **argv)
         AT_LEAST(num_fds, ((unsigned int) (pipe_fd + 1)));
     }
     if ((cmd_fd = command_func(argv)) < 0) {
-        print_error("Unable to run sub-command.\n");
+        libast_print_error("Unable to run sub-command.\n");
         paused = 1;
         rs_finished_text = "Hit a key to exit...";
     }
@@ -3438,12 +3438,12 @@ cmd_getc(void)
         if (retval < 0) {
             if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
                 if (errno != EINTR) {   /* may have rcvd SIGCHLD or so */
-                    print_error(" (%ld) Error reading from tty -- %s\n", getpid(), strerror(errno));
+                    libast_print_error(" (%ld) Error reading from tty -- %s\n", getpid(), strerror(errno));
                     cmd_fd = -1;
                 }
             }
             if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
-                print_error("Error reading from pipe -- %s\n", strerror(errno));
+                libast_print_error("Error reading from pipe -- %s\n", strerror(errno));
                 pipe_fd = -1;
             }
             if (pipe_fd < 0 && cmd_fd < 0 && !paused) {
@@ -3661,7 +3661,7 @@ main_loop(void)
                 }
                 handle = iconv_open("WCHAR_T", "UTF-8");
                 if (handle == SPIF_CAST_C(iconv_t) - 1) {
-                    print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
+                    libast_print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
                     setlocale(LC_ALL, "C");
                     scr_add_lines(str, nlines, (cmdbuf_ptr - str));
@@ -3679,27 +3679,27 @@ main_loop(void)
                     errno = 0;
                     D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff,
                           bufflen));
-                    print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
+                    libast_print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
                     outlen = (size_t) (poutbuff - outbuff);
                     if (retval != (size_t) - 1) {
                         errno = 0;
                     }
                     if (errno == E2BIG) {
-                        print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
+                        libast_print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
                     } else if (errno == EILSEQ) {
-                        print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n", *pinbuff, *pinbuff);
+                        libast_print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n", *pinbuff, *pinbuff);
                         *pinbuff = ' ';
                         pinbuff++;
                     } else if (errno == EINVAL) {
                         D_VT(("Incomplete multibyte sequence encountered.\n"));
-                        print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n",
+                        libast_print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n",
                                       (cmdbuf_ptr - str), outlen);
                     } else {
-                        print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
+                        libast_print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
                     }
 
-                    print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
+                    libast_print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
                     MEMSET(outbuff + outlen, 0, sizeof(wchar_t));
                     wcbuff = SPIF_CAST_C(wchar_t *) outbuff;
                     MEMSET(&mbs, 0, sizeof(mbstate_t));
@@ -3710,9 +3710,9 @@ main_loop(void)
                         outlen = wcsrtombs(outbuff, &wcbuff, outlen, &mbs);
                         if ((long) outlen >= 0) {
                             FREE(wcbuff);
-                            print_error("I win!\n");
+                            libast_print_error("I win!\n");
                         } else {
-                            print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno,
+                            libast_print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno,
                                         strerror(errno));
                         }
                         if (pinbuff > (char *) str) {
@@ -3720,7 +3720,7 @@ main_loop(void)
                             scr_add_lines(outbuff, nlines, outlen);
                         }
                     } else {
-                        print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen,
+                        libast_print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen,
                                     errno, strerror(errno));
                     }
                     FREE(outbuff);
@@ -3823,7 +3823,7 @@ v_writeBig(int f, char *d, int len)
                     v_bufend = v_bufptr + len;
                 } else {
                     /* no memory: ignore entire write request */
-                    print_error("cannot allocate buffer space\n");
+                    libast_print_error("cannot allocate buffer space\n");
                     v_buffer = v_bufstr;        /* restore clobbered pointer */
                     c = 0;
                 }

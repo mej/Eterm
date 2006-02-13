@@ -96,7 +96,7 @@ get_tint_by_color_name(const char *color)
 
     D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", color, wcol.red, wcol.green, wcol.blue));
     if (!XParseColor(Xdisplay, cmap, color, &xcol)) {
-        print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
+        libast_print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
         return 0xffffff;
     }
 
@@ -144,7 +144,7 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
     xcol.blue /= 2;
 
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
+        libast_print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
                     xcol.green, xcol.blue);
         xcol.pixel = PixColors[minColor];
     }
@@ -177,7 +177,7 @@ get_top_shadow_color(Pixel norm_color, const char *type)
     xcol.blue = MIN(white.blue, (xcol.blue * 7) / 5);
 
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
+        libast_print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
                     xcol.green, xcol.blue);
         xcol.pixel = PixColors[WhiteColor];
     }
@@ -204,11 +204,11 @@ get_color_by_name(const char *name, const char *fallback)
         }
     }
     if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-        print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
+        libast_print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
         name = fallback;
         if (name) {
             if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-                print_warning
+                libast_print_warning
                     ("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.\n",
                      name);
                 return ((Pixel) - 1);
@@ -218,12 +218,12 @@ get_color_by_name(const char *name, const char *fallback)
         }
     }
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".\n",
+        libast_print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".\n",
                       name, xcol.pixel, xcol.red, xcol.green, xcol.blue, NONULL(fallback));
         name = fallback;
         if (name) {
             if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-                print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", name, xcol.pixel,
+                libast_print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", name, xcol.pixel,
                               xcol.red, xcol.green, xcol.blue);
                 return ((Pixel) - 1);
             }
@@ -241,19 +241,19 @@ get_color_by_pixel(Pixel pixel, Pixel fallback)
 
     xcol.pixel = pixel;
     if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.\n", pixel, fallback);
+        libast_print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.\n", pixel, fallback);
         xcol.pixel = fallback;
         if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to convert pixel value 0x%08x to an XColor structure.\n", xcol.pixel);
+            libast_print_warning("Unable to convert pixel value 0x%08x to an XColor structure.\n", xcol.pixel);
             return ((Pixel) 0);
         }
     }
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.\n", xcol.pixel,
+        libast_print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.\n", xcol.pixel,
                       xcol.red, xcol.green, xcol.blue, fallback);
         xcol.pixel = fallback;
         if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.\n", xcol.pixel, xcol.red,
+            libast_print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.\n", xcol.pixel, xcol.red,
                           xcol.green, xcol.blue);
             return ((Pixel) 0);
         }
@@ -380,7 +380,7 @@ Create_Windows(int argc, char *argv[])
     if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_BORDERLESS)) {
         prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
         if (prop == None) {
-            print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
+            libast_print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
             Attributes.override_redirect = TRUE;
             mwmhints.flags = 0;
         } else {
@@ -740,12 +740,12 @@ set_window_color(int idx, const char *color)
         } else if (i >= 0 && i <= 7) {  /* normal colors */
             PixColors[idx] = PixColors[minColor + i];
         } else {
-            print_warning("Color index %d is invalid.\n", i);
+            libast_print_warning("Color index %d is invalid.\n", i);
             return;
         }
     } else if (XParseColor(Xdisplay, cmap, color, &xcol)) {
         if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to allocate \"%s\" in the color map.\n", color);
+            libast_print_warning("Unable to allocate \"%s\" in the color map.\n", color);
             return;
         }
         if ((idx > maxBright) && (idx < 256) && (PixColors[idx])) {
@@ -753,7 +753,7 @@ set_window_color(int idx, const char *color)
         }
         PixColors[idx] = xcol.pixel;
     } else {
-        print_warning("Unable to resolve \"%s\" as a color name.\n", color);
+        libast_print_warning("Unable to resolve \"%s\" as a color name.\n", color);
         return;
     }
     set_colorfgbg();

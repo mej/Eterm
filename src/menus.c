@@ -1239,7 +1239,7 @@ menu_action(menuitem_t *item)
             menu_dialog(NULL, item->action.alert, 0, NULL, NULL);
             break;
         default:
-            fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
+            libast_fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
             break;
     }
 }

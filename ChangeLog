@@ -5472,3 +5472,7 @@ DragonFly BSD fixes from Joerg Sonnenberger <joerg@britannica.bec.de>.
 
 Also some type mismatch fixes.
 ----------------------------------------------------------------------
+Mon Feb 13 14:51:56 2006                        Michael Jennings (mej)
+
+Update to libast 0.6+ API.
+----------------------------------------------------------------------

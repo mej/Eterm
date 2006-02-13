@@ -117,7 +117,7 @@ eterm_bootstrap(int argc, char *argv[])
     privileges(REVERT);
 #endif
     if (!Xdisplay) {
-        print_error("can't open display %s\n", display_name);
+        libast_print_error("can't open display %s\n", display_name);
         exit(EXIT_FAILURE);
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
@@ -155,20 +155,20 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_EWMH_OPACITY] = XInternAtom(Xdisplay, "_NET_WM_WINDOW_OPACITY", True);
     props[PROP_EWMH_STARTUP_ID] = XInternAtom(Xdisplay, "_NET_STARTUP_ID", False);
 
-    if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
+    if ((theme_dir = spifconf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
+        D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", theme_dir));
         tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
     }
     if ((user_dir =
-         conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
+         spifconf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
                           (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
+        D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", user_dir));
         tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
         sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
         putenv(tmp);

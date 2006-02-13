@@ -2531,7 +2531,7 @@ selection_copy_string(Atom sel, char *str, size_t len)
         D_SELECT(("Changing ownership of selection %d to my window 0x%08x\n", (int) sel, (int) TermWin.vt));
         XSetSelectionOwner(Xdisplay, sel, TermWin.vt, CurrentTime);
         if (XGetSelectionOwner(Xdisplay, sel) != TermWin.vt) {
-            print_error("Can't take ownership of selection\n");
+            libast_print_error("Can't take ownership of selection\n");
         }
     } else {
         D_SELECT(("Copying selection to cut buffer %d\n", (int) sel));

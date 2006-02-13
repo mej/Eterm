@@ -2013,7 +2013,7 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 #ifdef NS_HAVE_SCREEN
       case NS_MODE_SCREEN:
 /*        ret = ns_screen_command(s, "\x01S"); */
-          ret = ns_statement(s, "split");
+          ret = ns_statement(s, "spiftool_split");
           break;
 #endif
     }
@@ -2663,7 +2663,7 @@ ns_inp_tab(void *xd, char *b, size_t l, size_t m)
         "resize", "screen", "scrollback", "select",
         "sessionname", "setenv", "setsid", "shell",
         "shelltitle", "silence", "silencewait", "sleep",
-        "slowpast", "source", "sorendition", "split", "stuff",
+        "slowpast", "source", "sorendition", "spiftool_split", "stuff",
         "su", "suspend", "term", "termcap", "terminfo",
         "termcapinfo", "unsetenv", "utf8", "vbell",
         "vbell_msg", "vbellwait", "verbose", "version",

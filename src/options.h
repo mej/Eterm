@@ -152,7 +152,7 @@ extern KeySym ks_smallfont;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern char *conf_parse_theme(char **theme, char *conf_name, unsigned char fallback);
+extern char *spifconf_parse_theme(char **theme, char *spifconf_name, unsigned char fallback);
 extern void init_libast(void);
 extern void init_defaults(void);
 extern void post_parse(void);

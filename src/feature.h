@@ -95,7 +95,6 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# define LIBAST_COMPAT_05_API 1
 # include <libast.h>
 # include "eterm_debug.h"
 
@@ -111,8 +110,9 @@
 /* Disable the secondary screen ("\E[?47h" / "\E[?47l") */
 /* #define NO_SECONDARY_SCREEN */
 
-/* The number of screenfuls between refreshes. */
-# define REFRESH_PERIOD  2
+/* The number of screenfuls between refreshes.  Anything higher than 1
+ * will cause gaps in the scrollback buffer. */
+# define REFRESH_PERIOD  1
 
 /* This will force clearing of characters before writing new ones on top of
  * them. This is experimental - added in order to try and fix pixel dropping

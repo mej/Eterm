@@ -117,7 +117,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
         if (sscanf(pty, "pts/%d", &n) == 1)
             sprintf(ut_id, "vt%02x", n);        /* sysv naming */
         else {
-            print_error("can't parse tty name \"%s\"\n", pty);
+            libast_print_error("can't parse tty name \"%s\"\n", pty);
             ut_id[0] = '\0';    /* entry not made */
             return;
         }
@@ -343,7 +343,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
     if (!strncmp(pty, "pty", 3) || !strncmp(pty, "tty", 3))
         strncpy(ut_id, (pty + 3), sizeof(ut_id));       /* bsd naming */
     else {
-        print_error("can't parse tty name \"%s\"\n", pty);
+        libast_print_error("can't parse tty name \"%s\"\n", pty);
         ut_id[0] = '\0';        /* entry not made */
         return;
     }

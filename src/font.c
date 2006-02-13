@@ -417,9 +417,9 @@ load_font(const char *name, const char *fallback, unsigned char type)
     /* No match in the cache, so we'll have to add it. */
     if (type == FONT_TYPE_X) {
         if ((xfont = XLoadQueryFont(Xdisplay, name)) == NULL) {
-            print_error("Unable to load font \"%s\".  Falling back on \"%s\"\n", name, fallback);
+            libast_print_error("Unable to load font \"%s\".  Falling back on \"%s\"\n", name, fallback);
             if ((xfont = XLoadQueryFont(Xdisplay, fallback)) == NULL) {
-                fatal_error("Couldn't load the fallback font either.  Giving up.\n");
+                libast_fatal_error("Couldn't load the fallback font either.  Giving up.\n");
             } else {
                 font_cache_add(fallback, type, (void *) xfont);
             }
@@ -740,7 +740,7 @@ parse_font_fx(char *line)
 
     ASSERT_RVAL(line != NULL, 0);
 
-    n = num_words(line);
+    n = spiftool_num_words(line);
 
     if (!BEG_STRCASECMP(line, "none")) {
         MEMSET(&fshadow, 0, sizeof(fontshadow_t));
@@ -748,7 +748,7 @@ parse_font_fx(char *line)
         if (n != 2) {
             return 0;
         }
-        color = get_word(2, line);
+        color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
         FREE(color);
         for (which = 0; which < 4; which++) {
@@ -757,10 +757,10 @@ parse_font_fx(char *line)
     } else if (!BEG_STRCASECMP(line, "shadow")) {
         if (n == 2) {
             which = SHADOW_BOTTOM_RIGHT;
-            color = get_word(2, line);
+            color = spiftool_get_word(2, line);
         } else if (n == 3) {
-            color = get_word(3, line);
-            corner = get_pword(2, line);
+            color = spiftool_get_word(3, line);
+            corner = spiftool_get_pword(2, line);
             which = get_corner(corner);
             if (which >= 4) {
                 return 0;
@@ -774,12 +774,12 @@ parse_font_fx(char *line)
         if (n != 3) {
             return 0;
         }
-        color = get_word(2, line);
+        color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
         set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
         FREE(color);
 
-        color = get_word(3, line);
+        color = spiftool_get_word(3, line);
         p = get_color_by_name(color, "white");
         set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
         FREE(color);
@@ -787,12 +787,12 @@ parse_font_fx(char *line)
         if (n != 3) {
             return 0;
         }
-        color = get_word(2, line);
+        color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
         set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
         FREE(color);
 
-        color = get_word(3, line);
+        color = spiftool_get_word(3, line);
         p = get_color_by_name(color, "white");
         set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
         FREE(color);
@@ -803,11 +803,11 @@ parse_font_fx(char *line)
             which = get_corner(line);
             if (which >= 4) {
                 which = i;
-                color = get_word(1, line);
-                line = get_pword(2, line);
+                color = spiftool_get_word(1, line);
+                line = spiftool_get_pword(2, line);
             } else {
-                color = get_word(2, line);
-                line = get_pword(3, line);
+                color = spiftool_get_word(2, line);
+                line = spiftool_get_pword(3, line);
             }
             set_shadow_color_by_name(which, color);
             FREE(color);

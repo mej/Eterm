@@ -874,7 +874,7 @@ xerror_handler(Display * display, XErrorEvent * event)
 
     strcpy(err_string, "");
     XGetErrorText(display, event->error_code, err_string, sizeof(err_string));
-    print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n",
+    libast_print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n",
                 request_code_to_name(event->request_code), (int) event->resourceid, event->request_code, event->minor_code,
                 err_string, event->error_code);
 #if DEBUG > DEBUG_X11
@@ -882,6 +882,6 @@ xerror_handler(Display * display, XErrorEvent * event)
         dump_stack_trace();
     }
 #endif
-    print_error("Attempting to continue...\n");
+    libast_print_error("Attempting to continue...\n");
     return 0;
 }
