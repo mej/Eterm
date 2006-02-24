@@ -73,7 +73,6 @@ Atom props[NUM_PROPS];
 int
 eterm_bootstrap(int argc, char *argv[])
 {
-
     int i;
     char *val;
 
@@ -81,7 +80,7 @@ eterm_bootstrap(int argc, char *argv[])
     static char windowid_string[20], *display_string, *term_string;
 
     orig_argv0 = argv[0];
-
+    
     /* Security enhancements -- mej */
     putenv("IFS= \t\n");
     my_ruid = getuid();
@@ -116,7 +115,7 @@ eterm_bootstrap(int argc, char *argv[])
 #ifdef NEED_LINUX_HACK
     privileges(REVERT);
 #endif
-    if (!Xdisplay) {
+    if (!Xdisplay && !(Xdisplay = XOpenDisplay(display_name))) {
         libast_print_error("can't open display %s\n", display_name);
         exit(EXIT_FAILURE);
     }

@@ -5476,3 +5476,8 @@ Mon Feb 13 14:51:56 2006                        Michael Jennings (mej)
 
 Update to libast 0.6+ API.
 ----------------------------------------------------------------------
+Fri Feb 24 16:58:43 2006                        Michael Jennings (mej)
+
+Add fallback attempt to open display in case NEED_LINUX_HACK is set
+and shouldn't be.
+----------------------------------------------------------------------
