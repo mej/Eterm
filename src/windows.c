@@ -691,11 +691,19 @@ handle_resize(unsigned int width, unsigned int height)
 void
 handle_move(int x, int y)
 {
+    int dx, dy;
+
     if ((TermWin.x != x) || (TermWin.y != y)) {
+        dx = abs(TermWin.x - x);
+        dy = abs(TermWin.y - y);
         TermWin.x = x;
         TermWin.y = y;
+        /* If we've moved an even multiple of the screen size, there's no
+           need to redraw trans/viewport images; the images will line up. */
         if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
-            redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+            if ((dx % DisplayWidth(Xdisplay, Xscreen)) || (dy % DisplayHeight(Xdisplay, Xscreen))) {
+                redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+            }
         }
     }
 }

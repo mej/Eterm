@@ -5481,3 +5481,9 @@ Fri Feb 24 16:58:43 2006                        Michael Jennings (mej)
 Add fallback attempt to open display in case NEED_LINUX_HACK is set
 and shouldn't be.
 ----------------------------------------------------------------------
+Wed May 17 15:42:28 2006                        Michael Jennings (mej)
+
+Patch from Kim Woelders <kim@woelders.dk> to optimize transparent
+Eterms moved an even multiple of the desktop size (i.e., to another
+desktop area).
+----------------------------------------------------------------------

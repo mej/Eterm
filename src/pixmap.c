@@ -686,17 +686,11 @@ create_trans_pixmap(simage_t *simg, unsigned char which, Drawable d, int x, int 
     D_PIXMAP(("Created p [0x%08x] as a %hux%hu pixmap at %d, %d relative to window 0x%08x\n", p, width, height, x, y,
               desktop_window));
     if (p != None) {
-        if (pw < scr->width || ph < scr->height) {
-            D_PIXMAP(("Tiling %ux%u desktop pixmap 0x%08x onto p.\n", pw, ph, desktop_pixmap));
-            XSetTile(Xdisplay, gc, desktop_pixmap);
-            XSetTSOrigin(Xdisplay, gc, pw - (x % pw), ph - (y % ph));
-            XSetFillStyle(Xdisplay, gc, FillTiled);
-            XFillRectangle(Xdisplay, p, gc, 0, 0, width, height);
-        } else {
-            D_PIXMAP(("Copying %hux%hu rectangle at %d, %d from %ux%u desktop pixmap 0x%08x onto p.\n", width, height, x, y, pw, ph,
-                      desktop_pixmap));
-            XCopyArea(Xdisplay, desktop_pixmap, p, gc, x, y, width, height, 0, 0);
-        }
+        D_PIXMAP(("Tiling %ux%u desktop pixmap 0x%08x onto p.\n", pw, ph, desktop_pixmap));
+        XSetTile(Xdisplay, gc, desktop_pixmap);
+        XSetTSOrigin(Xdisplay, gc, pw - (x % pw), ph - (y % ph));
+        XSetFillStyle(Xdisplay, gc, FillTiled);
+        XFillRectangle(Xdisplay, p, gc, 0, 0, width, height);
         if ((which != image_bg || (BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS))
              || images[image_bg].current != images[image_bg].norm)
             && need_colormod(simg->iml)) {
