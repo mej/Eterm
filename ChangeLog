@@ -5487,3 +5487,12 @@ Patch from Kim Woelders <kim@woelders.dk> to optimize transparent
 Eterms moved an even multiple of the desktop size (i.e., to another
 desktop area).
 ----------------------------------------------------------------------
+Fri May 19 16:46:02 2006                        Michael Jennings (mej)
+
+Fixed a problem that's been bugging me for ages:  Instead of a
+hard-coded delay, wait until we can connect to the ssh forwarding port
+before starting the Escreen session via ssh.
+
+Add usleep() to system() wait so as to not peg the CPU while sitting
+and spinning.
+----------------------------------------------------------------------

@@ -1080,6 +1080,42 @@ ns_attach_lcl(_ns_sess ** sp)
 }
 
 
+static int
+ns_wait_for_socket(int port)
+{
+    int tmp_sock, ret;
+    time_t start_time;
+
+    D_ESCREEN(("Waiting for forwarder to begin listening on port %d.\n", port));
+    tmp_sock = socket(PF_INET, SOCK_STREAM, 6);
+    start_time = time(NULL);
+    if (tmp_sock > 0) {
+        struct sockaddr_in addr;
+        char timeout = 0;
+
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = htons(port);
+
+        do {
+            usleep(100);
+            if ((time(NULL) - start_time) >= NS_TUNNEL_DELAY) {
+                timeout = 1;
+                break;
+            }
+        } while (connect(tmp_sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)));
+        if (timeout) {
+            D_ESCREEN((" -> Unable to connect; timeout after %d seconds.\n", NS_TUNNEL_DELAY));
+            sleep(1);
+            return -1;
+        } else {
+            ret = time(NULL) - start_time;
+            D_ESCREEN((" -> Connected after %d seconds.\n", ret));
+        }
+        close(tmp_sock);
+    }
+    return ret;
+}
 
 /* attach a remote session (using screen/scream via ssh)
    sp  the session
@@ -1115,22 +1151,36 @@ ns_attach_ssh(_ns_sess ** sp)
 
     if (sess->hop) {
         if (sess->hop->established == NS_HOP_DOWN) {    /* the nightmare foe */
+            _ns_efuns *efuns = NULL;
+
             ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d -L %d:%s:%d %s@%s",
                            NS_SSH_CALL, NS_SSH_TUNNEL_OPTS, sess->hop->fwport, sess->hop->localport, sess->host, sess->port,
                            sess->user, sess->hop->fw);
             if (ret < 0 || ret > NS_MAXCMD)
                 return NS_FAIL;
+            D_ESCREEN(("Spawning forwarder:  %s\n", cmd));
             ns_run(sess->efuns, cmd);
-            sleep(sess->hop->delay);
+            if (NS_EFUN_EXISTS(efuns, sess, NULL, inp_text)) {
+                char tmp_buff[] = "Waiting for forwarder...";
+
+                efuns->inp_text((void *) 1, sess->fd, tmp_buff);
+            }
+            if ((ns_wait_for_socket(sess->hop->localport) < 0) && efuns) {
+                char tmp_buff[] = "...timed out.";
+
+                efuns->inp_text((void *) 1, sess->fd, tmp_buff);
+            }
         }
         ret = snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@localhost \"%s%s\"",
                        NS_SSH_CALL, NS_SSH_OPTS, sess->hop->localport, sess->user, call, ((sess->backend == NS_MODE_SCREEN)
                                                                                           || (sess->backend ==
                                                                                               NS_MODE_NEGOTIATE)) ? esc : "");
+        D_ESCREEN(("Spawning screen session:  %s\n", cmd));
     } else {
         ret =
             snprintf(cmd, NS_MAXCMD, "%s %s -p %d %s@%s \"%s%s\"", NS_SSH_CALL, NS_SSH_OPTS, sess->port, sess->user, sess->host,
                      call, ((sess->backend == NS_MODE_SCREEN) || (sess->backend == NS_MODE_NEGOTIATE)) ? esc : "");
+        D_ESCREEN(("Spawning screen session:  %s\n", cmd));
     }
     ns_free(&call);
 
@@ -2155,16 +2205,20 @@ ns_scroll2y(_ns_sess * s, int y)
 int
 ns_upd_stat(_ns_sess * s)
 {
+    D_ESCREEN(("Forcing update of status line for session 0x%p.\n", s));
     if (!s) {
         return NS_FAIL;
     }
 
     switch (s->backend) {
+        /* FIXME:  Causes other problems.  case NS_MODE_NEGOTIATE:*/
 #ifdef NS_HAVE_SCREEN
         case NS_MODE_SCREEN:
+            D_ESCREEN(("Calling ns_screen_command(0x%p, %s)\n", s, NS_SCREEN_UPDATE));
             return ns_screen_command(s, NS_SCREEN_UPDATE);
 #endif
         default:
+            D_ESCREEN(("Failed; backend set to %d\n", s->backend));
             return NS_FAIL;
     }
 }
@@ -2568,6 +2622,7 @@ ns_screen_command(_ns_sess * sess, char *cmd)
     char *c;
     int ret = NS_SUCC;
 
+    D_ESCREEN(("Sending command \"%s\"\n", NONULL(cmd)));
     if (!cmd || !*cmd) {
         return NS_FAIL;
     }
@@ -3177,7 +3232,7 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
             *p2 = 0;            /* make darn sure it's NUL-terminated */
         }
 
-        D_ESCREEN(("parse_screen: screen sends (%d) ::%s::\n", strlen(p), p));
+        D_ESCREEN(("parse_screen: screen sends \"%s\" (%d)\n", p, strlen(p)));
 
         if (strlen(p) < 2) {    /* special case: display 0 */
             disp = screen->dsps;        /* might not get a status-line in d0! */
@@ -3205,9 +3260,19 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
                     if (NS_EFUN_EXISTS(efuns, screen, NULL, waitstate)) {
                         ret = efuns->waitstate(NULL, screen->delay * 1000);
                     }
-                    (void) ns_upd_stat(screen);
+                    if (screen->where == NS_LCL) {
+                        D_ESCREEN(("Sending update request.\n"));
+                        ns_upd_stat(screen);
+                    } else {
+                        D_ESCREEN(("Not sending update request (%d).\n", screen->where));
+                    }
                 } else {
-                    (void) ns_screen_command(screen, NS_SCREEN_INIT);
+                    if (screen->where == NS_LCL) {
+                        D_ESCREEN(("Sending init request.\n"));
+                        (void) ns_screen_command(screen, NS_SCREEN_INIT);
+                    } else {
+                        D_ESCREEN(("Not sending init request (%d).\n", screen->where));
+                    }
                     screen->timestamp = 1;
                 }
             } else if ((screen->timestamp > 1) && (time(NULL) >= screen->timestamp)) {

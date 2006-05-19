@@ -52,6 +52,7 @@ wait_for_chld(int system_pid)
     while (1) {
         do {
             errno = 0;
+            usleep(10);
         } while ((((pid = waitpid(system_pid, &status, WNOHANG)) == -1) && (errno == EINTR)) || !pid);
         /* If the child that exited is the command we spawned, or if the
            child exited before fork() returned in the parent, it must be
@@ -79,32 +80,20 @@ wait_for_chld(int system_pid)
 }
 
 /* Replace the system() call with a fork-and-exec that unprivs the child process */
-
 int
 system_wait(char *command)
 {
-
     pid_t pid;
 
     D_OPTIONS(("system_wait(%s) called.\n", command));
 
-    if (!(pid = fork())) {
-        setreuid(my_ruid, my_ruid);
-        setregid(my_rgid, my_rgid);
-        execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-        libast_print_error("execl(%s) failed -- %s\n", command, strerror(errno));
-        exit(EXIT_FAILURE);
-    } else {
-        D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
-        return (wait_for_chld(pid));
-    }
-    ASSERT_NOTREACHED_RVAL(0);
+    pid = system_no_wait(command);
+    return (wait_for_chld(pid));
 }
 
-int
+pid_t
 system_no_wait(char *command)
 {
-
     pid_t pid;
 
     D_OPTIONS(("system_no_wait(%s) called.\n", command));
@@ -116,5 +105,6 @@ system_no_wait(char *command)
         libast_print_error("execl(%s) failed -- %s\n", command, strerror(errno));
         exit(EXIT_FAILURE);
     }
-    return (0);
+    D_OPTIONS(("%d:  fork() returned %d\n", getpid(), pid));
+    return (pid);
 }

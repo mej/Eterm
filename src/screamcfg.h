@@ -68,12 +68,12 @@
 #define NS_SCREEN_ACT_T      "Activity in window "
 
 /* should be 1s */
-#define NS_INIT_DELAY        1
+#define NS_INIT_DELAY        2
 
 /* how many seconds to wait for an SSH-tunnel to build when using the
    -Z option (tunnel through firewall).  2 for very fast networks,
    much more for slow connections. */
-#define NS_TUNNEL_DELAY      3
+#define NS_TUNNEL_DELAY      30
 
 /* what to call the menu entry for Escreen */
 #define NS_MENU_TITLE        "Escreen"

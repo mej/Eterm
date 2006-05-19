@@ -2696,11 +2696,16 @@ err_msg(void *xd, int err, char *msg)
 static int
 inp_text(void *xd, int id, char *txt)
 {
-    USE_VAR(xd);
+    int which = (int) xd;
     USE_VAR(id);
 
-    D_ESCREEN(("Writing \"%s\" to subprocess.\n", safe_print_string(txt, strlen(txt))));
-    tt_write(txt, strlen(txt));
+    if (which) {
+        D_ESCREEN(("Writing \"%s\" to screen.\n", safe_print_string(txt, strlen(txt))));
+        cmd_write(txt, strlen(txt));
+    } else {
+        D_ESCREEN(("Writing \"%s\" to subprocess.\n", safe_print_string(txt, strlen(txt))));
+        tt_write(txt, strlen(txt));
+    }
     return NS_SUCC;
 }
 
