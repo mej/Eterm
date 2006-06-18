@@ -39,9 +39,9 @@ Eterm_DEPENDENCIES = libEterm.la
 Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Eterm_LDADD = libEterm.la 
 
-EXTRA_DIST = mmx_cmod.S sse2_cmod.c
+EXTRA_DIST = gdb.scr mmx_cmod.S sse2_cmod.c
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) gdb.scr $(DESTDIR)$(pkgdatadir)/ || :
+	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) $(srcdir)/gdb.scr $(DESTDIR)$(pkgdatadir)/ || :
 MAINTAINERCLEANFILES=Makefile.in

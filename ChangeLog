@@ -5496,3 +5496,8 @@ before starting the Escreen session via ssh.
 Add usleep() to system() wait so as to not peg the CPU while sitting
 and spinning.
 ----------------------------------------------------------------------
+Sat Jun 17 23:06:03 2006                        Michael Jennings (mej)
+
+Daniel Macks <dmacks@netspace.org> noticed that gdb.scr wasn't being
+installed.  Oops.  Fixed now.
+----------------------------------------------------------------------
