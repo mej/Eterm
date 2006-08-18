@@ -206,9 +206,6 @@
 
 /********************* Miscellaneous options *********************/
 
-/* To have $DISPLAY and the "\E[7n" response be IP addresses rather than FQDN's */
-/* #define DISPLAY_IS_IP */
-
 /* To have "\E[7n" reply with the display name.  This is a potential security risk,
  * so its use is discouraged and unsupported. */
 /* #define ENABLE_DISPLAY_ANSWER */

@@ -1,38 +1,25 @@
-/*--------------------------------*-C-*---------------------------------*
- * File:	command.c
+/*
+ * Copyright (C) 1997-2006, Michael Jennings
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* notes: */
-/*----------------------------------------------------------------------*
- * Copyright 1992 John Bovey, University of Kent at Canterbury.
- *
- * You can do what you like with this source code as long as
- * you don't try to make money out of it and you include an
- * unaltered copy of this message (including the copyright).
- *
- * This module has been very heavily modified by R. Nation
- * <nation@rocket.sanders.lockheed.com>
- * No additional restrictions are applied
- *
- * Additional modification by Garrett D'Amore <garrett@netcom.com> to
- * allow vt100 printing.  No additional restrictions are applied.
- *
- * Integrated modifications by Steven Hirsch <hirsch@emba.uvm.edu> to
- * properly support X11 mouse report mode and support for DEC
- * "private mode" save/restore functions.
- *
- * Integrated key-related changes by Jakub Jelinek <jj@gnu.ai.mit.edu>
- * to handle Shift+function keys properly.
- * Should be used with enclosed termcap / terminfo database.
- *
- * Extensive modifications by mj olesen <olesen@me.QueensU.CA>
- * No additional restrictions.
- *
- * Further modification and cleanups for Solaris 2.x and Linux 1.2.x
- * by Raul Garcia Garcia <rgg@tid.es>. No additional restrictions.
- *
- * As usual, the author accepts no responsibility for anything, nor does
- * he guarantee anything whatsoever.
- *----------------------------------------------------------------------*/
 
 static const char cvs_ident[] = "$Id$";
 

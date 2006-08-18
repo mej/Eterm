@@ -386,9 +386,6 @@ extern void tt_printf(const unsigned char *, ...);
 extern void main_loop(void);
 extern int v_doPending(void);
 extern void v_writeBig(int, char *, int);
-#ifdef DISPLAY_IS_IP
-extern char *network_display(const char *);
-#endif
 
 _XFUNCPROTOEND
 

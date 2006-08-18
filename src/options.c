@@ -662,11 +662,6 @@ version(void)
 #else
     printf(" -MULTI_CHARSET");
 #endif
-#ifdef DISPLAY_IS_IP
-    printf(" +DISPLAY_IS_IP");
-#else
-    printf(" -DISPLAY_IS_IP");
-#endif
 #ifdef ENABLE_DISPLAY_ANSWER
     printf(" +ENABLE_DISPLAY_ANSWER");
 #else

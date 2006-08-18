@@ -261,24 +261,10 @@ eterm_bootstrap(int argc, char *argv[])
     }
 #endif
 
-#ifdef DISPLAY_IS_IP
-    /* Fixup display_name for export over pty to any interested terminal
-     * clients via "ESC[7n" (e.g. shells).  Note we use the pure IP number
-     * (for the first non-loopback interface) that we get from
-     * network_display().  This is more "name-resolution-portable", if you
-     * will, and probably allows for faster x-client startup if your name
-     * server is beyond a slow link or overloaded at client startup.  Of
-     * course that only helps the shell's child processes, not us.
-     *
-     * Giving out the display_name also affords a potential security hole
-     */
-
-    val = display_name = network_display(display_name);
-    if (val == NULL)
-#endif /* DISPLAY_IS_IP */
-        val = XDisplayString(Xdisplay);
-    if (display_name == NULL)
-        display_name = val;     /* use broken `:0' value */
+    val = XDisplayString(Xdisplay);
+    if (display_name == NULL) {
+        display_name = val;
+    }
 
     i = strlen(val);
     display_string = MALLOC(i + 9);

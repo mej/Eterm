@@ -90,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-, root, root)
 %doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti doc/README.Escreen
-%doc README ReleaseNotes ReleaseNotes.1 ChangeLog
+%doc LICENSE README ReleaseNotes ReleaseNotes.1 ChangeLog
 %config %{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 %{_bindir}/*
 %{_libdir}/*
