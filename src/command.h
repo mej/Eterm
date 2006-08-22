@@ -1,22 +1,25 @@
-/*--------------------------------*-C-*---------------------------------*
- * File:	command.h
+/*
+ * Copyright (C) 1997-2006, Michael Jennings
  *
- * Copyright 1992 John Bovey, University of Kent at Canterbury.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You can do what you like with this source code as long as you don't try
- * to make money out of it and you include an unaltered copy of this
- * message (including the copyright).
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
  *
- * This module has been heavily modified by R. Nation
- * <nation@rocket.sanders.lockheed.com>
- * No additional restrictions are applied.
- *
- * Additional modifications by mj olesen <olesen@me.QueensU.CA>
- * No additional restrictions are applied.
- *
- * As usual, the author accepts no responsibility for anything, nor does
- * he guarantee anything whatsoever.
- *----------------------------------------------------------------------*/
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 #ifndef _COMMAND_H_
 # define _COMMAND_H_
 # include <signal.h>
