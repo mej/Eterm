@@ -78,7 +78,7 @@ chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 /sbin/ldconfig || :
 
 if [ -d /usr/share/terminfo -a ! -f /usr/share/terminfo/E/Eterm ]; then
-    tic -o/usr/share/terminfo $RPM_DOC_DIR/%{name}-%{version}/%{name}.ti || :
+    tic -o/usr/share/terminfo %{_docdir}/%{name}-%{version}/%{name}.ti || :
 fi
 
 %postun
