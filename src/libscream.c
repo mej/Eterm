@@ -8,6 +8,7 @@
  * and vice versa.  several sessions can be open at once.
  *
  * Lesser GNU Public Licence applies.
+ * Distributed with Eterm under the same license terms as Eterm itself.
  * Thread-safe:  untested
  *
  * 2002/04/19  Azundris  incept
