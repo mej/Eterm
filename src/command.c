@@ -1125,7 +1125,7 @@ x_resource_dump(int sig)
     /* Create type atoms for future use. */
     pixmap_atom = XInternAtom(Xdisplay, "PIXMAP", False);
     gc_atom = XInternAtom(Xdisplay, "GC", False);
-    gc_atom = XInternAtom(Xdisplay, "FONT", False);
+    font_atom = XInternAtom(Xdisplay, "FONT", False);
 
     /* Look at what *we* think our consumption is. */
 #if DEBUG >= DEBUG_MEM

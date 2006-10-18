@@ -5517,3 +5517,8 @@ Tue Sep 19 17:07:28 2006                        Michael Jennings (mej)
 
 libscream.c is licensed just like Eterm.
 ----------------------------------------------------------------------
+Wed Oct 18 13:35:18 2006                        Michael Jennings (mej)
+
+Fixed a typo and some logic errors in libscream located by Mike
+Frysinger <vapier@gentoo.org>.
+----------------------------------------------------------------------

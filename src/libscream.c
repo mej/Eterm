@@ -1084,13 +1084,13 @@ ns_attach_lcl(_ns_sess ** sp)
 static int
 ns_wait_for_socket(int port)
 {
-    int tmp_sock, ret;
+    int tmp_sock, ret = -1;
     time_t start_time;
 
     D_ESCREEN(("Waiting for forwarder to begin listening on port %d.\n", port));
     tmp_sock = socket(PF_INET, SOCK_STREAM, 6);
     start_time = time(NULL);
-    if (tmp_sock > 0) {
+    if (tmp_sock >= 0) {
         struct sockaddr_in addr;
         char timeout = 0;
 
@@ -1933,7 +1933,7 @@ int
 ns_ren_disp(_ns_sess * s, int d, char *name)
 {
     char *i = NULL, *n;
-    size_t l;
+    size_t l = 0;
     int ret = NS_FAIL;
 
     if (!s) {
