@@ -61,6 +61,7 @@
 # define ETERM_OPTIONS_DOUBLE_BUFFER              (1LU << 15)
 # define ETERM_OPTIONS_MBYTE_CURSOR               (1LU << 16)
 # define ETERM_OPTIONS_RESIZE_GRAVITY             (1LU << 17)
+# define ETERM_OPTIONS_STICKY                     (1LU << 18)
 
 # define IMAGE_OPTIONS_TRANS                      (1U  <<  0)
 # define IMAGE_OPTIONS_ITRANS                     (1U  <<  1)

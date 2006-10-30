@@ -457,6 +457,9 @@ Display the scrollbar only when the Eterm window is focused.
 .BR "\-x", " \-\-borderless"
 This option forces Eterm to have no borders.
 .TP
+.BR "\-S", " \-\-sticky"
+Start Eterm as a sticky window (shows on all desktops)
+.TP
 .BR "\-m", " \-\-map-alert"
 Un-iconify on beep.
 .TP
@@ -1733,6 +1736,11 @@ through 15) rather than the low-intensity colors (0 through 7).
 If true (default), any colored text (that is, any text not rendered
 using the default foreground color) will not be given any other
 special treatment for bolding (e.g., bold font or bold overstrike).
+.RE
+
+.BI sticky " boolean"
+.RS 5
+If true, Eterm will make its window sticky (shows on all desktops).
 .RE
 .RE
 

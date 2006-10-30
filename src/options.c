@@ -305,6 +305,7 @@ spifopt_t option_list[] = {
     SPIFOPT_BOOL_LONG("blink-brightens-background", "\"blink\" attribute brightens background color", vt_options,
                       VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND),
     SPIFOPT_BOOL_LONG("colors-suppress-bold", "do not make ANSI colors 0-16 bold", vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD),
+    SPIFOPT_BOOL('S', "sticky", "start window sticky", eterm_options, ETERM_OPTIONS_STICKY),
 #ifndef NO_MAPALERT
 # ifdef MAPALERT_OPTION
     SPIFOPT_BOOL('m', "map-alert", "uniconify on beep", vt_options, VT_OPTIONS_MAP_ALERT),
@@ -1276,6 +1277,13 @@ parse_toggles(char *buff, void *state)
             BITFIELD_SET(vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD);
         } else {
             BITFIELD_CLEAR(vt_options, VT_OPTIONS_COLORS_SUPPRESS_BOLD);
+        }
+
+    } else if (!BEG_STRCASECMP(buff, "sticky ")) {
+        if (bool_val) {
+            BITFIELD_SET(eterm_options, ETERM_OPTIONS_STICKY);
+        } else {
+            BITFIELD_CLEAR(eterm_options, ETERM_OPTIONS_STICKY);
         }
 
     } else {
@@ -3823,6 +3831,7 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    itrans %d\n", (BITFIELD_IS_SET(image_options, IMAGE_OPTIONS_ITRANS) ? 1 : 0));
     fprintf(fp, "    buttonbar %d\n", ((buttonbar && bbar_is_visible(buttonbar)) ? 1 : 0));
     fprintf(fp, "    resize_gravity %d\n", (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_RESIZE_GRAVITY) ? 1 : 0));
+    fprintf(fp, "    sticky %d\n", (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_STICKY) ? 1 : 0));
     fprintf(fp, "end toggles\n\n");
 
     fprintf(fp, "begin keyboard\n");

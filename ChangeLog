@@ -5522,3 +5522,8 @@ Wed Oct 18 13:35:18 2006                        Michael Jennings (mej)
 Fixed a typo and some logic errors in libscream located by Mike
 Frysinger <vapier@gentoo.org>.
 ----------------------------------------------------------------------
+Mon Oct 30 16:11:47 2006                        Michael Jennings (mej)
+
+Patch from Jason McCarver <slam@parasite.cc> to support -S/--sticky
+option for "sticky" (i.e., present on all desktops) startup.
+----------------------------------------------------------------------

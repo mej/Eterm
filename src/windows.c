@@ -498,6 +498,12 @@ Create_Windows(int argc, char *argv[])
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
     }
 
+    /* Make window sticky if requested */
+    if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_STICKY)) {
+        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_STATE], XA_ATOM, 32, PropModeReplace,
+                        (unsigned char *) &props[PROP_EWMH_STATE_STICKY], 1);
+    }
+
     /* Set startup ID property if given by the launching application. */
     if (getenv("DESKTOP_STARTUP_ID")) {
         Atom atom;

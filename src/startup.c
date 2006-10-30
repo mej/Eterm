@@ -153,6 +153,8 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_EWMH_ICON] = XInternAtom(Xdisplay, "_NET_WM_ICON", False);
     props[PROP_EWMH_OPACITY] = XInternAtom(Xdisplay, "_NET_WM_WINDOW_OPACITY", True);
     props[PROP_EWMH_STARTUP_ID] = XInternAtom(Xdisplay, "_NET_STARTUP_ID", False);
+    props[PROP_EWMH_STATE] = XInternAtom(Xdisplay, "_NET_WM_STATE", False);
+    props[PROP_EWMH_STATE_STICKY] = XInternAtom(Xdisplay, "_NET_WM_STATE_STICKY", False);
 
     if ((theme_dir = spifconf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
