@@ -111,6 +111,7 @@ fi
 
 AC_PROG_CC
 AC_PROG_CPP
+AM_PROG_AS
 
 dnl# These must be run after AC_PROG_CC but before any other macros that use
 dnl# the C compiler
