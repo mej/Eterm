@@ -96,7 +96,11 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Open display, get options/resources and create the window */
     if (getenv("DISPLAY") == NULL) {
-        display_name = STRDUP(":0");
+        /* do not default to any display due to security issues -- vapier
+         * http://article.gmane.org/gmane.comp.security.oss.general/122
+         */
+        libast_print_error("can't open display: DISPLAY not set\n");
+        exit(EXIT_FAILURE);
     } else {
         display_name = STRDUP(getenv("DISPLAY"));
     }
