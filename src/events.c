@@ -200,6 +200,7 @@ event_win_is_parent(register event_dispatcher_data_t *data, Window win)
 unsigned char
 handle_key_press(event_t *ev)
 {
+    XWMHints *wm_hints;
 #ifdef COUNT_X_EVENTS
     static unsigned long keypress_cnt = 0;
 #endif
@@ -213,6 +214,12 @@ handle_key_press(event_t *ev)
     COUNT_EVENT(keypress_cnt);
     if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT))) {
         lookup_key(ev);
+    }
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+        wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+        wm_hints->flags &= ~XUrgencyHint;
+        XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+        XFree(wm_hints);
     }
     PROF_DONE(handle_key_press);
     PROF_TIME(handle_key_press);
@@ -453,6 +460,7 @@ handle_leave_notify(event_t *ev)
 unsigned char
 handle_focus_in(event_t *ev)
 {
+    XWMHints *wm_hints;
 
     D_EVENTS(("handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -488,6 +496,12 @@ handle_focus_in(event_t *ev)
         if (xim_input_context != NULL)
             XSetICFocus(xim_input_context);
 #endif
+        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+            wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+            wm_hints->flags &= ~XUrgencyHint;
+            XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+            XFree(wm_hints);
+        }
     }
     return 1;
 }

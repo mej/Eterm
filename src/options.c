@@ -311,6 +311,7 @@ spifopt_t option_list[] = {
     SPIFOPT_BOOL('m', "map-alert", "uniconify on beep", vt_options, VT_OPTIONS_MAP_ALERT),
 # endif
 #endif
+    SPIFOPT_BOOL_LONG("urg-alert", "set urgent hint on beep", vt_options, VT_OPTIONS_URG_ALERT),
 #ifdef META8_OPTION
     SPIFOPT_BOOL('8', "meta-8", "Meta key toggles 8-bit", vt_options, VT_OPTIONS_META8),
 #endif
@@ -1078,6 +1079,12 @@ parse_toggles(char *buff, void *state)
         libast_print_warning("Support for the map_alert attribute was not compiled in, ignoring\n");
 #endif
 
+    } else if (!BEG_STRCASECMP(buff, "urg_alert ")) {
+        if (bool_val) {
+            BITFIELD_SET(vt_options, VT_OPTIONS_URG_ALERT);
+        } else {
+            BITFIELD_CLEAR(vt_options, VT_OPTIONS_URG_ALERT);
+        }
     } else if (!BEG_STRCASECMP(buff, "visual_bell ")) {
         if (bool_val) {
             BITFIELD_SET(vt_options, VT_OPTIONS_VISUAL_BELL);
@@ -3808,6 +3815,7 @@ save_config(char *path, unsigned char save_theme)
 
     fprintf(fp, "begin toggles\n");
     fprintf(fp, "    map_alert %d\n", (BITFIELD_IS_SET(vt_options, VT_OPTIONS_MAP_ALERT) ? 1 : 0));
+    fprintf(fp, "    urg_alert %d\n", (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT) ? 1 : 0));
     fprintf(fp, "    visual_bell %d\n", (BITFIELD_IS_SET(vt_options, VT_OPTIONS_VISUAL_BELL) ? 1 : 0));
     fprintf(fp, "    login_shell %d\n", (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_LOGIN_SHELL) ? 1 : 0));
     fprintf(fp, "    scrollbar %d\n", (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_SCROLLBAR) ? 1 : 0));

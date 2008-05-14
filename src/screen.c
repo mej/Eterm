@@ -1552,6 +1552,14 @@ scr_page(int direction, int nlines)
 void
 scr_bell(void)
 {
+    XWMHints *wm_hints;
+
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+        wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+        wm_hints->flags |= XUrgencyHint;
+        XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+        XFree(wm_hints);
+    }
 #ifndef NO_MAPALERT
 #ifdef MAPALERT_OPTION
     if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_MAP_ALERT))

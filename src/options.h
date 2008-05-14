@@ -42,6 +42,7 @@
 # define VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND     (1LU << 11)
 # define VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND    (1LU << 12)
 # define VT_OPTIONS_COLORS_SUPPRESS_BOLD          (1LU << 13)
+# define VT_OPTIONS_URG_ALERT                     (1LU << 14)
 
 # define ETERM_OPTIONS_LOGIN_SHELL                (1LU <<  0)
 # define ETERM_OPTIONS_ICONIC                     (1LU <<  1)

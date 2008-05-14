@@ -5555,3 +5555,8 @@ change the "#if 0" to "#ifdef ESCREEN" to revert to previous behavior
 when in Escreen mode.  Normal operation should not require the call in
 question.
 ----------------------------------------------------------------------
+Wed May 14 14:54:16 2008                        Michael Jennings (mej)
+
+Modified patch from hsim@gmx.li to allow setting of the "Urgent" hint
+on beep.
+----------------------------------------------------------------------

@@ -2619,6 +2619,10 @@ xterm_seq(int op, const char *str)
                     XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
                     XFree(wm_hints);
                     break;
+                case 28:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_URG_ALERT);
+                    break;
                 case 40:
                     nstr = (char *) strsep(&tnstr, ";");
                     if (nstr) {
