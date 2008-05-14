@@ -5531,3 +5531,27 @@ Tue Jul  3 20:48:46 2007                        Michael Jennings (mej)
 
 Remove some cruft from kEsetroot.
 ----------------------------------------------------------------------
+Wed May 14 12:42:51 2008                        Michael Jennings (mej)
+
+Patch from Kim Woelders <kim@woelders.dk>:
+
+    There is a race problem with Eterm during startup related to the
+    shell LINES/COLUMNS env vars.
+
+    If the WM changes the window size (e.g. due to saved settings)
+    before mapping the window, sometimes the shell will set LINES and
+    COLUMNS according to the old/incorrect size and sometimes to the
+    new/correct size, depending on wheter the call to tt_winsize() at
+    command.c line 2322 (by the shell child process) or the
+    tt_resize() (by the Eterm process) due to the ConfigureNotify
+    caused by the resize (or WM ICCCM ConfigureNotify) operation
+    happens first.
+
+The call in question was added by Azundris for Escreen.  So far
+Escreen seems to be behaving properly with this patch applied, but all
+my Eterm windows (Escreen and otherwise) are pre-sized with -g anyway.
+So I'm going to keep my eye on it for awhile.  In case of trouble,
+change the "#if 0" to "#ifdef ESCREEN" to revert to previous behavior
+when in Escreen mode.  Normal operation should not require the call in
+question.
+----------------------------------------------------------------------

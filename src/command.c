@@ -2319,7 +2319,11 @@ run_command(char **argv)
 
         get_tty();
         SET_TTYMODE(0, &tio);
-        tt_winsize(0);
+#if 0
+        if (TermWin.screen_mode != NS_MODE_NONE) {
+            tt_winsize(0);
+        }
+#endif
 
         /* become virtual console, fail silently */
         if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_CONSOLE)) {
