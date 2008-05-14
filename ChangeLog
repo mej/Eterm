@@ -5560,3 +5560,8 @@ Wed May 14 14:54:16 2008                        Michael Jennings (mej)
 Modified patch from hsim@gmx.li to allow setting of the "Urgent" hint
 on beep.
 ----------------------------------------------------------------------
+Wed May 14 15:26:13 2008                        Michael Jennings (mej)
+
+Patch from Emmanuel Anne <emmanuel.anne@gmail.com> to fix cut/paste
+with KDE applications.
+----------------------------------------------------------------------

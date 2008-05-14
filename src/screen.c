@@ -3320,7 +3320,7 @@ selection_send(XSelectionRequestEvent * rq)
         target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
         target_list[1] = (Atom32) XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list,
+                        8, PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
@@ -3333,8 +3333,8 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
             if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value,
-                                xtextp.nitems);
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay),
+                                8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
             }
         }
