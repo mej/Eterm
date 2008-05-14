@@ -5565,3 +5565,15 @@ Wed May 14 15:26:13 2008                        Michael Jennings (mej)
 Patch from Emmanuel Anne <emmanuel.anne@gmail.com> to fix cut/paste
 with KDE applications.
 ----------------------------------------------------------------------
+Wed May 14 16:09:04 2008                        Michael Jennings (mej)
+
+(Correct) fix for CVE-2008-1692.  Eterm no longer defaults to using
+":0" for $DISPLAY due to the possibility that an attacker can create a
+fake X server on a shared system, intercept the Eterm X connection,
+and send fake keystrokes to the victim's Eterm to execute arbitrary
+commands as that user.
+
+The previous fix, while it did indeed correct the vulnerability, broke
+the --display option.  The original fix from Bernhard Link was more
+correct, albeit not quite on target.
+----------------------------------------------------------------------

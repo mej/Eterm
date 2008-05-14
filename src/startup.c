@@ -95,13 +95,7 @@ eterm_bootstrap(int argc, char *argv[])
     init_libast();
 
     /* Open display, get options/resources and create the window */
-    if (getenv("DISPLAY") == NULL) {
-        /* do not default to any display due to security issues -- vapier
-         * http://article.gmane.org/gmane.comp.security.oss.general/122
-         */
-        libast_print_error("can't open display: DISPLAY not set\n");
-        exit(EXIT_FAILURE);
-    } else {
+    if (getenv("DISPLAY") != NULL) {
         display_name = STRDUP(getenv("DISPLAY"));
     }
 
@@ -119,8 +113,10 @@ eterm_bootstrap(int argc, char *argv[])
 #ifdef NEED_LINUX_HACK
     privileges(REVERT);
 #endif
+
     if (!Xdisplay && !(Xdisplay = XOpenDisplay(display_name))) {
-        libast_print_error("can't open display %s\n", display_name);
+        libast_print_error("Can't open display %s.  Set $DISPLAY or use --display\n",
+                           NONULL(display_name));
         exit(EXIT_FAILURE);
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
