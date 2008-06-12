@@ -5577,3 +5577,7 @@ The previous fix, while it did indeed correct the vulnerability, broke
 the --display option.  The original fix from Bernhard Link was more
 correct, albeit not quite on target.
 ----------------------------------------------------------------------
+Wed Jun 11 20:18:44 2008                        Michael Jennings (mej)
+
+Eterm 0.9.5 release.
+----------------------------------------------------------------------
