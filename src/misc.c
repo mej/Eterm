@@ -75,7 +75,7 @@ char *
 str_trim(char *str)
 {
 
-    register char *tmp = str;
+    register spif_charptr_t tmp = (spif_charptr_t) str;
     size_t n;
 
     if (str && *str) {
@@ -234,7 +234,7 @@ escape_string(spif_charptr_t str, spif_char_t quote, spif_int32_t maxlen)
     }
 
     /* The escaped string will be at most twice the length of the original. */
-    buff = SPIF_CAST(charptr) MALLOC(strlen(SPIF_CAST_PTR(char) str) * 2 + 1);
+    buff = (spif_charptr_t) MALLOC(strlen((char *) str) * 2 + 1);
 
     /* Copy and escape the string from str into buff. */
     for (pbuff = buff; (*s); s++, pbuff++) {
@@ -316,7 +316,7 @@ add_carriage_returns(unsigned char *buff, unsigned long cnt)
     register unsigned char *out, *outp, *in;
     register unsigned long i;
 
-    D_CMD(("buff == %8p \"%s\", cnt == %lu\n", buff, safe_print_string(buff, cnt), cnt));
+    D_CMD(("buff == %8p \"%s\", cnt == %lu\n", buff, safe_print_string((spif_charptr_t) buff, cnt), cnt));
     outp = out = (unsigned char *) MALLOC(cnt * 2);
     for (i = 0, in = buff; i < cnt; i++) {
         if (*in == '\n') {
@@ -327,14 +327,14 @@ add_carriage_returns(unsigned char *buff, unsigned long cnt)
     i = (unsigned long) (out - outp);
     memcpy(buff, outp, i);
     FREE(outp);
-    D_CMD(("buff == %8p \"%s\", i == %lu\n", buff, safe_print_string(buff, i), i));
+    D_CMD(("buff == %8p \"%s\", i == %lu\n", buff, safe_print_string((spif_charptr_t) buff, i), i));
     return i;
 }
 
 unsigned char
 mkdirhier(const char *path)
 {
-    char *str, *pstr;
+    spif_charptr_t str, pstr;
     struct stat dst;
 
     D_CMD(("path == %s\n", path));

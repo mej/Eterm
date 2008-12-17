@@ -507,7 +507,7 @@ Create_Windows(int argc, char *argv[])
     /* Set startup ID property if given by the launching application. */
     if (getenv("DESKTOP_STARTUP_ID")) {
         Atom atom;
-        unsigned char *tmp = SPIF_CAST_PTR(uchar) getenv("DESKTOP_STARTUP_ID");
+        unsigned char *tmp = (spif_uchar_t *) getenv("DESKTOP_STARTUP_ID");
 
         atom = XInternAtom(Xdisplay, "UTF8_STRING", False);
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_STARTUP_ID], atom, 8, PropModeReplace, tmp, strlen(tmp) + 1);
@@ -517,9 +517,9 @@ Create_Windows(int argc, char *argv[])
     /* Set window opacity if needed. */
     if ((props[PROP_EWMH_OPACITY] != None) && (rs_opacity != 0xff)) {
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_OPACITY],
-                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) & rs_opacity, 1);
+                        XA_CARDINAL, 32, PropModeReplace, (spif_uchar_t *) &rs_opacity, 1);
         XChangeProperty(Xdisplay, TermWin.vt, props[PROP_EWMH_OPACITY],
-                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) & rs_opacity, 1);
+                        XA_CARDINAL, 32, PropModeReplace, (spif_uchar_t *) &rs_opacity, 1);
     }
 
     /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */

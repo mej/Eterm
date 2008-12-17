@@ -2577,20 +2577,20 @@ init_defaults(void)
     spifconf_init_subsystem();
 
     /* Register Eterm's context parsers. */
-    spifconf_register_context("color", SPIF_CAST_C(ctx_handler_t) parse_color);
-    spifconf_register_context("attributes", SPIF_CAST_C(ctx_handler_t) parse_attributes);
-    spifconf_register_context("toggles", SPIF_CAST_C(ctx_handler_t) parse_toggles);
-    spifconf_register_context("keyboard", SPIF_CAST_C(ctx_handler_t) parse_keyboard);
-    spifconf_register_context("misc", SPIF_CAST_C(ctx_handler_t) parse_misc);
-    spifconf_register_context("imageclasses", SPIF_CAST_C(ctx_handler_t) parse_imageclasses);
-    spifconf_register_context("image", SPIF_CAST_C(ctx_handler_t) parse_image);
-    spifconf_register_context("actions", SPIF_CAST_C(ctx_handler_t) parse_actions);
-    spifconf_register_context("menu", SPIF_CAST_C(ctx_handler_t) parse_menu);
-    spifconf_register_context("menuitem", SPIF_CAST_C(ctx_handler_t) parse_menuitem);
-    spifconf_register_context("button_bar", SPIF_CAST_C(ctx_handler_t) parse_bbar);
-    spifconf_register_context("xim", SPIF_CAST_C(ctx_handler_t) parse_xim);
-    spifconf_register_context("multichar", SPIF_CAST_C(ctx_handler_t) parse_multichar);
-    spifconf_register_context("escreen", SPIF_CAST_C(ctx_handler_t) parse_escreen);
+    spifconf_register_context("color", (ctx_handler_t) parse_color);
+    spifconf_register_context("attributes", (ctx_handler_t) parse_attributes);
+    spifconf_register_context("toggles", (ctx_handler_t) parse_toggles);
+    spifconf_register_context("keyboard", (ctx_handler_t) parse_keyboard);
+    spifconf_register_context("misc", (ctx_handler_t) parse_misc);
+    spifconf_register_context("imageclasses", (ctx_handler_t) parse_imageclasses);
+    spifconf_register_context("image", (ctx_handler_t) parse_image);
+    spifconf_register_context("actions", (ctx_handler_t) parse_actions);
+    spifconf_register_context("menu", (ctx_handler_t) parse_menu);
+    spifconf_register_context("menuitem", (ctx_handler_t) parse_menuitem);
+    spifconf_register_context("button_bar", (ctx_handler_t) parse_bbar);
+    spifconf_register_context("xim", (ctx_handler_t) parse_xim);
+    spifconf_register_context("multichar", (ctx_handler_t) parse_multichar);
+    spifconf_register_context("escreen", (ctx_handler_t) parse_escreen);
 }
 
 /* Sync up options with our internal data after parsing options and configs */
@@ -3885,10 +3885,7 @@ save_config(char *path, unsigned char save_theme)
     fprintf(fp, "    min_anchor_size %d\n", rs_min_anchor_size);
     fprintf(fp, "    border_width %d\n", TermWin.internalBorder);
     fprintf(fp, "    term_name %s\n", getenv("TERM"));
-    fprintf(fp, "    beep_command \"%s\"\n", SPIF_CAST_PTR(char) ((rs_beep_command)
-                                                                  ? (SPIF_CAST_PTR(char) rs_beep_command)
-                                                                  : (SPIF_CAST_PTR(char) "")
-            ));
+    fprintf(fp, "    beep_command \"%s\"\n", (char *) ((rs_beep_command) ? (rs_beep_command) : ("")));
 
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
     if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
@@ -3902,7 +3899,7 @@ save_config(char *path, unsigned char save_theme)
     if (rs_cutchars) {
         spif_charptr_t cut_chars_escaped;
 
-        cut_chars_escaped = escape_string(SPIF_CAST(charptr) rs_cutchars, '\"', 0);
+        cut_chars_escaped = escape_string((spif_charptr_t) rs_cutchars, '\"', 0);
         fprintf(fp, "    cut_chars \"%s\"\n", (char *) cut_chars_escaped);
     }
 #endif

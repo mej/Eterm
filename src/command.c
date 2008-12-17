@@ -3656,7 +3656,7 @@ main_loop(void)
                     set_multichar_encoding("utf8");
                 }
                 handle = iconv_open("WCHAR_T", "UTF-8");
-                if (handle == SPIF_CAST_C(iconv_t) - 1) {
+                if (handle == (iconv_t) -1) {
                     libast_print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
                     setlocale(LC_ALL, "C");
@@ -3670,7 +3670,7 @@ main_loop(void)
                     pinbuff = (char *) str;
                     bufflen = cmdbuf_ptr - str;
                     outlen = bufflen * 6;
-                    poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+                    poutbuff = outbuff = (char *) MALLOC(outlen);
 
                     errno = 0;
                     D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff,
@@ -3697,11 +3697,11 @@ main_loop(void)
 
                     libast_print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
                     MEMSET(outbuff + outlen, 0, sizeof(wchar_t));
-                    wcbuff = SPIF_CAST_C(wchar_t *) outbuff;
+                    wcbuff = (wchar_t *) outbuff;
                     MEMSET(&mbs, 0, sizeof(mbstate_t));
                     outlen = wcsrtombs(NULL, &wcbuff, 0, &mbs) + 1;
                     if (outlen > 0) {
-                        outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+                        outbuff = (char *) MALLOC(outlen);
 
                         outlen = wcsrtombs(outbuff, &wcbuff, outlen, &mbs);
                         if ((long) outlen >= 0) {

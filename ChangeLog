@@ -5581,3 +5581,8 @@ Wed Jun 11 20:18:44 2008                        Michael Jennings (mej)
 
 Eterm 0.9.5 release.
 ----------------------------------------------------------------------
+Tue Dec 16 22:03:54 2008                        Michael Jennings (mej)
+
+Fix compile errors related to the removal of unnecessary typecasting
+macros.
+----------------------------------------------------------------------
