@@ -1853,33 +1853,34 @@ create_fontset(const char *font1, const char *font2)
     XFontSet fontset = 0;
     char *fontname, **ml, *ds;
     int mc;
-    const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";
+    /*const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";*/
 
     ASSERT_RVAL(font1 != NULL, (XFontSet) 0);
 
     if (font2) {
-        fontname = MALLOC(strlen(font1) + strlen(font2) + sizeof(fs_base) + 2);
+        fontname = MALLOC(strlen(font1) + strlen(font2) /*+ sizeof(fs_base)*/ + 2);
         if (fontname) {
             strcpy(fontname, font1);
             strcat(fontname, ",");
             strcat(fontname, font2);
-            strcat(fontname, fs_base);
+            /*strcat(fontname, fs_base);*/
         }
     } else {
-        fontname = MALLOC(strlen(font1) + sizeof(fs_base) + 1);
+        fontname = MALLOC(strlen(font1) /*+ sizeof(fs_base)*/ + 1);
         if (fontname) {
             strcpy(fontname, font1);
-            strcat(fontname, fs_base);
+            /*strcat(fontname, fs_base);*/
         }
     }
     if (fontname) {
         setlocale(LC_ALL, "");
-        fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, &ds);
-        D_FONT(("Created fontset from %s, %d missing charsets, default string \"%s\".\n", fontname, mc, NONULL(ds)));
+        fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, NULL);
+        D_FONT(("Created fontset from %s, %d missing charsets (\"%s\").\n", fontname, mc,
+                ((mc > 0) ? (ml[0]) : ("N/A"))));
         FREE(fontname);
         if (mc) {
             XFreeStringList(ml);
-            fontset = 0;
+            /*fontset = 0;*/
         }
     }
     return fontset;

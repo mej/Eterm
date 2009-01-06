@@ -5586,3 +5586,8 @@ Tue Dec 16 22:03:54 2008                        Michael Jennings (mej)
 Fix compile errors related to the removal of unnecessary typecasting
 macros.
 ----------------------------------------------------------------------
+Mon Jan  5 23:50:28 2009                        Michael Jennings (mej)
+
+Remove fontset fallbacks.  I think this might help speed up the load
+time slowness some people are seeing.  Let's find out.
+----------------------------------------------------------------------
