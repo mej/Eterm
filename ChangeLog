@@ -5591,3 +5591,7 @@ Mon Jan  5 23:50:28 2009                        Michael Jennings (mej)
 Remove fontset fallbacks.  I think this might help speed up the load
 time slowness some people are seeing.  Let's find out.
 ----------------------------------------------------------------------
+Tue Jan  6 01:03:35 2009                        Michael Jennings (mej)
+
+Prevent blank Escreen buttonbar on startup.
+----------------------------------------------------------------------

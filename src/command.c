@@ -2726,11 +2726,10 @@ exe_prg(void *xd, char **argv)
 
 /****** Azundris' playthings :-) ******/
 
-#ifdef ESCREEN_FX
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
-#define CLEAR (1<<16)
+#define CLEAR (RS_None | bgColor)
 
 static void
 direct_write_screen(int x, int y, char *fg, rend_t bg)
@@ -2747,6 +2746,7 @@ direct_write_screen(int x, int y, char *fg, rend_t bg)
     }
 }
 
+#ifdef ESCREEN_FX
 static void
 bosconian(int n)
 {
@@ -2900,8 +2900,9 @@ waitstate(void *xd, int ms)
             matrix(31);
             unbosconian();
         }
-        bosconian(4);
+        bosconian(20);
         unbosconian();
+        scr_refresh(SLOW_REFRESH);
     }
 
     direct_write_screen(0, y++, "    **** COMMODORE 64 BASIC V2 ****", (0 << 8) | CLEAR);
@@ -2911,11 +2912,29 @@ waitstate(void *xd, int ms)
     screen.row = y;
     screen.col = 0;
 
-    scr_refresh(FAST_REFRESH);
+    scr_refresh(SLOW_REFRESH);
 
     sleep(dur);
 
     return 0;
+}
+#else
+static int
+waitstate(void *xd, int ms)
+{
+    USE_VAR(xd);
+
+    direct_write_screen(TERM_WINDOW_GET_REPORTED_COLS() / 2 - 17, TERM_WINDOW_GET_ROWS() / 2,
+                        "**** Initializing, please wait ****", (15 << 9) | CLEAR);
+    screen.row = 0;
+    screen.col = 0;
+
+    scr_refresh(SLOW_REFRESH);
+
+    sleep((time_t) (ms / 1000));
+
+    return 0;
+
 }
 #endif
 
@@ -2947,9 +2966,7 @@ escreen_reg_funcs(void)
     ns_register_inp(efuns, input_dialog);
     ns_register_tab(efuns, menu_tab);
 
-#ifdef ESCREEN_FX
     ns_register_fun(efuns, waitstate);
-#endif
 
     return efuns;
 }
