@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2006, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -376,7 +376,7 @@ static void
 usage(void)
 {
     printf("Eterm Enlightened Terminal Emulator for the X Window System\n");
-    printf("Copyright (c) 1997-2006, " AUTHORS "\n\n");
+    printf("Copyright (c) 1997-2009, " AUTHORS "\n\n");
 
     printf("OPTION types:\n");
     printf("  (bool) -- Boolean option ('1', 'on', 'yes', or 'true' to activate, '0', 'off', 'no', or 'false' to deactivate)\n");
@@ -402,7 +402,7 @@ version(void)
 {
 
     printf("Eterm " VERSION "\n");
-    printf("Copyright (c) 1997-2006, " AUTHORS "\n\n");
+    printf("Copyright (c) 1997-2009, " AUTHORS "\n\n");
 
     printf("Build info:\n");
     printf("    Built on " BUILD_DATE "\n");
