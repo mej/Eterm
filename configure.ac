@@ -62,7 +62,6 @@ AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' $srcdir/src/grkelot.c | sed 's
 AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' $srcdir/src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [main.c RCS ID])
 AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' $srcdir/src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [menus.c RCS ID])
 AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' $srcdir/src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [misc.c RCS ID])
-AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' $srcdir/src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [netdisp.c RCS ID])
 AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' $srcdir/src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [options.c RCS ID])
 AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' $srcdir/src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [pixmap.c RCS ID])
 AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' $srcdir/src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [screen.c RCS ID])

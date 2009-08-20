@@ -417,7 +417,6 @@ version(void)
            "    " MAIN_IDENT "\n"
            "    " MENUS_IDENT "\n"
            "    " MISC_IDENT "\n"
-           "    " NETDISP_IDENT "\n"
            "    " OPTIONS_IDENT "\n"
            "    " PIXMAP_IDENT "\n"
            "    " SCREEN_IDENT "\n"
