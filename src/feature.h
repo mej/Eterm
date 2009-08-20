@@ -54,7 +54,9 @@
 # endif
 
 # ifdef __GNUC__
-#  define _GNU_SOURCE
+#  ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#  endif
 # else
 #  define _XOPEN_SOURCE 600
 #  define _XOPEN_SOURCE_EXTENDED 1
