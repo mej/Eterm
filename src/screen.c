@@ -3320,7 +3320,7 @@ selection_send(XSelectionRequestEvent * rq)
         target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
         target_list[1] = (Atom32) XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        8, PropModeReplace, (unsigned char *) target_list,
+                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
