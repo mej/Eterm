@@ -3292,13 +3292,6 @@ selection_rotate(int x, int y)
 }
 
 /*
- * On some systems, the Atom typedef is 64 bits wide.  We need to have a type
- * that is exactly 32 bits wide, because a format of 64 is not allowed by
- * the X11 protocol.
- */
-typedef CARD32 Atom32;
-
-/*
  * Respond to a request for our current selection
  * EXT: SelectionRequest
  */
@@ -3306,7 +3299,7 @@ void
 selection_send(XSelectionRequestEvent * rq)
 {
     XEvent ev;
-    Atom32 target_list[2];
+    long target_list[2];
 
     ev.xselection.type = SelectionNotify;
     ev.xselection.property = None;
@@ -3317,10 +3310,10 @@ selection_send(XSelectionRequestEvent * rq)
     ev.xselection.time = rq->time;
 
     if (rq->target == props[PROP_SELECTION_TARGETS]) {
-        target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
-        target_list[1] = (Atom32) XA_STRING;
+        target_list[0] = props[PROP_SELECTION_TARGETS];
+        target_list[1] = XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list,
+                        32, PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
