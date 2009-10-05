@@ -363,6 +363,46 @@ set_pointer_colors(const char *fg_name, const char *bg_name)
     XRecolorCursor(Xdisplay, TermWin_cursor, &fg, &bg);
 }
 
+int
+check_mwm_supported(void)
+{
+    Atom prop, mwm_prop, type_ret;
+    unsigned char *prop_ret;
+    unsigned long bytes_after, num_ret;
+    int format_ret, num, i, supported = 0;
+
+    /* check whether wm support mwm hint */
+    prop = XInternAtom(Xdisplay, "_NET_SUPPORTED", True);
+    mwm_prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", True);
+    
+    if ((prop != None) && (mwm_prop != None)) {
+        prop_ret = NULL;
+        if (XGetWindowProperty(Xdisplay, Xroot, prop, 0, 0x7fffffff, False,
+                               XA_ATOM, &type_ret, &format_ret, &num_ret,
+                               &bytes_after, &prop_ret) == Success) {
+
+            if ((type_ret == XA_ATOM) &&
+                (format_ret == 32) &&
+                (num_ret && prop_ret))
+            {
+                for (i = 0; i < num_ret; i++)
+                    if (mwm_prop == ((unsigned long*)prop_ret)[i])
+                        supported = 1;
+            }
+            if (prop_ret)
+                XFree(prop_ret);
+        }
+    }
+    /* check whether wm is mwm */
+    if (!supported) {
+        prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
+        if (prop != None) {
+            supported = 1;
+        }
+    }    
+    return supported;
+}
+
 /* Create_Windows() - Open and map the window */
 void
 Create_Windows(int argc, char *argv[])
@@ -378,14 +418,13 @@ Create_Windows(int argc, char *argv[])
     MWMHints mwmhints;
 
     if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_BORDERLESS)) {
-        prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
-        if (prop == None) {
+        if (check_mwm_supported()) {
+            mwmhints.flags = MWM_HINTS_DECORATIONS;
+            mwmhints.decorations = 0;
+        } else {
             libast_print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
             Attributes.override_redirect = TRUE;
             mwmhints.flags = 0;
-        } else {
-            mwmhints.flags = MWM_HINTS_DECORATIONS;
-            mwmhints.decorations = 0;
         }
     } else {
         mwmhints.flags = 0;
