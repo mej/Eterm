@@ -383,11 +383,13 @@ check_mwm_supported(void)
 
             if ((type_ret == XA_ATOM) &&
                 (format_ret == 32) &&
-                (num_ret && prop_ret))
-            {
-                for (i = 0; i < num_ret; i++)
-                    if (mwm_prop == ((unsigned long*)prop_ret)[i])
+                (num_ret && prop_ret)) {
+                for (i = 0; i < num_ret; i++) {
+                    if (mwm_prop == ((unsigned long*)prop_ret)[i]) {
                         supported = 1;
+                        break;
+                    }
+                }
             }
             if (prop_ret)
                 XFree(prop_ret);
