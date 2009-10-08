@@ -1573,10 +1573,10 @@ ns_tog_disp(_ns_sess * s)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
+        case NS_MODE_SCREEN:
 /*        return ns_screen_command(s, "\x01\x01"); */
-          return ns_statement(s, "other");
-          break;
+            return ns_statement(s, "other");
+            break;
 #endif
         default:
             return NS_FAIL;
@@ -1594,16 +1594,17 @@ ns_go2_disp(_ns_sess * s, int d)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          {
+        case NS_MODE_SCREEN:
+            {
 /*            char b[] = "\x01_";
               b[1] = '0' + d;
               return ns_screen_command(s, b); */
-              char b[] = "select _";
-              b[7] = '0' + d;
-              return ns_statement(s, b);
-          }
-          break;
+                char b[] = "select _";
+
+                b[7] = '0' + d;
+                return ns_statement(s, b);
+            }
+            break;
 #endif
 #ifdef NS_HAVE_TWIN
         case NS_MODE_TWIN:
@@ -1636,16 +1637,16 @@ ns_mon_disp(_ns_sess * s, int no, int quiet)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (no >= 0)
-              ns_go2_disp(s, no);
-          if (quiet == NS_MON_TOGGLE_QUIET)
-              s->flags |= NS_SESS_NO_MON_MSG;
-          else
-              s->flags &= (~NS_SESS_NO_MON_MSG);
+        case NS_MODE_SCREEN:
+            if (no >= 0)
+                ns_go2_disp(s, no);
+            if (quiet == NS_MON_TOGGLE_QUIET)
+                s->flags |= NS_SESS_NO_MON_MSG;
+            else
+                s->flags &= (~NS_SESS_NO_MON_MSG);
 /*        return ns_screen_command(s, "\x01M"); */
-          return ns_statement(s, "monitor");
-          break;
+            return ns_statement(s, "monitor");
+            break;
 #endif
     }
     return NS_FAIL;
@@ -1660,11 +1661,11 @@ ns_sbb_disp(_ns_sess * s, int no)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          ns_go2_disp(s, no);
+        case NS_MODE_SCREEN:
+            ns_go2_disp(s, no);
 /*        return ns_screen_command(s, "\x01\x1b"); */
-          return ns_statement(s, "copy");
-          break;
+            return ns_statement(s, "copy");
+            break;
 #endif
         default:
             return NS_FAIL;
@@ -1728,21 +1729,21 @@ ns_add_disp(_ns_sess * s, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (after >= 0)
-              ns_go2_disp(s, after);
+        case NS_MODE_SCREEN:
+            if (after >= 0)
+                ns_go2_disp(s, after);
 /*        if (ns_screen_command(s, "\x01\x03") == NS_SUCC) { */
-          ret = ns_statement(s, "screen");
-          if (ret == NS_SUCC) {
-              D_ESCREEN(("Sent \"screen\" command, now renaming tab.\n"));
-              if (!name || strlen(name)) {
-                  ns_ren_disp(s, -2, name);
-              }
-              ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
-          } else {
-              D_ESCREEN(("ns_statement(screen) returned %d\n", ret));
-          }
-          break;
+            ret = ns_statement(s, "screen");
+            if (ret == NS_SUCC) {
+                D_ESCREEN(("Sent \"screen\" command, now renaming tab.\n"));
+                if (!name || strlen(name)) {
+                    ns_ren_disp(s, -2, name);
+                }
+                ret = ns_mon_disp(s, -2, NS_MON_TOGGLE_QUIET);
+            } else {
+                D_ESCREEN(("ns_statement(screen) returned %d\n", ret));
+            }
+            break;
 #endif
 #ifdef NS_HAVE_TWIN
         case NS_MODE_TWIN:
@@ -1839,12 +1840,12 @@ ns_rem_disp(_ns_sess * s, int d, int ask)
     if (*i == 'y' || *i == 'Y') {
         switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-          case NS_MODE_SCREEN:
-              ns_go2_disp(s, d);
+            case NS_MODE_SCREEN:
+                ns_go2_disp(s, d);
 /*            ret = ns_screen_command(s, "\x01ky\r"); */
-              if ((ret = ns_statement(s, "kill")) == NS_SUCC)
-                  ret = ns_screen_command(s, "y\r");
-              break;
+                if ((ret = ns_statement(s, "kill")) == NS_SUCC)
+                    ret = ns_screen_command(s, "y\r");
+                break;
 #endif
         }
     }
@@ -1969,14 +1970,14 @@ ns_rel_region(_ns_sess * s, _ns_disp * d, int n)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
-          if (n < 0)
-              return NS_FAIL;
-          do {
+        case NS_MODE_SCREEN:
+            if (n < 0)
+                return NS_FAIL;
+            do {
 /*            ret = ns_screen_command(s, "\x01\x09"); */
-              ret = ns_statement(s, "focus");
-          } while (--n && (ret == NS_SUCC));
-          break;
+                ret = ns_statement(s, "focus");
+            } while (--n && (ret == NS_SUCC));
+            break;
 #endif
     }
     return ret;
@@ -1997,10 +1998,10 @@ ns_add_region(_ns_sess * s, _ns_disp * d, int after, char *name)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
+        case NS_MODE_SCREEN:
 /*        ret = ns_screen_command(s, "\x01S"); */
-          ret = ns_statement(s, "split");
-          break;
+            ret = ns_statement(s, "split");
+            break;
 #endif
     }
     return ret;
@@ -2031,10 +2032,10 @@ ns_rem_region(_ns_sess * s, _ns_disp * d, int r, int ask)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
+        case NS_MODE_SCREEN:
 /*        ret = ns_screen_command(s, "\x01X"); */
-          ret = ns_statement(s, "remove");
-          break;
+            ret = ns_statement(s, "remove");
+            break;
 #endif
     }
     return ret;
@@ -2054,10 +2055,10 @@ ns_one_region(_ns_sess * s, _ns_disp * d, int r)
 
     switch (s->backend) {
 #ifdef NS_HAVE_SCREEN
-      case NS_MODE_SCREEN:
+        case NS_MODE_SCREEN:
 /*        ret = ns_screen_command(s, "\x01Q"); */
-          ret = ns_statement(s, "only");
-          break;
+            ret = ns_statement(s, "only");
+            break;
 #endif
     }
     return ret;
@@ -2195,8 +2196,7 @@ ns_statement(_ns_sess * s, char *c)
                     s->escape = x;
                 }
                 ret = ns_screen_xcommand(s, NS_SCREEN_CMD, i ? i : c);
-                D_ESCREEN(("ns_screen_xcommand(%10p, NS_SCREEN_CMD, %s) returned %d.\n",
-                           s, NONULL(((i) ? (i) : (c))), ret));
+                D_ESCREEN(("ns_screen_xcommand(%10p, NS_SCREEN_CMD, %s) returned %d.\n", s, NONULL(((i) ? (i) : (c))), ret));
                 s->escape = y;
             } else if (ret == NS_NOT_ALLOWED) {
                 ns_inp_dial(s, "Sorry, David, I cannot allow that.", 0, NULL, NULL);

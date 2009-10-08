@@ -62,21 +62,21 @@ typedef unsigned char (*event_dispatcher_t)(event_t *);
 typedef unsigned char (*event_handler_t)(event_t *);
 typedef void (*event_dispatcher_init_t)(void);
 typedef struct {
-  event_dispatcher_t *dispatchers;
-  unsigned char num_dispatchers;
+    event_dispatcher_t *dispatchers;
+    unsigned char num_dispatchers;
 } event_master_t;
 typedef struct {
-  event_handler_t handlers[LASTEvent];
-  unsigned char num_my_windows;
-  Window *my_windows;
-  unsigned char num_my_parents;
-  Window *my_parents;
+    event_handler_t handlers[LASTEvent];
+    unsigned char num_my_windows;
+    Window *my_windows;
+    unsigned char num_my_parents;
+    Window *my_parents;
 } event_dispatcher_data_t;
 
 typedef struct {
-  unsigned short clicks, bypass_keystate, report_mode, mouse_offset;
-  Time button_press, last_button_press, activate_time;
-  unsigned char ignore_release;
+    unsigned short clicks, bypass_keystate, report_mode, mouse_offset;
+    Time button_press, last_button_press, activate_time;
+    unsigned char ignore_release;
 } mouse_button_state_t;
 
 /************ Variables ************/

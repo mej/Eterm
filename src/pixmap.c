@@ -1587,13 +1587,13 @@ shade_ximage_15(void *data, int bpl, int w, int h, int rm, int gm, int bm)
                 int r, g, b;
 
                 b = ((DATA16 *) ptr)[x];
-                r = (((b >> 10) & 0x001f ) * rm) >> 8;
+                r = (((b >> 10) & 0x001f) * rm) >> 8;
                 r = (r > 0x001f) ? 0x7c00 : (r << 10);
-                g = (((b >>  5) & 0x001f ) * gm) >> 8;
+                g = (((b >> 5) & 0x001f) * gm) >> 8;
                 g = (g > 0x001f) ? 0x03e0 : (g << 5);
-                b = (((b >>  0) & 0x001f ) * bm) >> 8;
+                b = (((b >> 0) & 0x001f) * bm) >> 8;
                 b = (b > 0x001f) ? 0x001f : (b << 0);
-                ((DATA16 *) ptr)[x] = (r|g|b);
+                ((DATA16 *) ptr)[x] = (r | g | b);
             }
             ptr += bpl;
         }
@@ -1631,12 +1631,12 @@ shade_ximage_16(void *data, int bpl, int w, int h, int rm, int gm, int bm)
 
                 b = ((DATA16 *) ptr)[x];
                 r = (((b >> 11) & 0x001f) * rm) >> 8;
-		r = (r > 0x001f) ? 0xf800 : (r << 11);
-                g = (((b >>  5) & 0x003f) * gm) >> 8;
-		g = (g > 0x003f) ? 0x07e0 : (g << 5);
-                b = (((b >>  0) & 0x001f) * bm) >> 8;
-		b = (b > 0x001f) ? 0x001f : (b << 0);
-                ((DATA16 *) ptr)[x] = (r|g|b);
+                r = (r > 0x001f) ? 0xf800 : (r << 11);
+                g = (((b >> 5) & 0x003f) * gm) >> 8;
+                g = (g > 0x003f) ? 0x07e0 : (g << 5);
+                b = (((b >> 0) & 0x001f) * bm) >> 8;
+                b = (b > 0x001f) ? 0x001f : (b << 0);
+                ((DATA16 *) ptr)[x] = (r | g | b);
             }
             ptr += bpl;
         }
@@ -1671,20 +1671,21 @@ shade_ximage_32(void *data, int bpl, int w, int h, int rm, int gm, int bm)
         for (y = h; --y >= 0;) {
             for (x = -(w * 4); x < 0; x += 4) {
                 int r, g, b;
+
 # if WORDS_BIGENDIAN
                 r = (ptr[x + 1] * rm) >> 8;
-                ptr[x + 1] = r|(!(r >> 8) - 1);
+                ptr[x + 1] = r | (!(r >> 8) - 1);
                 g = (ptr[x + 2] * gm) >> 8;
-                ptr[x + 2] = g|(!(g >> 8) - 1);
+                ptr[x + 2] = g | (!(g >> 8) - 1);
                 b = (ptr[x + 3] * bm) >> 8;
-                ptr[x + 3] = b|(!(b >> 8) - 1);
+                ptr[x + 3] = b | (!(b >> 8) - 1);
 # else
                 r = (ptr[x + 2] * rm) >> 8;
-                ptr[x + 2] = r|(!(r >> 8) - 1);
+                ptr[x + 2] = r | (!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
-                ptr[x + 1] = g|(!(g >> 8) - 1);
+                ptr[x + 1] = g | (!(g >> 8) - 1);
                 b = (ptr[x + 0] * bm) >> 8;
-                ptr[x + 0] = b|(!(b >> 8) - 1);
+                ptr[x + 0] = b | (!(b >> 8) - 1);
 # endif
             }
             ptr += bpl;
@@ -1724,18 +1725,18 @@ shade_ximage_24(void *data, int bpl, int w, int h, int rm, int gm, int bm)
 
 # if WORDS_BIGENDIAN
                 r = (ptr[x + 0] * rm) >> 8;
-                ptr[x + 0] = r|(!(r >> 8) - 1);
+                ptr[x + 0] = r | (!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
-                ptr[x + 1] = g|(!(g >> 8) - 1);
+                ptr[x + 1] = g | (!(g >> 8) - 1);
                 b = (ptr[x + 2] * bm) >> 8;
-                ptr[x + 2] = b|(!(b >> 8) - 1);
+                ptr[x + 2] = b | (!(b >> 8) - 1);
 # else
                 r = (ptr[x + 2] * rm) >> 8;
-                ptr[x + 2] = r|(!(r >> 8) - 1);
+                ptr[x + 2] = r | (!(r >> 8) - 1);
                 g = (ptr[x + 1] * gm) >> 8;
-                ptr[x + 1] = g|(!(g >> 8) - 1);
+                ptr[x + 1] = g | (!(g >> 8) - 1);
                 b = (ptr[x + 0] * bm) >> 8;
-                ptr[x + 0] = b|(!(b >> 8) - 1);
+                ptr[x + 0] = b | (!(b >> 8) - 1);
 # endif
             }
             ptr += bpl;
@@ -1749,9 +1750,9 @@ colormod_trans(Pixmap p, imlib_t *iml, GC gc, unsigned short w, unsigned short h
 {
 
 #ifdef HAVE_SSE2
-    XImage * __attribute__ ((aligned (16))) ximg;
+    XImage * __attribute__ ((aligned(16))) ximg;
 #elif defined HAVE_MMX
-    XImage * __attribute__ ((aligned (8))) ximg;
+    XImage * __attribute__ ((aligned(8))) ximg;
 #else
     XImage *ximg;
 #endif

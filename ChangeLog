@@ -4620,9 +4620,21 @@ Mon Apr 29 10:48:33 2002                        Michael Jennings (mej)
 Disable the screen dump escape sequence and implement a save_buff()
 script function instead.
 ----------------------------------------------------------------------
-Mon Apr 29 21:18:20 2002                        Michael Jennings (mej)
+Mon Apr 29 17:44:46 2002                        Michael Jennings (mej)
 
-Fixed the --install option which hasn't worked for ages.
+Use the new option parser in libast.  You will need the latest libast
+from CVS to use this version, but if you have it, and you've always
+been bugged by that -F -font-name-with-dashes problem, give this a
+try.
+
+This branch is a playground for 0.10 development.  Be careful before
+attempting to use anything you get from here.
+----------------------------------------------------------------------
+Mon Apr 29 21:06:07 2002                        Michael Jennings (mej)
+
+Oops...need to pre-parse some of those options. :)
+
+Also fixed the --install option which hasn't worked for ages.
 ----------------------------------------------------------------------
 Sat May  4 10:23:38 2002                        Michael Jennings (mej)
 
@@ -4643,13 +4655,18 @@ Tue May  7 10:16:56 2002                        Michael Jennings (mej)
 configure.in and configure.ac should no longer differ, so let's not
 maintain both.
 ----------------------------------------------------------------------
-Mon May 13 18:46:06 2002                        Michael Jennings (mej)
+Thu May  9 11:30:15 2002                        Michael Jennings (mej)
+
+Getting synced back up with the main trunk.  This includes Azundris'
+Escreen patch and re-indenting the code.
+----------------------------------------------------------------------
+Thu May  9 11:39:02 2002                        Michael Jennings (mej)
+
+Now works with the latest libast.
+----------------------------------------------------------------------
+Mon May 13 19:15:34 2002                        Michael Jennings (mej)
 
 Latest Escreen patch from Azundris <hacks@azundris.com>.
-----------------------------------------------------------------------
-Mon May 13 19:18:46 2002                        Michael Jennings (mej)
-
-Fixed indentation.
 ----------------------------------------------------------------------
 Mon May 13 23:58:16 2002                        Michael Jennings (mej)
 
@@ -5198,32 +5215,13 @@ Thu Mar 11 11:55:45 2004                        Michael Jennings (mej)
 
 Fix "make distcheck"
 ----------------------------------------------------------------------
-Mon Apr  5 17:12:06 2004                        Michael Jennings (mej)
+Mon Jun 28 12:34:36 2004                        Michael Jennings (mej)
 
-Fixed bug in loading print_pipe attribute pointed out by Tom A. Cox
-<tomc@hot.rr.com>.
+Cleaning up some warnings.
 ----------------------------------------------------------------------
-Tue Apr 20 13:44:22 2004                        Michael Jennings (mej)
+Mon Jun 28 12:46:09 2004                        Michael Jennings (mej)
 
-As requested by Ben Armstrong <synrg@sanctuary.nslug.ns.ca>, saving
-theme settings will not preserve -e/--exec arguments unless a theme
-was specifically named by the user.
-----------------------------------------------------------------------
-Tue Apr 20 15:40:39 2004                        Michael Jennings (mej)
-
-Enable title-reporting and iconname-reporting escape sequences only if
-specifically requested by user at compile time.  This exists solely to
-protect the ignorant and careless from themselves.
-----------------------------------------------------------------------
-Mon May 10 18:43:15 2004                        Michael Jennings (mej)
-
-Revert change from February 29th.  I never could reproduce it anyway.
-----------------------------------------------------------------------
-Fri Jun 25 17:48:24 2004                        Michael Jennings (mej)
-
-Chris Schoeneman <crs23@bigfoot.com> pointed out that Eterm didn't get
-keypresses if another app (like synergy) decided to listen for its
-events.  This should correct that behavior.
+Fixed Escreen menu file.
 ----------------------------------------------------------------------
 Mon Jun 28 12:34:36 2004                        Michael Jennings (mej)
 
@@ -5235,6 +5233,70 @@ Applied patch from Kim Woelders <kim@woelders.dk> to fix setting of
 _NET_WM_ICON property.
 
 Fixed a couple warnings.
+----------------------------------------------------------------------
+Thu Jul 15 15:46:34 2004                        Michael Jennings (mej)
+
+Fixed compile error in term.c
+
+Actions are now honest-to-goodness libast-style objects.  Action
+bindings for menus are currently disabled, but other stuff works.
+----------------------------------------------------------------------
+Fri Jul 16 17:59:48 2004                        Michael Jennings (mej)
+
+If $LANG refers to a UTF-8 or similar locale, remove that part.  In
+other words, en_US.utf8 becomes en_US instead.
+----------------------------------------------------------------------
+Fri Jul 23 12:21:25 2004                        Michael Jennings (mej)
+
+Kirby Kuehl <vacuum@technotronic.com> pointed out some portability
+issues.  These should now be fixed.
+----------------------------------------------------------------------
+Fri Jul 23 12:27:18 2004                        Michael Jennings (mej)
+
+Oops, missed one. :(
+----------------------------------------------------------------------
+Wed Nov  3 18:17:52 2004                        Michael Jennings (mej)
+
+Small patch for building against libast 0.6.1.
+
+Fixed compile error when enabling OFFIX_DND support pointed out by JG
+Miller <miller@yoyo.org>.
+----------------------------------------------------------------------
+Sun Nov  7 15:37:43 2004                        Michael Jennings (mej)
+
+Fixed minor typo.
+----------------------------------------------------------------------
+Tue Dec 14 17:13:02 2004                        Michael Jennings (mej)
+
+0.9.3 release
+----------------------------------------------------------------------
+Tue Dec 14 17:22:23 2004                        Michael Jennings (mej)
+
+The benefits of being a passenger on a long road trip...  The
+beginnings of EWMH opacity (a la xcompmgr) support and (hopefully)
+UTF-8 support.  Both as yet untested.
+----------------------------------------------------------------------
+Fri Dec 17 16:35:31 2004                        Michael Jennings (mej)
+
+Another attempt (and failure) at UTF-8 support.  Disabled until
+someone can help me out.
+
+If you know iconv(), please have a look at the FIXME_BLOCK starting at
+line 3509 of src/command.c.
+----------------------------------------------------------------------
+Mon Dec 20 14:31:33 2004                        Michael Jennings (mej)
+
+Okay, so my first problem was that I didn't pay close enough attention
+to the iconv_open() man page and got the parameter order wrong.  Duh.
+Thanks to Sytse Wielinga <s.b.wielinga@student.utwente.nl> for
+noticing that.
+
+kwo suggested using XmbDrawString(), but that causes font problems I'm
+not ready to diagnose just yet.
+----------------------------------------------------------------------
+Wed Jan  5 15:17:51 2005                        Michael Jennings (mej)
+
+Spec dependency fixes.
 ----------------------------------------------------------------------
 Fri Jul 16 17:59:48 2004                        Michael Jennings (mej)
 
@@ -5312,6 +5374,10 @@ autoSHIT versions.
 Fixed error in saving of cut_chars attribute.
 
 Fixed saving/handling of beep_command attribute.
+----------------------------------------------------------------------
+Tue Mar 15 17:29:24 2005                        Michael Jennings (mej)
+
+Big-ass merge.
 ----------------------------------------------------------------------
 Mon Apr 18 16:00:22 2005                        Michael Jennings (mej)
 
@@ -5436,4 +5502,8 @@ Wed Oct  5 14:41:00 2005                        Michael Jennings (mej)
 Fixed an incredibly-difficult-to-track-down missing "break" statement
 which caused the "New..." and Ctrl-T functionality to fail to prompt
 for a tab name.
+----------------------------------------------------------------------
+Mon Dec  5 13:33:58 2005                        Michael Jennings (mej)
+
+Merge and re-indent code.
 ----------------------------------------------------------------------

@@ -4,6 +4,8 @@ DIRS = tile scale
 UPDATE_SCRIPT = @top_srcdir@/utils/Etbg_update_list
 
 EXTRA_DIST =  tile/circuit.jpg scale/Neopolis-horizon.jpg README.backgrounds
+MAINTAINERCLEANFILES=Makefile.in
+
 pixmapdir = $(pkgdatadir)/pix
 themedir = $(pkgdatadir)/themes
 
@@ -16,4 +18,3 @@ install-data-hook:
 	  done) ; \
 	done)
 	$(UPDATE_SCRIPT) $(DESTDIR)${pixmapdir}
-MAINTAINERCLEANFILES=Makefile.in

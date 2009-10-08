@@ -531,7 +531,7 @@ lookup_key(XEvent * ev)
 #endif
 
         /* Check for a corresponding action binding.  If there is one, we're done with this event. */
-        if (action_dispatch(ev, keysym)) {
+        if (eterm_action_dispatch(ev)) {
             LK_RET();
         }
         if (len) {

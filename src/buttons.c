@@ -770,7 +770,7 @@ button_free(button_t *button)
     if (button->text) {
         FREE(button->text);
     }
-    if (button->type == ACTION_STRING || button->type == ACTION_ECHO) {
+    if (button->type == ETERM_ACTION_STRING || button->type == ETERM_ACTION_ECHO) {
         FREE(button->action.string);
     }
     if (button->icon) {
@@ -808,24 +808,24 @@ button_set_icon(button_t *button, simage_t *icon)
 }
 
 unsigned char
-button_set_action(button_t *button, action_type_t type, char *action)
+button_set_action(button_t *button, spif_eterm_action_type_t type, char *action)
 {
     ASSERT_RVAL(button != NULL, 0);
 
     button->type = type;
     switch (type) {
-        case ACTION_MENU:
+        case ETERM_ACTION_MENU:
             button->action.menu = find_menu_by_title(menu_list, action);
             return ((button->action.menu == NULL) ? (0) : (1));
             break;
-        case ACTION_STRING:
-        case ACTION_ECHO:
+        case ETERM_ACTION_STRING:
+        case ETERM_ACTION_ECHO:
             button->action.string = (char *) MALLOC(strlen(action) + 2);
             strcpy(button->action.string, action);
             parse_escaped_string(button->action.string);
             return ((button->action.string == NULL) ? (0) : (1));
             break;
-        case ACTION_SCRIPT:
+        case ETERM_ACTION_SCRIPT:
             button->action.script = (char *) MALLOC(strlen(action) + 2);
             strcpy(button->action.script, action);
             return ((button->action.script == NULL) ? (0) : (1));
@@ -909,13 +909,13 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
             bbar, (int) press, (int) prvs, (unsigned long) t));
 
     switch (button->type) {
-        case ACTION_MENU:
+        case ETERM_ACTION_MENU:
             D_BBAR((" -> Menu button found.\n"));
             if (press) {
                 menu_invoke(button->x, button->y + button->h, bbar->win, button->action.menu, t);
             }
             break;
-        case ACTION_STRING:
+        case ETERM_ACTION_STRING:
             D_BBAR((" -> String button found.\n"));
             if (!press) {
                 size_t len;
@@ -925,7 +925,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
                 cmd_write((unsigned char *) button->action.string, strlen(button->action.string));
             }
             break;
-        case ACTION_ECHO:
+        case ETERM_ACTION_ECHO:
             D_BBAR((" -> Echo button found.\n"));
             if (!press) {
                 size_t len;
@@ -990,7 +990,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
                 tt_write((unsigned char *) button->action.string, len);
             }
             break;
-        case ACTION_SCRIPT:
+        case ETERM_ACTION_SCRIPT:
             D_BBAR((" -> Script button found.\n"));
             if (!press) {
                 script_parse((char *) button->action.script);

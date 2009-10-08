@@ -40,8 +40,8 @@ Eterm_LDFLAGS = -rpath $(libdir):$(pkglibdir)
 Eterm_LDADD = libEterm.la 
 
 EXTRA_DIST = mmx_cmod.S sse2_cmod.c
+MAINTAINERCLEANFILES=Makefile.in
 
 install-exec-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	test ! -z "$(GDB_CMD_FILE)" && $(INSTALL_DATA) gdb.scr $(DESTDIR)$(pkgdatadir)/ || :
-MAINTAINERCLEANFILES=Makefile.in

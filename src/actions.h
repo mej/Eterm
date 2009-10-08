@@ -26,77 +26,91 @@
 
 #include <X11/Xfuncproto.h>
 #include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
+#include <libast.h>
 
 #include "events.h"
 #include "menus.h"
 
 /************ Macros and Definitions ************/
 typedef enum {
-  ACTION_NONE = 0,
-  ACTION_STRING,
-  ACTION_ECHO,
-  ACTION_SCRIPT,
-  ACTION_MENU
-} action_type_t;
+    ETERM_ACTION_NONE = 0,
+    ETERM_ACTION_STRING,
+    ETERM_ACTION_ECHO,
+    ETERM_ACTION_SCRIPT,
+    ETERM_ACTION_MENU
+} SPIF_TYPE(eterm_action_type);
+typedef SPIF_TYPE(obj) SPIF_TYPE(eterm_action_parameter);
+typedef spif_func_t SPIF_TYPE(eterm_action_handler);
 
-#define KEYSYM_NONE    (0UL)
+#define ETERM_KEYSYM_NONE        (0UL)
 
-#define MOD_NONE           (0UL)
-#define MOD_CTRL           (1UL << 0)
-#define MOD_SHIFT          (1UL << 1)
-#define MOD_LOCK           (1UL << 2)
-#define MOD_META           (1UL << 3)
-#define MOD_ALT            (1UL << 4)
-#define MOD_MOD1           (1UL << 5)
-#define MOD_MOD2           (1UL << 6)
-#define MOD_MOD3           (1UL << 7)
-#define MOD_MOD4           (1UL << 8)
-#define MOD_MOD5           (1UL << 9)
-#define MOD_ANY            (1UL << 10)
+#define ETERM_MOD_NONE           (0UL)
+#define ETERM_MOD_CTRL           (1UL << 0)
+#define ETERM_MOD_SHIFT          (1UL << 1)
+#define ETERM_MOD_LOCK           (1UL << 2)
+#define ETERM_MOD_META           (1UL << 3)
+#define ETERM_MOD_ALT            (1UL << 4)
+#define ETERM_MOD_MOD1           (1UL << 5)
+#define ETERM_MOD_MOD2           (1UL << 6)
+#define ETERM_MOD_MOD3           (1UL << 7)
+#define ETERM_MOD_MOD4           (1UL << 8)
+#define ETERM_MOD_MOD5           (1UL << 9)
+#define ETERM_MOD_ANY            (1UL << 10)
 
-#define BUTTON_NONE        (0)
-#define BUTTON_ANY         (0xff)
+#define ETERM_BUTTON_NONE        (0)
+#define ETERM_BUTTON_ANY         (0xff)
 
 #define LOGICAL_XOR(a, b)  !(((a) && (b)) || (!(a) && !(b)))
 
-#define SHOW_MODS(m)       ((m & MOD_CTRL) ? 'C' : 'c'), ((m & MOD_SHIFT) ? 'S' : 's'), ((m & MOD_META) ? 'M' : 'm'), ((m & MOD_ALT) ? 'A' : 'a')
+#define SHOW_MODS(m)       ((m & ETERM_MOD_CTRL) ? 'C' : 'c'), ((m & ETERM_MOD_SHIFT) ? 'S' : 's'), ((m & ETERM_MOD_META) ? 'M' : 'm'), ((m & ETERM_MOD_ALT) ? 'A' : 'a')
 #define SHOW_X_MODS(m)     ((m & ControlMask) ? 'C' : 'c'), ((m & ShiftMask) ? 'S' : 's'), ((m & MetaMask) ? 'M' : 'm'), ((m & AltMask) ? 'A' : 'a')
 #define MOD_FMT            "%c%c%c%c"
 
-/************ Structures ************/
-typedef struct action_struct action_t;
-typedef unsigned char (*action_handler_t) (event_t *, action_t *);
-struct action_struct {
-  unsigned short mod;
-  unsigned char button; 
-  KeySym keysym;
-  action_type_t type;
-  action_handler_t handler;
-  union {
-    char *string;
-    char *script;
-    menu_t *menu;
-  } param;
-  struct action_struct *next;
+
+
+
+
+
+/* Cast an arbitrary object pointer to a eterm_action. */
+#define SPIF_ETERM_ACTION(obj)                (SPIF_CAST(eterm_action) (obj))
+
+/* Check to see if a pointer references a eterm_actioning object. */
+#define SPIF_OBJ_IS_ETERM_ACTION(obj)         (SPIF_OBJ_IS_TYPE(obj, eterm_action))
+
+/* Check for NULL eterm_action object */
+#define SPIF_ETERM_ACTION_ISNULL(s)           SPIF_OBJ_ISNULL(SPIF_OBJ(s))
+
+SPIF_DECL_OBJ(eterm_action) {
+    SPIF_DECL_PARENT_TYPE(obj);
+    SPIF_DECL_PROPERTY(eterm_action_type, type);
+    SPIF_DECL_PROPERTY(ushort, modifiers);
+    SPIF_DECL_PROPERTY(uchar, button);
+    SPIF_DECL_PROPERTY_C(KeySym, keysym);
+    SPIF_DECL_PROPERTY(eterm_action_handler, handler);
+    SPIF_DECL_PROPERTY(obj, parameter);
 };
 
-/************ Variables ************/
-extern action_t *action_list;
+extern spif_vector_t actions;
+extern spif_class_t SPIF_CLASS_VAR(eterm_action);
+extern spif_eterm_action_t spif_eterm_action_new(void);
+extern spif_eterm_action_t spif_eterm_action_new_from_data(spif_eterm_action_type_t, spif_ushort_t,
+                                                           spif_uchar_t, KeySym, spif_ptr_t);
+extern spif_bool_t spif_eterm_action_del(spif_eterm_action_t);
+extern spif_bool_t spif_eterm_action_init(spif_eterm_action_t);
+extern spif_bool_t spif_eterm_action_init_from_data(spif_eterm_action_t, spif_eterm_action_type_t,
+                                                    spif_ushort_t, spif_uchar_t, KeySym, spif_ptr_t);
+extern spif_bool_t spif_eterm_action_done(spif_eterm_action_t);
+extern spif_eterm_action_t spif_eterm_action_dup(spif_eterm_action_t);
+extern spif_cmp_t spif_eterm_action_comp(spif_eterm_action_t, spif_eterm_action_t);
+extern spif_str_t spif_eterm_action_show(spif_eterm_action_t, spif_charptr_t, spif_str_t, size_t);
+extern spif_classname_t spif_eterm_action_type(spif_eterm_action_t);
+SPIF_DECL_PROPERTY_FUNC(eterm_action, eterm_action_type, type);
+SPIF_DECL_PROPERTY_FUNC(eterm_action, ushort, modifiers);
+SPIF_DECL_PROPERTY_FUNC(eterm_action, uchar, button);
+SPIF_DECL_PROPERTY_FUNC_C(eterm_action, KeySym, keysym);
+SPIF_DECL_PROPERTY_FUNC(eterm_action, eterm_action_handler, handler);
+SPIF_DECL_PROPERTY_FUNC(eterm_action, eterm_action_parameter, parameter);
 
-/************ Function Prototypes ************/
-_XFUNCPROTOBEGIN
-
-extern unsigned char action_handle_string(event_t *ev, action_t *action);
-extern unsigned char action_handle_echo(event_t *ev, action_t *action);
-extern unsigned char action_handle_script(event_t *ev, action_t *action);
-extern unsigned char action_handle_menu(event_t *ev, action_t *action);
-extern action_t *action_find_match(unsigned short mod, unsigned char button, KeySym keysym);
-extern unsigned char action_check_button(unsigned char button, int x_button);
-extern unsigned char action_check_keysym(KeySym keysym, KeySym x_keysym);
-extern unsigned char action_check_modifiers(unsigned short mod, int x_mod);
-extern unsigned char action_dispatch(event_t *ev, KeySym keysym);
-extern void action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_t type, void *param);
-
-_XFUNCPROTOEND
+extern spif_bool_t eterm_action_dispatch(event_t *ev);
 
 #endif	/* _ACTIONS_H_ */

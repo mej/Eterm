@@ -4,6 +4,7 @@ THEMES = Eterm auto Escreen trans
 
 EXTRA_DIST = Eterm/theme.cfg.in Escreen/theme.cfg.in trans/theme.cfg.in auto/theme.cfg.in \
              Eterm/menus.cfg Escreen/menus.cfg trans/menus.cfg auto/menus.cfg
+MAINTAINERCLEANFILES=Makefile.in
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)/themes
@@ -30,4 +31,3 @@ install-data-hook:
 
 uninstall-hook:
 	rm -rf $(DESTDIR)$(pkgdatadir)/themes
-MAINTAINERCLEANFILES=Makefile.in

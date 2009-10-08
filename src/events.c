@@ -206,9 +206,7 @@ handle_key_press(event_t *ev)
 
     PROF_INIT(handle_key_press);
     D_EVENTS(("handle_key_press(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
-#if UNUSED_BLOCK
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
-#endif
 
     COUNT_EVENT(keypress_cnt);
     if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT))) {
@@ -629,7 +627,7 @@ handle_button_press(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &primary_data), 0);
 
-    if (action_dispatch(ev, 0)) {
+    if (eterm_action_dispatch(ev)) {
         button_state.ignore_release = 1;
         return 1;
     }
@@ -704,15 +702,15 @@ handle_button_press(event_t *ev)
                          * This is also true for the scroll() function in script.c.
                          */
                     case Button4:
-                        if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+                        if (ev->xbutton.state & ETERM_MOD_CTRL) {
                             scr_page(UP, (TermWin.nrow * 5) - CONTEXT_LINES);
-                        } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & ETERM_MOD_SHIFT) {
                             scr_page(UP, 1);
-                        } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & ETERM_MOD_ALT) {
                             tt_write("\033[5~", 4);
-                        } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & (ETERM_MOD_ALT | ETERM_MOD_SHIFT)) {
                             tt_write("\033[A", 3);
-                        } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & (ETERM_MOD_ALT | ETERM_MOD_CTRL)) {
                             tt_write("\033[5~\033[5~\033[5~\033[5~\033[5~", 20);
                         } else {
                             scr_page(UP, TermWin.nrow - CONTEXT_LINES);
@@ -720,15 +718,15 @@ handle_button_press(event_t *ev)
                         button_state.last_button_press = 4;
                         break;
                     case Button5:
-                        if (action_check_modifiers(MOD_CTRL, ev->xbutton.state)) {
+                        if (ev->xbutton.state & ETERM_MOD_CTRL) {
                             scr_page(DN, (TermWin.nrow * 5) - CONTEXT_LINES);
-                        } else if (action_check_modifiers(MOD_SHIFT, ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & ETERM_MOD_SHIFT) {
                             scr_page(DN, 1);
-                        } else if (action_check_modifiers(MOD_ALT, ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & ETERM_MOD_ALT) {
                             tt_write("\033[6~", 4);
-                        } else if (action_check_modifiers((MOD_ALT | MOD_SHIFT), ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & (ETERM_MOD_ALT | ETERM_MOD_SHIFT)) {
                             tt_write("\033[B", 3);
-                        } else if (action_check_modifiers((MOD_ALT | MOD_CTRL), ev->xbutton.state)) {
+                        } else if (ev->xbutton.state & (ETERM_MOD_ALT | ETERM_MOD_CTRL)) {
                             tt_write("\033[6~\033[6~\033[6~\033[6~\033[6~", 20);
                         } else {
                             scr_page(DN, TermWin.nrow - CONTEXT_LINES);

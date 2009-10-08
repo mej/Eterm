@@ -4,6 +4,7 @@ EXTRA_DIST =  bar_horizontal_1.png bar_horizontal_2.png bar_horizontal_3.png bar
               bar_vertical_3.png button_arrow_down_1.png button_arrow_down_2.png button_arrow_down_3.png \
               button_arrow_up_1.png button_arrow_up_2.png button_arrow_up_3.png menu1.png menu2.png menu3.png \
               thumb_1.png thumb_2.png help.png exit.png
+MAINTAINERCLEANFILES=Makefile.in
 
 pixmapdir = $(pkgdatadir)/pix
 
@@ -16,4 +17,3 @@ install-data-hook:
 
 uninstall-hook:
 	rm -rf $(DESTDIR)$(pkgdatadir)/pix
-MAINTAINERCLEANFILES=Makefile.in

@@ -14,7 +14,7 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * $Header$
+ * $Header: /cvsroot/enlightenment/eterm/Eterm/src/grkelot.h,v 1.2 1999/08/18 01:12:44 mej Exp $
  */
 
 #ifndef _GRKELOT_H

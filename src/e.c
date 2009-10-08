@@ -96,7 +96,7 @@ enl_ipc_get_win(void)
             if (tmp) {
                 ver = tmp + 1;
                 tmp = strchr((char *) ver, ' ');
-                if (! tmp) {
+                if (!tmp) {
                     tmp = strchr((char *) ver, '-');
                 }
                 if (tmp) {

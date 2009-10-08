@@ -467,8 +467,9 @@ menu_t *menu_create(char *title)
         xattr.colormap = cmap;
 
         cursor = XCreateFontCursor(Xdisplay, XC_left_ptr);
-        mask = KeyPressMask | PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask
-            | Button1MotionMask | Button2MotionMask | Button3MotionMask;
+        mask =
+            PointerMotionMask | ButtonMotionMask | ButtonPressMask | ButtonReleaseMask | Button1MotionMask | Button2MotionMask |
+            Button3MotionMask;
     }
     menu = (menu_t *) MALLOC(sizeof(menu_t));
     MEMSET(menu, 0, sizeof(menu_t));

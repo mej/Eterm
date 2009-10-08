@@ -59,38 +59,38 @@
 typedef struct menu_t_struct menu_t;
 
 typedef struct {
-  simage_t *icon;
-  unsigned char type, state;
-  union {
-    menu_t *submenu;
-    char *string;
-    char *script;
-    char *alert;
-  } action;
-  char *text, *rtext;
-  unsigned short len, rlen;
-  unsigned short x, y, w, h;
+    simage_t *icon;
+    unsigned char type, state;
+    union {
+        menu_t *submenu;
+        char *string;
+        char *script;
+        char *alert;
+    } action;
+    char *text, *rtext;
+    unsigned short len, rlen;
+    unsigned short x, y, w, h;
 } menuitem_t;
 
 struct menu_t_struct {
-  char *title;
-  Window win, swin;
-  Pixmap bg;
-  unsigned short x, y, w, h;
-  GC gc;
-  unsigned char state;
-  XFontStruct *font;
+    char *title;
+    Window win, swin;
+    Pixmap bg;
+    unsigned short x, y, w, h;
+    GC gc;
+    unsigned char state;
+    XFontStruct *font;
 #ifdef MULTI_CHARSET
-  XFontSet fontset;
+    XFontSet fontset;
 #endif
-  unsigned short fwidth, fheight;
-  unsigned short numitems, curitem;
-  menuitem_t **items;
+    unsigned short fwidth, fheight;
+    unsigned short numitems, curitem;
+    menuitem_t **items;
 };
 
 typedef struct {
-  unsigned char nummenus;
-  menu_t **menus;
+    unsigned char nummenus;
+    menu_t **menus;
 } menulist_t;
 
 /************ Variables ************/

@@ -642,10 +642,10 @@ version(void)
 #else
     printf(" -NEXT_SCROLLBAR");
 #endif
-#ifdef SCROLLBAR_BUTTON_CONTINUAL_SCROLLING
-    printf(" +SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
+#ifdef SCROLLBAR_ETERM_BUTTON_CONTINUAL_SCROLLING
+    printf(" +SCROLLBAR_ETERM_BUTTON_CONTINUAL_SCROLLING");
 #else
-    printf(" -SCROLLBAR_BUTTON_CONTINUAL_SCROLLING");
+    printf(" -SCROLLBAR_ETERM_BUTTON_CONTINUAL_SCROLLING");
 #endif
 #ifdef META8_OPTION
     printf(" +META8_OPTION");
@@ -1241,10 +1241,12 @@ parse_toggles(char *buff, void *state)
 
     } else if (!BEG_STRCASECMP(buff, "buttonbar")) {
         if (bool_val) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
+                );
             rs_buttonbars = 1;  /* Reset for future use. */
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
+                );
             rs_buttonbars = 1;  /* Reset for future use. */
         }
 
@@ -1463,7 +1465,8 @@ parse_misc(char *buff, void *state)
     }
     if (!BEG_STRCASECMP(buff, "print_pipe ")) {
 #ifdef PRINTPIPE
-        RESET_AND_ASSIGN(rs_print_pipe, get_word(2, buff));
+        RESET_AND_ASSIGN(rs_print_pipe, STRDUP(get_pword(2, buff)));
+        chomp(rs_print_pipe);
 #else
         print_warning("Support for the print_pipe attribute was not compiled in, ignoring\n");
 #endif
@@ -1991,8 +1994,9 @@ parse_image(char *buff, void *state)
 static void *
 parse_actions(char *buff, void *state)
 {
-    unsigned short mod = MOD_NONE;
-    unsigned char button = BUTTON_NONE;
+    spif_eterm_action_t new_action = SPIF_NULL_TYPE(eterm_action);
+    unsigned short mod = ETERM_MOD_NONE;
+    unsigned char button = ETERM_BUTTON_NONE;
     KeySym keysym = 0;
     char *str;
     unsigned short i;
@@ -2004,27 +2008,27 @@ parse_actions(char *buff, void *state)
     if (!BEG_STRCASECMP(buff, "bind ")) {
         for (i = 2; (str = get_word(i, buff)) && strcasecmp(str, "to"); i++) {
             if (!BEG_STRCASECMP(str, "anymod")) {
-                mod = MOD_ANY;
+                mod = ETERM_MOD_ANY;
             } else if (!BEG_STRCASECMP(str, "ctrl")) {
-                mod |= MOD_CTRL;
+                mod |= ETERM_MOD_CTRL;
             } else if (!BEG_STRCASECMP(str, "shift")) {
-                mod |= MOD_SHIFT;
+                mod |= ETERM_MOD_SHIFT;
             } else if (!BEG_STRCASECMP(str, "lock")) {
-                mod |= MOD_LOCK;
+                mod |= ETERM_MOD_LOCK;
             } else if (!BEG_STRCASECMP(str, "meta")) {
-                mod |= MOD_META;
+                mod |= ETERM_MOD_META;
             } else if (!BEG_STRCASECMP(str, "alt")) {
-                mod |= MOD_ALT;
+                mod |= ETERM_MOD_ALT;
             } else if (!BEG_STRCASECMP(str, "mod1")) {
-                mod |= MOD_MOD1;
+                mod |= ETERM_MOD_MOD1;
             } else if (!BEG_STRCASECMP(str, "mod2")) {
-                mod |= MOD_MOD2;
+                mod |= ETERM_MOD_MOD2;
             } else if (!BEG_STRCASECMP(str, "mod3")) {
-                mod |= MOD_MOD3;
+                mod |= ETERM_MOD_MOD3;
             } else if (!BEG_STRCASECMP(str, "mod4")) {
-                mod |= MOD_MOD4;
+                mod |= ETERM_MOD_MOD4;
             } else if (!BEG_STRCASECMP(str, "mod5")) {
-                mod |= MOD_MOD5;
+                mod |= ETERM_MOD_MOD5;
             } else if (!BEG_STRCASECMP(str, "button")) {
                 button = *(str + 6) - '0';
             } else if (isdigit(*str)) {
@@ -2039,37 +2043,40 @@ parse_actions(char *buff, void *state)
             return NULL;
         }
         FREE(str);
-        if ((button == BUTTON_NONE) && (keysym == 0)) {
-            print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n", file_peek_path(),
-                        file_peek_line());
+        if ((button == ETERM_BUTTON_NONE) && (keysym == 0)) {
+            print_error("Parse error in file %s, line %lu:  No valid button/keysym found for action\n",
+                        file_peek_path(), file_peek_line());
             return NULL;
         }
         i++;
         str = get_pword(i, buff);
         if (!BEG_STRCASECMP(str, "string")) {
             str = get_word(i + 1, buff);
-            action_add(mod, button, keysym, ACTION_STRING, (void *) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_STRING, mod, button, keysym, SPIF_CAST(ptr) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "echo")) {
             str = get_word(i + 1, buff);
-            action_add(mod, button, keysym, ACTION_ECHO, (void *) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_ECHO, mod, button, keysym, SPIF_CAST(ptr) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "menu")) {
-            menu_t *menu;
+            /*menu_t *menu; */
 
             str = get_word(i + 1, buff);
-            menu = find_menu_by_title(menu_list, str);
-            action_add(mod, button, keysym, ACTION_MENU, (void *) menu);
+            /*menu = find_menu_by_title(menu_list, str); */
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_MENU, mod, button, keysym, SPIF_NULL_TYPE(ptr));
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "script")) {
             str = get_word(i + 1, buff);
-            action_add(mod, button, keysym, ACTION_SCRIPT, (void *) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_SCRIPT, mod, button, keysym, SPIF_CAST(ptr) str);
             FREE(str);
         } else {
-            print_error
-                ("Parse error in file %s, line %lu:  No valid action type found.  Valid types are \"string,\" \"echo,\" \"menu,\" and \"script.\"\n",
-                 file_peek_path(), file_peek_line());
+            print_error("Parse error in file %s, line %lu:  No valid action type found.  Valid types are "
+                        "\"string,\" \"echo,\" \"menu,\" and \"script.\"\n", file_peek_path(), file_peek_line());
             return NULL;
+        }
+
+        if (!SPIF_ETERM_ACTION_ISNULL(new_action)) {
+            SPIF_VECTOR_INSERT(actions, new_action);
         }
 
     } else {
@@ -2297,13 +2304,13 @@ parse_bbar(char *buff, void *state)
 
             action = get_word(2, type);
             if (!BEG_STRCASECMP(type, "menu ")) {
-                button_set_action(button, ACTION_MENU, action);
+                button_set_action(button, ETERM_ACTION_MENU, action);
             } else if (!BEG_STRCASECMP(type, "string ")) {
-                button_set_action(button, ACTION_STRING, action);
+                button_set_action(button, ETERM_ACTION_STRING, action);
             } else if (!BEG_STRCASECMP(type, "echo ")) {
-                button_set_action(button, ACTION_ECHO, action);
+                button_set_action(button, ETERM_ACTION_ECHO, action);
             } else if (!BEG_STRCASECMP(type, "script ")) {
-                button_set_action(button, ACTION_SCRIPT, action);
+                button_set_action(button, ETERM_ACTION_SCRIPT, action);
             } else {
                 print_error("Parse error in file %s, line %lu:  Invalid button action \"%s\"\n", file_peek_path(), file_peek_line(),
                             type);
@@ -2562,6 +2569,9 @@ init_defaults(void)
 #endif
 
     TermWin.internalBorder = DEFAULT_BORDER_WIDTH;
+
+    /* Initialize the action list. */
+    actions = SPIF_VECTOR_NEW(array);
 
     /* Initialize the parser */
     conf_init_subsystem();
@@ -2865,9 +2875,11 @@ post_parse(void)
        specified.  If specified, it will either become 3 (on) or 0 (off). */
     if (rs_buttonbars != 1) {
         if (rs_buttonbars) {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 1);
+                );
         } else {
-            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0););
+            FOREACH_BUTTONBAR(bbar_set_visible(bbar, 0);
+                );
         }
         rs_buttonbars = 1;      /* Reset for future use. */
     }
@@ -3108,7 +3120,7 @@ save_config(char *path, unsigned char save_theme)
     struct tm *cur_tm;
     struct stat fst;
     simage_t *simg;
-    action_t *action;
+    spif_iterator_t iter;
     buttonbar_t *bbar;
 
     D_OPTIONS(("Saving %s config to \"%s\"\n", (save_theme ? "theme" : "user"), NONULL(path)));
@@ -3660,40 +3672,43 @@ save_config(char *path, unsigned char save_theme)
     }
 
     fprintf(fp, "begin actions\n");
-    for (action = action_list; action; action = action->next) {
+    for (iter = SPIF_VECTOR_ITERATOR(actions); SPIF_ITERATOR_HAS_NEXT(iter);) {
+        spif_eterm_action_t action;
+
+        action = SPIF_CAST(eterm_action) SPIF_ITERATOR_NEXT(iter);
         fprintf(fp, "    bind ");
-        if (action->mod != MOD_NONE) {
-            if (action->mod & MOD_ANY) {
+        if (action->modifiers != ETERM_MOD_NONE) {
+            if (action->modifiers & ETERM_MOD_ANY) {
                 fprintf(fp, "anymod ");
             }
-            if (action->mod & MOD_CTRL) {
+            if (action->modifiers & ETERM_MOD_CTRL) {
                 fprintf(fp, "ctrl ");
             }
-            if (action->mod & MOD_SHIFT) {
+            if (action->modifiers & ETERM_MOD_SHIFT) {
                 fprintf(fp, "shift ");
             }
-            if (action->mod & MOD_LOCK) {
+            if (action->modifiers & ETERM_MOD_LOCK) {
                 fprintf(fp, "lock ");
             }
-            if (action->mod & MOD_META) {
+            if (action->modifiers & ETERM_MOD_META) {
                 fprintf(fp, "meta ");
             }
-            if (action->mod & MOD_ALT) {
+            if (action->modifiers & ETERM_MOD_ALT) {
                 fprintf(fp, "alt ");
             }
-            if (action->mod & MOD_MOD1) {
+            if (action->modifiers & ETERM_MOD_MOD1) {
                 fprintf(fp, "mod1 ");
             }
-            if (action->mod & MOD_MOD2) {
+            if (action->modifiers & ETERM_MOD_MOD2) {
                 fprintf(fp, "mod2 ");
             }
-            if (action->mod & MOD_MOD3) {
+            if (action->modifiers & ETERM_MOD_MOD3) {
                 fprintf(fp, "mod3 ");
             }
-            if (action->mod & MOD_MOD4) {
+            if (action->modifiers & ETERM_MOD_MOD4) {
                 fprintf(fp, "mod4 ");
             }
-            if (action->mod & MOD_MOD5) {
+            if (action->modifiers & ETERM_MOD_MOD5) {
                 fprintf(fp, "mod5 ");
             }
         }
@@ -3703,14 +3718,14 @@ save_config(char *path, unsigned char save_theme)
             fprintf(fp, "button%d", (int) action->button);
         }
         fprintf(fp, " to ");
-        if (action->type == ACTION_STRING) {
-            fprintf(fp, "string '%s'\n", safe_print_string(action->param.string, -1));
-        } else if (action->type == ACTION_ECHO) {
-            fprintf(fp, "echo '%s'\n", safe_print_string(action->param.string, -1));
-        } else if (action->type == ACTION_MENU) {
-            fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title);
-        } else if (action->type == ACTION_SCRIPT) {
-            fprintf(fp, "script '%s'\n", action->param.script);
+        if (action->type == ETERM_ACTION_STRING) {
+            fprintf(fp, "string '%s'\n", safe_print_string(SPIF_STR_STR(SPIF_STR(action->parameter)), -1));
+        } else if (action->type == ETERM_ACTION_ECHO) {
+            fprintf(fp, "echo '%s'\n", safe_print_string(SPIF_STR_STR(SPIF_STR(action->parameter)), -1));
+        } else if (action->type == ETERM_ACTION_MENU) {
+            /*fprintf(fp, "menu \"%s\"\n", (action->param.menu)->title); */
+        } else if (action->type == ETERM_ACTION_SCRIPT) {
+            fprintf(fp, "script '%s'\n", SPIF_STR_STR(SPIF_STR(action->parameter)));
         }
     }
     fprintf(fp, "end actions\n\n");
@@ -3766,13 +3781,13 @@ save_config(char *path, unsigned char save_theme)
                 }
 #endif
                 fprintf(fp, "action ");
-                if (b->type == ACTION_STRING) {
+                if (b->type == ETERM_ACTION_STRING) {
                     fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));
-                } else if (b->type == ACTION_ECHO) {
+                } else if (b->type == ETERM_ACTION_ECHO) {
                     fprintf(fp, "echo '%s'\n", safe_print_string(b->action.string, -1));
-                } else if (b->type == ACTION_MENU) {
+                } else if (b->type == ETERM_ACTION_MENU) {
                     fprintf(fp, "menu \"%s\"\n", (b->action.menu)->title);
-                } else if (b->type == ACTION_SCRIPT) {
+                } else if (b->type == ETERM_ACTION_SCRIPT) {
                     fprintf(fp, "script '%s'\n", b->action.script);
                 }
             }
@@ -3789,13 +3804,13 @@ save_config(char *path, unsigned char save_theme)
                 }
 #endif
                 fprintf(fp, "action ");
-                if (b->type == ACTION_STRING) {
+                if (b->type == ETERM_ACTION_STRING) {
                     fprintf(fp, "string '%s'\n", safe_print_string(b->action.string, -1));
-                } else if (b->type == ACTION_ECHO) {
+                } else if (b->type == ETERM_ACTION_ECHO) {
                     fprintf(fp, "echo '%s'\n", safe_print_string(b->action.string, -1));
-                } else if (b->type == ACTION_MENU) {
+                } else if (b->type == ETERM_ACTION_MENU) {
                     fprintf(fp, "menu \"%s\"\n", (b->action.menu)->title);
-                } else if (b->type == ACTION_SCRIPT) {
+                } else if (b->type == ETERM_ACTION_SCRIPT) {
                     fprintf(fp, "script '%s'\n", b->action.script);
                 }
             }
@@ -3879,7 +3894,7 @@ save_config(char *path, unsigned char save_theme)
             ));
 
     fprintf(fp, "    debug %d\n", DEBUG_LEVEL);
-    if (save_theme && rs_exec_args && rs_theme && strcmp(rs_theme, PACKAGE)) {
+    if (save_theme && rs_exec_args) {
         fprintf(fp, "    exec ");
         for (i = 0; rs_exec_args[i]; i++) {
             fprintf(fp, "'%s' ", rs_exec_args[i]);

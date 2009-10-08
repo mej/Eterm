@@ -25,6 +25,7 @@
 # define _BUTTONS_H
 
 # include <X11/Xfuncproto.h>
+# include <libast.h>
 # include "actions.h"
 # include "events.h"
 # include "menus.h"
@@ -59,7 +60,7 @@
 /************ Structures ************/
 typedef struct button_struct {
   simage_t *icon;
-  action_type_t type;
+  spif_eterm_action_type_t type;
   union {
     menu_t *menu;
     char *script;
@@ -130,7 +131,7 @@ extern button_t *button_create(char *text);
 extern void button_free(button_t *);
 extern unsigned char button_set_text(button_t *button, const char *text);
 extern unsigned char button_set_icon(button_t *button, simage_t *icon);
-extern unsigned char button_set_action(button_t *button, action_type_t type, char *action);
+extern unsigned char button_set_action(button_t *button, spif_eterm_action_type_t type, char *action);
 extern void bbar_select_button(buttonbar_t *bbar, button_t *button);
 extern void bbar_deselect_button(buttonbar_t *bbar, button_t *button);
 extern void bbar_click_button(buttonbar_t *bbar, button_t *button);

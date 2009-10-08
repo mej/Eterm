@@ -1151,7 +1151,8 @@ clean_exit(void)
         font_cache_clear();
         eterm_font_list_clear();
 # ifdef PIXMAP_SUPPORT
-        FOREACH_IMAGE(free_eterm_image(&(images[idx])););
+        FOREACH_IMAGE(free_eterm_image(&(images[idx]));
+            );
 # endif
         for (i = 0; i < NRS_COLORS; i++) {
             if (rs_color[i]) {
@@ -2373,7 +2374,7 @@ static button_t *screen_button_create(char *text, char code)
     p[1] = code;
     p[2] = '\0';
     D_ESCREEN(("Creating button \"%s\" for display %c (%s)\n", NONULL(text), code, safe_print_string(p, 2)));
-    button_set_action(b, ACTION_ECHO, p);
+    button_set_action(b, ETERM_ACTION_ECHO, p);
     b->flags |= NS_SCREAM_BUTTON;
 
     return b;
@@ -2920,7 +2921,7 @@ make_escreen_menu(buttonbar_t *bbar)
 #endif
 
         if ((button = button_create(NS_MENU_TITLE))) {
-            if ((button_set_action(button, ACTION_MENU, NS_MENU_TITLE))) {
+            if ((button_set_action(button, ETERM_ACTION_MENU, NS_MENU_TITLE))) {
                 bbar_add_rbutton(bbar, button);
                 bbar_calc_button_sizes(bbar);
             }
