@@ -1329,7 +1329,7 @@ scr_rvideo_mode(int mode)
 
         maxlines = TermWin.saveLines + TERM_WINDOW_GET_REPORTED_ROWS();
         for (i = TermWin.saveLines; i < maxlines; i++)
-            for (j = 0; j < TERM_WINDOW_GET_REPORTED_COLS() + 1; j++)
+            for (j = 0; j < TERM_WINDOW_GET_REPORTED_COLS(); j++)
                 screen.rend[i][j] ^= RS_RVid;
         scr_refresh(SLOW_REFRESH);
     }

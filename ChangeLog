@@ -5629,3 +5629,8 @@ borderless with no override_redirect (which may come back some day as
 a separate option if there's a need) based on advice from raster and
 kwo.
 ----------------------------------------------------------------------
+Sun Oct 25 14:07:07 2009                        Michael Jennings (mej)
+
+Fix off-by-one error that was causing crashes with visual bell.  Found
+by d_willsc@cojobo.bonn.de.
+----------------------------------------------------------------------
