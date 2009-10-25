@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -106,6 +106,8 @@ enum {
   PROP_EWMH_ICON,
   PROP_EWMH_OPACITY,
   PROP_EWMH_STARTUP_ID,
+  PROP_EWMH_STATE,
+  PROP_EWMH_STATE_STICKY,
   NUM_PROPS
 };
 

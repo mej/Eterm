@@ -9,8 +9,9 @@ done
 for i in *.c src/*.c utils/*.c ; do
     if test -f $i; then
         echo Reformatting $i
-        indent -bad -bap -bbo -br -brs -cdw -ce -ci4 -cli4 -cs -di1 -i4 -l132 \
-            -lp -lps -nbc -nbfda -npcs -nprs -nsob -nss -nut -psl -saf -sai -saw $TYPENAMES $i
+        indent -bad -bap -bbo -bli0 -br -brs -cdw -ce -ci4 -cli4 -cs -di1 -i4 -l132 \
+            -lp -lps -nbc -nbfda -npcs -nprs -nsob -nss -nut -psl -saf -sai -saw -sbi0 \
+            $TYPENAMES $i
     fi
 done
 

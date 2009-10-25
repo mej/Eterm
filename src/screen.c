@@ -1552,6 +1552,14 @@ scr_page(int direction, int nlines)
 void
 scr_bell(void)
 {
+    XWMHints *wm_hints;
+
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+        wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+        wm_hints->flags |= XUrgencyHint;
+        XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+        XFree(wm_hints);
+    }
 #ifndef NO_MAPALERT
 #ifdef MAPALERT_OPTION
     if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_MAP_ALERT))
@@ -1562,7 +1570,7 @@ scr_bell(void)
         scr_rvideo_mode(!rvideo);
         scr_rvideo_mode(!rvideo);
     } else if (!SPIF_PTR_ISNULL(rs_beep_command) && (*rs_beep_command)) {
-        system_no_wait(SPIF_CAST_C(char *)rs_beep_command);
+        system_no_wait((char *) rs_beep_command);
     } else {
         XBell(Xdisplay, 0);
     }
@@ -2473,8 +2481,8 @@ selection_fetch(Window win, unsigned prop, int delete)
             return;
         }
         nread += nitems;
-        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n", (int) actual_type,
-                  actual_fmt, nitems, data, bytes_after));
+        D_SELECT(("Got selection info:  Actual type %d (format %d), %lu items at 0x%08x, %lu bytes left over.\n",
+                  (int) actual_type, actual_fmt, nitems, data, bytes_after));
 
         if (nitems == 0) {
             D_SELECT(("Retrieval of incremental selection complete.\n"));
@@ -2523,14 +2531,15 @@ selection_fetch(Window win, unsigned prop, int delete)
 void
 selection_copy_string(Atom sel, char *str, size_t len)
 {
+    D_SELECT(("Copying %ul bytes from 0x%08x to selection %d\n", len, str, (int) sel));
     if (str == NULL || len == 0) {
         return;
     }
     if (IS_SELECTION(sel)) {
-        D_SELECT(("Copying selection to selection %d\n", (int) sel));
+        D_SELECT(("Changing ownership of selection %d to my window 0x%08x\n", (int) sel, (int) TermWin.vt));
         XSetSelectionOwner(Xdisplay, sel, TermWin.vt, CurrentTime);
         if (XGetSelectionOwner(Xdisplay, sel) != TermWin.vt) {
-            print_error("Can't take ownership of selection\n");
+            libast_print_error("Can't take ownership of selection\n");
         }
     } else {
         D_SELECT(("Copying selection to cut buffer %d\n", (int) sel));
@@ -2549,30 +2558,25 @@ selection_copy(Atom sel)
 void
 selection_paste(Atom sel)
 {
+    D_SELECT(("Attempting to paste selection %d.\n", (int) sel));
     if (selection.text != NULL) {
         /* If we have a selection of our own, paste it. */
         D_SELECT(("Pasting my current selection of length %lu\n", selection.len));
         selection_write(selection.text, selection.len);
     } else if (IS_SELECTION(sel)) {
-        if (XGetSelectionOwner(Xdisplay, sel) == None) {
-            /* If nobody owns the current selection, just try to paste it ourselves. */
-            D_SELECT(("Current selection %d unowned.  Attempting to paste the default cut buffer.\n", (int) sel));
-            selection_fetch(Xroot, XA_CUT_BUFFER0, False);
-        } else {
-            /* If someone owns the current selection, send a request to that client to
-               convert the selection to the appropriate form (usually XA_STRING) and
-               save it for us in the VT_SELECTION property.  We'll then get a SelectionNotify. */
-            D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
+        /* Request the current selection be converted to the appropriate
+           form (usually XA_STRING) and save it for us in the VT_SELECTION
+           property.  We'll then get a SelectionNotify. */
+        D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-            if (encoding_method != LATIN1) {
-                XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-            } else {
-                XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-            }
-#else
+        if (encoding_method != LATIN1) {
+            XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+        } else {
             XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
-#endif
         }
+#else
+        XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+#endif
     } else {
         D_SELECT(("Pasting cut buffer %d.\n", (int) sel));
         selection_fetch(Xroot, sel, False);
@@ -3288,13 +3292,6 @@ selection_rotate(int x, int y)
 }
 
 /*
- * On some systems, the Atom typedef is 64 bits wide.  We need to have a type
- * that is exactly 32 bits wide, because a format of 64 is not allowed by
- * the X11 protocol.
- */
-typedef CARD32 Atom32;
-
-/*
  * Respond to a request for our current selection
  * EXT: SelectionRequest
  */
@@ -3302,7 +3299,7 @@ void
 selection_send(XSelectionRequestEvent * rq)
 {
     XEvent ev;
-    Atom32 target_list[2];
+    long target_list[2];
 
     ev.xselection.type = SelectionNotify;
     ev.xselection.property = None;
@@ -3313,10 +3310,10 @@ selection_send(XSelectionRequestEvent * rq)
     ev.xselection.time = rq->time;
 
     if (rq->target == props[PROP_SELECTION_TARGETS]) {
-        target_list[0] = (Atom32) props[PROP_SELECTION_TARGETS];
-        target_list[1] = (Atom32) XA_STRING;
+        target_list[0] = props[PROP_SELECTION_TARGETS];
+        target_list[1] = XA_STRING;
         XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target,
-                        (8 * sizeof(target_list[0])), PropModeReplace, (unsigned char *) target_list,
+                        32, PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
 #if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
@@ -3329,8 +3326,8 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
             if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay), 8, PropModeReplace, xtextp.value,
-                                xtextp.nitems);
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay),
+                                8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
             }
         }

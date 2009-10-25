@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -38,7 +38,7 @@ static const char cvs_ident[] = "$Id$";
 # endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
-#  if defined(USE_SYSV_UTMP) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+#  if defined(USE_SYSV_UTMP) || defined(NEW_BSD_UTMP) || defined(__OpenBSD__)
 static char ut_id[5];           /* remember if entry to utmp made */
 #  else
 static int utmp_pos;            /* BSD position of utmp-stamp */
@@ -117,7 +117,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
         if (sscanf(pty, "pts/%d", &n) == 1)
             sprintf(ut_id, "vt%02x", n);        /* sysv naming */
         else {
-            print_error("can't parse tty name \"%s\"\n", pty);
+            libast_print_error("can't parse tty name \"%s\"\n", pty);
             ut_id[0] = '\0';    /* entry not made */
             return;
         }
@@ -222,7 +222,7 @@ remove_utmp_entry(void)
 # else /* USE_SYSV_UTMP */
 /* BSD utmp support */
 
-#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  ifdef NEW_BSD_UTMP
 
 /* used to hold the line we are using */
 static char ut_line[32];
@@ -270,7 +270,7 @@ b_login(struct utmp *ut)
     }
 }
 
-#  else /* __FreeBSD__ || NetBSD || BSDI */
+#  else /* NEW_BSD_UTMP */
 static int utmp_pos = 0;        /* position of utmp-stamp */
 
 /*----------------------------------------------------------------------*
@@ -328,7 +328,7 @@ write_utmp(struct utmp *putmp)
     return rval;
 }
 
-#  endif /* __FreeBSD__ || NetBSD || BSDI */
+#  endif /* NEW_BSD_UTMP */
 
 void
 add_utmp_entry(const char *pty, const char *hostname, int fd)
@@ -343,12 +343,12 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
     if (!strncmp(pty, "pty", 3) || !strncmp(pty, "tty", 3))
         strncpy(ut_id, (pty + 3), sizeof(ut_id));       /* bsd naming */
     else {
-        print_error("can't parse tty name \"%s\"\n", pty);
+        libast_print_error("can't parse tty name \"%s\"\n", pty);
         ut_id[0] = '\0';        /* entry not made */
         return;
     }
 
-#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  ifdef NEW_BSD_UTMP
     strncpy(ut_line, pty, 31);
 
     strncpy(utmp.ut_line, pty, UT_LINESIZE);
@@ -357,7 +357,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
     utmp.ut_time = time(NULL);
 
     b_login(&utmp);
-#  else /* __FreeBSD__ || NetBSD || BSDI */
+#  else /* NEW_BSD_UTMP */
     strncpy(utmp.ut_line, ut_id, sizeof(utmp.ut_line));
     strncpy(utmp.ut_name, pwent->pw_name, sizeof(utmp.ut_name));
     strncpy(utmp.ut_host, hostname, sizeof(utmp.ut_host));
@@ -376,10 +376,10 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
 void
 remove_utmp_entry(void)
 {
-#  if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+#  ifdef NEW_BSD_UTMP
     logout(ut_line);
     logwtmp(ut_line, "", "");
-#  else /* __FreeBSD__ */
+#  else /* NEW_BSD_UTMP */
     FILE *fd;
 
     privileges(INVOKE);
@@ -393,7 +393,7 @@ remove_utmp_entry(void)
         fclose(fd);
     }
     privileges(REVERT);
-#  endif /* __FreeBSD__ || NetBSD || BSDI */
+#  endif /* NEW_BSD_UTMP */
 }
 
 # endif /* USE_SYSV_UTMP */

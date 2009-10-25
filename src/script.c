@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -103,13 +103,13 @@ eterm_handle_winop(char *action)
         int x, y, n;
         char *xx, *yy;
 
-        n = num_words(action);
+        n = spiftool_num_words(action);
         if (n == 3 || n == 4) {
             if (n == 3) {
                 win = TermWin.parent;
             }
-            xx = get_pword(n - 1, action);
-            yy = get_pword(n, action);
+            xx = spiftool_get_pword(n - 1, action);
+            yy = spiftool_get_pword(n, action);
             x = (int) strtol(xx, (char **) NULL, 0);
             y = (int) strtol(yy, (char **) NULL, 0);
             XMoveWindow(Xdisplay, win, x, y);
@@ -118,13 +118,13 @@ eterm_handle_winop(char *action)
         int w, h, n;
         char *ww, *hh;
 
-        n = num_words(action);
+        n = spiftool_num_words(action);
         if (n == 3 || n == 4) {
             if (n == 3) {
                 win = TermWin.parent;
             }
-            ww = get_pword(n - 1, action);
-            hh = get_pword(n, action);
+            ww = spiftool_get_pword(n - 1, action);
+            hh = spiftool_get_pword(n, action);
             w = (int) strtol(ww, (char **) NULL, 0);
             h = (int) strtol(hh, (char **) NULL, 0);
             XResizeWindow(Xdisplay, win, w, h);
@@ -134,7 +134,7 @@ eterm_handle_winop(char *action)
     } else if (!BEG_STRCASECMP(action, "iconify")) {
         XIconifyWindow(Xdisplay, win, Xscreen);
     } else {
-        print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
+        libast_print_error("IPC Error:  Unrecognized window operation \"%s\"\n", action);
     }
 }
 #endif
@@ -153,7 +153,7 @@ eterm_handle_winop(char *action)
  * the "primary" buffer (XA_PRIMARY in Xlib-speak).
  */
 void
-script_handler_copy(char **params)
+script_handler_copy(spif_charptr_t *params)
 {
     unsigned char i;
     char *buffer_id;
@@ -171,7 +171,7 @@ script_handler_copy(char **params)
                 } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
                     sel = XA_SECONDARY;
                 } else {
-                    print_error("Invalid parameter to copy():  \"%s\"\n", buffer_id);
+                    libast_print_error("Invalid parameter to copy():  \"%s\"\n", buffer_id);
                 }
             }
         }
@@ -186,9 +186,9 @@ script_handler_copy(char **params)
  * <string> is the string of characters to send to the pty.
  */
 void
-script_handler_echo(char **params)
+script_handler_echo(spif_charptr_t *params)
 {
-    char **tmp;
+    spif_charptr_t *tmp;
 
     for (tmp = params; tmp && *tmp; tmp++) {
         tt_write(*tmp, strlen(*tmp));
@@ -205,7 +205,7 @@ script_handler_echo(char **params)
  * and no message.
  */
 void
-script_handler_exit(char **params)
+script_handler_exit(spif_charptr_t *params)
 {
     unsigned char code = 0;
     char *tmp;
@@ -214,7 +214,7 @@ script_handler_exit(char **params)
         if (isdigit(params[0][0]) || (params[0][0] == '-' && isdigit(params[0][1]))) {
             code = (unsigned char) atoi(params[0]);
         } else {
-            tmp = join(" ", params);
+            tmp = spiftool_join(" ", params);
             printf("Exiting:  %s\n", tmp);
             FREE(tmp);
         }
@@ -230,7 +230,7 @@ script_handler_exit(char **params)
  * specified, SIGTERM is the default.
  */
 void
-script_handler_kill(char **params)
+script_handler_kill(spif_charptr_t *params)
 {
     int sig;
 
@@ -254,7 +254,7 @@ script_handler_kill(char **params)
  * the "primary" buffer (XA_PRIMARY in Xlib-speak).
  */
 void
-script_handler_paste(char **params)
+script_handler_paste(spif_charptr_t *params)
 {
     unsigned char i;
     char *buffer_id;
@@ -272,7 +272,7 @@ script_handler_paste(char **params)
                 } else if (!BEG_STRCASECMP(buffer_id, "secondary")) {
                     sel = XA_SECONDARY;
                 } else {
-                    print_error("Invalid parameter to paste():  \"%s\"\n", buffer_id);
+                    libast_print_error("Invalid parameter to paste():  \"%s\"\n", buffer_id);
                 }
             }
         }
@@ -291,7 +291,7 @@ script_handler_paste(char **params)
  * will be theme.cfg.
  */
 void
-script_handler_save(char **params)
+script_handler_save(spif_charptr_t *params)
 {
     if (params && *params) {
         if (!strcasecmp(params[0], "theme")) {
@@ -312,7 +312,7 @@ script_handler_save(char **params)
  * the specified file.
  */
 void
-script_handler_save_buff(char **params)
+script_handler_save_buff(spif_charptr_t *params)
 {
     if (params && *params) {
         scr_dump_to_file(params[0]);
@@ -334,7 +334,7 @@ script_handler_save_buff(char **params)
  * and the type may be passed as a second parameter if you wish.
  */
 void
-script_handler_scroll(char **params)
+script_handler_scroll(spif_charptr_t *params)
 {
     char *type;
     double cnt_float;
@@ -361,7 +361,7 @@ script_handler_scroll(char **params)
             } else if (str_leading_match("buffers", type)) {
                 count = (long) (cnt_float * (TermWin.nrow + TermWin.saveLines));
             } else {
-                print_error("Invalid modifier \"%s\" in scroll()\n", type);
+                libast_print_error("Invalid modifier \"%s\" in scroll()\n", type);
                 return;
             }
         } else {
@@ -384,7 +384,7 @@ script_handler_scroll(char **params)
  * search() will clear the previously-highlighted search term.
  */
 void
-script_handler_search(char **params)
+script_handler_search(spif_charptr_t *params)
 {
     static char *search = NULL;
 
@@ -406,12 +406,12 @@ script_handler_search(char **params)
  * If no command is specified, the default is to execute another Eterm.
  */
 void
-script_handler_spawn(char **params)
+script_handler_spawn(spif_charptr_t *params)
 {
     char *tmp;
 
     if (params && *params) {
-        tmp = join(" ", params);
+        tmp = spiftool_join(" ", params);
         system_no_wait(tmp);
         FREE(tmp);
     } else {
@@ -426,9 +426,9 @@ script_handler_spawn(char **params)
  * <string> is the string of characters to send to the handler.
  */
 void
-script_handler_string(char **params)
+script_handler_string(spif_charptr_t *params)
 {
-    char **tmp;
+    spif_charptr_t *tmp;
 
     for (tmp = params; tmp && *tmp; tmp++) {
         cmd_write(*tmp, strlen(*tmp));
@@ -442,13 +442,13 @@ script_handler_string(char **params)
  * <command> is the command to be executed.
  */
 void
-script_handler_exec_dialog(char **params)
+script_handler_exec_dialog(spif_charptr_t *params)
 {
     char *tmp;
     int ret;
 
     if (params && *params) {
-        tmp = join(" ", params);
+        tmp = spiftool_join(" ", params);
     } else {
         tmp = NULL;
     }
@@ -469,12 +469,12 @@ script_handler_exec_dialog(char **params)
  * <message> is the message to present.
  */
 void
-script_handler_msgbox(char **params)
+script_handler_msgbox(spif_charptr_t *params)
 {
     char *tmp;
 
     if (params && *params) {
-        tmp = join(" ", params);
+        tmp = spiftool_join(" ", params);
         scr_refresh(DEFAULT_REFRESH);
         menu_dialog(NULL, tmp, 1, NULL, NULL);
         FREE(tmp);
@@ -500,7 +500,7 @@ script_handler_msgbox(char **params)
  * scrollback - View the scrollback for a display
  */
 void
-script_handler_es_display(char **params)
+script_handler_es_display(spif_charptr_t *params)
 {
     _ns_sess *sess = TermWin.screen;
     char *p, *a;
@@ -511,7 +511,7 @@ script_handler_es_display(char **params)
         return;
     }
 
-    p = downcase_str(*params);
+    p = spiftool_downcase_str(*params);
     a = params[index++];
     if (a && isdigit(*a)) {
         no = atoi(a);
@@ -565,7 +565,7 @@ script_handler_es_display(char **params)
         D_ESCREEN(("View scrollback on display %d\n", no));
         ns_sbb_disp(sess, no);
     } else {
-        print_error("Error in script:  \"display\" has no sub-function \"%s\".\n", p);
+        libast_print_error("Error in script:  \"display\" has no sub-function \"%s\".\n", p);
     }
 }
 
@@ -588,7 +588,7 @@ script_handler_es_display(char **params)
  * scrollback - View the scrollback for a region
  */
 void
-script_handler_es_region(char **params)
+script_handler_es_region(spif_charptr_t *params)
 {
     _ns_sess *sess = TermWin.screen;
     _ns_disp *disp;
@@ -606,7 +606,7 @@ script_handler_es_region(char **params)
         return;
     }
 
-    p = downcase_str(*params);
+    p = spiftool_downcase_str(*params);
     a = params[index++];
     if (a && isdigit(*a)) {
         no = atoi(a);
@@ -626,7 +626,7 @@ script_handler_es_region(char **params)
     } else if (!strcmp(p, "toggle")) {
         D_ESCREEN(("Toggle region of display %8p\n", disp));
         ns_tog_region(sess, disp);
-    } else if (!strcmp(p, "new") || !strcmp(p, "split")) {
+    } else if (!strcmp(p, "new") || !strcmp(p, "spiftool_split")) {
         if (!a || !*a || !strcasecmp(a, "ask")) {
             D_ESCREEN(("region new ask\n"));
             ns_add_region(sess, disp, no, NULL);
@@ -660,7 +660,7 @@ script_handler_es_region(char **params)
         D_ESCREEN(("View scrollback for region %d of display %8p\n", no, disp));
         ns_sbb_region(sess, disp, no);
     } else {
-        print_error("Error in script:  \"region\" has no sub-function \"%s\".\n", p);
+        libast_print_error("Error in script:  \"region\" has no sub-function \"%s\".\n", p);
     }
 }
 
@@ -671,12 +671,12 @@ script_handler_es_region(char **params)
  * <statement> is the Escreen (screen) statement to execute.
  */
 void
-script_handler_es_statement(char **params)
+script_handler_es_statement(spif_charptr_t *params)
 {
     char *tmp;
 
     if (params && *params) {
-        tmp = join(" ", params);
+        tmp = spiftool_join(" ", params);
         ns_statement(TermWin.screen, tmp);
         FREE(tmp);
     } else {
@@ -689,7 +689,7 @@ script_handler_es_statement(char **params)
  * Syntax:  es_reset()
  */
 void
-script_handler_es_reset(char **params)
+script_handler_es_reset(spif_charptr_t *params)
 {
     USE_VAR(params);
     ns_reset(TermWin.screen, 0);
@@ -703,7 +703,7 @@ script_handler_es_reset(char **params)
  * This function can be used to cancel undesired default behavior.
  */
 void
-script_handler_nop(char **params)
+script_handler_nop(spif_charptr_t *params)
 {
     USE_VAR(params);
 }
@@ -728,7 +728,7 @@ eterm_script_handler_t *script_find_handler(const char *name)
 void
 script_parse(char *s)
 {
-    char **token_list, **param_list;
+    spif_charptr_t *token_list, *param_list;
     register char *pstr;
     register unsigned long i;
     char *func_name, *params, *tmp;
@@ -739,7 +739,7 @@ script_parse(char *s)
 
     D_SCRIPT(("Parsing:  \"%s\"\n", s));
 
-    token_list = split(";", s);
+    token_list = spiftool_split(";", s);
     if (token_list == NULL) {
         D_SCRIPT(("No tokens found; ignoring script.\n"));
         return;
@@ -747,7 +747,7 @@ script_parse(char *s)
 
     for (i = 0; token_list[i]; i++) {
         pstr = token_list[i];
-        chomp(pstr);
+        spiftool_chomp(pstr);
         if (!(*pstr)) {
             continue;
         }
@@ -758,15 +758,15 @@ script_parse(char *s)
                 strncpy(func_name, pstr, len);
                 func_name[len] = 0;
             } else {
-                print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
-                free_array((void **) token_list, 0);
+                libast_print_error("Error in script \"%s\":  Missing function name before \"%s\".\n", s, params);
+                spiftool_free_array((void **) token_list, 0);
                 return;
             }
         } else {
             func_name = STRDUP(pstr);
         }
         if (!func_name) {
-            free_array((void **) token_list, 0);
+            spiftool_free_array((void **) token_list, 0);
             return;
         }
         if (params) {
@@ -774,11 +774,11 @@ script_parse(char *s)
             if ((tmp = strrchr(params, ')')) != NULL) {
                 *tmp = 0;
             } else {
-                print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
-                free_array((void **) token_list, 0);
+                libast_print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
+                spiftool_free_array((void **) token_list, 0);
                 return;
             }
-            param_list = split(", \t", params);
+            param_list = spiftool_split(", \t", params);
         } else {
             param_list = NULL;
         }
@@ -786,12 +786,12 @@ script_parse(char *s)
         if ((func = script_find_handler(func_name)) != NULL) {
             (func->handler) (param_list);
         } else {
-            print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);
+            libast_print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);
         }
     }
 
     if (params) {
-        free_array((void **) param_list, 0);
+        spiftool_free_array((void **) param_list, 0);
     }
-    free_array((void **) token_list, 0);
+    spiftool_free_array((void **) token_list, 0);
 }

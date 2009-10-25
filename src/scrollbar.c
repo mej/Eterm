@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -924,7 +924,7 @@ scrollbar_drawing_init(void)
 #ifdef XTERM_SCROLLBAR
     gcvalue.stipple = XCreateBitmapFromData(Xdisplay, scrollbar.win, (char *) xterm_sb_bits, 12, 2);
     if (!gcvalue.stipple) {
-        print_error("Unable to create xterm scrollbar bitmap.\n\n");
+        libast_print_error("Unable to create xterm scrollbar bitmap.\n\n");
         if (scrollbar_get_type() == SCROLLBAR_XTERM) {
             scrollbar_set_type(SCROLLBAR_MOTIF);
         }

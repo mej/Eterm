@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -200,6 +200,7 @@ event_win_is_parent(register event_dispatcher_data_t *data, Window win)
 unsigned char
 handle_key_press(event_t *ev)
 {
+    XWMHints *wm_hints;
 #ifdef COUNT_X_EVENTS
     static unsigned long keypress_cnt = 0;
 #endif
@@ -211,6 +212,12 @@ handle_key_press(event_t *ev)
     COUNT_EVENT(keypress_cnt);
     if (!(BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT))) {
         lookup_key(ev);
+    }
+    if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+        wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+        wm_hints->flags &= ~XUrgencyHint;
+        XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+        XFree(wm_hints);
     }
     PROF_DONE(handle_key_press);
     PROF_TIME(handle_key_press);
@@ -451,6 +458,7 @@ handle_leave_notify(event_t *ev)
 unsigned char
 handle_focus_in(event_t *ev)
 {
+    XWMHints *wm_hints;
 
     D_EVENTS(("handle_focus_in(ev [%8p] on window 0x%08x)\n", ev, ev->xany.window));
 
@@ -486,6 +494,12 @@ handle_focus_in(event_t *ev)
         if (xim_input_context != NULL)
             XSetICFocus(xim_input_context);
 #endif
+        if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
+            wm_hints = XGetWMHints(Xdisplay, TermWin.parent);
+            wm_hints->flags &= ~XUrgencyHint;
+            XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
+            XFree(wm_hints);
+        }
     }
     return 1;
 }
@@ -872,7 +886,7 @@ xerror_handler(Display * display, XErrorEvent * event)
 
     strcpy(err_string, "");
     XGetErrorText(display, event->error_code, err_string, sizeof(err_string));
-    print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n",
+    libast_print_error("XError in function %s, resource 0x%08x (request %d.%d):  %s (error %d)\n",
                 request_code_to_name(event->request_code), (int) event->resourceid, event->request_code, event->minor_code,
                 err_string, event->error_code);
 #if DEBUG > DEBUG_X11
@@ -880,6 +894,6 @@ xerror_handler(Display * display, XErrorEvent * event)
         dump_stack_trace();
     }
 #endif
-    print_error("Attempting to continue...\n");
+    libast_print_error("Attempting to continue...\n");
     return 0;
 }

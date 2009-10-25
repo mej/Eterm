@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -1077,11 +1077,11 @@ popen_printer(void)
     FILE *stream;
 
     if (((my_ruid != my_euid) || (my_rgid != my_egid)) && (strcmp(rs_print_pipe, PRINTPIPE))) {
-        print_warning("Running setuid/setgid.  Refusing to use custom printpipe.\n");
+        libast_print_warning("Running setuid/setgid.  Refusing to use custom printpipe.\n");
         RESET_AND_ASSIGN(rs_print_pipe, STRDUP(PRINTPIPE));
     }
     if ((stream = (FILE *) popen(rs_print_pipe, "w")) == NULL) {
-        print_error("Can't open printer pipe \"%s\" -- %s\n", rs_print_pipe, strerror(errno));
+        libast_print_error("Can't open printer pipe \"%s\" -- %s\n", rs_print_pipe, strerror(errno));
     }
     return stream;
 }
@@ -2526,22 +2526,22 @@ xterm_seq(int op, const char *str)
 #ifdef XTERM_SCROLLBAR
                             scrollbar_change_type(SCROLLBAR_XTERM);
 #else
-                            print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
+                            libast_print_error("Support for xterm scrollbars was not compiled in.  Sorry.\n");
 #endif
                         } else if (!strcasecmp(nstr, "next")) {
 #ifdef NEXT_SCROLLBAR
                             scrollbar_change_type(SCROLLBAR_NEXT);
 #else
-                            print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
+                            libast_print_error("Support for NeXT scrollbars was not compiled in.  Sorry.\n");
 #endif
                         } else if (!strcasecmp(nstr, "motif")) {
 #ifdef MOTIF_SCROLLBAR
                             scrollbar_change_type(SCROLLBAR_MOTIF);
 #else
-                            print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
+                            libast_print_error("Support for motif scrollbars was not compiled in.  Sorry.\n");
 #endif
                         } else {
-                            print_error("Unrecognized scrollbar type \"%s\".\n", nstr);
+                            libast_print_error("Unrecognized scrollbar type \"%s\".\n", nstr);
                         }
                     }
                     nstr = (char *) strsep(&tnstr, ";");
@@ -2618,6 +2618,10 @@ xterm_seq(int op, const char *str)
                     wm_hints->input = ((BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_NO_INPUT)) ? False : True);
                     XSetWMHints(Xdisplay, TermWin.parent, wm_hints);
                     XFree(wm_hints);
+                    break;
+                case 28:
+                    nstr = (char *) strsep(&tnstr, ";");
+                    OPT_SET_OR_TOGGLE(nstr, vt_options, VT_OPTIONS_URG_ALERT);
                     break;
                 case 40:
                     nstr = (char *) strsep(&tnstr, ";");

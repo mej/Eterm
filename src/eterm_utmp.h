@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -69,8 +69,9 @@
 # ifdef HAVE_LASTLOG_H
 #  include <lastlog.h>
 # endif
-# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
+# if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DragonFly__)
 #  include <ttyent.h>
+#  define NEW_BSD_UTMP
 # endif
 
 # ifdef HAVE_LIBUTEMPTER

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -1240,7 +1240,7 @@ menu_action(menuitem_t *item)
             menu_dialog(NULL, item->action.alert, 0, NULL, NULL);
             break;
         default:
-            fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
+            libast_fatal_error("Internal Program Error:  Unknown menuitem type:  %u\n", item->type);
             break;
     }
 }

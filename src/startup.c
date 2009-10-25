@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -73,7 +73,6 @@ Atom props[NUM_PROPS];
 int
 eterm_bootstrap(int argc, char *argv[])
 {
-
     int i;
     char *val;
 
@@ -81,7 +80,7 @@ eterm_bootstrap(int argc, char *argv[])
     static char windowid_string[20], *display_string, *term_string;
 
     orig_argv0 = argv[0];
-
+    
     /* Security enhancements -- mej */
     putenv("IFS= \t\n");
     my_ruid = getuid();
@@ -96,9 +95,7 @@ eterm_bootstrap(int argc, char *argv[])
     init_libast();
 
     /* Open display, get options/resources and create the window */
-    if (getenv("DISPLAY") == NULL) {
-        display_name = STRDUP(":0");
-    } else {
+    if (getenv("DISPLAY") != NULL) {
         display_name = STRDUP(getenv("DISPLAY"));
     }
 
@@ -116,8 +113,10 @@ eterm_bootstrap(int argc, char *argv[])
 #ifdef NEED_LINUX_HACK
     privileges(REVERT);
 #endif
-    if (!Xdisplay) {
-        print_error("can't open display %s\n", display_name);
+
+    if (!Xdisplay && !(Xdisplay = XOpenDisplay(display_name))) {
+        libast_print_error("Can't open display %s.  Set $DISPLAY or use --display\n",
+                           NONULL(display_name));
         exit(EXIT_FAILURE);
     }
     XSetErrorHandler((XErrorHandler) xerror_handler);
@@ -154,21 +153,23 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_EWMH_ICON] = XInternAtom(Xdisplay, "_NET_WM_ICON", False);
     props[PROP_EWMH_OPACITY] = XInternAtom(Xdisplay, "_NET_WM_WINDOW_OPACITY", True);
     props[PROP_EWMH_STARTUP_ID] = XInternAtom(Xdisplay, "_NET_STARTUP_ID", False);
+    props[PROP_EWMH_STATE] = XInternAtom(Xdisplay, "_NET_WM_STATE", False);
+    props[PROP_EWMH_STATE_STICKY] = XInternAtom(Xdisplay, "_NET_WM_STATE_STICKY", False);
 
-    if ((theme_dir = conf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
+    if ((theme_dir = spifconf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", theme_dir));
+        D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", theme_dir));
         tmp = (char *) MALLOC(strlen(theme_dir) + sizeof("ETERM_THEME_ROOT=\0"));
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
     }
     if ((user_dir =
-         conf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
+         spifconf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
                           (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
-        D_OPTIONS(("conf_parse_theme() returned \"%s\"\n", user_dir));
+        D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", user_dir));
         tmp = (char *) MALLOC(strlen(user_dir) + sizeof("ETERM_USER_ROOT=\0"));
         sprintf(tmp, "ETERM_USER_ROOT=%s", user_dir);
         putenv(tmp);
@@ -262,24 +263,10 @@ eterm_bootstrap(int argc, char *argv[])
     }
 #endif
 
-#ifdef DISPLAY_IS_IP
-    /* Fixup display_name for export over pty to any interested terminal
-     * clients via "ESC[7n" (e.g. shells).  Note we use the pure IP number
-     * (for the first non-loopback interface) that we get from
-     * network_display().  This is more "name-resolution-portable", if you
-     * will, and probably allows for faster x-client startup if your name
-     * server is beyond a slow link or overloaded at client startup.  Of
-     * course that only helps the shell's child processes, not us.
-     *
-     * Giving out the display_name also affords a potential security hole
-     */
-
-    val = display_name = network_display(display_name);
-    if (val == NULL)
-#endif /* DISPLAY_IS_IP */
-        val = XDisplayString(Xdisplay);
-    if (display_name == NULL)
-        display_name = val;     /* use broken `:0' value */
+    val = XDisplayString(Xdisplay);
+    if (display_name == NULL) {
+        display_name = val;
+    }
 
     i = strlen(val);
     display_string = MALLOC(i + 9);

@@ -5215,6 +5215,33 @@ Thu Mar 11 11:55:45 2004                        Michael Jennings (mej)
 
 Fix "make distcheck"
 ----------------------------------------------------------------------
+Mon Apr  5 17:12:06 2004                        Michael Jennings (mej)
+
+Fixed bug in loading print_pipe attribute pointed out by Tom A. Cox
+<tomc@hot.rr.com>.
+----------------------------------------------------------------------
+Tue Apr 20 13:44:22 2004                        Michael Jennings (mej)
+
+As requested by Ben Armstrong <synrg@sanctuary.nslug.ns.ca>, saving
+theme settings will not preserve -e/--exec arguments unless a theme
+was specifically named by the user.
+----------------------------------------------------------------------
+Tue Apr 20 15:40:39 2004                        Michael Jennings (mej)
+
+Enable title-reporting and iconname-reporting escape sequences only if
+specifically requested by user at compile time.  This exists solely to
+protect the ignorant and careless from themselves.
+----------------------------------------------------------------------
+Mon May 10 18:43:15 2004                        Michael Jennings (mej)
+
+Revert change from February 29th.  I never could reproduce it anyway.
+----------------------------------------------------------------------
+Fri Jun 25 17:48:24 2004                        Michael Jennings (mej)
+
+Chris Schoeneman <crs23@bigfoot.com> pointed out that Eterm didn't get
+keypresses if another app (like synergy) decided to listen for its
+events.  This should correct that behavior.
+----------------------------------------------------------------------
 Mon Jun 28 12:34:36 2004                        Michael Jennings (mej)
 
 Cleaning up some warnings.
@@ -5506,4 +5533,170 @@ for a tab name.
 Mon Dec  5 13:33:58 2005                        Michael Jennings (mej)
 
 Merge and re-indent code.
+----------------------------------------------------------------------
+Mon Dec  5 15:46:34 2005                        Michael Jennings (mej)
+
+Prevent firewall bounces from trying for the same port.
+----------------------------------------------------------------------
+Thu Dec 22 18:32:31 2005                        Michael Jennings (mej)
+
+Cleanups and minor enhancements.
+----------------------------------------------------------------------
+Wed Jan  4 03:44:04 2006                        Michael Jennings (mej)
+
+X resource tracking/debugging support.
+----------------------------------------------------------------------
+Wed Jan  4 04:14:14 2006                        Michael Jennings (mej)
+
+Applied patches from Tres Melton <tres@mindspring.com> for SSE2
+alignment and other shading-related issues.
+----------------------------------------------------------------------
+Wed Jan  4 04:22:13 2006                        Michael Jennings (mej)
+
+Update copyright dates.
+----------------------------------------------------------------------
+Thu Jan  5 14:50:53 2006                        Michael Jennings (mej)
+
+Fixed firewall bounce port checking from 2005-12-05.
+----------------------------------------------------------------------
+Mon Feb  6 01:02:15 2006                        Michael Jennings (mej)
+
+Fixed paste from clipboard.
+----------------------------------------------------------------------
+Mon Feb  6 17:15:49 2006                        Michael Jennings (mej)
+
+DragonFly BSD fixes from Joerg Sonnenberger <joerg@britannica.bec.de>.
+
+Also some type mismatch fixes.
+----------------------------------------------------------------------
+Mon Feb 13 14:51:56 2006                        Michael Jennings (mej)
+
+Update to libast 0.6+ API.
+----------------------------------------------------------------------
+Fri Feb 24 16:58:43 2006                        Michael Jennings (mej)
+
+Add fallback attempt to open display in case NEED_LINUX_HACK is set
+and shouldn't be.
+----------------------------------------------------------------------
+Wed May 17 15:42:28 2006                        Michael Jennings (mej)
+
+Patch from Kim Woelders <kim@woelders.dk> to optimize transparent
+Eterms moved an even multiple of the desktop size (i.e., to another
+desktop area).
+----------------------------------------------------------------------
+Fri May 19 16:46:02 2006                        Michael Jennings (mej)
+
+Fixed a problem that's been bugging me for ages:  Instead of a
+hard-coded delay, wait until we can connect to the ssh forwarding port
+before starting the Escreen session via ssh.
+
+Add usleep() to system() wait so as to not peg the CPU while sitting
+and spinning.
+----------------------------------------------------------------------
+Sat Jun 17 23:06:03 2006                        Michael Jennings (mej)
+
+Daniel Macks <dmacks@netspace.org> noticed that gdb.scr wasn't being
+installed.  Oops.  Fixed now.
+----------------------------------------------------------------------
+Fri Aug 18 13:41:14 2006                        Michael Jennings (mej)
+
+Addressed licensing concerns.
+----------------------------------------------------------------------
+Tue Aug 22 14:07:23 2006                        Michael Jennings (mej)
+
+Forgot one.
+----------------------------------------------------------------------
+Tue Aug 22 14:38:15 2006                        Michael Jennings (mej)
+
+Eterm 0.9.4 is final.
+----------------------------------------------------------------------
+Tue Sep 19 17:07:28 2006                        Michael Jennings (mej)
+
+libscream.c is licensed just like Eterm.
+----------------------------------------------------------------------
+Wed Oct 18 13:35:18 2006                        Michael Jennings (mej)
+
+Fixed a typo and some logic errors in libscream located by Mike
+Frysinger <vapier@gentoo.org>.
+----------------------------------------------------------------------
+Mon Oct 30 16:11:47 2006                        Michael Jennings (mej)
+
+Patch from Jason McCarver <slam@parasite.cc> to support -S/--sticky
+option for "sticky" (i.e., present on all desktops) startup.
+----------------------------------------------------------------------
+Tue Jul  3 20:48:46 2007                        Michael Jennings (mej)
+
+Remove some cruft from kEsetroot.
+----------------------------------------------------------------------
+Wed May 14 12:42:51 2008                        Michael Jennings (mej)
+
+Patch from Kim Woelders <kim@woelders.dk>:
+
+    There is a race problem with Eterm during startup related to the
+    shell LINES/COLUMNS env vars.
+
+    If the WM changes the window size (e.g. due to saved settings)
+    before mapping the window, sometimes the shell will set LINES and
+    COLUMNS according to the old/incorrect size and sometimes to the
+    new/correct size, depending on wheter the call to tt_winsize() at
+    command.c line 2322 (by the shell child process) or the
+    tt_resize() (by the Eterm process) due to the ConfigureNotify
+    caused by the resize (or WM ICCCM ConfigureNotify) operation
+    happens first.
+
+The call in question was added by Azundris for Escreen.  So far
+Escreen seems to be behaving properly with this patch applied, but all
+my Eterm windows (Escreen and otherwise) are pre-sized with -g anyway.
+So I'm going to keep my eye on it for awhile.  In case of trouble,
+change the "#if 0" to "#ifdef ESCREEN" to revert to previous behavior
+when in Escreen mode.  Normal operation should not require the call in
+question.
+----------------------------------------------------------------------
+Wed May 14 14:54:16 2008                        Michael Jennings (mej)
+
+Modified patch from hsim@gmx.li to allow setting of the "Urgent" hint
+on beep.
+----------------------------------------------------------------------
+Wed May 14 15:26:13 2008                        Michael Jennings (mej)
+
+Patch from Emmanuel Anne <emmanuel.anne@gmail.com> to fix cut/paste
+with KDE applications.
+----------------------------------------------------------------------
+Wed May 14 16:09:04 2008                        Michael Jennings (mej)
+
+(Correct) fix for CVE-2008-1692.  Eterm no longer defaults to using
+":0" for $DISPLAY due to the possibility that an attacker can create a
+fake X server on a shared system, intercept the Eterm X connection,
+and send fake keystrokes to the victim's Eterm to execute arbitrary
+commands as that user.
+
+The previous fix, while it did indeed correct the vulnerability, broke
+the --display option.  The original fix from Bernhard Link was more
+correct, albeit not quite on target.
+----------------------------------------------------------------------
+Wed Jun 11 20:18:44 2008                        Michael Jennings (mej)
+
+Eterm 0.9.5 release.
+----------------------------------------------------------------------
+Tue Dec 16 22:03:54 2008                        Michael Jennings (mej)
+
+Fix compile errors related to the removal of unnecessary typecasting
+macros.
+----------------------------------------------------------------------
+Mon Jan  5 23:50:28 2009                        Michael Jennings (mej)
+
+Remove fontset fallbacks.  I think this might help speed up the load
+time slowness some people are seeing.  Let's find out.
+----------------------------------------------------------------------
+Tue Jan  6 01:03:35 2009                        Michael Jennings (mej)
+
+Prevent blank Escreen buttonbar on startup.
+----------------------------------------------------------------------
+Tue Jan  6 01:08:47 2009                        Michael Jennings (mej)
+
+Update copyright dates and fix a bad license.
+----------------------------------------------------------------------
+Sun Oct 25 11:35:50 2009                        Michael Jennings (mej)
+
+Merge code from 0.9.5.  0.10 branch is now up-to-date.
 ----------------------------------------------------------------------

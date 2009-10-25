@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -36,6 +36,6 @@ typedef RETSIGTYPE (*eterm_sighandler_t)(int);
 
 extern int wait_for_chld(int);
 extern int system_wait(char *);
-extern int system_no_wait(char *);
+extern pid_t system_no_wait(char *);
 
 #endif /* _SYSTEM_H_ */

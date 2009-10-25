@@ -62,7 +62,6 @@ AC_DEFINE_UNQUOTED(GRKELOT_IDENT, "`grep '$''Id:' $srcdir/src/grkelot.c | sed 's
 AC_DEFINE_UNQUOTED(MAIN_IDENT, "`grep '$''Id:' $srcdir/src/main.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [main.c RCS ID])
 AC_DEFINE_UNQUOTED(MENUS_IDENT, "`grep '$''Id:' $srcdir/src/menus.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [menus.c RCS ID])
 AC_DEFINE_UNQUOTED(MISC_IDENT, "`grep '$''Id:' $srcdir/src/misc.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [misc.c RCS ID])
-AC_DEFINE_UNQUOTED(NETDISP_IDENT, "`grep '$''Id:' $srcdir/src/netdisp.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [netdisp.c RCS ID])
 AC_DEFINE_UNQUOTED(OPTIONS_IDENT, "`grep '$''Id:' $srcdir/src/options.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [options.c RCS ID])
 AC_DEFINE_UNQUOTED(PIXMAP_IDENT, "`grep '$''Id:' $srcdir/src/pixmap.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [pixmap.c RCS ID])
 AC_DEFINE_UNQUOTED(SCREEN_IDENT, "`grep '$''Id:' $srcdir/src/screen.c | sed 's/^.*\$''Id: //;s/ \$.*$//;s/.v / /;s/ Exp//'`", [screen.c RCS ID])
@@ -111,6 +110,7 @@ fi
 
 AC_PROG_CC
 AC_PROG_CPP
+AM_PROG_AS
 
 dnl# These must be run after AC_PROG_CC but before any other macros that use
 dnl# the C compiler
@@ -204,8 +204,10 @@ AC_CHECK_HEADERS(fcntl.h termios.h \
 sys/ioctl.h sys/select.h sys/time.h \
 sys/sockio.h sys/byteorder.h malloc.h \
 utmpx.h unistd.h bsd/signal.h regex.h \
-regexp.h stdarg.h X11/Xmu/Atoms.h \
-X11/Sunkeysym.h X11/Xlocale.h)
+regexp.h stdarg.h X11/X.h X11/Xlib.h \
+X11/Xmu/Atoms.h X11/Sunkeysym.h \
+X11/Xlocale.h \
+)
 AC_HEADER_TIME
 
 dnl# Missing typedefs and replacements
@@ -219,7 +221,8 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(atexit _exit unsetenv setutent \
 seteuid memmove putenv strsep setresuid setresgid \
 memmem usleep snprintf strcasestr strcasechr \
-strcasepbrk strrev nl_langinfo)
+strcasepbrk strrev nl_langinfo \
+)
 
 # NOTE:  The following line is NOT NOT NOT NOT NOT a typo!
 # If you are having problems with it, libast.m4 is not installed
@@ -871,6 +874,25 @@ AC_ARG_ENABLE(xim,
 if test "$XIM" = "TRUE"; then
   AC_CHECK_LIB(X11, XRegisterIMInstantiateCallback, AC_DEFINE(USE_X11R6_XIM, , [Define if we have X11R6 XIM.]))
 fi
+
+# Check for XResource extension
+AC_CHECK_HEADER([X11/extensions/XRes.h],
+                [
+                    AC_DEFINE([HAVE_X11_EXTENSIONS_XRES_H], [], [Define if we have X11/extensions/XRes.h])
+                ], [],
+                [
+#ifdef HAVE_X11_X_H
+#  include <X11/X.h>
+#endif
+#ifdef HAVE_X11_XLIB_H
+#  include <X11/Xlib.h>
+#endif
+                ])
+AC_CHECK_LIB(XRes, XResQueryExtension,
+             [
+                 GRLIBS="$GRLIBS -lXRes"
+                 AC_DEFINE(HAVE_XRES_EXT, , [Define if we have the XResource extension.])
+             ])
 
 AC_MSG_CHECKING(for Greek keyboard support)
 AC_ARG_ENABLE(greek,

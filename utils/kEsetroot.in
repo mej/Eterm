@@ -56,7 +56,7 @@ while (<in>) {
 }
 close (in);
 
-system("@BINDIR@/Esetroot $PixMapMode-display :0 $PixMap");
+system("@BINDIR@/Esetroot $PixMapMode $PixMap");
 
 if (!-e "$HOME/Desktop/Autostart/kEsetroot.kdelnk") {
 	print "Do you want to start kEsetroot when KDE starts? y/n [y] ";

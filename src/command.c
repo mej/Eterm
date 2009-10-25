@@ -1,38 +1,25 @@
-/*--------------------------------*-C-*---------------------------------*
- * File:	command.c
+/*
+ * Copyright (C) 1997-2009, Michael Jennings
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies of the Software, its documentation and marketing & publicity
+ * materials, and acknowledgment shall be given in the documentation, materials
+ * and software packages that this Software was used.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* notes: */
-/*----------------------------------------------------------------------*
- * Copyright 1992 John Bovey, University of Kent at Canterbury.
- *
- * You can do what you like with this source code as long as
- * you don't try to make money out of it and you include an
- * unaltered copy of this message (including the copyright).
- *
- * This module has been very heavily modified by R. Nation
- * <nation@rocket.sanders.lockheed.com>
- * No additional restrictions are applied
- *
- * Additional modification by Garrett D'Amore <garrett@netcom.com> to
- * allow vt100 printing.  No additional restrictions are applied.
- *
- * Integrated modifications by Steven Hirsch <hirsch@emba.uvm.edu> to
- * properly support X11 mouse report mode and support for DEC
- * "private mode" save/restore functions.
- *
- * Integrated key-related changes by Jakub Jelinek <jj@gnu.ai.mit.edu>
- * to handle Shift+function keys properly.
- * Should be used with enclosed termcap / terminfo database.
- *
- * Extensive modifications by mj olesen <olesen@me.QueensU.CA>
- * No additional restrictions.
- *
- * Further modification and cleanups for Solaris 2.x and Linux 1.2.x
- * by Raul Garcia Garcia <rgg@tid.es>. No additional restrictions.
- *
- * As usual, the author accepts no responsibility for anything, nor does
- * he guarantee anything whatsoever.
- *----------------------------------------------------------------------*/
 
 static const char cvs_ident[] = "$Id$";
 
@@ -67,6 +54,9 @@ static const char cvs_ident[] = "$Id$";
 #include <X11/Xos.h>
 #include <X11/Xproto.h>
 #include <X11/IntrinsicP.h>
+#ifdef HAVE_XRES_EXT
+# include <X11/extensions/XRes.h>
+#endif
 #ifdef PTY_GRP_NAME
 # include <grp.h>
 #endif
@@ -147,6 +137,7 @@ TW_DECL_MAGIC(libscream_magic);
 static RETSIGTYPE handle_child_signal(int);
 static RETSIGTYPE handle_exit_signal(int);
 static RETSIGTYPE handle_crash(int);
+static RETSIGTYPE x_resource_dump(int);
 
 /* local variables */
 int my_ruid, my_euid, my_rgid, my_egid;
@@ -999,13 +990,15 @@ void
 dump_stack_trace(void)
 {
     char cmd[256];
+#ifdef GDB
     struct stat st;
+#endif
 
 #ifdef NO_STACK_TRACE
     return;
 #endif
 
-    print_error("Attempting to dump a stack trace....\n");
+    libast_print_error("Attempting to dump a stack trace....\n");
     signal(SIGTSTP, exit);      /* Don't block on tty output, just die */
 
 #ifdef HAVE_U_STACK_TRACE
@@ -1027,7 +1020,7 @@ dump_stack_trace(void)
     snprintf(cmd, sizeof(cmd), "/bin/echo 'where\ndetach' | " DBX " %s %d", orig_argv0, getpid());
 #  endif
 #else
-    print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
+    libast_print_error("Your system does not support any of the methods Eterm uses.  Exiting.\n");
     return;
 #endif
     signal(SIGALRM, (eterm_sighandler_t) hard_exit);
@@ -1080,7 +1073,7 @@ static RETSIGTYPE
 handle_exit_signal(int sig)
 {
 
-    print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
+    libast_print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
     signal(sig, SIG_DFL);
 
 #ifdef UTMP_SUPPORT
@@ -1099,7 +1092,7 @@ static RETSIGTYPE
 handle_crash(int sig)
 {
 
-    print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
+    libast_print_error("Received terminal signal %s (%d)\n", sig_to_str(sig), sig);
     signal(sig, SIG_DFL);       /* Let the OS handle recursive seg faults */
 
     /* Lock down security so we don't write any core files as root. */
@@ -1113,6 +1106,116 @@ handle_crash(int sig)
     exit(sig);
     SIG_RETURN(0);
 }
+
+#ifdef HAVE_XRES_EXT
+static RETSIGTYPE
+x_resource_dump(int sig)
+{
+    int event_base, error_base, count, i;
+    unsigned long bytes;
+    XResClient *clients = NULL;
+    XResType *types = NULL;
+    Atom pixmap_atom, gc_atom, font_atom;
+    pid_t my_pid;
+    char *title, *ptitle;
+
+    USE_VAR(sig);
+    my_pid = getpid();
+
+    /* Create type atoms for future use. */
+    pixmap_atom = XInternAtom(Xdisplay, "PIXMAP", False);
+    gc_atom = XInternAtom(Xdisplay, "GC", False);
+    font_atom = XInternAtom(Xdisplay, "FONT", False);
+
+    /* Look at what *we* think our consumption is. */
+#if DEBUG >= DEBUG_MEM
+    if (DEBUG_LEVEL >= DEBUG_MEM) {
+        PIXMAP_DUMP();
+        GC_DUMP();
+    }
+#endif
+
+    /* Make sure we have the extension loaded. */
+    if (!XResQueryExtension(Xdisplay, &event_base, &error_base)) {
+        fprintf(stderr, "XResource extension not available on current display.\n");
+        return;
+    }
+    D_X11(("Got XResource extension values:  %d (0x%08x) / %d (0x%08x)\n",
+           event_base, event_base, error_base, error_base));
+
+    /* Get a list of X clients and find our window ID in the list. */
+    if (!XResQueryClients(Xdisplay, &count, &clients)) {
+        if (clients) {
+            XFree(clients);
+        }
+        D_X11((" -> Unable to query clients.\n"));
+        return;
+    }
+    D_X11((" -> Got %d clients.\n", count));
+
+    if (count == 0) {
+        D_X11((" -> Nothing to do!\n"));
+        return;
+    }
+
+    for (i = 0; i < count; i++) {
+        Window win;
+
+        win = clients[i].resource_base & (~clients[i].resource_mask);
+        D_X11(("Checking client:  base %d, mask %d, window 0x%08x\n", clients[i].resource_base,
+               clients[i].resource_mask, win));
+        if ((TermWin.parent & (~clients[i].resource_mask)) == win) {
+            break;
+        }
+    }
+    if (i == count) {
+        D_X11((" -> No client found with window 0x%08x (0x%08x\n", TermWin.parent,
+               (TermWin.parent & (~clients[i].resource_mask))));
+        return;
+    }
+
+    /* Request resource info for our client ID. */
+    if (!XResQueryClientResources(Xdisplay, clients[i].resource_base, &count, &types)
+        || !XResQueryClientPixmapBytes(Xdisplay, clients[i].resource_base, &bytes)) {
+        if (types) {
+            XFree(types);
+        }
+        D_X11((" -> Unable to query resources.\n"));
+        return;
+    }
+    D_X11((" -> Got %d types.\n", count));
+
+    /* Get and sanitize window title for easier identification. */
+    XFetchName(Xdisplay, TermWin.parent, &title);
+    if (title) {
+        for (ptitle = title; *ptitle; ptitle++) {
+            if (!isprint(*ptitle)) {
+                *ptitle = ' ';
+            }
+        }
+    }
+
+    for (i = 0; i < count; i++) {
+        if (types[i].resource_type == pixmap_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d pixmaps (%lu bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count, bytes);
+        } else if (types[i].resource_type == gc_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d GC's (%d bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count,
+                    types[i].count * (sizeof(XGCValues) + sizeof(GC)));
+        } else if (types[i].resource_type == font_atom) {
+            fprintf(stderr, "Process %lu, window 0x%08x (%s):  %d fonts (%d bytes).\n", (unsigned long) my_pid,
+                    (unsigned int) TermWin.parent, NONULL(title), types[i].count,
+                    types[i].count * (sizeof(XFontStruct) + sizeof(Font)));
+        }
+    }
+    XFree(clients);
+    XFree(types);
+    if (title) {
+        XFree(title);
+    }
+}
+#endif
 
 void
 install_handlers(void)
@@ -1133,6 +1236,11 @@ install_handlers(void)
     signal(SIGILL, handle_crash);
     signal(SIGSYS, handle_crash);
     signal(SIGPIPE, SIG_IGN);
+#ifdef HAVE_XRES_EXT
+    signal(SIGUSR1, x_resource_dump);
+#else
+    signal(SIGUSR1, SIG_IGN);
+#endif
 }
 
 /* Exit gracefully, clearing the utmp entry and restoring tty attributes */
@@ -1151,15 +1259,16 @@ clean_exit(void)
         font_cache_clear();
         eterm_font_list_clear();
 # ifdef PIXMAP_SUPPORT
-        FOREACH_IMAGE(free_eterm_image(&(images[idx]));
-            );
+        FOREACH_IMAGE({
+                free_eterm_image(&(images[idx]));
+            });
 # endif
         for (i = 0; i < NRS_COLORS; i++) {
             if (rs_color[i]) {
                 FREE(rs_color[i]);
             }
         }
-        conf_free_subsystem();
+        spifconf_free_subsystem();
 # ifdef USE_XIM
         if (xim_input_context) {
             XUnsetICFocus(xim_input_context);
@@ -1293,15 +1402,15 @@ svr_get_pty(void)
         return (-1);
     } else {
         if (grantpt(fd) != 0) {
-            print_error("grantpt(%d) failed:  %s\n", fd, strerror(errno));
+            libast_print_error("grantpt(%d) failed:  %s\n", fd, strerror(errno));
             return (-1);
         } else if (unlockpt(fd) != 0) {
-            print_error("unlockpt(%d) failed:  %s\n", fd, strerror(errno));
+            libast_print_error("unlockpt(%d) failed:  %s\n", fd, strerror(errno));
             return (-1);
         } else {
             ptydev = ttydev = ptsname(fd);
             if (ttydev == NULL) {
-                print_error("ptsname(%d) failed:  %s\n", fd, strerror(errno));
+                libast_print_error("ptsname(%d) failed:  %s\n", fd, strerror(errno));
                 return (-1);
             }
         }
@@ -1366,7 +1475,7 @@ get_pty(void)
         fcntl(fd, F_SETFL, O_NDELAY);
         return (fd);
     } else {
-        print_error("Can't open pseudo-tty -- %s\n", strerror(errno));
+        libast_print_error("Can't open pseudo-tty -- %s\n", strerror(errno));
         return (-1);
     }
 }
@@ -1399,10 +1508,10 @@ get_tty(void)
 
     privileges(INVOKE);
     if (ttydev == NULL) {
-        print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
+        libast_print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
         exit(EXIT_FAILURE);
     } else if ((fd = open(ttydev, O_RDWR)) < 0) {
-        print_error("Can't open slave tty %s -- %s\n", ttydev, strerror(errno));
+        libast_print_error("Can't open slave tty %s -- %s\n", ttydev, strerror(errno));
         exit(EXIT_FAILURE);
     } else {
         D_TTY(("Opened slave tty %s\n", ttydev));
@@ -1746,33 +1855,34 @@ create_fontset(const char *font1, const char *font2)
     XFontSet fontset = 0;
     char *fontname, **ml, *ds;
     int mc;
-    const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";
+    /*const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";*/
 
     ASSERT_RVAL(font1 != NULL, (XFontSet) 0);
 
     if (font2) {
-        fontname = MALLOC(strlen(font1) + strlen(font2) + sizeof(fs_base) + 2);
+        fontname = MALLOC(strlen(font1) + strlen(font2) /*+ sizeof(fs_base)*/ + 2);
         if (fontname) {
             strcpy(fontname, font1);
             strcat(fontname, ",");
             strcat(fontname, font2);
-            strcat(fontname, fs_base);
+            /*strcat(fontname, fs_base);*/
         }
     } else {
-        fontname = MALLOC(strlen(font1) + sizeof(fs_base) + 1);
+        fontname = MALLOC(strlen(font1) /*+ sizeof(fs_base)*/ + 1);
         if (fontname) {
             strcpy(fontname, font1);
-            strcat(fontname, fs_base);
+            /*strcat(fontname, fs_base);*/
         }
     }
     if (fontname) {
         setlocale(LC_ALL, "");
-        fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, &ds);
-        D_FONT(("Created fontset from %s, %d missing charsets, default string \"%s\".\n", fontname, mc, NONULL(ds)));
+        fontset = XCreateFontSet(Xdisplay, fontname, &ml, &mc, NULL);
+        D_FONT(("Created fontset from %s, %d missing charsets (\"%s\").\n", fontname, mc,
+                ((mc > 0) ? (ml[0]) : ("N/A"))));
         FREE(fontname);
         if (mc) {
             XFreeStringList(ml);
-            fontset = 0;
+            /*fontset = 0;*/
         }
     }
     return fontset;
@@ -1797,7 +1907,7 @@ init_locale(void)
     XSetLocaleModifiers("");
     TermWin.fontset = (XFontSet) 0;
     if ((locale == NULL) || (!XSupportsLocale())) {
-        print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
+        libast_print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
         locale = setlocale(LC_ALL, "C");
         XSetLocaleModifiers("");
         REQUIRE(locale);
@@ -1968,13 +2078,13 @@ xim_real_init(void)
         destroy_cb.callback = xim_destroy_cb;
         destroy_cb.client_data = NULL;
         if (XSetIMValues(xim_input_method, XNDestroyCallback, &destroy_cb, NULL)) {
-            print_error("Could not set destroy callback to IM\n");
+            libast_print_error("Could not set destroy callback to IM\n");
         }
     }
 #endif
 
     if ((XGetIMValues(xim_input_method, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
-        print_error("input method doesn't support any style\n");
+        libast_print_error("input method doesn't support any style\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2008,14 +2118,14 @@ xim_real_init(void)
     XFree(xim_styles);
 
     if (found == 0) {
-        print_error("input method doesn't support my preedit type\n");
+        libast_print_error("input method doesn't support my preedit type\n");
         XCloseIM(xim_input_method);
         return -1;
     }
     if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
         && (xim_input_style != (XIMPreeditArea | XIMStatusArea))
         && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
-        print_error("This program does not support the preedit type\n");
+        libast_print_error("This program does not support the preedit type\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2046,7 +2156,7 @@ xim_real_init(void)
         XFree(status_attr);
     }
     if (xim_input_context == NULL) {
-        print_error("Failed to create input context\n");
+        libast_print_error("Failed to create input context\n");
         XCloseIM(xim_input_method);
         return -1;
     }
@@ -2152,7 +2262,7 @@ run_command(char **argv)
 # if defined (__sun__)
     on_exit(clean_exit, NULL);  /* non-ANSI exit handler */
 # else
-    print_error("no atexit(), UTMP entries can't be cleaned\n");
+    libast_print_error("no atexit(), UTMP entries can't be cleaned\n");
 # endif
 #endif
 
@@ -2180,7 +2290,7 @@ run_command(char **argv)
     cmd_pid = fork();
     D_CMD(("After fork(), cmd_pid == %d\n", cmd_pid));
     if (cmd_pid < 0) {
-        print_error("fork(): %s\n", strerror(errno));
+        libast_print_error("fork(): %s\n", strerror(errno));
         return (-1);
     }
     if (cmd_pid == 0) {
@@ -2212,7 +2322,11 @@ run_command(char **argv)
 
         get_tty();
         SET_TTYMODE(0, &tio);
-        tt_winsize(0);
+#if 0
+        if (TermWin.screen_mode != NS_MODE_NONE) {
+            tt_winsize(0);
+        }
+#endif
 
         /* become virtual console, fail silently */
         if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_CONSOLE)) {
@@ -2257,7 +2371,7 @@ run_command(char **argv)
 #endif
         D_CMD(("[%d] About to spawn shell\n", getpid()));
         if (chdir(initial_dir)) {
-            print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
+            libast_print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
         }
         if (argv != NULL) {
 #if DEBUG >= DEBUG_CMD
@@ -2271,7 +2385,7 @@ run_command(char **argv)
 #endif
             D_CMD(("[%d] execvp(\"%s\", %8p) is next.  I'm outta here!\n", getpid(), NONULL(argv[0]), argv));
             execvp(argv[0], argv);
-            print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
+            libast_print_error("execvp() failed, cannot execute \"%s\": %s\n", argv[0], strerror(errno));
         } else {
 
             const char *argv0, *shell;
@@ -2288,7 +2402,7 @@ run_command(char **argv)
                 argv0 = p;
             }
             execlp(shell, argv0, NULL);
-            print_error("execlp() failed, cannot execute \"%s\": %s\n", shell, strerror(errno));
+            libast_print_error("execlp() failed, cannot execute \"%s\": %s\n", shell, strerror(errno));
         }
         sleep(3);               /* Sleep to make sure fork() returns in the parent, and so user can read error message */
         exit(EXIT_FAILURE);
@@ -2576,11 +2690,16 @@ err_msg(void *xd, int err, char *msg)
 static int
 inp_text(void *xd, int id, char *txt)
 {
-    USE_VAR(xd);
+    int which = (int) xd;
     USE_VAR(id);
 
-    D_ESCREEN(("Writing \"%s\" to subprocess.\n", safe_print_string(txt, strlen(txt))));
-    tt_write(txt, strlen(txt));
+    if (which) {
+        D_ESCREEN(("Writing \"%s\" to screen.\n", safe_print_string(txt, strlen(txt))));
+        cmd_write(txt, strlen(txt));
+    } else {
+        D_ESCREEN(("Writing \"%s\" to subprocess.\n", safe_print_string(txt, strlen(txt))));
+        tt_write(txt, strlen(txt));
+    }
     return NS_SUCC;
 }
 
@@ -2609,11 +2728,10 @@ exe_prg(void *xd, char **argv)
 
 /****** Azundris' playthings :-) ******/
 
-#ifdef ESCREEN_FX
 #define DIRECT_MASK (~(RS_Cursor|RS_Select|RS_fontMask))
 #define COLOUR_MASK (RS_fgMask|RS_bgMask)
 #define DIRECT_SET_SCREEN(x,y,fg,bg) (screen.text[ys+y])[x]=fg; (screen.rend[ys+y])[x]=bg&DIRECT_MASK;
-#define CLEAR (1<<16)
+#define CLEAR (RS_None | bgColor)
 
 static void
 direct_write_screen(int x, int y, char *fg, rend_t bg)
@@ -2630,6 +2748,7 @@ direct_write_screen(int x, int y, char *fg, rend_t bg)
     }
 }
 
+#ifdef ESCREEN_FX
 static void
 bosconian(int n)
 {
@@ -2783,8 +2902,9 @@ waitstate(void *xd, int ms)
             matrix(31);
             unbosconian();
         }
-        bosconian(4);
+        bosconian(20);
         unbosconian();
+        scr_refresh(SLOW_REFRESH);
     }
 
     direct_write_screen(0, y++, "    **** COMMODORE 64 BASIC V2 ****", (0 << 8) | CLEAR);
@@ -2794,11 +2914,29 @@ waitstate(void *xd, int ms)
     screen.row = y;
     screen.col = 0;
 
-    scr_refresh(FAST_REFRESH);
+    scr_refresh(SLOW_REFRESH);
 
     sleep(dur);
 
     return 0;
+}
+#else
+static int
+waitstate(void *xd, int ms)
+{
+    USE_VAR(xd);
+
+    direct_write_screen(TERM_WINDOW_GET_REPORTED_COLS() / 2 - 17, TERM_WINDOW_GET_ROWS() / 2,
+                        "**** Initializing, please wait ****", (15 << 9) | CLEAR);
+    screen.row = 0;
+    screen.col = 0;
+
+    scr_refresh(SLOW_REFRESH);
+
+    sleep((time_t) (ms / 1000));
+
+    return 0;
+
 }
 #endif
 
@@ -2830,9 +2968,7 @@ escreen_reg_funcs(void)
     ns_register_inp(efuns, input_dialog);
     ns_register_tab(efuns, menu_tab);
 
-#ifdef ESCREEN_FX
     ns_register_fun(efuns, waitstate);
-#endif
 
     return efuns;
 }
@@ -3031,7 +3167,7 @@ init_command(char **argv)
         AT_LEAST(num_fds, ((unsigned int) (pipe_fd + 1)));
     }
     if ((cmd_fd = command_func(argv)) < 0) {
-        print_error("Unable to run sub-command.\n");
+        libast_print_error("Unable to run sub-command.\n");
         paused = 1;
         rs_finished_text = "Hit a key to exit...";
     }
@@ -3318,12 +3454,12 @@ cmd_getc(void)
         if (retval < 0) {
             if (cmd_fd >= 0 && FD_ISSET(cmd_fd, &readfds)) {
                 if (errno != EINTR) {   /* may have rcvd SIGCHLD or so */
-                    print_error(" (%ld) Error reading from tty -- %s\n", getpid(), strerror(errno));
+                    libast_print_error(" (%ld) Error reading from tty -- %s\n", getpid(), strerror(errno));
                     cmd_fd = -1;
                 }
             }
             if (pipe_fd >= 0 && FD_ISSET(pipe_fd, &readfds)) {
-                print_error("Error reading from pipe -- %s\n", strerror(errno));
+                libast_print_error("Error reading from pipe -- %s\n", strerror(errno));
                 pipe_fd = -1;
             }
             if (pipe_fd < 0 && cmd_fd < 0 && !paused) {
@@ -3540,8 +3676,8 @@ main_loop(void)
                     set_multichar_encoding("utf8");
                 }
                 handle = iconv_open("WCHAR_T", "UTF-8");
-                if (handle == SPIF_CAST_C(iconv_t) - 1) {
-                    print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
+                if (handle == (iconv_t) -1) {
+                    libast_print_error("Unable to decode UTF-8 locale %s to WCHAR_T.  Defaulting to portable C locale.\n",
                                 setlocale(LC_ALL, ""));
                     setlocale(LC_ALL, "C");
                     scr_add_lines(str, nlines, (cmdbuf_ptr - str));
@@ -3554,45 +3690,45 @@ main_loop(void)
                     pinbuff = (char *) str;
                     bufflen = cmdbuf_ptr - str;
                     outlen = bufflen * 6;
-                    poutbuff = outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+                    poutbuff = outbuff = (char *) MALLOC(outlen);
 
                     errno = 0;
                     D_VT(("Allocated output buffer of %lu chars at %010p against input buffer of %lu\n", bufflen * 6, outbuff,
                           bufflen));
-                    print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
+                    libast_print_warning("Moo:  %s\n", safe_print_string(str, bufflen));
                     retval = iconv(handle, &pinbuff, &bufflen, &poutbuff, &outlen);
                     outlen = (size_t) (poutbuff - outbuff);
                     if (retval != (size_t) - 1) {
                         errno = 0;
                     }
                     if (errno == E2BIG) {
-                        print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
+                        libast_print_error("My UTF-8 decode buffer was too small by %lu bytes?!\n", bufflen);
                     } else if (errno == EILSEQ) {
-                        print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n", *pinbuff, *pinbuff);
+                        libast_print_error("Illegal multibyte sequence encountered at \'%c\' (0x%02x); skipping.\n", *pinbuff, *pinbuff);
                         *pinbuff = ' ';
                         pinbuff++;
                     } else if (errno == EINVAL) {
                         D_VT(("Incomplete multibyte sequence encountered.\n"));
-                        print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n",
+                        libast_print_warning("Converted %lu input chars to %lu output chars before incomplete sequence.\n",
                                       (cmdbuf_ptr - str), outlen);
                     } else {
-                        print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
+                        libast_print_warning("Converted %lu input chars to %lu output chars.\n", (cmdbuf_ptr - str), outlen);
                     }
 
-                    print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
+                    libast_print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
                     MEMSET(outbuff + outlen, 0, sizeof(wchar_t));
-                    wcbuff = SPIF_CAST_C(wchar_t *) outbuff;
+                    wcbuff = (wchar_t *) outbuff;
                     MEMSET(&mbs, 0, sizeof(mbstate_t));
                     outlen = wcsrtombs(NULL, &wcbuff, 0, &mbs) + 1;
                     if (outlen > 0) {
-                        outbuff = SPIF_CAST_C(char *) MALLOC(outlen);
+                        outbuff = (char *) MALLOC(outlen);
 
                         outlen = wcsrtombs(outbuff, &wcbuff, outlen, &mbs);
                         if ((long) outlen >= 0) {
                             FREE(wcbuff);
-                            print_error("I win!\n");
+                            libast_print_error("I win!\n");
                         } else {
-                            print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno,
+                            libast_print_error("wcsrtombs() returned %ld (errno is %d (%s))\n", (unsigned long) outlen, errno,
                                         strerror(errno));
                         }
                         if (pinbuff > (char *) str) {
@@ -3600,7 +3736,7 @@ main_loop(void)
                             scr_add_lines(outbuff, nlines, outlen);
                         }
                     } else {
-                        print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen,
+                        libast_print_error("wcsrtombs(NULL, %10p, 0) returned %ld (errno is %d (%s))\n", wcbuff, (unsigned long) outlen,
                                     errno, strerror(errno));
                     }
                     FREE(outbuff);
@@ -3703,7 +3839,7 @@ v_writeBig(int f, char *d, int len)
                     v_bufend = v_bufptr + len;
                 } else {
                     /* no memory: ignore entire write request */
-                    print_error("cannot allocate buffer space\n");
+                    libast_print_error("cannot allocate buffer space\n");
                     v_buffer = v_bufstr;        /* restore clobbered pointer */
                     c = 0;
                 }

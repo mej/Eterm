@@ -3,6 +3,9 @@
 %endif
 
 %define __os_install_post /usr/lib/rpm/brp-compress
+%if %{?optflags:1}0
+%define optflags ${RPM_OPT_FLAGS:--O0 -g3}
+%endif
 
 Summary: Enlightened terminal emulator
 Name: Eterm
@@ -11,13 +14,13 @@ Version: 0.10
 Release: 0.%(date '+%Y%m%d')
 License: BSD
 Group: User Interface/X
-Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
-#BuildSuggests: xorg-x11-devel
-BuildRequires: libast imlib2-devel XFree86-devel
-Source0: ftp://ftp.eterm.org/pub/Eterm/%{name}-%{version}.tar.%{compression}
-Source1: ftp://ftp.eterm.org/pub/Eterm/%{name}-bg-%{version}.tar.%{compression}
 URL: http://www.eterm.org/
-BuildRoot: /var/tmp/%{name}-%{version}-root
+Source0: http://www.eterm.org/download/%{name}-%{version}.tar.%{compression}
+Source1: http://www.eterm.org/download/%{name}-bg-%{version}.tar.%{compression}
+#BuildSuggests: xorg-x11-devel XFree86-devel xorg-x11-proto-devel libXext-devel libXt-devel freetype-devel
+BuildRequires: libast imlib2-devel
+Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
+BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{name}-%{version}-root
 
 %description
 Eterm is a color vt102 terminal emulator with enhanced graphical
@@ -32,8 +35,7 @@ have the Imlib2 library installed.
 %setup -a 1
 
 %build
-#CFLAGS="$RPM_OPT_FLAGS"
-CFLAGS="-O0 -g3"
+CFLAGS="%{optflags}"
 export CFLAGS
 
 # When using the configure macro, I also specify all the directory
@@ -45,21 +47,21 @@ export CFLAGS
 %{__make} %{?mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
 # If the configure macro is used above (which it is), there
 # is NO reason to use the makeinstall macro here, so don't.
 %{__make} install DESTDIR=$RPM_BUILD_ROOT %{?mflags_install}
 
 ( cd $RPM_BUILD_ROOT
-  mv .%{_bindir}/%{name} .%{_bindir}/%{name}-%{version}
+  %{__mv} .%{_bindir}/%{name} .%{_bindir}/%{name}-%{version}
   cd $RPM_BUILD_ROOT%{_bindir}
-  ln -f -s %{name}-%{version} %{name}
+  %{__ln_s} -f %{name}-%{version} %{name}
   cd $RPM_BUILD_ROOT
   chmod +x .%{_libdir}/lib*so* ||:
 )
 
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities
 cat > $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop <<EOF
 [Desktop Entry]
 Name=Eterm
@@ -76,7 +78,7 @@ chmod 0644 $RPM_BUILD_ROOT%{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 /sbin/ldconfig || :
 
 if [ -d /usr/share/terminfo -a ! -f /usr/share/terminfo/E/Eterm ]; then
-    tic -o/usr/share/terminfo $RPM_DOC_DIR/%{name}-%{version}/%{name}.ti || :
+    tic -o/usr/share/terminfo %{_docdir}/%{name}-%{version}/%{name}.ti || :
 fi
 
 %postun
@@ -88,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-, root, root)
 %doc doc/Eterm_reference.html doc/Eterm.1.html doc/Eterm.tcap doc/Eterm.ti doc/README.Escreen
-%doc README ReleaseNotes ReleaseNotes.1 ChangeLog
+%doc LICENSE README ReleaseNotes ReleaseNotes.1 ChangeLog
 %config %{_sysconfdir}/X11/applnk/Utilities/Eterm.desktop
 %{_bindir}/*
 %{_libdir}/*

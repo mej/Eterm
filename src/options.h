@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -42,6 +42,7 @@
 # define VT_OPTIONS_BOLD_BRIGHTENS_FOREGROUND     (1LU << 11)
 # define VT_OPTIONS_BLINK_BRIGHTENS_BACKGROUND    (1LU << 12)
 # define VT_OPTIONS_COLORS_SUPPRESS_BOLD          (1LU << 13)
+# define VT_OPTIONS_URG_ALERT                     (1LU << 14)
 
 # define ETERM_OPTIONS_LOGIN_SHELL                (1LU <<  0)
 # define ETERM_OPTIONS_ICONIC                     (1LU <<  1)
@@ -61,6 +62,7 @@
 # define ETERM_OPTIONS_DOUBLE_BUFFER              (1LU << 15)
 # define ETERM_OPTIONS_MBYTE_CURSOR               (1LU << 16)
 # define ETERM_OPTIONS_RESIZE_GRAVITY             (1LU << 17)
+# define ETERM_OPTIONS_STICKY                     (1LU << 18)
 
 # define IMAGE_OPTIONS_TRANS                      (1U  <<  0)
 # define IMAGE_OPTIONS_ITRANS                     (1U  <<  1)
@@ -152,7 +154,7 @@ extern KeySym ks_smallfont;
 /************ Function Prototypes ************/
 _XFUNCPROTOBEGIN
 
-extern char *conf_parse_theme(char **theme, char *conf_name, unsigned char fallback);
+extern char *spifconf_parse_theme(char **theme, char *spifconf_name, unsigned char fallback);
 extern void init_libast(void);
 extern void init_defaults(void);
 extern void post_parse(void);

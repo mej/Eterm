@@ -54,7 +54,7 @@
 #define NS_SCREEN_PRVS_REG   "\x01:focus up\r"
 
 #define NS_DFLT_SSH_PORT     22
-#define NS_MIN_PORT          1025
+#define NS_MIN_PORT          47323
 #define NS_MAX_PORT          65535
 
 #define NS_MAX_DISPS         512
@@ -68,12 +68,12 @@
 #define NS_SCREEN_ACT_T      "Activity in window "
 
 /* should be 1s */
-#define NS_INIT_DELAY        1
+#define NS_INIT_DELAY        2
 
 /* how many seconds to wait for an SSH-tunnel to build when using the
    -Z option (tunnel through firewall).  2 for very fast networks,
    much more for slow connections. */
-#define NS_TUNNEL_DELAY      3
+#define NS_TUNNEL_DELAY      30
 
 /* what to call the menu entry for Escreen */
 #define NS_MENU_TITLE        "Escreen"

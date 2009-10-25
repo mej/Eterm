@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -96,7 +96,7 @@ get_tint_by_color_name(const char *color)
 
     D_PIXMAP(("Tint string is \"%s\", white color is rgbi:%d/%d/%d\n", color, wcol.red, wcol.green, wcol.blue));
     if (!XParseColor(Xdisplay, cmap, color, &xcol)) {
-        print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
+        libast_print_error("Unable to parse tint color \"%s\".  Ignoring.\n", color);
         return 0xffffff;
     }
 
@@ -144,7 +144,7 @@ get_bottom_shadow_color(Pixel norm_color, const char *type)
     xcol.blue /= 2;
 
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
+        libast_print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
                     xcol.green, xcol.blue);
         xcol.pixel = PixColors[minColor];
     }
@@ -177,7 +177,7 @@ get_top_shadow_color(Pixel norm_color, const char *type)
     xcol.blue = MIN(white.blue, (xcol.blue * 7) / 5);
 
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
+        libast_print_error("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", type, xcol.pixel, xcol.red,
                     xcol.green, xcol.blue);
         xcol.pixel = PixColors[WhiteColor];
     }
@@ -204,11 +204,11 @@ get_color_by_name(const char *name, const char *fallback)
         }
     }
     if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-        print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
+        libast_print_warning("Unable to resolve \"%s\" as a color name.  Falling back on \"%s\".\n", name, NONULL(fallback));
         name = fallback;
         if (name) {
             if (!XParseColor(Xdisplay, cmap, name, &xcol)) {
-                print_warning
+                libast_print_warning
                     ("Unable to resolve \"%s\" as a color name.  This should never fail.  Please repair/restore your RGB database.\n",
                      name);
                 return ((Pixel) - 1);
@@ -218,12 +218,12 @@ get_color_by_name(const char *name, const char *fallback)
         }
     }
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".\n",
+        libast_print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on \"%s\".\n",
                       name, xcol.pixel, xcol.red, xcol.green, xcol.blue, NONULL(fallback));
         name = fallback;
         if (name) {
             if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-                print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", name, xcol.pixel,
+                libast_print_warning("Unable to allocate \"%s\" (0x%08x:  0x%04x, 0x%04x, 0x%04x) in the color map.\n", name, xcol.pixel,
                               xcol.red, xcol.green, xcol.blue);
                 return ((Pixel) - 1);
             }
@@ -241,19 +241,19 @@ get_color_by_pixel(Pixel pixel, Pixel fallback)
 
     xcol.pixel = pixel;
     if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.\n", pixel, fallback);
+        libast_print_warning("Unable to convert pixel value 0x%08x to an XColor structure.  Falling back on 0x%08x.\n", pixel, fallback);
         xcol.pixel = fallback;
         if (!XQueryColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to convert pixel value 0x%08x to an XColor structure.\n", xcol.pixel);
+            libast_print_warning("Unable to convert pixel value 0x%08x to an XColor structure.\n", xcol.pixel);
             return ((Pixel) 0);
         }
     }
     if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-        print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.\n", xcol.pixel,
+        libast_print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.  Falling back on 0x%08x.\n", xcol.pixel,
                       xcol.red, xcol.green, xcol.blue, fallback);
         xcol.pixel = fallback;
         if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.\n", xcol.pixel, xcol.red,
+            libast_print_warning("Unable to allocate 0x%08x (0x%04x, 0x%04x, 0x%04x) in the color map.\n", xcol.pixel, xcol.red,
                           xcol.green, xcol.blue);
             return ((Pixel) 0);
         }
@@ -363,6 +363,48 @@ set_pointer_colors(const char *fg_name, const char *bg_name)
     XRecolorCursor(Xdisplay, TermWin_cursor, &fg, &bg);
 }
 
+int
+check_mwm_supported(void)
+{
+    Atom prop, mwm_prop, type_ret;
+    unsigned char *prop_ret;
+    unsigned long bytes_after, num_ret;
+    int format_ret, num, i, supported = 0;
+
+    /* check whether wm support mwm hint */
+    prop = XInternAtom(Xdisplay, "_NET_SUPPORTED", True);
+    mwm_prop = XInternAtom(Xdisplay, "_MOTIF_WM_HINTS", True);
+    
+    if ((prop != None) && (mwm_prop != None)) {
+        prop_ret = NULL;
+        if (XGetWindowProperty(Xdisplay, Xroot, prop, 0, 0x7fffffff, False,
+                               XA_ATOM, &type_ret, &format_ret, &num_ret,
+                               &bytes_after, &prop_ret) == Success) {
+
+            if ((type_ret == XA_ATOM) &&
+                (format_ret == 32) &&
+                (num_ret && prop_ret)) {
+                for (i = 0; i < num_ret; i++) {
+                    if (mwm_prop == ((unsigned long*)prop_ret)[i]) {
+                        supported = 1;
+                        break;
+                    }
+                }
+            }
+            if (prop_ret)
+                XFree(prop_ret);
+        }
+    }
+    /* check whether wm is mwm */
+    if (!supported) {
+        prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
+        if (prop != None) {
+            supported = 1;
+        }
+    }    
+    return supported;
+}
+
 /* Create_Windows() - Open and map the window */
 void
 Create_Windows(int argc, char *argv[])
@@ -378,14 +420,13 @@ Create_Windows(int argc, char *argv[])
     MWMHints mwmhints;
 
     if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_BORDERLESS)) {
-        prop = XInternAtom(Xdisplay, "_MOTIF_WM_INFO", True);
-        if (prop == None) {
-            print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
-            Attributes.override_redirect = TRUE;
-            mwmhints.flags = 0;
-        } else {
+        if (check_mwm_supported()) {
             mwmhints.flags = MWM_HINTS_DECORATIONS;
             mwmhints.decorations = 0;
+        } else {
+            libast_print_warning("Window Manager does not support MWM hints.  Bypassing window manager control for borderless window.\n");
+            Attributes.override_redirect = TRUE;
+            mwmhints.flags = 0;
         }
     } else {
         mwmhints.flags = 0;
@@ -498,10 +539,16 @@ Create_Windows(int argc, char *argv[])
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_DESKTOP], XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &val, 1);
     }
 
+    /* Make window sticky if requested */
+    if (BITFIELD_IS_SET(eterm_options, ETERM_OPTIONS_STICKY)) {
+        XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_STATE], XA_ATOM, 32, PropModeReplace,
+                        (unsigned char *) &props[PROP_EWMH_STATE_STICKY], 1);
+    }
+
     /* Set startup ID property if given by the launching application. */
     if (getenv("DESKTOP_STARTUP_ID")) {
         Atom atom;
-        unsigned char *tmp = SPIF_CAST_PTR(uchar) getenv("DESKTOP_STARTUP_ID");
+        unsigned char *tmp = (spif_uchar_t *) getenv("DESKTOP_STARTUP_ID");
 
         atom = XInternAtom(Xdisplay, "UTF8_STRING", False);
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_STARTUP_ID], atom, 8, PropModeReplace, tmp, strlen(tmp) + 1);
@@ -511,9 +558,9 @@ Create_Windows(int argc, char *argv[])
     /* Set window opacity if needed. */
     if ((props[PROP_EWMH_OPACITY] != None) && (rs_opacity != 0xff)) {
         XChangeProperty(Xdisplay, TermWin.parent, props[PROP_EWMH_OPACITY],
-                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) & rs_opacity, 1);
+                        XA_CARDINAL, 32, PropModeReplace, (spif_uchar_t *) &rs_opacity, 1);
         XChangeProperty(Xdisplay, TermWin.vt, props[PROP_EWMH_OPACITY],
-                        XA_CARDINAL, 32, PropModeReplace, SPIF_CAST_PTR(uchar) & rs_opacity, 1);
+                        XA_CARDINAL, 32, PropModeReplace, (spif_uchar_t *) &rs_opacity, 1);
     }
 
     /* We're done creating our windows.  Now let's initialize the event subsystem to handle them. */
@@ -691,11 +738,19 @@ handle_resize(unsigned int width, unsigned int height)
 void
 handle_move(int x, int y)
 {
+    int dx, dy;
+
     if ((TermWin.x != x) || (TermWin.y != y)) {
+        dx = abs(TermWin.x - x);
+        dy = abs(TermWin.y - y);
         TermWin.x = x;
         TermWin.y = y;
+        /* If we've moved an even multiple of the screen size, there's no
+           need to redraw trans/viewport images; the images will line up. */
         if (image_mode_any(MODE_TRANS | MODE_VIEWPORT)) {
-            redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+            if ((dx % DisplayWidth(Xdisplay, Xscreen)) || (dy % DisplayHeight(Xdisplay, Xscreen))) {
+                redraw_images_by_mode(MODE_TRANS | MODE_VIEWPORT);
+            }
         }
     }
 }
@@ -740,12 +795,12 @@ set_window_color(int idx, const char *color)
         } else if (i >= 0 && i <= 7) {  /* normal colors */
             PixColors[idx] = PixColors[minColor + i];
         } else {
-            print_warning("Color index %d is invalid.\n", i);
+            libast_print_warning("Color index %d is invalid.\n", i);
             return;
         }
     } else if (XParseColor(Xdisplay, cmap, color, &xcol)) {
         if (!XAllocColor(Xdisplay, cmap, &xcol)) {
-            print_warning("Unable to allocate \"%s\" in the color map.\n", color);
+            libast_print_warning("Unable to allocate \"%s\" in the color map.\n", color);
             return;
         }
         if ((idx > maxBright) && (idx < 256) && (PixColors[idx])) {
@@ -753,7 +808,7 @@ set_window_color(int idx, const char *color)
         }
         PixColors[idx] = xcol.pixel;
     } else {
-        print_warning("Unable to resolve \"%s\" as a color name.\n", color);
+        libast_print_warning("Unable to resolve \"%s\" as a color name.\n", color);
         return;
     }
     set_colorfgbg();

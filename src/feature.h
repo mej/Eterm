@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -54,7 +54,9 @@
 # endif
 
 # ifdef __GNUC__
-#  define _GNU_SOURCE
+#  ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#  endif
 # else
 #  define _XOPEN_SOURCE 600
 #  define _XOPEN_SOURCE_EXTENDED 1
@@ -95,7 +97,6 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-# define LIBAST_COMPAT_05_API 1
 # include <libast.h>
 # include "eterm_debug.h"
 
@@ -111,8 +112,9 @@
 /* Disable the secondary screen ("\E[?47h" / "\E[?47l") */
 /* #define NO_SECONDARY_SCREEN */
 
-/* The number of screenfuls between refreshes. */
-# define REFRESH_PERIOD  2
+/* The number of screenfuls between refreshes.  Anything higher than 1
+ * will cause gaps in the scrollback buffer. */
+# define REFRESH_PERIOD  1
 
 /* This will force clearing of characters before writing new ones on top of
  * them. This is experimental - added in order to try and fix pixel dropping
@@ -206,9 +208,6 @@
 
 /********************* Miscellaneous options *********************/
 
-/* To have $DISPLAY and the "\E[7n" response be IP addresses rather than FQDN's */
-/* #define DISPLAY_IS_IP */
-
 /* To have "\E[7n" reply with the display name.  This is a potential security risk,
  * so its use is discouraged and unsupported. */
 /* #define ENABLE_DISPLAY_ANSWER */
@@ -298,6 +297,10 @@ inline void *memmove(void *, const void *, size_t);
 
 #if defined (__sun__) || defined (__svr4__)
 # define NO_DELETE_KEY		/* These systems seem to be anal this way*/
+#endif
+
+#if !defined(HAVE_X11_EXTENSIONS_XRES_H)
+# undef HAVE_XRES_EXT
 #endif
 
 #ifndef PATH_ENV

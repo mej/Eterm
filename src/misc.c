@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -75,12 +75,12 @@ char *
 str_trim(char *str)
 {
 
-    register char *tmp = str;
+    register spif_charptr_t tmp = (spif_charptr_t) str;
     size_t n;
 
     if (str && *str) {
 
-        chomp(str);
+        spiftool_chomp(str);
         n = strlen(str);
 
         if (!n) {
@@ -216,7 +216,7 @@ parse_escaped_string(char *str)
 #if DEBUG >= DEBUG_STRINGS
     if (DEBUG_LEVEL >= DEBUG_STRINGS) {
         D_STRINGS(("New value is:\n"));
-        hex_dump(str, (size_t) (pnew - str));
+        spiftool_hex_dump(str, (size_t) (pnew - str));
     }
 #endif
 
@@ -234,7 +234,7 @@ escape_string(spif_charptr_t str, spif_char_t quote, spif_int32_t maxlen)
     }
 
     /* The escaped string will be at most twice the length of the original. */
-    buff = SPIF_CAST(charptr) MALLOC(strlen(SPIF_CAST_PTR(char) str) * 2 + 1);
+    buff = (spif_charptr_t) MALLOC(strlen((char *) str) * 2 + 1);
 
     /* Copy and escape the string from str into buff. */
     for (pbuff = buff; (*s); s++, pbuff++) {
@@ -316,7 +316,7 @@ add_carriage_returns(unsigned char *buff, unsigned long cnt)
     register unsigned char *out, *outp, *in;
     register unsigned long i;
 
-    D_CMD(("buff == %8p \"%s\", cnt == %lu\n", buff, safe_print_string(buff, cnt), cnt));
+    D_CMD(("buff == %8p \"%s\", cnt == %lu\n", buff, safe_print_string((spif_charptr_t) buff, cnt), cnt));
     outp = out = (unsigned char *) MALLOC(cnt * 2);
     for (i = 0, in = buff; i < cnt; i++) {
         if (*in == '\n') {
@@ -327,14 +327,14 @@ add_carriage_returns(unsigned char *buff, unsigned long cnt)
     i = (unsigned long) (out - outp);
     memcpy(buff, outp, i);
     FREE(outp);
-    D_CMD(("buff == %8p \"%s\", i == %lu\n", buff, safe_print_string(buff, i), i));
+    D_CMD(("buff == %8p \"%s\", i == %lu\n", buff, safe_print_string((spif_charptr_t) buff, i), i));
     return i;
 }
 
 unsigned char
 mkdirhier(const char *path)
 {
-    char *str, *pstr;
+    spif_charptr_t str, pstr;
     struct stat dst;
 
     D_CMD(("path == %s\n", path));

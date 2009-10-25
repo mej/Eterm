@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2004, Michael Jennings
+ * Copyright (C) 1997-2009, Michael Jennings
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -104,8 +104,8 @@ enl_ipc_get_win(void)
                 }
 
                 /* Make sure the version string is within the acceptable range. */
-                if (SPIF_CMP_IS_LESS(spiftool_version_compare(SPIF_CAST(charptr) str, SPIF_CAST(charptr) "0.16.4"))
-                    || SPIF_CMP_IS_GREATER(spiftool_version_compare(SPIF_CAST(charptr) str, SPIF_CAST(charptr) "0.16.999"))) {
+                if (SPIF_CMP_IS_LESS(spiftool_version_compare((spif_charptr_t) str, (spif_charptr_t) "0.16.4"))
+                    || SPIF_CMP_IS_GREATER(spiftool_version_compare((spif_charptr_t) str, (spif_charptr_t) "0.16.999"))) {
                     D_ENL((" -> IPC version string \"%s\" out of range.  I'll have to ignore it.\n"));
                     ipc_win = None;
                 }
