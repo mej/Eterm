@@ -2304,6 +2304,7 @@ run_command(char **argv)
         signal(SIGILL, SIG_DFL);
         signal(SIGSYS, SIG_DFL);
         signal(SIGALRM, SIG_DFL);
+        signal(SIGPIPE, SIG_DFL);
 #ifdef SIGTSTP
         signal(SIGTSTP, SIG_IGN);
         signal(SIGTTIN, SIG_IGN);

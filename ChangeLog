@@ -5603,3 +5603,8 @@ Sun Oct 25 12:08:16 2009                        Michael Jennings (mej)
 
 Fix some bad replacements.
 ----------------------------------------------------------------------
+Sun Oct 25 12:29:32 2009                        Michael Jennings (mej)
+
+Re-enable SIGPIPE after fork() for child processes who might not
+re-enable it on their own.
+----------------------------------------------------------------------
