@@ -1543,7 +1543,7 @@ scr_page(int direction, int nlines)
     D_SCREEN(("scr_page(%s, %d) view_start:%d\n", ((direction == UP) ? "UP" : "DN"), nlines, TermWin.view_start));
 
     start = TermWin.view_start;
-    BOUND(nlines, 1, TERM_WINDOW_GET_REPORTED_ROWS());
+    BOUND(nlines, 1, TermWin.nscrolled);
     TermWin.view_start += ((direction == UP) ? nlines : (-nlines));
     BOUND(TermWin.view_start, 0, TermWin.nscrolled);
     return (TermWin.view_start - start);

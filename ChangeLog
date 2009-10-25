@@ -5613,3 +5613,7 @@ Sun Oct 25 12:36:01 2009                        Michael Jennings (mej)
 
 Patch for FreeBSD UNIX98 pty support from Ed Schouten <ed@80386.nl>.
 ----------------------------------------------------------------------
+Sun Oct 25 12:39:34 2009                        Michael Jennings (mej)
+
+Fix for scrolling limitations from Cliff Miller <cbm@whatexit.org>.
+----------------------------------------------------------------------
