@@ -5704,3 +5704,34 @@ Sun Oct 25 12:12:06 2009                        Michael Jennings (mej)
 
 Fix some bad replacements.
 ----------------------------------------------------------------------
+Sun Oct 25 12:29:32 2009                        Michael Jennings (mej)
+
+Re-enable SIGPIPE after fork() for child processes who might not
+re-enable it on their own.  Pointed out by Sylvain Martin
+<sylvain.martin@ulg.ac.be>.
+----------------------------------------------------------------------
+Sun Oct 25 12:36:01 2009                        Michael Jennings (mej)
+
+Patch for FreeBSD UNIX98 pty support from Ed Schouten <ed@80386.nl>.
+----------------------------------------------------------------------
+Sun Oct 25 12:39:34 2009                        Michael Jennings (mej)
+
+Fix for scrolling limitations from Cliff Miller <cbm@whatexit.org>.
+----------------------------------------------------------------------
+Sun Oct 25 13:52:40 2009                        Michael Jennings (mej)
+
+Support font effects in 8 directions.  Patch supplied by Joern
+Bernhardt <Joern.Bernhardt@gmx.net>.
+----------------------------------------------------------------------
+Sun Oct 25 14:02:14 2009                        Michael Jennings (mej)
+
+Revert bad change to borderless code.  We're now doing best effort
+borderless with no override_redirect (which may come back some day as
+a separate option if there's a need) based on advice from raster and
+kwo.
+----------------------------------------------------------------------
+Sun Oct 25 14:07:07 2009                        Michael Jennings (mej)
+
+Fix off-by-one error that was causing crashes with visual bell.  Found
+by d_willsc@cojobo.bonn.de.
+----------------------------------------------------------------------

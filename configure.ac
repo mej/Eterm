@@ -258,6 +258,9 @@ AC_ARG_WITH(debugging, [  --with-debugging[=num]  enable debugging output, num i
                   AC_DEFINE_UNQUOTED(DEBUG, 4, [Debugging level to compile in.])
 ])
 
+AC_CHECK_FUNC(posix_openpt,
+              HAVE_POSIX_OPENPT=yes
+             )
 AC_CHECK_FUNC(ptsname,
               HAVE_PTSNAME=yes
              )
@@ -270,6 +273,10 @@ AC_CHECK_FUNC(unlockpt,
 dnl# Check for the appropriate pty mechanism
 AC_MSG_CHECKING(for pty mechanism)
 PTY_MECH=""
+if test ! -z "$HAVE_POSIX_OPENPT" -a ! -z "$HAVE_PTSNAME" -a ! -z "$HAVE_GRANTPT" -a ! -z "$HAVE_UNLOCKPT"; then
+  AC_DEFINE(HAVE_POSIX_OPENPT, , [Define for posix_openpt() support.])
+  PTY_MECH="POSIX $PTY_MECH"
+fi
 if test -c /dev/ptc ; then
   AC_DEFINE(HAVE_DEV_PTC, , [Define for /dev/ptc support.])
   PTY_MECH="AIX $PTY_MECH"
