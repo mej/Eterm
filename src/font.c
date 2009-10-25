@@ -52,7 +52,7 @@ const char *def_mfontName[] = { MFONT0, MFONT1, MFONT2, MFONT3, MFONT4 };
 #endif
 const char *def_fontName[] = { FONT0, FONT1, FONT2, FONT3, FONT4 };
 unsigned char font_chg = 0;
-fontshadow_t fshadow = { {0, 0, 0, 0}, {0, 0, 0, 1}, 1 };
+fontshadow_t fshadow = { {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 1}, 1 };
 
 static cachefont_t *font_cache = NULL, *cur_font = NULL;
 static void font_cache_add(const char *name, unsigned char type, void *info);
@@ -689,10 +689,18 @@ get_corner(const char *corner)
 {
     if (!BEG_STRCASECMP(corner, "tl ") || !BEG_STRCASECMP(corner, "top_left")) {
         return SHADOW_TOP_LEFT;
+    } else if (!BEG_STRCASECMP(corner, "t ") || !BEG_STRCASECMP(corner, "top")) {
+        return SHADOW_TOP;
     } else if (!BEG_STRCASECMP(corner, "tr ") || !BEG_STRCASECMP(corner, "top_right")) {
         return SHADOW_TOP_RIGHT;
+    } else if (!BEG_STRCASECMP(corner, "l ") || !BEG_STRCASECMP(corner, "left")) {
+        return SHADOW_LEFT;
+    } else if (!BEG_STRCASECMP(corner, "r ") || !BEG_STRCASECMP(corner, "right")) {
+        return SHADOW_RIGHT;
     } else if (!BEG_STRCASECMP(corner, "bl ") || !BEG_STRCASECMP(corner, "bottom_left")) {
         return SHADOW_BOTTOM_LEFT;
+    } else if (!BEG_STRCASECMP(corner, "b ") || !BEG_STRCASECMP(corner, "bottom")) {
+        return SHADOW_BOTTOM;
     } else if (!BEG_STRCASECMP(corner, "br ") || !BEG_STRCASECMP(corner, "bottom_right")) {
         return SHADOW_BOTTOM_RIGHT;
     } else {
@@ -705,7 +713,7 @@ set_shadow_color_by_name(unsigned char which, const char *color_name)
 {
     Pixel p;
 
-    ASSERT(which <= 4);
+    ASSERT(which <= 7); // which = 0-7 [SHADOW_TOP_LEFT - SHADOW_BOTTOM_RIGHT]
 
     p = get_color_by_name(color_name, "#000000");
     fshadow.color[which] = p;
@@ -715,7 +723,7 @@ set_shadow_color_by_name(unsigned char which, const char *color_name)
 void
 set_shadow_color_by_pixel(unsigned char which, Pixel p)
 {
-    ASSERT(which <= 4);
+    ASSERT(which <= 7); // which = 0-7 [SHADOW_TOP_LEFT - SHADOW_BOTTOM_RIGHT]
 
     fshadow.color[which] = p;
     fshadow.shadow[which] = fshadow.do_shadow = 1;
@@ -751,7 +759,7 @@ parse_font_fx(char *line)
         color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
         FREE(color);
-        for (which = 0; which < 4; which++) {
+        for (which = 0; which < 8; which++) {
             set_shadow_color_by_pixel(which, p);
         }
     } else if (!BEG_STRCASECMP(line, "shadow")) {
@@ -762,8 +770,10 @@ parse_font_fx(char *line)
             color = spiftool_get_word(3, line);
             corner = spiftool_get_pword(2, line);
             which = get_corner(corner);
-            if (which >= 4) {
+            if (which >= 8) {
                 return 0;
+            } else if (which != SHADOW_BOTTOM_RIGHT) {
+            	fshadow.shadow[SHADOW_BOTTOM_RIGHT] = 0;
             }
         } else {
             return 0;
@@ -776,12 +786,14 @@ parse_font_fx(char *line)
         }
         color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
+        set_shadow_color_by_pixel(SHADOW_BOTTOM, p);
         set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
         FREE(color);
 
         color = spiftool_get_word(3, line);
         p = get_color_by_name(color, "white");
         set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
+        set_shadow_color_by_pixel(SHADOW_TOP, p);
         FREE(color);
     } else if (!BEG_STRCASECMP(line, "carved")) {
         if (n != 3) {
@@ -790,10 +802,12 @@ parse_font_fx(char *line)
         color = spiftool_get_word(2, line);
         p = get_color_by_name(color, "black");
         set_shadow_color_by_pixel(SHADOW_TOP_LEFT, p);
+        set_shadow_color_by_pixel(SHADOW_TOP, p);
         FREE(color);
 
         color = spiftool_get_word(3, line);
         p = get_color_by_name(color, "white");
+        set_shadow_color_by_pixel(SHADOW_BOTTOM, p);
         set_shadow_color_by_pixel(SHADOW_BOTTOM_RIGHT, p);
         FREE(color);
     } else {

@@ -389,7 +389,7 @@ scr_poweron(void)
 
 /*
  * Save and Restore cursor
- * XTERM_SEQ: Save cursor   : ESC 7     
+ * XTERM_SEQ: Save cursor   : ESC 7
  * XTERM_SEQ: Restore cursor: ESC 8
  */
 void
@@ -2014,11 +2014,11 @@ scr_refresh(int type)
                         ww = Width2Pixel(wlen);
                         hh = Height2Pixel(1);
                         CLEAR_CHARS(xpixel, ypixel - ascent, len);
-                        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+                        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
                             yy--;
                             hh++;
                         }
-                        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+                        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
                             hh++;
                             if (row < nrows - 1) {
                                 int ii;
@@ -2035,9 +2035,30 @@ scr_refresh(int type)
                                 dtp[col - 1] = 0;
                             }
                         }
+                        if (fshadow.shadow[SHADOW_TOP]) {
+                            XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_TOP]);
+                            DRAW_STRING(draw_string, xpixel, ypixel - 1, buffer, wlen);
+                            if (col) {
+                                dtp[col] = 0;
+                            }
+                        }
                         if (fshadow.shadow[SHADOW_TOP_RIGHT]) {
                             XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_TOP_RIGHT]);
                             DRAW_STRING(draw_string, xpixel + 1, ypixel - 1, buffer, wlen);
+                            if (col < ncols - 1) {
+                                dtp[col + 1] = 0;
+                            }
+                        }
+                        if (fshadow.shadow[SHADOW_LEFT]) {
+                            XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_LEFT]);
+                            DRAW_STRING(draw_string, xpixel - 1, ypixel, buffer, wlen);
+                            if (col) {
+                                dtp[col - 1] = 0;
+                            }
+                        }
+                        if (fshadow.shadow[SHADOW_RIGHT]) {
+                            XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_RIGHT]);
+                            DRAW_STRING(draw_string, xpixel + 1, ypixel, buffer, wlen);
                             if (col < ncols - 1) {
                                 dtp[col + 1] = 0;
                             }
@@ -2047,6 +2068,13 @@ scr_refresh(int type)
                             DRAW_STRING(draw_string, xpixel - 1, ypixel + 1, buffer, wlen);
                             if (col) {
                                 dtp[col - 1] = 0;
+                            }
+                        }
+                        if (fshadow.shadow[SHADOW_BOTTOM]) {
+                            XSetForeground(Xdisplay, TermWin.gc, fshadow.color[SHADOW_BOTTOM]);
+                            DRAW_STRING(draw_string, xpixel, ypixel + 1, buffer, wlen);
+                            if (col) {
+                                dtp[col] = 0;
                             }
                         }
                         if (fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
@@ -2163,37 +2191,37 @@ scr_refresh(int type)
         D_SCREEN(("Update box dimensions:  from (%d, %d) to (%d, %d).  Dimensions %dx%d\n", low_x, low_y, high_x, high_y,
                   high_x - low_x + 1, high_y - low_y + 1));
         XClearArea(Xdisplay, TermWin.vt, low_x, low_y, high_x - low_x + 1, high_y - low_y + 1, False);
-        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
+        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
             XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1,
                       TermWin.internalBorder - 1, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
         }
-        if (fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) {
+        if (fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) {
             XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1,
                       TermWin_TotalWidth() - 2, 0);
             XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
         }
-        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
             XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, 0,
                       TermWin.internalBorder - 1);
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
         }
-        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
             XCopyArea(Xdisplay, pmap, buffer_pixmap, TermWin.gc, 0, TermWin_TotalHeight() - TermWin.internalBorder,
                       TermWin_TotalWidth() - 1, 1, 0, TermWin_TotalHeight() - TermWin.internalBorder);
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin_TotalHeight() - TermWin.internalBorder, TermWin_TotalWidth() - 1, 1, False);
         }
     } else {
-        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
+        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_LEFT] || fshadow.shadow[SHADOW_BOTTOM_LEFT]) {
             XClearArea(Xdisplay, TermWin.vt, TermWin.internalBorder - 1, 0, 1, TermWin_TotalHeight() - 1, False);
         }
-        if ((fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) && TermWin.internalBorder) {
+        if ((fshadow.shadow[SHADOW_TOP_RIGHT] || fshadow.shadow[SHADOW_RIGHT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT] || boldlast) && TermWin.internalBorder) {
             XClearArea(Xdisplay, TermWin.vt, TermWin_TotalWidth() - 2, 0, 1, TermWin_TotalHeight() - 1, False);
         }
-        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
+        if (fshadow.shadow[SHADOW_TOP_LEFT] || fshadow.shadow[SHADOW_TOP] || fshadow.shadow[SHADOW_TOP_RIGHT]) {
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin.internalBorder - 1, TermWin_TotalWidth() - 1, 1, False);
         }
-        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
+        if (fshadow.shadow[SHADOW_BOTTOM_LEFT] || fshadow.shadow[SHADOW_BOTTOM] || fshadow.shadow[SHADOW_BOTTOM_RIGHT]) {
             XClearArea(Xdisplay, TermWin.vt, 0, TermWin_TotalHeight() - TermWin.internalBorder, TermWin_TotalWidth() - 1, 1, False);
         }
     }
@@ -2704,7 +2732,7 @@ selection_start_colrow(int col, int row)
     selection.mark.row = row;
 }
 
-/* 
+/*
  * Copy a selection into the cut buffer
  * EXT: button 1 or 3 release
  */
@@ -3242,7 +3270,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
     D_SELECT(("(c:%d,r:%d)-(c:%d,r:%d) old (c:%d,r:%d)-(c:%d,r:%d)\n", selection.beg.col, selection.beg.row,
               selection.end.col, selection.end.row, old_beg.col, old_beg.row, old_end.col, old_end.row));
 
-/* 
+/*
  * B1: clear anything before the current selection
  */
     if ((old_beg.row < selection.beg.row) || (old_beg.row == selection.beg.row && old_beg.col < selection.beg.col)) {
@@ -3255,7 +3283,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
         }
         selection_setclr(0, old_beg.row, old_beg.col, row, col);
     }
-/* 
+/*
  * B2: clear anything after the current selection
  */
     if ((old_end.row > selection.end.row) || (old_end.row == selection.end.row && old_end.col > selection.end.col)) {
@@ -3268,7 +3296,7 @@ selection_extend_colrow(int col, int row, int flag, int cont)
         }
         selection_setclr(0, row, col, old_end.row, old_end.col);
     }
-/* 
+/*
  * B3: set everything
  */
 /* TODO: optimise this */

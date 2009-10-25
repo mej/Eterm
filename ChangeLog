@@ -5617,3 +5617,8 @@ Sun Oct 25 12:39:34 2009                        Michael Jennings (mej)
 
 Fix for scrolling limitations from Cliff Miller <cbm@whatexit.org>.
 ----------------------------------------------------------------------
+Sun Oct 25 13:52:40 2009                        Michael Jennings (mej)
+
+Support font effects in 8 directions.  Patch supplied by Joern
+Bernhardt <Joern.Bernhardt@gmx.net>.
+----------------------------------------------------------------------

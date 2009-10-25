@@ -3255,14 +3255,18 @@ save_config(char *path, unsigned char save_theme)
     if (fshadow.do_shadow) {
         const char *corners[] = {
             "top_left",
+            "top",
             "top_right",
+            "left",
+            "right",
             "bottom_left",
+            "bottom",
             "bottom_right"
         };
         unsigned char shad = 0;
 
         fprintf(fp, "    font effects");
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < 8; i++) {
             if (fshadow.shadow[i]) {
                 fprintf(fp, " %s 0x%08x", corners[i], (unsigned int) fshadow.color[i]);
                 shad = 1;

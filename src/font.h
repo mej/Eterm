@@ -42,9 +42,13 @@
 
 /* These are subscripts for the arrays in a fontshadow_t */
 #define SHADOW_TOP_LEFT      0
-#define SHADOW_TOP_RIGHT     1
-#define SHADOW_BOTTOM_LEFT   2
-#define SHADOW_BOTTOM_RIGHT  3
+#define SHADOW_TOP           1
+#define SHADOW_TOP_RIGHT     2
+#define SHADOW_LEFT          3
+#define SHADOW_RIGHT         4
+#define SHADOW_BOTTOM_LEFT   5
+#define SHADOW_BOTTOM        6
+#define SHADOW_BOTTOM_RIGHT  7
 
 /* The macros are used to advance to the next/previous font as with Ctrl-> and Ctrl-< */
 #define NEXT_FONT(i)   do { if (font_idx + ((i)?(i):1) >= font_cnt) {font_idx = font_cnt - 1;} else {font_idx += ((i)?(i):1);} \
@@ -67,8 +71,8 @@ typedef struct cachefont_struct {
 } cachefont_t;
 
 typedef struct fontshadow_struct {
-  Pixel color[4];
-  unsigned char shadow[4];
+  Pixel color[8];
+  unsigned char shadow[8];
   unsigned char do_shadow;
 } fontshadow_t;
 
