@@ -5735,3 +5735,12 @@ Sun Oct 25 14:07:07 2009                        Michael Jennings (mej)
 Fix off-by-one error that was causing crashes with visual bell.  Found
 by d_willsc@cojobo.bonn.de.
 ----------------------------------------------------------------------
+Sun Oct 25 14:18:42 2009                        Michael Jennings (mej)
+
+Patch from Kim Woelders <kim@woelders.dk> that adds UTF-8 support to
+Eterm (with a fix for 64-bit platforms).
+
+This patch should be considered EXPERIMENTAL; that's why it's on the
+0.10 branch.  It probably needs a lot of love, so please test and
+contribute fixes.
+----------------------------------------------------------------------

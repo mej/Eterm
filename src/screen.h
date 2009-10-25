@@ -159,7 +159,7 @@ enum {
    many lines back into the scrollback buffer the currently-visible data
    is.  (0 means we're at the bottom and not in scrollback.)
 */
-typedef unsigned char text_t;
+typedef unsigned short text_t;
 typedef unsigned int rend_t;
 typedef enum {
     SELECTION_CLEAR = 0,

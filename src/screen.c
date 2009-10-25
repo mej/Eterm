@@ -29,6 +29,7 @@ static const char cvs_ident[] = "$Id$";
 #ifdef HAVE_X11_XMU_ATOMS_H
 # include <X11/Xmu/Atoms.h>
 #endif
+#include <iconv.h>
 
 #include "buttons.h"
 #include "command.h"
@@ -112,9 +113,10 @@ blank_line(text_t *et, rend_t *er, int width, rend_t efs)
     register unsigned int i = width;
     rend_t *r = er, fs = efs;
 
-    MEMSET(et, ' ', i);
-    for (; i--;)
+    for (; i--;) {
+        *et++ = ' ';
         *r++ = fs;
+    }
 }
 
 /* Create a new row in the screen buffer and initialize it. */
@@ -124,15 +126,18 @@ blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
 {
     register unsigned int i = TERM_WINDOW_GET_REPORTED_COLS();
     rend_t *r, fs = efs;
+    text_t *et;
 
     if (tp[row] == NULL) {
         tp[row] = MALLOC(sizeof(text_t) * (TERM_WINDOW_GET_REPORTED_COLS() + 1));
         rp[row] = MALLOC(sizeof(rend_t) * TERM_WINDOW_GET_REPORTED_COLS());
     }
-    MEMSET(tp[row], ' ', i);
     tp[row][i] = 0;
-    for (r = rp[row]; i--;)
+    et = tp[row];
+    for (r = rp[row]; i--;) {
+        *et++ = ' ';
         *r++ = fs;
+    }
 }
 
 void
@@ -690,6 +695,43 @@ scroll_text(int row1, int row2, int count, int spec)
     return count;
 }
 
+#undef FIXME_BLOCK
+#define FIXME_BLOCK 1
+
+#define UTF8_DEBUG 0
+
+static text_t *
+mb2text(const char *str, size_t *len)
+{
+    static iconv_t ih = (iconv_t)-1;
+    text_t *tstr;
+    char *pi, *po;
+    size_t olen, maxolen;
+
+    //printf("mb2text(\"%s\", %d)\n", str, *len); fflush(stdout);
+    maxolen = *len * sizeof(text_t);
+    tstr = MALLOC(maxolen);
+    //printf("Allocated buffer of size %d\n", maxolen); fflush(stdout);
+    pi = (char*)str;
+    po = (char*)tstr;
+    if (ih == (iconv_t)-1)
+        ih = iconv_open("UCS-2", "UTF-8");
+    olen = maxolen;
+    iconv(ih, &pi, len, &po, &olen);
+    //printf("iconv returned output length of %d\n", olen); fflush(stdout);
+    olen = (maxolen - olen) / 2;
+    //printf("Output string length is %d\n", olen); fflush(stdout);
+#if UTF8_DEBUG
+    int i;
+    printf("TO UCS2:");
+    for (i = 0; i < olen; i++)
+       printf(" %04x", tstr[i]);
+    printf(" UCS2 len=%d\n\n", olen); fflush(stdout);
+#endif
+    *len = olen;
+    return tstr;
+}
+
 /*
  * Add text given in <str> of length <len> to screen struct
  */
@@ -697,17 +739,19 @@ void
 scr_add_lines(const unsigned char *str, int nlines, int len)
 {
 /*    char            c; */
-    register char c;
+    register text_t c;
 
 /*    int             i, j, row, last_col; */
     int last_col;
     register int i, j, row;
-    text_t *stp;
+    text_t *stp, *tstr;
     rend_t *srp;
     row_col_t beg, end;
+    size_t slen;
 
     if (len <= 0)               /* sanity */
         return;
+    slen = len;
 
     last_col = TERM_WINDOW_GET_REPORTED_COLS();
 
@@ -745,8 +789,11 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
         chstat = WBYTE;
 #endif
 
-    for (i = 0; i < len;) {
-        c = str[i++];
+    /* Convert incoming (mb) string to UCS-2 */
+    tstr = mb2text(str, &slen);
+
+    for (i = 0; i < slen;) {
+        c = tstr[i++];
 #ifdef MULTI_CHARSET
         if ((encoding_method != LATIN1) && (chstat == WBYTE)) {
             rstyle |= RS_multiMask;     /* multibyte 2nd byte */
@@ -829,6 +876,9 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
                 screen.flags &= ~Screen_WrapNext;
         }
     }
+
+    FREE(tstr);
+
     LOWER_BOUND(stp[last_col], screen.col);
     if (screen.col == 0) {
         end.col = last_col - 1;
@@ -1629,6 +1679,50 @@ scr_multi2(void)
 }
 #endif /* MULTI_CHARSET */
 
+static int
+scr_draw_string(Display *dpy, Drawable draw, GC gc, int x, int y, text_t *str, int len)
+{
+    unsigned short buf[2048];
+    int i;
+
+    if (len > 2048)
+        len = 2048;
+#if UTF8_DEBUG
+    for (i = 0; i < len; i++)
+    {
+       buf[i] = (str[i] >> 8) | (str[i] << 8);
+       printf(" %04x", buf[i]);
+    }
+    printf("\n");
+#else
+    for (i = 0; i < len; i++)
+       buf[i] = (str[i] >> 8) | (str[i] << 8);
+#endif
+    XDrawString16(dpy, draw, gc, x, y, (XChar2b*)buf, len);
+}
+
+static int
+scr_draw_image_string(Display *dpy, Drawable draw, GC gc, int x, int y, text_t *str, int len)
+{
+    unsigned short buf[2048];
+    int i;
+
+    if (len > 2048)
+        len = 2048;
+#if UTF8_DEBUG
+    for (i = 0; i < len; i++)
+    {
+       buf[i] = (str[i] >> 8) | (str[i] << 8);
+       printf(" %04x", buf[i]);
+    }
+    printf("\n");
+#else
+    for (i = 0; i < len; i++)
+       buf[i] = (str[i] >> 8) | (str[i] << 8);
+#endif
+    XDrawImageString16(dpy, draw, gc, x, y, (XChar2b*)buf, len);
+}
+
 /*
  * Refresh the screen
  * drawn_text/drawn_rend contain the screen information before the update.
@@ -1661,8 +1755,8 @@ scr_refresh(int type)
     rend_t *drp, *srp;          /* drawn-rend-pointer, screen-rend-pointer   */
     text_t *dtp, *stp;          /* drawn-text-pointer, screen-text-pointer   */
     XGCValues gcvalue;          /* Graphics Context values                   */
-    char buf[MAX_COLS + 1];
-    register char *buffer = buf;
+    text_t buf[MAX_COLS + 1];
+    register text_t *buffer = buf;
     Pixmap pmap = images[image_bg].current->pmap->pixmap;
     int (*draw_string) (), (*draw_image_string) ();
     register int low_x = 99999, low_y = 99999, high_x = 0, high_y = 0;
@@ -1709,8 +1803,8 @@ scr_refresh(int type)
     XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
 
 #if FIXME_BLOCK
-    draw_string = XmbDrawString;
-    draw_image_string = XmbDrawImageString;
+    draw_string = scr_draw_string;
+    draw_image_string = scr_draw_image_string;
 #else
     draw_string = XDrawString;
     draw_image_string = XDrawImageString;
@@ -1800,8 +1894,8 @@ scr_refresh(int type)
                         wbyte = 1;
                         XSetFont(Xdisplay, TermWin.gc, TermWin.mfont->fid);
 # if FIXME_BLOCK
-                        draw_string = XmbDrawString;
-                        draw_image_string = XmbDrawImageString;
+                        draw_string = scr_draw_string;
+                        draw_image_string = scr_draw_image_string;
 # else
                         draw_string = XDrawString16;
                         draw_image_string = XDrawImageString16;
@@ -1843,8 +1937,8 @@ scr_refresh(int type)
                         wbyte = 0;
                         XSetFont(Xdisplay, TermWin.gc, TermWin.font->fid);
 # if FIXME_BLOCK
-                        draw_string = XmbDrawString;
-                        draw_image_string = XmbDrawImageString;
+                        draw_string = scr_draw_string;
+                        draw_image_string = scr_draw_image_string;
 # else
                         draw_string = XDrawString;
                         draw_image_string = XDrawImageString;
@@ -2253,7 +2347,7 @@ scr_strmatch(unsigned long row, unsigned long col, const char *str)
 void
 scr_search_scrollback(char *str)
 {
-    unsigned char *c;
+    text_t *c;
     char *s;
     static char *last_str = NULL;
     unsigned int *i;
