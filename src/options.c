@@ -382,7 +382,7 @@ usage(void)
     printf("  (bool) -- Boolean option ('1', 'on', 'yes', or 'true' to activate, '0', 'off', 'no', or 'false' to deactivate)\n");
     printf("  (int)  -- Integer option (any signed number of reasonable value, usually in decimal/octal/hex)\n");
     printf("  (str)  -- String option (be sure to quote strings if needed to avoid shell expansion)\n");
-    printf("  (strs) -- Stringlist option (quoting strings will be spiftool_split on whitespace)\n\n");
+    printf("  (strs) -- Stringlist option (quoting strings will be split on whitespace)\n\n");
 
     printf("NOTE:  Long options can be separated from their values by an equal sign ('='), or you can\n");
     printf("       pass the value as the following argument on the command line (e.g., '--scrollbar 0'\n");
