@@ -2719,7 +2719,7 @@ ns_inp_tab(void *xd, char *b, size_t l, size_t m)
         "resize", "screen", "scrollback", "select",
         "sessionname", "setenv", "setsid", "shell",
         "shelltitle", "silence", "silencewait", "sleep",
-        "slowpast", "source", "sorendition", "spiftool_split", "stuff",
+        "slowpast", "source", "sorendition", "split", "stuff",
         "su", "suspend", "term", "termcap", "terminfo",
         "termcapinfo", "unsetenv", "utf8", "vbell",
         "vbell_msg", "vbellwait", "verbose", "version",
