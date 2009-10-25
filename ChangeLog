@@ -5606,5 +5606,10 @@ Fix some bad replacements.
 Sun Oct 25 12:29:32 2009                        Michael Jennings (mej)
 
 Re-enable SIGPIPE after fork() for child processes who might not
-re-enable it on their own.
+re-enable it on their own.  Pointed out by Sylvain Martin
+<sylvain.martin@ulg.ac.be>.
+----------------------------------------------------------------------
+Sun Oct 25 12:36:01 2009                        Michael Jennings (mej)
+
+Patch for FreeBSD UNIX98 pty support from Ed Schouten <ed@80386.nl>.
 ----------------------------------------------------------------------

@@ -38,9 +38,9 @@ static const char cvs_ident[] = "$Id$";
 # endif
 
 /* don't go off end of ut_id & remember if an entry has been made */
-#  if defined(USE_SYSV_UTMP) || defined(NEW_BSD_UTMP) || defined(__OpenBSD__)
+#  if defined(USE_SYSV_UTMP) || defined(__OpenBSD__)
 static char ut_id[5];           /* remember if entry to utmp made */
-#  else
+#  elif !defined(NEW_BSD_UTMP)
 static int utmp_pos;            /* BSD position of utmp-stamp */
 #  endif
 
@@ -340,13 +340,6 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
 
     if (!strncmp(pty, "/dev/", 5))
         pty += 5;               /* skip /dev/ prefix */
-    if (!strncmp(pty, "pty", 3) || !strncmp(pty, "tty", 3))
-        strncpy(ut_id, (pty + 3), sizeof(ut_id));       /* bsd naming */
-    else {
-        libast_print_error("can't parse tty name \"%s\"\n", pty);
-        ut_id[0] = '\0';        /* entry not made */
-        return;
-    }
 
 #  ifdef NEW_BSD_UTMP
     strncpy(ut_line, pty, 31);
@@ -358,6 +351,14 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
 
     b_login(&utmp);
 #  else /* NEW_BSD_UTMP */
+    if (!strncmp(pty, "pty", 3) || !strncmp(pty, "tty", 3))
+        strncpy(ut_id, (pty + 3), sizeof(ut_id));       /* bsd naming */
+    else {
+        libast_print_error("can't parse tty name \"%s\"\n", pty);
+        ut_id[0] = '\0';        /* entry not made */
+        return;
+    }
+
     strncpy(utmp.ut_line, ut_id, sizeof(utmp.ut_line));
     strncpy(utmp.ut_name, pwent->pw_name, sizeof(utmp.ut_name));
     strncpy(utmp.ut_host, hostname, sizeof(utmp.ut_host));

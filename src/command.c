@@ -1386,17 +1386,21 @@ sco_get_pty(void)
 }
 #endif
 
-#ifdef HAVE_DEV_PTMX
-inline int svr_get_pty(void);
+#if defined(HAVE_POSIX_OPENPT) || defined(HAVE_DEV_PTMX)
+inline int posix_get_pty(void);
 
 inline int
-svr_get_pty(void)
+posix_get_pty(void)
 {
 
     int fd = -1;
 
     /* open the STREAMS, clone device /dev/ptmx (master pty) */
+#if defined(HAVE_POSIX_OPENPT)
+    if ((fd = posix_openpt(O_RDWR|O_NOCTTY)) < 0) {
+#else
     if ((fd = open("/dev/ptmx", O_RDWR)) < 0) {
+#endif
         return (-1);
     } else {
         if (grantpt(fd) != 0) {
@@ -1455,12 +1459,12 @@ get_pty(void)
 
     int fd = -1;
 
-#if defined(__sgi)
+#if defined(HAVE_POSIX_OPENPT) || defined(HAVE_DEV_PTMX)
+    fd = posix_get_pty();
+#elif defined(__sgi)
     fd = sgi_get_pty();
 #elif defined(HAVE_DEV_PTC)
     fd = aix_get_pty();
-#elif defined(HAVE_DEV_PTMX)
-    fd = svr_get_pty();
 #elif defined(HAVE_SCO_PTYS)
     fd = sco_get_pty();
 #endif
