@@ -9,18 +9,18 @@
 
 Summary: Enlightened terminal emulator
 Name: Eterm
-Version: 0.9.5
-Release: 1
-#Release: 0.%(date '+%Y%m%d')
+Version: 0.9.6
+#Release: 1
+Release: 0.%(date '+%Y%m%d')
 License: BSD
 Group: User Interface/X
 URL: http://www.eterm.org/
 Source0: http://www.eterm.org/download/%{name}-%{version}.tar.%{compression}
 Source1: http://www.eterm.org/download/%{name}-bg-%{version}.tar.%{compression}
-#BuildSuggests: xorg-x11-devel XFree86-devel xorg-x11-proto-devel libXext-devel libXt-devel freetype-devel
-BuildRequires: libast imlib2-devel
+#BuildSuggests: xorg-x11-devel, XFree86-devel, xorg-x11-proto-devel, libXext-devel, libXt-devel, freetype-devel
+BuildRequires: libast, imlib2-devel
 Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
-BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{name}-%{version}-root
+BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{name}-%{version}-%{release}-root
 
 %description
 Eterm is a color vt102 terminal emulator with enhanced graphical

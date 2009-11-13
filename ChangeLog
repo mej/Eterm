@@ -5634,3 +5634,7 @@ Sun Oct 25 14:07:07 2009                        Michael Jennings (mej)
 Fix off-by-one error that was causing crashes with visual bell.  Found
 by d_willsc@cojobo.bonn.de.
 ----------------------------------------------------------------------
+Thu Nov 12 16:23:46 2009                        Michael Jennings (mej)
+
+Gearing up for 0.9.6 release.
+----------------------------------------------------------------------
