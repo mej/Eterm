@@ -269,7 +269,7 @@ if (test) PrivateModes |= (bit); else PrivateModes &= ~(bit);} while (0)
 #define CHARS_READ()      (cmdbuf_ptr < cmdbuf_endp)
 #define CHARS_BUFFERED()  (count != CMD_BUF_SIZE)
 #define RETURN_CHAR()     do { \
-                            char c = *cmdbuf_ptr++; \
+                            unsigned char c = *cmdbuf_ptr++; \
                             refreshed = 0; \
                             if (c < 32) D_VT(("RETURN_CHAR():  \'%s\' (%d 0x%02x %03o)\n", get_ctrl_char_name(c), c, c, c)); \
                             else D_VT(("RETURN_CHAR():  \'%c\' (%d 0x%02x %03o)\n", c, c, c, c)); \

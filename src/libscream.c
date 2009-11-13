@@ -1489,6 +1489,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
 #warning compiling in libscream
 #ifdef NS_HAVE_SCREEN
         if (!strcmp(sess->proto, "screen")) {
+            D_ESCREEN(("Using session protocol \"%s\"\n", sess->proto));
             sess->backend = NS_MODE_SCREEN;
         } else
 #warning compiling in support for GNU screen
@@ -1498,6 +1499,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
         if (!strcmp(sess->proto, "twin")) {
             char *twd = getenv("TWDISPLAY");
 
+            D_ESCREEN(("Using session protocol \"%s\"\n", sess->proto));
             sess->backend = NS_MODE_TWIN;
 
             /* fall back on TWDISPLAY env var only if host not set yet */
@@ -1524,6 +1526,7 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
         } else
 #endif
         if (!strcmp(sess->proto, "scream")) {
+            D_ESCREEN(("Using session protocol \"%s\"\n", sess->proto));
             sess->backend = NS_MODE_SCREAM;
         } else {
             *err = NS_UNKNOWN_PROTO;
@@ -1531,6 +1534,8 @@ ns_attach_by_URL(char *url, char *hop, _ns_efuns ** ef, int *err, void *xd)
             fprintf(stderr, "protocol \"%s\" not known...\n", sess->proto);
             goto fail;
         }
+    } else {
+        D_ESCREEN(("No session protocol specified.\n"));
     }
 
     if ((sess->disp < 0) || (sess->disp > NS_MAX_PORT))
@@ -3130,9 +3135,10 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
     } else if (!strcmp(p, "New screen...") ||
                !strncmp(p, "msgwait", strlen("msgwait")) ||
                !strncmp(p, "msgminwait", strlen("msgminwait")) ||
-               !strcmp(p, "Press ^@ to destroy or ^@ to resurrect window") || !strcmp(p, "Aborted because of window size change."))
+               !strcmp(p, "Press ^@ to destroy or ^@ to resurrect window")
+               || !strcmp(p, "Aborted because of window size change.")) {
         p = NULL;
-    else if ((screen->flags & NS_SESS_NO_MON_MSG) &&
+    } else if ((screen->flags & NS_SESS_NO_MON_MSG) &&
              ((sscanf(p, "Window %d (%s) is now being monitored for all activity.", &n, win) == 2) ||
               (sscanf(p, "Window %d (%s) is no longer being monitored for activity.", &n, win) == 2))) {
         D_ESCREEN(("activity toggled quietly for window %d-%s\n", n, win));
@@ -3163,16 +3169,17 @@ ns_parse_screen_msg(_ns_sess * screen, char *p)
         p = NULL;
         D_ESCREEN(("ns_parse_screen_msg: scre%s %d.%2d.%2d %s a/o %s -> mode %d\n", vtype, ma, mi, mu, vrem, vdate,
                    screen->backend));
-    } else if (!strcmp(p, NS_SCREEN_NO_DEBUG))
+    } else if (!strcmp(p, NS_SCREEN_NO_DEBUG)) {
         p = "debug info was not compiled into \"screen\"...";
-    else if (!strncmp(p, NS_SCREEN_DK_CMD_T, strlen(NS_SCREEN_DK_CMD_T))) {
+    } else if (!strncmp(p, NS_SCREEN_DK_CMD_T, strlen(NS_SCREEN_DK_CMD_T))) {
         p[strlen(p) - 1] = '\0';
         p2 = &p[strlen(NS_SCREEN_DK_CMD_T)];
         p = "unknown screen statement ignored";
     }
     if (p) {                    /* status. send to status-line or dialog or whatever */
-        if (NS_EFUN_EXISTS(efuns, screen, NULL, err_msg))
+        if (NS_EFUN_EXISTS(efuns, screen, NULL, err_msg)) {
             ret = efuns->err_msg(NULL, type, p);
+        }
     }
     return ret;
 }
@@ -3220,6 +3227,8 @@ ns_parse_screen(_ns_sess * screen, int force, int width, char *p)
     if (!force && screen->timestamp)
         return NS_SUCC;
 
+    D_ESCREEN(("ns_parse_screen(0x%08x, %d, %d, \"%s\")\n", screen, force, width,
+               safe_print_string(p, width)));
     if ((p = STRDUP(p))) {
         _ns_parse pd[NS_MAX_DISPS];
 
