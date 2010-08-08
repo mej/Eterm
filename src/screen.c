@@ -3344,7 +3344,25 @@ selection_send(XSelectionRequestEvent * rq)
                         32, PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
+#ifdef MULTI_CHARSET
+#  ifdef X_HAVE_UTF8_STRING
+    } else if (rq->target == XA_UTF8_STRING(Xdisplay)) {
+        XTextProperty xtextp;
+        char *l[1];
+
+        *l = selection.text;
+        xtextp.value = NULL;
+        xtextp.nitems = 0;
+        if (XmbTextListToTextProperty(Xdisplay, l, 1, XUTF8StringStyle, &xtextp) == Success) {
+            if (xtextp.nitems > 0 && xtextp.value != NULL) {
+                XChangeProperty(Xdisplay, rq->requestor, rq->property,
+                                rq->target, 8, PropModeReplace, xtextp.value, xtextp.nitems);
+                ev.xselection.property = rq->property;
+                XFree(xtextp.value);
+            }
+        }
+#  endif /* X_HAVE_UTF8_STRING */
+#  ifdef HAVE_X11_XMU_ATOMS_H
     } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
         XTextProperty xtextp;
         char *l[1];
@@ -3357,11 +3375,13 @@ selection_send(XSelectionRequestEvent * rq)
                 XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay),
                                 8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
+                XFree(xtextp.value);
             }
         }
-#endif
-    } else if (rq->target == XA_STRING) {
-        XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target, 8, PropModeReplace, selection.text, selection.len);
+#  endif /* HAVE_X11_XMU_ATOMS_H */
+#endif /* MULTI_CHARSET */
+    } else {
+        XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_STRING, 8, PropModeReplace, selection.text, selection.len);
         ev.xselection.property = rq->property;
     }
     XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);
