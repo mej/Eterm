@@ -561,15 +561,15 @@ lookup_key(XEvent * ev)
         }
 #endif
 
-#if defined(HAVE_X11_SUNKEYSYM_H) && defined(HAVE_X11_XMU_ATOMS_H)
+#if defined(HAVE_X11_SUNKEYSYM_H)
         switch (keysym) {
             case SunXK_Copy:
             case SunXK_Cut:
-                selection_copy(XA_CLIPBOARD(Xdisplay));
+                selection_copy(props[PROP_CLIPBOARD]);
                 LK_RET();
                 break;
             case SunXK_Paste:
-                selection_paste(XA_CLIPBOARD(Xdisplay));
+                selection_paste(props[PROP_CLIPBOARD]);
                 LK_RET();
                 break;
             case SunXK_Front:

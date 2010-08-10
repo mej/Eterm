@@ -16,16 +16,12 @@
 #include <X11/Xfuncproto.h>
 #include "startup.h"
 
-#ifndef XA_CLIPBOARD
-# define XA_CLIPBOARD(d)        XA_PRIMARY
-#endif
-
 /************ Macros and Definitions ************/
 #define WRAP_CHAR       (0xff)
 #define PROP_SIZE           4096
 #define TABSIZE             8   /* default tab size */
 
-#define IS_SELECTION(a)         (((a) == XA_PRIMARY) || ((a) == XA_SECONDARY) || ((a) == XA_CLIPBOARD(Xdisplay)))
+#define IS_SELECTION(a)         (((a) == XA_PRIMARY) || ((a) == XA_SECONDARY) || ((a) == props[PROP_CLIPBOARD]))
 #define IS_CUT_BUFFER(a)        (((a) >= XA_CUT_BUFFER0) && ((a) <= XA_CUT_BUFFER7))
 
 #define ZERO_SCROLLBACK do { \

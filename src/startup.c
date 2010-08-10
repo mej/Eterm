@@ -138,6 +138,10 @@ eterm_bootstrap(int argc, char *argv[])
 
     /* Get all our properties set up. */
     MEMSET(props, 0, sizeof(props));
+    props[PROP_TEXT] = XInternAtom(Xdisplay, "TEXT", False);
+    props[PROP_COMPOUND_TEXT] = XInternAtom(Xdisplay, "COMPOUND_TEXT", False);
+    props[PROP_UTF8_STRING] = XInternAtom(Xdisplay, "UTF8_STRING", False);
+    props[PROP_CLIPBOARD] = XInternAtom(Xdisplay, "CLIPBOARD", False);
     props[PROP_DESKTOP] = XInternAtom(Xdisplay, "_NET_WM_DESKTOP", False);
     props[PROP_TRANS_PIXMAP] = XInternAtom(Xdisplay, "_XROOTPMAP_ID", False);
     props[PROP_TRANS_COLOR] = XInternAtom(Xdisplay, "_XROOTCOLOR_PIXEL", False);

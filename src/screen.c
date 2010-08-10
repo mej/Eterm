@@ -26,9 +26,6 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>            /* CARD32 */
-#ifdef HAVE_X11_XMU_ATOMS_H
-# include <X11/Xmu/Atoms.h>
-#endif
 
 #include "buttons.h"
 #include "command.h"
@@ -2596,9 +2593,9 @@ selection_paste(Atom sel)
            form (usually XA_STRING) and save it for us in the VT_SELECTION
            property.  We'll then get a SelectionNotify. */
         D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
+#if defined(MULTI_CHARSET)
         if (encoding_method != LATIN1) {
-            XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+            XConvertSelection(Xdisplay, sel, props[PROP_COMPOUND_TEXT], props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
         } else {
             XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
         }
@@ -3346,7 +3343,7 @@ selection_send(XSelectionRequestEvent * rq)
         ev.xselection.property = rq->property;
 #ifdef MULTI_CHARSET
 #  ifdef X_HAVE_UTF8_STRING
-    } else if (rq->target == XA_UTF8_STRING(Xdisplay)) {
+    } else if (rq->target == props[PROP_UTF8_STRING]) {
         XTextProperty xtextp;
         char *l[1];
 
@@ -3362,8 +3359,7 @@ selection_send(XSelectionRequestEvent * rq)
             }
         }
 #  endif /* X_HAVE_UTF8_STRING */
-#  ifdef HAVE_X11_XMU_ATOMS_H
-    } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
+    } else if (rq->target == props[PROP_TEXT] || rq->target == props[PROP_COMPOUND_TEXT]) {
         XTextProperty xtextp;
         char *l[1];
 
@@ -3372,13 +3368,12 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
             if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay),
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, props[PROP_COMPOUND_TEXT],
                                 8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
                 XFree(xtextp.value);
             }
         }
-#  endif /* HAVE_X11_XMU_ATOMS_H */
 #endif /* MULTI_CHARSET */
     } else {
         XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_STRING, 8, PropModeReplace, selection.text, selection.len);
