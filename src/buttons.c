@@ -62,7 +62,7 @@ draw_string(buttonbar_t *bbar, Drawable d, GC gc, int x, int y, char *str, size_
 
     D_BBAR(("Writing string \"%s\" (length %lu) using font 0x%08x onto drawable 0x%08x at %d, %d\n",
             str, len, bbar->font, d, x, y));
-    REQUIRE(bbar != NULL);
+    REQUIRE(!!bbar);
     REQUIRE(d != None);
     REQUIRE(gc != None);
 
@@ -193,7 +193,7 @@ bbar_handle_enter_notify(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
 
-    if ((bbar = find_bbar_by_window(ev->xany.window)) == NULL) {
+    if (!(bbar = find_bbar_by_window(ev->xany.window))) {
         return 0;
     }
     bbar_draw(bbar, IMAGE_STATE_SELECTED, 0);
@@ -215,7 +215,7 @@ bbar_handle_leave_notify(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
 
-    if ((bbar = find_bbar_by_window(ev->xany.window)) == NULL) {
+    if (!(bbar = find_bbar_by_window(ev->xany.window))) {
         return 0;
     }
     bbar_draw(bbar, IMAGE_STATE_NORMAL, 0);
@@ -234,7 +234,7 @@ bbar_handle_button_press(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
 
-    if ((bbar = find_bbar_by_window(ev->xany.window)) == NULL) {
+    if (!(bbar = find_bbar_by_window(ev->xany.window))) {
         D_EVENTS((" -> No buttonbar found for this window.\n"));
         return 0;
     }
@@ -326,7 +326,7 @@ bbar_handle_button_release(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
 
-    if ((bbar = find_bbar_by_window(ev->xany.window)) == NULL) {
+    if (!(bbar = find_bbar_by_window(ev->xany.window))) {
         D_EVENTS((" -> No buttonbar found for this window.\n"));
         return 0;
     }
@@ -364,7 +364,7 @@ bbar_handle_motion_notify(event_t *ev)
 
     REQUIRE_RVAL(XEVENT_IS_MYWIN(ev, &buttonbar->event_data), 0);
 
-    if ((bbar = find_bbar_by_window(ev->xany.window)) == NULL) {
+    if (!(bbar = find_bbar_by_window(ev->xany.window))) {
         return 0;
     }
     while (XCheckTypedWindowEvent(Xdisplay, ev->xany.window, MotionNotify, ev));
@@ -392,7 +392,7 @@ bbar_handle_motion_notify(event_t *ev)
 unsigned char
 bbar_dispatch_event(event_t *ev)
 {
-    if (buttonbar->event_data.handlers[ev->type] != NULL) {
+    if (buttonbar->event_data.handlers[ev->type]) {
         return ((buttonbar->event_data.handlers[ev->type]) (ev));
     }
     return (0);
@@ -633,7 +633,7 @@ bbar_add_button(buttonbar_t *bbar, button_t *button)
 
     D_BBAR(("bbar_add_button(%8p, %8p):  Adding button \"%s\".\n", bbar, button, button->text));
 
-    ASSERT(bbar != NULL);
+    ASSERT(!!bbar);
 
     if (bbar->buttons) {
         for (b = bbar->buttons; b->next; b = b->next);
@@ -661,7 +661,7 @@ bbar_set_font(buttonbar_t *bbar, const char *fontname)
 {
     XFontStruct *font;
 
-    ASSERT_RVAL(fontname != NULL, 0);
+    ASSERT_RVAL(!!fontname, 0);
 
     D_BBAR(("bbar_set_font(%8p, \"%s\"):  Current font is %8p, dimensions %d/%d/%d\n", bbar, fontname, bbar->font, bbar->fwidth,
             bbar->fheight, bbar->h));
@@ -695,7 +695,7 @@ button_t *find_button_by_text(buttonbar_t *bbar, char *text)
 {
     register button_t *b;
 
-    REQUIRE_RVAL(text != NULL, NULL);
+    REQUIRE_RVAL(!!text, NULL);
 
     for (b = bbar->buttons; b; b = b->next) {
         if (!strcasecmp(b->text, text)) {
@@ -721,7 +721,7 @@ button_t *find_button_by_index(buttonbar_t *bbar, long idx)
     } else {
         b = bbar->buttons;
     }
-    for (i = 0; (b != NULL) && (i < idx); b = b->next, i++);
+    for (i = 0; (b) && (i < idx); b = b->next, i++);
     return ((i == idx) ? (b) : (NULL));
 }
 
@@ -729,7 +729,7 @@ button_t *find_button_by_coords(buttonbar_t *bbar, int x, int y)
 {
     register button_t *b;
 
-    ASSERT_RVAL(bbar != NULL, NULL);
+    ASSERT_RVAL(!!bbar, NULL);
 
     for (b = bbar->buttons; b; b = b->next) {
         if ((x >= b->x) && (y >= b->y) && (x < b->x + b->w) && (y < b->y + b->h)) {
@@ -782,7 +782,7 @@ button_free(button_t *button)
 unsigned char
 button_set_text(button_t *button, const char *text)
 {
-    ASSERT_RVAL(button != NULL, 0);
+    ASSERT_RVAL(!!button, 0);
 
     if (button->text) {
         FREE(button->text);
@@ -800,8 +800,8 @@ button_set_text(button_t *button, const char *text)
 unsigned char
 button_set_icon(button_t *button, simage_t *icon)
 {
-    ASSERT_RVAL(button != NULL, 0);
-    ASSERT_RVAL(icon != NULL, 0);
+    ASSERT_RVAL(!!button, 0);
+    ASSERT_RVAL(!!icon, 0);
 
     button->icon = icon;
     return 1;
@@ -810,25 +810,25 @@ button_set_icon(button_t *button, simage_t *icon)
 unsigned char
 button_set_action(button_t *button, action_type_t type, char *action)
 {
-    ASSERT_RVAL(button != NULL, 0);
+    ASSERT_RVAL(!!button, 0);
 
     button->type = type;
     switch (type) {
         case ACTION_MENU:
             button->action.menu = find_menu_by_title(menu_list, action);
-            return ((button->action.menu == NULL) ? (0) : (1));
+            return ((!button->action.menu) ? (0) : (1));
             break;
         case ACTION_STRING:
         case ACTION_ECHO:
             button->action.string = (char *) MALLOC(strlen(action) + 2);
             strcpy(button->action.string, action);
             parse_escaped_string(button->action.string);
-            return ((button->action.string == NULL) ? (0) : (1));
+            return ((!button->action.string) ? (0) : (1));
             break;
         case ACTION_SCRIPT:
             button->action.script = (char *) MALLOC(strlen(action) + 2);
             strcpy(button->action.script, action);
-            return ((button->action.script == NULL) ? (0) : (1));
+            return ((!button->action.script) ? (0) : (1));
             break;
         default:
             break;
@@ -874,7 +874,7 @@ bbar_deselect_button(buttonbar_t *bbar, button_t *button)
 void
 bbar_click_button(buttonbar_t *bbar, button_t *button)
 {
-    REQUIRE(button != NULL);
+    REQUIRE(!!button);
 
     D_BBAR(("Drawing clicked button %8p (%s) on buttonbar %8p\n", button, NONULL(button->text), bbar));
 
@@ -903,7 +903,7 @@ button_check_action(buttonbar_t *bbar, button_t *button, unsigned char press, Ti
 {
     static unsigned char prvs = 0;
 
-    REQUIRE(button != NULL);
+    REQUIRE(!!button);
 
     D_BBAR(("Checking action for button %8p (%s) on buttonbar %8p, press %d, prvs %d, time %lu\n", button, NONULL(button->text),
             bbar, (int) press, (int) prvs, (unsigned long) t));
@@ -1075,7 +1075,7 @@ bbar_draw(buttonbar_t *bbar, unsigned char image_state, unsigned char force_mode
 {
     button_t *button;
 
-    ASSERT(bbar != NULL);
+    ASSERT(!!bbar);
 
     D_BBAR(("bbar_draw(%8p, 0x%02x, 0x%02x) called.\n", bbar, image_state, force_modes));
     if (image_state != IMAGE_STATE_CURRENT) {

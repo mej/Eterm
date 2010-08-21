@@ -99,7 +99,7 @@ void
 event_data_add_mywin(event_dispatcher_data_t *data, Window win)
 {
 
-    ASSERT(data != NULL);
+    ASSERT(!!data);
 
     if (data->num_my_windows > 0) {
         (data->num_my_windows)++;
@@ -116,7 +116,7 @@ void
 event_data_add_parent(event_dispatcher_data_t *data, Window win)
 {
 
-    ASSERT(data != NULL);
+    ASSERT(!!data);
 
     if (data->num_my_parents > 0) {
         (data->num_my_parents)++;
@@ -171,7 +171,7 @@ event_win_is_mywin(register event_dispatcher_data_t *data, Window win)
 
     register unsigned short i;
 
-    ASSERT_RVAL(data != NULL, 0);
+    ASSERT_RVAL(!!data, 0);
 
     for (i = 0; i < data->num_my_windows; i++) {
         if (data->my_windows[i] == win) {
@@ -187,7 +187,7 @@ event_win_is_parent(register event_dispatcher_data_t *data, Window win)
 
     register unsigned short i;
 
-    ASSERT_RVAL(data != NULL, 0);
+    ASSERT_RVAL(!!data, 0);
 
     for (i = 0; i < data->num_my_parents; i++) {
         if (data->my_parents[i] == win) {
@@ -353,7 +353,7 @@ handle_client_message(event_t *ev)
 
         XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType,
                            &ActualFormat, &Size, &RemainingBytes, &data);
-        if (data != NULL) {
+        if (data) {
             XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
             selection_paste(XA_CUT_BUFFER0);
             XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
@@ -493,7 +493,7 @@ handle_focus_in(event_t *ev)
         }
         bbar_draw_all(IMAGE_STATE_NORMAL, MODE_SOLID);
 #ifdef USE_XIM
-        if (xim_input_context != NULL)
+        if (xim_input_context)
             XSetICFocus(xim_input_context);
 #endif
         if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
@@ -527,7 +527,7 @@ handle_focus_out(event_t *ev)
         }
         bbar_draw_all(IMAGE_STATE_DISABLED, MODE_SOLID);
 #ifdef USE_XIM
-        if (xim_input_context != NULL)
+        if (xim_input_context)
             XUnsetICFocus(xim_input_context);
 #endif
     }
@@ -874,7 +874,7 @@ process_x_event(event_t *ev)
 #if 0
     D_EVENTS(("process_x_event(ev [%8p] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
 #endif
-    if (primary_data.handlers[ev->type] != NULL) {
+    if (primary_data.handlers[ev->type]) {
         return ((primary_data.handlers[ev->type]) (ev));
     }
     return (0);

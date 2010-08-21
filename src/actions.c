@@ -52,7 +52,7 @@ unsigned char
 action_handle_string(event_t *ev, action_t *action)
 {
     USE_VAR(ev);
-    REQUIRE_RVAL(action->param.string != NULL, 0);
+    REQUIRE_RVAL(!!action->param.string, 0);
     cmd_write((unsigned char *) action->param.string, strlen(action->param.string));
     return 1;
 }
@@ -61,7 +61,7 @@ unsigned char
 action_handle_echo(event_t *ev, action_t *action)
 {
     USE_VAR(ev);
-    REQUIRE_RVAL(action->param.string != NULL, 0);
+    REQUIRE_RVAL(!!action->param.string, 0);
 #ifdef ESCREEN
     if (TermWin.screen && TermWin.screen->backend) {
 #  ifdef NS_HAVE_SCREEN
@@ -78,7 +78,7 @@ unsigned char
 action_handle_script(event_t *ev, action_t *action)
 {
     USE_VAR(ev);
-    REQUIRE_RVAL(action->param.script != NULL, 0);
+    REQUIRE_RVAL(!!action->param.script, 0);
     script_parse(action->param.script);
     return 1;
 }
@@ -86,7 +86,7 @@ action_handle_script(event_t *ev, action_t *action)
 unsigned char
 action_handle_menu(event_t *ev, action_t *action)
 {
-    REQUIRE_RVAL(action->param.menu != NULL, 0);
+    REQUIRE_RVAL(!!action->param.menu, 0);
     menu_invoke(ev->xbutton.x, ev->xbutton.y, TermWin.parent, action->param.menu, ev->xbutton.time);
     return 1;
 }
@@ -202,7 +202,7 @@ action_dispatch(event_t *ev, KeySym keysym)
 {
     action_t *action;
 
-    ASSERT_RVAL(ev != NULL, 0);
+    ASSERT_RVAL(!!ev, 0);
     ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, 0);
     D_ACTIONS(("Event %8p:  Button %d, Keysym 0x%08x, Key State 0x%08x (modifiers " MOD_FMT ")\n", ev, ev->xbutton.button, keysym,
                ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
@@ -228,7 +228,7 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
 
     action_t *action;
 
-    if (!action_list || (action = action_find_match(mod, button, keysym)) == NULL) {
+    if (!action_list || !(action = action_find_match(mod, button, keysym))) {
         action = (action_t *) MALLOC(sizeof(action_t));
         action->next = action_list;
         action_list = action;
