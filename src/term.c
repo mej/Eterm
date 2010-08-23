@@ -473,7 +473,7 @@ lookup_key(XEvent * ev)
         PrivMode((!numlock_state), PrivMode_aplKP);
     }
 #ifdef USE_XIM
-    if (xim_input_context) {
+    if (xim_input_context != NULL) {
         Status status_return;
 
         kbuf[0] = '\0';
@@ -680,7 +680,7 @@ lookup_key(XEvent * ev)
         if (keysym >= 0xff00 && keysym <= 0xffff) {
 #ifdef KEYSYM_ATTRIBUTE
             /* The "keysym" attribute in the config file gets handled here. */
-            if (!(shft | ctrl) && KeySym_map[keysym - 0xff00]) {
+            if (!(shft | ctrl) && KeySym_map[keysym - 0xff00] != NULL) {
 
                 const unsigned char *tmpbuf;
                 unsigned int len;
@@ -1080,7 +1080,7 @@ popen_printer(void)
         libast_print_warning("Running setuid/setgid.  Refusing to use custom printpipe.\n");
         RESET_AND_ASSIGN(rs_print_pipe, STRDUP(PRINTPIPE));
     }
-    if (!(stream = (FILE *)popen(rs_print_pipe, "w"))) {
+    if ((stream = (FILE *) popen(rs_print_pipe, "w")) == NULL) {
         libast_print_error("Can't open printer pipe \"%s\" -- %s\n", rs_print_pipe, strerror(errno));
     }
     return stream;
@@ -1102,7 +1102,7 @@ process_print_pipe(void)
     int index;
     FILE *fd;
 
-    if ((fd = popen_printer())) {
+    if ((fd = popen_printer()) != NULL) {
         for (index = 0; index < 4; /* nil */ ) {
             unsigned char ch = cmd_getc();
 
@@ -2078,10 +2078,10 @@ append_to_title(const char *str)
 {
     char *name, *buff;
 
-    REQUIRE(!!str);
+    REQUIRE(str != NULL);
 
     XFetchName(Xdisplay, TermWin.parent, &name);
-    if (name) {
+    if (name != NULL) {
         buff = (char *) MALLOC(strlen(name) + strlen(str) + 1);
         strcpy(buff, name);
         strcat(buff, str);
@@ -2095,10 +2095,10 @@ append_to_icon_name(const char *str)
 {
     char *name, *buff;
 
-    REQUIRE(!!str);
+    REQUIRE(str != NULL);
 
     XGetIconName(Xdisplay, TermWin.parent, &name);
-    if (name) {
+    if (name != NULL) {
         buff = (char *) MALLOC(strlen(name) + strlen(str) + 1);
         strcpy(buff, name);
         strcat(buff, str);
@@ -2158,19 +2158,19 @@ xterm_seq(int op, const char *str)
             set_title(str);
             break;
         case ESCSEQ_XTERM_PROP:        /* 3 */
-            if (!(nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) == NULL) {
                 break;
             }
-            if ((valptr = strchr(nstr, '='))) {
+            if ((valptr = strchr(nstr, '=')) != NULL) {
                 *(valptr++) = 0;
             }
             set_text_property(TermWin.parent, nstr, valptr);
             break;
         case ESCSEQ_XTERM_CHANGE_COLOR:        /* Changing existing colors 256 */
-            while ((nstr = (char *)strsep(&tnstr, ";"))) {
+            while ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 i = (unsigned int) strtoul(nstr, (char **) NULL, 0);
                 nstr = (char *) strsep(&tnstr, ";");
-                if ((i < 256) && (nstr)) {
+                if ((i < 256) && (nstr != NULL)) {
                     D_COLORS(("Changing color : [%d] -> %s\n", i, nstr));
                     set_window_color(i, nstr);
                 }
@@ -2256,7 +2256,7 @@ xterm_seq(int op, const char *str)
                 case 1:
                     changed = 0;
                     for (; 1;) {
-                        if (!(color = (char *)strsep(&tnstr, ";"))) {
+                        if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
                             break;
                         }
                         which = image_max;
@@ -2264,13 +2264,13 @@ xterm_seq(int op, const char *str)
                                       which = idx; break;}
                         );
                         if (which != image_max) {
-                            if (!(color = (char *)strsep(&tnstr, ";"))) {
+                            if ((color = (char *) strsep(&tnstr, ";")) == NULL) {
                                 break;
                             }
                         } else {
                             which = image_bg;
                         }
-                        if (!(mod = (char *)strsep(&tnstr, ";"))) {
+                        if ((mod = (char *) strsep(&tnstr, ";")) == NULL) {
                             break;
                         }
                         if (!strcasecmp(mod, "clear")) {
@@ -2297,7 +2297,7 @@ xterm_seq(int op, const char *str)
                             changed = 1;
                             continue;
                         }
-                        if (!(valptr = (char *)strsep(&tnstr, ";"))) {
+                        if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                             break;
                         }
                         D_CMD(("Modifying the %s attribute of the %s color modifier of the %s image to be %s\n",
@@ -2314,7 +2314,7 @@ xterm_seq(int op, const char *str)
                         if (!strcasecmp(color, "image")) {
                             imlib_t *iml = images[which].current->iml;
 
-                            if (!iml->mod) {
+                            if (iml->mod == NULL) {
                                 iml->mod = create_colormod();
                             }
                             if (!BEG_STRCASECMP(mod, "brightness")) {
@@ -2331,7 +2331,7 @@ xterm_seq(int op, const char *str)
                         } else if (!strcasecmp(color, "red")) {
                             imlib_t *iml = images[which].current->iml;
 
-                            if (!iml->rmod) {
+                            if (iml->rmod == NULL) {
                                 iml->rmod = create_colormod();
                             }
                             if (!BEG_STRCASECMP(mod, "brightness")) {
@@ -2348,7 +2348,7 @@ xterm_seq(int op, const char *str)
                         } else if (!strcasecmp(color, "green")) {
                             imlib_t *iml = images[which].current->iml;
 
-                            if (!iml->gmod) {
+                            if (iml->gmod == NULL) {
                                 iml->gmod = create_colormod();
                             }
                             if (!BEG_STRCASECMP(mod, "brightness")) {
@@ -2365,7 +2365,7 @@ xterm_seq(int op, const char *str)
                         } else if (!strcasecmp(color, "blue")) {
                             imlib_t *iml = images[which].current->iml;
 
-                            if (!iml->bmod) {
+                            if (iml->bmod == NULL) {
                                 iml->bmod = create_colormod();
                             }
                             if (!BEG_STRCASECMP(mod, "bright")) {
@@ -2387,14 +2387,14 @@ xterm_seq(int op, const char *str)
                 case 2:
                     changed = 0;
                     which = image_max;
-                    if (!(nstr = (char *)strsep(&tnstr, ";")) || !(valptr = (char *)strsep(&tnstr, ";"))) {
+                    if ((nstr = (char *) strsep(&tnstr, ";")) == NULL || (valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                         break;
                     }
                     FOREACH_IMAGE(if (!strcasecmp(valptr, (get_image_type(idx) + 6))) {
                                   which = idx; break;}
                     );
                     if (which != image_max) {
-                        if (!(valptr = (char *)strsep(&tnstr, ";"))) {
+                        if ((valptr = (char *) strsep(&tnstr, ";")) == NULL) {
                             break;
                         }
                     } else {
@@ -2408,7 +2408,7 @@ xterm_seq(int op, const char *str)
                         s = (int) strtol(valptr, (char **) NULL, 0);
                         s = ((100 - s) << 8) / 100;
                         if (s == 0x100) {
-                            if (iml->mod) {
+                            if (iml->mod != NULL) {
                                 if (iml->mod->brightness != 0x100) {
                                     iml->mod->brightness = 0x100;
                                     changed = 1;
@@ -2418,7 +2418,7 @@ xterm_seq(int op, const char *str)
                                 }
                             }
                         } else {
-                            if (!iml->mod) {
+                            if (iml->mod == NULL) {
                                 iml->mod = create_colormod();
                             }
                             if (iml->mod->brightness != s) {
@@ -2438,7 +2438,7 @@ xterm_seq(int op, const char *str)
                         }
                         r = (t & 0xff0000) >> 16;
                         if (r == 0xff) {
-                            if (iml->rmod) {
+                            if (iml->rmod != NULL) {
                                 if (iml->rmod->brightness != 0x100) {
                                     iml->rmod->brightness = 0x100;
                                     changed = 1;
@@ -2448,7 +2448,7 @@ xterm_seq(int op, const char *str)
                                 }
                             }
                         } else {
-                            if (!iml->rmod) {
+                            if (iml->rmod == NULL) {
                                 iml->rmod = create_colormod();
                             }
                             if (iml->rmod->brightness != (int) r) {
@@ -2458,7 +2458,7 @@ xterm_seq(int op, const char *str)
                         }
                         g = (t & 0xff00) >> 8;
                         if (g == 0xff) {
-                            if (iml->gmod) {
+                            if (iml->gmod != NULL) {
                                 if (iml->gmod->brightness != 0x100) {
                                     iml->gmod->brightness = 0x100;
                                     changed = 1;
@@ -2468,7 +2468,7 @@ xterm_seq(int op, const char *str)
                                 }
                             }
                         } else {
-                            if (!iml->gmod) {
+                            if (iml->gmod == NULL) {
                                 iml->gmod = create_colormod();
                             }
                             if (iml->gmod->brightness != (int) g) {
@@ -2478,7 +2478,7 @@ xterm_seq(int op, const char *str)
                         }
                         b = t & 0xff;
                         if (b == 0xff) {
-                            if (iml->bmod) {
+                            if (iml->bmod != NULL) {
                                 if (iml->bmod->brightness != 0x100) {
                                     iml->bmod->brightness = 0x100;
                                     changed = 1;
@@ -2488,7 +2488,7 @@ xterm_seq(int op, const char *str)
                                 }
                             }
                         } else {
-                            if (!iml->bmod) {
+                            if (iml->bmod == NULL) {
                                 iml->bmod = create_colormod();
                                 iml->bmod->contrast = iml->bmod->gamma = 0x100;
                             }
@@ -2709,54 +2709,54 @@ xterm_seq(int op, const char *str)
 
 #ifdef XTERM_COLOR_CHANGE
         case ESCSEQ_XTERM_FGCOLOR:     /* 10 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 set_window_color(fgColor, nstr);
             }
             /* drop */
         case ESCSEQ_XTERM_BGCOLOR:     /* 11 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 set_window_color(bgColor, nstr);
             }
             /* drop */
         case ESCSEQ_XTERM_CURSOR_COLOR:        /* 12 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
 # ifndef NO_CURSORCOLOR
                 set_window_color(cursorColor, nstr);
 # endif
             }
             /* drop */
         case ESCSEQ_XTERM_PTR_FGCOLOR: /* 13 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 set_pointer_colors(nstr, NULL);
             }
             /* drop */
         case ESCSEQ_XTERM_PTR_BGCOLOR: /* 14 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 /* UNSUPPORTED */
             }
             /* drop */
         case ESCSEQ_XTERM_TEK_FGCOLOR: /* 15 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 /* UNSUPPORTED */
             }
             /* drop */
         case ESCSEQ_XTERM_TEK_BGCOLOR: /* 16 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 /* UNSUPPORTED */
             }
             /* drop */
         case ESCSEQ_XTERM_HILIGHT_COLOR:       /* 17 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 /* UNSUPPORTED */
             }
             /* drop */
         case ESCSEQ_XTERM_BOLD_COLOR:  /* 18 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 set_window_color(colorBD, nstr);
             }
             /* drop */
         case ESCSEQ_XTERM_ULINE_COLOR: /* 19 */
-            if ((nstr = (char *)strsep(&tnstr, ";"))) {
+            if ((nstr = (char *) strsep(&tnstr, ";")) != NULL) {
                 set_window_color(colorUL, nstr);
             }
 #endif

@@ -67,9 +67,9 @@ set_text_property(Window win, char *propname, char *value)
     XTextProperty prop;
     Atom atom;
 
-    ASSERT(!!propname);
+    ASSERT(propname != NULL);
 
-    if (!value) {
+    if (value == NULL) {
         atom = XInternAtom(Xdisplay, propname, True);
         if (atom == None) {
             return;
@@ -189,8 +189,8 @@ get_color_by_name(const char *name, const char *fallback)
 {
     XColor xcol;
 
-    if (!name) {
-        if (!fallback) {
+    if (name == NULL) {
+        if (fallback == NULL) {
             return ((Pixel) - 1);
         } else {
             name = fallback;
@@ -348,13 +348,13 @@ set_pointer_colors(const char *fg_name, const char *bg_name)
 {
     XColor fg, bg;
 
-    if (fg_name) {
+    if (fg_name != NULL) {
         fg.pixel = get_color_by_name(fg_name, COLOR_NAME(pointerColor));
     } else {
         fg.pixel = PixColors[pointerColor];
     }
     XQueryColor(Xdisplay, cmap, &fg);
-    if (bg_name) {
+    if (bg_name != NULL) {
         bg.pixel = get_color_by_name(bg_name, COLOR_NAME(bgColor));
     } else {
         bg.pixel = PixColors[bgColor];
@@ -735,7 +735,7 @@ set_window_color(int idx, const char *color)
 
     D_X11(("idx == %d, color == \"%s\"\n", idx, NONULL(color)));
 
-    if (!color || *color == '\0')
+    if (color == NULL || *color == '\0')
         return;
 
     /* handle color aliases */

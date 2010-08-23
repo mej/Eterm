@@ -178,10 +178,10 @@ eterm_default_font_locale(char ***fonts, char ***mfonts, char **mencoding, int *
     int j, k;
 
     locale = setlocale(LC_CTYPE, "");
-    if (!locale)
-        if (!(locale = getenv("LC_ALL")))
-            if (!(locale = getenv("LC_CTYPE")))
-                if (!(locale = getenv("LANG")))
+    if (locale == NULL)
+        if ((locale = getenv("LC_ALL")) == NULL)
+            if ((locale = getenv("LC_CTYPE")) == NULL)
+                if ((locale = getenv("LANG")) == NULL)
                     locale = "C";       /* failsafe */
 
     /* Obtain a "normalized" name of current encoding.

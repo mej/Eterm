@@ -83,7 +83,7 @@
                                    } while (0)
 #define CHECK_VALID_INDEX(i)       (((i) >= image_bg) && ((i) < image_max))
 
-#define RESET_AND_ASSIGN(var, val)  do {if ((var)) FREE(var);  (var) = (val);} while (0)
+#define RESET_AND_ASSIGN(var, val)  do {if ((var) != NULL) FREE(var);  (var) = (val);} while (0)
 
 #define BITFIELD_SET(var, field)       ((var) |= (field))
 #define BITFIELD_CLEAR(var, field)     ((var) &= ~(field))

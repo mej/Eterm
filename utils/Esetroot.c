@@ -181,7 +181,7 @@ main(int argc, char *argv[])
     imlib_context_set_display(Xdisplay);
     imlib_context_set_visual(DefaultVisual(Xdisplay, DefaultScreen(Xdisplay)));
     im = imlib_load_image_immediately(fname);
-    if (!im) {
+    if (im == NULL) {
         fprintf(stderr, "%s:  Unable to load image file \"%s\".\n", *argv, fname);
         exit(1);
     } else if (debug) {

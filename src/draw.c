@@ -168,7 +168,7 @@ bevel_pixmap(Pixmap p, int w, int h, Imlib_Border * bord, unsigned char up)
         real_depth = Xdepth;
     }
     ximg = XGetImage(Xdisplay, p, 0, 0, w, h, -1, ZPixmap);
-    if (!ximg) {
+    if (ximg == NULL) {
         return;
     }
     /* Determine bitshift and bitmask values */

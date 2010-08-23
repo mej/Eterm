@@ -357,7 +357,7 @@ sb_handle_motion_notify(event_t *ev)
 unsigned char
 scrollbar_dispatch_event(event_t *ev)
 {
-    if (scrollbar_event_data.handlers[ev->type]) {
+    if (scrollbar_event_data.handlers[ev->type] != NULL) {
         return ((scrollbar_event_data.handlers[ev->type]) (ev));
     }
     return (0);

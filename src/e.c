@@ -156,12 +156,12 @@ enl_ipc_send(char *str)
     unsigned short len;
     XEvent ev;
 
-    if (!str) {
-        ASSERT(!!last_msg);
+    if (str == NULL) {
+        ASSERT(last_msg != NULL);
         str = last_msg;
         D_ENL(("Resending last message \"%s\" to Enlightenment.\n", str));
     } else {
-        if (last_msg) {
+        if (last_msg != NULL) {
             FREE(last_msg);
         }
         last_msg = STRDUP(str);
@@ -246,7 +246,7 @@ enl_ipc_get(const char *msg_data)
     }
     buff[12] = 0;
     blen = strlen(buff);
-    if (message) {
+    if (message != NULL) {
         len += blen;
         message = (char *) REALLOC(message, len + 1);
         strcat(message, buff);

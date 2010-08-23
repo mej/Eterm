@@ -192,8 +192,8 @@ static enc_context_t *enc_create_context(const char *id)
 static void
 enc_context_add_state(enc_context_t *context, enc_state_t *state)
 {
-    ASSERT(!!context);
-    ASSERT(!!state);
+    ASSERT(context != NULL);
+    ASSERT(state != NULL);
 
     state->next = context->states;
     context->states = state;
@@ -225,14 +225,14 @@ enc_state_add_switch(enc_state_t *state, unsigned char key, enc_state_t *next_st
 static void
 enc_state_set_in_table(enc_state_t *state, trans_table_t in_tbl)
 {
-    ASSERT(!!state);
+    ASSERT(state != NULL);
     state->in_tbl = in_tbl;
 }
 
 static void
 enc_state_set_out_table(enc_state_t *state, trans_table_t out_tbl)
 {
-    ASSERT(!!state);
+    ASSERT(state != NULL);
     state->out_tbl = out_tbl;
 }
 

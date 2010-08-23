@@ -1330,7 +1330,7 @@ sgi_get_pty(void)
     privileges(INVOKE);
     ptydev = ttydev = _getpty(&fd, O_RDWR | O_NDELAY, 0620, 0);
     privileges(REVERT);
-    return (!ptydev ? -1 : fd);
+    return (ptydev == NULL ? -1 : fd);
 
 }
 #endif
@@ -1411,7 +1411,7 @@ posix_get_pty(void)
             return (-1);
         } else {
             ptydev = ttydev = ptsname(fd);
-            if (!ttydev) {
+            if (ttydev == NULL) {
                 libast_print_error("ptsname(%d) failed:  %s\n", fd, strerror(errno));
                 return (-1);
             }
@@ -1509,7 +1509,7 @@ get_tty(void)
 #endif /* ultrix */
 
     privileges(INVOKE);
-    if (!ttydev) {
+    if (ttydev == NULL) {
         libast_print_error("Slave tty device name is NULL.  Failed to open slave pty.\n");
         exit(EXIT_FAILURE);
     } else if ((fd = open(ttydev, O_RDWR)) < 0) {
@@ -1859,7 +1859,7 @@ create_fontset(const char *font1, const char *font2)
     int mc;
     /*const char fs_base[] = ",-misc-fixed-*-r-*-*-*-120-*-*-*-*-*-*,*";*/
 
-    ASSERT_RVAL(!!font1, (XFontSet) 0);
+    ASSERT_RVAL(font1 != NULL, (XFontSet) 0);
 
     if (font2) {
         fontname = MALLOC(strlen(font1) + strlen(font2) /*+ sizeof(fs_base)*/ + 2);
@@ -1908,7 +1908,7 @@ init_locale(void)
     locale = setlocale(LC_ALL, "");
     XSetLocaleModifiers("");
     TermWin.fontset = (XFontSet) 0;
-    if ((!locale) || (!XSupportsLocale())) {
+    if ((locale == NULL) || (!XSupportsLocale())) {
         libast_print_warning("Locale not supported; defaulting to portable \"C\" locale.\n");
         locale = setlocale(LC_ALL, "C");
         XSetLocaleModifiers("");
@@ -1956,7 +1956,7 @@ xim_send_spot(void)
     static XPoint oldSpot = { -1, -1 };
     XVaNestedList preedit_attr;
 
-    if (!xim_input_context) {
+    if (xim_input_context == NULL) {
         return;
     }
 
@@ -2029,7 +2029,7 @@ xim_real_init(void)
     XVaNestedList preedit_attr = NULL;
     XVaNestedList status_attr = NULL;
 
-    REQUIRE_RVAL(!xim_input_context, -1);
+    REQUIRE_RVAL(xim_input_context == NULL, -1);
 
     xim_input_style = 0;
 
@@ -2045,8 +2045,8 @@ xim_real_init(void)
             *(end + 1) = '\0';
             if (*s) {
                 snprintf(buf, sizeof(buf), "@im=%s", s);
-                if (((p = XSetLocaleModifiers(buf))) && (*p)
-                    && ((xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL)))) {
+                if (((p = XSetLocaleModifiers(buf)) != NULL) && (*p)
+                    && ((xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL)) != NULL)) {
                     break;
                 }
             }
@@ -2057,20 +2057,20 @@ xim_real_init(void)
     }
 
     /* try with XMODIFIERS env. var. */
-    if (!xim_input_method && getenv("XMODIFIERS") && (p = XSetLocaleModifiers("")) && *p) {
+    if (xim_input_method == NULL && getenv("XMODIFIERS") && (p = XSetLocaleModifiers("")) != NULL && *p) {
         xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
     }
 
     /* try with no modifiers base */
-    if (!xim_input_method && (p = XSetLocaleModifiers("@im=none")) && *p) {
+    if (xim_input_method == NULL && (p = XSetLocaleModifiers("@im=none")) != NULL && *p) {
         xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
     }
 
-    if (!xim_input_method) {
+    if (xim_input_method == NULL) {
         xim_input_method = XOpenIM(Xdisplay, NULL, NULL, NULL);
     }
 
-    if (!xim_input_method) {
+    if (xim_input_method == NULL) {
         return -1;
     }
 #ifdef USE_X11R6_XIM
@@ -2157,7 +2157,7 @@ xim_real_init(void)
     if (status_attr) {
         XFree(status_attr);
     }
-    if (!xim_input_context) {
+    if (xim_input_context == NULL) {
         libast_print_error("Failed to create input context\n");
         XCloseIM(xim_input_method);
         return -1;
@@ -2174,7 +2174,7 @@ xim_set_status_position(void)
     XVaNestedList preedit_attr, status_attr;
     XPoint spot;
 
-    REQUIRE(!!xim_input_context);
+    REQUIRE(xim_input_context != NULL);
 
     if (xim_input_style & XIMPreeditPosition) {
         xim_set_size(&rect);
@@ -2205,7 +2205,7 @@ xim_set_fontset(void)
     XVaNestedList preedit_attr = NULL;
     XVaNestedList status_attr = NULL;
 
-    REQUIRE(!!xim_input_context);
+    REQUIRE(xim_input_context != NULL);
 
     if (xim_input_style & XIMStatusArea) {
         status_attr = XVaCreateNestedList(0, XNFontSet, TermWin.fontset, NULL);
@@ -2376,7 +2376,7 @@ run_command(char **argv)
         if (chdir(initial_dir)) {
             libast_print_warning("Unable to chdir to \"%s\" -- %s\n", initial_dir, strerror(errno));
         }
-        if (argv) {
+        if (argv != NULL) {
 #if DEBUG >= DEBUG_CMD
             if (DEBUG_LEVEL >= DEBUG_CMD) {
                 int i;
@@ -2393,7 +2393,7 @@ run_command(char **argv)
 
             const char *argv0, *shell;
 
-            if (!(shell = getenv("SHELL")) || *shell == '\0')
+            if ((shell = getenv("SHELL")) == NULL || *shell == '\0')
                 shell = "/bin/sh";
 
             argv0 = my_basename(shell);
@@ -3089,14 +3089,14 @@ escreen_init(char **argv)
     efuns = escreen_reg_funcs();
 
     /* Create buttonbar for Escreen's use. */
-    if (!(bbar = bbar_create())) {
-        if (buttonbar) {
+    if ((bbar = bbar_create()) == NULL) {
+        if (buttonbar != NULL) {
             bbar = buttonbar;
         } else {
             return -1;
         }
     } else {
-        if (!buttonbar) {
+        if (buttonbar == NULL) {
             buttonbar = bbar;
         }
         bbar_set_font(bbar, ((rs_es_font) ? (rs_es_font) : ("-*-helvetica-medium-r-normal--10-*-*-*-p-*-iso8859-1")));
@@ -3105,7 +3105,7 @@ escreen_init(char **argv)
     }
 
     BITFIELD_SET(eterm_options, ETERM_OPTIONS_PAUSE);
-    if (!(TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar))) {
+    if ((TermWin.screen = ns_attach_by_URL(rs_url, rs_hop, &efuns, &ns_err, bbar)) == NULL) {
         D_CMD(("ns_attach_by_URL(%s,%s) failed\n", rs_url, rs_hop));
         return -1;
     }
@@ -3284,7 +3284,7 @@ check_pixmap_change(int sig)
         last_update = now;
         old_handler = signal(SIGALRM, check_pixmap_change);
         alarm(rs_anim_delay);
-        if (!rs_anim_pixmaps[image_idx]) {
+        if (rs_anim_pixmaps[image_idx] == NULL) {
             image_idx = 0;
         }
     }
@@ -3390,7 +3390,7 @@ cmd_getc(void)
             XNextEvent(Xdisplay, &ev);
 
 #ifdef USE_XIM
-            if (xim_input_context) {
+            if (xim_input_context != NULL) {
                 if (!XFilterEvent(&ev, ev.xkey.window)) {
                     event_dispatch(&ev);
                 }
@@ -3803,7 +3803,7 @@ v_writeBig(int f, char *d, int len)
     int written;
     int c = len;
 
-    if (!v_bufstr && len > 0) {
+    if (v_bufstr == NULL && len > 0) {
 
         v_buffer = MALLOC(len);
         v_bufstr = v_buffer;

@@ -301,7 +301,7 @@ menu_handle_button_release(event_t *ev)
 
         if (button_press_time && (ev->xbutton.time - button_press_time > MENU_CLICK_TIME)) {
             /* Take action here based on the current menu item */
-            if ((item = menuitem_get_current(current_menu))) {
+            if ((item = menuitem_get_current(current_menu)) != NULL) {
                 if (item->type == MENUITEM_SUBMENU) {
                     menu_display_submenu(current_menu, item);
                 } else {
@@ -326,7 +326,7 @@ menu_handle_button_release(event_t *ev)
         if (current_menu && (ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w)
             && (ev->xbutton.y < current_menu->h)) {
             /* Click inside the menu window.  Activate the current item. */
-            if ((item = menuitem_get_current(current_menu))) {
+            if ((item = menuitem_get_current(current_menu)) != NULL) {
                 if (item->type == MENUITEM_SUBMENU) {
                     menu_display_submenu(current_menu, item);
                 } else {
@@ -415,7 +415,7 @@ menu_handle_motion_notify(event_t *ev)
 unsigned char
 menu_dispatch_event(event_t *ev)
 {
-    if (menu_event_data.handlers[ev->type]) {
+    if (menu_event_data.handlers[ev->type] != NULL) {
         return ((menu_event_data.handlers[ev->type]) (ev));
     }
     return (0);
@@ -423,7 +423,7 @@ menu_dispatch_event(event_t *ev)
 
 menulist_t *menulist_add_menu(menulist_t *list, menu_t *menu)
 {
-    ASSERT_RVAL(!!menu, list);
+    ASSERT_RVAL(menu != NULL, list);
 
     if (list) {
         list->nummenus++;
@@ -442,7 +442,7 @@ menulist_clear(menulist_t *list)
 {
     unsigned long i;
 
-    ASSERT(!!list);
+    ASSERT(list != NULL);
 
     for (i = 0; i < list->nummenus; i++) {
         menu_delete(list->menus[i]);
@@ -496,7 +496,7 @@ menu_delete(menu_t *menu)
 {
     unsigned short i;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     D_MENU(("Deleting menu \"%s\"\n", menu->title));
     for (i = 0; i < menu->numitems; i++) {
@@ -535,8 +535,8 @@ menu_delete(menu_t *menu)
 unsigned char
 menu_set_title(menu_t *menu, const char *title)
 {
-    ASSERT_RVAL(!!menu, 0);
-    REQUIRE_RVAL(!!title, 0);
+    ASSERT_RVAL(menu != NULL, 0);
+    REQUIRE_RVAL(title != NULL, 0);
 
     FREE(menu->title);
     menu->title = STRDUP(title);
@@ -550,8 +550,8 @@ menu_set_font(menu_t *menu, const char *fontname)
     XFontStruct *font;
     XGCValues gcvalue;
 
-    ASSERT_RVAL(!!menu, 0);
-    REQUIRE_RVAL(!!fontname, 0);
+    ASSERT_RVAL(menu != NULL, 0);
+    REQUIRE_RVAL(fontname != NULL, 0);
 
     font = (XFontStruct *) load_font(fontname, "fixed", FONT_TYPE_X);
 #ifdef MULTI_CHARSET
@@ -571,8 +571,8 @@ menu_set_font(menu_t *menu, const char *fontname)
 unsigned char
 menu_add_item(menu_t *menu, menuitem_t *item)
 {
-    ASSERT_RVAL(!!menu, 0);
-    ASSERT_RVAL(!!item, 0);
+    ASSERT_RVAL(menu != NULL, 0);
+    ASSERT_RVAL(item != NULL, 0);
 
     if (menu->numitems) {
         menu->numitems++;
@@ -594,12 +594,12 @@ menu_is_child(menu_t *menu, menu_t *submenu)
     register unsigned char i;
     register menuitem_t *item;
 
-    ASSERT_RVAL(!!menu, 0);
-    ASSERT_RVAL(!!submenu, 0);
+    ASSERT_RVAL(menu != NULL, 0);
+    ASSERT_RVAL(submenu != NULL, 0);
 
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
             if (item->action.submenu == submenu) {
                 return 1;
             } else if (menu_is_child(item->action.submenu, submenu)) {
@@ -614,7 +614,7 @@ menu_t *find_menu_by_title(menulist_t *list, char *title)
 {
     register unsigned char i;
 
-    REQUIRE_RVAL(!!list, NULL);
+    REQUIRE_RVAL(list != NULL, NULL);
 
     for (i = 0; i < list->nummenus; i++) {
         if (!strcasecmp(list->menus[i]->title, title)) {
@@ -628,7 +628,7 @@ menu_t *find_menu_by_window(menulist_t *list, Window win)
 {
     register unsigned char i;
 
-    REQUIRE_RVAL(!!list, NULL);
+    REQUIRE_RVAL(list != NULL, NULL);
 
     for (i = 0; i < list->nummenus; i++) {
         if (list->menus[i]->win == win) {
@@ -643,7 +643,7 @@ menuitem_t *find_item_by_coords(menu_t *menu, int x, int y)
     register unsigned char i;
     register menuitem_t *item;
 
-    ASSERT_RVAL(!!menu, NULL);
+    ASSERT_RVAL(menu != NULL, NULL);
 
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
@@ -659,8 +659,8 @@ find_item_in_menu(menu_t *menu, menuitem_t *item)
 {
     register unsigned char i;
 
-    ASSERT_RVAL(!!menu, (unsigned short) -1);
-    ASSERT_RVAL(!!item, (unsigned short) -1);
+    ASSERT_RVAL(menu != NULL, (unsigned short) -1);
+    ASSERT_RVAL(item != NULL, (unsigned short) -1);
 
     for (i = 0; i < menu->numitems; i++) {
         if (item == menu->items[i]) {
@@ -675,7 +675,7 @@ menuitem_change_current(menuitem_t *item)
 {
     menuitem_t *current;
 
-    ASSERT(!!current_menu);
+    ASSERT(current_menu != NULL);
 
     current = menuitem_get_current(current_menu);
     if (current != item) {
@@ -686,8 +686,8 @@ menuitem_change_current(menuitem_t *item)
             menuitem_deselect(current_menu);
             /* If we're changing from one submenu to another and neither is a child of the other, or if we're changing from a submenu to
                no current item at all, reset the tree for the current submenu */
-            if (current->type == MENUITEM_SUBMENU && current->action.submenu) {
-                if ((item && item->type == MENUITEM_SUBMENU && item->action.submenu
+            if (current->type == MENUITEM_SUBMENU && current->action.submenu != NULL) {
+                if ((item && item->type == MENUITEM_SUBMENU && item->action.submenu != NULL
                      && !menu_is_child(current->action.submenu, item->action.submenu)
                      && !menu_is_child(item->action.submenu, current->action.submenu))
                     || (!item)) {
@@ -727,7 +727,7 @@ menuitem_t *menuitem_create(char *text)
 void
 menuitem_delete(menuitem_t *item)
 {
-    ASSERT(!!item);
+    ASSERT(item != NULL);
 
     if (item->icon) {
         free_simage(item->icon);
@@ -751,8 +751,8 @@ menuitem_delete(menuitem_t *item)
 unsigned char
 menuitem_set_text(menuitem_t *item, const char *text)
 {
-    ASSERT_RVAL(!!item, 0);
-    REQUIRE_RVAL(!!text, 0);
+    ASSERT_RVAL(item != NULL, 0);
+    REQUIRE_RVAL(text != NULL, 0);
 
     if (item->text) {
         FREE(item->text);
@@ -765,8 +765,8 @@ menuitem_set_text(menuitem_t *item, const char *text)
 unsigned char
 menuitem_set_icon(menuitem_t *item, simage_t *icon)
 {
-    ASSERT_RVAL(!!item, 0);
-    ASSERT_RVAL(!!icon, 0);
+    ASSERT_RVAL(item != NULL, 0);
+    ASSERT_RVAL(icon != NULL, 0);
 
     item->icon = icon;
     return 1;
@@ -775,7 +775,7 @@ menuitem_set_icon(menuitem_t *item, simage_t *icon)
 unsigned char
 menuitem_set_action(menuitem_t *item, unsigned char type, char *action)
 {
-    ASSERT_RVAL(!!item, 0);
+    ASSERT_RVAL(item != NULL, 0);
 
     item->type = type;
     switch (type) {
@@ -805,8 +805,8 @@ menuitem_set_action(menuitem_t *item, unsigned char type, char *action)
 unsigned char
 menuitem_set_rtext(menuitem_t *item, char *rtext)
 {
-    ASSERT_RVAL(!!item, 0);
-    ASSERT_RVAL(!!rtext, 0);
+    ASSERT_RVAL(item != NULL, 0);
+    ASSERT_RVAL(rtext != NULL, 0);
 
     item->rtext = STRDUP(rtext);
     item->rlen = strlen(rtext);
@@ -816,7 +816,7 @@ menuitem_set_rtext(menuitem_t *item, char *rtext)
 void
 menu_reset(menu_t *menu)
 {
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     D_MENU(("menu_reset(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
     if (!(menu->state & MENU_STATE_IS_MAPPED)) {
@@ -833,13 +833,13 @@ menu_reset_all(menulist_t *list)
 {
     register unsigned short i;
 
-    ASSERT(!!list);
+    ASSERT(list != NULL);
 
     if (list->nummenus == 0)
         return;
 
     D_MENU(("menu_reset_all(%8p) called\n", list));
-    if (current_menu && menuitem_get_current(current_menu)) {
+    if (current_menu && menuitem_get_current(current_menu) != NULL) {
         menuitem_deselect(current_menu);
     }
     for (i = 0; i < list->nummenus; i++) {
@@ -854,7 +854,7 @@ menu_reset_tree(menu_t *menu)
     register unsigned short i;
     register menuitem_t *item;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     D_MENU(("menu_reset_tree(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
     if (!(menu->state & MENU_STATE_IS_MAPPED)) {
@@ -862,7 +862,7 @@ menu_reset_tree(menu_t *menu)
     }
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
             menu_reset_tree(item->action.submenu);
         }
     }
@@ -875,12 +875,12 @@ menu_reset_submenus(menu_t *menu)
     register unsigned short i;
     register menuitem_t *item;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     D_MENU(("menu_reset_submenus(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
             menu_reset_tree(item->action.submenu);
         }
     }
@@ -892,7 +892,7 @@ menuitem_select(menu_t *menu)
     static Pixel top = 0, bottom = 0;
     menuitem_t *item;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     if (top == 0) {
         top = get_top_shadow_color(images[image_submenu].selected->bg, "submenu top shadow color");
@@ -900,7 +900,7 @@ menuitem_select(menu_t *menu)
     }
 
     item = menuitem_get_current(menu);
-    REQUIRE(!!item);
+    REQUIRE(item != NULL);
     D_MENU(("Selecting new current item \"%s\" within menu \"%s\" (window 0x%08x, selection window 0x%08x)\n", item->text,
             menu->title, menu->win, menu->swin));
     item->state |= MENU_STATE_IS_CURRENT;
@@ -939,10 +939,10 @@ menuitem_deselect(menu_t *menu)
 {
     menuitem_t *item;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     item = menuitem_get_current(menu);
-    REQUIRE(!!item);
+    REQUIRE(item != NULL);
     D_MENU(("Deselecting item \"%s\"\n", item->text));
     item->state &= ~(MENU_STATE_IS_CURRENT);
     XUnmapWindow(Xdisplay, menu->swin);
@@ -953,9 +953,9 @@ menu_display_submenu(menu_t *menu, menuitem_t *item)
 {
     menu_t *submenu;
 
-    ASSERT(!!menu);
-    ASSERT(!!item);
-    REQUIRE(!!item->action.submenu);
+    ASSERT(menu != NULL);
+    ASSERT(item != NULL);
+    REQUIRE(item->action.submenu != NULL);
 
     submenu = item->action.submenu;
     D_MENU(("Displaying submenu \"%s\" (window 0x%08x) of menu \"%s\" (window 0x%08x)\n", submenu->title, submenu->win, menu->title,
@@ -974,7 +974,7 @@ void
 menu_move(menu_t *menu, unsigned short x, unsigned short y)
 {
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     D_MENU(("Moving menu \"%s\" to %hu, %hu\n", menu->title, x, y));
     menu->x = x;
@@ -996,7 +996,7 @@ menu_draw(menu_t *menu)
     XCharStruct chars;
     Screen *scr;
 
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     scr = ScreenOfDisplay(Xdisplay, Xscreen);
     if (!menu->font) {
@@ -1177,7 +1177,7 @@ menu_draw(menu_t *menu)
 void
 menu_display(int x, int y, menu_t *menu)
 {
-    ASSERT(!!menu);
+    ASSERT(menu != NULL);
 
     menu->state |= (MENU_STATE_IS_CURRENT);
     current_menu = menu;
@@ -1197,7 +1197,7 @@ menu_display(int x, int y, menu_t *menu)
 void
 menu_action(menuitem_t *item)
 {
-    ASSERT(!!item);
+    ASSERT(item != NULL);
 
     D_MENU(("menu_action() called to invoke %s\n", item->text));
     switch (item->type) {
@@ -1250,7 +1250,7 @@ menu_invoke(int x, int y, Window win, menu_t *menu, Time timestamp)
     int root_x, root_y;
     Window unused;
 
-    REQUIRE(!!menu);
+    REQUIRE(menu != NULL);
 
     if (timestamp != CurrentTime) {
         button_press_time = timestamp;
@@ -1266,8 +1266,8 @@ menu_invoke_by_title(int x, int y, Window win, char *title, Time timestamp)
 {
     menu_t *menu;
 
-    REQUIRE(!!title);
-    REQUIRE(!!menu_list);
+    REQUIRE(title != NULL);
+    REQUIRE(menu_list != NULL);
 
     menu = find_menu_by_title(menu_list, title);
     if (!menu) {
@@ -1344,11 +1344,11 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
         inp_tab = NULL;
         maxlen = 0;
         retstr = NULL;
-        if (!(b = STRDUP("Press \"Return\" to continue..."))) {
+        if ((b = STRDUP("Press \"Return\" to continue...")) == NULL) {
             return ret;
         }
     } else {
-        if ((!(b = MALLOC(maxlen + 1)))) {
+        if (((b = MALLOC(maxlen + 1)) == NULL)) {
             return ret;
         } else if (*retstr) {
             strncpy(b, *retstr, maxlen);

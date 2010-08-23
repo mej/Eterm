@@ -95,7 +95,7 @@ eterm_bootstrap(int argc, char *argv[])
     init_libast();
 
     /* Open display, get options/resources and create the window */
-    if (getenv("DISPLAY")) {
+    if (getenv("DISPLAY") != NULL) {
         display_name = STRDUP(getenv("DISPLAY"));
     }
 
@@ -160,7 +160,7 @@ eterm_bootstrap(int argc, char *argv[])
     props[PROP_EWMH_STATE] = XInternAtom(Xdisplay, "_NET_WM_STATE", False);
     props[PROP_EWMH_STATE_STICKY] = XInternAtom(Xdisplay, "_NET_WM_STATE_STICKY", False);
 
-    if ((theme_dir = spifconf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL))) {
+    if ((theme_dir = spifconf_parse_theme(&rs_theme, THEME_CFG, PARSE_TRY_ALL)) != NULL) {
         char *tmp;
 
         D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", theme_dir));
@@ -168,7 +168,9 @@ eterm_bootstrap(int argc, char *argv[])
         sprintf(tmp, "ETERM_THEME_ROOT=%s", theme_dir);
         putenv(tmp);
     }
-    if ((user_dir = spifconf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG), (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME)))) {
+    if ((user_dir =
+         spifconf_parse_theme(&rs_theme, (rs_config_file ? rs_config_file : USER_CFG),
+                          (PARSE_TRY_USER_THEME | PARSE_TRY_NO_THEME))) != NULL) {
         char *tmp;
 
         D_OPTIONS(("spifconf_parse_theme() returned \"%s\"\n", user_dir));
@@ -266,7 +268,7 @@ eterm_bootstrap(int argc, char *argv[])
 #endif
 
     val = XDisplayString(Xdisplay);
-    if (!display_name) {
+    if (display_name == NULL) {
         display_name = val;
     }
 
@@ -290,7 +292,7 @@ eterm_bootstrap(int argc, char *argv[])
         putenv("COLORTERM_BCE=" COLORTERMENV "-mono");
         putenv("TERM=" TERMENV);
     } else {
-        if (rs_term_name) {
+        if (rs_term_name != NULL) {
             i = strlen(rs_term_name);
             term_string = MALLOC(i + 6);
 

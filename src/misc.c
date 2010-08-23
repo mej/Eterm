@@ -285,7 +285,7 @@ safe_print_string(const char *str, unsigned long len)
         rb_size = 0;
         return ((char *) NULL);
     }
-    if (!ret_buff) {
+    if (ret_buff == NULL) {
         rb_size = len;
         ret_buff = (char *) MALLOC(rb_size + 1);
     } else if (len > rb_size) {

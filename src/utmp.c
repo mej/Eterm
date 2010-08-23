@@ -181,7 +181,7 @@ remove_utmp_entry(void)
     setutent();
     strncpy(utmp.ut_id, ut_id, sizeof(utmp.ut_id));
     utmp.ut_type = USER_PROCESS;
-    if (!getutid(&utmp)) {
+    if (getutid(&utmp) == NULL) {
         return;
     }
     utmp.ut_type = DEAD_PROCESS;
@@ -204,7 +204,7 @@ remove_utmp_entry(void)
      * The following code waw copied from the poeigl-1.20 login/init package.
      * Special thanks to poe for the code examples.
      */
-    while ((putmp = getutent())) {
+    while ((putmp = getutent()) != NULL) {
         if (putmp->ut_pid == pid) {
             putmp->ut_type = DEAD_PROCESS;
             putmp->ut_pid = 0;
@@ -286,10 +286,10 @@ get_tslot(const char *ttyname)
     char buf[256], name[256];
     FILE *fd;
 
-    if ((fd = fopen(UTMP_FILENAME, "r"))) {
+    if ((fd = fopen(UTMP_FILENAME, "r")) != NULL) {
         int i;
 
-        for (i = 1; fgets(buf, sizeof(buf), fd); i++) {
+        for (i = 1; fgets(buf, sizeof(buf), fd) != NULL; i++) {
             if (*buf == '#' || sscanf(buf, "%s", name) != 1)
                 continue;
             if (!strcmp(ttyname, name)) {
@@ -313,7 +313,7 @@ write_utmp(struct utmp *putmp)
 
     fprintf(stderr, "Utmp file is %s\n", UTMP_FILENAME);
     privileges(INVOKE);
-    if ((fd = fopen(UTMP_FILENAME, "r+"))) {
+    if ((fd = fopen(UTMP_FILENAME, "r+")) != NULL) {
         utmp_pos = get_tslot(putmp->ut_line) * sizeof(struct utmp);
 
         if (utmp_pos >= 0) {
@@ -384,7 +384,7 @@ remove_utmp_entry(void)
     FILE *fd;
 
     privileges(INVOKE);
-    if (!ut_id[0] && (fd = fopen(UTMP_FILENAME, "r+"))) {
+    if (!ut_id[0] && (fd = fopen(UTMP_FILENAME, "r+")) != NULL) {
         struct utmp utmp;
         MEMSET(&utmp, 0, sizeof(struct utmp));
 
