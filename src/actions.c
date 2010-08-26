@@ -228,7 +228,7 @@ action_add(unsigned short mod, unsigned char button, KeySym keysym, action_type_
 
     action_t *action;
 
-    if (!action_list || (action = action_find_match(mod, button, keysym)) == NULL) {
+    if (!action_list || !(action = action_find_match(mod, button, keysym))) {
         action = (action_t *) MALLOC(sizeof(action_t));
         action->next = action_list;
         action_list = action;

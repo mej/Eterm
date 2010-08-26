@@ -160,7 +160,7 @@ script_handler_copy(spif_charptr_t *params)
     Atom sel = XA_PRIMARY;
 
     if (params) {
-        for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+        for (i = 0; (buffer_id = params[i]); i++) {
             if (*buffer_id) {
                 if (*buffer_id >= '0' && *buffer_id <= '7') {
                     sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) (*buffer_id - '0'));
@@ -261,7 +261,7 @@ script_handler_paste(spif_charptr_t *params)
     Atom sel = XA_PRIMARY;
 
     if (params) {
-        for (i = 0; (buffer_id = params[i]) != NULL; i++) {
+        for (i = 0; (buffer_id = params[i]); i++) {
             if (*buffer_id) {
                 if (*buffer_id >= '0' && *buffer_id <= '7') {
                     sel = (Atom) ((int) XA_CUT_BUFFER0 + (int) (*buffer_id - '0'));
@@ -389,7 +389,7 @@ script_handler_search(spif_charptr_t *params)
     static char *search = NULL;
 
     if (params && *params) {
-        if (search != NULL) {
+        if (search) {
             FREE(search);
         }
         search = STRDUP(*params);
@@ -740,7 +740,7 @@ script_parse(char *s)
     D_SCRIPT(("Parsing:  \"%s\"\n", s));
 
     token_list = spiftool_split(";", s);
-    if (token_list == NULL) {
+    if (!token_list) {
         D_SCRIPT(("No tokens found; ignoring script.\n"));
         return;
     }
@@ -751,7 +751,7 @@ script_parse(char *s)
         if (!(*pstr)) {
             continue;
         }
-        if ((params = strchr(pstr, '(')) != NULL) {
+        if ((params = strchr(pstr, '('))) {
             if (params != pstr) {
                 len = params - pstr;
                 func_name = (char *) MALLOC(len + 1);
@@ -771,7 +771,7 @@ script_parse(char *s)
         }
         if (params) {
             params++;
-            if ((tmp = strrchr(params, ')')) != NULL) {
+            if ((tmp = strrchr(params, ')'))) {
                 *tmp = 0;
             } else {
                 libast_print_error("Error in script \"%s\":  Missing closing parentheses for \"%s\".\n", s, token_list[i]);
@@ -783,7 +783,7 @@ script_parse(char *s)
             param_list = NULL;
         }
         D_SCRIPT(("Calling function %s with parameters:  %s\n", func_name, NONULL(params)));
-        if ((func = script_find_handler(func_name)) != NULL) {
+        if ((func = script_find_handler(func_name))) {
             (func->handler) (param_list);
         } else {
             libast_print_error("Error in script \"%s\":  No such function \"%s\".\n", s, func_name);

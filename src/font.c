@@ -179,7 +179,7 @@ font_cache_add(const char *name, unsigned char type, void *info)
     D_FONT((" -> Created new cachefont_t struct at %p:  \"%s\", %d, %p\n", font, font->name, font->type, font->fontinfo.xfontinfo));
 
     /* Actually add the struct to the end of our cache linked list. */
-    if (font_cache == NULL) {
+    if (!font_cache) {
         font_cache = cur_font = font;
         font->next = NULL;
         D_FONT((" -> Stored as first font in cache.  font_cache == cur_font == font == %p\n", font_cache));
@@ -202,7 +202,7 @@ font_cache_del(const void *info)
 
     D_FONT(("font_cache_del(%8p) called.\n", info));
 
-    if (font_cache == NULL) {
+    if (!font_cache) {
         return;                 /* No fonts in the cache.  Theoretically this should never happen, but... */
     }
 
@@ -376,7 +376,7 @@ load_font(const char *name, const char *fallback, unsigned char type)
     }
 
     /* Specify some sane fallbacks */
-    if (name == NULL) {
+    if (!name) {
         if (fallback) {
             name = fallback;
             fallback = "fixed";
@@ -388,14 +388,14 @@ load_font(const char *name, const char *fallback, unsigned char type)
             fallback = "-misc-fixed-medium-r-normal--13-120-75-75-c-60-iso8859-1";
 #endif
         }
-    } else if (fallback == NULL) {
+    } else if (!fallback) {
         fallback = "fixed";
     }
     D_FONT((" -> Using name == \"%s\" and fallback == \"%s\"\n", name, fallback));
 
     /* Look for the font name in the cache.  If it's there, add one to the
        reference count and return the existing fontinfo pointer to the caller. */
-    if ((font = font_cache_find(name, type)) != NULL) {
+    if ((font = font_cache_find(name, type))) {
         font_cache_add_ref(font);
         D_FONT((" -> Font found in cache.  Incrementing reference count to %d and returning existing data.\n", font->ref_cnt));
         switch (type) {
@@ -416,9 +416,9 @@ load_font(const char *name, const char *fallback, unsigned char type)
 
     /* No match in the cache, so we'll have to add it. */
     if (type == FONT_TYPE_X) {
-        if ((xfont = XLoadQueryFont(Xdisplay, name)) == NULL) {
+        if (!(xfont = XLoadQueryFont(Xdisplay, name))) {
             libast_print_error("Unable to load font \"%s\".  Falling back on \"%s\"\n", name, fallback);
-            if ((xfont = XLoadQueryFont(Xdisplay, fallback)) == NULL) {
+            if (!(xfont = XLoadQueryFont(Xdisplay, fallback))) {
                 libast_fatal_error("Couldn't load the fallback font either.  Giving up.\n");
             } else {
                 font_cache_add(fallback, type, (void *) xfont);
@@ -461,7 +461,7 @@ change_font(int init, const char *fontname)
 
     if (init) {
         ASSERT(etfonts != NULL);
-        if ((def_font_idx >= font_cnt) || (etfonts[def_font_idx] == NULL)) {
+        if ((def_font_idx >= font_cnt) || (!etfonts[def_font_idx])) {
             def_font_idx = font_idx;
         } else {
             font_idx = def_font_idx;
@@ -518,7 +518,7 @@ change_font(int init, const char *fontname)
         }
 
         /* If we get here with a non-NULL fontname, we have to load a new font.  Rats. */
-        if (fontname != NULL) {
+        if (fontname) {
             eterm_font_add(&etfonts, fontname, font_idx);
         } else if (font_idx == old_idx) {
             /* Sigh.  What a waste of time, changing to the same font. */
@@ -539,7 +539,7 @@ change_font(int init, const char *fontname)
     }
 
 #ifndef NO_BOLDFONT
-    if (init && rs_boldFont != NULL) {
+    if (init && rs_boldFont) {
         /* If we're initializing, load the bold font too. */
         boldFont = load_font(rs_boldFont, "-misc-fixed-bold-r-semicondensed--13-120-75-75-c-60-iso8859-1", FONT_TYPE_X);
     }
@@ -636,7 +636,7 @@ change_font(int init, const char *fontname)
     /* Check the bold font size and make sure it matches the normal font */
 #ifndef NO_BOLDFONT
     TermWin.boldFont = NULL;    /* FIXME:  Memory leak?  Not that anyone uses bold fonts.... */
-    if (boldFont != NULL) {
+    if (boldFont) {
 
         fw = boldFont->min_bounds.width;
         fh = boldFont->ascent + boldFont->descent + rs_line_space;
@@ -825,7 +825,7 @@ parse_font_fx(char *line)
             }
             set_shadow_color_by_name(which, color);
             FREE(color);
-            if (line == NULL) {
+            if (!line) {
                 break;
             }
         }

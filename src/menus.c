@@ -301,7 +301,7 @@ menu_handle_button_release(event_t *ev)
 
         if (button_press_time && (ev->xbutton.time - button_press_time > MENU_CLICK_TIME)) {
             /* Take action here based on the current menu item */
-            if ((item = menuitem_get_current(current_menu)) != NULL) {
+            if ((item = menuitem_get_current(current_menu))) {
                 if (item->type == MENUITEM_SUBMENU) {
                     menu_display_submenu(current_menu, item);
                 } else {
@@ -326,7 +326,7 @@ menu_handle_button_release(event_t *ev)
         if (current_menu && (ev->xbutton.x >= 0) && (ev->xbutton.y >= 0) && (ev->xbutton.x < current_menu->w)
             && (ev->xbutton.y < current_menu->h)) {
             /* Click inside the menu window.  Activate the current item. */
-            if ((item = menuitem_get_current(current_menu)) != NULL) {
+            if ((item = menuitem_get_current(current_menu))) {
                 if (item->type == MENUITEM_SUBMENU) {
                     menu_display_submenu(current_menu, item);
                 } else {
@@ -415,7 +415,7 @@ menu_handle_motion_notify(event_t *ev)
 unsigned char
 menu_dispatch_event(event_t *ev)
 {
-    if (menu_event_data.handlers[ev->type] != NULL) {
+    if (menu_event_data.handlers[ev->type]) {
         return ((menu_event_data.handlers[ev->type]) (ev));
     }
     return (0);
@@ -599,7 +599,7 @@ menu_is_child(menu_t *menu, menu_t *submenu)
 
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
             if (item->action.submenu == submenu) {
                 return 1;
             } else if (menu_is_child(item->action.submenu, submenu)) {
@@ -686,8 +686,8 @@ menuitem_change_current(menuitem_t *item)
             menuitem_deselect(current_menu);
             /* If we're changing from one submenu to another and neither is a child of the other, or if we're changing from a submenu to
                no current item at all, reset the tree for the current submenu */
-            if (current->type == MENUITEM_SUBMENU && current->action.submenu != NULL) {
-                if ((item && item->type == MENUITEM_SUBMENU && item->action.submenu != NULL
+            if (current->type == MENUITEM_SUBMENU && current->action.submenu) {
+                if ((item && item->type == MENUITEM_SUBMENU && item->action.submenu
                      && !menu_is_child(current->action.submenu, item->action.submenu)
                      && !menu_is_child(item->action.submenu, current->action.submenu))
                     || (!item)) {
@@ -839,7 +839,7 @@ menu_reset_all(menulist_t *list)
         return;
 
     D_MENU(("menu_reset_all(%8p) called\n", list));
-    if (current_menu && menuitem_get_current(current_menu) != NULL) {
+    if (current_menu && menuitem_get_current(current_menu)) {
         menuitem_deselect(current_menu);
     }
     for (i = 0; i < list->nummenus; i++) {
@@ -862,7 +862,7 @@ menu_reset_tree(menu_t *menu)
     }
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
             menu_reset_tree(item->action.submenu);
         }
     }
@@ -880,7 +880,7 @@ menu_reset_submenus(menu_t *menu)
     D_MENU(("menu_reset_submenus(menu %8p \"%s\"), window 0x%08x\n", menu, menu->title, menu->win));
     for (i = 0; i < menu->numitems; i++) {
         item = menu->items[i];
-        if (item->type == MENUITEM_SUBMENU && item->action.submenu != NULL) {
+        if (item->type == MENUITEM_SUBMENU && item->action.submenu) {
             menu_reset_tree(item->action.submenu);
         }
     }
@@ -1344,11 +1344,11 @@ menu_dialog(void *xd, char *prompt, int maxlen, char **retstr, int (*inp_tab) (v
         inp_tab = NULL;
         maxlen = 0;
         retstr = NULL;
-        if ((b = STRDUP("Press \"Return\" to continue...")) == NULL) {
+        if (!(b = STRDUP("Press \"Return\" to continue..."))) {
             return ret;
         }
     } else {
-        if (((b = MALLOC(maxlen + 1)) == NULL)) {
+        if ((!(b = MALLOC(maxlen + 1)))) {
             return ret;
         } else if (*retstr) {
             strncpy(b, *retstr, maxlen);
