@@ -26,9 +26,6 @@ static const char cvs_ident[] = "$Id$";
 #include <errno.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>            /* CARD32 */
-#ifdef HAVE_X11_XMU_ATOMS_H
-# include <X11/Xmu/Atoms.h>
-#endif
 #include <iconv.h>
 
 #include "buttons.h"
@@ -128,7 +125,7 @@ blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
     rend_t *r, fs = efs;
     text_t *et;
 
-    if (tp[row] == NULL) {
+    if (!tp[row]) {
         tp[row] = MALLOC(sizeof(text_t) * (TERM_WINDOW_GET_REPORTED_COLS() + 1));
         rp[row] = MALLOC(sizeof(rend_t) * TERM_WINDOW_GET_REPORTED_COLS());
     }
@@ -272,7 +269,7 @@ scr_reset(void)
                 screen.row += k;
                 TermWin.nscrolled -= k;
                 for (i = TermWin.saveLines - TermWin.nscrolled; k--; i--) {
-                    if (screen.text[i] == NULL) {
+                    if (!screen.text[i]) {
                         blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
                     }
                 }
@@ -463,7 +460,7 @@ scr_change_screen(int scrn)
     if (current_screen == PRIMARY) {
         scroll_text(0, (TERM_WINDOW_GET_REPORTED_ROWS() - 1), TERM_WINDOW_GET_REPORTED_ROWS(), 0);
         for (i = TermWin.saveLines; i < TERM_WINDOW_GET_REPORTED_ROWS() + TermWin.saveLines; i++)
-            if (screen.text[i] == NULL) {
+            if (!screen.text[i]) {
                 blank_screen_mem(screen.text, screen.rend, i, DEFAULT_RSTYLE);
             }
     }
@@ -642,7 +639,7 @@ scroll_text(int row1, int row2, int count, int spec)
         for (i = 0, j = row1; i < count; i++, j++) {
             buf_text[i] = screen.text[j];
             buf_rend[i] = screen.rend[j];
-            if (buf_text[i] == NULL) {
+            if (!buf_text[i]) {
                 /* A new ALLOC is done with size ncol and
                    blankline with size prev_ncol -- Sebastien van K */
                 buf_text[i] = MALLOC(sizeof(text_t) * (prev_ncol + 1));
@@ -669,7 +666,7 @@ scroll_text(int row1, int row2, int count, int spec)
         for (i = 0, j = row2; i < count; i++, j--) {
             buf_text[i] = screen.text[j];
             buf_rend[i] = screen.rend[j];
-            if (buf_text[i] == NULL) {
+            if (!buf_text[i]) {
                 /* A new ALLOC is done with size ncol and
                    blankline with size prev_ncol -- Sebastien van K */
                 buf_text[i] = MALLOC(sizeof(text_t) * (prev_ncol + 1));
@@ -775,7 +772,7 @@ scr_add_lines(const unsigned char *str, int nlines, int len)
     BOUND(screen.row, -TermWin.nscrolled, TERM_WINDOW_GET_REPORTED_ROWS() - 1);
 
     row = screen.row + TermWin.saveLines;
-    if (screen.text[row] == NULL) {
+    if (!screen.text[row]) {
         blank_screen_mem(screen.text, screen.rend, row, DEFAULT_RSTYLE);
     }                           /* avoid segfault -- added by Sebastien van K */
     beg.row = screen.row;
@@ -1634,7 +1631,7 @@ scr_printscreen(int fullhist)
     text_t *t;
     FILE *fd;
 
-    if ((fd = popen_printer()) == NULL)
+    if (!(fd = popen_printer()))
         return;
     nrows = TERM_WINDOW_GET_REPORTED_ROWS();
     if (fullhist) {
@@ -2042,7 +2039,7 @@ scr_refresh(int type)
                 XChangeGC(Xdisplay, TermWin.gc, gcmask, &gcvalue);
             }
 #ifndef NO_BOLDFONT
-            if (!wbyte && MONO_BOLD(rend) && TermWin.boldFont != NULL) {
+            if (!wbyte && MONO_BOLD(rend) && TermWin.boldFont) {
                 XSetFont(Xdisplay, TermWin.gc, TermWin.boldFont->fid);
                 bfont = 1;
             } else if (bfont) {
@@ -2353,8 +2350,8 @@ scr_search_scrollback(char *str)
     unsigned int *i;
     unsigned long row, lrow, col, rows, cols, len, k;
 
-    if (str == NULL) {
-        if ((str = last_str) == NULL) {
+    if (!str) {
+        if (!(str = last_str)) {
             return;
         }
     } else {
@@ -2595,9 +2592,9 @@ selection_fetch(Window win, unsigned prop, int delete)
         if ((XGetWindowProperty
              (Xdisplay, win, prop, (nread / 4), PROP_SIZE, delete, AnyPropertyType, &actual_type, &actual_fmt, &nitems,
               &bytes_after, &data) != Success)
-            || (actual_type == None) || (data == NULL)) {
+            || (actual_type == None) || (!data)) {
             D_SELECT(("Unable to fetch the value of property %d from window 0x%08x\n", (int) prop, (int) win));
-            if (data != NULL) {
+            if (data) {
                 XFree(data);
             }
             return;
@@ -2654,7 +2651,7 @@ void
 selection_copy_string(Atom sel, char *str, size_t len)
 {
     D_SELECT(("Copying %ul bytes from 0x%08x to selection %d\n", len, str, (int) sel));
-    if (str == NULL || len == 0) {
+    if (!str || len == 0) {
         return;
     }
     if (IS_SELECTION(sel)) {
@@ -2681,7 +2678,7 @@ void
 selection_paste(Atom sel)
 {
     D_SELECT(("Attempting to paste selection %d.\n", (int) sel));
-    if (selection.text != NULL) {
+    if (selection.text) {
         /* If we have a selection of our own, paste it. */
         D_SELECT(("Pasting my current selection of length %lu\n", selection.len));
         selection_write(selection.text, selection.len);
@@ -2690,9 +2687,9 @@ selection_paste(Atom sel)
            form (usually XA_STRING) and save it for us in the VT_SELECTION
            property.  We'll then get a SelectionNotify. */
         D_SELECT(("Requesting current selection (%d) -> VT_SELECTION (%d)\n", sel, props[PROP_SELECTION_DEST]));
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
+#if defined(MULTI_CHARSET)
         if (encoding_method != LATIN1) {
-            XConvertSelection(Xdisplay, sel, XA_COMPOUND_TEXT(Xdisplay), props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
+            XConvertSelection(Xdisplay, sel, props[PROP_COMPOUND_TEXT], props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
         } else {
             XConvertSelection(Xdisplay, sel, XA_STRING, props[PROP_SELECTION_DEST], TermWin.vt, CurrentTime);
         }
@@ -2954,9 +2951,9 @@ selection_click(int clicks, int x, int y)
 
 /* what do we want: spaces/tabs are delimiters or cutchars or non-cutchars */
 #ifdef CUTCHAR_OPTION
-#  define DELIMIT_TEXT(x) (strchr((rs_cutchars?rs_cutchars:CUTCHARS), (x)) != NULL)
+#  define DELIMIT_TEXT(x) (strchr((rs_cutchars ? rs_cutchars : CUTCHARS), (x)))
 #else
-#  define DELIMIT_TEXT(x) (strchr(CUTCHARS, (x)) != NULL)
+#  define DELIMIT_TEXT(x) (strchr(CUTCHARS, (x)))
 #endif
 #ifdef MULTI_CHARSET
 #define DELIMIT_REND(x)	(((x) & RS_multiMask) ? 1 : 0)
@@ -3438,8 +3435,25 @@ selection_send(XSelectionRequestEvent * rq)
                         32, PropModeReplace, (unsigned char *) target_list,
                         (sizeof(target_list) / sizeof(target_list[0])));
         ev.xselection.property = rq->property;
-#if defined(MULTI_CHARSET) && defined(HAVE_X11_XMU_ATOMS_H)
-    } else if (rq->target == XA_TEXT(Xdisplay) || rq->target == XA_COMPOUND_TEXT(Xdisplay)) {
+#ifdef MULTI_CHARSET
+#  ifdef X_HAVE_UTF8_STRING
+    } else if (rq->target == props[PROP_UTF8_STRING]) {
+        XTextProperty xtextp;
+        char *l[1];
+
+        *l = selection.text;
+        xtextp.value = NULL;
+        xtextp.nitems = 0;
+        if (XmbTextListToTextProperty(Xdisplay, l, 1, XUTF8StringStyle, &xtextp) == Success) {
+            if (xtextp.nitems > 0 && xtextp.value) {
+                XChangeProperty(Xdisplay, rq->requestor, rq->property,
+                                rq->target, 8, PropModeReplace, xtextp.value, xtextp.nitems);
+                ev.xselection.property = rq->property;
+                XFree(xtextp.value);
+            }
+        }
+#  endif /* X_HAVE_UTF8_STRING */
+    } else if (rq->target == props[PROP_TEXT] || rq->target == props[PROP_COMPOUND_TEXT]) {
         XTextProperty xtextp;
         char *l[1];
 
@@ -3447,15 +3461,16 @@ selection_send(XSelectionRequestEvent * rq)
         xtextp.value = NULL;
         xtextp.nitems = 0;
         if (XmbTextListToTextProperty(Xdisplay, l, 1, XCompoundTextStyle, &xtextp) == Success) {
-            if (xtextp.nitems > 0 && xtextp.value != NULL) {
-                XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_COMPOUND_TEXT(Xdisplay),
+            if (xtextp.nitems > 0 && xtextp.value) {
+                XChangeProperty(Xdisplay, rq->requestor, rq->property, props[PROP_COMPOUND_TEXT],
                                 8, PropModeReplace, xtextp.value, xtextp.nitems);
                 ev.xselection.property = rq->property;
+                XFree(xtextp.value);
             }
         }
-#endif
-    } else if (rq->target == XA_STRING) {
-        XChangeProperty(Xdisplay, rq->requestor, rq->property, rq->target, 8, PropModeReplace, selection.text, selection.len);
+#endif /* MULTI_CHARSET */
+    } else {
+        XChangeProperty(Xdisplay, rq->requestor, rq->property, XA_STRING, 8, PropModeReplace, selection.text, selection.len);
         ev.xselection.property = rq->property;
     }
     XSendEvent(Xdisplay, rq->requestor, False, 0, &ev);

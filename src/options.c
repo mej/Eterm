@@ -1347,7 +1347,7 @@ parse_keyboard(char *buff, void *state)
             len = parse_escaped_string(str);
             if (len > 255)
                 len = 255;      /* We can only handle lengths that will fit in a char */
-            if (len && KeySym_map[sym] == NULL) {
+            if (len && !KeySym_map[sym]) {
 
                 char *p = MALLOC(len + 1);
 
@@ -1676,7 +1676,7 @@ parse_image(char *buff, void *state)
         if (allow_list) {
             char *allow;
 
-            for (; (allow = (char *) strsep(&allow_list, " ")) != NULL;) {
+            for (; (allow = (char *)strsep(&allow_list, " "));) {
                 if (!BEG_STRCASECMP(allow, "image")) {
                     images[idx].mode |= ALLOW_IMAGE;
                 } else if (!BEG_STRCASECMP(allow, "trans")) {
@@ -1705,25 +1705,25 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         if (!strcasecmp(state, "normal")) {
-            if (images[idx].norm == NULL) {
+            if (!images[idx].norm) {
                 images[idx].norm = (simage_t *) MALLOC(sizeof(simage_t));
                 new = 1;
             }
             images[idx].current = images[idx].norm;
         } else if (!strcasecmp(state, "selected")) {
-            if (images[idx].selected == NULL) {
+            if (!images[idx].selected) {
                 images[idx].selected = (simage_t *) MALLOC(sizeof(simage_t));
                 new = 1;
             }
             images[idx].current = images[idx].selected;
         } else if (!strcasecmp(state, "clicked")) {
-            if (images[idx].clicked == NULL) {
+            if (!images[idx].clicked) {
                 images[idx].clicked = (simage_t *) MALLOC(sizeof(simage_t));
                 new = 1;
             }
             images[idx].current = images[idx].clicked;
         } else if (!strcasecmp(state, "disabled")) {
-            if (images[idx].disabled == NULL) {
+            if (!images[idx].disabled) {
                 images[idx].disabled = (simage_t *) MALLOC(sizeof(simage_t));
                 new = 1;
             }
@@ -1747,7 +1747,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered \"color\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
@@ -1779,7 +1779,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered \"file\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
@@ -1803,7 +1803,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered \"geom\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
@@ -1827,7 +1827,7 @@ parse_image(char *buff, void *state)
                         file_peek_path(), file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered color modifier with no image state defined\n",
                         file_peek_path(), file_peek_line());
             return NULL;
@@ -1930,7 +1930,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered \"bevel\" with no image state defined\n", file_peek_path(),
                         file_peek_line());
             return NULL;
@@ -1940,7 +1940,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current->iml->bevel != NULL) {
+        if (images[idx].current->iml->bevel) {
             FREE(images[idx].current->iml->bevel->edges);
             FREE(images[idx].current->iml->bevel);
         }
@@ -1970,7 +1970,7 @@ parse_image(char *buff, void *state)
                         file_peek_line());
             return NULL;
         }
-        if (images[idx].current == NULL) {
+        if (!images[idx].current) {
             libast_print_error("Parse error in file %s, line %lu:  Encountered \"padding\" with no image state defined\n",
                         file_peek_path(), file_peek_line());
             return NULL;
@@ -2376,7 +2376,7 @@ parse_multichar(char *buff, void *state)
     }
     if (!BEG_STRCASECMP(buff, "encoding ")) {
         RESET_AND_ASSIGN(rs_multichar_encoding, spiftool_get_word(2, buff));
-        if (rs_multichar_encoding != NULL) {
+        if (rs_multichar_encoding) {
             if (BEG_STRCASECMP(rs_multichar_encoding, "eucj")
                 && BEG_STRCASECMP(rs_multichar_encoding, "sjis")
                 && BEG_STRCASECMP(rs_multichar_encoding, "euckr")
@@ -2492,13 +2492,13 @@ spifconf_parse_theme(char **theme, char *spifconf_name, unsigned char fallback)
         spifconf_shell_expand(path);
     }
     if (fallback & PARSE_TRY_USER_THEME) {
-        if (theme && *theme && (ret = spifconf_parse(spifconf_name, *theme, path)) != NULL) {
+        if (theme && *theme && (ret = spifconf_parse(spifconf_name, *theme, path))) {
             return ret;
         }
     }
     if (fallback & PARSE_TRY_DEFAULT_THEME) {
         RESET_AND_ASSIGN(*theme, STRDUP(PACKAGE));
-        if ((ret = spifconf_parse(spifconf_name, *theme, path)) != NULL) {
+        if ((ret = spifconf_parse(spifconf_name, *theme, path))) {
             return ret;
         }
     }
@@ -2643,8 +2643,8 @@ post_parse(void)
     }
 
     /* set any defaults not already set */
-    if (rs_name == NULL) {
-        if (rs_exec_args != NULL) {
+    if (!rs_name) {
+        if (rs_exec_args) {
             rs_name = STRDUP(rs_exec_args[0]);
         } else {
             rs_name = STRDUP(APL_NAME " " VERSION);
@@ -2675,7 +2675,7 @@ post_parse(void)
 #endif
 
 #ifndef NO_BOLDFONT
-    if (rs_font[0] == NULL && rs_boldFont != NULL) {
+    if (!rs_font[0] && rs_boldFont) {
         rs_font[0] = rs_boldFont;
         rs_boldFont = NULL;
     }
@@ -2706,7 +2706,7 @@ post_parse(void)
                 eterm_font_add(&etmfonts, rs_mfont[i], ((i == 0) ? def_font_idx : ((i <= def_font_idx) ? (i - 1) : i)));
                 RESET_AND_ASSIGN(rs_mfont[i], NULL);
             }
-        } else if (etmfonts[i] == NULL) {
+        } else if (!etmfonts[i]) {
             eterm_font_add(&etmfonts, etfonts[i], i);
         }
 #endif
@@ -2728,7 +2728,7 @@ post_parse(void)
 #endif
     }
 #ifdef MULTI_CHARSET
-    if (rs_multichar_encoding != NULL) {
+    if (rs_multichar_encoding) {
         set_multichar_encoding(rs_multichar_encoding);
     }
 #endif
@@ -3053,7 +3053,7 @@ post_parse(void)
         NumLockMask = modmasks[rs_numlock_mod - 1];
     }
 #ifdef BACKGROUND_CYCLING_SUPPORT
-    if (rs_anim_pixmap_list != NULL) {
+    if (rs_anim_pixmap_list) {
         rs_anim_delay = strtoul(rs_anim_pixmap_list, (char **) NULL, 0);
         fflush(stdout);
         if (rs_anim_delay == 0) {
@@ -3069,7 +3069,7 @@ post_parse(void)
 
             for (i = 0; i < count; i++) {
                 temp = spiftool_get_word(i + 2, rs_anim_pixmap_list);    /* +2 rather than +1 to account for the delay */
-                if (temp == NULL)
+                if (!temp)
                     break;
                 if (spiftool_num_words(temp) != 3) {
                     if (spiftool_num_words(temp) == 1) {
@@ -3205,7 +3205,7 @@ save_config(char *path, unsigned char save_theme)
         link(path, bak_path);
         unlink(path);
     }
-    if ((fp = fopen(path, "w")) == NULL) {
+    if (!(fp = fopen(path, "w"))) {
         libast_print_error("Unable to save configuration to file \"%s\" -- %s\n", path, strerror(errno));
         return errno;
     }
@@ -3297,7 +3297,7 @@ save_config(char *path, unsigned char save_theme)
         fprintf(fp, "begin imageclasses\n");
         fprintf(fp, "    path \"%s\"\n", rs_path);
 #ifdef PIXMAP_SUPPORT
-        if (rs_icon != NULL) {
+        if (rs_icon) {
             fprintf(fp, "    icon %s\n", rs_icon);
         }
         if (rs_anim_delay) {

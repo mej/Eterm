@@ -351,7 +351,7 @@ handle_client_message(event_t *ev)
 
         XGetWindowProperty(Xdisplay, Xroot, props[PROP_DND_SELECTION], 0L, 1000000L, False, AnyPropertyType, &ActualType,
                            &ActualFormat, &Size, &RemainingBytes, &data);
-        if (data != NULL) {
+        if (data) {
             XChangeProperty(Xdisplay, Xroot, XA_CUT_BUFFER0, XA_STRING, 8, PropModeReplace, data, strlen(data));
             selection_paste(XA_CUT_BUFFER0);
             XSetInputFocus(Xdisplay, Xroot, RevertToNone, CurrentTime);
@@ -491,7 +491,7 @@ handle_focus_in(event_t *ev)
         }
         bbar_draw_all(IMAGE_STATE_NORMAL, MODE_SOLID);
 #ifdef USE_XIM
-        if (xim_input_context != NULL)
+        if (xim_input_context)
             XSetICFocus(xim_input_context);
 #endif
         if (BITFIELD_IS_SET(vt_options, VT_OPTIONS_URG_ALERT)) {
@@ -525,7 +525,7 @@ handle_focus_out(event_t *ev)
         }
         bbar_draw_all(IMAGE_STATE_DISABLED, MODE_SOLID);
 #ifdef USE_XIM
-        if (xim_input_context != NULL)
+        if (xim_input_context)
             XUnsetICFocus(xim_input_context);
 #endif
     }
@@ -872,7 +872,7 @@ process_x_event(event_t *ev)
 #if 0
     D_EVENTS(("process_x_event(ev [%8p] %s on window 0x%08x)\n", ev, event_type_to_name(ev->xany.type), ev->xany.window));
 #endif
-    if (primary_data.handlers[ev->type] != NULL) {
+    if (primary_data.handlers[ev->type]) {
         return ((primary_data.handlers[ev->type]) (ev));
     }
     return (0);

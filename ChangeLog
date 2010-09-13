@@ -5744,3 +5744,26 @@ This patch should be considered EXPERIMENTAL; that's why it's on the
 0.10 branch.  It probably needs a lot of love, so please test and
 contribute fixes.
 ----------------------------------------------------------------------
+Thu Nov 12 16:23:46 2009                        Michael Jennings (mej)
+
+Gearing up for 0.9.6 release.
+----------------------------------------------------------------------
+Thu Nov 12 22:11:49 2009                        Michael Jennings (mej)
+
+Additional debugging and proper bracing.
+----------------------------------------------------------------------
+Sun Aug  8 16:32:44 2010                        Michael Jennings (mej)
+
+Modified patch from Paolo Ferrario <skooks@tiscali.it> based on input
+from Kim Woelders <kim@woelders.dk> to allow Eterm to respond to
+selection requests in UTF-8, compound text, or string only.
+Previously, exotic selection request types would receive a string
+back, but it would claim to be whatever type was requested.  Now it
+claims to be a string, which is probably more correct.  This should
+also eliminate server round-trips when clients ask for UTF-8, get a
+string, then ask for a string (Opera).
+----------------------------------------------------------------------
+Sun Sep 12 23:20:09 2010                        Michael Jennings (mej)
+
+Merge changes from 0.9.6 branch.
+----------------------------------------------------------------------

@@ -205,8 +205,7 @@ sys/ioctl.h sys/select.h sys/time.h \
 sys/sockio.h sys/byteorder.h malloc.h \
 utmpx.h unistd.h bsd/signal.h regex.h \
 regexp.h stdarg.h X11/X.h X11/Xlib.h \
-X11/Xmu/Atoms.h X11/Sunkeysym.h \
-X11/Xlocale.h \
+X11/Sunkeysym.h X11/Xlocale.h \
 )
 AC_HEADER_TIME
 
@@ -871,11 +870,6 @@ AC_ARG_ENABLE(xim,
 	        AC_DEFINE(USE_XIM, , [Define for X Input Method support.])
 	        XIM="TRUE"
 ])
-
-# For multibyte selection handling
-#if test "$MULTICHAR_ENCODING" != "none"; then
-  AC_CHECK_LIB(Xmu, XmuInternAtom)
-#fi
 
 # check X11R6 for XIM
 if test "$XIM" = "TRUE"; then

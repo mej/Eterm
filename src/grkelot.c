@@ -250,7 +250,7 @@ kstate_add_xlat(char *str)
     char *sval;
     int i;
 
-    if (str == NULL)
+    if (!str)
         return;
     /* add a new xlat table in state */
     if (pStateNow->num_xlat == 0) {
@@ -263,11 +263,11 @@ kstate_add_xlat(char *str)
     xlat->last = (u_int) atoi(strtok(NULL, ":"));
     i = 0;
     pval_tmp = CALLOC(MAX_VAL, sizeof(K_XLAT));
-    while ((sval = strtok(NULL, ",")) != NULL) {
+    while ((sval = strtok(NULL, ","))) {
         pval_tmp[i++] = (u_int) (atoi(sval));
     }
     xlat->pval = CALLOC(i, sizeof(K_XLAT));
-    if (xlat->pval != NULL)
+    if (xlat->pval)
         memcpy(xlat->pval, pval_tmp, i * sizeof(u_int));
     FREE(pval_tmp);
     pStateNow->num_xlat++;
@@ -281,7 +281,7 @@ kstate_add_switcher(char *str)
 {
     K_SWITCH *switcher;
 
-    if (str == NULL)
+    if (!str)
         return;
     if (pStateNow->num_switcher >= MAX_SWITCHER)
         return;

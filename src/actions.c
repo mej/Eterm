@@ -439,18 +439,12 @@ eterm_action_dispatch(event_t *ev)
 static spif_bool_t
 action_matches_event(spif_eterm_action_t action, event_t *ev)
 {
-    /* The very first thing we do is match the event type to the type
-       of the current action.  This means that we'll only run through
-       the modifier checks below if we absolutely have to. */
-    D_ACTIONS(("Checking action %10p for match to event %10p.\n", action, ev));
-    if (ev->xany.type == ButtonPress) {
-        if (!action_check_button(action->button, ev->xbutton.button)) {
-            return FALSE;
-        }
-    } else if (ev->xany.type == KeyPress) {
-        if (!action_check_keysym(action->keysym, XKeycodeToKeysym(Xdisplay, ev->xkey.keycode, 0))) {
-            return FALSE;
-        }
+    action_t *action;
+
+    if (!action_list || !(action = action_find_match(mod, button, keysym))) {
+        action = (action_t *) MALLOC(sizeof(action_t));
+        action->next = action_list;
+        action_list = action;
     } else {
         ASSERT_NOTREACHED_RVAL(FALSE);
     }
