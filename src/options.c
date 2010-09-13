@@ -2002,7 +2002,7 @@ parse_image(char *buff, void *state)
 static void *
 parse_actions(char *buff, void *state)
 {
-    spif_eterm_action_t new_action = SPIF_NULL_TYPE(eterm_action);
+    spif_eterm_action_t new_action = (spif_eterm_action_t) NULL;
     unsigned short mod = ETERM_MOD_NONE;
     unsigned char button = ETERM_BUTTON_NONE;
     KeySym keysym = 0;
@@ -2060,22 +2060,22 @@ parse_actions(char *buff, void *state)
         str = spiftool_get_pword(i, buff);
         if (!BEG_STRCASECMP(str, "string")) {
             str = spiftool_get_word(i + 1, buff);
-            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_STRING, mod, button, keysym, SPIF_CAST(ptr) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_STRING, mod, button, keysym, (spif_ptr_t) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "echo")) {
             str = spiftool_get_word(i + 1, buff);
-            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_ECHO, mod, button, keysym, SPIF_CAST(ptr) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_ECHO, mod, button, keysym, (spif_ptr_t) str);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "menu")) {
             /*menu_t *menu; */
 
             str = spiftool_get_word(i + 1, buff);
             /*menu = find_menu_by_title(menu_list, str); */
-            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_MENU, mod, button, keysym, SPIF_NULL_TYPE(ptr));
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_MENU, mod, button, keysym, (spif_ptr_t) NULL);
             FREE(str);
         } else if (!BEG_STRCASECMP(str, "script")) {
             str = spiftool_get_word(i + 1, buff);
-            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_SCRIPT, mod, button, keysym, SPIF_CAST(ptr) str);
+            new_action = spif_eterm_action_new_from_data(ETERM_ACTION_SCRIPT, mod, button, keysym, (spif_ptr_t) str);
             FREE(str);
         } else {
             libast_print_error("Parse error in file %s, line %lu:  No valid action type found.  Valid types are "
@@ -3687,7 +3687,7 @@ save_config(char *path, unsigned char save_theme)
     for (iter = SPIF_VECTOR_ITERATOR(actions); SPIF_ITERATOR_HAS_NEXT(iter);) {
         spif_eterm_action_t action;
 
-        action = SPIF_CAST(eterm_action) SPIF_ITERATOR_NEXT(iter);
+        action = (spif_eterm_action_t) SPIF_ITERATOR_NEXT(iter);
         fprintf(fp, "    bind ");
         if (action->modifiers != ETERM_MOD_NONE) {
             if (action->modifiers & ETERM_MOD_ANY) {

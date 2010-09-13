@@ -81,7 +81,7 @@ spif_eterm_action_new(void)
     self = SPIF_ALLOC(eterm_action);
     if (!spif_eterm_action_init(self)) {
         SPIF_DEALLOC(self);
-        self = SPIF_NULL_TYPE(eterm_action);
+        self = (spif_eterm_action_t) NULL;
     }
     return self;
 }
@@ -95,7 +95,7 @@ spif_eterm_action_new_from_data(spif_eterm_action_type_t type, spif_ushort_t mod
     self = SPIF_ALLOC(eterm_action);
     if (!spif_eterm_action_init_from_data(self, type, modifiers, button, keysym, param)) {
         SPIF_DEALLOC(self);
-        self = SPIF_NULL_TYPE(eterm_action);
+        self = (spif_eterm_action_t) NULL;
     }
     return self;
 }
@@ -117,8 +117,8 @@ spif_eterm_action_init(spif_eterm_action_t self)
     self->modifiers = ETERM_MOD_NONE;
     self->button = ETERM_BUTTON_NONE;
     self->keysym = ETERM_KEYSYM_NONE;
-    self->handler = SPIF_NULL_TYPE(eterm_action_handler);
-    self->parameter = SPIF_NULL_TYPE(eterm_action_parameter);
+    self->handler = (spif_eterm_action_handler_t) NULL;
+    self->parameter = (spif_eterm_action_parameter_t) NULL;
     return TRUE;
 }
 
@@ -135,28 +135,28 @@ spif_eterm_action_init_from_data(spif_eterm_action_t self, spif_eterm_action_typ
 
     switch (type) {
         case ETERM_ACTION_STRING:
-            self->handler = SPIF_CAST(eterm_action_handler) action_handle_string;
-            self->parameter = SPIF_CAST(obj) spif_str_new_from_ptr(param);
+            self->handler = (spif_eterm_action_handler_t) action_handle_string;
+            self->parameter = (spif_obj_t) spif_str_new_from_ptr(param);
             /*parse_escaped_string(self->parameter.string); */
             break;
         case ETERM_ACTION_ECHO:
-            self->handler = SPIF_CAST(eterm_action_handler) action_handle_echo;
-            self->parameter = SPIF_CAST(obj) spif_str_new_from_ptr(param);
+            self->handler = (spif_eterm_action_handler_t) action_handle_echo;
+            self->parameter = (spif_obj_t) spif_str_new_from_ptr(param);
             /*parse_escaped_string(self->parameter.string); */
             break;
         case ETERM_ACTION_SCRIPT:
-            self->handler = SPIF_CAST(eterm_action_handler) action_handle_script;
-            self->parameter = SPIF_CAST(obj) spif_str_new_from_ptr(param);
+            self->handler = (spif_eterm_action_handler_t) action_handle_script;
+            self->parameter = (spif_obj_t) spif_str_new_from_ptr(param);
             break;
         case ETERM_ACTION_MENU:
-            self->handler = SPIF_CAST(eterm_action_handler) action_handle_menu;
+            self->handler = (spif_eterm_action_handler_t) action_handle_menu;
             /*self->parameter.menu = (menu_t *) param; */
             break;
         default:
             break;
     }
     D_ACTIONS(("Added action.  modifiers == 0x%08x, button == %d, keysym == 0x%08x\n",
-               self->modifiers, self->button, SPIF_CAST_C(unsigned) self->keysym));
+               self->modifiers, self->button, (unsigned) self->keysym));
 
     return TRUE;
 }
@@ -175,8 +175,8 @@ spif_eterm_action_done(spif_eterm_action_t self)
     self->modifiers = ETERM_MOD_NONE;
     self->button = ETERM_BUTTON_NONE;
     self->keysym = ETERM_KEYSYM_NONE;
-    self->handler = SPIF_NULL_TYPE(eterm_action_handler);
-    self->parameter = SPIF_NULL_TYPE(eterm_action_parameter);
+    self->handler = (spif_eterm_action_handler_t) NULL;
+    self->parameter = (spif_eterm_action_parameter_t) NULL;
     spif_obj_done(SPIF_OBJ(self));
     return TRUE;
 }
@@ -205,7 +205,7 @@ spif_eterm_action_show(spif_eterm_action_t self, spif_charptr_t name, spif_str_t
     spif_str_append_from_ptr(buff, tmp);
     snprintf(tmp + indent, sizeof(tmp) - indent, "  (spif_uchar_t) button:  %d\n", self->button);
     spif_str_append_from_ptr(buff, tmp);
-    snprintf(tmp + indent, sizeof(tmp) - indent, "  (KeySym) keysym:  %04x\n", SPIF_CAST_C(unsigned) self->keysym);
+    snprintf(tmp + indent, sizeof(tmp) - indent, "  (KeySym) keysym:  %04x\n", (unsigned) self->keysym);
 
     spif_str_append_from_ptr(buff, tmp);
     snprintf(tmp + indent, sizeof(tmp) - indent, "  (spif_eterm_action_handler_t) handler:  %10p\n", self->handler);
@@ -224,22 +224,22 @@ spif_eterm_action_comp(spif_eterm_action_t self, spif_eterm_action_t other)
     spif_cmp_t c;
 
     SPIF_OBJ_COMP_CHECK_NULL(self, other);
-    c = SPIF_CMP_FROM_INT(SPIF_CAST_C(int) (self->type) - SPIF_CAST_C(int) (other->type));
+    c = SPIF_CMP_FROM_INT((int) (self->type) - (int) (other->type));
 
     if (!SPIF_CMP_IS_EQUAL(c)) {
         return c;
     }
-    c = SPIF_CMP_FROM_INT(SPIF_CAST_C(int) (self->button) - SPIF_CAST_C(int) (other->button));
+    c = SPIF_CMP_FROM_INT((int) (self->button) - (int) (other->button));
 
     if (!SPIF_CMP_IS_EQUAL(c)) {
         return c;
     }
-    c = SPIF_CMP_FROM_INT(SPIF_CAST_C(int) (self->keysym) - SPIF_CAST_C(int) (other->keysym));
+    c = SPIF_CMP_FROM_INT((int) (self->keysym) - (int) (other->keysym));
 
     if (!SPIF_CMP_IS_EQUAL(c)) {
         return c;
     }
-    return SPIF_CMP_FROM_INT(SPIF_CAST_C(int) (self->modifiers) - SPIF_CAST_C(int) (other->modifiers));
+    return SPIF_CMP_FROM_INT((int) (self->modifiers) - (int) (other->modifiers));
 }
 
 spif_eterm_action_t
@@ -247,7 +247,7 @@ spif_eterm_action_dup(spif_eterm_action_t self)
 {
     spif_eterm_action_t tmp;
 
-    REQUIRE_RVAL(!SPIF_ETERM_ACTION_ISNULL(self), SPIF_NULL_TYPE(eterm_action));
+    REQUIRE_RVAL(!SPIF_ETERM_ACTION_ISNULL(self), (spif_eterm_action_t) NULL);
     tmp = spif_eterm_action_new();
     tmp->type = self->type;
     tmp->modifiers = self->modifiers;
@@ -423,14 +423,14 @@ eterm_action_dispatch(event_t *ev)
     ASSERT_RVAL(ev != NULL, FALSE);
     ASSERT_RVAL(ev->xany.type == ButtonPress || ev->xany.type == KeyPress, FALSE);
     D_ACTIONS(("Event %8p:  Button %d, Keycode %d, Key State 0x%08x (modifiers %c%c%c%c)\n",
-               ev, ev->xbutton.button, SPIF_CAST_C(int) ev->xkey.keycode, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
+               ev, ev->xbutton.button, (int) ev->xkey.keycode, ev->xkey.state, SHOW_X_MODS(ev->xkey.state)));
     D_ACTIONS(("Searching %d actions to find match.\n", SPIF_VECTOR_COUNT(actions)));
 
     for (iter = SPIF_VECTOR_ITERATOR(actions); SPIF_ITERATOR_HAS_NEXT(iter);) {
-        action = SPIF_CAST(eterm_action) SPIF_ITERATOR_NEXT(iter);
+        action = (spif_eterm_action_t) SPIF_ITERATOR_NEXT(iter);
         if (action_matches_event(action, ev)) {
             D_ACTIONS(("Spawning handler for action object %10p.\n", action));
-            return SPIF_CAST(bool) ((SPIF_CAST(eterm_action_handler) (action->handler)) (ev, action));
+            return (spif_bool_t) (((spif_eterm_action_handler_t) (action->handler)) (ev, action));
         }
     }
     return FALSE;
@@ -439,12 +439,18 @@ eterm_action_dispatch(event_t *ev)
 static spif_bool_t
 action_matches_event(spif_eterm_action_t action, event_t *ev)
 {
-    action_t *action;
-
-    if (!action_list || !(action = action_find_match(mod, button, keysym))) {
-        action = (action_t *) MALLOC(sizeof(action_t));
-        action->next = action_list;
-        action_list = action;
+    /* The very first thing we do is match the event type to the type
+       of the current action.  This means that we'll only run through
+       the modifier checks below if we absolutely have to. */
+    D_ACTIONS(("Checking action %10p for match to event %10p.\n", action, ev));
+    if (ev->xany.type == ButtonPress) {
+        if (!action_check_button(action->button, ev->xbutton.button)) {
+            return FALSE;
+        }
+    } else if (ev->xany.type == KeyPress) {
+        if (!action_check_keysym(action->keysym, XKeycodeToKeysym(Xdisplay, ev->xkey.keycode, 0))) {
+            return FALSE;
+        }
     } else {
         ASSERT_NOTREACHED_RVAL(FALSE);
     }
