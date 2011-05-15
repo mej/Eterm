@@ -1274,6 +1274,7 @@ clean_exit(void)
         }
         if (xim_input_method) {
             XCloseIM(xim_input_method);
+            xim_input_method = NULL;
         }
 # endif
         XCloseDisplay(Xdisplay);
@@ -2088,6 +2089,7 @@ xim_real_init(void)
     if ((XGetIMValues(xim_input_method, XNQueryInputStyle, &xim_styles, NULL)) || (!xim_styles)) {
         libast_print_error("input method doesn't support any style\n");
         XCloseIM(xim_input_method);
+        xim_input_method = NULL;
         return -1;
     }
     strncpy(tmp, (rs_preedit_type ? rs_preedit_type : "OverTheSpot,OffTheSpot,Root"), sizeof(tmp) - 1);
@@ -2099,7 +2101,8 @@ xim_real_init(void)
             break;
         }
         for (end = s; (*end && (*end != ',')); end++);
-        for (next_s = end--; ((end >= s) && isspace(*end)); end--);
+        next_s = ((*end) ? (end) : (end + 1));
+        for (end--; ((end >= s) && isspace(*end)); end--);
         *(end + 1) = '\0';
 
         if (!strcmp(s, "OverTheSpot")) {
@@ -2122,6 +2125,7 @@ xim_real_init(void)
     if (found == 0) {
         libast_print_error("input method doesn't support my preedit type\n");
         XCloseIM(xim_input_method);
+        xim_input_method = NULL;
         return -1;
     }
     if ((xim_input_style != (XIMPreeditNothing | XIMStatusNothing))
@@ -2129,6 +2133,7 @@ xim_real_init(void)
         && (xim_input_style != (XIMPreeditPosition | XIMStatusNothing))) {
         libast_print_error("This program does not support the preedit type\n");
         XCloseIM(xim_input_method);
+        xim_input_method = NULL;
         return -1;
     }
     if (xim_input_style & XIMPreeditPosition) {
@@ -2160,6 +2165,7 @@ xim_real_init(void)
     if (!xim_input_context) {
         libast_print_error("Failed to create input context\n");
         XCloseIM(xim_input_method);
+        xim_input_method = NULL;
         return -1;
     }
     if (xim_input_style & XIMPreeditArea)

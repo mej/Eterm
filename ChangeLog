@@ -5653,3 +5653,13 @@ claims to be a string, which is probably more correct.  This should
 also eliminate server round-trips when clients ask for UTF-8, get a
 string, then ask for a string (Opera).
 ----------------------------------------------------------------------
+Tue Mar 15 23:03:57 2011                                           mej
+
+Fix for CVE-2011-0409 (CERT VU#285156), a use-after-free error in the
+XIM code.  This only affects versions where XIM support is compiled in
+(which it is by default).  There are no known exploits for this bug,
+but it is theoretically exploitable.  Thanks to Jonathan Brossard and
+the team at Toucan System for responsibly disclosing this
+vulnerability and to CERT for assisting with coordination and
+disclosure.
+----------------------------------------------------------------------
