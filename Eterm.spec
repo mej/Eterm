@@ -10,8 +10,8 @@
 Summary: Enlightened terminal emulator
 Name: Eterm
 Version: 0.9.6
-#Release: 1
-Release: 0.%(date '+%Y%m%d')
+Release: 1
+#Release: 0.%(date '+%Y%m%d')
 License: BSD
 Group: User Interface/X
 URL: http://www.eterm.org/
