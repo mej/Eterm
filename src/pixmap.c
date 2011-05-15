@@ -1327,7 +1327,7 @@ search_path(const char *pathlist, const char *file)
     D_OPTIONS(("search_path(\"%s\", \"%s\") called from \"%s\".\n", pathlist, file, name));
     if (len < PATH_MAX - 1) {
         strcat(name, "/");
-        strncat(name, file, PATH_MAX - len - 1);
+        strncat(name, file, PATH_MAX - len - 2);
     }
     D_OPTIONS(("Checking for file \"%s\"\n", name));
     if (!access(name, R_OK)) {

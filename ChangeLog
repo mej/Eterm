@@ -5653,7 +5653,7 @@ claims to be a string, which is probably more correct.  This should
 also eliminate server round-trips when clients ask for UTF-8, get a
 string, then ask for a string (Opera).
 ----------------------------------------------------------------------
-Tue Mar 15 23:03:57 2011                                           mej
+Tue Mar 15 23:03:57 2011                        Michael Jennings (mej)
 
 Fix for CVE-2011-0409 (CERT VU#285156), a use-after-free error in the
 XIM code.  This only affects versions where XIM support is compiled in
@@ -5662,4 +5662,13 @@ but it is theoretically exploitable.  Thanks to Jonathan Brossard and
 the team at Toucan System for responsibly disclosing this
 vulnerability and to CERT for assisting with coordination and
 disclosure.
+----------------------------------------------------------------------
+Tue Mar 15 23:08:26 2011                        Michael Jennings (mej)
+
+Fix for CVE-2011-0768, an off-by-one error in handling large pixmap
+filenames which resulted in an overflow of a single NUL character if
+the filename exceeded PATH_MAX bytes.  This bug is NOT exploitable.
+Again, thanks to Jonathan Brossard and the team at Toucan System for
+responsibly disclosing this vulnerability and to CERT for assisting
+with coordination and disclosure.
 ----------------------------------------------------------------------
