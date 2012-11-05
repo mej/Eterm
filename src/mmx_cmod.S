@@ -485,4 +485,8 @@ shade_ximage_32_mmx:
 3:
         LEAVE
 
+#if defined(__linux__) && defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
+
 #endif /* HAVE_MMX */
