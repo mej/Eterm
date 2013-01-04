@@ -1052,7 +1052,7 @@ AC_SUBST(THREADLIBS)
 
 basedir=.
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_OUTPUT([Makefile bg/Makefile doc/Makefile utils/Makefile pix/Makefile
           src/Makefile themes/Makefile])
