@@ -5676,3 +5676,8 @@ Tue Mar 15 23:26:05 2011                        Michael Jennings (mej)
 
 Release Eterm 0.9.6.
 ----------------------------------------------------------------------
+Wed Mar 26 08:59:13 2014                        Michael Jennings (mej)
+
+Patch from Pavel Sanda <ps@ucw.cz> to fix copy/paste behavior with
+some Qt-based apps (e.g., LyX).
+----------------------------------------------------------------------

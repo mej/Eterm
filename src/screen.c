@@ -2566,6 +2566,7 @@ selection_copy_string(Atom sel, char *str, size_t len)
         if (XGetSelectionOwner(Xdisplay, sel) != TermWin.vt) {
             libast_print_error("Can't take ownership of selection\n");
         }
+        XFlush(Xdisplay);
     } else {
         D_SELECT(("Copying selection to cut buffer %d\n", (int) sel));
         XChangeProperty(Xdisplay, Xroot, sel, XA_STRING, 8, PropModeReplace, str, len);
