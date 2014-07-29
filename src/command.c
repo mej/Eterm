@@ -1561,8 +1561,8 @@ get_tty(void)
      * child processes remain alive upon deletion of the window.
      */
     {
-        unsigned short i;
-        unsigned long max_fds;
+        long i;
+        long max_fds;
 
         /* get number of available file descriptors */
 #ifdef _POSIX_VERSION
