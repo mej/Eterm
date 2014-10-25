@@ -1247,7 +1247,7 @@ menu_action(menuitem_t *item)
 void
 menu_invoke(int x, int y, Window win, menu_t *menu, Time timestamp)
 {
-    int root_x, root_y;
+    int root_x = x, root_y = y;
     Window unused;
 
     REQUIRE(menu != NULL);
