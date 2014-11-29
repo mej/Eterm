@@ -694,7 +694,7 @@ By convention and default, Eterm themes should be stored under
 ~/.Eterm/themes/<theme_name>/ or @THEMEDIR@/<theme_name>.
 
 Eterm now supports the existence of a user configuration file as a
-suppliment to the theme configuration file.  The default name for this
+supplement to the theme configuration file.  The default name for this
 file is user.cfg, and it follows the exact same syntax as any other
 configuration file.  It is searched for using the same algorithm used
 for the theme.cfg file, and any settings in the user.cfg will override
@@ -2255,7 +2255,7 @@ to scroll down half a page.  The default unit if not specified is
 Presents a dialog box into which the user may enter a search term.
 The default value is set to
 .IR str .
-All occurances of the specified search string are highlighted in the
+All occurrences of the specified search string are highlighted in the
 scrollback buffer, and Eterm jumps back to the most recent one.
 Searching again with the same keyword will clear the previous
 highlighting.
