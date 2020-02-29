@@ -20,7 +20,7 @@ Source0: http://www.eterm.org/download/%{name}-%{version}.tar.%{compression}
 Source1: http://www.eterm.org/download/%{name}-backgrounds.tar.%{compression}
 #BuildSuggests: xorg-x11-devel, XFree86-devel, xorg-x11-proto-devel, libXext-devel, libXt-devel, freetype-devel
 BuildRequires: libast, imlib2-devel
-Requires: imlib2, imlib2-loader_jpeg, imlib2-loader_png
+Requires: imlib2
 BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{name}-%{version}-%{release}-root
 
 %description
