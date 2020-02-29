@@ -1731,11 +1731,11 @@ parse_image(char *buff, void *state)
             return NULL;
         }
         if (new) {
-            MEMSET(images[idx].current, 0, sizeof(simage_t));
+            memset(images[idx].current, 0, sizeof(simage_t));
             images[idx].current->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
             images[idx].current->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
-            MEMSET(images[idx].current->pmap, 0, sizeof(pixmap_t));
-            MEMSET(images[idx].current->iml, 0, sizeof(imlib_t));
+            memset(images[idx].current->pmap, 0, sizeof(pixmap_t));
+            memset(images[idx].current->iml, 0, sizeof(imlib_t));
         }
     } else if (!BEG_STRCASECMP(buff, "color ")) {
         char *fg = spiftool_get_word(2, buff), *bg = spiftool_get_word(3, buff);
@@ -2546,10 +2546,10 @@ init_defaults(void)
     rs_path = NULL;
 #endif
     colorfgbg = DEFAULT_RSTYLE;
-    MEMSET(PixColors, 0, sizeof(PixColors));
+    memset(PixColors, 0, sizeof(PixColors));
 
     /* Font stuff. */
-    MEMSET(rs_font, 0, sizeof(char *) * NFONTS);
+    memset(rs_font, 0, sizeof(char *) * NFONTS);
 #if AUTO_ENCODING
     /* Auto-encoding means the default fonts are chosen by locale. */
 # ifdef MULTI_CHARSET
@@ -2756,8 +2756,8 @@ post_parse(void)
             simg->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
             simg->fg = WhitePixel(Xdisplay, Xscreen);
             simg->bg = BlackPixel(Xdisplay, Xscreen);
-            MEMSET(simg->pmap, 0, sizeof(pixmap_t));
-            MEMSET(simg->iml, 0, sizeof(imlib_t));
+            memset(simg->pmap, 0, sizeof(pixmap_t));
+            memset(simg->iml, 0, sizeof(imlib_t));
             images[i].mode = MODE_IMAGE & ALLOW_IMAGE;
         }
         images[i].current = simg;

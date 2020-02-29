@@ -109,7 +109,7 @@ blank_line(text_t *et, rend_t *er, int width, rend_t efs)
     register unsigned int i = width;
     rend_t *r = er, fs = efs;
 
-    MEMSET(et, ' ', i);
+    memset(et, ' ', i);
     for (; i--;)
         *r++ = fs;
 }
@@ -126,7 +126,7 @@ blank_screen_mem(text_t **tp, rend_t **rp, int row, rend_t efs)
         tp[row] = MALLOC(sizeof(text_t) * (TERM_WINDOW_GET_REPORTED_COLS() + 1));
         rp[row] = MALLOC(sizeof(rend_t) * TERM_WINDOW_GET_REPORTED_COLS());
     }
-    MEMSET(tp[row], ' ', i);
+    memset(tp[row], ' ', i);
     tp[row][i] = 0;
     for (r = rp[row]; i--;)
         *r++ = fs;
@@ -355,7 +355,7 @@ scr_poweron(void)
     D_SCREEN(("scr_poweron()\n"));
 
     /* Reset all character sets to Latin1 */
-    MEMSET(charsets, 'B', sizeof(charsets));
+    memset(charsets, 'B', sizeof(charsets));
     rvideo = 0;
     /* Reset the rendering style to the default colors/style */
     scr_rendition(0, ~RS_None);
@@ -1304,7 +1304,7 @@ void
 scr_set_tab(int mode)
 {
     if (mode < 0)
-        MEMSET(tabs, 0, (unsigned int) TERM_WINDOW_GET_REPORTED_COLS());
+        memset(tabs, 0, (unsigned int) TERM_WINDOW_GET_REPORTED_COLS());
 
     else if (screen.col < TERM_WINDOW_GET_REPORTED_COLS())
         tabs[screen.col] = (mode ? 1 : 0);
@@ -1510,7 +1510,7 @@ scr_expose(int x, int y, int width, int height)
               rect_end.col, rect_end.row));
 
     for (i = rect_beg.row; i <= rect_end.row; i++) {
-        MEMSET(&(drawn_text[i][rect_beg.col]), 0, rect_end.col - rect_beg.col + 1);
+        memset(&(drawn_text[i][rect_beg.col]), 0, rect_end.col - rect_beg.col + 1);
     }
 }
 

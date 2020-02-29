@@ -184,7 +184,7 @@ static enc_context_t *enc_create_context(const char *id)
     enc_context_t *tmp;
 
     tmp = (enc_context_t *) MALLOC(sizeof(enc_context_t));
-    MEMSET(tmp, 0, sizeof(enc_context_t));
+    memset(tmp, 0, sizeof(enc_context_t));
     tmp->id = STRDUP(id);
     return tmp;
 }
@@ -204,7 +204,7 @@ static enc_state_t *enc_create_state(const char *id, unsigned char lifetime)
     enc_state_t *tmp;
 
     tmp = (enc_state_t *) MALLOC(sizeof(enc_state_t));
-    MEMSET(tmp, 0, sizeof(enc_state_t));
+    memset(tmp, 0, sizeof(enc_state_t));
     tmp->id = STRDUP(id);
     tmp->lifetime = lifetime;
     return tmp;

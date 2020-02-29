@@ -137,7 +137,7 @@ eterm_bootstrap(int argc, char *argv[])
     get_modifiers();            /* Set up modifier masks before parsing config files. */
 
     /* Get all our properties set up. */
-    MEMSET(props, 0, sizeof(props));
+    memset(props, 0, sizeof(props));
     props[PROP_TEXT] = XInternAtom(Xdisplay, "TEXT", False);
     props[PROP_COMPOUND_TEXT] = XInternAtom(Xdisplay, "COMPOUND_TEXT", False);
     props[PROP_UTF8_STRING] = XInternAtom(Xdisplay, "UTF8_STRING", False);

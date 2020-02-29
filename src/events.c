@@ -133,7 +133,7 @@ void
 event_init_primary_dispatcher(void)
 {
 
-    MEMSET(&primary_data, 0, sizeof(event_dispatcher_data_t));
+    memset(&primary_data, 0, sizeof(event_dispatcher_data_t));
 
     EVENT_DATA_ADD_HANDLER(primary_data, KeyPress, handle_key_press);
     EVENT_DATA_ADD_HANDLER(primary_data, PropertyNotify, handle_property_notify);

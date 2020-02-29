@@ -73,7 +73,7 @@ void
 scrollbar_event_init_dispatcher(void)
 {
 
-    MEMSET(&scrollbar_event_data, 0, sizeof(event_dispatcher_data_t));
+    memset(&scrollbar_event_data, 0, sizeof(event_dispatcher_data_t));
 
     EVENT_DATA_ADD_HANDLER(scrollbar_event_data, EnterNotify, sb_handle_enter_notify);
     EVENT_DATA_ADD_HANDLER(scrollbar_event_data, LeaveNotify, sb_handle_leave_notify);

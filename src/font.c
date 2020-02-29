@@ -79,23 +79,23 @@ eterm_font_add(char ***plist, const char *fontname, unsigned char idx)
 
         /* The below looks messy with all the cpp stuff, but it really just malloc's/realloc's
            both etfonts and etmfonts at the same time to the same size, zeros all the new
-           memory space using MEMSET(), and then prints some goop. */
+           memory space using memset(), and then prints some goop. */
         if (etfonts) {
             etfonts = (char **) REALLOC(etfonts, new_size);
-            MEMSET(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
+            memset(etfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
 #ifdef MULTI_CHARSET
             etmfonts = (char **) REALLOC(etmfonts, new_size);
-            MEMSET(etmfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
+            memset(etmfonts + font_cnt, 0, sizeof(char *) * (idx - font_cnt + 1));
             D_FONT((" -> Reallocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
             D_FONT((" -> Reallocated font list:  %u bytes at %8p\n", new_size, etfonts));
 #endif
         } else {
             etfonts = (char **) MALLOC(new_size);
-            MEMSET(etfonts, 0, new_size);
+            memset(etfonts, 0, new_size);
 #ifdef MULTI_CHARSET
             etmfonts = (char **) MALLOC(new_size);
-            MEMSET(etmfonts, 0, new_size);
+            memset(etmfonts, 0, new_size);
             D_FONT((" -> Allocated font lists:  %u bytes at %8p/%8p\n", new_size, etfonts, etmfonts));
 #else
             D_FONT((" -> Allocating font list:  %u bytes at %8p\n", new_size, etfonts));
@@ -751,7 +751,7 @@ parse_font_fx(char *line)
     n = spiftool_num_words(line);
 
     if (!BEG_STRCASECMP(line, "none")) {
-        MEMSET(&fshadow, 0, sizeof(fontshadow_t));
+        memset(&fshadow, 0, sizeof(fontshadow_t));
     } else if (!BEG_STRCASECMP(line, "outline")) {
         if (n != 2) {
             return 0;

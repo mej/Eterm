@@ -84,7 +84,7 @@ buttonbar_t *bbar_create(void)
     XSetWindowAttributes xattr;
 
     bbar = (buttonbar_t *) MALLOC(sizeof(buttonbar_t));
-    MEMSET(bbar, 0, sizeof(buttonbar_t));
+    memset(bbar, 0, sizeof(buttonbar_t));
 
     xattr.border_pixel = BlackPixel(Xdisplay, Xscreen);
     xattr.save_under = FALSE;
@@ -749,7 +749,7 @@ button_t *button_create(char *text)
     button_t *button;
 
     button = (button_t *) MALLOC(sizeof(button_t));
-    MEMSET(button, 0, sizeof(button_t));
+    memset(button, 0, sizeof(button_t));
 
     if (text) {
         button->text = STRDUP(text);

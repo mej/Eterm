@@ -2831,7 +2831,7 @@ matrix(int n)
         return;
     }
 
-    MEMSET(s, 0, TERM_WINDOW_GET_COLS());
+    memset(s, 0, TERM_WINDOW_GET_COLS());
 #define MATRIX_HI CLEAR
 #define MATRIX_LO ((4<<8)|CLEAR)
 
@@ -3195,7 +3195,7 @@ tt_winsize(int fd)
     if (fd < 0)
         return;
 
-    MEMSET(&ws, 0, sizeof(struct winsize));
+    memset(&ws, 0, sizeof(struct winsize));
 
     ws.ws_row = (unsigned short) TERM_WINDOW_GET_REPORTED_ROWS();
     ws.ws_col = (unsigned short) TERM_WINDOW_GET_REPORTED_COLS();
@@ -3725,9 +3725,9 @@ main_loop(void)
                     }
 
                     libast_print_warning("Moo2:  %s\n", safe_print_string(outbuff, outlen));
-                    MEMSET(outbuff + outlen, 0, sizeof(wchar_t));
+                    memset(outbuff + outlen, 0, sizeof(wchar_t));
                     wcbuff = (wchar_t *) outbuff;
-                    MEMSET(&mbs, 0, sizeof(mbstate_t));
+                    memset(&mbs, 0, sizeof(mbstate_t));
                     outlen = wcsrtombs(NULL, &wcbuff, 0, &mbs) + 1;
                     if (outlen > 0) {
                         outbuff = (char *) MALLOC(outlen);

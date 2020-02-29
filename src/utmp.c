@@ -97,10 +97,10 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
 #   ifdef HAVE_UTMPX_H
     struct utmpx utmp;
     struct utmp utmp2;
-    MEMSET(&utmp, 0, sizeof(struct utmpx));
+    memset(&utmp, 0, sizeof(struct utmpx));
 #   else
     struct utmp utmp;
-    MEMSET(&utmp, 0, sizeof(struct utmp));
+    memset(&utmp, 0, sizeof(struct utmp));
 #   endif
 
 #   ifdef WITH_DMALLOC
@@ -336,7 +336,7 @@ add_utmp_entry(const char *pty, const char *hostname, int fd)
     struct passwd *pwent = getpwuid(my_ruid);
     struct utmp utmp;
 
-    MEMSET(&utmp, 0, sizeof(struct utmp));
+    memset(&utmp, 0, sizeof(struct utmp));
 
     if (!strncmp(pty, "/dev/", 5))
         pty += 5;               /* skip /dev/ prefix */
@@ -386,7 +386,7 @@ remove_utmp_entry(void)
     privileges(INVOKE);
     if (!ut_id[0] && (fd = fopen(UTMP_FILENAME, "r+"))) {
         struct utmp utmp;
-        MEMSET(&utmp, 0, sizeof(struct utmp));
+        memset(&utmp, 0, sizeof(struct utmp));
 
         fseek(fd, utmp_pos, 0);
         fwrite(&utmp, sizeof(struct utmp), 1, fd);

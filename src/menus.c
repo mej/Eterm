@@ -471,7 +471,7 @@ menu_t *menu_create(char *title)
             | Button1MotionMask | Button2MotionMask | Button3MotionMask;
     }
     menu = (menu_t *) MALLOC(sizeof(menu_t));
-    MEMSET(menu, 0, sizeof(menu_t));
+    memset(menu, 0, sizeof(menu_t));
     menu->title = STRDUP(title ? title : "");
 
     menu->win =
@@ -715,7 +715,7 @@ menuitem_t *menuitem_create(char *text)
     menuitem_t *menuitem;
 
     menuitem = (menuitem_t *) MALLOC(sizeof(menuitem_t));
-    MEMSET(menuitem, 0, sizeof(menuitem_t));
+    memset(menuitem, 0, sizeof(menuitem_t));
 
     if (text) {
         menuitem->text = STRDUP(text);

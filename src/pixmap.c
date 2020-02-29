@@ -357,7 +357,7 @@ image_t *create_eterm_image(void)
     image_t *i;
 
     i = (image_t *) MALLOC(sizeof(image_t));
-    MEMSET(i, 0, sizeof(image_t));
+    memset(i, 0, sizeof(image_t));
     return (i);
 }
 
@@ -431,11 +431,11 @@ simage_t *create_simage(void)
     simage_t *s;
 
     s = (simage_t *) MALLOC(sizeof(simage_t));
-    MEMSET(s, 0, sizeof(simage_t));
+    memset(s, 0, sizeof(simage_t));
     s->pmap = (pixmap_t *) MALLOC(sizeof(pixmap_t));
     s->iml = (imlib_t *) MALLOC(sizeof(imlib_t));
-    MEMSET(s->pmap, 0, sizeof(pixmap_t));
-    MEMSET(s->iml, 0, sizeof(imlib_t));
+    memset(s->pmap, 0, sizeof(pixmap_t));
+    memset(s->iml, 0, sizeof(imlib_t));
     return s;
 }
 
