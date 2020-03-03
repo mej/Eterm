@@ -1,4 +1,4 @@
-%{!?_rel:%{expand:%%global _rel 0.%(git describe --abbrev=4 --always --tags --long --dirty=.1 | cut -d- -f 2- | tr '-' '.')}}
+%{!?_rel:%{expand:%%global _rel 0.%(git describe --abbrev=4 --always --tags --long --dirty=1 | cut -d- -f 2- | tr '-' '.')}}
 
 %if %{!?compression:1}0
 %define compression gz
