@@ -44,6 +44,7 @@
 
 #include "config.h"
 #include "feature.h"
+#include "misc.h"
 
 /* use libast if we have it */
 #ifdef DEBUG_ESCREEN
